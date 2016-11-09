@@ -252,8 +252,6 @@ class PersonAuthentication(PersonAuthenticationType):
             elif (saml_enroll_user):
                 # Convert SAML response to user entry
                 newUser = self.getMappedUser(configurationAttributes, requestParameters, saml_response_attributes)
-                if self.generateNameId:
-                    newUser.removeAttribute("uid")
 
                 saml_user_uid = self.getNameId(samlResponse, newUser)
                 if saml_user_uid == None:
@@ -307,8 +305,6 @@ class PersonAuthentication(PersonAuthenticationType):
             elif (saml_enroll_all_user_attr):
                 # Convert SAML response to user entry
                 newUser = self.getMappedAllAttributesUser(saml_response_attributes)
-                if self.generateNameId:
-                    newUser.removeAttribute("uid")
 
                 saml_user_uid = self.getNameId(samlResponse, newUser)
                 if saml_user_uid == None:
@@ -735,6 +731,9 @@ class PersonAuthentication(PersonAuthenticationType):
             ldapAttributeName = samlUriToAttributesMap.get(key)
             if ldapAttributeName == None:
                 print "Saml. Get mapped all attributes user. Skipping saml attribute: '%s'" %  key
+                continue
+
+            if StringHelper.equalsIgnoreCase(ldapAttributeName, "uid")
                 continue
 
             attribute = CustomAttribute(ldapAttributeName)
