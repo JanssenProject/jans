@@ -253,7 +253,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Convert SAML response to user entry
                 newUser = self.getMappedUser(configurationAttributes, requestParameters, saml_response_attributes)
                 if self.generateNameId:
-                    newUser.removeCustmAttribute("uid")
+                    newUser.removeAttribute("uid")
 
                 saml_user_uid = self.getNameId(samlResponse, newUser)
                 if saml_user_uid == None:
@@ -308,7 +308,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Convert SAML response to user entry
                 newUser = self.getMappedAllAttributesUser(saml_response_attributes)
                 if self.generateNameId:
-                    newUser.removeCustmAttribute("uid")
+                    newUser.removeAttribute("uid")
 
                 saml_user_uid = self.getNameId(samlResponse, newUser)
                 if saml_user_uid == None:
