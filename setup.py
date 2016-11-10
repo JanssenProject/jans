@@ -869,7 +869,7 @@ class Setup(object):
 
         try:
             self.run(['rm', '-fr', '/opt/jython-%s' % self.jython_version])
-            self.run([self.cmd_java, '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard'])
+            self.run([self.cmd_java, '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard', '-e', 'ensurepip'])
         except:
             self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
