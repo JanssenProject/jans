@@ -19,6 +19,8 @@ Gluu uses a hierarchial structure to define the schema elements and allots numbe
 1.3.6.1.4.1.48710.1.2 (Matching Rule definitions)
 1.3.6.1.4.1.48710.1.3 (Attribute definitions)
 1.3.6.1.4.1.48710.1.4 (Object Class definitions)
+1.3.6.1.4.1.48710.1.10 (Customer Allocations)
+
 ```
 
 OpenLDAP Schema definition rules give a way to abstract this structure into aliases that are easier to be used in definitions. The following aliases are defined in `gluu.schema`
