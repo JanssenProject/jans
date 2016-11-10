@@ -419,6 +419,10 @@ class Setup(object):
                      self.openldapSymasConf: False
                      }
 
+        self.oxauth_openid_keys_generator_libs = [ 'bcprov-jdk15on-1.54.jar', 'bcpkix-jdk15on-1.54.jar', 'commons-lang-2.6.jar',
+                                                  'log4j-1.2.14.jar', 'commons-codec-1.5.jar','commons-cli-1.2.jar',
+                                                  'jettison-1.3.jar', 'oxauth-model.jar', 'oxauth.jar' ]
+
     def __repr__(self):
         try:
             return 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
@@ -1170,32 +1174,10 @@ class Setup(object):
                       '"%s"' % dn_name])
             self.run(['/bin/sh', '-c', cmd])
 
-        self.copyFile("%s/static/oxauth/lib/oxauth.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/jettison-1.3.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/oxauth-model.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/bcprov-jdk15on-1.54.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/bcpkix-jdk15on-1.54.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/commons-codec-1.5.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/commons-lang-2.6.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/commons-cli-1.2.jar" % self.install_dir, self.jetty_user_home_lib)
-        self.copyFile("%s/static/oxauth/lib/log4j-1.2.14.jar" % self.install_dir, self.jetty_user_home_lib)
-
-        self.change_ownership()
-
-        requiredJars =['%s/bcprov-jdk15on-1.54.jar' % self.jetty_user_home_lib,
-                       '%s/bcpkix-jdk15on-1.54.jar' % self.jetty_user_home_lib,
-                       '%s/commons-lang-2.6.jar' % self.jetty_user_home_lib,
-                       '%s/log4j-1.2.14.jar' % self.jetty_user_home_lib,
-                       '%s/commons-codec-1.5.jar' % self.jetty_user_home_lib,
-                       '%s/commons-cli-1.2.jar' % self.jetty_user_home_lib,
-                       '%s/jettison-1.3.jar' % self.jetty_user_home_lib,
-                       '%s/oxauth-model.jar' % self.jetty_user_home_lib,
-                       '%s/oxauth.jar' % self.jetty_user_home_lib]
-
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
-                        ":".join(requiredJars),
+                        ":".join(self.oxauth_openid_keys_generator_libs),
                         "org.xdi.oxauth.util.KeyGenerator",
                         "-keystore",
                         jks_path,
@@ -1211,7 +1193,7 @@ class Setup(object):
 
         self.logIt("Runnning: %s" % " ".join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.jetty_user_home_lib)
             output, err = p.communicate()
             p.wait()
             if err:
@@ -1426,7 +1408,8 @@ class Setup(object):
         self.index_opendj_backend('userRoot')
         self.index_opendj_backend('site')
 
-    def install_ox_base(self):
+    def prepare_openid_keys_generator(self):
+        self.logIt("Preparing files needed to run OpenID keys generator")
         # Unpack oxauth.war to get libs needed to run key generator
         oxauthWar = 'oxauth.war'
         distOxAuthPath = '%s/%s' % (self.distFolder, oxauthWar)
@@ -1440,12 +1423,18 @@ class Setup(object):
         self.run([self.cmd_jar,
                   'xf',
                   distOxAuthPath], tmpOxAuthDir)
+        
+        tmpLibsOxAuthPath = '%s/WEB-INF/libs' % tmpOxAuthDir
 
         self.logIt("Copying files to %s..." % self.jetty_user_home_lib)
-        # TODO: Add copy commands here
-        # We can use it to extract required libs which we put now into static/oxauth/lib
+        for oxauth_lib in oxauth_openid_keys_generator_libs:
+            self.copyFile("%s/%s" % (self.tmpLibsOxAuthPath, oxauth_lib), self.jetty_user_home_lib)
 
         self.removeDirs(tmpOxAuthDir)
+
+    def install_gluu_base(self):
+        self.logIt("Installing Gluu base...")
+        prepare_openid_keys_generator()
 
     def load_certificate_text(self, filePath):
         self.logIt("Load certificate %s" % filePath)
@@ -1749,6 +1738,7 @@ class Setup(object):
             self.run([self.cmd_mkdir, '-p', self.configFolder])
             self.run([self.cmd_mkdir, '-p', self.certFolder])
             self.run([self.cmd_mkdir, '-p', self.outputFolder])
+            self.run([self.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
             # OS /etc/default folder
             osDefault = "/etc/default"
@@ -1758,7 +1748,6 @@ class Setup(object):
             if self.installOxTrust | self.installOxAuth:
                 self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
                 self.run([self.cmd_mkdir, '-p', self.gluuOptBinFolder])
-                self.run([self.cmd_mkdir, '-p', self.jetty_user_home_lib])
                 self.run([self.cmd_mkdir, '-p', self.oxPhotosFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustCacheRefreshFolder])
@@ -2546,6 +2535,7 @@ if __name__ == '__main__':
             installObject.make_oxauth_salt()
             installObject.downloadWarFiles()
             installObject.render_jetty_templates()
+            installObject.install_gluu_base()
             # Temporary fix to render correct setup properties
             if installObject.ldap_type is 'opendj':
                 installObject.configure_opendj_install()
