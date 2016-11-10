@@ -101,7 +101,7 @@ class Setup(object):
         self.os_type = None
         self.os_initdaemon = None
 
-        self.shibboleth_version = 'v3'
+        self.shibboleth_version = ''
 
         self.jetty_dist = '/opt/jetty-9.3'
         self.jetty_home = '/opt/jetty'
@@ -453,6 +453,7 @@ class Setup(object):
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
 
         if self.installSaml:
+            self.shibboleth_version = 'v3'
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
 
