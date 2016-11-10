@@ -422,7 +422,7 @@ class Setup(object):
 
         self.oxauth_openid_keys_generator_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
                                                   'log4j-*.jar', 'commons-codec-*.jar','commons-cli-*.jar',
-                                                  'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-*.jar' ]
+                                                  'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
     def __repr__(self):
         try:
@@ -1189,6 +1189,7 @@ class Setup(object):
             self.run(['/bin/sh', '-c', cmd])
 
         oxauth_lib_files = self.findFiles(self.oxauth_openid_keys_generator_libs, self.jetty_user_home_lib)
+        print "111: %s" % ":".join(oxauth_lib_files)
 
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
