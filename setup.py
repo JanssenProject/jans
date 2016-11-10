@@ -60,7 +60,6 @@ class Setup(object):
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
-        
         self.templateRenderingDict = {}
 
         # OS commands
@@ -71,6 +70,8 @@ class Setup(object):
         self.cmd_rpm = '/bin/rpm'
         self.cmd_dpkg = '/usr/bin/dpkg'
         self.opensslCommand = '/usr/bin/openssl'
+
+        self.sysemProfile = "/etc/profile"
 
         # java commands
         self.jre_home = '/opt/jre'
@@ -243,7 +244,8 @@ class Setup(object):
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapDsCreateRcCommand = "%s/bin/create-rc-script" % self.ldapBaseFolder
         self.ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
-        self.ldapPassFn = '/home/ldap/.pw'
+        self.ldap_user_home = '/home/ldap'
+        self.ldapPassFn = '%s/.pw' % self.ldap_user_home
         self.ldap_backend_type = 'local-db'
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.ldapModifyCommand = '%s/bin/ldapmodify' % self.ldapBaseFolder
@@ -324,6 +326,7 @@ class Setup(object):
         self.asimba_properties = '%s/asimba.properties' % self.outputFolder
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.gluuBaseFolder
         self.network = "/etc/sysconfig/network"
+        self.system_profile_update = '%s/system_profile' % self.outputFolder
         
         self.idp3_configuration_properties = '/idp.properties' 
         self.idp3_configuration_ldap_properties = '/ldap.properties'
@@ -667,6 +670,33 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
         
         return foundFiles
+
+    def readFile(self, inFilePath):
+        inFilePathText = None
+
+        try:
+            f = open(inFilePath)
+            inFilePathText = f.read()
+            f.close
+        except:
+            self.logIt("Error reading %s" % inFilePathText, True)
+            self.logIt(traceback.format_exc(), True)
+
+        return inFilePathText
+
+    def writeFile(self, outFilePath, text):
+        inFilePathText = None
+
+        try:
+            f = open(outFilePath, 'w')
+            f.write(text)
+            f.close()
+        except:
+            self.logIt("Error writing %s" % inFilePathText, True)
+            self.logIt(traceback.format_exc(), True)
+
+        return inFilePathText
+
 
     def copyFile(self, inFile, destFolder):
         try:
@@ -1189,7 +1219,6 @@ class Setup(object):
             self.run(['/bin/sh', '-c', cmd])
 
         oxauth_lib_files = self.findFiles(self.oxauth_openid_keys_generator_libs, self.jetty_user_home_lib)
-        print "111: %s" % ":".join(oxauth_lib_files)
 
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
@@ -1742,16 +1771,24 @@ class Setup(object):
         if self.os_type in ['debian', 'ubuntu']:
             self.defaultTrustStoreFN = '/etc/ssl/certs/java/cacerts'
 
-    def createUsers(self):
+
+    def createUser(self, userName, homeDir):
         try:
             useradd = '/usr/sbin/useradd'
-            self.run([useradd, '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', self.jetty_user_home, 'jetty'])
+            self.run([useradd, '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', homeDir, userName])
         except:
             self.logIt("Error adding users", True)
             self.logIt(traceback.format_exc(), True)
 
+    def createUsers(self):
+        self.createUser('ldap', self.ldap_user_home)
+        self.createUser('jetty', self.jetty_user_home)
+
     def makeFolders(self):
         try:
+            # Allow write to /tmp
+            self.run([self.cmd_chmod, 'ga+w', "/tmp"])
+
             # Create these folder on all instances
             self.run([self.cmd_mkdir, '-p', self.configFolder])
             self.run([self.cmd_mkdir, '-p', self.certFolder])
@@ -1800,6 +1837,26 @@ class Setup(object):
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
+
+    def customiseSystem(self):
+        # Render customized part
+        self.renderTemplate(self.system_profile_update)
+        renderedSystemProfile = self.readFile(self.system_profile_update)
+        
+        # Read source file
+        currentSystemProfile = self.readFile(self.sysemProfile)
+
+        # Write merged file
+        resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
+        self.writeFile(self.sysemProfile, resultSystemProfile)
+        
+        # Fix new file permissions
+        self.run([self.cmd_chmod, '644', self.sysemProfile])
+
+    def configureSystem(self):
+        self.customiseSystem()
+        self.createUsers()
+        self.makeFolders()
 
     def make_salt(self):
         try:
@@ -2543,8 +2600,7 @@ if __name__ == '__main__':
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
 #            installObject.configureOsPatches()
-            installObject.createUsers()
-            installObject.makeFolders()
+            installObject.configureSystem()
             installObject.calculate_aplications_memory()
             installObject.installJRE()
             installObject.installJetty()

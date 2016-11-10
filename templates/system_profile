@@ -1,0 +1,12 @@
+#####################################################################################################
+# Added by Gluu to prevent user to login into chroot container without starting gluu-server service #
+#####################################################################################################
+if [ "$(ls -A /dev/pts/)" != "" ] && [ "$(ls -A /proc/)" != "" ] && [ "$(ls -A /lib/modules/)" != "" ] && [ "$(ls -A /sys/class/net/lo/)" != "" ] && [ "$(ls /dev/ | grep -vE 'null|pts')" != "" ]; then
+	echo "Welcome to the Gluu Server!"
+else
+	echo "Gluu server is not started, please start it from root machine by service gluu-server start"
+	exit
+fi
+#####################################################################################################
+# End Gluu Block                                                                                    #
+#####################################################################################################
