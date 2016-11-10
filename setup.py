@@ -38,6 +38,7 @@ import sys
 import getopt
 import hashlib
 import re
+import glob
 
 class Setup(object):
     def __init__(self, install_dir=None):
@@ -419,9 +420,9 @@ class Setup(object):
                      self.openldapSymasConf: False
                      }
 
-        self.oxauth_openid_keys_generator_libs = [ 'bcprov-jdk15on-1.54.jar', 'bcpkix-jdk15on-1.54.jar', 'commons-lang-2.6.jar',
-                                                  'log4j-1.2.14.jar', 'commons-codec-1.5.jar','commons-cli-1.2.jar',
-                                                  'jettison-1.3.jar', 'oxauth-model.jar', 'oxauth.jar' ]
+        self.oxauth_openid_keys_generator_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
+                                                  'log4j-*.jar', 'commons-codec-*.jar','commons-cli-*.jar',
+                                                  'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-*.jar' ]
 
     def __repr__(self):
         try:
@@ -653,6 +654,19 @@ class Setup(object):
         except:
             self.logIt("Error executing config changes", True)
             self.logIt(traceback.format_exc(), True)
+
+    def findFiles(self, filePatterns, filesFolder):
+        foundFiles = []
+        try:
+            for filePattern in filePatterns:
+                fileFullPathPattern = "%s/%s" % (filesFolder, filePattern)
+                for fileFullPath in glob.iglob(fileFullPathPattern):
+                    foundFiles.append(fileFullPath)
+        except:
+            self.logIt("Error finding files %s in folder %s" % (":".join(filePatterns), filesFolder), True)
+            self.logIt(traceback.format_exc(), True)
+        
+        return foundFiles
 
     def copyFile(self, inFile, destFolder):
         try:
@@ -1174,10 +1188,12 @@ class Setup(object):
                       '"%s"' % dn_name])
             self.run(['/bin/sh', '-c', cmd])
 
+        oxauth_lib_files = self.findFiles(self.oxauth_openid_keys_generator_libs, self.jetty_user_home_lib)
+
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
-                        ":".join(self.oxauth_openid_keys_generator_libs),
+                        ":".join(oxauth_lib_files),
                         "org.xdi.oxauth.util.KeyGenerator",
                         "-keystore",
                         jks_path,
@@ -1193,7 +1209,7 @@ class Setup(object):
 
         self.logIt("Runnning: %s" % " ".join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.jetty_user_home_lib)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
             p.wait()
             if err:
@@ -1409,10 +1425,10 @@ class Setup(object):
         self.index_opendj_backend('site')
 
     def prepare_openid_keys_generator(self):
-        self.logIt("Preparing files needed to run OpenID keys generator")
+        self.logIt("Preparing files needed to run OpenId keys generator")
         # Unpack oxauth.war to get libs needed to run key generator
         oxauthWar = 'oxauth.war'
-        distOxAuthPath = '%s/%s' % (self.distFolder, oxauthWar)
+        distOxAuthPath = '%s/%s' % (self.distWarFolder, oxauthWar)
 
         tmpOxAuthDir = '%s/tmp_oxauth' % self.distWarFolder
 
@@ -1424,17 +1440,18 @@ class Setup(object):
                   'xf',
                   distOxAuthPath], tmpOxAuthDir)
         
-        tmpLibsOxAuthPath = '%s/WEB-INF/libs' % tmpOxAuthDir
+        tmpLibsOxAuthPath = '%s/WEB-INF/lib' % tmpOxAuthDir
 
         self.logIt("Copying files to %s..." % self.jetty_user_home_lib)
-        for oxauth_lib in oxauth_openid_keys_generator_libs:
-            self.copyFile("%s/%s" % (self.tmpLibsOxAuthPath, oxauth_lib), self.jetty_user_home_lib)
+        oxauth_lib_files = self.findFiles(self.oxauth_openid_keys_generator_libs, tmpLibsOxAuthPath)
+        for oxauth_lib_file in oxauth_lib_files:
+            self.copyFile(oxauth_lib_file, self.jetty_user_home_lib)
 
         self.removeDirs(tmpOxAuthDir)
 
     def install_gluu_base(self):
         self.logIt("Installing Gluu base...")
-        prepare_openid_keys_generator()
+        self.prepare_openid_keys_generator()
 
     def load_certificate_text(self, filePath):
         self.logIt("Load certificate %s" % filePath)
