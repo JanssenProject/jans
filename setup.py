@@ -211,8 +211,6 @@ class Setup(object):
 
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
-        self.staticFolder = '%s/static/opendj' % self.install_dir
-        self.indexJson = '%s/static/opendj/opendj_index.json' % self.install_dir
         self.oxauth_error_json = '%s/static/oxauth/oxauth-errors.json' % self.install_dir
 
         self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
@@ -229,9 +227,7 @@ class Setup(object):
         self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
         self.asimbaJksPass = None
         self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
-        self.openDjCertFn = '%s/opendj.crt' % self.certFolder
 
-        self.ldap_type = "opendj"
         self.ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
@@ -239,31 +235,19 @@ class Setup(object):
         self.ldap_jmx_port = '1689'
         self.ldap_admin_port = '4444'
         self.ldapBaseFolder = '/opt/opendj'
-        self.ldapStartTimeOut = 30
-        self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
-        self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
-        self.ldapDsCreateRcCommand = "%s/bin/create-rc-script" % self.ldapBaseFolder
-        self.ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
         self.ldap_user_home = '/home/ldap'
         self.ldapPassFn = '%s/.pw' % self.ldap_user_home
-        self.ldap_backend_type = 'local-db'
+        self.ldap_backend_type = 'je'
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.ldapModifyCommand = '%s/bin/ldapmodify' % self.ldapBaseFolder
-        self.loadLdifCommand = self.importLdifCommand
+        self.loadLdifCommand = self.ldapModifyCommand
         self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
         self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
-        self.schemaFiles = ["%s/static/%s/96-eduperson.ldif" % (self.install_dir, self.ldap_type),
-                            "%s/static/%s/101-ox.ldif" % (self.install_dir, self.ldap_type),
-                            "%s/static/%s/77-customAttributes.ldif" % (self.install_dir, self.ldap_type),
-                            "%s/output/100-user.ldif" % self.install_dir]
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
-        self.init_files = ['%s/static/opendj/opendj' % self.install_dir]
-        self.opendj_service_centos7 = '%s/static/opendj/systemd/opendj.service' % self.install_dir
-        self.redhat_services = ['memcached', 'opendj', 'httpd']
-        self.debian_services = ['memcached', 'opendj', 'apache2']
+        self.redhat_services = ['memcached', 'httpd']
+        self.debian_services = ['memcached', 'apache2']
 
-        self.ldap_start_script = '/etc/init.d/opendj'
         self.apache_start_script = '/etc/init.d/httpd'
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
@@ -453,16 +437,6 @@ class Setup(object):
                 s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
 
-    def add_ldap_schema(self):
-        try:
-            self.logIt("Copying LDAP schema")
-            for schemaFile in self.schemaFiles:
-                self.copyFile(schemaFile, self.schemaFolder)
-            self.run([self.cmd_chown, '-R', 'ldap:ldap', self.ldapBaseFolder])
-        except:
-            self.logIt("Error adding schema")
-            self.logIt(traceback.format_exc(), True)
-
     def change_ownership(self):
         self.logIt("Changing ownership")
         realCertFolder = os.path.realpath(self.certFolder)
@@ -619,45 +593,6 @@ class Setup(object):
         if not self.installSaml:
             self.oxTrustConfigGeneration = "false"
 
-    def configure_opendj(self):
-        try:
-            self.logIt("Making LDAP configuration changes")
-            if self.opendj_version == "2.6":
-                opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN||targetEntryUUID||changeInitiatorsName||changeLogCookie||includedAttributes")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
-            else:
-                opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
-            config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
-                              ['set-attribute-syntax-prop', '--syntax-name', '"Directory String"',   '--set', 'allow-zero-length-values:true'],
-                              ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'allow-pre-encoded-passwords:true'],
-                              ['set-log-publisher-prop', '--publisher-name', '"File-Based Audit Logger"', '--set', 'enabled:true'],
-                              ['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % self.ldap_backend_type, '--set', 'enabled:true'],
-                              ['set-connection-handler-prop', '--handler-name', '"LDAP Connection Handler"', '--set', 'enabled:false'],
-                              ['set-access-control-handler-prop', '--remove', '%s' % opendj_prop_name],
-                              ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true'],
-                              ['set-password-policy-prop', '--policy-name', '"Default Password Policy"', '--set', 'default-password-storage-scheme:"Salted SHA-512"'],
-                              ['set-global-configuration-prop', '--set', 'reject-unauthenticated-requests:true']
-                              ]
-            for changes in config_changes:
-                dsconfigCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
-                                        self.ldapDsconfigCommand,
-                                        '--trustAll',
-                                        '--no-prompt',
-                                        '--hostname',
-                                        self.ldap_hostname,
-                                        '--port',
-                                        self.ldap_admin_port,
-                                        '--bindDN',
-                                        '"%s"' % self.ldap_binddn,
-                                        '--bindPasswordFile',
-                                        self.ldapPassFn] + changes)
-                self.run(['/bin/su',
-                          'ldap',
-                          '-c',
-                          dsconfigCmd])
-        except:
-            self.logIt("Error executing config changes", True)
-            self.logIt(traceback.format_exc(), True)
-
     def findFiles(self, filePatterns, filesFolder):
         foundFiles = []
         try:
@@ -790,14 +725,6 @@ class Setup(object):
                 self.logIt('Created dir: %s' % name)
         except:
             self.logIt("Error making directory %s" % name, True)
-            self.logIt(traceback.format_exc(), True)
-
-    def deleteLdapPw(self):
-        try:
-            os.remove(self.ldapPassFn)
-            os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
-        except:
-            self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
             self.logIt(traceback.format_exc(), True)
 
     def detect_os_type(self):
@@ -1003,43 +930,6 @@ class Setup(object):
         except:
             self.logIt("Error encoding passwords", True)
             self.logIt(traceback.format_exc(), True)
-
-    def export_opendj_public_cert(self):
-        # Load password to acces OpenDJ truststore
-        self.logIt("Reading OpenDJ truststore")
-
-        openDjPinFn = '%s/config/keystore.pin' % self.ldapBaseFolder
-        openDjTruststoreFn = '%s/config/truststore' % self.ldapBaseFolder
-
-        openDjPin = None
-        try:
-            f = open(openDjPinFn)
-            openDjPin = f.read().splitlines()[0]
-            f.close()
-        except:
-            self.logIt("Error reding OpenDJ truststore", True)
-            self.logIt(traceback.format_exc(), True)
-
-        # Export public OpenDJ certificate
-        self.logIt("Exporting OpenDJ certificate")
-        self.run([self.cmd_keytool,
-                  '-exportcert',
-                  '-keystore',
-                  openDjTruststoreFn,
-                  '-storepass',
-                  openDjPin,
-                  '-file',
-                  self.openDjCertFn,
-                  '-alias',
-                  'server-cert',
-                  '-rfc'])
-
-        # Import OpenDJ certificate into java truststore
-        self.logIt("Import OpenDJ certificate")
-
-        self.run([self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_opendj" % self.hostname, \
-                  "-file", self.openDjCertFn, "-keystore", self.defaultTrustStoreFN, \
-                  "-storepass", "changeit", "-noprompt"])
 
     def file_get_contents(self, filename):
         with open(filename) as f:
@@ -1328,131 +1218,6 @@ class Setup(object):
 
     def getQuad(self):
         return str(uuid.uuid4())[:4].upper()
-
-    def import_ldif(self):
-        self.logIt("Importing userRoot LDIF data")
-        ldifFolder = '%s/ldif' % self.ldapBaseFolder
-        for ldif_file_fn in self.ldif_files:
-            ldifFolder = '%s/ldif' % self.ldapBaseFolder
-            self.copyFile(ldif_file_fn, ldifFolder)
-            ldif_file_fullpath = "%s/ldif/%s" % (self.ldapBaseFolder,
-                                                 os.path.split(ldif_file_fn)[-1])
-            self.run([self.cmd_chown, 'ldap:ldap', ldif_file_fullpath])
-            importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
-                                  self.loadLdifCommand,
-                                  '--hostname',
-                                  self.ldap_hostname,
-                                  '--port',
-                                  self.ldap_admin_port,
-                                  '--bindDN',
-                                  '"%s"' % self.ldap_binddn,
-                                  '-j',
-                                  self.ldapPassFn,
-                                  '--trustAll']
-            if self.opendj_version == "2.6":
-                importParams.append('--backendID')
-                importParams.append('userRoot')
-                importParams.append('--append')
-                importParams.append('--ldifFile')
-                importParams.append(ldif_file_fullpath)
-            else:
-                importParams.append('--useSSL')
-                importParams.append('--defaultAdd')
-                importParams.append('--continueOnError')
-                importParams.append('--filename')
-                importParams.append(ldif_file_fullpath)
-
-            importCmd = " ".join(importParams)
-            self.run(['/bin/su',
-                      'ldap',
-                      '-c',
-                      '%s' % importCmd])
-
-        self.logIt("Importing site LDIF")
-        self.copyFile("%s/static/cache-refresh/o_site.ldif" % self.install_dir, ldifFolder)
-        site_ldif_fn = "%s/o_site.ldif" % ldifFolder
-        self.run([self.cmd_chown, 'ldap:ldap', site_ldif_fn])
-        
-        importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
-                              self.importLdifCommand,
-                              '--ldifFile',
-                              site_ldif_fn,
-                              '--backendID',
-                              'site',
-                              '--hostname',
-                              self.ldap_hostname,
-                              '--port',
-                              self.ldap_admin_port,
-                              '--bindDN',
-                              '"%s"' % self.ldap_binddn,
-                              '-j',
-                              self.ldapPassFn,
-                              '--trustAll']
-        if self.opendj_version == "2.6":
-            importParams.append('--append')
-
-        importCmd = " ".join(importParams)
-        self.run(['/bin/su',
-                  'ldap',
-                  '-c',
-                  '%s' % importCmd])
-
-    def index_opendj_backend(self, backend):
-        if self.opendj_version == "2.6":
-            index_command = 'create-local-db-index'
-        else:
-            index_command = 'create-backend-index'
-            
-        try:
-            self.logIt("Running LDAP index creation commands for " + backend + " backend")
-            # This json file contains a mapping of the required indexes.
-            # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
-            index_json = self.load_json(self.indexJson)
-            if index_json:
-                for attrDict in index_json:
-                    attr_name = attrDict['attribute']
-                    index_types = attrDict['index']
-                    for index_type in index_types:
-                        backend_names = attrDict['backend']
-                        for backend_name in backend_names:
-                            if (backend_name == backend):
-                                self.logIt("Creating %s index for attribute %s" % (index_type, attr_name))
-                                indexCmd = " ".join(['cd %s/bin ; ' % self.ldapBaseFolder,
-                                                     self.ldapDsconfigCommand,
-                                                     index_command,
-                                                     '--backend-name',
-                                                     backend,
-                                                     '--type',
-                                                     'generic',
-                                                     '--index-name',
-                                                     attr_name,
-                                                     '--set',
-                                                     'index-type:%s' % index_type,
-                                                     '--set',
-                                                     'index-entry-limit:4000',
-                                                     '--hostName',
-                                                     self.ldap_hostname,
-                                                     '--port',
-                                                     self.ldap_admin_port,
-                                                     '--bindDN',
-                                                     '"%s"' % self.ldap_binddn,
-                                                     '-j', self.ldapPassFn,
-                                                     '--trustAll',
-                                                     '--noPropertiesFile',
-                                                     '--no-prompt'])
-                                self.run(['/bin/su',
-                                          'ldap',
-                                          '-c',
-                                          indexCmd])
-            else:
-                self.logIt('NO indexes found %s' % self.indexJson, True)
-        except:
-            self.logIt("Error occured during backend " + backend + " LDAP indexing", True)
-            self.logIt(traceback.format_exc(), True)
-
-    def index_opendj(self):
-        self.index_opendj_backend('userRoot')
-        self.index_opendj_backend('site')
 
     def prepare_openid_keys_generator(self):
         self.logIt("Preparing files needed to run OpenId keys generator")
@@ -1832,7 +1597,7 @@ class Setup(object):
                 # self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
                 self.run([self.cmd_chown, '-R', 'jetty:jetty', self.idp3Folder])
 
-            if self.installLdap and self.ldap_type is 'openldap':
+            if self.installLdap:
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data'])
         except:
             self.logIt("Error making folders", True)
@@ -1928,20 +1693,6 @@ class Setup(object):
         promptForLDAP = self.getPrompt("Install LDAP Server?", "Yes")[0].lower()
         if promptForLDAP == 'y':
             self.installLdap = True
-            option = None
-            while (option != 1) and (option != 2):
-                try:
-                    option = int(self.getPrompt("Choose a LDAP software. 1.OpenLDAP 2.OpenDJ", "1"))
-                except ValueError:
-                    option = None
-                if (option != 1) and (option != 2):
-                    print "You did not enter the correct option. Enter either 1 or 2."
-
-            if option == 1:
-                self.ldap_type = 'openldap'
-                self.ldap_binddn = 'cn=directory manager,o=gluu'
-            elif option == 2:
-                self.ldap_type = 'opendj'
         else:
             self.installLdap = False
 
@@ -2156,20 +1907,33 @@ class Setup(object):
             self.logIt("Error saving properties", True)
             self.logIt(traceback.format_exc(), True)
 
-    def setup_opendj(self):
-        self.logIt("Running OpenDJ Setup")
+    def createLdapPw(self):
         try:
-            self.add_ldap_schema()
+            f = open(self.ldapPassFn, 'w')
+            f.write(self.ldapPass)
+            f.close()
+            self.run([self.cmd_chown, 'ldap:ldap', self.ldapPassFn])
         except:
-            self.logIt('Error adding ldap schema', True)
+            self.logIt("Error writing temporary LDAP password.")
             self.logIt(traceback.format_exc(), True)
 
+    def deleteLdapPw(self):
+        try:
+            os.remove(self.ldapPassFn)
+            os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
+        except:
+            self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
+            self.logIt(traceback.format_exc(), True)
+
+    def install_opendj(self):
+        self.logIt("Running OpenDJ Setup")
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
         self.change_ownership()
         try:
-            setupCmd = "cd /opt/opendj ; export OPENDJ_JAVA_HOME=" + self.jre_home + " ; " + " ".join([self.ldapSetupCommand,
+            ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
+            setupCmd = "cd /opt/opendj ; export OPENDJ_JAVA_HOME=" + self.jre_home + " ; " + " ".join([ldapSetupCommand,
                                       '--no-prompt',
                                       '--cli',
                                       '--propertiesFilePath',
@@ -2184,6 +1948,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         try:
+            ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
             dsjavaCmd = "cd /opt/opendj/bin ; %s" % self.ldapDsJavaPropCommand
             self.run(['/bin/su',
                       'ldap',
@@ -2193,20 +1958,6 @@ class Setup(object):
         except:
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
-
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
-                opendj_dest_folder = "/etc/systemd/system"
-                try:
-                    self.copyFile(self.opendj_service_centos7, opendj_dest_folder)
-                    service_path = '/usr/bin/systemctl'
-                    self.run([service_path, 'daemon-reload'])
-                    self.run([service_path, 'enable', 'opendj'])
-                except:
-                    self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
-                    self.logIt(traceback.format_exc(), True)
-        else:
-              self.run(["/opt/opendj/bin/create-rc-script", "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
 
     def setup_init_scripts(self):
         if self.os_initdaemon == 'initd':
@@ -2221,13 +1972,11 @@ class Setup(object):
 
         if self.os_type in ['centos', 'fedora']:
             for service in self.redhat_services:
-                if service != 'opendj':
-                    self.run(["/sbin/chkconfig", service, "on"])
+                self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['redhat']:
             for service in self.redhat_services:
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
@@ -2257,7 +2006,7 @@ class Setup(object):
            self.run([service_path, 'memcached', 'start'])
 
         # Openldap
-        if self.ldap_type is 'openldap':
+        if self.installLdap:
             # FIXME Tested on ubuntu only
             if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
                self.run([service_path, 'restart', 'rsyslog.service'])
@@ -2302,22 +2051,6 @@ class Setup(object):
             self.run(['/bin/hostname', self.hostname])
 
         self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
-
-    def configure_opendj_install(self):
-        if self.opendj_version == "2.6":
-            self.loadLdifCommand = self.importLdifCommand
-            self.ldap_backend_type = 'local-db'
-        else:
-            self.loadLdifCommand = self.ldapModifyCommand
-            self.ldap_backend_type = 'je'
-
-        try:
-            f = open(self.ldapPassFn, 'w')
-            f.write(self.ldapPass)
-            f.close()
-            self.run([self.cmd_chown, 'ldap:ldap', self.ldapPassFn])
-        except:
-            self.logIt("Error writing temporary LDAP password.")
 
     def install_openldap(self):
         self.logIt("Installing OpenLDAP from package")
@@ -2383,20 +2116,19 @@ class Setup(object):
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
 
     def install_ldap_server(self):
-        self.logIt("Running LDAP Setup")
-        if installObject.ldap_type is 'opendj':
-            installObject.configure_opendj_install()
-            installObject.setup_opendj()
-            installObject.configure_opendj()
-            installObject.index_opendj()
-            installObject.import_ldif()
-            installObject.export_opendj_public_cert()
-            installObject.deleteLdapPw()
-        elif installObject.ldap_type is 'openldap':
-            installObject.setup_openldap_logging()
-            installObject.install_openldap()
-            installObject.configure_openldap()
-            installObject.import_ldif_openldap()
+        self.logIt("Running OpenDJ Setup")
+
+        installObject.extractOpenDJ()
+        installObject.opendj_version = installObject.determineOpenDJVersion()
+        installObject.createLdapPw()
+        installObject.install_opendj()
+        installObject.deleteLdapPw()
+
+        self.logIt("Running OpenLDAP Setup")
+        installObject.setup_openldap_logging()
+        installObject.install_openldap()
+        installObject.configure_openldap()
+        installObject.import_ldif_openldap()
 
     def calculate_aplications_memory(self):
         self.logIt("Calculating memory setting for applications")
@@ -2552,17 +2284,10 @@ if __name__ == '__main__':
     # Get apache version
     installObject.apache_version = installObject.determineApacheVersionForOS()
 
-    # TODO find if this extraction of opendj by default is necessary as we move to openldap install
-    installObject.extractOpenDJ()
-
-    # Get OpenDJ version
-    installObject.opendj_version = installObject.determineOpenDJVersion()
-
     print "\nInstalling Gluu Server..."
     print "Detected OS  :  %s" % installObject.os_type
     print "Detected init:  %s" % installObject.os_initdaemon
     print "Detected Apache:  %s" % installObject.apache_version
-    print "Detected OpenDJ:  %s" % installObject.opendj_version
 
     print "\nInstalling Gluu Server...\n\nFor more info see:\n  %s  \n  %s\n" % (installObject.log, installObject.logError)
     print "\n** All clear text passwords contained in %s.\n" % installObject.savedProperties
@@ -2610,9 +2335,6 @@ if __name__ == '__main__':
             installObject.downloadWarFiles()
             installObject.render_jetty_templates()
             installObject.install_gluu_base()
-            # Temporary fix to render correct setup properties
-            if installObject.ldap_type is 'opendj':
-                installObject.configure_opendj_install()
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.generate_scim_configuration()
