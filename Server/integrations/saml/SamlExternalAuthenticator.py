@@ -733,7 +733,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml. Get mapped all attributes user. Skipping saml attribute: '%s'" %  key
                 continue
 
-            if StringHelper.equalsIgnoreCase(ldapAttributeName, "uid")
+            if StringHelper.equalsIgnoreCase(ldapAttributeName, "uid"):
                 continue
 
             attribute = CustomAttribute(ldapAttributeName)
