@@ -4,8 +4,10 @@
 package org.xdi.oxd.server.license;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,7 @@ import java.io.Serializable;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 12/10/2014
  */
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LicenseFile implements Serializable {
 
     public static final String LICENSE_FILE_NAME = ".oxd-license";
@@ -31,8 +33,23 @@ public class LicenseFile implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(LicenseFile.class);
 
+    public static class MacAddress {
+        private static String MAC_ADDRESS = null;
+
+        public static synchronized String getMacAddress() {
+            return MAC_ADDRESS;
+        }
+
+        public static synchronized void setMacAddress(String macAddress) {
+            LOG.trace("MAC ADDRESS set to : " + macAddress);
+            MacAddress.MAC_ADDRESS = macAddress;
+        }
+    }
+
     @JsonProperty(value = "encoded_license")
     private String encodedLicense;
+    @JsonProperty(value = "mac_address")
+    private String macAddress;
 
     @JsonIgnore
     private long lastModified;
@@ -40,8 +57,9 @@ public class LicenseFile implements Serializable {
     public LicenseFile() {
     }
 
-    public LicenseFile(String encodedLicense) {
+    public LicenseFile(String encodedLicense, String macAddress) {
         this.encodedLicense = encodedLicense;
+        this.macAddress = macAddress;
     }
 
     public String getEncodedLicense() {
@@ -50,6 +68,14 @@ public class LicenseFile implements Serializable {
 
     public void setEncodedLicense(String encodedLicense) {
         this.encodedLicense = encodedLicense;
+    }
+
+    public String getMacAddress() {
+        return macAddress;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.macAddress = macAddress;
     }
 
     public long getLastModified() {
@@ -63,7 +89,13 @@ public class LicenseFile implements Serializable {
     private static LicenseFile create(InputStream p_stream) {
         try {
             try {
-                return CoreUtils.createJsonMapper().readValue(p_stream, LicenseFile.class);
+                LicenseFile licenseFile = CoreUtils.createJsonMapper().readValue(p_stream, LicenseFile.class);
+                if (licenseFile != null) {
+                    if (!Strings.isNullOrEmpty(licenseFile.getMacAddress())) {
+                        LicenseFile.MacAddress.setMacAddress(licenseFile.getMacAddress());
+                    }
+                    return licenseFile;
+                }
             } catch (Exception e) {
                 if (e.getMessage().startsWith("No content to map to Object")) { // quick trick to make it less verbose for empty file
                     LOG.error(e.getMessage());
