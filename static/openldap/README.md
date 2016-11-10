@@ -4,6 +4,14 @@ The OIDs are dot seperate numbers with the number `1.3.6.1.4.1.48710` allocated 
 
 Gluu uses a hierarchial structure to define the schema elements and allots numbers in the same structure.
 ```
+1.3.6.1.4.1.4870
+├── .0-Reserved
+└── .1-Published
+    ├── .1-Syntax
+    ├── .2-MatchingRule
+    ├── .3-Attribute
+    └── .4-ObjectClass
+
 1.3.6.1.4.1.48710 (Organization OID for Gluu)
 1.3.6.1.4.1.48710.0 (Reserved Group for testing and other purposes)
 1.3.6.1.4.1.48710.1 (Published Group used in Gluu Server LDAP schema)
