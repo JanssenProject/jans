@@ -23,6 +23,7 @@ Gluu uses a hierarchial structure to define the schema elements and allots numbe
 
 OpenLDAP Schema definition rules give a way to abstract this structure into aliases that are easier to be used in definitions. The following aliases are defined in `gluu.schema`
 
+
 ```
 objectIdentifier oxOrgOID      1.3.6.1.4.1.48710
 objectIdentifier oxReserved    oxOrgOID:0
@@ -34,6 +35,7 @@ objectIdentifier oxObjectClass oxPublished:4
 ```
 
 So any new definition could be added by specifying the alias followed by a number.
+*Note:* While defining the schema, use a `colon` followed by the number NOT a `dot`
 
 ```
 attributetype ( oxAttribute:1 NAME ( 'oxAssociatedClient' 'associatedClient' )
