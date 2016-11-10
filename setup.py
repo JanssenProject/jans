@@ -121,7 +121,7 @@ class Setup(object):
             },
                 'idp' : {'name' : 'idp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                         'memory' : {'ratio' : 0.2, "max_allowed_mb" : 1024},
                          'installed' : False
             },
                 'asimba' : {'name' : 'asimba',
@@ -130,11 +130,6 @@ class Setup(object):
                          'installed' : False
             },
                 'cas' : {'name' : 'cas',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
-                         'installed' : False
-            },
-                'credmgr' : {'name' : 'credmgr',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
                          'installed' : False
@@ -252,7 +247,6 @@ class Setup(object):
 
         self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
         self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuOptFolder
-#        self.defaultTrustStoreFN = '/usr/java/latest/lib/security/cacerts'
         self.defaultTrustStoreFN = '%s/jre/lib/security/cacerts' % self.jre_home
         self.defaultTrustStorePW = 'changeit'
 
@@ -1949,7 +1943,7 @@ class Setup(object):
 
         try:
             ldapDsJavaPropCommand = "%s/bin/dsjavaproperties" % self.ldapBaseFolder
-            dsjavaCmd = "cd /opt/opendj/bin ; %s" % self.ldapDsJavaPropCommand
+            dsjavaCmd = "cd /opt/opendj/bin ; %s" % ldapDsJavaPropCommand
             self.run(['/bin/su',
                       'ldap',
                       '-c',
