@@ -20,7 +20,9 @@ import org.xdi.oxd.server.service.HttpService;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -72,23 +74,25 @@ public class LicenseFileUpdateService {
     }
 
     private ScheduledExecutorService newExecutor() {
-         return Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
+        return Executors.newSingleThreadScheduledExecutor(CoreUtils.daemonThreadFactory());
     }
 
     private void updateLicenseFromServer() {
         try {
             final GenerateWS generateWS = LicenseClient.generateWs(LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor());
 
-            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + ", retry: " + retry + " ... ");
-            final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId(), macAddress());
+            final String macAddress = macAddress();
+            LOG.trace("Updating license, license_id: " + conf.getLicenseId() + ", retry: " + retry + " ... Mac address: " + macAddress);
+
+            final List<LicenseResponse> generatedLicenses = generateWS.generatePost(conf.getLicenseId(), macAddress);
             if (generatedLicenses != null && !generatedLicenses.isEmpty() && !Strings.isNullOrEmpty(generatedLicenses.get(0).getEncodedLicense())) {
                 final File file = LicenseFile.getLicenseFile();
                 if (file != null) {
-                    final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense()).asJson();
+                    final String json = new LicenseFile(generatedLicenses.get(0).getEncodedLicense(), macAddress).asJson();
                     FileUtils.write(file, json);
 
                     retry.set(0);
-                    LOG.info("License file updated successfully.");
+                    LOG.info("License file updated successfully. Mac address: " + macAddress);
                     return;
                 }
             } else {
@@ -123,19 +127,43 @@ public class LicenseFileUpdateService {
     }
 
     private String macAddress() {
+        String macAddressFromFile = LicenseFile.MacAddress.getMacAddress();
+        if (!Strings.isNullOrEmpty(macAddressFromFile)) {
+            LOG.trace("Mac address fetched from file: " + macAddressFromFile);
+            return macAddressFromFile;
+        }
         try {
             InetAddress ip = InetAddress.getLocalHost();
+            LOG.trace("Generating new mac address ... ip: " + ip);
             NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-            byte[] mac = network.getHardwareAddress();
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < mac.length; i++) {
-                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            if (network != null) {
+                byte[] mac = network.getHardwareAddress();
+                if (mac != null && mac.length > 0) {
+                    return macAsString(mac);
+                }
             }
-            return sb.toString();
+
+            for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                byte[] mac = networkInterface.getHardwareAddress();
+
+                if (mac != null && mac.length > 0) {
+                    return macAsString(mac);
+                }
+            }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            return "unknown";
         }
+
+        String uuid = UUID.randomUUID().toString();
+        LOG.debug("Generated fallback UUID instead of mac address:" + uuid);
+        return uuid;
+    }
+
+    private static String macAsString(byte[] mac) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        }
+        return sb.toString();
     }
 }
