@@ -22,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version November 11, 2016
  */
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
@@ -202,14 +202,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     public String getSessionDn() {
-		return sessionDn;
-	}
+        return sessionDn;
+    }
 
-	public void setSessionDn(String sessionDn) {
-		this.sessionDn = sessionDn;
-	}
+    public void setSessionDn(String sessionDn) {
+        this.sessionDn = sessionDn;
+    }
 
-	/**
+    /**
      * Checks the scopes policy configured according to the type of the
      * authorization grant to limit the issued token scopes.
      *
@@ -219,11 +219,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      */
     @Override
     public String checkScopesPolicy(String requestedScopes) {
-    	this.scopes.clear();
+        this.scopes.clear();
 
-    	Set<String> grantedScopes = ScopeChecker.instance().checkScopesPolicy(client, requestedScopes);
-    	this.scopes.addAll(grantedScopes);
-    	
+        Set<String> grantedScopes = ScopeChecker.instance().checkScopesPolicy(client, requestedScopes);
+        this.scopes.addAll(grantedScopes);
+
         final StringBuilder grantedScopesSb = new StringBuilder();
         for (String scope : scopes) {
             grantedScopesSb.append(" ").append(scope);
@@ -232,7 +232,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         final String grantedScopesSt = grantedScopesSb.toString().trim();
 
-    	return grantedScopesSt;
+        return grantedScopesSt;
     }
 
     @Override
