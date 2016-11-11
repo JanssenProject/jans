@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 24, 2016
+ * @version November 11, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("grantService")
@@ -172,7 +172,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
         try {
-            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.create(String.format("oxAuthAuthorizationCode=%s", p_authorizationCode)));
+            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.create(String.format("oxAuthAuthorizationCode=%s", TokenHashUtil.getHashedToken(p_authorizationCode))));
         } catch (LDAPException e) {
             log.trace(e.getMessage(), e);
         } catch (Exception e) {
