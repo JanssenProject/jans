@@ -1954,6 +1954,18 @@ class Setup(object):
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
 
+        try:
+            stopDsJavaPropCommand = "%s/bin/stop-ds" % self.ldapBaseFolder
+            dsjavaCmd = "cd /opt/opendj/bin ; %s" % stopDsJavaPropCommand
+            self.run(['/bin/su',
+                      'ldap',
+                      '-c',
+                      dsjavaCmd
+            ])
+        except:
+            self.logIt("Error running stop-ds", True)
+            self.logIt(traceback.format_exc(), True)
+
     def setup_init_scripts(self):
         if self.os_initdaemon == 'initd':
             for init_file in self.init_files:
