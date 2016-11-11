@@ -5,6 +5,7 @@
  */package org.xdi.config.oxtrust;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
@@ -150,6 +151,9 @@ public final class ApplicationConfiguration implements Serializable {
 	private int rptConnectionPoolCustomKeepAliveTimeout;  // In seconds; will be converted to millis
 	
 	private boolean oxIncommonFlag;
+	
+	private List<String> clientWhiteList;
+    private List<String> clientBlackList;
 
 	public boolean isOxIncommonFlag() {
 		return oxIncommonFlag;
@@ -923,5 +927,21 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setIdp3EncryptionCert(String idp3EncryptionCert) {
 		this.idp3EncryptionCert = idp3EncryptionCert;
+	}
+
+	public List<String> getClientWhiteList() {
+		return clientWhiteList;
+	}
+
+	public void setClientWhiteList(List<String> clientWhiteList) {
+		this.clientWhiteList = clientWhiteList;
+	}
+
+	public List<String> getClientBlackList() {
+		return clientBlackList;
+	}
+
+	public void setClientBlackList(List<String> clientBlackList) {
+		this.clientBlackList = clientBlackList;
 	}
 }
