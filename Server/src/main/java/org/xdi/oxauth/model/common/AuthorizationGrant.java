@@ -17,6 +17,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.IdTokenFactory;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.GrantService;
+import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.util.security.StringEncrypter;
 
 import java.security.SignatureException;
@@ -28,7 +29,7 @@ import java.util.Set;
  * Base class for all the types of authorization grant.
  *
  * @author Javier Rojas Blum
- * @version October 7, 2016
+ * @version November 11, 2016
  */
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -226,7 +227,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setGrantId(getGrantId());
         result.setCreationDate(p_token.getCreationDate());
         result.setExpirationDate(p_token.getExpirationDate());
-        result.setTokenCode(p_token.getCode());
+        result.setTokenCode(TokenHashUtil.getHashedToken(p_token.getCode()));
         result.setUserId(getUserId());
         result.setClientId(getClientId());
         result.setScope(getScopesAsString());
@@ -241,7 +242,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
         final AuthorizationCode authorizationCode = getAuthorizationCode();
         if (authorizationCode != null) {
-            result.setAuthorizationCode(authorizationCode.getCode());
+            result.setAuthorizationCode(TokenHashUtil.getHashedToken(authorizationCode.getCode()));
         }
 
         final String nonce = getNonce();
