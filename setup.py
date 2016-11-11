@@ -223,7 +223,7 @@ class Setup(object):
         self.asimbaJksPass = None
         self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
 
-        self.ldap_binddn = 'cn=directory manager'
+        self.opendj_ldap_binddn = 'cn=directory manager'
         self.ldap_hostname = "localhost"
         self.ldap_port = '1389'
         self.ldaps_port = '1636'
@@ -1242,6 +1242,7 @@ class Setup(object):
     def install_gluu_base(self):
         self.logIt("Installing Gluu base...")
         self.prepare_openid_keys_generator()
+        self.ldap_binddn = self.openldapRootUser
 
     def load_certificate_text(self, filePath):
         self.logIt("Load certificate %s" % filePath)
