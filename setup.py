@@ -760,9 +760,8 @@ class Setup(object):
     def detect_os_type(self):
         # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
-        try:
-            distro_info = self.readFile('/etc/redhat-release')
-        except IOError:
+        distro_info = self.readFile('/etc/redhat-release')
+        if distro_info == None:
             distro_info = self.readFile('/etc/os-release')
 
         if 'CentOS' in distro_info:
@@ -1282,6 +1281,7 @@ class Setup(object):
     def install_gluu_base(self):
         self.logIt("Installing Gluu base...")
         self.prepare_openid_keys_generator()
+        self.generate_scim_configuration()
         self.ldap_binddn = self.openldapRootUser
 
     def load_certificate_text(self, filePath):
@@ -1487,7 +1487,6 @@ class Setup(object):
         if self.installOxAuth:
             self.install_oxauth()
 
-        self.generate_scim_configuration()
         if self.installOxTrust:
             self.install_oxtrust()
 
