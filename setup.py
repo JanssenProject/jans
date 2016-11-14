@@ -48,15 +48,14 @@ class Setup(object):
         self.githubBranchName = 'master'
 
         # Used only if -w (get wars) options is given to setup.py
-        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.oxauth_rp_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-rp/%s/oxauth-rp-%s.war' % (self.oxVersion, self.oxVersion)
-        self.idp_war = 'http://ox.gluu.org/maven/org/xdi/oxidp/%s/oxidp-%s.war' % (self.oxVersion, self.oxVersion)
+        self.oxtrust_war = 'https://ox.gluu.org/maven/org/xdi/oxtrust-server/%s/oxtrust-server-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_war = 'http://ox.gluu.org/maven/org/xdi/oxshibbolethIdp/%s/oxshibbolethIdp-%s.war' % (self.oxVersion, self.oxVersion)
         self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
         self.idp3_cml_keygenerator = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
-        self.asimba_war = "http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war" % (self.oxVersion, self.oxVersion)
-        self.cas_war = "http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war" % (self.oxVersion, self.oxVersion)
+        self.asimba_war = 'http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war' % (self.oxVersion, self.oxVersion)
+        self.cas_war = 'http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
 
         self.downloadWars = None
@@ -162,6 +161,7 @@ class Setup(object):
         self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
         self.oxTrustCacheRefreshFolder = "/var/ox/oxtrust/vds-snapshots"
         self.oxCustomizationFolder = "/var/gluu/webapps"
+
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
@@ -185,6 +185,8 @@ class Setup(object):
         self.encoded_ox_ldap_pw = None
         self.encoded_ldap_pw = None
         self.encoded_shib_jks_pw = None
+        self.application_max_ram = None    # in MB
+
         self.baseInum = None
         self.inumOrg = None
         self.inumAppliance = None
@@ -201,7 +203,6 @@ class Setup(object):
         self.oxauthClient_4_pw = None
         self.oxauthClient_4_encoded_pw = None
         self.encode_salt = None
-        self.oxauth_jsf_salt = None
         self.oxTrustConfigGeneration = "true"
 
         self.outputFolder = '%s/output' % self.install_dir
@@ -237,7 +238,6 @@ class Setup(object):
         self.ldapModifyCommand = '%s/bin/ldapmodify' % self.ldapBaseFolder
         self.loadLdifCommand = self.ldapModifyCommand
         self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
-        self.org_custom_schema = "%s/config/schema/100-user.ldif" % self.ldapBaseFolder
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.redhat_services = ['memcached', 'httpd']
@@ -267,7 +267,7 @@ class Setup(object):
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
 
 
-        # Stuff that gets rendered; filname is necessary. Full path should
+        # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
@@ -279,7 +279,6 @@ class Setup(object):
         self.gluu_python_readme = '%s/conf/python/python.txt' % self.gluuBaseFolder
         self.ox_ldap_properties = '%s/ox-ldap.properties' % self.configFolder
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
-        self.application_max_ram = None    # in MB
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
         self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
@@ -316,18 +315,8 @@ class Setup(object):
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
         # oxAuth/oxTrust Base64 configuration files
-        self.oxauth_config_base64 = None
-        self.oxauth_static_conf_base64 = None
-        self.oxauth_error_base64 = None
-        self.oxauth_openid_key_base64 = None
         self.pairwiseCalculationKey = None
         self.pairwiseCalculationSalt = None
-        self.oxtrust_config_base64 = None
-        self.oxtrust_cache_refresh_base64 = None
-        self.oxtrust_import_person_base64 = None
-        self.oxidp_config_base64 = None
-        self.oxcas_config_base64 = None
-        self.oxasimba_config_base64 = None
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
@@ -337,14 +326,12 @@ class Setup(object):
         # oxTrust SCIM configuration
         self.scim_rs_client_id = None
         self.scim_rs_client_jwks = None
-        self.scim_rs_client_base64_jwks = None
         self.scim_rs_client_jks_fn = "%s/scim-rs.jks" % self.certFolder
         self.scim_rs_client_jks_pass = None
         self.scim_rs_client_jks_pass_encoded = None
 
         self.scim_rp_client_id = None
         self.scim_rp_client_jwks = None
-        self.scim_rp_client_base64_jwks = None
         self.scim_rp_client_jks_fn = "%s/scim-rp.jks" % self.outputFolder
         self.scim_rp_client_jks_pass = 'secret'
 
@@ -374,7 +361,6 @@ class Setup(object):
                      self.oxauth_static_conf_json: False,
                      self.oxTrust_log_rotation_configuration: True,
                      self.ldap_setup_properties: False,
-                     self.org_custom_schema: False,
                      self.apache2_conf: False,
                      self.apache2_ssl_conf: False,
                      self.apache2_24_conf: False,
@@ -1183,10 +1169,10 @@ class Setup(object):
         self.scim_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
         
         self.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rs_client_jks_fn, self.scim_rs_client_jks_pass)
-        self.scim_rs_client_base64_jwks = self.generate_base64_string(self.scim_rs_client_jwks, 1)
+        self.templateRenderingDict['scim_rs_client_base64_jwks'] = self.generate_base64_string(self.scim_rs_client_jwks, 1)
 
         self.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rp_client_jks_fn, self.scim_rp_client_jks_pass)
-        self.scim_rp_client_base64_jwks = self.generate_base64_string(self.scim_rp_client_jwks, 1)
+        self.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(self.scim_rp_client_jwks, 1)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -1273,15 +1259,6 @@ class Setup(object):
     def install_saml(self):
         if self.installSaml:
             self.logIt("Install SAML Shibboleth IDP v3...")
-            # choose SAML IDP version
-            # if self.allowPreReleasedApplications:
-            #     saml_version_var = self.choose_from_list(['IDP v2', 'IDP v3'], "Shibboleth IDP version")
-            #     if 'IDP v3' in saml_version_var:
-            #         self.installSamlIDP3 = True
-            #     else:
-            #         self.installSamlIDP2 = True
-            # else:
-            #     self.installSamlIDP2 = True
 
             # Put latest SAML templates
             identityWar = 'identity.war'
@@ -1631,7 +1608,6 @@ class Setup(object):
 
 
     def make_oxauth_salt(self):
-        self.oxauth_jsf_salt = os.urandom(16).encode('hex')
         self.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
@@ -1849,18 +1825,18 @@ class Setup(object):
         return self.generate_base64_file(fn, 1)
 
     def generate_base64_configuration(self):
-        self.oxauth_config_base64 = self.generate_base64_ldap_file(self.oxauth_config_json)
-        self.oxauth_static_conf_base64 = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
-        self.oxauth_error_base64 = self.generate_base64_ldap_file(self.oxauth_error_json)
-        self.oxauth_openid_key_base64 = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
+        self.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
+        self.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
+        self.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
+        self.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
 
-        self.oxtrust_config_base64 = self.generate_base64_ldap_file(self.oxtrust_config_json);
-        self.oxtrust_cache_refresh_base64 = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json)
-        self.oxtrust_import_person_base64 = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
+        self.templateRenderingDict['oxtrust_config_base64'] = self.generate_base64_ldap_file(self.oxtrust_config_json);
+        self.templateRenderingDict['oxtrust_cache_refresh_base64'] = self.generate_base64_ldap_file(self.oxtrust_cache_refresh_json)
+        self.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
 
-        self.oxidp_config_base64 = self.generate_base64_ldap_file(self.oxidp_config_json)
-        self.oxcas_config_base64 = self.generate_base64_ldap_file(self.oxcas_config_json)
-        self.oxasimba_config_base64 = self.generate_base64_ldap_file(self.oxasimba_config_json)
+        self.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
+        self.templateRenderingDict['oxcas_config_base64'] = self.generate_base64_ldap_file(self.oxcas_config_json)
+        self.templateRenderingDict['oxasimba_config_base64'] = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
     def run(self, args, cwd=None, env=None, useWait=False):
@@ -1990,7 +1966,7 @@ class Setup(object):
 
 
     def start_services(self):
-        # Detect sevice path and apache service name
+        # Detect service path and apache service name
         service_path = '/sbin/service'
         apache_service_name = 'httpd'
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
