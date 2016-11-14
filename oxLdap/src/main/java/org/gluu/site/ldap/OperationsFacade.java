@@ -270,7 +270,6 @@ public class OperationsFacade {
 	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {
 
 		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
-			System.err.println("!!!!!!!!!! LDAP");
 			(new Exception()).printStackTrace();
 		}
 
@@ -353,7 +352,6 @@ public class OperationsFacade {
 	 */
 	public SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException {
 		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
-			System.err.println("!!!!!!!!!! LDAP");
 			(new Exception()).printStackTrace();
 		}
 
