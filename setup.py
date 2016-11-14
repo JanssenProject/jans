@@ -288,6 +288,7 @@ class Setup(object):
         self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
         self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
+        self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -328,6 +329,20 @@ class Setup(object):
         self.scim_rp_client_jks_fn = "%s/scim-rp.jks" % self.outputFolder
         self.scim_rp_client_jks_pass = 'secret'
 
+        # oxPassport Configuration
+        self.passport_rs_client_id = None
+        self.passport_rs_client_jwks = None
+        self.passport_rs_client_base64_jwks = None
+        self.passport_rs_client_jks_fn = "%s/passport-rs.jks" % self.certFolder
+        self.passport_rs_client_jks_pass = None
+        self.passport_rs_client_jks_pass_encoded = None
+
+        self.passport_rp_client_id = None
+        self.passport_rp_client_jwks = None
+        self.passport_rp_client_base64_jwks = None
+        self.passport_rp_client_jks_fn = "%s/passport-rp.jks" % self.certFolder
+        self.passport_rp_client_jks_pass = 'secret'
+
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
                            self.ldif_attributes,
@@ -339,7 +354,8 @@ class Setup(object):
                            self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
-                           self.ldif_asimba
+                           self.ldif_asimba,
+                           self.ldif_passport
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
@@ -370,6 +386,7 @@ class Setup(object):
                      self.ldif_scripts: False,
                      self.ldif_scim: False,
                      self.ldif_asimba: False,
+                     self.ldif_passport: False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
@@ -512,6 +529,12 @@ class Setup(object):
         if not self.scim_rp_client_id:
             scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.scim_rp_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
+        if not self.passport_rs_client_id:
+	        passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+	        self.passport_rs_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)
+        if not self.passport_rp_client_id:
+	        passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+	        self.passport_rp_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)
         if not self.inumApplianceFN:
             self.inumApplianceFN = self.inumAppliance.replace('@', '').replace('!', '').replace('.', '')
         if not self.inumOrgFN:
@@ -1227,6 +1250,18 @@ class Setup(object):
         self.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rp_client_jks_fn, self.scim_rp_client_jks_pass)
         self.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(self.scim_rp_client_jwks, 1)
 
+    def generate_passport_configuration(self):
+	    self.passport_rs_client_jks_pass = self.getPW()
+
+        cmd = "%s %s" % (self.oxEncodePWCommand, self.passport_rs_client_jks_pass)
+	    self.passport_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
+
+	    self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self, self.passport_rs_client_jks_pass)
+	    self.passport_rs_client_base64_jwks = self.generate_base64_string(self.passport_rs_client_jwks, 1)
+
+	    self.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass)
+	    self.passport_rp_client_base64_jwks = self.generate_base64_string(self.passport_rp_client_jwks, 1)
+
     def getPrompt(self, prompt, defaultValue=None):
         try:
             if defaultValue:
@@ -1282,6 +1317,7 @@ class Setup(object):
         self.logIt("Installing Gluu base...")
         self.prepare_openid_keys_generator()
         self.generate_scim_configuration()
+        self.generate_passport_configuration()
         self.ldap_binddn = self.openldapRootUser
 
         if self.installSaml:
