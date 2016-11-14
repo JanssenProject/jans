@@ -186,6 +186,7 @@ class Setup(object):
         self.encoded_ldap_pw = None
         self.encoded_shib_jks_pw = None
         self.application_max_ram = None    # in MB
+        self.encode_salt = None
 
         self.baseInum = None
         self.inumOrg = None
@@ -196,21 +197,11 @@ class Setup(object):
         self.oxauth_client_id = None
         self.oxauthClient_pw = None
         self.oxauthClient_encoded_pw = None
-        self.oxauthClient_2_pw = None
-        self.oxauthClient_2_encoded_pw = None
-        self.oxauthClient_3_pw = None
-        self.oxauthClient_3_encoded_pw = None
-        self.oxauthClient_4_pw = None
-        self.oxauthClient_4_encoded_pw = None
-        self.encode_salt = None
-        self.oxTrustConfigGeneration = "true"
+        self.oxTrustConfigGeneration = None
 
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
         self.oxauth_error_json = '%s/static/oxauth/oxauth-errors.json' % self.install_dir
-
-        self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
-        self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
 
         self.oxauth_openid_jwks_fn = "%s/oxauth-keys.json" % self.certFolder
         self.oxauth_openid_jks_fn = "%s/oxauth-keys.jks" % self.certFolder
@@ -305,6 +296,8 @@ class Setup(object):
         self.network = "/etc/sysconfig/network"
         self.system_profile_update = '%s/system_profile' % self.outputFolder
         
+        self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
+        self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
         self.idp3_configuration_properties = '/idp.properties' 
         self.idp3_configuration_ldap_properties = '/ldap.properties'
         self.idp3_configuration_saml_nameid = '/saml-nameid.properties' 
@@ -417,16 +410,18 @@ class Setup(object):
                 s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
 
-    def change_ownership(self):
+    def set_ownership(self):
         self.logIt("Changing ownership")
         realCertFolder = os.path.realpath(self.certFolder)
         realConfigFolder = os.path.realpath(self.configFolder)
-        realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
 
         self.run([self.cmd_chown, '-R', 'jetty:jetty', realCertFolder])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', realConfigFolder])
-        self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxBaseDataFolder])
+
+        # Set right permissions
+        self.run([self.cmd_chmod, '-R', '550', realCertFolder])
+        self.run([self.cmd_chmod, 'u+X', realCertFolder])
 
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
@@ -436,12 +431,6 @@ class Setup(object):
             self.shibboleth_version = 'v3'
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
-
-    def change_permissions(self):
-        realCertFolder = os.path.realpath(self.certFolder)
-
-        self.run([self.cmd_chmod, '-R', '550', realCertFolder])
-        self.run([self.cmd_chmod, 'u+X', realCertFolder])
 
     def get_ip(self):
         testIP = None
@@ -571,7 +560,9 @@ class Setup(object):
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
 
     def configure_oxtrust(self):
-        if not self.installSaml:
+        if self.installSaml:
+            self.oxTrustConfigGeneration = "true"
+        else:
             self.oxTrustConfigGeneration = "false"
 
     def findFiles(self, filePatterns, filesFolder):
@@ -787,6 +778,9 @@ class Setup(object):
             self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, openDJArchive))
             self.logIt(traceback.format_exc(), True)
 
+        realLdapBaseFolder = os.path.realpath(self.ldapBaseFolder)
+        self.run([self.cmd_chown, '-R', 'ldap:ldap', realLdapBaseFolder])
+
     def installJetty(self):
         self.logIt("Installing jetty %s..." % self.jetty_version)
 
@@ -896,20 +890,26 @@ class Setup(object):
             self.oxauthClient_pw = self.getPW()
             cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
             self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
-
-            self.oxauthClient_2_pw = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_2_pw)
-            self.oxauthClient_2_encoded_pw = os.popen(cmd, 'r').read().strip()
-
-            self.oxauthClient_3_pw = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_3_pw)
-            self.oxauthClient_3_encoded_pw = os.popen(cmd, 'r').read().strip()
-
-            self.oxauthClient_4_pw = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_4_pw)
-            self.oxauthClient_4_encoded_pw = os.popen(cmd, 'r').read().strip()
         except:
             self.logIt("Error encoding passwords", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def encode_test_passwords(self):
+        self.logIt("Encoding test passwords")
+        try:
+            self.templateRenderingDict['oxauthClient_2_pw'] = self.getPW()
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.templateRenderingDict['oxauthClient_2_pw'])
+            self.templateRenderingDict['oxauthClient_2_encoded_pw'] = os.popen(cmd, 'r').read().strip()
+
+            self.templateRenderingDict['oxauthClient_3_pw'] = self.getPW()
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.templateRenderingDict['oxauthClient_3_pw'])
+            self.templateRenderingDict['oxauthClient_3_encoded_pw'] = os.popen(cmd, 'r').read().strip()
+
+            self.templateRenderingDict['oxauthClient_4_pw'] = self.getPW()
+            cmd = "%s %s" % (self.oxEncodePWCommand, self.templateRenderingDict['oxauthClient_4_pw'])
+            self.templateRenderingDict['oxauthClient_4_encoded_pw'] = os.popen(cmd, 'r').read().strip()
+        except:
+            self.logIt("Error encoding test passwords", True)
             self.logIt(traceback.format_exc(), True)
 
     def file_get_contents(self, filename):
@@ -1902,7 +1902,7 @@ class Setup(object):
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setupPropsFN = os.path.join(self.ldapBaseFolder, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % self.outputFolder, setupPropsFN)
-        self.change_ownership()
+        self.set_ownership()
         try:
             ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
             setupCmd = "cd /opt/opendj ; export OPENDJ_JAVA_HOME=" + self.jre_home + " ; " + " ".join([ldapSetupCommand,
@@ -2321,6 +2321,7 @@ if __name__ == '__main__':
             installObject.install_gluu_base()
             installObject.copy_scripts()
             installObject.encode_passwords()
+            installObject.encode_test_passwords()
             installObject.generate_scim_configuration()
             installObject.configure_oxtrust()
             installObject.render_templates()
@@ -2336,8 +2337,7 @@ if __name__ == '__main__':
             installObject.setup_init_scripts()
             installObject.install_gluu_components()
             installObject.copy_static()
-            installObject.change_ownership()
-            installObject.change_permissions()
+            installObject.set_ownership()
             installObject.start_services()
             installObject.save_properties()
         except:
