@@ -1284,6 +1284,11 @@ class Setup(object):
         self.generate_scim_configuration()
         self.ldap_binddn = self.openldapRootUser
 
+        if self.installSaml:
+            self.oxTrustConfigGeneration = "true"
+        else:
+            self.oxTrustConfigGeneration = "false"
+
     def load_certificate_text(self, filePath):
         self.logIt("Load certificate %s" % filePath)
         f = open(filePath)
@@ -1491,10 +1496,7 @@ class Setup(object):
             self.install_oxtrust()
 
         if self.installSaml:
-            self.oxTrustConfigGeneration = "true"
             self.install_saml()
-        else:
-            self.oxTrustConfigGeneration = "false"
 
         if self.installCas:
             self.install_cas()
