@@ -541,30 +541,7 @@ class Setup(object):
                 self.logIt(traceback.format_exc(), True)
         return return_value
 
-    def configure_httpd(self):
-        # CentOS 7.* + systemd + apache 2.4
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
-            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
-
-        # CentOS 6.* + init + apache 2.2
-        if self.os_type == 'centos' and self.os_initdaemon == 'init':
-            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
-        if self.os_type in ['redhat', 'fedora'] and self.os_initdaemon == 'init':
-            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
-            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
-        if self.os_type in ['debian', 'ubuntu']:
-            self.copyFile(self.apache2_ssl_conf, '/etc/apache2/sites-available/https_gluu.conf')
-            self.run([self.cmd_ln, '-s', '/etc/apache2/sites-available/https_gluu.conf',
-                      '/etc/apache2/sites-enabled/https_gluu.conf'])
-
-    def configure_oxtrust(self):
-        if self.installSaml:
-            self.oxTrustConfigGeneration = "true"
-        else:
-            self.oxTrustConfigGeneration = "false"
-
+    # = File system  =================================================================
     def findFiles(self, filePatterns, filesFolder):
         foundFiles = []
         try:
@@ -632,6 +609,96 @@ class Setup(object):
             self.logIt("Error copying tree %s to %s" % (src, dst), True)
             self.logIt(traceback.format_exc(), True)
 
+    def createDirs(self, name):
+        try:
+            if not os.path.exists(name):
+                os.makedirs(name, 0700)
+                self.logIt('Created dir: %s' % name)
+        except:
+            self.logIt("Error making directory %s" % name, True)
+            self.logIt(traceback.format_exc(), True)
+
+    def removeDirs(self, name):
+        try:
+            if os.path.exists(name):
+                shutil.rmtree(name)
+                self.logIt('Removed dir: %s' % name)
+        except:
+            self.logIt("Error removing directory %s" % name, True)
+            self.logIt(traceback.format_exc(), True)
+
+    def removeFile(self, fileName):
+        try:
+            if os.path.exists(fileName):
+                os.remove(fileName)
+                self.logIt('Removed file: %s' % fileName)
+        except:
+            self.logIt("Error removing file %s" % fileName, True)
+            self.logIt(traceback.format_exc(), True)
+
+    # = Utilities ====================================================================
+
+    def logIt(self, msg, errorLog=False):
+        if errorLog:
+            f = open(self.logError, 'a')
+            f.write('%s %s\n' % (time.strftime('%X %x'), msg))
+            f.close()
+        f = open(self.log, 'a')
+        f.write('%s %s\n' % (time.strftime('%X %x'), msg))
+        f.close()
+
+    def load_properties(self, fn):
+        self.logIt('Loading Properties %s' % fn)
+        p = Properties.Properties()
+        try:
+            p.load(open(fn))
+            properties_list = p.keys()
+            for prop in properties_list:
+                try:
+                    self.__dict__[prop] = p[prop]
+                    if p[prop] == 'True':
+                        self.__dict__[prop] = True
+                    elif p[prop] == 'False':
+                        self.__dict__[prop] = False
+                except:
+                    self.logIt("Error loading property %s" % prop)
+                    self.logIt(traceback.format_exc(), True)
+        except:
+            self.logIt("Error loading properties", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def load_json(self, fn):
+        self.logIt('Loading JSON from %s' % fn)
+        try:
+            json_file = open(fn)
+            json_text = json_file.read()
+            json_file.close()
+            return json.loads(json_text)
+        except:
+            self.logIt("Unable to read or parse json file from %s" % fn, True)
+            self.logIt(traceback.format_exc(), True)
+        return None
+
+    # ================================================================================
+
+    def configure_httpd(self):
+        # CentOS 7.* + systemd + apache 2.4
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
+            self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_24_conf, '/etc/httpd/conf.d/https_gluu.conf')
+
+        # CentOS 6.* + init + apache 2.2
+        if self.os_type == 'centos' and self.os_initdaemon == 'init':
+            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
+        if self.os_type in ['redhat', 'fedora'] and self.os_initdaemon == 'init':
+            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
+            self.copyFile(self.apache2_ssl_conf, '/etc/httpd/conf.d/https_gluu.conf')
+        if self.os_type in ['debian', 'ubuntu']:
+            self.copyFile(self.apache2_ssl_conf, '/etc/apache2/sites-available/https_gluu.conf')
+            self.run([self.cmd_ln, '-s', '/etc/apache2/sites-available/https_gluu.conf',
+                      '/etc/apache2/sites-enabled/https_gluu.conf'])
+
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
 
@@ -690,22 +757,13 @@ class Setup(object):
             self.copyFile("%s/static/auth/conf/cert_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
 
-    def createDirs(self, name):
-        try:
-            if not os.path.exists(name):
-                os.makedirs(name, 0700)
-                self.logIt('Created dir: %s' % name)
-        except:
-            self.logIt("Error making directory %s" % name, True)
-            self.logIt(traceback.format_exc(), True)
-
     def detect_os_type(self):
         # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
         try:
-            distro_info = self.file_get_contents('/etc/redhat-release')
+            distro_info = self.readFile('/etc/redhat-release')
         except IOError:
-            distro_info = self.file_get_contents('/etc/os-release')
+            distro_info = self.readFile('/etc/os-release')
 
         if 'CentOS' in distro_info:
             return self.os_types[0]
@@ -911,10 +969,6 @@ class Setup(object):
         except:
             self.logIt("Error encoding test passwords", True)
             self.logIt(traceback.format_exc(), True)
-
-    def file_get_contents(self, filename):
-        with open(filename) as f:
-            return f.read()
 
     def gen_cert(self, suffix, password, user='root'):
         self.logIt('Generating Certificate for %s' % suffix)
@@ -1433,11 +1487,15 @@ class Setup(object):
         if self.installOxAuth:
             self.install_oxauth()
 
+        self.generate_scim_configuration()
         if self.installOxTrust:
             self.install_oxtrust()
 
         if self.installSaml:
+            self.oxTrustConfigGeneration = "true"
             self.install_saml()
+        else:
+            self.oxTrustConfigGeneration = "false"
 
         if self.installCas:
             self.install_cas()
@@ -1455,15 +1513,6 @@ class Setup(object):
         except socket.error:
             return False
 
-    def logIt(self, msg, errorLog=False):
-        if errorLog:
-            f = open(self.logError, 'a')
-            f.write('%s %s\n' % (time.strftime('%X %x'), msg))
-            f.close()
-        f = open(self.log, 'a')
-        f.write('%s %s\n' % (time.strftime('%X %x'), msg))
-        f.close()
-
     def ldap_encode(self, password):
         salt = os.urandom(4)
         sha = hashlib.sha1(password)
@@ -1471,44 +1520,6 @@ class Setup(object):
         b64encoded = '{0}{1}'.format(sha.digest(), salt).encode('base64').strip()
         encrypted_password = '{{SSHA}}{0}'.format(b64encoded)
         return encrypted_password
-
-    def load_properties(self, fn):
-        self.logIt('Loading Properties %s' % fn)
-        p = Properties.Properties()
-        try:
-            p.load(open(fn))
-            properties_list = p.keys()
-            for prop in properties_list:
-                try:
-                    self.__dict__[prop] = p[prop]
-                    if p[prop] == 'True':
-                        self.__dict__[prop] = True
-                    elif p[prop] == 'False':
-                        self.__dict__[prop] = False
-                except:
-                    self.logIt("Error loading property %s" % prop)
-                    self.logIt(traceback.format_exc(), True)
-        except:
-            self.logIt("Error loading properties", True)
-            self.logIt(traceback.format_exc(), True)
-
-    def load_json(self, fn):
-        self.logIt('Loading JSON from %s' % fn)
-        try:
-            json_file = open(fn)
-            json_text = json_file.read()
-            json_file.close()
-            return json.loads(json_text)
-        except:
-            self.logIt("Unable to read or parse json file from %s" % fn, True)
-            self.logIt(traceback.format_exc(), True)
-        return None
-
-    # TODO: Remove. We uses JRE 1.8
-    def configureOsPatches(self):
-        if self.os_type in ['debian', 'ubuntu']:
-            self.defaultTrustStoreFN = '/etc/ssl/certs/java/cacerts'
-
 
     def createUser(self, userName, homeDir):
         try:
@@ -1697,24 +1708,6 @@ class Setup(object):
             self.installOxAuthRP = True
         else:
             self.installOxAuthRP = False
-
-    def removeDirs(self, name):
-        try:
-            if os.path.exists(name):
-                shutil.rmtree(name)
-                self.logIt('Removed dir: %s' % name)
-        except:
-            self.logIt("Error removing directory %s" % name, True)
-            self.logIt(traceback.format_exc(), True)
-
-    def removeFile(self, fileName):
-        try:
-            if os.path.exists(fileName):
-                os.remove(fileName)
-                self.logIt('Removed file: %s' % fileName)
-        except:
-            self.logIt("Error removing file %s" % fileName, True)
-            self.logIt(traceback.format_exc(), True)
 
     def get_filepaths(self, directory):
         file_paths = []
@@ -2001,14 +1994,6 @@ class Setup(object):
 
         # Jetty services
         try:
-            # Give LDAP a few seconds to load the data...
-            i = 0
-            wait_time = 5
-            while i < wait_time:
-                time.sleep(1)
-                print ".",
-                i = i + 1
-
             # Iterate through all components and start installed            
             for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
                 if applicationConfiguration['installed']:
@@ -2308,24 +2293,19 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-#            installObject.configureOsPatches()
             installObject.configureSystem()
+            installObject.downloadWarFiles()
             installObject.calculate_aplications_memory()
             installObject.installJRE()
             installObject.installJetty()
             installObject.installJython()
             installObject.make_salt()
             installObject.make_oxauth_salt()
-            installObject.downloadWarFiles()
-            installObject.render_jetty_templates()
             installObject.install_gluu_base()
             installObject.copy_scripts()
             installObject.encode_passwords()
             installObject.encode_test_passwords()
-            installObject.generate_scim_configuration()
-            installObject.configure_oxtrust()
             installObject.render_templates()
-            installObject.render_test_templates()
             installObject.generate_crypto()
             installObject.generate_oxauth_openid_keys()
             installObject.generate_base64_configuration()
@@ -2335,7 +2315,9 @@ if __name__ == '__main__':
             installObject.install_ldap_server()
             installObject.copy_output()
             installObject.setup_init_scripts()
+            installObject.render_jetty_templates()
             installObject.install_gluu_components()
+            installObject.render_test_templates()
             installObject.copy_static()
             installObject.set_ownership()
             installObject.start_services()
