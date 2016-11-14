@@ -2064,9 +2064,6 @@ class Setup(object):
                 pem.write(crt.read())
             with open(self.openldapTLSKey, 'r') as key:
                 pem.write(key.read())
-        # 5. Generate the cn=config directory
-        self.run([self.cmd_mkdir, '-p', self.openldapCnConfig])
-        self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
     def import_ldif_openldap(self):
         self.logIt("Importing LDIF files into OpenLDAP")
@@ -2077,6 +2074,9 @@ class Setup(object):
                 self.run([cmd, '-b', 'o=site', '-f', config, '-l', ldif])
             else:
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
+        # Generate the cn=config directory
+        self.run([self.cmd_mkdir, '-p', self.openldapCnConfig])
+        self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
     def setup_openldap_logging(self):
         self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
