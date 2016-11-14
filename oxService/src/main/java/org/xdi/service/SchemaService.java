@@ -500,7 +500,7 @@ public class SchemaService {
 	 * @return DN string for DS schema
 	 */
 	public String getDnForSchema() {
-		return OxConstants.schemaDN;
+		return ldapEntryManager.getLdapOperationService().getSubschemaSubentry();
 	}
 
 	/**

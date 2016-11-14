@@ -257,6 +257,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			if (!isSchemaUpdate && (getCustomObjectClasses(entry, entryClass).length > 0)) {
 				String[] objectClasses = getObjectClasses(entry, entryClass);
 				if (objectClasses.length > 0) {
+					// TODO: Don't add replace if we are not changing Object Classes
 					attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE, new AttributeData(
 							OBJECT_CLASS, objectClasses), new AttributeData(OBJECT_CLASS, objectClasses)));
 				}

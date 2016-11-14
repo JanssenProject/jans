@@ -505,6 +505,10 @@ public class OperationsFacade {
 		return this.connectionProvider.getSupportedLDAPVersion();
 	}
 
+	public String getSubschemaSubentry() {
+		return this.connectionProvider.getSubschemaSubentry();
+	}
+
 	public boolean destroy() {
 		boolean result = true;
 

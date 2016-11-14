@@ -13,8 +13,6 @@ import org.xdi.util.LDAPConstants;
  * @version 0.1, 10/14/2010
  */
 public  class OxConstants extends LDAPConstants {
-	public static final String schemaDN = "cn=schema";
-
 	public static final String INUM = "inum";
 	public static final String INAME = "iname";
 	public static final String DISPLAY_NAME = "displayName";

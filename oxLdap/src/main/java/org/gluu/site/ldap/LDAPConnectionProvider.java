@@ -35,6 +35,7 @@ public class LDAPConnectionProvider {
 	private static final Logger log = Logger.getLogger(LDAPConnectionProvider.class);
 
 	private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
+	private static final String DEFAULT_SUBSCHEMA_SUBENTRY = "cn=schema";
 
 	private static final String[] SSL_PROTOCOLS = { "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3" };
 
@@ -42,6 +43,7 @@ public class LDAPConnectionProvider {
 	private ResultCode creationResultCode;
 	
 	private int supportedLDAPVersion = DEFAULT_SUPPORTED_LDAP_VERSION;
+	private String subschemaSubentry = DEFAULT_SUBSCHEMA_SUBENTRY;
 
 	private String[] servers;
 	private String[] addresses;
@@ -137,6 +139,7 @@ public class LDAPConnectionProvider {
 		
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
+		this.subschemaSubentry = determineSubschemaSubentry();
 		this.creationResultCode = ResultCode.SUCCESS;
 	}
 	private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
@@ -239,6 +242,7 @@ public class LDAPConnectionProvider {
 		if (connectionPool == null) {
 			return resultSupportedLDAPVersion;
 		}
+
 		try {
 			String supportedLDAPVersions[] = connectionPool.getRootDSE().getAttributeValues("supportedLDAPVersion");
 			if (ArrayHelper.isEmpty(supportedLDAPVersions)) {
@@ -255,8 +259,36 @@ public class LDAPConnectionProvider {
 		return resultSupportedLDAPVersion;
 	}
 
+	private String determineSubschemaSubentry() {
+		String resultSubschemaSubentry = LDAPConnectionProvider.DEFAULT_SUBSCHEMA_SUBENTRY;
+		
+		if (StringHelper.isEmptyString(bindDn) || StringHelper.isEmptyString(bindPassword)) {
+			return resultSubschemaSubentry;
+		}
+
+		if (connectionPool == null) {
+			return resultSubschemaSubentry;
+		}
+
+		try {
+			String subschemaSubentry = connectionPool.getRootDSE().getAttributeValue("subschemaSubentry");
+			if (StringHelper.isEmpty(subschemaSubentry)) {
+				return resultSubschemaSubentry;
+			}
+			resultSubschemaSubentry = subschemaSubentry;
+		} catch (Exception ex) {
+			log.error("Failed to determine subschemaSubentry", ex);
+		}
+
+		return resultSubschemaSubentry;
+	}
+
 	public int getSupportedLDAPVersion() {
 		return supportedLDAPVersion;
+	}
+
+	public String getSubschemaSubentry() {
+		return subschemaSubentry;
 	}
 
 	/**
