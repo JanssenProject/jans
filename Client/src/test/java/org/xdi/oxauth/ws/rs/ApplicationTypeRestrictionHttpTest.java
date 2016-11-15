@@ -19,21 +19,29 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
+/**
+ * @author Javier Rojas Blum
+ * @version November 2, 2016
+ */
 public class ApplicationTypeRestrictionHttpTest extends BaseTest {
 
     /**
      * Register a client without specify an Application Type.
      * Read client to check whether it is using the default Application Type <code>web</code>.
      */
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void omittedApplicationType(final String redirectUris) throws Exception {
+    public void omittedApplicationType(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("omittedApplicationType");
 
         // 1. Register client
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse registerResponse = registerClient.execRegister(null, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(null, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
@@ -74,15 +82,19 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
      * Register a client with Application Type <code>web</code>.
      * Read client to check whether it is using the Application Type <code>web</code>.
      */
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void applicationTypeWeb(final String redirectUris) throws Exception {
+    public void applicationTypeWeb(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("applicationTypeWeb");
 
         // 1. Register client
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
@@ -212,7 +224,8 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
     /**
      * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the schema HTTPS.
      */
-    @Test(enabled = false)//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
+    @Test(enabled = false)
+//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail1() throws Exception {
         showTitle("applicationTypeNativeFail1");
 
@@ -233,7 +246,8 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
      * Fail: Register a client with Application Type <code>native</code> and Redirect URI with the host different than localhost.
      */
     @Parameters({"redirectUris"})
-    @Test(enabled = false)//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
+    @Test(enabled = false)
+//allowed to register redirect_uris with custom schema to conform "OAuth 2.0 for Native Apps" spec
     public void applicationTypeNativeFail2(final String redirectUris) throws Exception {
         showTitle("applicationTypeNativeFail2");
 

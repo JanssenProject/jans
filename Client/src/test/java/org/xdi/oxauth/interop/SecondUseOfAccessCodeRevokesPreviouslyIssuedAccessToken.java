@@ -26,14 +26,15 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token
  *
  * @author Javier Rojas Blum
- * @version June 22, 2015
+ * @version November 3, 2016
  */
 public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void secondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken(final String userId, final String userSecret, final String redirectUris,
-                                                                        final String redirectUri) throws Exception {
+    public void secondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Second Use of Access Code Revokes Previously Issued Access Token");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -44,6 +45,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

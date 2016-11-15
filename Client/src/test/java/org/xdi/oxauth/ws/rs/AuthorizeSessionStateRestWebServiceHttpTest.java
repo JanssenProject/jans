@@ -6,67 +6,62 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
+import static org.testng.Assert.*;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
- * Functional tests for checking Sessions in Authorize Web Services workflow (HTTP) 
+ * Functional tests for checking Sessions in Authorize Web Services workflow (HTTP)
  *
  * @author Yuriy Movchan
- * @version 0.1, 12/21/2015
+ * @author Javier Rojas Blum
+ * @version November 2, 2016
  */
 public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestSessionStateAuthorizationCode1(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
-		showTitle("requestSessionStateAuthorizationCode1");
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestSessionStateAuthorizationCode1");
 
-        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationEndpoint, authorizationEndpoint);
+        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationEndpoint,
+                authorizationEndpoint, sectorIdentifierUri);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestSessionStateAuthorizationCode2(
-            final String userId, final String userSecret,
-            final String redirectUris, final String redirectUri) throws Exception {
-		showTitle("requestSessionStateAuthorizationCode2");
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestSessionStateAuthorizationCode2");
 
-        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationPageEndpoint, authorizationEndpoint);
+        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationPageEndpoint,
+                authorizationEndpoint, sectorIdentifierUri);
     }
 
-	private void requestSessionStateAuthorizationCode(final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-			final String authorizationEndpoint1, final String authorizationEndpoint2) {
+    private void requestSessionStateAuthorizationCode(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String authorizationEndpoint1, final String authorizationEndpoint2, final String sectorIdentifierUri) {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -131,6 +126,6 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
         assertNotEquals(sessionState, authorizationResponse.getSessionState(), "The session_state is the same for 2 different authorization requests");
-	}
+    }
 
 }

@@ -27,14 +27,15 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Can Request and Use Signed UserInfo Response
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 3, 2016
  */
 public class CanRequestAndUseSignedUserInfoResponse extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canRequestAndUseSignedUserInfoResponse(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Can Request and Use Signed UserInfo Response");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -44,6 +45,7 @@ public class CanRequestAndUseSignedUserInfoResponse extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

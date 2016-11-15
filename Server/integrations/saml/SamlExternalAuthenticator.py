@@ -71,6 +71,13 @@ class PersonAuthentication(PersonAuthenticationType):
         self.generateNameId = False
         if configurationAttributes.containsKey("saml_generate_name_id"):
             self.generateNameId = StringHelper.toBoolean(configurationAttributes.get("saml_generate_name_id").getValue2(), False)
+        print "Saml. Initialization. The property saml_generate_name_id is %s" % self.generateNameId
+
+        self.updateUser = False
+        if configurationAttributes.containsKey("saml_update_user"):
+            self.updateUser = StringHelper.toBoolean(configurationAttributes.get("saml_update_user").getValue2(), False)
+
+        print "Saml. Initialization. The property saml_update_user is %s" % self.updateUser
 
         self.userObjectClasses = None
         if configurationAttributes.containsKey("user_object_classes"):
@@ -251,19 +258,18 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 self.setDefaultUid(newUser, saml_user_uid)
+                newUser.setAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
 
                 # Use auto enrollment to local IDP
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml: '%s'" % saml_user_uid
 
                 # Check if there is user with specified saml_user_uid
                 find_user_by_uid = userService.getUserByAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
-                if (find_user_by_uid == None):
+                if find_user_by_uid == None:
                     # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
-        
-                    newUser.setAttribute("oxExternalUid", "saml:%s" % saml_user_uid)
-                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
 
+                    print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
                     user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
                         print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getUserId()
@@ -274,6 +280,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     find_user_by_uid = userService.addUser(newUser, True)
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
+                else:
+                    if self.updateUser:
+                        print "Saml. Authenticate for step 1. Attempting to update user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
+                        find_user_by_uid.setCustomAttributes(newUser.getCustomAttributes())
+                        userService.updateUser(find_user_by_uid)
+                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % saml_user_uid
 
                 found_user_name = find_user_by_uid.getUserId()
                 print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
@@ -299,6 +311,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 self.setDefaultUid(newUser, saml_user_uid)
+                newUser.setAttribute("oxExternalUid", "saml:%s" %  saml_user_uid)
 
                 print "Saml. Authenticate for step 1. Attempting to find user by oxExternalUid: saml:%s" % saml_user_uid
 
@@ -308,9 +321,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     # Auto user enrollment
                     print "Saml. Authenticate for step 1. There is no user in LDAP. Adding user to local LDAP"
 
-                    newUser.setAttribute("oxExternalUid", "saml:%s" %  saml_user_uid)
                     print "Saml. Authenticate for step 1. Attempting to add user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
-
                     user_unique = self.checkUserUniqueness(newUser)
                     if not user_unique:
                         print "Saml. Authenticate for step 1. Failed to add user: '%s'. User not unique" % newUser.getUserId()
@@ -321,6 +332,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     find_user_by_uid = userService.addUser(newUser, True)
                     print "Saml. Authenticate for step 1. Added new user with UID: '%s'" % find_user_by_uid.getUserId()
+                else:
+                    if self.updateUser:
+                        print "Saml. Authenticate for step 1. Attempting to update user '%s' with next attributes: '%s'" % (saml_user_uid, newUser.getCustomAttributes())
+                        find_user_by_uid.setCustomAttributes(newUser.getCustomAttributes())
+                        userService.updateUser(find_user_by_uid)
+                        print "Saml. Authenticate for step 1. Updated user with UID: '%s'" % saml_user_uid
 
                 found_user_name = find_user_by_uid.getUserId()
                 print "Saml. Authenticate for step 1. found_user_name: '%s'" % found_user_name
@@ -714,6 +731,9 @@ class PersonAuthentication(PersonAuthenticationType):
             ldapAttributeName = samlUriToAttributesMap.get(key)
             if ldapAttributeName == None:
                 print "Saml. Get mapped all attributes user. Skipping saml attribute: '%s'" %  key
+                continue
+
+            if StringHelper.equalsIgnoreCase(ldapAttributeName, "uid"):
                 continue
 
             attribute = CustomAttribute(ldapAttributeName)

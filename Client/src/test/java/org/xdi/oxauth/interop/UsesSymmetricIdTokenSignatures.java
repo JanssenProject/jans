@@ -27,14 +27,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Uses Symmetric ID Token Signatures
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 3, 2016
  */
 public class UsesSymmetricIdTokenSignatures extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void usesSymmetricIdTokenSignaturesHS256(final String redirectUris, final String userId,
-                                                    final String userSecret, final String redirectUri) throws Exception {
+    public void usesSymmetricIdTokenSignaturesHS256(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Uses Symmetric ID Token Signatures HS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -44,6 +45,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS256);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -82,10 +84,11 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         assertTrue(hmacSigner.validate(jwt));
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void usesSymmetricIdTokenSignaturesHS384(final String redirectUris, final String userId,
-                                                    final String userSecret, final String redirectUri) throws Exception {
+    public void usesSymmetricIdTokenSignaturesHS384(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Uses Symmetric ID Token Signatures HS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -95,6 +98,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS384);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -133,10 +137,11 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
         assertTrue(hmacSigner.validate(jwt));
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void usesSymmetricIdTokenSignaturesHS512(final String redirectUris, final String userId,
-                                                    final String userSecret, final String redirectUri) throws Exception {
+    public void usesSymmetricIdTokenSignaturesHS512(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Uses Symmetric ID Token Signatures HS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -146,6 +151,7 @@ public class UsesSymmetricIdTokenSignatures extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.HS512);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
