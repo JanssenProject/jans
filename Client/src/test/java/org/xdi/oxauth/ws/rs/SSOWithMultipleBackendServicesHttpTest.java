@@ -30,20 +30,22 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for SSO with Multiple Backend Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version November 2, 2016
  */
 public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "hostnameVerifier"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "hostnameVerifier", "sectorIdentifierUri"})
     @Test
-    public void sessionWorkFlow1(final String redirectUris, final String userId, final String userSecret,
-                                 final String redirectUri, String hostnameVerifier) throws Exception {
+    public void sessionWorkFlow1(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String hostnameVerifier, final String sectorIdentifierUri) throws Exception {
         showTitle("sessionWorkFlow1");
 
         // Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -189,15 +191,18 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         assertNotNull(userInfoResponse2.getClaim(JwtClaimName.EMAIL), "Unexpected result: email not found");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "hostnameVerifier"})
+    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "hostnameVerifier", "sectorIdentifierUri"})
     @Test
-    public void sessionWorkFlow2(final String redirectUris, final String redirectUri, final String userInum, final String userEmail, final String hostnameVerifier) throws Exception {
+    public void sessionWorkFlow2(
+            final String redirectUris, final String redirectUri, final String userInum, final String userEmail,
+            final String hostnameVerifier, final String sectorIdentifierUri) throws Exception {
         showTitle("sessionWorkFlow2");
 
         // Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

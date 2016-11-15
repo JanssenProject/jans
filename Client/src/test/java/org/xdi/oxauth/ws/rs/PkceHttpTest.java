@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.ws.rs;
 
 import org.testng.annotations.Parameters;
@@ -21,21 +27,25 @@ import static org.xdi.oxauth.client.Asserter.assertOk;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 25/03/2016
+ * @author Javier Rojas Blum
+ * @version November 2, 2016
  */
 
 public class PkceHttpTest extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void tokenWithPkceCheck(final String redirectUris, final String userId, final String userSecret,
-                                  final String redirectUri) throws Exception {
+    public void tokenWithPkceCheck(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenWithPkceCheck");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -97,16 +107,19 @@ public class PkceHttpTest extends BaseTest {
 
     }
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void invalidCodeVerifier(final String redirectUris, final String userId, final String userSecret,
-                                  final String redirectUri) throws Exception {
+    public void invalidCodeVerifier(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("invalidCodeVerifier");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();

@@ -28,7 +28,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version July 26, 2016
+ * @version November 2, 2016
  */
 public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
@@ -36,15 +36,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * Register a client without specify a Token Endpoint Auth Method.
      * Read client to check whether it is using the default Token Endpoint Auth Method <code>client_secret_basic</code>.
      */
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void omittedTokenEndpointAuthMethod(final String redirectUris) throws Exception {
+    public void omittedTokenEndpointAuthMethod(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("omittedTokenEndpointAuthMethod");
 
         // 1. Register client
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
@@ -88,17 +92,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * Request authorization code.
      * Call to Token Endpoint with Auth Method <code>client_secret_basic</code>.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretBasic(
-            final String redirectUris, final String redirectUri, final String userId, final String userSecret)
-            throws Exception {
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretBasic");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -193,17 +199,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 1: Call to Token Endpoint with Auth Method <code>client_secret_post</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretBasicFail1(
-            final String redirectUris, final String redirectUri, final String userId, final String userSecret)
-            throws Exception {
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretBasicFail1");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -295,16 +303,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 2: Call to Token Endpoint with Auth Method <code>client_secret_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
-    public void tokenEndpointAuthMethodClientSecretBasicFail2(final String redirectUris, final String redirectUri,
-                                                              final String userId, final String userSecret) throws Exception {
+    public void tokenEndpointAuthMethodClientSecretBasicFail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretBasicFail2");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -397,17 +408,20 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 3: Call to Token Endpoint with Auth Method <code>private_key_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretBasicFail3(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretBasicFail3");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -509,17 +523,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * Request authorization code.
      * Call to Token Endpoint with Auth Method <code>client_secret_post</code>.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretPost(
-            final String redirectUris, final String redirectUri, final String userId, final String userSecret)
-            throws Exception {
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretPost");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -614,17 +630,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 1: Call to Token Endpoint with Auth Method <code>client_secret_basic</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretPostFail1(
-            final String redirectUris, final String redirectUri, final String userId, final String userSecret)
-            throws Exception {
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretPostFail1");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -716,16 +734,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 2: Call to Token Endpoint with Auth Method <code>client_secret_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
-    public void tokenEndpointAuthMethodClientSecretPostFail2(final String redirectUris, final String redirectUri,
-                                                             final String userId, final String userSecret) throws Exception {
+    public void tokenEndpointAuthMethodClientSecretPostFail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretPostFail2");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -818,17 +839,20 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 3: Call to Token Endpoint with Auth Method <code>private_key_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretPostFail3(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretPostFail3");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -930,17 +954,20 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * Request authorization code.
      * Call to Token Endpoint with Auth Method <code>client_secret_Jwt</code>.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwt(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwt");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -1039,17 +1066,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 1: Call to Token Endpoint with Auth Method <code>client_secret_basic</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtFail1(
-            final String redirectUris, final String redirectUri, final String userId,
-            final String userSecret) throws Exception {
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtFail1");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -1141,17 +1170,19 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 2: Call to Token Endpoint with Auth Method <code>client_secret_post</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtFail2(
-            final String redirectUris, final String redirectUri, final String userId,
-            final String userSecret) throws Exception {
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtFail2");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -1243,17 +1274,20 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 3: Call to Token Endpoint with Auth Method <code>private_key_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "RS256_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtFail3(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String keyId, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String keyId, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtFail3");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -1355,12 +1389,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * Request authorization code.
      * Call to Token Endpoint with Auth Method <code>private_key_jwt</code>.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodPrivateKeyJwt(
-            final String redirectUris, final String redirectUri, final String userId, final String userSecret, final String clientJwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwt");
 
         // 1. Register client
@@ -1368,6 +1403,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1467,10 +1503,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 1: Call to Token Endpoint with Auth Method <code>client_secret_basic</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
-    public void tokenEndpointAuthMethodPrivateKeyJwtFail1(final String redirectUris, final String redirectUri,
-                                                          final String userId, final String userSecret) throws Exception {
+    public void tokenEndpointAuthMethodPrivateKeyJwtFail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtFail1");
 
         // 1. Register client
@@ -1478,6 +1515,8 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -1569,10 +1608,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 2: Call to Token Endpoint with Auth Method <code>client_secret_post</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
-    public void tokenEndpointAuthMethodPrivateKeyJwtFail2(final String redirectUris, final String redirectUri,
-                                                          final String userId, final String userSecret) throws Exception {
+    public void tokenEndpointAuthMethodPrivateKeyJwtFail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtFail2");
 
         // 1. Register client
@@ -1580,6 +1620,8 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -1671,10 +1713,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
     /**
      * Fail 3: Call to Token Endpoint with Auth Method <code>client_secret_jwt</code> should fail.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
-    public void tokenEndpointAuthMethodPrivateKeyJwtFail3(final String redirectUris, final String redirectUri,
-                                                          final String userId, final String userSecret) throws Exception {
+    public void tokenEndpointAuthMethodPrivateKeyJwtFail3(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodPrivateKeyJwtFail3");
 
         // 1. Register client
@@ -1682,6 +1725,8 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();

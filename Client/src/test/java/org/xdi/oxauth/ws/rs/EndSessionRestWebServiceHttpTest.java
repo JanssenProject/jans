@@ -27,14 +27,15 @@ import static org.testng.Assert.*;
  * Functional tests for End Session Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 28, 2015
+ * @version November 2, 2016
  */
 public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri", "logoutUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri", "logoutUri", "sectorIdentifierUri"})
     @Test
-    public void requestEndSession(final String userId, final String userSecret, final String redirectUri,
-                                  final String redirectUris, final String postLogoutRedirectUri, final String logoutUri) throws Exception {
+    public void requestEndSession(
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String postLogoutRedirectUri, final String logoutUri, final String sectorIdentifierUri) throws Exception {
         showTitle("requestEndSession");
 
         // 1. OpenID Connect Dynamic Registration
@@ -43,6 +44,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
         registerRequest.setLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

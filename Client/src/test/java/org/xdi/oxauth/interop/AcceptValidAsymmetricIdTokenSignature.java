@@ -33,14 +33,15 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature
  *
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version November 2, 2016
  */
 public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void acceptValidAsymmetricIdTokenSignatureRS256(final String redirectUris, final String userId,
-                                                           final String userSecret, final String redirectUri) throws Exception {
+    public void acceptValidAsymmetricIdTokenSignatureRS256(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Accept Valid Asymmetric ID Token Signature RS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
@@ -50,6 +51,7 @@ public class AcceptValidAsymmetricIdTokenSignature extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS256);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
