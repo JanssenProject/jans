@@ -6,7 +6,6 @@ inum: %(passport_rs_client_id)s
 displayName: Pasport Resource Server Client
 oxAuthAppType: native
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthJwks:: %(passport_rs_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt

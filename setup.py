@@ -332,14 +332,12 @@ class Setup(object):
         # oxPassport Configuration
         self.passport_rs_client_id = None
         self.passport_rs_client_jwks = None
-        self.passport_rs_client_base64_jwks = None
         self.passport_rs_client_jks_fn = "%s/passport-rs.jks" % self.certFolder
         self.passport_rs_client_jks_pass = None
         self.passport_rs_client_jks_pass_encoded = None
 
         self.passport_rp_client_id = None
         self.passport_rp_client_jwks = None
-        self.passport_rp_client_base64_jwks = None
         self.passport_rp_client_jks_fn = "%s/passport-rp.jks" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
 
@@ -1256,7 +1254,7 @@ class Setup(object):
         cmd = "%s %s" % (self.oxEncodePWCommand, self.passport_rs_client_jks_pass)
         self.passport_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
 
-        self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self, self.passport_rs_client_jks_pass)
+        self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self, self.passport_rs_client_jks_fn, self.passport_rs_client_jks_pass)
         self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
 
         self.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass)
@@ -1316,8 +1314,10 @@ class Setup(object):
     def install_gluu_base(self):
         self.logIt("Installing Gluu base...")
         self.prepare_openid_keys_generator()
+
         self.generate_scim_configuration()
         self.generate_passport_configuration()
+
         self.ldap_binddn = self.openldapRootUser
 
         if self.installSaml:
