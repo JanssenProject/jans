@@ -77,7 +77,7 @@ class Setup(object):
         self.cmd_java = '%s/bin/java' % self.jre_home
         self.cmd_keytool = '%s/bin/keytool' % self.jre_home
         self.cmd_jar = '%s/bin/jar' % self.jre_home
-        
+
         # Component versions
         self.jre_version = '102'
         self.jetty_version = '9.3.12.v20160915'
@@ -288,6 +288,7 @@ class Setup(object):
         self.ldif_configuration = '%s/configuration.ldif' % self.outputFolder
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
         self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
+        self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -295,15 +296,15 @@ class Setup(object):
         self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.gluuBaseFolder
         self.network = "/etc/sysconfig/network"
         self.system_profile_update = '%s/system_profile' % self.outputFolder
-        
+
         self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
         self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
-        self.idp3_configuration_properties = '/idp.properties' 
+        self.idp3_configuration_properties = '/idp.properties'
         self.idp3_configuration_ldap_properties = '/ldap.properties'
-        self.idp3_configuration_saml_nameid = '/saml-nameid.properties' 
-        self.idp3_configuration_services = '/services.properties' 
+        self.idp3_configuration_saml_nameid = '/saml-nameid.properties'
+        self.idp3_configuration_services = '/services.properties'
         self.idp3_configuration_password_authn = '/authn/password-authn-config.xml'
-        self.idp3_metadata = '/idp-metadata.xml' 
+        self.idp3_metadata = '/idp-metadata.xml'
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -313,7 +314,7 @@ class Setup(object):
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=oxAuth CA Certificates'
-        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'        
+        self.default_key_algs = 'RS256 RS384 RS512 ES256 ES384 ES512'
         self.default_key_expiration = 365
 
         # oxTrust SCIM configuration
@@ -328,6 +329,20 @@ class Setup(object):
         self.scim_rp_client_jks_fn = "%s/scim-rp.jks" % self.outputFolder
         self.scim_rp_client_jks_pass = 'secret'
 
+        # oxPassport Configuration
+        self.passport_rs_client_id = None
+        self.passport_rs_client_jwks = None
+        self.passport_rs_client_base64_jwks = None
+        self.passport_rs_client_jks_fn = "%s/passport-rs.jks" % self.certFolder
+        self.passport_rs_client_jks_pass = None
+        self.passport_rs_client_jks_pass_encoded = None
+
+        self.passport_rp_client_id = None
+        self.passport_rp_client_jwks = None
+        self.passport_rp_client_base64_jwks = None
+        self.passport_rp_client_jks_fn = "%s/passport-rp.jks" % self.certFolder
+        self.passport_rp_client_jks_pass = 'secret'
+
         self.ldif_files = [self.ldif_base,
                            self.ldif_appliance,
                            self.ldif_attributes,
@@ -339,7 +354,8 @@ class Setup(object):
                            self.ldif_scripts,
                            self.ldif_configuration,
                            self.ldif_scim,
-                           self.ldif_asimba
+                           self.ldif_asimba,
+                           self.ldif_passport
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
@@ -370,6 +386,7 @@ class Setup(object):
                      self.ldif_scripts: False,
                      self.ldif_scim: False,
                      self.ldif_asimba: False,
+                     self.ldif_passport: False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
@@ -512,6 +529,12 @@ class Setup(object):
         if not self.scim_rp_client_id:
             scimClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
             self.scim_rp_client_id = '%s!0008!%s' % (self.inumOrg, scimClientTwoQuads)
+        if not self.passport_rs_client_id:
+            passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+            self.passport_rs_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)
+        if not self.passport_rp_client_id:
+            passportClientTwoQuads = '%s.%s' % tuple([self.getQuad() for i in xrange(2)])
+            self.passport_rp_client_id = '%s!0008!%s' % (self.inumOrg, passportClientTwoQuads)
         if not self.inumApplianceFN:
             self.inumApplianceFN = self.inumAppliance.replace('@', '').replace('!', '').replace('.', '')
         if not self.inumOrgFN:
@@ -552,7 +575,7 @@ class Setup(object):
         except:
             self.logIt("Error finding files %s in folder %s" % (":".join(filePatterns), filesFolder), True)
             self.logIt(traceback.format_exc(), True)
-        
+
         return foundFiles
 
     def readFile(self, inFilePath):
@@ -877,13 +900,13 @@ class Setup(object):
         jettyModules = serviceConfiguration['jetty']['modules']
         self.run([self.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
-        
+
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
         self.run([self.cmd_ln, '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
-        
+
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'redhat']:
             if self.os_initdaemon == 'systemd':
@@ -892,7 +915,7 @@ class Setup(object):
                 self.run(["/sbin/chkconfig", serviceName, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
-            
+
         serviceConfiguration['installed'] = True
 
     def installJython(self):
@@ -1098,10 +1121,10 @@ class Setup(object):
 
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create = True, key_expiration = None, dn_name = None, key_algs = None):
         self.logIt("Generating oxAuth OpenID Connect keys")
-        
+
         if dn_name == None:
             dn_name = self.default_openid_jks_dn_name
-        
+
         if key_algs == None:
             key_algs = self.default_key_algs
 
@@ -1220,12 +1243,24 @@ class Setup(object):
 
         cmd = "%s %s" % (self.oxEncodePWCommand, self.scim_rs_client_jks_pass)
         self.scim_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
-        
+
         self.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rs_client_jks_fn, self.scim_rs_client_jks_pass)
         self.templateRenderingDict['scim_rs_client_base64_jwks'] = self.generate_base64_string(self.scim_rs_client_jwks, 1)
 
         self.scim_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rp_client_jks_fn, self.scim_rp_client_jks_pass)
         self.templateRenderingDict['scim_rp_client_base64_jwks'] = self.generate_base64_string(self.scim_rp_client_jwks, 1)
+
+    def generate_passport_configuration(self):
+        self.passport_rs_client_jks_pass = self.getPW()
+
+        cmd = "%s %s" % (self.oxEncodePWCommand, self.passport_rs_client_jks_pass)
+        self.passport_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
+
+        self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self, self.passport_rs_client_jks_pass)
+        self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
+
+        self.passport_rp_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass)
+        self.templateRenderingDict['passport_rp_client_base64_jwks'] = self.generate_base64_string(self.passport_rp_client_jwks, 1)
 
     def getPrompt(self, prompt, defaultValue=None):
         try:
@@ -1268,7 +1303,7 @@ class Setup(object):
         self.run([self.cmd_jar,
                   'xf',
                   distOxAuthPath], tmpOxAuthDir)
-        
+
         tmpLibsOxAuthPath = '%s/WEB-INF/lib' % tmpOxAuthDir
 
         self.logIt("Copying files to %s..." % self.jetty_user_home_lib)
@@ -1282,6 +1317,7 @@ class Setup(object):
         self.logIt("Installing Gluu base...")
         self.prepare_openid_keys_generator()
         self.generate_scim_configuration()
+        self.generate_passport_configuration()
         self.ldap_binddn = self.openldapRootUser
 
         if self.installSaml:
@@ -1359,11 +1395,11 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
             print "Downloading Shibboleth IDP v3 binary distributive file..."
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
-            
+
             # unpack IDP3 JAR with static configs
             self.run([self.cmd_jar, 'xf', self.distWarFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
-            
+
             # copy templates
             self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_properties, self.idp3ConfFolder + self.idp3_configuration_properties)
             self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_ldap_properties, self.idp3ConfFolder + self.idp3_configuration_ldap_properties)
@@ -1371,7 +1407,7 @@ class Setup(object):
             self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_services, self.idp3ConfFolder + self.idp3_configuration_services)
             self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_password_authn, self.idp3ConfFolder + self.idp3_configuration_password_authn)
             self.copyFile(self.staticIDP3FolderMetadata + self.idp3_metadata, self.idp3MetadataFolder + self.idp3_metadata)
-            
+
             # Process templates
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_properties, self.idp3ConfFolder, self.idp3ConfFolder)
             self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_ldap_properties, self.idp3ConfFolder, self.idp3ConfFolder)
@@ -1382,7 +1418,7 @@ class Setup(object):
             # load certificates to update metadata
             self.idp3EncryptionCertificateText = self.load_certificate_text(self.certFolder + '/idp-encryption.crt')
             self.idp3SigningCertificateText = self.load_certificate_text(self.certFolder + '/idp-signing.crt')
-            # update IDP3 metadata 
+            # update IDP3 metadata
             self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder)
 
             self.idpWarFullPath = '%s/idp.war' % self.distWarFolder
@@ -1592,14 +1628,14 @@ class Setup(object):
         # Render customized part
         self.renderTemplate(self.system_profile_update)
         renderedSystemProfile = self.readFile(self.system_profile_update)
-        
+
         # Read source file
         currentSystemProfile = self.readFile(self.sysemProfile)
 
         # Write merged file
         resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
         self.writeFile(self.sysemProfile, resultSystemProfile)
-        
+
         # Fix new file permissions
         self.run([self.cmd_chmod, '644', self.sysemProfile])
 
@@ -1712,7 +1748,7 @@ class Setup(object):
 
     def get_filepaths(self, directory):
         file_paths = []
-        
+
         for root, directories, files in os.walk(directory):
             for filename in files:
                 # filepath = os.path.join(root, filename)
@@ -1744,7 +1780,7 @@ class Setup(object):
 
     def render_configuration_template(self):
         self.logIt("Rendering configuration templates")
-        
+
         fullPath = self.ldif_configuration
         try:
             self.renderTemplate(fullPath)
@@ -1754,7 +1790,7 @@ class Setup(object):
 
     def render_templates_folder(self, templatesFolder):
         self.logIt("Rendering templates folder: %s" % templatesFolder)
-        
+
         for templateBase, templateDirectories, templateFiles in os.walk(templatesFolder):
             for templateFile in templateFiles:
                 fullPath = '%s/%s' % (templateBase, templateFile)
@@ -1765,7 +1801,7 @@ class Setup(object):
                     f = open(os.path.join(self.templateFolder, fn))
                     template_text = f.read()
                     f.close()
-                    
+
                     fullOutputFile = os.path.join(self.outputFolder, fn)
                     # Create full path to the output file
                     fullOutputDir = os.path.dirname(fullOutputFile)
@@ -1809,7 +1845,7 @@ class Setup(object):
         except:
             self.logIt("Error loading file", True)
             self.logIt(traceback.format_exc(), True)
-        
+
         if num_spaces > 0:
             plain_file_b64encoded_text = self.reindent(plain_file_b64encoded_text, num_spaces)
 
@@ -1995,7 +2031,7 @@ class Setup(object):
 
         # Jetty services
         try:
-            # Iterate through all components and start installed            
+            # Iterate through all components and start installed
             for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
                 if applicationConfiguration['installed']:
                     if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
@@ -2008,7 +2044,7 @@ class Setup(object):
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
-            
+
         if self.os_initdaemon == 'systemd' and self.os_type in ['centos', 'redhat', 'fedora']:
             self.run(['/usr/bin/hostnamectl', 'set-hostname', self.hostname])
         else:
@@ -2025,13 +2061,13 @@ class Setup(object):
     def install_openldap(self):
         self.logIt("Installing OpenLDAP from package")
 
-        # Determine package type 
+        # Determine package type
         packageRpm = True
         packageExtension = ".rpm"
         if self.os_type in ['debian', 'ubuntu']:
             packageRpm = False
             packageExtension = ".deb"
-        
+
         openLdapDistFolder = "%s/%s" % (self.distFolder, "symas")
 
         # Find package
@@ -2039,7 +2075,7 @@ class Setup(object):
         for file in os.listdir(openLdapDistFolder):
             if file.endswith(packageExtension):
                 packageName = "%s/%s" % ( openLdapDistFolder, file )
-                
+
         if packageName == None:
             raise Exception('Failed to find OpenLDAP package in folder %s !' % directory)
 
@@ -2102,7 +2138,7 @@ class Setup(object):
 
     def calculate_aplications_memory(self):
         self.logIt("Calculating memory setting for applications")
-        
+
         installedComponents = []
         allowedApplicationsMemory = {}
 
@@ -2118,23 +2154,23 @@ class Setup(object):
             installedComponents.append(self.jetty_app_configuration['asimba'])
         if self.installOxAuthRP:
             installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
-            
+
         usedRatio = 0.0
         for installedComponent in installedComponents:
             usedRatio += installedComponent['memory']['ratio']
-            
+
         ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
-        
+
         for installedComponent in installedComponents:
             allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
             allowedMemory = int(round(allowedRatio * int(self.application_max_ram)))
-            
+
             if allowedMemory > installedComponent['memory']['max_allowed_mb']:
                 allowedMemory = installedComponent['memory']['max_allowed_mb']
 
             allowedApplicationsMemory[installedComponent['name']] = allowedMemory
 
-        # Iterate through all components into order to prepare all keys            
+        # Iterate through all components into order to prepare all keys
         for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
             if allowedApplicationsMemory.has_key(applicationName):
                 applicationMemory = allowedApplicationsMemory.get(applicationName)
