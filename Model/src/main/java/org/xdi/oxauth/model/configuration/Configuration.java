@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents the configuration XML file.
@@ -137,7 +138,9 @@ public class Configuration {
 
     private Boolean endSessionWithAccessToken;
     private Boolean enabledOAuthAuditLogging;
-
+    private Set<String> jmsBrokerURISet;
+    private String jmsUserName;
+    private String jmsPassword;
     private List<String> clientWhiteList;
     private List<String> clientBlackList;
     private Boolean legacyIdTokenClaims;
@@ -1190,7 +1193,31 @@ public class Configuration {
         this.enabledOAuthAuditLogging = enabledOAuthAuditLogging;
     }
 
-    public List<String> getClientWhiteList() {
+	public Set<String> getJmsBrokerURISet() {
+		return jmsBrokerURISet;
+	}
+
+	public void setJmsBrokerURISet(Set<String> jmsBrokerURISet) {
+		this.jmsBrokerURISet = jmsBrokerURISet;
+	}
+
+	public String getJmsUserName() {
+		return jmsUserName;
+	}
+
+	public void setJmsUserName(String jmsUserName) {
+		this.jmsUserName = jmsUserName;
+	}
+
+	public String getJmsPassword() {
+		return jmsPassword;
+	}
+
+	public void setJmsPassword(String jmsPassword) {
+		this.jmsPassword = jmsPassword;
+	}
+
+	public List<String> getClientWhiteList() {
         return clientWhiteList;
     }
 
