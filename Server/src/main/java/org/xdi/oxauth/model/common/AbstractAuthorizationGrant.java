@@ -12,6 +12,7 @@ import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.util.TokenHashUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +22,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version 0.9, 08/14/2014
+ * @version November 11, 2016
  */
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
@@ -201,28 +202,28 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     }
 
     public String getSessionDn() {
-		return sessionDn;
-	}
+        return sessionDn;
+    }
 
-	public void setSessionDn(String sessionDn) {
-		this.sessionDn = sessionDn;
-	}
+    public void setSessionDn(String sessionDn) {
+        this.sessionDn = sessionDn;
+    }
 
-	/**
+    /**
      * Checks the scopes policy configured according to the type of the
      * authorization grant to limit the issued token scopes.
      *
-     * @param scope A space-delimited list of values in which the order of
+     * @param requestedScopes A space-delimited list of values in which the order of
      *              values does not matter.
      * @return A space-delimited list of scopes
      */
     @Override
     public String checkScopesPolicy(String requestedScopes) {
-    	this.scopes.clear();
+        this.scopes.clear();
 
-    	Set<String> grantedScopes = ScopeChecker.instance().checkScopesPolicy(client, requestedScopes);
-    	this.scopes.addAll(grantedScopes);
-    	
+        Set<String> grantedScopes = ScopeChecker.instance().checkScopesPolicy(client, requestedScopes);
+        this.scopes.addAll(grantedScopes);
+
         final StringBuilder grantedScopesSb = new StringBuilder();
         for (String scope : scopes) {
             grantedScopesSb.append(" ").append(scope);
@@ -231,7 +232,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         final String grantedScopesSt = grantedScopesSb.toString().trim();
 
-    	return grantedScopesSt;
+        return grantedScopesSt;
     }
 
     @Override
@@ -412,20 +413,23 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      */
     @Override
     public AbstractToken getAccessToken(String tokenCode) {
+
+        String hashedTokenCode = TokenHashUtil.getHashedToken(tokenCode);
+
         final IdToken idToken = getIdToken();
         if (idToken != null) {
-            if (idToken.getCode().equals(tokenCode)) {
+            if (idToken.getCode().equals(hashedTokenCode)) {
                 return idToken;
             }
         }
 
         final AccessToken longLivedAccessToken = getLongLivedAccessToken();
         if (longLivedAccessToken != null) {
-            if (longLivedAccessToken.getCode().equals(tokenCode)) {
+            if (longLivedAccessToken.getCode().equals(hashedTokenCode)) {
                 return longLivedAccessToken;
             }
         }
 
-        return accessTokens.get(tokenCode);
+        return accessTokens.get(hashedTokenCode);
     }
 }

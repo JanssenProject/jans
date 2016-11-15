@@ -31,14 +31,15 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Can Request and Use Encrypted ID Token Response
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 3, 2016
  */
 public class CanRequestAndUseEncryptedIdTokenResponse extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void canRequestAndUseEncryptedIdTokenResponse(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Can Request and Use Encrypted ID Token Response");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -49,6 +50,7 @@ public class CanRequestAndUseEncryptedIdTokenResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

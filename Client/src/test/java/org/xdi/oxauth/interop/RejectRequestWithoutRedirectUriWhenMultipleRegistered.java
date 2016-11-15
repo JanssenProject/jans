@@ -25,13 +25,14 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Reject Request Without redirect uri when Multiple Registered
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 3, 2016
  */
 public class RejectRequestWithoutRedirectUriWhenMultipleRegistered extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @Test
-    public void rejectRequestWithoutRedirectUriWhenMultipleRegistered(final String userId, final String userSecret, final String redirectUris) throws Exception {
+    public void rejectRequestWithoutRedirectUriWhenMultipleRegistered(
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Reject Request Without redirect uri when Multiple Registered");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -40,6 +41,7 @@ public class RejectRequestWithoutRedirectUriWhenMultipleRegistered extends BaseT
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

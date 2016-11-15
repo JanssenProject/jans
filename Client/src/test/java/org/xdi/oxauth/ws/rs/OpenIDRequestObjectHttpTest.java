@@ -44,14 +44,15 @@ import static org.testng.Assert.*;
  * Functional tests for OpenID Request Object (HTTP)
  *
  * @author Javier Rojas Blum
- * @version August 17, 2016
+ * @version November 2, 2016
  */
 public class OpenIDRequestObjectHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethod1(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethod1");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -62,6 +63,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -134,10 +136,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.ADDRESS));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestParameterMethod2(final String userId, final String userSecret,
-                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethod2(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethod2");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -148,6 +151,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -219,10 +223,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response2.getClaim(JwtClaimName.ADDRESS));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestParameterMethod3(final String userId, final String userSecret,
-                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethod3(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethod3");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -231,6 +236,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -276,10 +282,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response.getCode(), "The code is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestParameterMethod4(final String userId, final String userSecret,
-                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethod4(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethod4");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -288,6 +295,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -334,10 +342,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestParameterMethod5(final String userId, final String userSecret,
-                                        final String redirectUris, final String redirectUri) throws Exception {
+    public void requestParameterMethod5(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethod5");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -346,6 +355,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -393,10 +403,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethod6(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri) throws Exception {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethod6");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
@@ -405,6 +416,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -464,11 +476,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS256(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -480,6 +493,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -550,11 +564,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS384(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -566,6 +581,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -637,11 +653,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS512(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -653,6 +670,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -722,11 +740,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES256(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -738,6 +757,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -809,11 +829,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES384(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -825,6 +846,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -897,11 +919,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES512(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -913,6 +936,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -983,11 +1007,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS256X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS256X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -999,6 +1024,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1069,11 +1095,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS384X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS384X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1085,6 +1112,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1155,11 +1183,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodRS512X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodRS512X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1171,6 +1200,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1241,11 +1271,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES256X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES256X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1257,6 +1288,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1328,11 +1360,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES384X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES384X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1344,6 +1377,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1415,11 +1449,12 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri",
-            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+            "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodES512X509Cert(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris, final String jwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String jwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestParameterMethodES512X509Cert");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
@@ -1431,6 +1466,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1500,10 +1536,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response3.getClaim(JwtClaimName.LOCALE));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodFail1(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri) {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodFail1");
 
@@ -1514,6 +1551,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1554,10 +1592,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodFail2(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri) {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodFail2");
 
@@ -1568,6 +1607,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1622,10 +1662,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodFail3(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri) {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodFail3");
 
@@ -1636,6 +1677,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1691,10 +1733,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodFail4(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri) {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodFail4");
 
@@ -1705,6 +1748,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1752,11 +1796,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBasePath", "requestFileBaseUrl"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBasePath", "requestFileBaseUrl", "sectorIdentifierUri"})
     @Test // This tests requires a place to publish a request object via HTTPS
     public void requestFileMethod(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+            @Optional final String requestFileBasePath, final String requestFileBaseUrl, final String sectorIdentifierUri) throws Exception {
         showTitle("requestFileMethod");
 
         if (StringHelper.isEmpty(requestFileBasePath)) {
@@ -1771,6 +1815,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1847,10 +1892,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void requestFileMethodFail1(
-            final String userId, final String userSecret, final String redirectUris, final String redirectUri) {
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestFileMethodFail1");
 
@@ -1862,6 +1908,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1905,11 +1952,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBaseUrl"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBaseUrl", "sectorIdentifierUri"})
     @Test
     public void requestFileMethodFail2(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
-            final String requestFileBaseUrl) {
+            final String requestFileBaseUrl, final String sectorIdentifierUri) {
         try {
             showTitle("requestFileMethodFail2");
 
@@ -1921,6 +1968,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1963,11 +2011,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBasePath", "requestFileBaseUrl"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "requestFileBasePath", "requestFileBaseUrl", "sectorIdentifierUri"})
     @Test // This tests requires a place to publish a request object via HTTPS
-    public void requestFileMethodFail3(final String userId, final String userSecret,
-                                       final String redirectUris, final String redirectUri,
-                                       @Optional final String requestFileBasePath, final String requestFileBaseUrl) throws Exception {
+    public void requestFileMethodFail3(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            @Optional final String requestFileBasePath, final String requestFileBaseUrl, final String sectorIdentifierUri) throws Exception {
         showTitle("requestFileMethodFail3");
 
         if (StringHelper.isEmpty(requestFileBasePath)) {
@@ -1982,6 +2030,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2052,10 +2101,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         assertNotNull(response.getState(), "The state is null");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodAlgNone(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodAlgNone");
 
@@ -2067,6 +2117,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2139,10 +2190,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodAlgRSAOAEPEncA256GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodAlgRSAOAEPEncA256GCM");
 
@@ -2153,6 +2205,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2234,10 +2287,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodAlgRSA15EncA128CBCPLUSHS256(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodAlgRSA15EncA128CBCPLUSHS256");
 
@@ -2248,6 +2302,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2329,10 +2384,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodAlgRSA15EncA256CBCPLUSHS512(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodAlgRSA15EncA256CBCPLUSHS512");
 
@@ -2343,6 +2399,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2424,10 +2481,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodAlgA128KWEncA128GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodAlgA128KWEncA128GCM");
 
@@ -2438,6 +2496,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2510,10 +2569,11 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
     @Test
     public void requestParameterMethodAlgA256KWEncA256GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris) {
+            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+            final String sectorIdentifierUri) {
         try {
             showTitle("requestParameterMethodAlgA256KWEncA256GCM");
 
@@ -2524,6 +2584,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+            registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);

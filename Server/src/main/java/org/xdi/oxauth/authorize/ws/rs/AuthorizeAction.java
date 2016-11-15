@@ -51,7 +51,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version May 24, 2016
+ * @version November 11, 2016
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -638,6 +638,9 @@ public class AuthorizeAction {
                 return;
             }
 
+            if (clientId == null) {
+                clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
+            }
             final Client client = clientService.getClient(clientId);
 
             if (client.getPersistClientAuthorizations()) {

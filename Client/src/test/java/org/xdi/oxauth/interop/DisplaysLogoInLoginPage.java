@@ -27,13 +27,13 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Displays Logo in Login Page
  *
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 3, 2016
  */
 public class DisplaysLogoInLoginPage extends BaseTest {
 
-    @Parameters({"redirectUris", "redirectUri"})
+    @Parameters({"redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void displaysLogoInLoginPage(final String redirectUris, final String redirectUri) throws Exception {
+    public void displaysLogoInLoginPage(final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("OC5:FeatureTest-Displays Logo in Login Page");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -44,6 +44,7 @@ public class DisplaysLogoInLoginPage extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setLogoUri(logoUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
