@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.ws.rs;
 
 import org.testng.annotations.Parameters;
@@ -19,13 +25,13 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version November 1, 2016
  */
 public class ClientCredentialsGrantHttpTest extends BaseTest {
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void defaultAuthenticationMethod(final String redirectUris) throws Exception {
+    public void defaultAuthenticationMethod(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("defaultAuthenticationMethod");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -34,6 +40,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -80,9 +87,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void defaultAuthenticationMethodFail(final String redirectUris) throws Exception {
+    public void defaultAuthenticationMethodFail(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("defaultAuthenticationMethodFail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -91,6 +98,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -123,9 +131,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretBasicAuthenticationMethod(final String redirectUris) throws Exception {
+    public void clientSecretBasicAuthenticationMethod(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretBasicAuthenticationMethod");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -135,6 +143,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -182,9 +191,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretBasicAuthenticationMethodFail(final String redirectUris) throws Exception {
+    public void clientSecretBasicAuthenticationMethodFail(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretBasicAuthenticationMethodFail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -194,6 +203,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -227,9 +237,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretPostAuthenticationMethod(final String redirectUris) throws Exception {
+    public void clientSecretPostAuthenticationMethod(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretPostAuthenticationMethod");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -239,6 +249,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -286,9 +297,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretPostAuthenticationMethodFail1(final String redirectUris) throws Exception {
+    public void clientSecretPostAuthenticationMethodFail1(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretPostAuthenticationMethodFail1");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -298,6 +309,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -331,9 +343,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretPostAuthenticationMethodFail2(final String redirectUris) throws Exception {
+    public void clientSecretPostAuthenticationMethodFail2(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretPostAuthenticationMethodFail2");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -343,6 +355,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -376,9 +389,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretPostAuthenticationMethodFail3(final String redirectUris) throws Exception {
+    public void clientSecretPostAuthenticationMethodFail3(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretPostAuthenticationMethodFail3");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -388,6 +401,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -421,9 +435,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretJwtAuthenticationMethodHS256(final String redirectUris) throws Exception {
+    public void clientSecretJwtAuthenticationMethodHS256(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretJwtAuthenticationMethodHS256");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -433,6 +447,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -485,9 +500,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretJwtAuthenticationMethodHS256Fail(final String redirectUris) throws Exception {
+    public void clientSecretJwtAuthenticationMethodHS256Fail(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretJwtAuthenticationMethodHS256Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -497,6 +512,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -535,9 +551,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretJwtAuthenticationMethodHS384(final String redirectUris) throws Exception {
+    public void clientSecretJwtAuthenticationMethodHS384(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretJwtAuthenticationMethodHS384");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -547,6 +563,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -599,9 +616,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretJwtAuthenticationMethodHS384Fail(final String redirectUris) throws Exception {
+    public void clientSecretJwtAuthenticationMethodHS384Fail(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretJwtAuthenticationMethodHS384Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -611,6 +628,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -649,9 +667,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretJwtAuthenticationMethodHS512(final String redirectUris) throws Exception {
+    public void clientSecretJwtAuthenticationMethodHS512(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretJwtAuthenticationMethodHS512");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -661,6 +679,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -713,9 +732,9 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris"})
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
-    public void clientSecretJwtAuthenticationMethodHS512Fail(final String redirectUris) throws Exception {
+    public void clientSecretJwtAuthenticationMethodHS512Fail(final String redirectUris, final String sectorIdentifierUri) throws Exception {
         showTitle("clientSecretJwtAuthenticationMethodHS512Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -725,6 +744,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -764,11 +784,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "RS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS256(
-            final String redirectUris, final String clientJwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS256");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -779,6 +799,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -830,11 +851,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS256Fail(
-            final String redirectUris, final String clientJwksUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS256Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -845,6 +866,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -883,11 +905,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "RS384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS384(
-            final String redirectUris, final String clientJwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS384");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -898,6 +920,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -949,11 +972,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS384Fail(
-            final String redirectUris, final String clientJwksUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS384Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -964,6 +987,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1002,11 +1026,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "RS512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS512(
-            final String redirectUris, final String clientJwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS512");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1017,6 +1041,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1068,11 +1093,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodRS512Fail(
-            final String redirectUris, final String clientJwksUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodRS512Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1083,6 +1108,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1121,11 +1147,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "ES256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES256(
-            final String redirectUris, final String clientJwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES256");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1136,6 +1162,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1187,11 +1214,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES256Fail(
-            final String redirectUris, final String clientJwksUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES256Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1202,6 +1229,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1240,11 +1268,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "ES384_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES384(
-            final String redirectUris, final String clientJwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES384");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1255,6 +1283,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1306,11 +1335,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES384Fail(
-            final String redirectUris, final String clientJwksUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES384Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1321,6 +1350,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1359,11 +1389,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription());
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "ES512_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES512(
-            final String redirectUris, final String clientJwksUri,
-            final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String keyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES512");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1374,6 +1404,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1425,11 +1456,11 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         assertNotNull(clientInfoResponse.getClaim("inum"), "Unexpected result: inum not found");
     }
 
-    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "clientJwksUri", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void privateKeyJwtAuthenticationMethodES512Fail(
-            final String redirectUris, final String clientJwksUri,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
+            final String redirectUris, final String clientJwksUri, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("privateKeyJwtAuthenticationMethodES512Fail");
 
         List<String> scopes = Arrays.asList("clientinfo");
@@ -1440,6 +1471,7 @@ public class ClientCredentialsGrantHttpTest extends BaseTest {
         registerRequest.setScopes(scopes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
