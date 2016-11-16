@@ -955,6 +955,14 @@ class Setup(object):
                 print "Downloading oxAuth RP war file..."
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
 
+        if self.installSaml:
+            print "Downloading Shibboleth IDP v3 war file..."
+            self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distWarFolder])
+            print "Downloading Shibboleth IDP v3 keygenerator..."
+            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
+            print "Downloading Shibboleth IDP v3 binary distributive file..."
+            self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
+
     def encode_passwords(self):
         self.logIt("Encoding passwords")
         try:
@@ -1387,13 +1395,6 @@ class Setup(object):
             self.copyTree('%s/shibboleth3' % tmpIdentityDir, '%s/shibboleth3' % jettyIdentityServiceConf)
 
             self.removeDirs(tmpIdentityDir)
-
-            print "Downloading Shibboleth IDP v3 war file..."
-            self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distWarFolder])
-            print "Downloading Shibboleth IDP v3 keygenerator..."
-            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
-            print "Downloading Shibboleth IDP v3 binary distributive file..."
-            self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
 
             # unpack IDP3 JAR with static configs
             self.run([self.cmd_jar, 'xf', self.distWarFolder + '/shibboleth-idp.jar'], '/opt')
