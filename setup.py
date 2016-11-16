@@ -443,7 +443,6 @@ class Setup(object):
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jks_fn])
 
         if self.installSaml:
-            self.shibboleth_version = 'v3'
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
 
@@ -1724,6 +1723,7 @@ class Setup(object):
 
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
         if promptForShibIDP == 'y':
+            self.shibboleth_version = 'v3'
             self.installSaml = True
         else:
             self.installSaml = False
