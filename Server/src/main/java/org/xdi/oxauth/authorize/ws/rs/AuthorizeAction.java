@@ -229,7 +229,7 @@ public class AuthorizeAction {
             requestParameterMap.put(Constants.REMOTE_IP, remoteIp);
 
             // Create unauthenticated session
-            SessionState unauthenticatedSession = sessionStateService.generateSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
+            SessionState unauthenticatedSession = sessionStateService.generateUnauthenticatedSessionState(null, new Date(), SessionIdState.UNAUTHENTICATED, requestParameterMap, false);
             unauthenticatedSession.setSessionAttributes(requestParameterMap);
             boolean persisted = sessionStateService.persistSessionState(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {

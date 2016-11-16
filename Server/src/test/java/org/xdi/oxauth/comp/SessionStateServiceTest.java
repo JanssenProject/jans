@@ -37,7 +37,7 @@ public class SessionStateServiceTest extends BaseComponentTest {
     }
 
     private SessionState generateSession() {
-        return m_service.generateSessionState("dummyDn", new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
+        return m_service.generateUnauthenticatedSessionState("dummyDn", new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
     }
 
     @Test
