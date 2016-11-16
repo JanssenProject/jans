@@ -296,7 +296,11 @@ public class SessionStateService {
         return generateSessionState(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
     }
 
-    public SessionState generateSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
+    public SessionState generateUnauthenticatedSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
+    	return generateSessionState(userDn, authenticationDate, state, sessionIdAttributes, persist);
+    }
+
+    private SessionState generateSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
         final String uuid = UUID.randomUUID().toString();
         final String dn = dn(uuid);
 
