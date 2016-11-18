@@ -955,7 +955,7 @@ class Setup(object):
                 print "Downloading oxAuth RP war file..."
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
 
-        if self.downloadWar and self.installSaml:
+        if self.downloadWars and self.installSaml:
             print "Downloading Shibboleth IDP v3 war file..."
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distWarFolder])
             print "Downloading Shibboleth IDP v3 keygenerator..."
