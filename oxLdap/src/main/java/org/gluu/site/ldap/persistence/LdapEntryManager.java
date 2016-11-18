@@ -24,6 +24,7 @@ import org.gluu.site.ldap.persistence.property.Setter;
 import org.gluu.site.ldap.persistence.util.ReflectHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SortOrder;
 import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
@@ -41,7 +42,6 @@ import com.unboundid.ldap.sdk.ModificationType;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.util.StaticUtils;
 
@@ -270,11 +270,19 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	}
 
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter) {
-		return findEntries(baseDN, entryClass, filter, null, 0);
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB);
+	}
+
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope) {
+		return findEntries(baseDN, entryClass, filter, scope, null, 0);
 	}
 
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, String[] ldapReturnAttributes, Filter filter) {
-		return findEntries(baseDN, entryClass, filter, ldapReturnAttributes, 0);
+		return findEntries(baseDN, entryClass, ldapReturnAttributes, filter, SearchScope.SUB);
+	}
+
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, String[] ldapReturnAttributes, Filter filter, SearchScope scope) {
+		return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, 0);
 	}
 
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int searchLimit) {
@@ -289,7 +297,15 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return findEntries(baseDN, entryClass, filter, ldapReturnAttributes, searchLimit, 0); 
 	}
 
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int searchLimit) {
+		return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, searchLimit, 0); 
+	}
+
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, searchLimit, sizeLimit);
+	}
+
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
 		}
@@ -312,7 +328,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
+
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}

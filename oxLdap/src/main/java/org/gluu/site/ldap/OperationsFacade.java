@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SortOrder;
 import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
@@ -37,7 +38,6 @@ import com.unboundid.ldap.sdk.SearchRequest;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultReference;
-import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldap.sdk.controls.*;
 import com.unboundid.ldif.LDIFChangeRecord;
 
@@ -202,6 +202,7 @@ public class OperationsFacade {
 		return search(dn, filter, SearchScope.SUB, searchLimit, sizeLimit, controls, attributes);
 	}
 
+	
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
@@ -215,9 +216,9 @@ public class OperationsFacade {
 
 
 		if (attributes == null) {
-			searchRequest = new SearchRequest(dn, scope, filter);
+			searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter);
 		} else {
-			searchRequest = new SearchRequest(dn, scope, filter, attributes);
+			searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, attributes);
 		}
 
 		boolean useSizeLimit = sizeLimit > 0;
@@ -276,9 +277,9 @@ public class OperationsFacade {
 		SearchRequest searchRequest;
 
 		if (attributes == null) {
-			searchRequest = new SearchRequest(dn, scope, filter);
+			searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter);
 		} else {
-			searchRequest = new SearchRequest(dn, scope, filter, attributes);
+			searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, attributes);
 		}
 
 		// startIndex and count should be "cleansed" before arriving here
