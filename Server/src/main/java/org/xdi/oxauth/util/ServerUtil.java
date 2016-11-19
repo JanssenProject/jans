@@ -25,6 +25,8 @@ import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
 import java.io.IOException;
@@ -201,6 +203,24 @@ public class ServerUtil {
             }
         }
         return httpRequest.getRemoteAddr();
+    }
+
+    /**
+     * Safe retrieves http request from FacesContext
+     * @return http
+     */
+    public static HttpServletRequest getRequestOrNull() {
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        if(facesContext == null)
+            return null;
+
+        ExternalContext externalContext = facesContext.getExternalContext();
+        if(externalContext == null)
+            return null;
+        Object request = externalContext.getRequest();
+        if(request == null || !(request instanceof HttpServletRequest))
+            return null;
+        return (HttpServletRequest)request;
     }
 
 }

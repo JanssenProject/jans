@@ -6,20 +6,16 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
+import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.model.audit.Action;
+import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
@@ -42,7 +38,12 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
-import com.google.common.collect.Sets;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
@@ -72,6 +73,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @In(required = false)
     private Identity identity;
+    @In
+    private OAuth2AuditLogger oAuth2AuditLogger;
 
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionState,
@@ -83,6 +86,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         EndSessionParamsValidator.validateParams(idTokenHint, errorResponseFactory);
 
         final Pair<SessionState, AuthorizationGrant> pair = endSession(idTokenHint, sessionState, httpRequest, httpResponse, sec);
+
+        auditLogging(httpRequest, pair.getSecond());
 
         if (HTTP_BASED) {
             return httpBased(postLogoutRedirectUri, state, pair);
@@ -137,10 +142,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
-        	Boolean endSessionWithAccessToken = ConfigurationFactory.instance().getConfiguration().getEndSessionWithAccessToken();
-        	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
-        		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
-        	}
+            Boolean endSessionWithAccessToken = ConfigurationFactory.instance().getConfiguration().getEndSessionWithAccessToken();
+            if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
+                authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
+            }
         }
         if (authorizationGrant == null) {
             log.info("Failed to find out authorization grant for id_token_hint '{0}'", idTokenHint);
@@ -153,7 +158,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         isExternalLogoutPresent = externalApplicationSessionService.isEnabled();
         if (isExternalLogoutPresent && (ldapSessionState != null)) {
-        	String userName = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
+            String userName = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, ldapSessionState);
             log.info("End session result for '{0}': '{1}'", userName, "logout", externalLogoutResult);
         }
@@ -278,5 +283,14 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 "</body>" +
                 "</html>";
         return html;
+    }
+
+    private void auditLogging(HttpServletRequest request, AuthorizationGrant authorizationGrant){
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.SESSION_DESTROYED);
+        oAuth2AuditLog.setSuccess(true);
+        oAuth2AuditLog.setClientId(authorizationGrant.getClientId());
+        oAuth2AuditLog.setScope(StringUtils.join(authorizationGrant.getScopes(), " "));
+        oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
+        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
     }
 }
