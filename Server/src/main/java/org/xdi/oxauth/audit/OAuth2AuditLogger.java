@@ -1,5 +1,6 @@
 package org.xdi.oxauth.audit;
 
+import com.google.common.base.Objects;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
@@ -13,6 +14,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import javax.jms.*;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -27,39 +29,19 @@ public class OAuth2AuditLogger {
 	private final String CLIENT_QUEUE_NAME = "oauth2.audit.logging";
 	private final boolean transacted = false;
 
-	private final MessageProducer producer;
-	private final Connection connection;
-	private final Session session;
+	private MessageProducer producer;
+	private Connection connection;
+	private Session session;
+
+	private Set<String> jmsBrokerURISet;
+	private String jmsUserName;
+	private String jmsPassword;
 
 	@Logger
 	private Log logger;
 
-	public OAuth2AuditLogger() throws JMSException {
-		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()) || CollectionUtils.isEmpty(getJmsBrokerURISet())) {
-			this.producer = null;
-			this.connection = null;
-			this.session = null;
-			return;
-		}
-
-		Iterator<String> jmsBrokerURIIterator = getJmsBrokerURISet().iterator();
-
-		StringBuilder uriBuilder = new StringBuilder();
-		while (jmsBrokerURIIterator.hasNext()) {
-			String jmsBrokerURI = jmsBrokerURIIterator.next();
-			uriBuilder.append("tcp://");
-			uriBuilder.append(jmsBrokerURI);
-			if (jmsBrokerURIIterator.hasNext())
-				uriBuilder.append(",");
-		}
-
-		String brokerUrl = BROKER_URL_PREFIX + uriBuilder + BROKER_URL_SUFFIX;
-
-		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
-		this.connection = connectionFactory.createConnection(getJmsUserName(), getJmsPassword());
-		this.connection.start();
-		this.session = connection.createSession(transacted, ACK_MODE);
-		this.producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME));
+	public OAuth2AuditLogger() {
+		tryToEstablishJMSConnection();
 	}
 
 	@Asynchronous
@@ -67,10 +49,14 @@ public class OAuth2AuditLogger {
 		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()))
 			return;
 
-		if (this.connection != null)
+		if (this.connection == null || isJmsConfigChanged()) {
+			if (tryToEstablishJMSConnection())
+				loggingThroughJMS(oAuth2AuditLog);
+			else
+				loggingThroughFile(oAuth2AuditLog);
+		} else {
 			loggingThroughJMS(oAuth2AuditLog);
-		else
-			loggingThroughFile(oAuth2AuditLog);
+		}
 	}
 
 	@Destroy
@@ -84,6 +70,47 @@ public class OAuth2AuditLogger {
 		} catch (JMSException e) {
 			logger.error("Can't close connection", e);
 		}
+	}
+
+	private boolean tryToEstablishJMSConnection() {
+		destroy();
+
+		Set<String> jmsBrokerURISet = getJmsBrokerURISet();
+		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()) || CollectionUtils.isEmpty(jmsBrokerURISet)) {
+			this.producer = null;
+			this.connection = null;
+			this.session = null;
+			return false;
+		}
+
+		this.jmsBrokerURISet = new HashSet<String>(jmsBrokerURISet);
+		this.jmsUserName = getJmsUserName();
+		this.jmsPassword = getJmsPassword();
+
+		Iterator<String> jmsBrokerURIIterator = jmsBrokerURISet.iterator();
+
+		StringBuilder uriBuilder = new StringBuilder();
+		while (jmsBrokerURIIterator.hasNext()) {
+			String jmsBrokerURI = jmsBrokerURIIterator.next();
+			uriBuilder.append("tcp://");
+			uriBuilder.append(jmsBrokerURI);
+			if (jmsBrokerURIIterator.hasNext())
+				uriBuilder.append(",");
+		}
+
+		String brokerUrl = BROKER_URL_PREFIX + uriBuilder + BROKER_URL_SUFFIX;
+
+		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
+		try {
+			this.connection = connectionFactory.createConnection(this.jmsUserName, this.jmsPassword);
+			this.connection.start();
+			this.session = connection.createSession(transacted, ACK_MODE);
+			this.producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME));
+		} catch (JMSException e) {
+			logger.error("Can't establish connection to jms broker");
+			return false;
+		}
+		return true;
 	}
 
 	private void loggingThroughJMS(OAuth2AuditLog oAuth2AuditLog) {
@@ -106,6 +133,11 @@ public class OAuth2AuditLogger {
 		} catch (IOException e) {
 			logger.error("Can't serialize the audit log", e);
 		}
+	}
+
+	private boolean isJmsConfigChanged() {
+		return !Objects.equal(this.jmsUserName, getJmsUserName()) || !Objects.equal(this.jmsPassword, getJmsPassword())
+				|| !Objects.equal(this.jmsBrokerURISet, getJmsBrokerURISet());
 	}
 
 	private Boolean isEnabledOAuthAuditnLogging() {
