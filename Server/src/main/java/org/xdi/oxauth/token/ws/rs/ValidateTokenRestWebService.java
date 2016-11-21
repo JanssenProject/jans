@@ -10,6 +10,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -39,6 +40,7 @@ public interface ValidateTokenRestWebService {
             @QueryParam("access_token")
             @ApiParam(value = "Access Token to validate.", required = true)
             String accessToken,
+            @Context HttpServletRequest httpRequest,
             @Context SecurityContext sec);
 
     @POST
@@ -54,5 +56,6 @@ public interface ValidateTokenRestWebService {
             @QueryParam("access_token")
             @ApiParam(value = "Access Token to validate.", required = true)
             String accessToken,
+            @Context HttpServletRequest httpRequest,
             @Context SecurityContext sec);
 }
