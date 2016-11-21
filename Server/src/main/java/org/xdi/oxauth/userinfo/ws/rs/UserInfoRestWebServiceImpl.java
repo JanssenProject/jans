@@ -15,6 +15,9 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
+import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.model.audit.Action;
+import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.Claim;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -46,8 +49,10 @@ import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -68,6 +73,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Logger
     private Log log;
+
+    @In
+    private OAuth2AuditLogger oAuth2AuditLogger;
 
     @In
     private ErrorResponseFactory errorResponseFactory;
@@ -94,22 +102,24 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     private PairwiseIdentifierService pairwiseIdentifierService;
 
     @Override
-    public Response requestUserInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
-        return requestUserInfo(accessToken, authorization, securityContext);
+    public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
+        return requestUserInfo(accessToken, authorization, request, securityContext);
     }
 
     @Override
-    public Response requestUserInfoPost(String accessToken, String authorization, SecurityContext securityContext) {
-        return requestUserInfo(accessToken, authorization, securityContext);
+    public Response requestUserInfoPost(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
+        return requestUserInfo(accessToken, authorization, request, securityContext);
     }
 
-    public Response requestUserInfo(String accessToken, String authorization, SecurityContext securityContext) {
+    public Response requestUserInfo(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
         if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
             accessToken = authorization.substring(7);
         }
         log.debug("Attempting to request User Info, Access token = {0}, Is Secure = {1}",
                 accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
+
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.USER_INFO);
 
         try {
             if (!UserInfoParamsValidator.validateParams(accessToken)) {
@@ -125,7 +135,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         && !authorizationGrant.getScopes().contains(DefaultScope.PROFILE.toString())) {
                     builder = Response.status(403);
                     builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
+                    oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
                 } else {
+                    oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, true);
                     CacheControl cacheControl = new CacheControl();
                     cacheControl.setPrivate(true);
                     cacheControl.setNoTransform(false);
@@ -185,6 +197,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             log.error(e.getMessage(), e);
         }
 
+        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
