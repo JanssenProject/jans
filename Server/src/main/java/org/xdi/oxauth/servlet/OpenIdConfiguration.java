@@ -344,13 +344,8 @@ public class OpenIdConfiguration extends HttpServlet {
         final JSONObject mappings = new JSONObject();
         try {
             Map<Integer, Set<String>> map = ExternalAuthenticationService.instance().levelToAcrMapping();
-
-            for (Integer level : map.keySet()) {
-                final JSONArray mappingList = new JSONArray();
-                mappingList.put(map.get(level));
-
-                mappings.put(level.toString(), mappingList);
-            }
+            for (Integer level : map.keySet())
+                mappings.put(level.toString(), map.get(level));
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
