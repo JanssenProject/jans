@@ -127,3 +127,12 @@ defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=%(inumOrg)s,o=gluu
 oxScopeType: openid
 
+dn: inum=%(inumOrg)s!0009!C4F5.F66C,ou=scopes,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthCustomScope
+objectClass: top
+defaultScope: true
+description: User permission and roles
+displayName: permission
+inum: %(inumOrg)s!0009!C4F5.F66C
+oxAuthClaim: inum=%(inumOrg)s!0005!6049,ou=attributes,o=%(inumOrg)s,o=gluu
+oxScopeType: dynamic
