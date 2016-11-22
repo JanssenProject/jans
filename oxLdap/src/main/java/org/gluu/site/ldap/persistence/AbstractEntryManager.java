@@ -114,7 +114,9 @@ public abstract class AbstractEntryManager implements EntityManager {
 			attributesFromLdap = new ArrayList<AttributeData>();
 		} else {
 			String[] currentLdapReturnAttributes = null;
-			currentLdapReturnAttributes = getLdapAttributes(entry, propertiesAnnotations, false);
+			List<String> currentLdapReturnAttributesList = getLdapAttributesList(entry, propertiesAnnotations, false);
+			currentLdapReturnAttributesList.add("objectClass");
+
 			attributesFromLdap = find(dnValue.toString(), currentLdapReturnAttributes);
 		}
 		Map<String, AttributeData> attributesFromLdapMap = getAttributesMap(attributesFromLdap);
@@ -251,7 +253,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 
 		// Update object classes if entry contains custom object classes
 		if (getSupportedLDAPVersion() > 2) {
-			if (!isSchemaUpdate && (getCustomObjectClasses(entry, entryClass).length > 0)) {
+			if (!isSchemaUpdate) {
 				String[] objectClasses = getObjectClasses(entry, entryClass);
 				String[] objectClassesFromLdap = attributesFromLdapMap.get(OBJECT_CLASS.toLowerCase()).getValues();
 
@@ -366,7 +368,19 @@ public abstract class AbstractEntryManager implements EntityManager {
 	}
 
 	protected <T> String[] getLdapAttributes(T entry, List<PropertyAnnotation> propertiesAnnotations, boolean isIgnoreLdapAttributesList) {
+		List<String> attributes = getLdapAttributesList(entry, propertiesAnnotations, isIgnoreLdapAttributesList);
+		
+		if (attributes == null) {
+			return null;
+		}
+
+		return attributes.toArray(new String[0]);
+	}
+
+	private <T> List<String> getLdapAttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations,
+			boolean isIgnoreLdapAttributesList) {
 		List<String> attributes = new ArrayList<String>();
+
 		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
 			String propertyName = propertiesAnnotation.getPropertyName();
 			Annotation ldapAttribute;
@@ -402,7 +416,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 			return null;
 		}
 
-		return attributes.toArray(new String[0]);
+		return attributes;
 	}
 
 	private <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes, List<PropertyAnnotation> propertiesAnnotations) {
@@ -514,7 +528,9 @@ public abstract class AbstractEntryManager implements EntityManager {
 			AttributeData attribute = getAttribute(propertyName, propertyName, getter, entry, false);
 			if (attribute != null) {
 				for (String objectClass : attribute.getValues()) {
-					result.add(objectClass);
+					if (objectClass != null) {
+						result.add(objectClass);
+					}
 				}
 			}
 			break;
@@ -568,6 +584,10 @@ public abstract class AbstractEntryManager implements EntityManager {
 		if (dnSetter == null) {
 			throw new MappingException("Entry should has getter for property " + dnProperty);
 		}
+
+		// Type object classes
+		String[] typeObjectClasses = getTypeObjectClasses(entryClass);
+		Arrays.sort(typeObjectClasses);
 
 		List<T> results = new ArrayList<T>(entriesAttributes.size());
 		for (Entry<String, List<AttributeData>> entryAttributes : entriesAttributes.entrySet()) {
@@ -671,7 +691,16 @@ public abstract class AbstractEntryManager implements EntityManager {
 							}
 
 							for (String objectClass : objectClasses) {
-								customObjectClasses.add(objectClass);
+								int idx = Arrays.binarySearch(typeObjectClasses, objectClass, new Comparator<String>() {
+									@Override
+									public int compare(String o1, String o2) {
+										return o1.toLowerCase().compareTo(o2.toLowerCase());
+									}
+								});
+								
+								if (idx < 0) {
+									customObjectClasses.add(objectClass);
+								}
 							}
 
 							continue;
