@@ -1089,3 +1089,18 @@ objectClass: top
 objectClass: gluuAttribute
 urn: urn:mace:dir:attribute-def:gluuIMAPData
 description: IMAP Data
+
+dn: inum=%(inumOrg)s!0005!6049,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: gluuAttribute
+objectClass: top
+description: gluuPermission
+description: User permission or role
+displayName: User permisison
+gluuAttributeEditType: admin
+gluuAttributeName: gluuPermission
+gluuAttributeOrigin: gluuPerson
+gluuAttributeType: string
+gluuAttributeViewType: admin
+gluuStatus: active
+inum: %(inumOrg)s!0005!6049
+urn: urn:gluu:dir:attribute-gluuPermission

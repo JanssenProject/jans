@@ -509,7 +509,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA Authorization policy
 displayName: uma_authorization_policy
-gluuStatus: true
+gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F995
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(inumOrg)s!0008!5DA4.8ADF","description":""}
 oxLevel: 100
