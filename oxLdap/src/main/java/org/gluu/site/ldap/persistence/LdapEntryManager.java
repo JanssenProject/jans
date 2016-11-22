@@ -121,7 +121,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 				} else if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
 					modification = new Modification(ModificationType.DELETE, oldAttribute.getName(), oldAttribute.getValues());
 				} else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-					if ((attribute.getValues().length == 1) || (OBJECT_CLASS.equalsIgnoreCase(attribute.getName()))) {
+					if (attribute.getValues().length == 1) {
 						modification = new Modification(ModificationType.REPLACE, attribute.getName(), attribute.getValues());
 					} else {
 						String[] oldValues = oldAttribute.getValues().clone();

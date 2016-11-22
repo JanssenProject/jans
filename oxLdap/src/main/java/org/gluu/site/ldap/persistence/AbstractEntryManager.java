@@ -214,9 +214,6 @@ public abstract class AbstractEntryManager implements EntityManager {
 				// Prepare attributes for adding and replace
 				for (AttributeData attributeToPersist : attributesToPersistMap.values()) {
 					String attributeName = attributeToPersist.getName();
-					// if (OBJECT_CLASS.equalsIgnoreCase(attributeName)) {
-					// continue;
-					// }
 
 					LdapAttribute ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName);
 					if ((ldapAttributeConfiguration != null) && ldapAttributeConfiguration.ignoreDuringUpdate()) {
@@ -256,10 +253,11 @@ public abstract class AbstractEntryManager implements EntityManager {
 		if (getSupportedLDAPVersion() > 2) {
 			if (!isSchemaUpdate && (getCustomObjectClasses(entry, entryClass).length > 0)) {
 				String[] objectClasses = getObjectClasses(entry, entryClass);
-				if (objectClasses.length > 0) {
-					// TODO: Don't add replace if we are not changing Object Classes
+				String[] objectClassesFromLdap = attributesFromLdapMap.get(OBJECT_CLASS.toLowerCase()).getValues();
+
+				if (!Arrays.equals(objectClassesFromLdap, objectClasses)) {
 					attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE, new AttributeData(
-							OBJECT_CLASS, objectClasses), new AttributeData(OBJECT_CLASS, objectClasses)));
+							OBJECT_CLASS, objectClasses), new AttributeData(OBJECT_CLASS, objectClassesFromLdap)));
 				}
 			}
 		}
