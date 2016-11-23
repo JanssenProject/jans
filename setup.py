@@ -400,8 +400,8 @@ class Setup(object):
                      }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
-                                        'log4j-*.jar', 'commons-codec-*.jar','commons-cli-*.jar', 'commons-io-*.jar'
-                                        'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
+                                                  'log4j-*.jar', 'commons-codec-*.jar','commons-cli-*.jar',
+                                                  'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
     def __repr__(self):
         try:
@@ -671,6 +671,31 @@ class Setup(object):
         f = open(self.log, 'a')
         f.write('%s %s\n' % (time.strftime('%X %x'), msg))
         f.close()
+
+    def appendLine(self, line, fileName=False):
+        try:
+            f = open(fileName, 'a')
+            f.write('%s\n' % line)
+            f.close()
+        except:
+            self.logIt("Error loading file %s" % fileName)
+
+    def setUlimits(self):
+        try:
+            if self.os_type in ['centos', 'redhat', 'fedora']:
+                apache_user = 'apache'
+            else:
+                apache_user = 'www-data'
+
+            self.appendLine("ldap       soft nofile     131072", "/etc/security/limits.conf")
+            self.appendLine("ldap       hard nofile     262144", "/etc/security/limits.conf")
+            self.appendLine("%s     soft nofile     131072" % apache_user, "/etc/security/limits.conf")
+            self.appendLine("%s     hard nofile     262144" % apache_user, "/etc/security/limits.conf")
+            self.appendLine("jetty      soft nofile     131072", "/etc/security/limits.conf")
+            self.appendLine("jetty      hard nofile     262144", "/etc/security/limits.conf")
+        except:
+            self.logIt("Could not set limits.")
+            self.logIt(traceback.format_exc(), True)
 
     def load_properties(self, fn):
         self.logIt('Loading Properties %s' % fn)
@@ -2404,6 +2429,7 @@ if __name__ == '__main__':
             installObject.generate_base64_configuration()
             installObject.render_configuration_template()
             installObject.update_hostname()
+            installObject.setUlimits()
             installObject.configure_httpd()
             installObject.install_ldap_server()
             installObject.copy_output()
