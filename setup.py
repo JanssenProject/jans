@@ -82,6 +82,7 @@ class Setup(object):
         self.jre_version = '102'
         self.jetty_version = '9.3.12.v20160915'
         self.jython_version = '2.7.0'
+        self.node_version = '6.9.1'
         self.apache_version = None
         self.opendj_version = None
 
@@ -102,6 +103,8 @@ class Setup(object):
         self.os_initdaemon = None
 
         self.shibboleth_version = ''
+
+        self.node_home = '/opt/node'
 
         self.jetty_dist = '/opt/jetty-9.3'
         self.jetty_home = '/opt/jetty'
@@ -866,10 +869,6 @@ class Setup(object):
     def installJetty(self):
         self.logIt("Installing jetty %s..." % self.jetty_version)
 
-        jettyTemp = '%s/temp' % self.jetty_dist
-        self.run([self.cmd_mkdir, '-p', jettyTemp])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyTemp])
-
         jettyArchive = 'jetty-distribution-%s.tar.gz' % self.jetty_version
         jettyDestinationPath = '%s/jetty-distribution-%s' % (self.jetty_dist, self.jetty_version)
         try:
@@ -886,6 +885,23 @@ class Setup(object):
 
         self.run([self.cmd_mkdir, '-p', self.jetty_base])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
+
+    def installNode(self):
+        self.logIt("Installing node %s..." % self.node_version)
+
+        nodeArchive = 'node-v%s-linux-x64.tar.xz' % self.node_version
+        nodeDestinationPath = '/opt/node-v%s-linux-x64' % self.node_version
+        try:
+            self.logIt("Extracting %s into /opt" % nodeArchive)
+            self.run(['tar', '-xJf', '%s/%s' % (self.distAppFolder, nodeArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+        except:
+            self.logIt("Error encountered while extracting archive %s" % nodeArchive)
+            self.logIt(traceback.format_exc(), True)
+
+        self.run([self.cmd_ln, '-sf', nodeDestinationPath, self.node_home])
+        self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % nodeDestinationPath])
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', nodeDestinationPath])
+        self.run([self.cmd_chown, '-h', 'jetty:jetty', self.node_home])
 
     def installJettyService(self, serviceConfiguration):
         serviceName = serviceConfiguration['name']
@@ -2392,6 +2408,7 @@ if __name__ == '__main__':
             installObject.installJRE()
             installObject.installJetty()
             installObject.installJython()
+            installObject.installNode()
             installObject.make_salt()
             installObject.make_oxauth_salt()
             installObject.copy_scripts()
