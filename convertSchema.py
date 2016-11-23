@@ -75,10 +75,12 @@ def convert(in_file, out_file, add_header=False):
 
 
 if __name__ == '__main__':
-    ox101 = './static/opendj/101-ox.ldif'
+    ox101 = './static/opendj/deprecated/101-ox.ldif'
     gluu_schema = './static/openldap/gluu.schema'
     convert(ox101, gluu_schema, True)
 
-    custom77 = './static/opendj/77-customAttributes.ldif'
+    attrs = 1000
+    objclasses = 100
+    custom77 = './static/opendj/deprecated/77-customAttributes.ldif'
     custom_schema = './static/openldap/custom.schema'
     convert(custom77, custom_schema)
