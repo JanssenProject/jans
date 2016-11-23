@@ -106,8 +106,6 @@ public class Configuration {
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
 
-    private Map<Integer, List<String>> authLevelMapping; //auth_level_mapping
-
     private String applianceInum;
     private int sessionIdUnusedLifetime;
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
@@ -964,15 +962,6 @@ public class Configuration {
         }
 
         return clientAuthenticationFilters;
-    }
-
-    @XmlElement(name = "auth_level_mapping")
-    public Map<Integer, List<String>> getAuthLevelMapping() {
-        return authLevelMapping;
-    }
-
-    public void setAuthLevelMapping(Map<Integer, List<String>> authLevelMapping) {
-        this.authLevelMapping = authLevelMapping;
     }
 
     @XmlElement(name = "appliance-inum")
