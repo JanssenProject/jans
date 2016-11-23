@@ -1559,7 +1559,7 @@ class Setup(object):
         self.logIt("Preparing Passport OpenID RP certificate...")
         passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
         for jwks_key in passport_rp_client_jwks_json["keys"]:
-            if jwks_key["alg"]  == passport_rp_client_cert_alg: 
+            if jwks_key["alg"]  == self.passport_rp_client_cert_alg: 
                 self.passport_rp_client_cert_alias = jwks_key["kid"]
                 break
 
