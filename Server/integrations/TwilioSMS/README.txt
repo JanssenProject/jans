@@ -12,6 +12,9 @@ and install it in /var/webapps/gluu/oxauth/libs directory and restart Tomcat usi
 service tomcat stop
 service tomcat start
 
+
+> **Note**: Indent and tabbing may change while copy, paste of the sample code, check for the tab before executing the sample code.
+
 There are three required custom properties:
     twilio_sid     Your account id at Twilio
     twilio_token   The API secret provided by Twilio
