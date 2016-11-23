@@ -19,21 +19,11 @@ objectClass: oxAuthClient
 objectClass: top
 displayName: Passport Requesting Party Client
 inum: %(passport_rp_client_id)s
-oxAuthAppType: web
-oxAuthClientSecret: %(passport_rp_client_jks_pass)s
-oxAuthGrantType: authorization_code
-oxAuthGrantType: implicit
-oxAuthGrantType: refresh_token
-oxAuthLogoutSessionRequired: true
-oxAuthResponseType: code
-oxAuthResponseType: token
-oxAuthResponseType: id_token
-oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
-oxAuthSubjectType: pairwise
-oxAuthTrustedClient: true
+oxAuthAppType: native
 oxAuthIdTokenSignedResponseAlg: HS256
-oxAuthJwks: %(passport_rp_client_base64_jwks)s
+oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
+oxAuthJwks:: %(passport_rp_client_base64_jwks)s
 oxAuthTokenEndpointAuthMethod: private_key_jwt
-oxPersistClientAuthorizations: true
+oxPersistClientAuthorizations: false
+oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
