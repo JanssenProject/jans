@@ -37,7 +37,6 @@ objectIdentifier oxObjectClass oxPublished:4
 ```
 
 So any new definition could be added by specifying the alias followed by a number.
-*Note:* While defining the schema, use a `colon` followed by the number NOT a `dot`
 
 ```
 attributetype ( oxAttribute:1 NAME ( 'oxAssociatedClient' 'associatedClient' )
@@ -48,3 +47,8 @@ objectclass ( oxObjectClass:999 NAME 'myObjectClass' SUP top
 ...
 ... )
 ```
+
+### Note for Schema Editors
+
+* While defining the schema, use a `colon` followed by the number NOT a `dot`
+* The file `custom.schema` starts with the `oxAttribute:1001` and `oxObjectClass:101`. Kindly keep this in mind when expanding `gluu.schema` so as not to run into the custom schema number space.
