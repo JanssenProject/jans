@@ -340,6 +340,7 @@ class Setup(object):
         self.passport_rp_client_id = None
         self.passport_rp_client_jwks = None
         self.passport_rp_client_jks_fn = "%s/passport-rp.jks" % self.certFolder
+        self.passport_rp_client_cert_alg = "RS512"
         self.passport_rp_client_cert_alias = None
         self.passport_rp_client_cert_fn = "%s/passport-rp.pem" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
@@ -1556,9 +1557,9 @@ class Setup(object):
         # TODO
 
         self.logIt("Preparing Passport OpenID RP certificate...")
-        passport_rp_client_jwks_json = json.loads(self.passport_rp_client_jwks)
+        passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
         for jwks_key in passport_rp_client_jwks_json["keys"]:
-            if jwks_key["alg"]  == "RS256": 
+            if jwks_key["alg"]  == passport_rp_client_cert_alg: 
                 self.passport_rp_client_cert_alias = jwks_key["kid"]
                 break
 
