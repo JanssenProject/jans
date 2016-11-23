@@ -106,7 +106,6 @@ class Setup(object):
 
         self.node_home = '/opt/node'
 
-        self.jetty_dist = '/opt/jetty-9.3'
         self.jetty_home = '/opt/jetty'
         self.jetty_base = '/opt/web/jetty'
         self.jetty_user_home = '/home/jetty'
@@ -894,14 +893,11 @@ class Setup(object):
     def installJetty(self):
         self.logIt("Installing jetty %s..." % self.jetty_version)
 
-        self.run([self.cmd_mkdir, '-p', self.jetty_dist])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_dist])
-
         jettyArchive = 'jetty-distribution-%s.tar.gz' % self.jetty_version
-        jettyDestinationPath = '%s/jetty-distribution-%s' % (self.jetty_dist, self.jetty_version)
+        jettyDestinationPath = '/opt/jetty-distribution-%s' % self.jetty_version
         try:
-            self.logIt("Extracting %s into /opt/jetty" % jettyArchive)
-            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jettyArchive), '-C', self.jetty_dist, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.logIt("Extracting %s into /opt" % jettyArchive)
+            self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jettyArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % jettyArchive)
             self.logIt(traceback.format_exc(), True)
