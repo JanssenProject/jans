@@ -345,7 +345,7 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         String sighAlgName = cert.getSigAlgName();
 
         for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
-            if (sa.getAlgorithm().equalsIgnoreCase(sighAlgName)) {
+            if (sighAlgName.equalsIgnoreCase(sa.getAlgorithm())) {
                 return sa;
             }
         }
