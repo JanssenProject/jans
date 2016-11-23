@@ -94,6 +94,7 @@ class Setup(object):
         self.installAsimba = False
         self.installCas = False
         self.installOxAuthRP = False
+        self.installPassport = False
         self.allowPreReleasedApplications = False
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -339,6 +340,8 @@ class Setup(object):
         self.passport_rp_client_id = None
         self.passport_rp_client_jwks = None
         self.passport_rp_client_jks_fn = "%s/passport-rp.jks" % self.certFolder
+        self.passport_rp_client_cert_alias = None
+        self.passport_rp_client_cert_fn = "%s/passport-rp.pem" % self.certFolder
         self.passport_rp_client_jks_pass = 'secret'
 
         self.ldif_files = [self.ldif_base,
@@ -395,7 +398,7 @@ class Setup(object):
                      self.openldapSymasConf: False
                      }
 
-        self.oxauth_openid_keys_generator_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
+        self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
                                                   'log4j-*.jar', 'commons-codec-*.jar','commons-cli-*.jar',
                                                   'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
@@ -1170,7 +1173,7 @@ class Setup(object):
                       '"%s"' % dn_name])
             self.run(['/bin/sh', '-c', cmd])
 
-        oxauth_lib_files = self.findFiles(self.oxauth_openid_keys_generator_libs, self.jetty_user_home_lib)
+        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
 
         cmd = " ".join([self.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
@@ -1203,6 +1206,26 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         return None
+
+    def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
+        self.logIt("Exporting oxAuth OpenID Connect keys")
+
+        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
+
+        cmd = " ".join([self.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp",
+                        ":".join(oxauth_lib_files),
+                        "org.xdi.oxauth.util.KeyExporter",
+                        "-keystore",
+                        jks_path,
+                        "-keypasswd",
+                        jks_pwd,
+                        "-alias",
+                        cert_alias,
+                        "-exportfile",
+                        cert_path])
+        self.run(['/bin/sh', '-c', cmd])
 
     def write_openid_keys(self, fn, jwks):
         self.logIt("Writing oxAuth OpenID Connect keys")
@@ -1312,7 +1335,7 @@ class Setup(object):
         tmpLibsOxAuthPath = '%s/WEB-INF/lib' % tmpOxAuthDir
 
         self.logIt("Copying files to %s..." % self.jetty_user_home_lib)
-        oxauth_lib_files = self.findFiles(self.oxauth_openid_keys_generator_libs, tmpLibsOxAuthPath)
+        oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, tmpLibsOxAuthPath)
         for oxauth_lib_file in oxauth_lib_files:
             self.copyFile(oxauth_lib_file, self.jetty_user_home_lib)
 
@@ -1524,6 +1547,22 @@ class Setup(object):
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
 
+    def install_passport(self):
+        self.logIt("Installing npm and Node.Js...")
+        # TODO
+
+        self.logIt("Installing Passport...")
+        # TODO
+
+        self.logIt("Preparing Passport OpenID RP certificate...")
+        passport_rp_client_jwks_json = json.loads(self.passport_rp_client_jwks)
+        for jwks_key in passport_rp_client_jwks_json["keys"]:
+            if jwks_key["alg"]  == "RS256": 
+                self.passport_rp_client_cert_alias = jwks_key["kid"]
+                break
+
+        self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
+
     def install_gluu_components(self):
         if self.installOxAuth:
             self.install_oxauth()
@@ -1542,6 +1581,9 @@ class Setup(object):
 
         if self.installOxAuthRP:
             self.install_oxauth_rp()
+
+        if self.installPassport:
+            self.install_passport()
 
     def isIP(self, address):
         try:
@@ -2196,6 +2238,7 @@ def print_help():
     print "    -a   Install Asimba"
     print "    -r   Install oxAuth RP"
     print "    -c   Install CAS"
+    print "    -p   Install Passport"
     print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
     print "    -f   specify setup.properties file"
     print "    -h   Help"
@@ -2246,6 +2289,8 @@ def getOpts(argv, setupOptions):
             setupOptions['downloadWars'] = True
         elif opt == '-r':
             setupOptions['installOxAuthRP'] = True
+        elif opt == '-p':
+            setupOptions['installPassport'] = True
         elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
     return setupOptions
@@ -2265,6 +2310,7 @@ if __name__ == '__main__':
         'installAsimba': False,
         'installCas': False,
         'installOxAuthRP': False,
+        'installPassport': False,
         'allowPreReleasedApplications': False
     }
     if len(sys.argv) > 1:
@@ -2282,6 +2328,7 @@ if __name__ == '__main__':
     installObject.installAsimba = setupOptions['installAsimba']
     installObject.installCas = setupOptions['installCas']
     installObject.installOxAuthRP = setupOptions['installOxAuthRP']
+    installObject.installPassport = setupOptions['installPassport']
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
 
     # Get the OS type
