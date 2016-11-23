@@ -894,6 +894,9 @@ class Setup(object):
     def installJetty(self):
         self.logIt("Installing jetty %s..." % self.jetty_version)
 
+        self.run([self.cmd_mkdir, '-p', self.jetty_dist])
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_dist])
+
         jettyArchive = 'jetty-distribution-%s.tar.gz' % self.jetty_version
         jettyDestinationPath = '%s/jetty-distribution-%s' % (self.jetty_dist, self.jetty_version)
         try:
