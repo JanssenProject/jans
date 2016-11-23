@@ -400,8 +400,8 @@ class Setup(object):
                      }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
-                                                  'log4j-*.jar', 'commons-codec-*.jar','commons-cli-*.jar',
-                                                  'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
+                                        'log4j-*.jar', 'commons-codec-*.jar','commons-cli-*.jar', 'commons-io-*.jar'
+                                        'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
     def __repr__(self):
         try:
