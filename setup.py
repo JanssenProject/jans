@@ -420,7 +420,8 @@ class Setup(object):
                 + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
                 + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
                 + 'Install CAS'.ljust(30) + repr(self.installCas).rjust(35) + "\n" \
-                + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n"
+                + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
+                + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
         except:
             s = ""
             for key in self.__dict__.keys():
@@ -1788,6 +1789,12 @@ class Setup(object):
             self.installOxAuthRP = True
         else:
             self.installOxAuthRP = False
+
+        promptForPassport = self.getPrompt("Install Passport?", "No")[0].lower()
+        if promptForPassport == 'y':
+            self.installPassport = True
+        else:
+            self.installPassport = False
 
     def get_filepaths(self, directory):
         file_paths = []
