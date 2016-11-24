@@ -107,15 +107,15 @@ public class KeyExporter {
                     	StringBuilder sb = new StringBuilder();
                         SignatureAlgorithm signatureAlgorithm = cryptoProvider.getSignatureAlgorithm(keyAlias);
                         if (SignatureAlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily())) {
-                        	sb.append("---BEGIN RSA PRIVATE KEY---\n");
+                        	sb.append("-----BEGIN RSA PRIVATE KEY-----\n");
                         	sb.append(base64EncodedKey);
                         	sb.append("\n");
-                        	sb.append("---END RSA  PRIVATE KEY---\n");
+                        	sb.append("-----END RSA PRIVATE KEY-----\n");
                         } else {
-                        	sb.append("---BEGIN PRIVATE KEY---\n");
+                        	sb.append("-----BEGIN PRIVATE KEY-----\n");
                         	sb.append(base64EncodedKey);
                         	sb.append("\n");
-                        	sb.append("---END PRIVATE KEY---\n");
+                        	sb.append("-----END PRIVATE KEY-----\n");
 	            		}
                         
                         FileUtils.writeStringToFile(new File(exportFile), sb.toString());
