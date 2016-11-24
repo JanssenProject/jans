@@ -293,6 +293,7 @@ class Setup(object):
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
         self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
+        self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -399,7 +400,8 @@ class Setup(object):
                      self.network: False,
                      self.user_schema: False,
                      self.openldapSlapdConf: False,
-                     self.openldapSymasConf: False
+                     self.openldapSymasConf: False,
+                     self.passport_config: True
                      }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
