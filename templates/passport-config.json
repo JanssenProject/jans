@@ -3,5 +3,6 @@
 	"serverWebPort": 8090,
 	"clientId": "%(passport_rp_client_id)s",
 	"keyPath": "%(passport_rp_client_cert_fn)s",
-	"keyId": "%(passport_rp_client_cert_alias)s"
+	"keyId": "%(passport_rp_client_cert_alias)s",
+	"passportConfigAPI": "https://%(hostname)s/identity/seam/resource/restv1/passportconfig"
 }
