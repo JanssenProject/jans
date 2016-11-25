@@ -4,5 +4,6 @@
 	"clientId": "%(passport_rp_client_id)s",
 	"keyPath": "%(passport_rp_client_cert_fn)s",
 	"keyId": "%(passport_rp_client_cert_alias)s",
+	"keyAlg": "%(passport_rp_client_cert_alg)s",
 	"passportConfigAPI": "https://%(hostname)s/identity/seam/resource/restv1/passportconfig"
 }
