@@ -400,8 +400,7 @@ class Setup(object):
                      self.network: False,
                      self.user_schema: False,
                      self.openldapSlapdConf: False,
-                     self.openldapSymasConf: False,
-                     self.passport_config: True
+                     self.openldapSymasConf: False
                      }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -1611,6 +1610,7 @@ class Setup(object):
                 break
 
         self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
+        self.renderTemplateInOut(self.passport_config, self.templateFolder, self.configFolder)
 
     def install_gluu_components(self):
         if self.installOxAuth:
