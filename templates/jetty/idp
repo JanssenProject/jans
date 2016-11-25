@@ -5,5 +5,5 @@ JAVA_OPTIONS="-server -Xms256m -Xmx%(idp_max_mem)sm -XX:+DisableExplicitGC -Dglu
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/idp
 JETTY_USER=jetty
-JETTY_ARGS="jetty.http.port=8086"
+JETTY_ARGS="jetty.http.port=8086 http.timeout=30000 http.soLingerTime=-1"
 TMPDIR=%(jetty_dist)s/temp

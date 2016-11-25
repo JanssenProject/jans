@@ -123,7 +123,7 @@ class Setup(object):
                               'installed' : False
             },
                 'idp' : {'name' : 'idp',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
                          'memory' : {'ratio' : 0.2, "max_allowed_mb" : 1024},
                          'installed' : False
             },
