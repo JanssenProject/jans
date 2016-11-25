@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
-import javax.ws.rs.core.CacheControl;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -36,6 +25,16 @@ import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
 
+import javax.ws.rs.core.CacheControl;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 26/12/2012
@@ -54,6 +53,16 @@ public class ServerUtil {
         } catch (IOException e) {
             LOG.trace(e.getMessage(), e);
             return "";
+        }
+    }
+
+    public static <T> T asObjectSilently(String json, Class<T> clazz) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            T clazzObject = mapper.readValue(json, clazz);
+            return clazzObject;
+        } catch (Exception e) {
+            return null;
         }
     }
 
