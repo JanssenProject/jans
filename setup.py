@@ -113,12 +113,12 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
-                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,resources'},
+                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext'},
                             'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096},
                             'installed' : False
             },
                 'identity' : {'name' : 'identity',
-                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,resources'},
+                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext'},
                               'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048},
                               'installed' : False
             },
@@ -933,7 +933,7 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'jetty:jetty', nodeDestinationPath])
         self.run([self.cmd_chown, '-h', 'jetty:jetty', self.node_home])
 
-    def installJettyService(self, serviceConfiguration, customPages=False):
+    def installJettyService(self, serviceConfiguration, supportCustomizations=False):
         serviceName = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % serviceName)
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
@@ -946,14 +946,11 @@ class Setup(object):
         # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module 
         if "ext" in jettyModulesList:
             self.run([self.cmd_mkdir, '-p', "%s/lib/ext" % jettyServiceBase])
-
-        # Create ./resources folder for custom resources only if installed Jetty "resources" module 
-        if "resources" in jettyModulesList:
-            self.run([self.cmd_mkdir, '-p', "%s/resources" % jettyServiceBase])
             
-        # Create ./pages folder for custom pages only if customPages variable is True 
-        if customPages:
+        # Create ./pages and ./web-resources folders for custom pages only if application supports thme 
+        if supportCustomizations:
             self.run([self.cmd_mkdir, '-p', "%s/pages" % jettyServiceBase])
+            self.run([self.cmd_mkdir, '-p', "%s/web-resources" % jettyServiceBase])
 
         self.logIt("Preparing %s service base configuration" % serviceName)
         jettyEnv = os.environ.copy()
