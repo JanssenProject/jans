@@ -113,12 +113,12 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
-                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets'},
+                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,resources'},
                             'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096},
                             'installed' : False
             },
                 'identity' : {'name' : 'identity',
-                              'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,resources'},
                               'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048},
                               'installed' : False
             },
@@ -933,19 +933,32 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'jetty:jetty', nodeDestinationPath])
         self.run([self.cmd_chown, '-h', 'jetty:jetty', self.node_home])
 
-    def installJettyService(self, serviceConfiguration):
+    def installJettyService(self, serviceConfiguration, customPages=False):
         serviceName = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % serviceName)
         jettyServiceBase = '%s/%s' % (self.jetty_base, serviceName)
+        jettyModules = serviceConfiguration['jetty']['modules']
+        jettyModulesList = jettyModules.split(',')
 
         self.logIt("Preparing %s service base folders" % serviceName)
         self.run([self.cmd_mkdir, '-p', jettyServiceBase])
+
+        # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module 
+        if "ext" in jettyModulesList:
+            self.run([self.cmd_mkdir, '-p', "%s/lib/ext" % jettyServiceBase])
+
+        # Create ./resources folder for custom resources only if installed Jetty "resources" module 
+        if "resources" in jettyModulesList:
+            self.run([self.cmd_mkdir, '-p', "%s/resources" % jettyServiceBase])
+            
+        # Create ./pages folder for custom pages only if customPages variable is True 
+        if customPages:
+            self.run([self.cmd_mkdir, '-p', "%s/pages" % jettyServiceBase])
 
         self.logIt("Preparing %s service base configuration" % serviceName)
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
 
-        jettyModules = serviceConfiguration['jetty']['modules']
         self.run([self.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
 
@@ -1415,7 +1428,7 @@ class Setup(object):
         self.logIt("Copying identity.war into jetty webapps folder...")
 
         jettyServiceName = 'oxauth'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/oxauth.war' % self.distWarFolder, jettyServiceWebapps)
@@ -1424,7 +1437,7 @@ class Setup(object):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
 
         jettyServiceName = 'identity'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
+        self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile('%s/identity.war' % self.distWarFolder, jettyServiceWebapps)
