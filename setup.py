@@ -1730,18 +1730,19 @@ class Setup(object):
 
     def customiseSystem(self):
         # Render customized part
-        self.renderTemplate(self.system_profile_update)
-        renderedSystemProfile = self.readFile(self.system_profile_update)
-
-        # Read source file
-        currentSystemProfile = self.readFile(self.sysemProfile)
-
-        # Write merged file
-        resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
-        self.writeFile(self.sysemProfile, resultSystemProfile)
-
-        # Fix new file permissions
-        self.run([self.cmd_chmod, '644', self.sysemProfile])
+        if self.os_initdaemon == 'init':
+            self.renderTemplate(self.system_profile_update)
+            renderedSystemProfile = self.readFile(self.system_profile_update)
+    
+            # Read source file
+            currentSystemProfile = self.readFile(self.sysemProfile)
+    
+            # Write merged file
+            resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
+            self.writeFile(self.sysemProfile, resultSystemProfile)
+    
+            # Fix new file permissions
+            self.run([self.cmd_chmod, '644', self.sysemProfile])
 
     def configureSystem(self):
         self.customiseSystem()
