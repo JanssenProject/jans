@@ -311,6 +311,9 @@ class Setup(object):
         self.idp3_configuration_password_authn = '/authn/password-authn-config.xml'
         self.idp3_metadata = '/idp-metadata.xml'
 
+        ### rsyslog file customised for init.d
+        self.rsyslogInitFile = "%s/static/etc/init.d/rsyslog" % self.install_dir
+
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
         # oxAuth/oxTrust Base64 configuration files
@@ -2134,6 +2137,9 @@ class Setup(object):
                self.run([service_path, 'restart', 'rsyslog.service'])
                self.run([service_path, 'start', 'solserver.service'])
             else:
+	       # Below two lines are specifically for Ubuntu 14.04
+               self.copyFile(self.rsyslogInitFile, "/etc/init.d")
+               self.removeFile("/etc/init/rsyslog.conf")
                self.run([service_path, 'rsyslog', 'restart'])
                self.run([service_path, 'solserver', 'start'])
 
