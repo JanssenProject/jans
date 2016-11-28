@@ -1061,7 +1061,7 @@ class Setup(object):
             self.logIt("Error encoding test passwords", True)
             self.logIt(traceback.format_exc(), True)
 
-    def gen_cert(self, suffix, password, user='root'):
+    def gen_cert(self, suffix, password, user='root', cn=None):
         self.logIt('Generating Certificate for %s' % suffix)
         key_with_password = '%s/%s.key.orig' % (self.certFolder, suffix)
         key = '%s/%s.key' % (self.certFolder, suffix)
@@ -1085,6 +1085,11 @@ class Setup(object):
                   '-out',
                   key
         ])
+
+        certCn = cn
+        if certCn == None:
+            certCn = self.hostname
+             
         self.run([self.opensslCommand,
                   'req',
                   '-new',
@@ -1093,7 +1098,7 @@ class Setup(object):
                   '-out',
                   csr,
                   '-subj',
-                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (self.countryCode, self.state, self.city, self.orgName, self.hostname, self.admin_email)
+                  '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (self.countryCode, self.state, self.city, self.orgName, certCn, self.admin_email)
         ])
         self.run([self.opensslCommand,
                   'x509',
@@ -1124,7 +1129,7 @@ class Setup(object):
             self.gen_cert('idp-encryption', self.shibJksPass, 'jetty')
             self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
             self.gen_cert('asimba', self.asimbaJksPass, 'jetty')
-            self.gen_cert('openldap', self.openldapKeyPass, 'ldap')
+            self.gen_cert('openldap', self.openldapKeyPass, 'ldap', certCn)
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
