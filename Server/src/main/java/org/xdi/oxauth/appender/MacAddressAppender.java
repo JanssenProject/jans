@@ -10,7 +10,7 @@ import org.xdi.oxauth.util.ServerUtil;
 public class MacAddressAppender extends DailyRollingFileAppender {
     @Override
     protected void subAppend(LoggingEvent event) {
-        String modifiedMessage = String.format("MAC Address: %s\n%s", ServerUtil.getMACAddressOrNull(), event.getMessage());
+        String modifiedMessage = String.format("MAC Address: %s. %s", ServerUtil.getMACAddressOrNull(), event.getMessage());
         LoggingEvent modifiedEvent = new LoggingEvent(event.getFQNOfLoggerClass(), event.getLogger(), event.getTimeStamp(), event.getLevel(), modifiedMessage,
                 event.getThreadName(), event.getThrowableInformation(), event.getNDC(), event.getLocationInformation(),
                 event.getProperties());
