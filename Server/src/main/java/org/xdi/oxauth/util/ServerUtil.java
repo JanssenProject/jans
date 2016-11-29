@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
-import javax.ws.rs.core.CacheControl;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -35,6 +24,16 @@ import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
+
+import javax.ws.rs.core.CacheControl;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.*;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -175,4 +174,22 @@ public class ServerUtil {
     	return null;
     }
 
+    public static String getMACAddressOrNull() {
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+
+            byte[] mac = network.getHardwareAddress();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+            return sb.toString();
+        } catch (UnknownHostException e) {
+            return null;
+        } catch (SocketException e){
+            return null;
+        }
+    }
 }
