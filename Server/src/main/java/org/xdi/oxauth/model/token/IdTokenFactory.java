@@ -259,11 +259,11 @@ public class IdTokenFactory {
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) script.getExternalType();
             int apiVersion = externalAuthenticator.getApiVersion();
 
-            if (apiVersion > 2) {
-                Map<String, String> additionalAmrsOrNull = externalAuthenticator.getAdditionalAmrsOrNull();
-                if (additionalAmrsOrNull != null) {
-                    for (String key : additionalAmrsOrNull.keySet()) {
-                        amrList.add(key + ":" + additionalAmrsOrNull.get(key));
+            if (apiVersion > 3) {
+                Map<String, String> authenticationMethodClaimsOrNull = externalAuthenticator.getAuthenticationMethodClaims();
+                if (authenticationMethodClaimsOrNull != null) {
+                    for (String key : authenticationMethodClaimsOrNull.keySet()) {
+                        amrList.add(key + ":" + authenticationMethodClaimsOrNull.get(key));
                     }
                 }
             }
