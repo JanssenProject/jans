@@ -53,6 +53,16 @@
           </layout>
    </appender>
 
+    <appender name="OAUTH2_AUDIT_LOG_FILE" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="${catalina.base}/logs/oauth2_audit.log"/>
+        <param name="DatePattern" value="'.'yyyy-MM-dd"/>
+
+        <layout class="org.apache.log4j.PatternLayout">
+            <!-- The default pattern: Date Priority [Category] (Thread) Message\n -->
+            <param name="ConversionPattern" value="%d %-5p [%c{6}] (%t) %m%n"/>
+        </layout>
+    </appender>
+
     <!-- ############### oxAuth #################  -->
     <category name="org.xdi.oxauth">
         <priority value="${log4j.default.log.level}"/>
@@ -190,6 +200,11 @@
     <logger name="org.xdi.oxauth.service.custom" additivity="false">
         <level value="${log4j.default.log.level}"/>
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
+    </logger>
+
+    <logger name="org.xdi.oxauth.audit.OAuth2AuditLogger" additivity="false">
+        <level value="${log4j.default.log.level}"/>
+        <appender-ref ref="OAUTH2_AUDIT_LOG_FILE" />
     </logger>
 
     <root>
