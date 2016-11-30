@@ -47,12 +47,14 @@
     <ui:define name="body">
         <h:form id="authorizeForm">
             <s:token allowMultiplePosts="true"/>
+            <h:inputHidden id="session_state" value="#{authorizeAction.sessionState}"/>
+
             <div class="authorize-panel">
                 <div class="authorize-panel-header">
                     <h:outputText value="#{messages['authorize.requestForPermission']}"/>
                 </div>
                 <div class="authorize-panel-body">
-                	<ui:param name="client" value='#{clientService.getClient(request.getParameter("client_id"))}' />
+                    <ui:param name="client" value='#{clientService.getClient(request.getParameter("client_id"))}'/>
 
                     <s:div rendered='#{!empty client.getLogoUri()}'>
                         <h:graphicImage url='#{client.getLogoUri()}'/>
@@ -63,9 +65,9 @@
                     </p>
 
                     <ul>
-                    	<ui:repeat var="_scope" value="#{authorizeAction.scopes}">
+                        <ui:repeat var="_scope" value="#{authorizeAction.scopes}">
                             <li>
-                                <h:outputText value="#{_scope.description}" />
+                                <h:outputText value="#{_scope.description}"/>
                             </li>
                         </ui:repeat>
                     </ul>

@@ -14,7 +14,6 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
-import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
@@ -37,7 +36,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version July 29, 2016
+ * @version November 30, 2016
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -349,18 +348,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.getPrompts().add(Prompt.NONE);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
@@ -404,9 +397,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(
                 responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
-        authorizationRequest.setAuthUsername(userId);
-        authorizationRequest.setAuthPassword(userSecret);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                 authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
@@ -418,12 +408,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         String authJwt = jwtAuthorizationRequest.getEncodedJwt();
         authorizationRequest.setRequest(authJwt);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
@@ -507,7 +494,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -562,7 +548,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -617,7 +602,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -672,7 +656,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -726,7 +709,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -780,7 +762,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -834,7 +815,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -888,7 +868,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -942,7 +921,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -1001,7 +979,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSubjectType(SubjectType.PAIRWISE);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -1069,7 +1046,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSubjectType(SubjectType.PAIRWISE);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -1137,7 +1113,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
-            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSubjectType(SubjectType.PAIRWISE);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -1201,7 +1176,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -1260,7 +1234,6 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
         registerRequest.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -1330,31 +1303,27 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         return requestAuthorization(userId, userSecret, redirectUri, responseTypes, clientId, scopes);
     }
 
-    private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
-                                                       List<ResponseType> responseTypes, String clientId, List<String> scopes) {
+    private AuthorizationResponse requestAuthorization(
+            final String userId, final String userSecret, final String redirectUri, List<ResponseType> responseTypes,
+            String clientId, List<String> scopes) {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(
+                responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response1 = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getLocation(), "The location is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertNotNull(response1.getState(), "The state is null");
-        assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(response1.getScope(), "The scope must be null");
-        assertNotNull(response1.getIdToken(), "The id token must be null");
-        return response1;
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
+        assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope must be null");
+        assertNotNull(authorizationResponse.getIdToken(), "The id token must be null");
+        return authorizationResponse;
     }
 
 }

@@ -24,7 +24,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version November 30, 2016
  */
 public class UserAuthenticationFilterHttpTest extends BaseTest {
 
@@ -266,25 +266,22 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.getPrompts().add(Prompt.NONE);
-        request.addCustomParameter("mail", userEmail);
-        request.addCustomParameter("inum", userInum);
-        request.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.addCustomParameter("mail", userEmail);
+        authorizationRequest.addCustomParameter("inum", userInum);
+        authorizationRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response1 = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, null, null);
 
-        showClient(authorizeClient);
-        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getLocation(), "The location is null");
-        assertNotNull(response1.getCode(), "The authorization code is null");
-        assertNotNull(response1.getState(), "The state is null");
-        assertNotNull(response1.getScope(), "The scope is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
 
-        String authorizationCode = response1.getCode();
+        String authorizationCode = authorizationResponse.getCode();
 
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
