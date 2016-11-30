@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Name("oAuth2AuditLogger")
 @Scope(ScopeType.APPLICATION)
@@ -40,7 +41,10 @@ public class OAuth2AuditLogger {
     @Logger
     private Log logger;
 
-    public OAuth2AuditLogger() {
+	private final ReentrantLock lock = new ReentrantLock();
+
+	@Create
+    public void init() {
         tryToEstablishJMSConnection();
     }
 
@@ -60,7 +64,7 @@ public class OAuth2AuditLogger {
     }
 
     @Destroy
-    public synchronized void destroy() {
+    public void destroy() {
         if (this.connection == null)
             return;
         try {
@@ -72,7 +76,20 @@ public class OAuth2AuditLogger {
         }
     }
 
-    private boolean tryToEstablishJMSConnection() {
+	private boolean tryToEstablishJMSConnection() {
+		lock.lock();
+		try {
+	        if (this.connection == null || isJmsConfigChanged()) {
+				return tryToEstablishJMSConnectionImpl();
+			}
+
+	        return true;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+    private boolean tryToEstablishJMSConnectionImpl() {
         destroy();
 
         Set<String> jmsBrokerURISet = getJmsBrokerURISet();
