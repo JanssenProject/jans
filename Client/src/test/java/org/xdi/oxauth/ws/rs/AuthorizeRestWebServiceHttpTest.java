@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Functional tests for Authorize Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version October 31, 2016
+ * @version November 30, 2016
  */
 public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
@@ -161,22 +161,16 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getCode(), "The authorization code is null");
-        assertNotNull(response.getState(), "The state is null");
-        assertNotNull(response.getScope(), "The scope is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -500,24 +494,18 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getAccessToken(), "The access token is null");
-        assertNotNull(response.getState(), "The state is null");
-        assertNotNull(response.getTokenType(), "The token type is null");
-        assertNotNull(response.getExpiresIn(), "The expires in value is null");
-        assertNotNull(response.getScope(), "The scope must be null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
+        assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope must be null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
@@ -774,26 +762,20 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getAccessToken(), "The accessToken is null");
-        assertNotNull(response.getTokenType(), "The tokenType is null");
-        assertNotNull(response.getIdToken(), "The idToken is null");
-        assertNotNull(response.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
 
-        String accessToken = response.getAccessToken();
-        String idToken = response.getIdToken();
+        String accessToken = authorizationResponse.getAccessToken();
+        String idToken = authorizationResponse.getIdToken();
 
         // 2. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
@@ -969,25 +951,19 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getCode(), "The code is null");
-        assertNotNull(response.getIdToken(), "The idToken is null");
-        assertNotNull(response.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The code is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
 
-        String code = response.getCode();
-        String idToken = response.getIdToken();
+        String code = authorizationResponse.getCode();
+        String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate code and id_token
         Jwt jwt = Jwt.parse(idToken);
@@ -1141,23 +1117,17 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getCode(), "The code is null");
-        assertNotNull(response.getAccessToken(), "The accessToken is null");
-        assertNotNull(response.getTokenType(), "The tokenType is null");
-        assertNotNull(response.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The code is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1320,28 +1290,22 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getAccessToken(), "The accessToken is null");
-        assertNotNull(response.getTokenType(), "The tokenType is null");
-        assertNotNull(response.getCode(), "The code is null");
-        assertNotNull(response.getIdToken(), "The idToken is null");
-        assertNotNull(response.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getCode(), "The code is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
 
-        String code = response.getCode();
-        String accessToken = response.getAccessToken();
-        String idToken = response.getIdToken();
+        String code = authorizationResponse.getCode();
+        String accessToken = authorizationResponse.getAccessToken();
+        String idToken = authorizationResponse.getIdToken();
 
         // 4. Validate access_token and id_token
         Jwt jwt = Jwt.parse(idToken);
@@ -1491,21 +1455,15 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getIdToken(), "The idToken is null");
-        assertNotNull(response.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -1567,30 +1525,24 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getCode(), "The code is null");
-        assertNotNull(response.getIdToken(), "The idToken is null");
-        assertNotNull(response.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The code is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestAuthorizationPromptNone(
+    public void requestAuthorizationPromptNoneTrustedClient(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("requestAuthorizationPromptNone");
+        showTitle("requestAuthorizationPromptNoneTrustedClient");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
@@ -1599,6 +1551,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2371,23 +2324,23 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         nonce = UUID.randomUUID().toString();
         state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request2.setAccessToken(accessToken);
-        request2.setState(state);
-        request2.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest2.setAccessToken(accessToken);
+        authorizationRequest2.setState(state);
+        authorizationRequest2.getPrompts().add(Prompt.NONE);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient2.setRequest(request2);
-        AuthorizationResponse response2 = authorizeClient2.exec();
+        authorizeClient2.setRequest(authorizationRequest2);
+        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
 
         showClient(authorizeClient2);
-        assertEquals(response2.getStatus(), 302, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getLocation(), "The location is null");
-        assertNotNull(response2.getCode(), "The authorization code is null");
-        assertNotNull(response2.getState(), "The state is null");
-        assertNotNull(response2.getScope(), "The scope is null");
+        assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
+        assertNotNull(authorizationResponse2.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse2.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse2.getState(), "The state is null");
+        assertNotNull(authorizationResponse2.getScope(), "The scope is null");
 
-        String authorizationCode = response2.getCode();
+        String authorizationCode = authorizationResponse2.getCode();
 
         // 5. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -2475,26 +2428,20 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request1 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request1.setState(state);
-        request1.setAuthUsername(userId);
-        request1.setAuthPassword(userSecret);
-        request1.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest1.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request1);
-        AuthorizationResponse response1 = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse1 = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest1, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getLocation(), "The location is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertNotNull(response1.getState(), "The state is null");
-        assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(response1.getScope(), "The scope must be null");
+        assertNotNull(authorizationResponse1.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse1.getAccessToken(), "The access token is null");
+        assertNotNull(authorizationResponse1.getState(), "The state is null");
+        assertNotNull(authorizationResponse1.getTokenType(), "The token type is null");
+        assertNotNull(authorizationResponse1.getExpiresIn(), "The expires in value is null");
+        assertNotNull(authorizationResponse1.getScope(), "The scope must be null");
 
-        String accessToken = response1.getAccessToken();
+        String accessToken = authorizationResponse1.getAccessToken();
 
         // 4. Downstream client may be authorized by oxAuth presenting the access token and client credentials
         responseTypes = Arrays.asList(
@@ -2504,23 +2451,23 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         nonce = UUID.randomUUID().toString();
         state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request2.setAccessToken(accessToken);
-        request2.setState(state);
-        request2.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest2.setAccessToken(accessToken);
+        authorizationRequest2.setState(state);
+        authorizationRequest2.getPrompts().add(Prompt.NONE);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient2.setRequest(request2);
-        AuthorizationResponse response2 = authorizeClient2.exec();
+        authorizeClient2.setRequest(authorizationRequest2);
+        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
 
         showClient(authorizeClient2);
-        assertEquals(response2.getStatus(), 302, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getLocation(), "The location is null");
-        assertNotNull(response2.getCode(), "The authorization code is null");
-        assertNotNull(response2.getState(), "The state is null");
-        assertNotNull(response2.getScope(), "The scope is null");
+        assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
+        assertNotNull(authorizationResponse2.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse2.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse2.getState(), "The state is null");
+        assertNotNull(authorizationResponse2.getScope(), "The scope is null");
 
-        String authorizationCode = response2.getCode();
+        String authorizationCode = authorizationResponse2.getCode();
 
         // 5. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -2616,5 +2563,93 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getErrorType(), "The error type is null");
         assertNotNull(response.getErrorDescription(), "The error description is null");
         assertNotNull(response.getState(), "The state is null");
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void requestAuthorizationDenyAccessThenGrantAccess(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAuthorizationDenyAccessThenGrantAccess");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String sessionState = null;
+
+        // 2. Request authorization, authenticate resource owner and deny access
+        {
+            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+            String state = UUID.randomUUID().toString();
+
+            AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+            authorizationRequest.setState(state);
+
+            AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndDenyAccess(
+                    authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+            assertNotNull(authorizationResponse.getLocation());
+            assertNotNull(authorizationResponse.getErrorType());
+            assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.ACCESS_DENIED);
+            assertNotNull(authorizationResponse.getErrorDescription());
+            assertNotNull(authorizationResponse.getState());
+
+            sessionState = authorizationResponse.getSessionState();
+        }
+
+        // 3. Request authorization and deny access (resource owner is already authenticated)
+        {
+            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+            String state = UUID.randomUUID().toString();
+
+            AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+            authorizationRequest.setState(state);
+            authorizationRequest.setSessionState(sessionState);
+
+            AuthorizationResponse authorizationResponse = authorizationRequestAndDenyAccess(
+                    authorizationEndpoint, authorizationRequest);
+
+            assertNotNull(authorizationResponse.getLocation());
+            assertNotNull(authorizationResponse.getErrorType());
+            assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.ACCESS_DENIED);
+            assertNotNull(authorizationResponse.getErrorDescription());
+            assertNotNull(authorizationResponse.getState());
+        }
+
+        // 4. Request authorization and grant access (resource owner is already authenticated)
+        {
+            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+            String state = UUID.randomUUID().toString();
+
+            AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+            authorizationRequest.setState(state);
+            authorizationRequest.setSessionState(sessionState);
+
+            AuthorizationResponse authorizationResponse = authorizationRequestAndGrantAccess(
+                    authorizationEndpoint, authorizationRequest);
+
+            assertNotNull(authorizationResponse.getLocation(), "The location is null");
+            assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+            assertNotNull(authorizationResponse.getState(), "The state is null");
+            assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        }
     }
 }
