@@ -30,11 +30,6 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 	}
 
 	@Override
-	public Map<String, String> getAdditionalAmrsOrNull() {
-		return null;
-	}
-
-	@Override
 	public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return true;
 	}
@@ -87,6 +82,11 @@ public class DummyPersonAuthenticationType implements PersonAuthenticationType {
 	@Override
 	public int getApiVersion() {
 		return 1;
+	}
+
+	@Override
+	public Map<String, String> getAuthenticationMethodClaims() {
+		return null;
 	}
 
 }

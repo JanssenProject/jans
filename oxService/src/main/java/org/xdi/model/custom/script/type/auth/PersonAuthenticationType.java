@@ -20,8 +20,6 @@ import java.util.Map;
  */
 public interface PersonAuthenticationType extends BaseExternalType {
 
-	public Map<String, String> getAdditionalAmrsOrNull();
-
 	public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
 
 	public String getAlternativeAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
@@ -41,5 +39,7 @@ public interface PersonAuthenticationType extends BaseExternalType {
 	public boolean logout(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
 
 	public String getLogoutExternalUrl(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
+
+	public Map<String, String> getAuthenticationMethodClaims();
 
 }
