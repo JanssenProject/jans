@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version February 23, 2016
+ * @version November 30, 2016
  */
 
 @Scope(ScopeType.STATELESS)
@@ -68,18 +68,18 @@ public class SessionStateService {
         }
         return (SessionStateService) Component.getInstance(SessionStateService.class);
     }
-    
-	public static String getAcr(SessionState session) {
-		if (session == null || session.getSessionAttributes() == null) {
-			return null;
-		}
 
-		String acr = session.getSessionAttributes().get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
-		if (StringUtils.isBlank(acr)) {
-			acr = session.getSessionAttributes().get("acr_values");
-		}
-		return acr;
-	}
+    public static String getAcr(SessionState session) {
+        if (session == null || session.getSessionAttributes() == null) {
+            return null;
+        }
+
+        String acr = session.getSessionAttributes().get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
+        if (StringUtils.isBlank(acr)) {
+            acr = session.getSessionAttributes().get("acr_values");
+        }
+        return acr;
+    }
 
     // #34 - update session attributes with each request
     // 1) redirect_uri change -> update session
@@ -109,7 +109,7 @@ public class SessionStateService {
 
                 log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
                         "current acr: " + acrValuesStr + "(level: " + currentAcrLevel + ")");
-                if (sessionAcrLevel < currentAcrLevel ) {
+                if (sessionAcrLevel < currentAcrLevel) {
                     throw new AcrChangedException();
                 } else { // https://github.com/GluuFederation/oxAuth/issues/291
                     return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
@@ -224,18 +224,22 @@ public class SessionStateService {
         return null;
     }
 
+    public void createSessionStateCookie(String sessionState, HttpServletResponse httpResponse) {
+        // Create the special cookie header with secure flag but not HttpOnly because the session_state
+        // needs to be read from the OP iframe using JavaScript
+        String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
+        header += "; Path=/";
+        header += "; Secure";
+        httpResponse.addHeader("Set-Cookie", header);
+    }
+
     public void createSessionStateCookie(String sessionState) {
         try {
             final Object response = FacesContext.getCurrentInstance().getExternalContext().getResponse();
             if (response instanceof HttpServletResponse) {
                 final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-                // Create the special cookie header with secure flag but not HttpOnly because the session_state
-                // needs to be read from the OP iframe using JavaScript
-                String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
-                header += "; Path=/";
-                header += "; Secure";
-                httpResponse.addHeader("Set-Cookie", header);
+                createSessionStateCookie(sessionState, httpResponse);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);

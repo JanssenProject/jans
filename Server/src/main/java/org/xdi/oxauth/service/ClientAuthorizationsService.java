@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.service;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -14,7 +20,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version October 16, 2015
+ * @version November 30, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("clientAuthorizationsService")
@@ -83,7 +89,7 @@ public class ClientAuthorizationsService {
             clientAuthorizations.setDn(getBaseDnForClientAuthorizations(clientAuthorizations.getId(), userInum));
 
             ldapEntryManager.persist(clientAuthorizations);
-        } else {
+        } else if (clientAuthorizations.getScopes() != null) {
             Set<String> set = new HashSet<String>(scopes);
             set.addAll(Arrays.asList(clientAuthorizations.getScopes()));
             clientAuthorizations.setScopes(set.toArray(new String[set.size()]));
