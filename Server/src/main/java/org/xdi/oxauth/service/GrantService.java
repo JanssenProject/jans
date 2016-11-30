@@ -13,6 +13,9 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.model.audit.Action;
+import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.ldap.Grant;
@@ -37,6 +40,8 @@ public class GrantService {
     private Log log;
     @In
     private LdapEntryManager ldapEntryManager;
+    @In
+    private OAuth2AuditLogger oAuth2AuditLogger;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
@@ -219,6 +224,9 @@ public class GrantService {
         try {
             final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(new Date())));
             final List<TokenLdap> entries = ldapEntryManager.findEntries(baseDn(), TokenLdap.class, filter);
+
+            auditLogging(entries);
+
             remove(entries);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
@@ -273,5 +281,16 @@ public class GrantService {
         dn.append(Client.buildClientDn(p_clientId));
 
         return dn.toString();
+    }
+
+    private void auditLogging(Collection<TokenLdap> entries) {
+        for (TokenLdap tokenLdap : entries) {
+            OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(null, Action.SESSION_DESTROYED);
+            oAuth2AuditLog.setSuccess(true);
+            oAuth2AuditLog.setClientId(tokenLdap.getClientId());
+            oAuth2AuditLog.setScope(tokenLdap.getScope());
+            oAuth2AuditLog.setUsername(tokenLdap.getUserId());
+            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        }
     }
 }
