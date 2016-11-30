@@ -29,20 +29,23 @@ import jarray
 
 class PersonAuthentication(PersonAuthenticationType):
 
-    def __init__(self, currentTimeMillis):
+   def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
     
-    def init(self, configurationAttributes):
-        print "Twilio SMS. Initialization"
-        print "Twilio SMS. Initialized successfully"
-        return True   
+   def init(self, configurationAttributes):
+      print "Twilio SMS. Initialization"
+      print "Twilio SMS. Initialized successfully"
+      ACCOUNT_SID = None            
+      AUTH_TOKEN = None            
+      FROM_NUMBER = None
+      return True   
 
-    def destroy(self, configurationAttributes):
+   def destroy(self, configurationAttributes):
         print "Twilio SMS. Destroy"
         print "Twilio SMS. Destroyed successfully"
         return True
  
-    def getApiVersion(self):
+   def getApiVersion(self):
         return 1
   
    def isValidAuthenticationMethod(self, usageType, configurationAttributes):
@@ -51,7 +54,7 @@ class PersonAuthentication(PersonAuthenticationType):
    def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
         return None
 
-  def authenticate(self, configurationAttributes, requestParameters, step):
+   def authenticate(self, configurationAttributes, requestParameters, step):
        context = Contexts.getEventContext()
        userService = UserService.instance()
        session_attributes = context.get("sessionAttributes")
@@ -59,7 +62,7 @@ class PersonAuthentication(PersonAuthenticationType):
        form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")
        print "form_response_passcode: %s" % str(form_passcode)
 
-    if (step == 1):
+   if (step == 1):
             print "Step 1 Password Authentication"
             credentials = Identity.instance().getCredentials()
             user_name = credentials.getUsername()
@@ -73,21 +76,19 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
          
             # Get Custom Properties
-            ACCOUNT_SID = None
-            AUTH_TOKEN = None
-            FROM_NUMBER = None
+            
             try:    
                 ACCOUNT_SID = configurationAttributes.get("twilio_sid").getValue2()
             except:
-                print 'Missing required configuration attribute "twilio_sid"'
+                print 'TwilioSMS, Missing required configuration attribute "twilio_sid"'
             try:
                 AUTH_TOKEN = configurationAttributes.get("twilio_token").getValue2()
             except:
-                print'Missing required configuration attribute "twilio_token"'
+                print'TwilioSMS, Missing required configuration attribute "twilio_token"'
             try:
                 FROM_NUMBER = configurationAttributes.get("from_number").getValue2()
             except:
-                print'Missing required configuration attribute "from_number"'
+                print'TwilioSMS, Missing required configuration attribute "from_number"'
  
             if None in (ACCOUNT_SID, AUTH_TOKEN, FROM_NUMBER):
                 print "ACCOUNT_SID, AUTH_TOKEN, FROM_NUMBER is None... returning False"
@@ -98,12 +99,12 @@ class PersonAuthentication(PersonAuthenticationType):
             try:
                 foundUser = userService.getUserByAttribute("uid", user_name)
             except:
-                print 'Error retrieving user %s from LDAP' % (user_name)
+                print 'TwilioSMS, Error retrieving user %s from LDAP' % (user_name)
                 return False
             try:
                 mobile_number = foundUser.getAttribute("phoneNumberVerified")
             except:
-                print 'Error finding mobile number for' % (user_name) 
+                print 'TwilioSMS, Error finding mobile number for' % (user_name) 
                 return False
                 
             # Generate Random six digit code and store it in array
@@ -124,37 +125,37 @@ class PersonAuthentication(PersonAuthenticationType):
             try:    
                 messageFactory = client.getAccount().getMessageFactory()
                 message = messageFactory.create(params)
-                print 'Message Sid: %s' % (message.getSid())
+                print 'TwilioSMs, Message Sid: %s' % (message.getSid())
                 return True
             except:
-                print "Error sending message to Twilio"
+                print "TwilioSMS, Error sending message to Twilio"
                 return False
         
         elif (step == 2):
             # Retrieve the session attribute
             print "Step 2 SMS/OTP Authentication"
             code = session_attributes.get("code")
-            print "Code: %s" % str(code)
+            print "TwilioSMS, Code: %s" % str(code)
    
             if (code is None):
-                print "Failed to find previously sent code"
+                print "TwilioSMS, Failed to find previously sent code"
                 return False 
            
             if (form_passcode is None):
-                print "Passcode is empty"
+                print "TwilioSMS, Passcode is empty"
                 return False 
    
             if len(form_passcode) != 6:
-                print "Passcode from response is not 6 digits: %s" % form_passcode
+                print "TwilioSMS, Passcode from response is not 6 digits: %s" % form_passcode
                 return False
  
             if (form_passcode == code):
-                print "SUCCESS! User entered the same code!" 
+                print "TiwlioSMS, SUCCESS! User entered the same code!" 
                 return True
             else:
-                print "FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
+                print "TwilioSMS, FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
                 return False            
-        print "ERROR: step param not found or != (1|2)"
+        print "ERROR: TwilioSMS, step param not found or != (1|2)"
         return False
  
     def prepareForStep(self, configurationAttributes, requestParameters, step):
@@ -183,8 +184,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
             return "/auth/TwilioSMS/twiliosms.xhtml"
-            return "" 
-
+            
     def logout(self, configurationAttributes, requestParameters):
         return True
  
