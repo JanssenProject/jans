@@ -1,0 +1,11 @@
+/var/log/openldap/ldap.log
+{
+        rotate 7
+        daily
+        missingok
+        notifempty
+        compress
+        postrotate
+                service rsyslog restart >/dev/null 2>&1 ||true
+        endscript
+}

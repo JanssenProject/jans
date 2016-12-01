@@ -260,6 +260,7 @@ class Setup(object):
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
+        self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
 
 
         # Stuff that gets rendered; filename is necessary. Full path should
@@ -2240,6 +2241,7 @@ class Setup(object):
         if not os.path.isdir('/etc/rsyslog.d/'):
             self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
+        self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
 
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
