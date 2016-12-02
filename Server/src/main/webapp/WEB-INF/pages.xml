@@ -84,11 +84,10 @@
                 <message severity="warn">Unexpected Error</message>
            </redirect>
        </exception>
-
+-->
         <exception>
             <redirect view-id="/error.xhtml">
                 <message severity="error">Unexpected error, please try again</message>
             </redirect>
         </exception>
-        -->
 </pages>

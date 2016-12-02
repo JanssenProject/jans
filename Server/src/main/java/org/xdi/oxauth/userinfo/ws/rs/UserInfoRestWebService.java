@@ -12,6 +12,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -53,6 +54,7 @@ public interface UserInfoRestWebService {
             @ApiParam(value = "OAuth 2.0 Access Token.", required = true)
             String accessToken,
             @HeaderParam("Authorization") String authorization,
+            @Context HttpServletRequest request,
             @Context SecurityContext securityContext);
 
     @POST
@@ -77,5 +79,6 @@ public interface UserInfoRestWebService {
             @ApiParam(value = "OAuth 2.0 Access Token.", required = true)
             String accessToken,
             @HeaderParam("Authorization") String authorization,
+            @Context HttpServletRequest request,
             @Context SecurityContext securityContext);
 }
