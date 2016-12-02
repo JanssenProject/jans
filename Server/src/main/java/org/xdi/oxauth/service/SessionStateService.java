@@ -16,6 +16,9 @@ import org.jboss.seam.annotations.*;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.model.audit.Action;
+import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
@@ -27,6 +30,7 @@ import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -61,6 +65,8 @@ public class SessionStateService {
     private AuthenticationService authenticationService;
     @In
     private ConfigurationFactory configurationFactory;
+    @In
+    private OAuth2AuditLogger oAuth2AuditLogger;
 
     public static SessionStateService instance() {
         if (!Contexts.isEventContextActive() && !Contexts.isApplicationContextActive()) {
@@ -68,7 +74,7 @@ public class SessionStateService {
         }
         return (SessionStateService) Component.getInstance(SessionStateService.class);
     }
-    
+
 	public static String getAcr(SessionState session) {
 		if (session == null || session.getSessionAttributes() == null) {
 			return null;
@@ -296,7 +302,11 @@ public class SessionStateService {
         return generateSessionState(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
     }
 
-    public SessionState generateSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
+    public SessionState generateUnauthenticatedSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
+    	return generateSessionState(userDn, authenticationDate, state, sessionIdAttributes, persist);
+    }
+
+    private SessionState generateSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
         final String uuid = UUID.randomUUID().toString();
         final String dn = dn(uuid);
 
@@ -341,6 +351,8 @@ public class SessionStateService {
             persisted = persistSessionState(sessionState);
         }
 
+        auditLogging(sessionState);
+
         log.trace("Generated new session, id = '{0}', state = '{1}', asJwt = '{2}', persisted = '{3}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
         return sessionState;
     }
@@ -379,6 +391,7 @@ public class SessionStateService {
 
         boolean persisted = updateSessionState(sessionState, true, true);
 
+        auditLogging(sessionState);
         log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionState.getId(), sessionState.getState(), persisted);
         return sessionState;
     }
@@ -580,4 +593,23 @@ public class SessionStateService {
     }
 
 
+    private void auditLogging(SessionState sessionState) {
+        HttpServletRequest httpServletRequest = ServerUtil.getRequestOrNull();
+        if(httpServletRequest != null){
+            Action action;
+            switch(sessionState.getState()){
+                case AUTHENTICATED:
+                    action = Action.SESSION_AUTHENTICATED;
+                    break;
+                case UNAUTHENTICATED:
+                    action = Action.SESSION_UNAUTHENTICATED;
+                    break;
+                default:
+                    action = Action.SESSION_UNAUTHENTICATED;
+            }
+            OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpServletRequest), action);
+            oAuth2AuditLog.setSuccess(true);
+            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        }
+    }
 }
