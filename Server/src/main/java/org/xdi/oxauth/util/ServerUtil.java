@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import java.net.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -165,16 +165,16 @@ public class ServerUtil {
         }
         return null;
     }
-
+    
     public static String getFirstValue(Map<String, String[]> map, String key) {
-    	if (map.containsKey(key)) {
-    		String[] values = map.get(key);
-    		if (ArrayHelper.isNotEmpty(values)) {
-    			return values[0];
-    		}
-    	}
+        if (map.containsKey(key)) {
+            String[] values = map.get(key);
+            if (ArrayHelper.isNotEmpty(values)) {
+                return values[0];
+            }
+        }
 
-    	return null;
+        return null;
     }
 
     /**
@@ -207,20 +207,40 @@ public class ServerUtil {
 
     /**
      * Safe retrieves http request from FacesContext
+     *
      * @return http
      */
     public static HttpServletRequest getRequestOrNull() {
         FacesContext facesContext = FacesContext.getCurrentInstance();
-        if(facesContext == null)
+        if (facesContext == null)
             return null;
 
         ExternalContext externalContext = facesContext.getExternalContext();
-        if(externalContext == null)
+        if (externalContext == null)
             return null;
         Object request = externalContext.getRequest();
-        if(request == null || !(request instanceof HttpServletRequest))
+        if (request == null || !(request instanceof HttpServletRequest))
             return null;
-        return (HttpServletRequest)request;
+        return (HttpServletRequest) request;
+    }
+
+    public static String getMACAddressOrNull() {
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+
+            byte[] mac = network.getHardwareAddress();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+            return sb.toString();
+        } catch (UnknownHostException e) {
+            return null;
+        } catch (SocketException e) {
+            return null;
+        }
     }
 
 }
