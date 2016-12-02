@@ -25,15 +25,15 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for SSO with Multiple Backend Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version December 2, 2016
  */
 public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "hostnameVerifier", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void sessionWorkFlow1(
             final String redirectUris, final String userId, final String userSecret, final String redirectUri,
-            final String hostnameVerifier, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("sessionWorkFlow1");
 
         // Register client
@@ -181,11 +181,11 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         assertNotNull(userInfoResponse2.getClaim(JwtClaimName.EMAIL), "Unexpected result: email not found");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "hostnameVerifier", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "sectorIdentifierUri"})
     @Test
     public void sessionWorkFlow2(
             final String redirectUris, final String redirectUri, final String userInum, final String userEmail,
-            final String hostnameVerifier, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("sessionWorkFlow2");
 
         // Register client

@@ -27,7 +27,7 @@ import java.util.Map;
  * Represents an authorization request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version December 2, 2016
  */
 public class AuthorizationRequest extends BaseRequest {
 
@@ -573,6 +573,14 @@ public class AuthorizationRequest extends BaseRequest {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.ACCESS_TOKEN)
                         .append("=").append(URLEncoder.encode(accessToken, Util.UTF8_STRING_ENCODING));
             }
+            if (StringUtils.isNotBlank(codeChallenge)) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.CODE_CHALLENGE)
+                        .append("=").append(codeChallenge);
+            }
+            if (StringUtils.isNotBlank(codeChallengeMethod)) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.CODE_CHALLENGE_METHOD)
+                        .append("=").append(codeChallengeMethod);
+            }
             for (String key : getCustomParameters().keySet()) {
                 queryStringBuilder.append("&");
                 queryStringBuilder.append(key).append("=").append(getCustomParameters().get(key));
@@ -671,6 +679,12 @@ public class AuthorizationRequest extends BaseRequest {
         }
         if (StringUtils.isNotBlank(accessToken)) {
             parameters.put(AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
+        }
+        if (StringUtils.isNotBlank(codeChallenge)) {
+            parameters.put(AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
+        }
+        if (StringUtils.isNotBlank(codeChallengeMethod)) {
+            parameters.put(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
         }
 
         for (String key : getCustomParameters().keySet()) {
