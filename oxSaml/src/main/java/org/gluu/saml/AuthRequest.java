@@ -41,7 +41,7 @@ import org.xdi.zip.CompressionHelper;
 public class AuthRequest {
 
 	private static final Logger log = Logger.getLogger(AuthRequest.class);
-	private static final SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'H:mm:ss");
+	private static final SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
 	static {
 		simpleDataFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
