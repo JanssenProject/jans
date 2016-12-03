@@ -2,6 +2,7 @@ package org.xdi.oxauth.audit;
 
 import com.google.common.base.Objects;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.jboss.seam.ScopeType;
@@ -17,7 +18,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Name("oAuth2AuditLogger")
 @Scope(ScopeType.APPLICATION)
@@ -30,9 +30,7 @@ public class OAuth2AuditLogger {
     private final String CLIENT_QUEUE_NAME = "oauth2.audit.logging";
     private final boolean transacted = false;
 
-    private MessageProducer producer;
-    private Connection connection;
-    private Session session;
+    private volatile PooledConnectionFactory pooledConnectionFactory;
 
     private Set<String> jmsBrokerURISet;
     private String jmsUserName;
@@ -41,19 +39,17 @@ public class OAuth2AuditLogger {
     @Logger
     private Log logger;
 
-	private final ReentrantLock lock = new ReentrantLock();
-
-	@Create
+    @Create
     public void init() {
         tryToEstablishJMSConnection();
     }
 
     @Asynchronous
-    public synchronized void sendMessage(OAuth2AuditLog oAuth2AuditLog) {
+    public void sendMessage(OAuth2AuditLog oAuth2AuditLog) {
         if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()))
             return;
 
-        if (this.connection == null || isJmsConfigChanged()) {
+        if (this.pooledConnectionFactory == null || isJmsConfigChanged()) {
             if (tryToEstablishJMSConnection())
                 loggingThroughJMS(oAuth2AuditLog);
             else
@@ -65,40 +61,18 @@ public class OAuth2AuditLogger {
 
     @Destroy
     public void destroy() {
-        if (this.connection == null)
+        if (this.pooledConnectionFactory == null)
             return;
-        try {
-            // There is no need to close the sessions, producers, and consumers
-            // of a closed connection.
-            this.connection.close();
-        } catch (JMSException e) {
-            logger.error("Can't close connection", e);
-        }
+        this.pooledConnectionFactory.clear();
+        this.pooledConnectionFactory = null;
     }
 
-	private boolean tryToEstablishJMSConnection() {
-		lock.lock();
-		try {
-	        if (this.connection == null || isJmsConfigChanged()) {
-				return tryToEstablishJMSConnectionImpl();
-			}
-
-	        return true;
-		} finally {
-			lock.unlock();
-		}
-	}
-
-    private boolean tryToEstablishJMSConnectionImpl() {
+    private synchronized boolean tryToEstablishJMSConnection() {
         destroy();
 
         Set<String> jmsBrokerURISet = getJmsBrokerURISet();
-        if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()) || CollectionUtils.isEmpty(jmsBrokerURISet)) {
-            this.producer = null;
-            this.connection = null;
-            this.session = null;
+        if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()) || CollectionUtils.isEmpty(jmsBrokerURISet))
             return false;
-        }
 
         this.jmsBrokerURISet = new HashSet<String>(jmsBrokerURISet);
         this.jmsUserName = getJmsUserName();
@@ -117,30 +91,42 @@ public class OAuth2AuditLogger {
 
         String brokerUrl = BROKER_URL_PREFIX + uriBuilder + BROKER_URL_SUFFIX;
 
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
-        try {
-            this.connection = connectionFactory.createConnection(this.jmsUserName, this.jmsPassword);
-            this.connection.start();
-            this.session = connection.createSession(transacted, ACK_MODE);
-            this.producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME));
-        } catch (JMSException e) {
-            logger.error("Can't establish connection to jms broker");
-            return false;
-        }
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory(this.jmsUserName, this.jmsPassword, brokerUrl);
+        this.pooledConnectionFactory = new PooledConnectionFactory(connectionFactory);
+
+        pooledConnectionFactory.setIdleTimeout(5000);
+        pooledConnectionFactory.setMaxConnections(10);
+        pooledConnectionFactory.start();
+
         return true;
     }
 
     private void loggingThroughJMS(OAuth2AuditLog oAuth2AuditLog) {
+        QueueConnection connection = null;
         try {
+            connection = pooledConnectionFactory.createQueueConnection();
+            connection.start();
+
+            QueueSession session = connection.createQueueSession(transacted, ACK_MODE);
+            MessageProducer producer = session.createProducer(session.createQueue(CLIENT_QUEUE_NAME));
+
             TextMessage txtMessage = session.createTextMessage();
             txtMessage.setText(ServerUtil.asPrettyJson(oAuth2AuditLog));
-            this.producer.send(txtMessage);
+            producer.send(txtMessage);
         } catch (JMSException e) {
             logger.error("Can't send message", e);
         } catch (IOException e) {
             logger.error("Can't serialize the audit log", e);
         } catch (Exception e) {
             logger.error("Can't send message, please check your activeMQ configuration.", e);
+        } finally {
+            if (connection == null)
+                return;
+            try {
+                connection.close();
+            } catch (JMSException e) {
+                logger.error("Can't close connection.");
+            }
         }
     }
 
