@@ -76,7 +76,7 @@ public class LdapStatusTimer {
 
     	for (int i = 0; i < ldapAuthEntryManagers.size(); i++) {
 			LdapEntryManager ldapAuthEntryManager = ldapAuthEntryManagers.get(i);
-			logConnectionProviderStatistic(ldapAuthEntryManager, "authConnectionProvider#" + i, "bindAuthConnectionProvider#" + "i");
+			logConnectionProviderStatistic(ldapAuthEntryManager, "authConnectionProvider#" + i, "bindAuthConnectionProvider#" + i);
     	}
     }
 
