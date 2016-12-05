@@ -34,15 +34,15 @@ public class ExternalResourceHandler extends ResourceResolver {
     public ExternalResourceHandler(ResourceResolver parent) {
         this.parent = parent;
 
-		String externalResourceBase = System.getProperty("gluu.external.resource.base");
+		String externalResourceBase = System.getProperty("catalina.base");
 		if (StringHelper.isNotEmpty(externalResourceBase)) {
-			externalResourceBase += "/oxauth/pages";
+			externalResourceBase += "/pages";
 			File folder = new File(externalResourceBase);
 			if (folder.exists() && folder.isDirectory()) {
 				this.externalResourceBaseFolder = folder;
 				this.useExternalResourceBase = true;
 			} else {
-				log.error("Specified path '" + externalResourceBase + "' in 'gluu.external.resource.base' not exists or not folder!");
+				log.error("Specified path '" + externalResourceBase + "' in 'catalina.base' not exists or not a folder!");
 			}
 		}
     }
