@@ -9,7 +9,7 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="host" elementType="Argument">
             <stringProp name="Argument.name">host</stringProp>
-            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.value">ce-dev.gluu.org</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="scope" elementType="Argument">
@@ -29,7 +29,7 @@
           </elementProp>
           <elementProp name="redirect_uri" elementType="Argument">
             <stringProp name="Argument.name">redirect_uri</stringProp>
-            <stringProp name="Argument.value">https://client.example.com/cb</stringProp>
+            <stringProp name="Argument.value">https://ce-dev.gluu.org/identity/authentication/authcode</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="client_id" elementType="Argument">
@@ -58,7 +58,7 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">3</stringProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <longProp name="ThreadGroup.start_time">1479823133000</longProp>
         <longProp name="ThreadGroup.end_time">1479823133000</longProp>
@@ -369,7 +369,12 @@ vars.put(&quot;password&quot;, password);</stringProp>
               <stringProp name="cacheKey"></stringProp>
               <stringProp name="filename"></stringProp>
               <stringProp name="parameters"></stringProp>
-              <stringProp name="script">String code = &quot;&quot;;
+              <stringProp name="script">import org.apache.jmeter.protocol.http.control.CookieManager;
+import org.apache.jmeter.protocol.http.control.Cookie;
+import org.apache.jmeter.testelement.property.JMeterProperty;
+import org.apache.jmeter.testelement.property.CollectionProperty;
+
+String code = &quot;&quot;;
 if (prev.getUrlAsString().contains(&quot;?code=&quot;)) {
 	code = org.apache.commons.lang3.StringUtils.substringAfter(prev.getUrlAsString(), &quot;?code=&quot;);
 } else {
@@ -380,7 +385,21 @@ if (code.contains(&quot;&amp;&quot;)) {
 }
 
 vars.put(&quot;code&quot;, code);
-log.info(&quot;login post processor, code : &quot; + code);</stringProp>
+log.info(&quot;login post processor, code : &quot; + code);
+
+CookieManager manager = sampler.getCookieManager();
+CollectionProperty collectionProperty = manager.getCookies();
+log.info(&quot;session collectionProperty : &quot; + collectionProperty + &quot;, size: &quot; + collectionProperty.size());
+
+for (int i = 0; i &lt; collectionProperty.size(); i++) {
+    JMeterProperty p = collectionProperty.get(i);
+    
+    if (&quot;session_state&quot;.equals(p.getName())) {
+        log.info(&quot;session_state : &quot; + p.getStringValue());
+    }
+}
+
+</stringProp>
               <stringProp name="scriptLanguage">java</stringProp>
             </JSR223PostProcessor>
             <hashTree/>
@@ -494,6 +513,12 @@ vars.put(&quot;client_header&quot;, clientHeader);</stringProp>
               <boolProp name="Assertion.assume_success">false</boolProp>
               <intProp name="Assertion.test_type">2</intProp>
             </ResponseAssertion>
+            <hashTree/>
+            <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Path PostProcessor" enabled="true">
+              <stringProp name="JSONPostProcessor.referenceNames">access_token</stringProp>
+              <stringProp name="JSONPostProcessor.jsonPathExprs">$.access_token</stringProp>
+              <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
+            </JSONPostProcessor>
             <hashTree/>
           </hashTree>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="/user_info" enabled="true">
