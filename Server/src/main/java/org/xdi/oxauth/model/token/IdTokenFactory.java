@@ -21,6 +21,7 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.oxauth.model.authorize.Claim;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -254,6 +255,18 @@ public class IdTokenFactory {
                 AuthenticationScriptUsageType.BOTH, acrValues);
         if (script != null) {
             amrList.add(Integer.toString(script.getLevel()));
+
+            PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) script.getExternalType();
+            int apiVersion = externalAuthenticator.getApiVersion();
+
+            if (apiVersion > 3) {
+                Map<String, String> authenticationMethodClaimsOrNull = externalAuthenticator.getAuthenticationMethodClaims();
+                if (authenticationMethodClaimsOrNull != null) {
+                    for (String key : authenticationMethodClaimsOrNull.keySet()) {
+                        amrList.add(key + ":" + authenticationMethodClaimsOrNull.get(key));
+                    }
+                }
+            }
         }
 
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
