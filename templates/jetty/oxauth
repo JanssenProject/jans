@@ -7,3 +7,5 @@ JETTY_BASE=%(jetty_base)s/oxauth
 JETTY_USER=jetty
 JETTY_ARGS="jetty.http.port=8081"
 TMPDIR=%(jetty_dist)s/temp
+
+export PYTHON_HOME=/opt/jython
