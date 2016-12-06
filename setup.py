@@ -888,7 +888,7 @@ class Setup(object):
         openDJArchive = 'opendj-server-3.0.0.zip'
         try:
             self.logIt("Unzipping %s in /opt/" % openDJArchive)
-            self.run(['unzip', '-n', '%s/%s' % (self.distAppFolder, openDJArchive), '-d', '/opt/' ])
+            self.run(['unzip', '-n', '-q', '%s/%s' % (self.distAppFolder, openDJArchive), '-d', '/opt/' ])
         except:
             self.logIt("Error encountered while doing unzip %s/%s -d /opt/" % (self.distAppFolder, openDJArchive))
             self.logIt(traceback.format_exc(), True)
