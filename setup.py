@@ -339,6 +339,8 @@ class Setup(object):
         self.scim_rp_client_jks_pass = 'secret'
 
         # oxPassport Configuration
+        self.ldif_pasport_config = '%s/oxpassport-config.ldif' % self.outputFolder
+
         self.passport_rs_client_id = None
         self.passport_rs_client_jwks = None
         self.passport_rs_client_jks_fn = "%s/passport-rs.jks" % self.certFolder
@@ -365,7 +367,8 @@ class Setup(object):
                            self.ldif_configuration,
                            self.ldif_scim,
                            self.ldif_asimba,
-                           self.ldif_passport
+                           self.ldif_passport,
+                           self.ldif_pasport_config
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
