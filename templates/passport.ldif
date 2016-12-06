@@ -27,3 +27,28 @@ oxAuthTokenEndpointAuthMethod: private_key_jwt
 oxPersistClientAuthorizations: false
 oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
+
+# Pasport Scope
+dn: inum=%(inumOrg)s!0010!8CAD.B06E,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthUmaScopeDescription
+objectClass: top
+displayName: Passport Access
+inum: %(inumOrg)s!0010!8CAD.B06E
+owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
+oxId: passport_access
+oxRevision: 1
+oxType: internal
+oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
+
+# Pasport Resource Set
+dn: inum=%(inumOrg)s!0012!B23E.0518,ou=resource_sets,ou=uma,o=%(inumOrg)s,o=gluu
+objectClass: oxAuthUmaResourceSet
+objectClass: top
+displayName: Passport Resource Set
+inum: %(inumOrg)s!0012!B23E.0518
+owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
+oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06E,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
+oxFaviconImage: http://www.gluu.org/img/passport_logo.png
+oxId: 1447184268440
+oxResource: https://%(hostname)s/identity/seam/resource/restv1/passport/config
+oxRevision: 1

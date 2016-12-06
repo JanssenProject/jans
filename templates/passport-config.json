@@ -5,7 +5,7 @@
 	"keyPath": "%(passport_rp_client_cert_fn)s",
 	"keyId": "%(passport_rp_client_cert_alias)s",
 	"keyAlg": "%(passport_rp_client_cert_alg)s",
-	"passportConfigAPI": "https://%(hostname)s/identity/seam/resource/restv1/passportconfig",
+	"passportConfigAPI": "https://%(hostname)s/identity/seam/resource/restv1/passport/config",
 	"applicationStartpoint": "https://%(hostname)s/oxauth/auth/generic/genericlogin.htm",
 	"applicationEndpoint": "https://%(hostname)s/oxauth/auth/generic/genericpostlogin.htm"
 }
