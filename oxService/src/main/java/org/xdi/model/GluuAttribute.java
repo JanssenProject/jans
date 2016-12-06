@@ -121,9 +121,6 @@ public class GluuAttribute extends Entry implements Serializable {
 
     @Transient
     private boolean requred;
-
-    @LdapAttribute(name = "gluuRegExp")
-    private String regExp;
     
 	@LdapJsonObject
 	@LdapAttribute(name = "oxValidation")
@@ -332,14 +329,6 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.requred = requred;
 	}
 
-	public String getRegExp() {
-		return regExp;
-	}
-
-	public void setRegExp(String regExp) {
-		this.regExp = regExp;
-	}
-
 	public String getGluuTooltip() {
 		return gluuTooltip;
 	}
@@ -426,7 +415,6 @@ public class GluuAttribute extends Entry implements Serializable {
 				* result
 				+ ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute
 						.hashCode());
-		result = prime * result + ((regExp == null) ? 0 : regExp.hashCode());
 		result = prime * result + (requred ? 1231 : 1237);
 		result = prime * result + ((salt == null) ? 0 : salt.hashCode());
 		result = prime * result
