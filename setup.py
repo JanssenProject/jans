@@ -113,12 +113,12 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
-                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext'},
+                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded'},
                             'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096},
                             'installed' : False
             },
                 'identity' : {'name' : 'identity',
-                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext'},
+                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,http-forwarded'},
                               'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048},
                               'installed' : False
             },
@@ -128,17 +128,17 @@ class Setup(object):
                          'installed' : False
             },
                 'asimba' : {'name' : 'asimba',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
                          'installed' : False
             },
                 'cas' : {'name' : 'cas',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
                          'installed' : False
             },
                 'oxauth-rp' : {'name' : 'oxauth-rp',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp'},
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 512},
                          'installed' : False
             }
