@@ -37,13 +37,13 @@ import org.xdi.util.StringHelper;
 
 public class UmaClient {
 
-	public Token requestAat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
+	public static Token requestAat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
         TokenRequest tokenRequest = TokenRequest.builder().aat().grantType(GrantType.CLIENT_CREDENTIALS).build();
 
         return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
 	}
 
-	public Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
+	public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
         TokenRequest tokenRequest = TokenRequest.builder().pat().grantType(GrantType.CLIENT_CREDENTIALS).build();
 
         return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
@@ -204,7 +204,7 @@ public class UmaClient {
         return null;
     }
 
-	private Token request(final String tokenUrl, final String clientKeyStoreFile,
+	private static Token request(final String tokenUrl, final String clientKeyStoreFile,
 			final String clientKeyStorePassword, final String clientId, final String keyId, TokenRequest tokenRequest)
 			throws UmaException {
 		OxAuthCryptoProvider cryptoProvider;
