@@ -18,6 +18,7 @@ import org.w3c.dom.Node;
 import org.xdi.model.GluuImage;
 import org.xdi.model.TrustContact;
 import org.xdi.util.StringHelper;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
@@ -35,6 +36,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Service class to work with images in photo repository
@@ -167,22 +169,45 @@ public class XmlService {
     public Document getXmlDocument(byte[] xmlDocumentBytes) throws SAXException, IOException, ParserConfigurationException {
     	ByteArrayInputStream bis = new ByteArrayInputStream(xmlDocumentBytes);
     	try {
-    		DocumentBuilderFactory fty = DocumentBuilderFactory.newInstance();
-
-    		fty.setNamespaceAware(true);
-    		
-    		// Fix XXE vulnerability
-    		fty.setXIncludeAware(false);
-    		fty.setExpandEntityReferences(false);
-    		fty.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-    		fty.setFeature("http://xml.org/sax/features/external-general-entities", false);
-    		fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+    		DocumentBuilderFactory fty = creaeDocumentBuilderFactory();
 
     		return fty.newDocumentBuilder().parse(bis);
     	} finally {
     		IOUtils.closeQuietly(bis);
     	}
     }
+
+    public Document getXmlDocument(InputStream is) throws SAXException, IOException, ParserConfigurationException {
+		DocumentBuilderFactory fty = creaeDocumentBuilderFactory();
+
+		return fty.newDocumentBuilder().parse(is);
+    }
+
+    public Document getXmlDocument(InputSource is) throws SAXException, IOException, ParserConfigurationException {
+		DocumentBuilderFactory fty = creaeDocumentBuilderFactory();
+
+		return fty.newDocumentBuilder().parse(is);
+    }
+
+    public Document getXmlDocument(String uri) throws SAXException, IOException, ParserConfigurationException {
+		DocumentBuilderFactory fty = creaeDocumentBuilderFactory();
+
+		return fty.newDocumentBuilder().parse(uri);
+    }
+
+	private DocumentBuilderFactory creaeDocumentBuilderFactory() throws ParserConfigurationException {
+		DocumentBuilderFactory fty = DocumentBuilderFactory.newInstance();
+
+		fty.setNamespaceAware(true);
+		
+		// Fix XXE vulnerability
+		fty.setXIncludeAware(false);
+		fty.setExpandEntityReferences(false);
+		fty.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+		fty.setFeature("http://xml.org/sax/features/external-general-entities", false);
+		fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+		return fty;
+	}
 
     public String getNodeValue(Document xmlDocument, String xPathExpression, String attributeName) throws XPathExpressionException {
 		XPath xPath = XPathFactory.newInstance().newXPath();

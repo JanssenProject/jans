@@ -128,12 +128,20 @@ public final class ApplicationConfiguration implements Serializable {
 	private boolean ignoreValidation;
 
 	private String umaIssuer;
+
 	private String umaClientId;
 	private String umaClientKeyId;
 	private String umaResourceId;
 	private String umaScope;
 	private String umaClientKeyStoreFile;
 	private String umaClientKeyStorePassword;
+
+	private String passportUmaClientId;
+	private String passportUmaClientKeyId;
+	private String passportUmaResourceId;
+	private String passportUmaScope;
+	private String passportUmaClientKeyStoreFile;
+	private String passportUmaClientKeyStorePassword;
 
 	private String cssLocation;
 	private String jsLocation;
@@ -791,6 +799,54 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setUmaClientKeyStorePassword(String umaClientKeyStorePassword) {
 		this.umaClientKeyStorePassword = umaClientKeyStorePassword;
+	}
+
+	public String getPassportUmaClientId() {
+		return passportUmaClientId;
+	}
+
+	public void setPassportUmaClientId(String passportUmaClientId) {
+		this.passportUmaClientId = passportUmaClientId;
+	}
+
+	public String getPassportUmaClientKeyId() {
+		return passportUmaClientKeyId;
+	}
+
+	public void setPassportUmaClientKeyId(String passportUmaClientKeyId) {
+		this.passportUmaClientKeyId = passportUmaClientKeyId;
+	}
+
+	public String getPassportUmaResourceId() {
+		return passportUmaResourceId;
+	}
+
+	public void setPassportUmaResourceId(String passportUmaResourceId) {
+		this.passportUmaResourceId = passportUmaResourceId;
+	}
+
+	public String getPassportUmaScope() {
+		return passportUmaScope;
+	}
+
+	public void setPassportUmaScope(String passportUmaScope) {
+		this.passportUmaScope = passportUmaScope;
+	}
+
+	public String getPassportUmaClientKeyStoreFile() {
+		return passportUmaClientKeyStoreFile;
+	}
+
+	public void setPassportUmaClientKeyStoreFile(String passportUmaClientKeyStoreFile) {
+		this.passportUmaClientKeyStoreFile = passportUmaClientKeyStoreFile;
+	}
+
+	public String getPassportUmaClientKeyStorePassword() {
+		return passportUmaClientKeyStorePassword;
+	}
+
+	public void setPassportUmaClientKeyStorePassword(String passportUmaClientKeyStorePassword) {
+		this.passportUmaClientKeyStorePassword = passportUmaClientKeyStorePassword;
 	}
 
 	public String getCssLocation() {
