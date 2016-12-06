@@ -1,5 +1,3 @@
-version: 1
-
 dn: ou=oxpassport,ou=configuration,inum=%(inumAppliance)s,ou=appliances,o=gluu
 objectClass: top
 objectClass: oxPassportConfiguration
