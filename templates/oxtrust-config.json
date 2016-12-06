@@ -120,12 +120,20 @@
     "logoutRedirectUrl":"https://%(hostname)s/identity/authentication/finishlogout",
 
     "umaIssuer":"https://%(hostname)s",
+
     "umaClientId":"%(scim_rs_client_id)s",
     "umaClientKeyId":"",
     "umaResourceId":"1447184268430",
     "umaScope":"https://%(hostname)s/oxauth/seam/resource/restv1/uma/scopes/scim_access",
     "umaClientKeyStoreFile":"%(scim_rs_client_jks_fn)s",
     "umaClientKeyStorePassword":"%(scim_rs_client_jks_pass_encoded)s",
+
+    "passportUmaClientId":"%(passport_rs_client_id)s",
+    "passportUmaClientKeyId":"",
+    "passportUmaResourceId":"1447184268440",
+    "passportUmaScope":"https://%(hostname)s/oxauth/seam/resource/restv1/uma/scopes/passport_access",
+    "passportUmaClientKeyStoreFile":"%(passport_rs_client_jks_fn)s",
+    "passportUmaClientKeyStorePassword":"%(passport_rs_client_jks_pass_encoded)s",
 
     "cssLocation":"",
     "jsLocation":"",
