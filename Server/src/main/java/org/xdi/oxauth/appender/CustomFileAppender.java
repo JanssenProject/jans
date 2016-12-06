@@ -9,28 +9,36 @@ import org.xdi.oxauth.util.ServerUtil;
  */
 public class CustomFileAppender extends DailyRollingFileAppender {
 
-    private boolean appendMacAddress;
+	private boolean appendMacAddress;
 
-    @Override
-    protected void subAppend(LoggingEvent event) {
-        String modifiedMessage;
-        if (appendMacAddress)
-            modifiedMessage = String.format("MAC Address: %s. %s", ServerUtil.getMACAddressOrNull(), event.getMessage());
-        else
-            modifiedMessage = event.getMessage().toString();
+	@Override
+	protected void subAppend(LoggingEvent event) {
+		if (event == null) {
+			super.subAppend(event);
+			return;
+		}
 
-        LoggingEvent modifiedEvent = new LoggingEvent(event.getFQNOfLoggerClass(), event.getLogger(), event.getTimeStamp(), event.getLevel(), modifiedMessage,
-                event.getThreadName(), event.getThrowableInformation(), event.getNDC(), event.getLocationInformation(),
-                event.getProperties());
+		String modifiedMessage = null;
+		if (event.getMessage() != null) {
+			if (appendMacAddress)
+				modifiedMessage = String.format("MAC Address: %s. %s", ServerUtil.getMACAddressOrNull(),
+						event.getMessage());
+			else
+				modifiedMessage = event.getMessage().toString();
+		}
+		
+		LoggingEvent modifiedEvent = new LoggingEvent(event.getFQNOfLoggerClass(), event.getLogger(),
+				event.getTimeStamp(), event.getLevel(), modifiedMessage, event.getThreadName(),
+				event.getThrowableInformation(), event.getNDC(), event.getLocationInformation(), event.getProperties());
 
-        super.subAppend(modifiedEvent);
-    }
+		super.subAppend(modifiedEvent);
+	}
 
-    public boolean isAppendMacAddress() {
-        return appendMacAddress;
-    }
+	public boolean isAppendMacAddress() {
+		return appendMacAddress;
+	}
 
-    public void setAppendMacAddress(boolean appendMacAddress) {
-        this.appendMacAddress = appendMacAddress;
-    }
+	public void setAppendMacAddress(boolean appendMacAddress) {
+		this.appendMacAddress = appendMacAddress;
+	}
 }
