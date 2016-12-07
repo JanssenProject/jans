@@ -232,7 +232,6 @@ class Setup(object):
         self.importLdifCommand = '%s/bin/import-ldif' % self.ldapBaseFolder
         self.ldapModifyCommand = '%s/bin/ldapmodify' % self.ldapBaseFolder
         self.loadLdifCommand = self.ldapModifyCommand
-        self.schemaFolder = "%s/template/config/schema" % self.ldapBaseFolder
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.redhat_services = ['memcached', 'httpd']
@@ -256,6 +255,7 @@ class Setup(object):
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
+        self.openldapSchemaFolder = "%s/schema/openldap" % self.self.gluuOptFolder
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
@@ -275,7 +275,6 @@ class Setup(object):
         self.ox_ldap_properties = '%s/ox-ldap.properties' % self.configFolder
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
-        self.eduperson_schema_ldif = '%s/config/schema/96-eduperson.ldif'
         self.apache2_conf = '%s/httpd.conf' % self.outputFolder
         self.apache2_ssl_conf = '%s/https_gluu.conf' % self.outputFolder
         self.apache2_24_conf = '%s/httpd_2.4.conf' % self.outputFolder
@@ -2214,8 +2213,9 @@ class Setup(object):
         self.copyFile(self.openldapSlapdConf, self.openldapConfFolder)
         self.copyFile(self.openldapSymasConf, self.openldapConfFolder)
         # 2. Copy the schema files into place
-        self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, "/opt/gluu/")
-        self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, "/opt/gluu/")
+        self.createDirs(self.openldapSchemaFolder)
+        self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, self.openldapSchemaFolder)
+        self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, self.openldapSchemaFolder)
         # 4. Create the PEM file from key and crt
         with open(self.openldapTLSCACert, 'w') as pem:
             with open(self.openldapTLSCert, 'r') as crt:
