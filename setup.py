@@ -250,7 +250,6 @@ class Setup(object):
         self.openldapConfFolder = '/opt/symas/etc/openldap'
         self.openldapCnConfig = '%s/slapd.d' % self.openldapConfFolder
         self.openldapRootUser = "cn=directory manager,o=gluu"
-        self.user_schema = '%s/user.schema' % self.outputFolder
         self.openldapKeyPass = None
         self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
         self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
@@ -406,7 +405,6 @@ class Setup(object):
                      self.asimba_properties: False,
                      self.asimba_selector_configuration: True,
                      self.network: False,
-                     self.user_schema: False,
                      self.openldapSlapdConf: False,
                      self.openldapSymasConf: False
                      }
@@ -2218,7 +2216,6 @@ class Setup(object):
         # 2. Copy the schema files into place
         self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, "/opt/gluu/")
         self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, "/opt/gluu/")
-        self.copyFile(self.user_schema, "/opt/gluu/")
         # 4. Create the PEM file from key and crt
         with open(self.openldapTLSCACert, 'w') as pem:
             with open(self.openldapTLSCert, 'r') as crt:

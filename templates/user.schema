@@ -1,3 +1,0 @@
-
-objectclass ( oxObjectClass:999 NAME 'ox-%(inumOrgFN)s'
-  SUP gluuPerson STRUCTURAL MUST objectClass X-SCHEMA-FILE 'user.schema' X-ORIGIN 'gluu' )
