@@ -28,7 +28,6 @@ CONFFILE=/etc/rsyslog.conf
 
 SCRIPTNAME=/etc/init.d/$NAME
 
-/usr/sbin/rsyslogd -i $PIDFILE -f /etc/sysconfig.conf
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
 
@@ -55,8 +54,13 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   other if daemon could not be stopped or a failure occurred
 	#start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --chuid 104 --pidfile $PIDFILE --exec $DAEMON
-	kill -s 9 `cat $PIDFILE` 
-	rm -f $PIDFILE
+	if [ -f $PIDFILE ]; then
+        	kill -s 9 `cat $PIDFILE`
+		rm -f $PIDFILE
+	else
+		process_pid=`ps -eaf|grep syslog|grep "^syslog"|awk '{print $2}'|head -n 1`
+		kill -s 9 $process_pid > /dev/null 2>&1
+	fi
 }
 
 #
@@ -92,7 +96,7 @@ case "$1" in
 	#fi
 	log_daemon_msg "Starting $DESC" "$RSYSLOGD"
 	create_xconsole
-	do_start 2>/dev/null
+	do_start
 	case "$?" in
 		0) sendsigs_omit
 		   log_end_msg 0 ;;
