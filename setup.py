@@ -255,7 +255,7 @@ class Setup(object):
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
-        self.openldapSchemaFolder = "%s/schema/openldap" % self.self.gluuOptFolder
+        self.openldapSchemaFolder = "%s/schema/openldap" % self.gluuOptFolder
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
