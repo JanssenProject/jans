@@ -39,6 +39,7 @@ class SetupOpenLDAP(object):
         self.orgName = None
         self.ldapPass = None
 
+        self.gluuOptFolder = '/opt/gluu'
         self.certFolder = '/etc/certs'
         self.openldapBaseFolder = '/opt/symas'
         self.openldapBinFolder = '/opt/symas/bin'
@@ -53,6 +54,7 @@ class SetupOpenLDAP(object):
         self.openldapPassHash = None
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
+        self.openldapSchemaFolder = "%s/schema/openldap" % self.gluuOptFolder
         self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapDataDir = '/opt/gluu/data'
         self.o_gluu = '%s/o_gluu.ldif' % self.miniSetupFolder
@@ -69,6 +71,15 @@ class SetupOpenLDAP(object):
             logging.debug("copied %s to %s" % (infile, destfolder))
         except:
             logging.error("error copying %s to %s" % (infile, destfolder))
+            logging.error(traceback.format_exc())
+
+    def createDirs(self, name):
+        try:
+            if not os.path.exists(name):
+                os.makedirs(name, 0700)
+                logging.debug('created dir: %s' % name)
+        except:
+            logging.error("error making directory %s" % name)
             logging.error(traceback.format_exc())
 
     def renderTemplate(self, filePath, templateFolder, outputFolder):
@@ -115,8 +126,9 @@ class SetupOpenLDAP(object):
         self.copyFile(self.openldapSlapdConf, self.openldapConfFolder)
         self.copyFile(self.openldapSymasConf, self.openldapConfFolder)
         # 2. Copy the schema files into place
-        self.copyFile("%s/static/openldap/gluu.schema" % self.setupFolder, "/opt/gluu/")
-        self.copyFile("%s/static/openldap/custom.schema" % self.setupFolder, "/opt/gluu/")
+        self.createDirs(self.openldapSchemaFolder)
+        self.copyFile("%s/static/openldap/gluu.schema" % self.setupFolder, self.openldapSchemaFolder)
+        self.copyFile("%s/static/openldap/custom.schema" % self.setupFolder, self.openldapSchemaFolder)
         self.copyFile(self.user_schema, "/opt/gluu/")
         # 4. Create the PEM file from key and crt
         with open(self.openldapTLSCACert, 'w') as pem:
