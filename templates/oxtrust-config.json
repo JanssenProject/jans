@@ -20,14 +20,12 @@
     "personObjectClassTypes":[
         "inetOrgPerson",
         "gluuPerson",
-        "eduPerson",
-        "ox-%(inumOrgFN)s"
+        "eduPerson"
     ],
     "personObjectClassDisplayNames":[
         "inetOrgPerson",
         "gluuPerson",
-        "eduPerson",
-        "Custom"
+        "eduPerson"
     ],
 
     "svnConfigurationStoreRoot":"unused",
@@ -43,7 +41,7 @@
 
     "clientAssociationAttribute":"inum",
 
-    "personCustomObjectClass":"ox-%(inumOrgFN)s",
+    "personCustomObjectClass":"",
 
     "contactObjectClassTypes":[
 
