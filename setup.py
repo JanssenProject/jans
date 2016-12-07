@@ -2145,9 +2145,11 @@ class Setup(object):
                self.run([service_path, 'restart', 'rsyslog.service'])
                self.run([service_path, 'start', 'solserver.service'])
             else:
-	       # Below two lines are specifically for Ubuntu 14.04
-               self.copyFile(self.rsyslogInitFile, "/etc/init.d")
-               self.removeFile("/etc/init/rsyslog.conf")
+	           # Below two lines are specifically for Ubuntu 14.04
+               if self.os_type == 'ubuntu':
+                   self.copyFile(self.rsyslogInitFile, "/etc/init.d")
+                   self.removeFile("/etc/init/rsyslog.conf")
+
                self.run([service_path, 'rsyslog', 'restart'])
                self.run([service_path, 'solserver', 'start'])
 
