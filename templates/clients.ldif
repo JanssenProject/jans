@@ -24,3 +24,6 @@ oxAuthPostLogoutRedirectURI: https://%(hostname)s/identity/authentication/finish
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthTrustedClient: true
+oxAuthSubjectType: public
+oxPersistClientAuthorizations: false
+oxAuthLogoutSessionRequired: true
