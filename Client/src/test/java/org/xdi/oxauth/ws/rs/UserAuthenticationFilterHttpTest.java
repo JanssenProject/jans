@@ -273,8 +273,8 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         authorizationRequest.addCustomParameter("inum", userInum);
         authorizationRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
-        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                authorizationEndpoint, authorizationRequest, null, null);
+        AuthorizationResponse authorizationResponse = authorizationRequestAndGrantAccess(
+                authorizationEndpoint, authorizationRequest);
 
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
