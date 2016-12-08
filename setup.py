@@ -295,11 +295,14 @@ class Setup(object):
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
-        self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
-        self.asimba_properties = '%s/asimba.properties' % self.outputFolder
-        self.asimba_selector_configuration = '%s/conf/asimba-selector.xml' % self.gluuBaseFolder
         self.network = "/etc/sysconfig/network"
         self.system_profile_update = '%s/system_profile' % self.outputFolder
+        
+        self.asimba_conf_folder = '%s/asimba' % self.configFolder
+        self.asimba_configuration_xml = '%s/asimba.xml' % self.asimba_conf_folder
+        self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
+        self.asimba_properties = '%s/asimba.properties' % self.outputFolder
+        self.asimba_selector_configuration = '%s/asimba-selector.xml' % self.asimba_conf_folder
 
         self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
         self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
@@ -1532,39 +1535,18 @@ class Setup(object):
     def install_asimba(self):
         asimbaWar = 'asimba.war'
         distAsimbaPath = '%s/%s' % (self.distWarFolder, asimbaWar)
-
-        tmpAsimbaDir = '%s/tmp_asimba' % self.distTmpFolder
-
-        self.logIt("Unpacking %s..." % asimbaWar)
-        self.removeDirs(tmpAsimbaDir)
-        self.createDirs(tmpAsimbaDir)
-
-        self.run([self.cmd_jar,
-                  'xf',
-                  distAsimbaPath], tmpAsimbaDir)
-
+        
         self.logIt("Configuring Asimba...")
-        self.copyFile(self.asimba_configuration, '%s/WEB-INF/conf/asimba.xml' % tmpAsimbaDir)
-        self.copyFile(self.asimba_properties, '%s/WEB-INF/asimba.properties' % tmpAsimbaDir)
-
-        self.logIt("Generating asimba.war...")
-        self.run([self.cmd_jar,
-                  'cmf',
-                  'tmp_asimba/META-INF/MANIFEST.MF',
-                  'asimba.war',
-                  '-C',
-                  '%s/' % tmpAsimbaDir ,
-                  '.'], self.distTmpFolder)
+        self.removeDirs(self.asimba_conf_folder)
+        self.createDirs(self.asimba_conf_folder)
+        self.copyFile(self.asimba_configuration, self.asimba_configuration_xml)
 
         self.logIt("Copying asimba.war into jetty webapps folder...")
         jettyServiceName = 'asimba'
         self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/asimba.war' % self.distTmpFolder, jettyServiceWebapps)
-
-        self.removeDirs(tmpAsimbaDir)
-        self.removeFile('%s/asimba.war' % self.distTmpFolder)
+        self.copyFile(distAsimbaPath, jettyServiceWebapps)
 
     def install_cas(self):
         casWar = 'cas.war'
