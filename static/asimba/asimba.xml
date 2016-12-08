@@ -581,11 +581,9 @@
 			gather can specify a whitelist of attributes to gather
 			if omitted, all available attributes are gathered
 			-->
-			<!--
 			<gather>
 				<attribute name="whitelist-attribute-name" />
 			</gather>
-			 -->
 			
 			<mapper>
 				<map ext="ext.phonenr" int="phonenr" />
@@ -596,17 +594,13 @@
 	
 	<attributerelease class="com.alfaariss.oa.engine.attribute.release.configuration.ConfigurationFactory">
 		<policy id="asimba.releasepolicy.1" friendlyname="Default Attribute Release policy" enabled="true">
-			<attribute name="firstname" />
-			<attribute name="lastname" />
-			<attribute name="email" />
-			<attribute name="role" />
-			<attribute name="country" />	<!-- country is defined in <global ..> attribute section -->
 			<!-- when all available attributes can be released, use the wildcard "*" for name,
 				like:
 				<attribute name="*" />
 				Asimba Baseline keeps the password in the same format as the attributes, so
 				allowing all attributes to be released, would expose the password as well!
 			 -->
+            <attribute name="*" />
 		</policy>
 	</attributerelease>
 	
