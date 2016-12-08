@@ -173,7 +173,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                                 authorizationGrant,
                                 authorizationGrant.getScopes()));
                     } else {
-                        builder.type((MediaType.APPLICATION_JSON));
+                        builder.type((MediaType.APPLICATION_JSON + ";charset=UTF-8"));
                         builder.entity(getJSonResponse(currentUser,
                                 authorizationGrant,
                                 authorizationGrant.getScopes()));
