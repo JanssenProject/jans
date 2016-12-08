@@ -162,6 +162,14 @@ def startOpenDJ():
 
 def stopOpenDJ():
     logging.info('Stopping Directory Server ...')
+    if (os.path.isfile('/usr/bin/systemctl')):
+        output = getOutput(['systemctl', 'is-active', 'opendj.service'])
+        if output.find("failed") > 0:
+            logging.critical("OpenDJ did not stop properly... exiting."
+                             " Check /opt/opendj/logs/errors")
+            sys.exit(3)
+        else:
+            return 
     output = getOutput([service, 'opendj', 'stop'])
     if output.find("Directory Server is now stopped") > 0:
         logging.info("Directory Server is now stopped")

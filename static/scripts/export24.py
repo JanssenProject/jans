@@ -244,7 +244,7 @@ def genProperties():
     props['asimbaJksPass'] = getProp('asimbaJksPass')
 
     # Preferences for installation of optional components
-    installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (Y/N):")
+    installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (y/N): [N]")
     props['installSaml'] = 'y' in installSaml.lower()
     props['installAsimba'] = os.path.isfile('/opt/tomcat/webapps/asimba.war')
     props['installCas'] = os.path.isfile('/opt/tomcat/webapps/cas.war')
