@@ -151,29 +151,33 @@ def getOutput(args):
 
 def startOpenDJ():
     logging.info('Starting Directory Server ...')
+    if (os.path.isfile('/usr/bin/systemctl')):
+        getOutput(['systemctl', 'start', 'opendj'])
+        output = getOutput(['systemctl', 'is-active', 'opendj'])
     output = getOutput([service, 'opendj', 'start'])
-    if output.find("Directory Server has started successfully") > 0:
+    if output.find("Directory Server has started successfully") > 0 or \
+            output.strip() == "active":
         logging.info("Directory Server has started successfully")
     else:
-        logging.critical("OpenDJ did not start properly... exiting."
-                         " Check /opt/opendj/logs/errors")
-        sys.exit(2)
+        logging.critical("OpenDJ did not start properly. Check "
+                         "/opt/opendj/logs/errors. Restart it manually.")
 
 
 def stopOpenDJ():
     logging.info('Stopping Directory Server ...')
     if (os.path.isfile('/usr/bin/systemctl')):
         getOutput(['systemctl', 'stop', 'opendj'])
-        output = getOutput(['systemctl', 'statuc', 'opendj.service'])
+        output = getOutput(['systemctl', 'is-active', 'opendj'])
     else:
         output = getOutput([service, 'opendj', 'stop'])
 
     if output.find("Directory Server is now stopped") > 0 or \
-            output.find("Stopped OpenDJ Directory Service") > 0:
+            output.strip() == "failed":
         logging.info("Directory Server is now stopped")
     else:
-        logging.critical("OpenDJ did not stop properly... exiting."
-                         " Check /opt/opendj/logs/errors")
+        logging.critical("OpenDJ did not stop properly. Import cannot run"
+                         " without stopping the directory server. Exiting from"
+                         " import. Check /opt/opendj/logs/errors")
         sys.exit(3)
 
 
