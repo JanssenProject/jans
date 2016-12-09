@@ -314,8 +314,7 @@ class Setup(object):
         self.idp3_metadata = '/idp-metadata.xml'
 
         ### rsyslog file customised for init.d
-        self.rsyslogUbuntuInitFile = "%s/static/system/ubuntu/rsyslog" % self.install_dir
-
+        self.rsyslogInitFile = "%s/static/etc/init.d/rsyslog" % self.install_dir
 
         self.ldap_setup_properties = '%s/opendj-setup.properties' % self.templateFolder
 
@@ -2134,7 +2133,7 @@ class Setup(object):
             else:
 	           # Below two lines are specifically for Ubuntu 14.04
                if self.os_type == 'ubuntu':
-                   self.copyFile(self.rsyslogUbuntuInitFile, "/etc/init.d")
+                   self.copyFile(self.rsyslogInitFile, "/etc/init.d")
                    self.removeFile("/etc/init/rsyslog.conf")
 
                self.run([service_path, 'rsyslog', 'restart'])
