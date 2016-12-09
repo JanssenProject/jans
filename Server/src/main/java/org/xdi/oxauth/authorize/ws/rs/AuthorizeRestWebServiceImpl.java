@@ -148,7 +148,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 state, request, securityContext.isSecure(), requestSessionState, sessionState);
 
         log.debug("Attempting to request authorization: "
-                        + "acrValues = {0}, amrValues = {1}, originHeaders = {4}, codeChallenge = {5}, codeChallengeMethod = {6}",
+                        + "acrValues = {0}, amrValues = {1}, originHeaders = {2}, codeChallenge = {3}, codeChallengeMethod = {4}",
                 acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod);
 
         ResponseBuilder builder = Response.ok();
