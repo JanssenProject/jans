@@ -16,7 +16,8 @@
 		<oxeleven.version>3.0.0-SNAPSHOT</oxeleven.version>
 		<jackson.version>1.9.11</jackson.version>
 		<jettison.version>1.3</jettison.version>
-		<resteasy.version>2.3.7.Final</resteasy.version>
+		<jaxrs.api.version>3.0.12.Final</jaxrs.api.version>
+		<resteasy.version>3.0.17.Final</resteasy.version>
 		<httpcore.version>4.3.3</httpcore.version>
 		<httpclient.version>4.3.6</httpclient.version>
 		<slf4j.version>1.7.2</slf4j.version>
@@ -378,7 +379,7 @@
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>jaxrs-api</artifactId>
-				<version>${resteasy.version}</version>
+				<version>${jaxrs.api.version}</version>
 			</dependency>
 
 			<!-- Jackson -->
