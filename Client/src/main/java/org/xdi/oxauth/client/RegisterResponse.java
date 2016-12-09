@@ -52,7 +52,7 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
 
         String entity = clientResponse.getEntity(String.class);
         setEntity(entity);
-        setHeaders(clientResponse.getStringHeaders());
+        setHeaders(clientResponse.getResponseHeaders());
         injectDataFromJson(entity);
     }
 

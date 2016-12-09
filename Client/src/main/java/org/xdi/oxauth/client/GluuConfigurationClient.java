@@ -44,7 +44,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getStringHeaders());
+            getResponse().setHeaders(clientResponse.getResponseHeaders());
             getResponse().setStatus(clientResponse.getStatus());
 
             if (StringUtils.isNotBlank(entity)) {
