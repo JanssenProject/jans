@@ -118,7 +118,7 @@ public class ClientInfoClient extends BaseClient<ClientInfoRequest, ClientInfoRe
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getResponseHeaders());
+            getResponse().setHeaders(clientResponse.getStringHeaders());
             if (StringUtils.isNotBlank(entity)) {
                 try {
                     JSONObject jsonObj = new JSONObject(entity);
