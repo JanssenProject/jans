@@ -6,14 +6,26 @@
 
 package org.gluu.saml;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.UUID;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
+import org.apache.ws.security.WSSecurityException;
+import org.apache.ws.security.saml.ext.OpenSAMLUtil;
+import org.opensaml.saml2.core.AuthnRequest;
+import org.opensaml.xml.Configuration;
+import org.opensaml.xml.XMLObject;
+import org.opensaml.xml.io.MarshallingException;
+import org.opensaml.xml.security.SecurityConfiguration;
+import org.opensaml.xml.security.SecurityException;
+import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.signature.SignatureConstants;
+import org.opensaml.xml.signature.Signer;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xdi.zip.CompressionHelper;
+import org.xml.sax.InputSource;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,22 +38,28 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xdi.zip.CompressionHelper;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.URLEncoder;
+import java.security.Signature;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * Preapres SAML request
- * 
+ *
  * @author Yuriy Movchan Date: 24/04/2014
  */
 public class AuthRequest {
 
 	private static final Logger log = Logger.getLogger(AuthRequest.class);
-	private static final SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private static final SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'H:mm:ss");
+
+
 
 	static {
 		simpleDataFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -60,7 +78,7 @@ public class AuthRequest {
 	public String getRequest(boolean useBase64, String assertionConsumerServiceUrl) throws ParserConfigurationException, XMLStreamException, IOException, TransformerException {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
- 
+
 		Document doc = docBuilder.newDocument();
 
 		// Add AuthnRequest
@@ -69,6 +87,7 @@ public class AuthRequest {
 		authnRequestElement.setAttribute("Version", "2.0");
 		authnRequestElement.setAttribute("IssueInstant", this.issueInstant);
 		authnRequestElement.setAttribute("ProtocolBinding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
+		authnRequestElement.setAttribute("Destination", this.samlSettings.getIdpSsoTargetUrl());
 		authnRequestElement.setAttribute("AssertionConsumerServiceURL", assertionConsumerServiceUrl);
 
 		doc.appendChild(authnRequestElement);
@@ -76,7 +95,7 @@ public class AuthRequest {
 		// Add AuthnRequest
 		Element issuerElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "saml:Issuer");
 		issuerElement.appendChild(doc.createTextNode(this.samlSettings.getIssuer()));
-		
+
 		authnRequestElement.appendChild(issuerElement);
 
 		// Add NameIDPolicy
@@ -85,18 +104,18 @@ public class AuthRequest {
 		nameIDPolicyElement.setAttribute("AllowCreate", "true");
 
 		authnRequestElement.appendChild(nameIDPolicyElement);
-		
+
 		if (this.samlSettings.isUseRequestedAuthnContext()) {
 			// Add RequestedAuthnContext
 			Element requestedAuthnContextElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:RequestedAuthnContext");
 			requestedAuthnContextElement.setAttribute("Comparison", "exact");
-	
+
 			authnRequestElement.appendChild(requestedAuthnContextElement);
-	
+
 			// Add AuthnContextClassRef
 			Element authnContextClassRefElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "saml:AuthnContextClassRef");
 			authnContextClassRefElement.appendChild(doc.createTextNode("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"));
-	
+
 			requestedAuthnContextElement.appendChild(authnContextClassRefElement);
 		}
 
@@ -109,9 +128,9 @@ public class AuthRequest {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		StreamResult result = new StreamResult(baos);
-		
- 		transformer.transform(source, result);
-		
+
+		transformer.transform(source, result);
+
 
 		if (log.isDebugEnabled()) {
 			log.debug("Genereated Saml Request " + new String(baos.toByteArray(), "UTF-8"));
@@ -130,8 +149,8 @@ public class AuthRequest {
 
 	public String getRequest(boolean useBase64) throws ParserConfigurationException, XMLStreamException, IOException, TransformerException {
 		return getRequest(useBase64, this.samlSettings.getAssertionConsumerServiceUrl());
-    }
-																																												
+	}
+
 	public String getStreamedRequest(boolean useBase64) throws XMLStreamException, IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -189,4 +208,164 @@ public class AuthRequest {
 		return new String(baos.toByteArray(), "UTF-8");
 	}
 
+	/**
+	 * This will generate the proper Redirect Query String as input for signing
+	 * @param SamlRequest
+	 * @param RelayState Optional
+	 * @return
+	 * @throws Exception
+	 */
+	private String genQueryString(String SamlRequest, String RelayState) throws Exception {
+		if (null == SamlRequest || null == this.samlSettings.getSigAlgUrl()) {
+			throw new Exception("SAMLRequest or sigAlgUrl cannot be null");
+		}
+
+		StringBuilder buf = new StringBuilder();
+		buf.append("SAMLRequest=").append(SamlRequest);
+		if (null != RelayState && 0 < RelayState.length()) buf.append("&RelayState=").append(URLEncoder.encode(RelayState, "UTF-8"));
+		buf.append("&SigAlg=").append(URLEncoder.encode(this.samlSettings.getSigAlgUrl(), "UTF-8").trim());
+
+		String bf = buf.toString();
+		if (log.isDebugEnabled()) {
+			log.debug("Generated Query: " + bf);
+		}
+		return bf;
+	}
+
+	/**
+	 * This will return just the signature from the query string based on SAML Redirect signature requirment.
+	 * @param SamlRequest
+	 * @param RelayState optional
+	 * @return
+	 * @throws Exception
+	 */
+	public String signRequest(String SamlRequest, String RelayState) throws Exception {
+
+		String queryString = genQueryString(SamlRequest, RelayState);
+		if(null != queryString && 0 < queryString.length()){
+			// text to bytes
+			byte[] data = queryString.getBytes();
+
+			// signature
+			Signature _sig = Signature.getInstance(this.samlSettings.getSigAlg());
+			_sig.initSign(this.samlSettings.getPrivateKey());
+			_sig.update(data);
+			byte[] signatureBytes = _sig.sign();
+
+			String b64 = org.opensaml.xml.util.Base64.encodeBytes(signatureBytes, org.opensaml.xml.util.Base64.DONT_BREAK_LINES);
+			return b64;
+		}else {
+			return null;
+		}
+	}
+
+	/**
+	 * This will generate the Redirect Query String Params with the signature that you can append to your IDP sso URL.
+	 * @param assertionConsumerServiceUrl
+	 * @param RelayState optional
+	 * @return
+	 * @throws Exception
+	 */
+	public String getRedirectRequestSignedQueryParams(String assertionConsumerServiceUrl, String RelayState) throws Exception {
+		String SamlRequest = getRequest(true, assertionConsumerServiceUrl);
+		String b64 = signRequest(SamlRequest, RelayState);
+		String qry = genQueryString(SamlRequest, RelayState);
+		String ret = qry+"&Signature="+ URLEncoder.encode(b64, "UTF-8").trim();
+		return ret;
+	}
+
+	public boolean verifyRedirectSignature(String SamlRequest, String RelayState, String sig) throws Exception {
+		byte[] v = DatatypeConverter.parseBase64Binary(sig);
+		String queryString = genQueryString(SamlRequest, RelayState);
+
+		Signature _sig = Signature.getInstance(this.samlSettings.getSigAlg());
+		_sig.initVerify(this.samlSettings.getCertificate().getPublicKey());
+		_sig.update(queryString.getBytes());
+		return _sig.verify(v);
+	}
+
+
+	/**
+	 * This will generate an Enveloped Digital Signature xml String that you can use for
+	 * a POST SAML AuthnRequest.
+	 * @param assertionConsumerServiceUrl
+	 * @param RelayState optional
+	 * @return
+	 * @throws WSSecurityException
+	 * @throws SecurityException
+	 * @throws MarshallingException
+	 * @throws org.opensaml.xml.signature.SignatureException
+	 * @throws IOException
+	 * @throws TransformerException
+	 * @throws XMLStreamException
+	 * @throws ParserConfigurationException
+	 */
+	public String getEnvelopedSignatureRequest(String assertionConsumerServiceUrl, String RelayState) throws WSSecurityException, SecurityException, MarshallingException, org.opensaml.xml.signature.SignatureException, IOException, TransformerException, XMLStreamException, ParserConfigurationException {
+		String samlRequest = getRequest(false, assertionConsumerServiceUrl);
+		AuthnRequest authReq = (AuthnRequest) string2XMLObject(samlRequest);
+
+		Credential credential = this.samlSettings.getCredential();
+		org.opensaml.xml.signature.Signature signature = (org.opensaml.xml.signature.Signature) Configuration.getBuilderFactory().getBuilder(org.opensaml.xml.signature.Signature.DEFAULT_ELEMENT_NAME)
+				.buildObject(org.opensaml.xml.signature.Signature.DEFAULT_ELEMENT_NAME);
+		signature.setSigningCredential(credential);
+		signature.setSignatureAlgorithm(this.samlSettings.getSigAlgUrl());
+		signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+
+		SecurityConfiguration secConfig = Configuration.getGlobalSecurityConfiguration();
+		SecurityHelper.prepareSignatureParams(signature, credential, secConfig, null);
+		authReq.setSignature(signature);
+		Configuration.getMarshallerFactory().getMarshaller(authReq).marshall(authReq);
+		Signer.signObject(signature);
+
+		String signedRequest = convertDocumentToString(authReq.getDOM().getOwnerDocument());
+		log.info("\n\n**************************\nSigned Post AuthnRequest:\n" + signedRequest + "\n**************************\n\n");
+
+		return signedRequest;
+	}
+	static protected XMLObject string2XMLObject(String val) throws WSSecurityException {
+		Document eaRequest = convertStringToDocument(val);
+		Element ar = eaRequest.getDocumentElement();
+		if (null != ar)
+			log.debug("AuthnRequest: \n" + convertDocumentToString(ar.getOwnerDocument()));
+		else
+			log.error("XML Object element is null!");
+		return OpenSAMLUtil.fromDom(ar);
+	}
+	static protected String convertDocumentToString(Document doc) {
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer transformer;
+		try {
+			transformer = tf.newTransformer();
+			// below code to remove XML declaration
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			StringWriter writer = new StringWriter();
+			transformer.transform(new DOMSource(doc), new StreamResult(writer));
+			String output = writer.getBuffer().toString();
+			return output;
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	static protected Document convertStringToDocument(String xmlStr) {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder;
+
+		try {
+			factory.setNamespaceAware(true);
+			builder = factory.newDocumentBuilder();
+			Document doc = builder.parse(new InputSource(new StringReader(xmlStr)));
+			return doc;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	static protected String b64compressed(boolean compress, byte[] val) throws IOException {
+		if(compress) val = CompressionHelper.deflate(val, true);
+		String base64 = Base64.encodeBase64String(val);
+		return base64;
+	}
 }

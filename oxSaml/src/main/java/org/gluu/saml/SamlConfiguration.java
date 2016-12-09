@@ -6,8 +6,23 @@
 
 package org.gluu.saml;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+
+import org.apache.ws.security.saml.ext.OpenSAMLUtil;
+import org.opensaml.xml.security.credential.BasicCredential;
+import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.security.credential.UsageType;
+import org.opensaml.xml.signature.SignatureConstants;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.exception.CloneFailedException;
@@ -15,7 +30,7 @@ import org.xdi.util.security.CertificateHelper;
 
 /**
  * Configuration settings
- * 
+ *
  * @author Yuriy Movchan Date: 24/04/2014
  */
 public class SamlConfiguration {
@@ -26,6 +41,12 @@ public class SamlConfiguration {
 	private String nameIdentifierFormat;
 	private X509Certificate certificate;
 	private boolean useRequestedAuthnContext;
+
+	protected PrivateKey privateKey;
+	protected String _sigAlg = "SHA256withRSA";
+	protected String _sigAlgUrl = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+
+
 
 	public String getIdpSsoTargetUrl() {
 		return idpSsoTargetUrl;
@@ -88,4 +109,56 @@ public class SamlConfiguration {
 		}
 	}
 
+
+	public String getSigAlg() {
+		return _sigAlg;
+	}
+	public void setSigAlg(String val) {
+		this._sigAlg = val;
+	}
+
+	public String getSigAlgUrl() {
+		return _sigAlgUrl;
+	}
+	public void setSigAlgUrl(String val) {
+		this._sigAlgUrl = val;
+	}
+
+	public PrivateKey getPrivateKey() {
+		return privateKey;
+	}
+	public void setPrivateKey(PrivateKey val) {
+		this.privateKey = val;
+	}
+
+	/**
+	 * loads the private key for digital signature
+	 * @param prvKeyPath file path to location of private key
+	 * @throws Exception
+	 */
+	public void loadPrivateKey(String prvKeyPath) throws Exception {
+		OpenSAMLUtil.initSamlEngine();
+
+		File privKeyFile = new File(prvKeyPath);
+		BufferedInputStream bis = null;
+		try {
+			bis = new BufferedInputStream(new FileInputStream(privKeyFile));
+		} catch (FileNotFoundException e) {
+			throw new Exception("Could not locate keyfile at '" + prvKeyPath + "'", e);
+		}
+		byte[] privKeyBytes = new byte[(int) privKeyFile.length()];
+		bis.read(privKeyBytes);
+		bis.close();
+		KeySpec ks = new PKCS8EncodedKeySpec(privKeyBytes);
+		KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+		privateKey = keyFactory.generatePrivate(ks);
+	}
+
+	protected Credential getCredential() {
+		BasicCredential credential = new BasicCredential();
+		credential.setPublicKey(certificate.getPublicKey());
+		credential.setPrivateKey(privateKey);
+		credential.setUsageType(UsageType.SIGNING);
+		return credential;
+	}
 }
