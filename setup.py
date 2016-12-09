@@ -447,6 +447,7 @@ class Setup(object):
         self.logIt("Changing ownership")
         realCertFolder = os.path.realpath(self.certFolder)
         realConfigFolder = os.path.realpath(self.configFolder)
+        realAsimbaJks = os.path.realpath(self.asimbaJksFn)
 
         self.run([self.cmd_chown, '-R', 'jetty:jetty', realCertFolder])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', realConfigFolder])
@@ -455,6 +456,9 @@ class Setup(object):
         # Set right permissions
         self.run([self.cmd_chmod, '-R', '550', realCertFolder])
         self.run([self.cmd_chmod, 'u+X', realCertFolder])
+        
+        # Set write permission for Asimba's keystore (oxTrust can change it)
+        self.run([self.cmd_chmod, 'u+w', realAsimbaJks])
 
         if self.installOxAuth:
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxauth_openid_jwks_fn])
