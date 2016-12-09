@@ -46,7 +46,7 @@ import org.xml.sax.SAXException;
 
 /**
  * Loads and validates SAML response
- * 
+ *
  * @author Yuriy Movchan Date: 24/04/2014
  */
 public class Response {
@@ -163,8 +163,8 @@ public class Response {
 			for (int j = 0; j < nameChildNodes.getLength(); j++) {
 				Node nameChildNode = nameChildNodes.item(j);
 
-				if (nameChildNode.getNamespaceURI().equalsIgnoreCase("urn:oasis:names:tc:SAML:2.0:assertion")
-						&& nameChildNode.getLocalName().equals("AttributeValue")) {
+				if ("urn:oasis:names:tc:SAML:2.0:assertion".equalsIgnoreCase(nameChildNode.getNamespaceURI())
+						&& "AttributeValue".equals(nameChildNode.getLocalName())) {
 					NodeList valueChildNodes = nameChildNode.getChildNodes();
 					for (int k = 0; k < valueChildNodes.getLength(); k++) {
 						Node valueChildNode = valueChildNodes.item(k);
