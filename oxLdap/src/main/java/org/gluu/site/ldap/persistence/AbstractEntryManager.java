@@ -113,11 +113,10 @@ public abstract class AbstractEntryManager implements EntityManager {
 			// attributes from LDAP
 			attributesFromLdap = new ArrayList<AttributeData>();
 		} else {
-			String[] currentLdapReturnAttributes = null;
 			List<String> currentLdapReturnAttributesList = getLdapAttributesList(entry, propertiesAnnotations, false);
 			currentLdapReturnAttributesList.add("objectClass");
 
-			attributesFromLdap = find(dnValue.toString(), currentLdapReturnAttributes);
+			attributesFromLdap = find(dnValue.toString(), currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
 		}
 		Map<String, AttributeData> attributesFromLdapMap = getAttributesMap(attributesFromLdap);
 

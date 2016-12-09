@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
+import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.util.StringHelper;
@@ -26,6 +27,9 @@ public class CustomEntry extends BaseEntry implements Serializable {
 
 	@LdapAttributesList(name = "name", value = "values", sortByName = true)
 	private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+
+    @LdapCustomObjectClass
+    private String[] customObjectClasses;
 
 	public List<CustomAttribute> getCustomAttributes() {
 		return customAttributes;
@@ -47,6 +51,14 @@ public class CustomEntry extends BaseEntry implements Serializable {
 
 	public void setCustomAttributes(List<CustomAttribute> customAttributes) {
 		this.customAttributes = customAttributes;
+	}
+
+	public String[] getCustomObjectClasses() {
+		return customObjectClasses;
+	}
+
+	public void setCustomObjectClasses(String[] customObjectClasses) {
+		this.customObjectClasses = customObjectClasses;
 	}
 
 }
