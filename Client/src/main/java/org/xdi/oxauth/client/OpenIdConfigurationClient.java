@@ -78,7 +78,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getStringHeaders());
+            getResponse().setHeaders(clientResponse.getResponseHeaders());
             if (StringUtils.isNotBlank(entity)) {
                 JSONObject jsonObj = new JSONObject(entity);
 

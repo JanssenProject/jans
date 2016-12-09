@@ -95,7 +95,7 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
 
             String entity = clientResponse1.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse1.getStringHeaders());
+            getResponse().setHeaders(clientResponse1.getResponseHeaders());
             if (StringUtils.isNotBlank(entity)) {
                 JSONObject jsonObj = new JSONObject(entity);
                 getResponse().setSubject(jsonObj.getString(SUBJECT));
