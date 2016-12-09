@@ -28,6 +28,10 @@ public class ClientUtils {
         System.out.println("RESPONSE:");
         System.out.println("-------------------------------------------------------");
         System.out.println(client.getResponseAsString());
+		if (client.getResponse() != null) {
+			System.out.println("RAW HEADERS:");
+			System.out.println(client.getResponse().getHeaders());
+		}
         System.out.println("");
     }
 
