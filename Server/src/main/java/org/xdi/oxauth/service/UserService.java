@@ -36,6 +36,8 @@ import java.util.List;
 @AutoCreate
 public class UserService {
 
+	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
+
     @Logger
     private Log log;
 

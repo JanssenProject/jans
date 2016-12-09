@@ -369,6 +369,7 @@ public class AuthenticationService {
     private void updateLastLogonUserTime(User user) {
         CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
+		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
 
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
         customEntry.getCustomAttributes().add(customAttribute);
