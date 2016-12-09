@@ -85,7 +85,7 @@ public class ValidateTokenClient extends BaseClient<ValidateTokenRequest, Valida
             int status = clientResponse.getStatus();
 
             setResponse(new ValidateTokenResponse(status));
-            getResponse().setHeaders(clientResponse.getStringHeaders());
+            getResponse().setHeaders(clientResponse.getResponseHeaders());
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
