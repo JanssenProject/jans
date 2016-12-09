@@ -70,7 +70,7 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
             int status = clientResponse.getStatus();
 
             setResponse(new JwkResponse(status));
-            getResponse().setHeaders(clientResponse.getHeaders());
+            getResponse().setHeaders(clientResponse.getStringHeaders());
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
