@@ -33,10 +33,10 @@ public abstract class BaseResponse {
         if (clientResponse != null) {
             status = clientResponse.getStatus();
             if (clientResponse.getLocation() != null) {
-                location = clientResponse.getLocationLink().getHref();
+                location = clientResponse.getLocation().getHref();
             }
             entity = clientResponse.getEntity(String.class);
-            headers = clientResponse.getResponseHeaders();
+            headers = clientResponse.getHeaders();
         }
     }
 
