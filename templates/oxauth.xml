@@ -1,3 +1,0 @@
-<Context>
-    <Environment name="com.sun.faces.ClientStateSavingPassword" value="%(oxauth_jsf_salt)s" type="java.lang.String" override="false"/>
-</Context>
