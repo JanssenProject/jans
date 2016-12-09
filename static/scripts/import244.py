@@ -163,7 +163,7 @@ def startOpenDJ():
 def stopOpenDJ():
     logging.info('Stopping Directory Server ...')
     if (os.path.isfile('/usr/bin/systemctl')):
-        getOuput(['systemctl', 'stop', 'opendj'])
+        getOutput(['systemctl', 'stop', 'opendj'])
         output = getOutput(['systemctl', 'statuc', 'opendj.service'])
     else:
         output = getOutput([service, 'opendj', 'stop'])
