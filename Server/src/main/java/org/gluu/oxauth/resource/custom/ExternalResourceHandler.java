@@ -116,7 +116,7 @@ public class ExternalResourceHandler extends ResourceResolver {
             log.debug("updating pages.xml file: " + pageXMLFile.getAbsolutePath());
 
             Pages pages = Pages.instance();
-            updateCachedPage(pages, stream, viewId);
+            updateCachedPageOrThrow(pages, stream, viewId);
             updatePageStacksOrThrow(pages, viewId, getUpdatedPageOrThrow(pages, viewId));
 
             pagesUpdateByViewId.put(viewId, true);
@@ -155,7 +155,7 @@ public class ExternalResourceHandler extends ResourceResolver {
      * @param viewId - a JSF view id.
      * @throws Exception
      */
-    private void updateCachedPage(Pages pages, InputStream stream, String viewId) throws Exception {
+    private void updateCachedPageOrThrow(Pages pages, InputStream stream, String viewId) throws Exception {
         Method method = pages.getClass().getDeclaredMethod("parse", InputStream.class, String.class);
         method.setAccessible(true);
         method.invoke(pages, stream, viewId);
