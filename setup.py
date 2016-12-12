@@ -975,6 +975,9 @@ class Setup(object):
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
+        if os.path.exists(jettyServiceConfiguration+"_web_resources.xml"):
+            self.copyFile(jettyServiceConfiguration+"_web_resources.xml", self.jetty_base+"/"+serviceName+"/webapps")
+
         self.run([self.cmd_ln, '-sf', '%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName])
 
         # Enable service autoload on Gluu-Server startup
