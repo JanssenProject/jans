@@ -1626,7 +1626,7 @@ class Setup(object):
             self.logIt("Running npm install in %s" % self.gluu_passport_base)
 
             nodeEnv = os.environ.copy()
-            nodeEnv['PATH'] = '%s/bin:' % self.node_home + jettyEnv['PATH']
+            nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
 
             self.run(['npm', 'install'], self.gluu_passport_base, jettyEnv, True)
         except:
@@ -2160,6 +2160,8 @@ class Setup(object):
                if self.os_type == 'ubuntu':
                    self.copyFile(self.rsyslogUbuntuInitFile, "/etc/init.d")
                    self.removeFile("/etc/init/rsyslog.conf")
+                   rsyslogFn = os.path.split(self.rsyslogUbuntuInitFile)[-1]
+                   self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % rsyslogFn])
 
                self.run([service_path, 'rsyslog', 'restart'])
                self.run([service_path, 'solserver', 'start'])
