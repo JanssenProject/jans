@@ -82,10 +82,6 @@
     "idpLdapServer":"localhost:1636",
     "idpUserFields":"",
 
-    "mysqlUrl":"",
-    "mysqlUser":"",
-    "mysqlPassword":"",
-
     "ldifStore":"/var/ox/oxtrust/removed",
 
     "caCertsLocation":"/usr/java/latest/jre/lib/security/cacerts",
