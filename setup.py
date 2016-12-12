@@ -147,7 +147,7 @@ class Setup(object):
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
-        self.distWarFolder = '%s/war' % self.distFolder
+        self.distWebFolder = '%s/web' % self.distFolder
         self.distTmpFolder = '%s/tmp' % self.distFolder
 
         self.setup_properties_fn = '%s/setup.properties' % self.install_dir
@@ -1013,35 +1013,35 @@ class Setup(object):
     def downloadWarFiles(self):
         if self.downloadWars:
             print "Downloading oxAuth war file..."
-            self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distAppFolder])
+            self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distWebFolder])
             print "Downloading oxTrust war file..."
-            self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distAppFolder])
+            self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distWebFolder])
             print "Downloading CAS war file..."
-            self.run(['/usr/bin/wget', self.cas_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distAppFolder])
+            self.run(['/usr/bin/wget', self.cas_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distWebFolder])
 
             print "Finished downloading latest war files"
 
         if self.installAsimba:
             # Asimba is not part of CE package. We need to download it if needed
-            distAsimbaPath = '%s/%s' % (self.distWarFolder, "asimba.war")
+            distAsimbaPath = '%s/%s' % (self.distWebFolder, "asimba.war")
             if not os.path.exists(distAsimbaPath):
                 print "Downloading Asimba war file..."
-                self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distWarFolder])
+                self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distWebFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
-            distOxAuthRpPath = '%s/%s' % (self.distWarFolder, "oxauth-rp.war")
+            distOxAuthRpPath = '%s/%s' % (self.distWebFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
                 print "Downloading oxAuth RP war file..."
-                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWarFolder])
+                self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distWebFolder])
 
         if self.downloadWars and self.installSaml:
             print "Downloading Shibboleth IDP v3 war file..."
-            self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distWarFolder])
+            self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distWebFolder])
             print "Downloading Shibboleth IDP v3 keygenerator..."
-            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/idp3_cml_keygenerator.jar'])
+            self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWebFolder + '/idp3_cml_keygenerator.jar'])
             print "Downloading Shibboleth IDP v3 binary distributive file..."
-            self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWarFolder + '/shibboleth-idp.jar'])
+            self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distWebFolder + '/shibboleth-idp.jar'])
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
@@ -1402,9 +1402,9 @@ class Setup(object):
         self.logIt("Preparing files needed to run OpenId keys generator")
         # Unpack oxauth.war to get libs needed to run key generator
         oxauthWar = 'oxauth.war'
-        distOxAuthPath = '%s/%s' % (self.distWarFolder, oxauthWar)
+        distOxAuthPath = '%s/%s' % (self.distWebFolder, oxauthWar)
 
-        tmpOxAuthDir = '%s/tmp_oxauth' % self.distWarFolder
+        tmpOxAuthDir = '%s/tmp_oxauth' % self.distWebFolder
 
         self.logIt("Unpacking %s..." % oxauthWar)
         self.removeDirs(tmpOxAuthDir)
@@ -1452,7 +1452,7 @@ class Setup(object):
         self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/oxauth.war' % self.distWarFolder, jettyServiceWebapps)
+        self.copyFile('%s/oxauth.war' % self.distWebFolder, jettyServiceWebapps)
 
     def install_oxtrust(self):
         self.logIt("Copying oxauth.war into jetty webapps folder...")
@@ -1461,7 +1461,7 @@ class Setup(object):
         self.installJettyService(self.jetty_app_configuration[jettyServiceName], True)
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/identity.war' % self.distWarFolder, jettyServiceWebapps)
+        self.copyFile('%s/identity.war' % self.distWebFolder, jettyServiceWebapps)
 
     def install_saml(self):
         if self.installSaml:
@@ -1469,9 +1469,9 @@ class Setup(object):
 
             # Put latest SAML templates
             identityWar = 'identity.war'
-            distIdentityPath = '%s/%s' % (self.distWarFolder, identityWar)
+            distIdentityPath = '%s/%s' % (self.distWebFolder, identityWar)
 
-            tmpIdentityDir = '%s/tmp_identity' % self.distWarFolder
+            tmpIdentityDir = '%s/tmp_identity' % self.distWebFolder
 
             self.logIt("Unpacking %s from %s..." % ('oxtrust-configuration.jar', identityWar))
             self.removeDirs(tmpIdentityDir)
@@ -1502,7 +1502,7 @@ class Setup(object):
             self.removeDirs(tmpIdentityDir)
 
             # unpack IDP3 JAR with static configs
-            self.run([self.cmd_jar, 'xf', self.distWarFolder + '/shibboleth-idp.jar'], '/opt')
+            self.run([self.cmd_jar, 'xf', self.distWebFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
 
             # copy templates
@@ -1526,17 +1526,17 @@ class Setup(object):
             # update IDP3 metadata
             self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder)
 
-            self.idpWarFullPath = '%s/idp.war' % self.distWarFolder
+            self.idpWarFullPath = '%s/idp.war' % self.distWebFolder
 
             # generate new keystore with AES symmetric key
             # there is one throuble with IDP3 - it doesn't load keystore from /etc/certs. It acceptas %{idp.home}/credentials/sealer.jks  %{idp.home}/credentials/sealer.kver format only.
-            self.run([self.cmd_java,'-classpath', self.distWarFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
+            self.run([self.cmd_java,'-classpath', self.distWebFolder + '/idp3_cml_keygenerator.jar', 'org.xdi.oxshibboleth.keygenerator.KeyGenerator', self.idp3CredentialsFolder, self.shibJksPass], self.idp3CredentialsFolder)
 
             jettyIdpServiceName = 'idp'
             jettyIdpServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyIdpServiceName)
 
             self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName])
-            self.copyFile('%s/idp.war' % self.distWarFolder, jettyIdpServiceWebapps)
+            self.copyFile('%s/idp.war' % self.distWebFolder, jettyIdpServiceWebapps)
 
             # chown -R jetty:jetty /opt/shibboleth-idp
             # self.run([self.cmd_chown,'-R', 'jetty:jetty', self.idp3Folder], '/opt')
@@ -1544,7 +1544,7 @@ class Setup(object):
 
     def install_asimba(self):
         asimbaWar = 'asimba.war'
-        distAsimbaPath = '%s/%s' % (self.distWarFolder, asimbaWar)
+        distAsimbaPath = '%s/%s' % (self.distWebFolder, asimbaWar)
         
         self.logIt("Configuring Asimba...")
         self.removeDirs(self.asimba_conf_folder)
@@ -1560,7 +1560,7 @@ class Setup(object):
 
     def install_cas(self):
         casWar = 'cas.war'
-        distCasPath = '%s/%s' % (self.distWarFolder, casWar)
+        distCasPath = '%s/%s' % (self.distWebFolder, casWar)
         tmpCasDir = '%s/tmp_cas' % self.distTmpFolder
 
         self.logIt("Unpacking %s..." % casWar)
@@ -1598,7 +1598,7 @@ class Setup(object):
 
     def install_oxauth_rp(self):
         oxAuthRPWar = 'oxauth-rp.war'
-        distOxAuthRpPath = '%s/%s' % (self.distWarFolder, oxAuthRPWar)
+        distOxAuthRpPath = '%s/%s' % (self.distWebFolder, oxAuthRPWar)
 
         self.logIt("Copying oxauth-rp.war into jetty webapps folder...")
 
@@ -1606,7 +1606,7 @@ class Setup(object):
         self.installJettyService(self.jetty_app_configuration[jettyServiceName])
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
+        self.copyFile('%s/oxauth-rp.war' % self.distWebFolder, jettyServiceWebapps)
 
     def install_passport(self):
         self.logIt("Installing Passport...")
@@ -1617,7 +1617,7 @@ class Setup(object):
         passportArchive = 'passport.tgz'
         try:
             self.logIt("Extracting %s into %s" % (passportArchive, self.gluu_passport_base))
-            self.run(['tar', '-xzf', '%s/%s' % (self.distWarFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run(['tar', '-xzf', '%s/%s' % (self.distWebFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % passportArchive)
             self.logIt(traceback.format_exc(), True)
