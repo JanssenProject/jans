@@ -2,26 +2,31 @@ package org.xdi.oxauth.model.audit;
 
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.util.ServerUtil;
 
 import java.util.Date;
 
 
 public class OAuth2AuditLog {
 
-    private String ip;
-    private Date timestamp;
+    private final String ip;
+    private final Action action;
+    private final Date timestamp;
+    private final String macAddress;
     private boolean isSuccess;
 
+
     private String clientId;
-    private Action action;
+
     private String username;
     private String scope;
 
     public OAuth2AuditLog(String ip, Action action) {
         this.ip = ip;
         this.action = action;
-        this.isSuccess = false;
         this.timestamp = new Date();
+        this.macAddress = ServerUtil.getMACAddressOrNull();
+        this.isSuccess = false;
     }
 
     public void updateOAuth2AuditLog(AuthorizationGrant authorizationGrant, boolean success) {
@@ -35,16 +40,16 @@ public class OAuth2AuditLog {
         return ip;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
     public Action getAction() {
         return action;
     }
 
-    public void setAction(Action action) {
-        this.action = action;
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public String getMacAddress() {
+        return macAddress;
     }
 
     public boolean isSuccess() {
@@ -55,14 +60,6 @@ public class OAuth2AuditLog {
         isSuccess = success;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getClientId() {
         return clientId;
     }
@@ -71,19 +68,19 @@ public class OAuth2AuditLog {
         this.clientId = clientId;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getScope() {
         return scope;
     }
 
     public void setScope(String scope) {
         this.scope = scope;
-    }
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
     }
 }
