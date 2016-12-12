@@ -1628,7 +1628,7 @@ class Setup(object):
             nodeEnv = os.environ.copy()
             nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
 
-            self.run(['npm', 'install'], self.gluu_passport_base, jettyEnv, True)
+            self.run(['npm', 'install'], self.gluu_passport_base, nodeEnv, True)
         except:
             self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
             self.logIt(traceback.format_exc(), True)
