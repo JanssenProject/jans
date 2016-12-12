@@ -25,7 +25,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for SSO with Multiple Backend Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version December 9, 2016
+ * @version December 12, 2016
  */
 public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
@@ -227,12 +227,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         authorizationRequest1.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
         authorizationRequest1.setRequestSessionState(true);
 
-        AuthorizeClient authorizeClient1 = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient1.setRequest(authorizationRequest1);
-        AuthorizationResponse authorizationResponse1 = authorizeClient1.exec();
+        AuthorizationResponse authorizationResponse1 = authorizationRequestAndGrantAccess(
+                authorizationEndpoint, authorizationRequest1);
 
-        showClient(authorizeClient1);
-        assertEquals(authorizationResponse1.getStatus(), 302);
         assertNotNull(authorizationResponse1.getLocation(), "The location is null");
         assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
         assertNotNull(authorizationResponse1.getSessionState(), "The session id is null");
