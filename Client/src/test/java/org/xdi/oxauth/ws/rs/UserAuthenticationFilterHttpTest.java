@@ -24,7 +24,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version December 9, 2016
+ * @version December 12, 2016
  */
 public class UserAuthenticationFilterHttpTest extends BaseTest {
 
@@ -273,12 +273,9 @@ public class UserAuthenticationFilterHttpTest extends BaseTest {
         authorizationRequest.addCustomParameter("inum", userInum);
         authorizationRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authorizationRequestAndGrantAccess(
+                authorizationEndpoint, authorizationRequest);
 
-        showClient(authorizeClient);
-        assertEquals(authorizationResponse.getStatus(), 302);
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
