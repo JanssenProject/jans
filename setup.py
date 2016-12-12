@@ -105,6 +105,7 @@ class Setup(object):
         self.shibboleth_version = ''
 
         self.node_home = '/opt/node'
+        self.node_base = '/opt/web/node'
 
         self.jetty_dist = '/opt/jetty-9.3'
         self.jetty_home = '/opt/jetty'
@@ -340,6 +341,7 @@ class Setup(object):
         self.scim_rp_client_jks_pass = 'secret'
 
         # oxPassport Configuration
+        self.gluu_passport_base = '%s/passport' % self.node_base
         self.ldif_passport_config = '%s/oxpassport-config.ldif' % self.outputFolder
 
         self.passport_rs_client_id = None
@@ -881,7 +883,7 @@ class Setup(object):
         jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
         jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
         try:
-            self.logIt("Extracting %s in /opt/" % jreArchive)
+            self.logIt("Extracting %s into /opt/" % jreArchive)
             self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % jreArchive)
@@ -944,6 +946,9 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % nodeDestinationPath])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', nodeDestinationPath])
         self.run([self.cmd_chown, '-h', 'jetty:jetty', self.node_home])
+
+        self.run([self.cmd_mkdir, '-p', self.node_base])
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', self.node_base])
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False):
         serviceName = serviceConfiguration['name']
@@ -1604,11 +1609,29 @@ class Setup(object):
         self.copyFile('%s/oxauth-rp.war' % self.distWarFolder, jettyServiceWebapps)
 
     def install_passport(self):
-        self.logIt("Installing npm and Node.Js...")
-        # TODO
-
         self.logIt("Installing Passport...")
-        # TODO
+
+        self.logIt("Preparing passport service base folders")
+        self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
+
+        passportArchive = 'passport.tgz'
+        try:
+            self.logIt("Extracting %s into %s" % (passportArchive, self.gluu_passport_base))
+            self.run(['tar', '-xzf', '%s/%s' % (self.distWarFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+        except:
+            self.logIt("Error encountered while extracting archive %s" % passportArchive)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            self.logIt("Running npm install in %s" % self.gluu_passport_base)
+
+            nodeEnv = os.environ.copy()
+            nodeEnv['PATH'] = '%s/bin:' % self.node_home + jettyEnv['PATH']
+
+            self.run(['npm', 'install'], self.gluu_passport_base, jettyEnv, True)
+        except:
+            self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
+            self.logIt(traceback.format_exc(), True)
 
         self.logIt("Preparing Passport OpenID RP certificate...")
         passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
