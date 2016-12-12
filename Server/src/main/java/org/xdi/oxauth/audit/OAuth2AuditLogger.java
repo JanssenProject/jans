@@ -68,7 +68,12 @@ public class OAuth2AuditLogger {
     }
 
     private synchronized boolean tryToEstablishJMSConnection() {
-        destroy();
+    	// Check if another thread init JMS pool already
+		if (this.pooledConnectionFactory != null && !isJmsConfigChanged()) {
+			return true;
+		}
+
+		destroy();
 
         Set<String> jmsBrokerURISet = getJmsBrokerURISet();
         if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging()) || CollectionUtils.isEmpty(jmsBrokerURISet))
