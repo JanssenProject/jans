@@ -1,8 +1,9 @@
+package org.xdi.service.metric;
 /*
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.service.metric;
+ */
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;

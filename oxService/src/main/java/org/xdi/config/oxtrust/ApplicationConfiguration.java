@@ -88,10 +88,6 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String gluuSpCert;
 
-	private String mysqlUrl;
-	private String mysqlUser;
-	private String mysqlPassword;
-
 	private String shibboleth3FederationRootDir;
 
 	private String caCertsLocation;
@@ -527,30 +523,6 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setGluuSpCert(String gluuSpCert) {
 		this.gluuSpCert = gluuSpCert;
-	}
-
-	public String getMysqlUrl() {
-		return mysqlUrl;
-	}
-
-	public void setMysqlUrl(String mysqlUrl) {
-		this.mysqlUrl = mysqlUrl;
-	}
-
-	public String getMysqlUser() {
-		return mysqlUser;
-	}
-
-	public void setMysqlUser(String mysqlUser) {
-		this.mysqlUser = mysqlUser;
-	}
-
-	public String getMysqlPassword() {
-		return mysqlPassword;
-	}
-
-	public void setMysqlPassword(String mysqlPassword) {
-		this.mysqlPassword = mysqlPassword;
 	}
 
 	public String getShibboleth3FederationRootDir() {
