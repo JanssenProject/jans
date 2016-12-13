@@ -18,10 +18,7 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
@@ -39,7 +36,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for Token Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version December 12, 2016
+ * @version December 13, 2016
  */
 public class TokenRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -360,9 +357,10 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
         }.run();
     }
 
-    @Parameters({"registerPath", "redirectUris"})
+    @Parameters({"registerPath", "redirectUris", "sectorIdentifierUri"})
     @Test
-    public void requestLongLivedAccessTokenStep1(final String registerPath, final String redirectUris) throws Exception {
+    public void requestLongLivedAccessTokenStep1(final String registerPath, final String redirectUris,
+                                                 final String sectorIdentifierUri) throws Exception {
 
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
                 ResourceRequestEnvironment.Method.POST, registerPath) {
@@ -381,6 +379,9 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
                     registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+                    registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+                    registerRequest.setSubjectType(SubjectType.PAIRWISE);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
