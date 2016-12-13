@@ -106,6 +106,7 @@ class Setup(object):
 
         self.node_home = '/opt/node'
         self.node_base = '/opt/web/node'
+        self.node_user_home = '/home/node'
 
         self.jetty_dist = '/opt/jetty-9.3'
         self.jetty_home = '/opt/jetty'
@@ -1691,6 +1692,7 @@ class Setup(object):
     def createUsers(self):
         self.createUser('ldap', self.ldap_user_home)
         self.createUser('jetty', self.jetty_user_home)
+        self.createUser('node', self.node_user_home)
 
     def makeFolders(self):
         try:
@@ -1698,6 +1700,8 @@ class Setup(object):
             self.run([self.cmd_chmod, 'ga+w', "/tmp"])
 
             # Create these folder on all instances
+            self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
+            self.run([self.cmd_mkdir, '-p', self.gluuOptBinFolder])
             self.run([self.cmd_mkdir, '-p', self.configFolder])
             self.run([self.cmd_mkdir, '-p', self.certFolder])
             self.run([self.cmd_mkdir, '-p', self.outputFolder])
@@ -1709,8 +1713,6 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', osDefault])
 
             if self.installOxTrust | self.installOxAuth:
-                self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
-                self.run([self.cmd_mkdir, '-p', self.gluuOptBinFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxPhotosFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustCacheRefreshFolder])
