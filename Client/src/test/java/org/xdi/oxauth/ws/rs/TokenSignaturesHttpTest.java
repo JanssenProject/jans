@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version November 30, 2016
  */
 public class TokenSignaturesHttpTest extends BaseTest {
 
@@ -461,7 +461,6 @@ public class TokenSignaturesHttpTest extends BaseTest {
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES256);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -488,16 +487,10 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
-        authorizationRequest.setAuthUsername(userId);
-        authorizationRequest.setAuthPassword(userSecret);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
@@ -531,7 +524,6 @@ public class TokenSignaturesHttpTest extends BaseTest {
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES384);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -558,16 +550,10 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
-        authorizationRequest.setAuthUsername(userId);
-        authorizationRequest.setAuthPassword(userSecret);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
@@ -601,7 +587,6 @@ public class TokenSignaturesHttpTest extends BaseTest {
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.ES512);
-        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -628,16 +613,10 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.getPrompts().add(Prompt.NONE);
-        authorizationRequest.setAuthUsername(userId);
-        authorizationRequest.setAuthPassword(userSecret);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(authorizationRequest);
-        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
