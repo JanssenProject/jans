@@ -163,7 +163,7 @@ public class LogoutAction {
 
 				int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
 	            if (apiVersion < 3) {
-	            	// Not support redirec to external system at logout
+	            	// Not support redirect to external system at logout
 					return externalLogoutResult;
 	            }
 

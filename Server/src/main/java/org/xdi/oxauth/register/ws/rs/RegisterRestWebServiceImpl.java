@@ -17,7 +17,10 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
+import org.xdi.oxauth.audit.OAuth2AuditLogger;
 import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.model.audit.Action;
+import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
@@ -67,6 +70,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Logger
     private Log log;
     @In
+    private OAuth2AuditLogger oAuth2AuditLogger;
+    @In
     private ErrorResponseFactory errorResponseFactory;
     @In
     private ScopeService scopeService;
@@ -87,15 +92,15 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
         com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.DYNAMIC_CLIENT_REGISTRATION_RATE).time();
         try {
-            return registerClientImpl(requestParams, securityContext);
+            return registerClientImpl(requestParams, httpRequest, securityContext);
         } finally {
             timerContext.stop();
         }
     }
 
-    private Response registerClientImpl(String requestParams, SecurityContext securityContext) {
+    private Response registerClientImpl(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
         Response.ResponseBuilder builder = Response.ok();
-
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
             if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
                 final RegisterRequest r = RegisterRequest.fromJson(requestParams);
@@ -175,6 +180,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                             JSONObject jsonObject = getJSONObject(client);
                             builder.entity(jsonObject.toString(4).replace("\\/", "/"));
+
+                            oAuth2AuditLog.setClientId(client.getClientId());
+                            oAuth2AuditLog.setScope(clientScopesToString(client));
+                            oAuth2AuditLog.setSuccess(true);
                         }
                     } else {
                         log.trace("Client parameters are invalid, returns invalid_request error.");
@@ -204,6 +213,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
         builder.header("Pragma", "no-cache");
+        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
@@ -360,10 +370,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @Override
     public Response requestClientUpdate(String requestParams, String clientId, @HeaderParam("Authorization") String authorization, @Context HttpServletRequest httpRequest, @Context SecurityContext securityContext) {
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_UPDATE);
+        oAuth2AuditLog.setClientId(clientId);
         try {
             log.debug("Attempting to UPDATE client, client_id: {0}, requestParams = {1}, isSecure = {3}",
                     clientId, requestParams, securityContext.isSecure());
             final String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
+
             if (StringUtils.isNotBlank(accessToken) && StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(requestParams)) {
                 final RegisterRequest request = RegisterRequest.fromJson(requestParams);
                 if (request != null) {
@@ -377,6 +390,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         if (request.getSubjectType() != null
                                 && !ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(request.getSubjectType())) {
                             log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
+                            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
                                     entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA)).build();
                         }
@@ -385,9 +399,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         if (client != null) {
                             updateClientFromRequestObject(client, request);
                             clientService.merge(client);
+
+                            oAuth2AuditLog.setScope(clientScopesToString(client));
+                            oAuth2AuditLog.setSuccess(true);
+                            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.OK).entity(clientAsEntity(client)).build();
                         } else {
                             log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
+                            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
                                     entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_TOKEN)).build();
                         }
@@ -396,12 +415,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             log.debug("Client UPDATE : parameters are invalid. Returns BAD_REQUEST response.");
+            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
             return Response.status(Response.Status.BAD_REQUEST).
                     entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA)).build();
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
         return internalErrorResponse().build();
     }
 
@@ -413,11 +434,15 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 clientId, accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_READ);
+        oAuth2AuditLog.setClientId(clientId);
         try {
             if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
                 if (RegisterParamsValidator.validateParamsClientRead(clientId, accessToken)) {
                     Client client = clientService.getClient(clientId, accessToken);
                     if (client != null) {
+                        oAuth2AuditLog.setScope(clientScopesToString(client));
+                        oAuth2AuditLog.setSuccess(true);
                         builder.entity(clientAsEntity(client));
                     } else {
                         log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
@@ -448,6 +473,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         cacheControl.setNoStore(true);
         builder.cacheControl(cacheControl);
         builder.header("Pragma", "no-cache");
+        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
@@ -553,5 +579,18 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 }
             }
         }
+    }
+
+    private String clientScopesToString(Client client){
+        String[] scopeDns = client.getScopes();
+        if (scopeDns != null) {
+            String[] scopeNames = new String[scopeDns.length];
+            for (int i = 0; i < scopeDns.length; i++) {
+                Scope scope = scopeService.getScopeByDn(scopeDns[i]);
+                scopeNames[i] = scope.getDisplayName();
+            }
+            return StringUtils.join(scopeNames, " ");
+        }
+        return null;
     }
 }

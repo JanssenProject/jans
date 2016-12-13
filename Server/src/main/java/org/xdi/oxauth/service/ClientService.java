@@ -40,6 +40,8 @@ import java.util.*;
 @AutoCreate
 public class ClientService {
 
+	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "oxAuthClient" };
+
     public static final String EVENT_CLEAR_CLIENT_CACHE = "eventClearClient";
     private static final String CACHE_CLIENT_NAME = "ClientCache";
     private static final String CACHE_CLIENT_FILTER_NAME = "ClientFilterCache";
@@ -264,6 +266,7 @@ public class ClientService {
 
         CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(clientDn);
+		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", now);
