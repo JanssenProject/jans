@@ -6,19 +6,12 @@
 
 package org.xdi.oxauth.userinfo.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.*;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -33,6 +26,7 @@ public interface UserInfoRestWebService {
 
     @GET
     @Path("/userinfo")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @ApiOperation(
             value = "Returns Claims about the authenticated End-User.",
             notes = "The Access Token obtained from an OpenID Connect Authentication Request is sent as a Bearer Token.",
@@ -53,6 +47,7 @@ public interface UserInfoRestWebService {
             @ApiParam(value = "OAuth 2.0 Access Token.", required = true)
             String accessToken,
             @HeaderParam("Authorization") String authorization,
+            @Context HttpServletRequest request,
             @Context SecurityContext securityContext);
 
     @POST
@@ -77,5 +72,6 @@ public interface UserInfoRestWebService {
             @ApiParam(value = "OAuth 2.0 Access Token.", required = true)
             String accessToken,
             @HeaderParam("Authorization") String authorization,
+            @Context HttpServletRequest request,
             @Context SecurityContext securityContext);
 }

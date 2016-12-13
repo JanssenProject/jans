@@ -6,8 +6,14 @@ SMS to the person's mobile number.
 
 This script uses the Twilio service to send the message. You'll need to sign-up with Twilio to 
 get an account to acquire credentials to call the API. You'll also need to download the
-latest Twilio Java helper jar file with dependencies http://search.maven.org/#browse%7C-1416163511 
-and install it in /opt/tomcat/endorsed folder.
+latest Twilio Java helper jar file with dependencies http://search.maven.org/#search%7Cga%7C1%7Ccom.twilio.sdk 
+and install it in /var/webapps/gluu/oxauth/libs directory and restart Tomcat using the below command.
+
+service tomcat stop
+service tomcat start
+
+
+> **Note**: Indent and tabbing may change while copy, paste of the sample code, check for the tab before executing the sample code.
 
 There are three required custom properties:
     twilio_sid     Your account id at Twilio

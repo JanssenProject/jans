@@ -7,7 +7,4 @@
     	<Valve className="org.xdi.tomcat7.WantSslAuthenticator" />
      -->
 
-    <Loader className="org.apache.catalina.loader.VirtualWebappLoader"
-            virtualClasspath="${gluu.external.resource.base}/oxauth/libs/*.jar"/>
-
 </Context>
