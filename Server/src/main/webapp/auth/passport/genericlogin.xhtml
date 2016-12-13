@@ -46,7 +46,7 @@
                 var APIURL = window.location.origin;
 
                 var errormsg = window.location.href.split("=");
-                if(errormsg[1]){
+                if (errormsg[1]) {
                     history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/generic-login');
                     $('.errormsg').html(decodeURIComponent(errormsg[1]));
                     $('.errormsg').prop('style', 'display:block');
@@ -55,10 +55,10 @@
                 $(".provider").click(function () {
                     provider = $(this).attr("data-p");
                     $.ajax({
-                        url: APIURL + "/token",
+                        url: APIURL + "/passport/token",
                         success: function (result) {
                             token = result.token_;
-                            window.location.href = APIURL + "/auth/" + provider + "/" + token;
+                            window.location.href = APIURL + "/passport/auth/" + provider + "/" + token;
                         },
                         error: function (error) {
                             $('.errormsg').html("An unknown error occurred");
@@ -76,9 +76,9 @@
         <ul id="messages" class="message">
         </ul>
         <table border="0" align="center">
-        <tr>
-        <td>
-            <li class="errormsg" style="display:none">error message.</li>
+            <tr>
+                <td>
+                    <li class="errormsg" style="display:none">error message.</li>
                     <div>
                         <h:form id="loginForm">
                             <s:token/>
@@ -116,21 +116,21 @@
                                                 <h:outputText value=""/>
 
                                                 <h:outputLabel for="rememberMe"
-                                            </p>
-                                            value="#{messages['login.rememberMe']}"/>
-                                            <h:selectBooleanCheckbox id="rememberMe"
-                                                                     value="#{rememberMe.enabled}"/>
-                                            <h:outputText value=""/>
-                                        </h:panelGrid>
-                                    </div>
+                                                               value="#{messages['login.rememberMe']}"/>
+                                                <h:selectBooleanCheckbox id="rememberMe"
+                                                                         value="#{rememberMe.enabled}"/>
+                                                <h:outputText value=""/>
+                                            </h:panelGrid>
+                                        </div>
 
-                                    <s:div rendered='#{!empty client.getPolicyUri()}'>
-                                        <p>
-                                        <h:outputText value="#{messages['common.agreePolicy']}"/>
-                                        <a target="_blank" href='#{client.getPolicyUri()}'>
-                                            <h:outputText
-                                                    value="#{messages['common.privacyPolicy']}"/>
-                                        </a>
+                                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                                            <p>
+                                                <h:outputText value="#{messages['common.agreePolicy']}"/>
+                                                <a target="_blank" href='#{client.getPolicyUri()}'>
+                                                    <h:outputText
+                                                            value="#{messages['common.privacyPolicy']}"/>
+                                                </a>
+                                            </p>
                                         </s:div>
 
                                         <s:div rendered='#{!empty client.getTosUri()}'>
@@ -152,26 +152,33 @@
                                 </div>
                                 <div class="login-panel">
                                     <div id="signinButton">
-                                        <a data-p="twitter" class="provider" href="javascript:void(0);"
-                                           style="height:40px; width:120px"><img src="img/twitter.jpg" style="height:40px; width:40px"></img></a>
+                                        <a data-p="twitter" class="provider" href="javascript:void(0);" style="height:40px; width:120px">
+                                            <img alt="twitter" src="img/twitter.jpg" style="height:40px; width:40px"></img>
+                                        </a>
 
-                                        <a data-p="linkedin" class="provider" href="javascript:void(0);"
-                                           style="height:40px; width:120px"><img src="img/linkedin.png" style="height:40px; width:40px"></img></a>
+                                        <a data-p="linkedin" class="provider" href="javascript:void(0);" style="height:40px; width:120px">
+                                            <img alt="linkedin" src="img/linkedin.png" style="height:40px; width:40px"></img>
+                                        </a>
 
-                                        <a data-p="facebook" class="provider" href="javascript:void(0);"
-                                           style="height:40px; width:120px"><img src="img/facebook.png" style="height:40px; width:40px"></img></a>
+                                        <a data-p="facebook" class="provider" href="javascript:void(0);" style="height:40px; width:120px">
+                                            <img alt="facebook" src="img/facebook.png" style="height:40px; width:40px"></img>
+                                        </a>
 
-                                        <a data-p="google" class="provider" href="javascript:void(0);"
-                                           style="height:40px; width:120px"><img src="img/google.jpg" style="height:40px; width:40px"></img></a>
+                                        <a data-p="google" class="provider" href="javascript:void(0);" style="height:40px; width:120px">
+                                            <img alt="google" src="img/google.jpg" style="height:40px; width:40px"></img>
+                                        </a>
 
-                                        <a data-p="github" class="provider" href="javascript:void(0);"
-                                           style="height:40px; width:120px"><img src="img/github.png" style="height:40px; width:40px"></img></a>
+                                        <a data-p="github" class="provider" href="javascript:void(0);" style="height:40px; width:120px">
+                                            <img alt="google" src="img/github.png" style="height:40px; width:40px"></img>
+                                        </a>
 
-                                        <a data-p="tumblr" class="provider" href="javascript:void(0);"
-                                           style="height:40px; width:120px"><img src="img/tumblr.png" style="height:40px; width:40px"></img></a>
+                                        <a data-p="tumblr" class="provider" href="javascript:void(0);" style="height:40px; width:120px">
+                                            <img alt="tumblr" src="img/tumblr.png" style="height:40px; width:40px"></img>
+                                        </a>
 
-                                        <a data-p="yahoo" class="provider" href="javascript:void(0);"
-                                           style="height:40px; width:120px"><img src="img/yahoo.png" style="height:40px; width:40px"></img></a>
+                                        <a data-p="yahoo" class="provider" href="javascript:void(0);" style="height:40px; width:120px">
+                                            <img alt="yahoo" src="img/yahoo.png" style="height:40px; width:40px"></img>
+                                        </a>
                                     </div>
                                 </div>
                             </h:panelGroup>
