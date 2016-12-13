@@ -39,7 +39,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for Token Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 23, 2015
+ * @version December 12, 2016
  */
 public class TokenRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -70,6 +70,7 @@ public class TokenRestWebServiceEmbeddedTest extends BaseTest {
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);

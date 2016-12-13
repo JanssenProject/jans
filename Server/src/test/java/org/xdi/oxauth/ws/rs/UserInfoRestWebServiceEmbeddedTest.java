@@ -43,7 +43,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for User Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version December 12, 2016
  */
 public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -87,6 +87,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     registerRequest.setResponseTypes(responseTypes);
                     registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
                     registerRequest.setSubjectType(SubjectType.PAIRWISE);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
