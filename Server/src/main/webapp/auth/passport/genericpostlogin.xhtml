@@ -1,0 +1,113 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:c="http://java.sun.com/jstl/core"
+                xmlns:s="http://jboss.com/products/seam/taglib"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                template="/WEB-INF/incl/layout/template.xhtml">
+    <ui:define name="head">
+        <script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.11.3.min.js"></script>
+
+        <style type="text/css">
+            .login-panel {
+                border-style: solid;
+                border-width: 1px;
+                padding: 1px;
+                background-color: #FFFFFF;
+                border-color: #C4C0B9;
+            }
+
+            .login-panel-header {
+                background-color: #D4CFC7;
+                background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
+                background-position: left top;
+                background-repeat: repeat-x;
+                border-style: solid;
+                border-width: 1px;
+                padding: 2px;
+                border-color: #D4CFC7;
+                color: #000000;
+                font-family: Arial, Verdana, sans-serif;
+                font-size: 11px;
+                font-weight: bold;
+            }
+
+            .login-panel-body {
+                padding: 10px;
+                color: #000000;
+                font-family: Arial, Verdana, sans-serif;
+                font-size: 11px;
+            }
+        </style>
+        <script type="text/javascript">
+            jQuery(document).ready(function () {
+                var user = window.location.href.split("=");
+                history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/generic-post-login');
+                var userQueryString = decodeURIComponent(user[1]);
+                var userObj = JSON.parse(userQueryString.substring(0, userQueryString.indexOf('}') + 1));
+                document.getElementById('loginForm')["loginForm:userid"].value = userObj.id;
+                document.getElementById('loginForm')["loginForm:displayname"].value = userObj.name;
+                document.getElementById('loginForm')["loginForm:username"].value = userObj.username;
+                document.getElementById('loginForm')["loginForm:token"].value = userObj.accessToken;
+                document.getElementById('loginForm')["loginForm:provider"].value = userObj.provider;
+                document.getElementById('loginForm')["loginForm:givenname"].value = userObj.givenName;
+                document.getElementById('loginForm')["loginForm:familyname"].value = userObj.familyName;
+                document.getElementById('loginForm')["loginForm:name"].value = userObj.name;
+                if (userObj.email) {
+                    document.getElementById('loginForm')["loginForm:email"].value = userObj.email;
+                }
+                document.getElementById('loginForm')["loginForm:postForm"].click();
+            });
+        </script>
+    </ui:define>
+
+    <ui:define name="pageTitle">Passport - PostLogin</ui:define>
+
+    <ui:define name="body">
+        <h:form id="loginForm">
+            <s:token/>
+
+            <h:panelGroup rendered="#{not identity.loggedIn}">
+                <div class="login-panel">
+                    <div class="login-panel-header">Login (second step)</div>
+                    <div class="login-panel-body">
+                        <c:set var="client" value='#{clientService.getClient(redirect.parameters["client_id"])}'/>
+
+                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                            <h:graphicImage url='#{client.getLogoUri()}'/>
+                        </s:div>
+
+                        <p class="info">Please login here</p>
+
+                        <div class="dialog">
+                            <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
+                                <h:outputLabel for="email">Email</h:outputLabel>
+                                <h:inputText id="email"/>
+                                <h:inputHidden id="userid"/>
+                                <h:inputHidden id="displayname"/>
+                                <h:inputHidden id="username"/>
+                                <h:inputHidden id="token"/>
+                                <h:inputHidden id="provider"/>
+                                <h:inputHidden id="givenname"/>
+                                <h:inputHidden id="familyname"/>
+                                <h:inputHidden id="name"/>
+                            </h:panelGrid>
+                        </div>
+
+                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                            <p>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                            </p>
+                        </s:div>
+
+                        <div id="btn" class="actionButtons">
+                            <h:commandButton value="Login" id="postForm" action="#{authenticator.authenticate}"/>
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </h:form>
+
+    </ui:define>
+</ui:composition>

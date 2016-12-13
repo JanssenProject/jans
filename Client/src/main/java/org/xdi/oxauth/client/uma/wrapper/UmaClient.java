@@ -6,27 +6,48 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.uma.UmaScopeType;
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.model.util.Util;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.AuthorizationResponse;
+import org.xdi.oxauth.client.AuthorizeClient;
+import org.xdi.oxauth.client.TokenClient;
+import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.uma.exception.UmaException;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.uma.UmaScopeType;
+import org.xdi.oxauth.model.uma.wrapper.Token;
+import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.StringHelper;
+
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version June 19, 2015
  */
 
 public class UmaClient {
+
+	public static Token requestAat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
+        TokenRequest tokenRequest = TokenRequest.builder().aat().grantType(GrantType.CLIENT_CREDENTIALS).build();
+
+        return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
+	}
+
+	public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
+        TokenRequest tokenRequest = TokenRequest.builder().pat().grantType(GrantType.CLIENT_CREDENTIALS).build();
+
+        return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
+	}
 
     @Deprecated
     public static Token requestAat(final String authorizeUrl, final String tokenUrl,
@@ -182,5 +203,47 @@ public class UmaClient {
 
         return null;
     }
+
+	private static Token request(final String tokenUrl, final String clientKeyStoreFile,
+			final String clientKeyStorePassword, final String clientId, final String keyId, TokenRequest tokenRequest)
+			throws UmaException {
+		OxAuthCryptoProvider cryptoProvider;
+		try {
+			cryptoProvider = new OxAuthCryptoProvider(clientKeyStoreFile, clientKeyStorePassword, null);
+		} catch (Exception ex) {
+			throw new UmaException("Failed to initialize crypto provider");
+		}
+
+		try {
+			String tmpKeyId = keyId;
+	        if (StringHelper.isEmpty(tmpKeyId)) {
+	        	// Get first key
+	        	List<String> aliases = cryptoProvider.getKeyAliases();
+	        	if (aliases.size() > 0) {
+	        		tmpKeyId = aliases.get(0);
+	        	}
+	        }
+
+	        if (StringHelper.isEmpty(tmpKeyId)) {
+				throw new UmaException("UMA keyId is empty");
+			}
+
+	        SignatureAlgorithm algorithm = cryptoProvider.getSignatureAlgorithm(tmpKeyId);
+	
+	
+			tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+			tokenRequest.setAuthUsername(clientId);
+			tokenRequest.setCryptoProvider(cryptoProvider);
+			tokenRequest.setAlgorithm(algorithm);
+			tokenRequest.setKeyId(tmpKeyId);
+			tokenRequest.setAudience(tokenUrl);
+
+			Token umaPat = UmaClient.request(tokenUrl, tokenRequest);
+			
+			return umaPat;
+		} catch (Exception ex) {
+			throw new UmaException("Failed to obtain valid UMA PAT token", ex);
+		}
+	}
 
 }
