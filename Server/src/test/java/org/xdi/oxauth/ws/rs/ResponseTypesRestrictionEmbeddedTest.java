@@ -39,7 +39,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version @version June 23, 2015
+ * @version December 12, 2016
  */
 public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
 
@@ -77,6 +77,7 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
@@ -377,6 +378,7 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
@@ -686,6 +688,7 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
@@ -782,7 +785,7 @@ public class ResponseTypesRestrictionEmbeddedTest extends BaseTest {
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test
+    @Test(dependsOnMethods = "responseTypesTokenIdTokenStep2")
     public void responseTypesTokenIdTokenStep3(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri)
             throws Exception {

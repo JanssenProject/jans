@@ -51,7 +51,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for OpenID Request Object (embedded)
  *
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version December 12, 2016
  */
 public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
 
@@ -86,6 +86,7 @@ public class OpenIDRequestObjectEmbeddedTest extends BaseTest {
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
