@@ -6,22 +6,17 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.dev.HostnameVerifierType;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -30,15 +25,15 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for SSO with Multiple Backend Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version December 12, 2016
  */
 public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "hostnameVerifier", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
     public void sessionWorkFlow1(
             final String redirectUris, final String userId, final String userSecret, final String redirectUri,
-            final String hostnameVerifier, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("sessionWorkFlow1");
 
         // Register client
@@ -62,10 +57,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        DefaultHttpClient httpClient = createHttpClient(HostnameVerifierType.fromString(hostnameVerifier));
-        CookieStore cookieStore = new BasicCookieStore();
-        httpClient.setCookieStore(cookieStore);
-        ClientExecutor clientExecutor = new ApacheHttpClient4Executor(httpClient);
+        String state1 = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
@@ -74,23 +66,18 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
                 redirectUri,
                 null);
 
-        authorizationRequest1.setAuthUsername(userId);
-        authorizationRequest1.setAuthPassword(userSecret);
-        authorizationRequest1.getPrompts().add(Prompt.NONE);
-        authorizationRequest1.setState("af0ifjsldkj");
+        authorizationRequest1.setState(state1);
         authorizationRequest1.setRequestSessionState(true);
 
-        AuthorizeClient authorizeClient1 = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient1.setRequest(authorizationRequest1);
-        AuthorizationResponse authorizationResponse1 = authorizeClient1.exec(clientExecutor);
+        AuthorizationResponse authorizationResponse1 = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest1, userId, userSecret);
 
-        showClient(authorizeClient1);
-        assertEquals(authorizationResponse1.getStatus(), 302, "Unexpected response code: " + authorizationResponse1.getStatus());
         assertNotNull(authorizationResponse1.getLocation(), "The location is null");
         assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
         assertNotNull(authorizationResponse1.getSessionState(), "The session state is null");
-        assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertNotNull(authorizationResponse1.getScope(), "The scope is null");
+        assertNotNull(authorizationResponse1.getState(), "The state is null");
+        assertEquals(authorizationResponse1.getState(), state1);
 
         String code1 = authorizationResponse1.getCode();
         String sessionState = authorizationResponse1.getSessionState();
@@ -133,6 +120,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         //             TV side. Code 2                //
         ////////////////////////////////////////////////
 
+        String state2 = UUID.randomUUID().toString();
+
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
@@ -141,19 +130,20 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
                 null);
 
         authorizationRequest2.getPrompts().add(Prompt.NONE);
-        authorizationRequest2.setState("af0ifjsldkj");
+        authorizationRequest2.setState(state2);
         authorizationRequest2.setSessionState(sessionState);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec(clientExecutor);
+        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
         assertNotNull(authorizationResponse2.getLocation(), "The location is null");
         assertNotNull(authorizationResponse2.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse2.getState(), "The state is null");
         assertNotNull(authorizationResponse2.getScope(), "The scope is null");
+        assertNotNull(authorizationResponse2.getState(), "The state is null");
+        assertEquals(authorizationResponse2.getState(), state2);
 
         String code2 = authorizationResponse2.getCode();
 
@@ -191,11 +181,11 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         assertNotNull(userInfoResponse2.getClaim(JwtClaimName.EMAIL), "Unexpected result: email not found");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "hostnameVerifier", "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userInum", "userEmail", "sectorIdentifierUri"})
     @Test
     public void sessionWorkFlow2(
             final String redirectUris, final String redirectUri, final String userInum, final String userEmail,
-            final String hostnameVerifier, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("sessionWorkFlow2");
 
         // Register client
@@ -219,12 +209,9 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        DefaultHttpClient httpClient = createHttpClient(HostnameVerifierType.fromString(hostnameVerifier));
-        CookieStore cookieStore = new BasicCookieStore();
-        httpClient.setCookieStore(cookieStore);
-        ClientExecutor clientExecutor = new ApacheHttpClient4Executor(httpClient);
-
         // Authorization code flow to authenticate on B1
+
+        String state1 = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
@@ -236,21 +223,19 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         authorizationRequest1.addCustomParameter("mail", userEmail);
         authorizationRequest1.addCustomParameter("inum", userInum);
         authorizationRequest1.getPrompts().add(Prompt.NONE);
-        authorizationRequest1.setState("af0ifjsldkj");
+        authorizationRequest1.setState(state1);
         authorizationRequest1.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
         authorizationRequest1.setRequestSessionState(true);
 
-        AuthorizeClient authorizeClient1 = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient1.setRequest(authorizationRequest1);
-        AuthorizationResponse authorizationResponse1 = authorizeClient1.exec(clientExecutor);
+        AuthorizationResponse authorizationResponse1 = authorizationRequestAndGrantAccess(
+                authorizationEndpoint, authorizationRequest1);
 
-        showClient(authorizeClient1);
-        assertEquals(authorizationResponse1.getStatus(), 302, "Unexpected response code: " + authorizationResponse1.getStatus());
         assertNotNull(authorizationResponse1.getLocation(), "The location is null");
         assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
         assertNotNull(authorizationResponse1.getSessionState(), "The session id is null");
-        assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertNotNull(authorizationResponse1.getScope(), "The scope is null");
+        assertNotNull(authorizationResponse1.getState(), "The state is null");
+        assertEquals(authorizationRequest1.getState(), state1);
 
         String authorizationCode1 = authorizationResponse1.getCode();
         String sessionState = authorizationResponse1.getSessionState();
@@ -276,6 +261,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         // User wants to authenticate on B2 (without sending its credentials)
 
+        String state2 = UUID.randomUUID().toString();
+
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
@@ -284,19 +271,20 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
                 null);
 
         authorizationRequest2.getPrompts().add(Prompt.NONE);
-        authorizationRequest2.setState("af0ifjsldkj");
+        authorizationRequest2.setState(state2);
         authorizationRequest2.setSessionState(sessionState);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
-        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec(clientExecutor);
+        AuthorizationResponse authorizationResponse2 = authorizeClient2.exec();
 
         showClient(authorizeClient2);
         assertEquals(authorizationResponse2.getStatus(), 302, "Unexpected response code: " + authorizationResponse2.getStatus());
         assertNotNull(authorizationResponse2.getLocation(), "The location is null");
         assertNotNull(authorizationResponse2.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse2.getState(), "The state is null");
         assertNotNull(authorizationResponse2.getScope(), "The scope is null");
+        assertNotNull(authorizationResponse2.getState(), "The state is null");
+        assertEquals(authorizationResponse2.getState(), state2);
 
         String authorizationCode2 = authorizationResponse2.getCode();
 
@@ -321,6 +309,8 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         // User wants to authenticate on B3 (without sending its credentials)
 
+        String state3 = UUID.randomUUID().toString();
+
         AuthorizationRequest authorizationRequest3 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
@@ -329,19 +319,20 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
                 null);
 
         authorizationRequest3.getPrompts().add(Prompt.NONE);
-        authorizationRequest3.setState("af0ifjsldkj");
+        authorizationRequest3.setState(state3);
         authorizationRequest3.setSessionState(sessionState);
 
         AuthorizeClient authorizeClient3 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient3.setRequest(authorizationRequest3);
-        AuthorizationResponse authorizationResponse3 = authorizeClient2.exec(clientExecutor);
+        AuthorizationResponse authorizationResponse3 = authorizeClient3.exec();
 
         showClient(authorizeClient3);
         assertEquals(authorizationResponse3.getStatus(), 302, "Unexpected response code: " + authorizationResponse3.getStatus());
         assertNotNull(authorizationResponse3.getLocation(), "The location is null");
         assertNotNull(authorizationResponse3.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse3.getState(), "The state is null");
         assertNotNull(authorizationResponse3.getScope(), "The scope is null");
+        assertNotNull(authorizationResponse3.getState(), "The state is null");
+        assertEquals(authorizationResponse3.getState(), state3);
 
         String authorizationCode3 = authorizationResponse3.getCode();
 

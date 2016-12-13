@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
  * Functional tests for Client Info Web Services (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 5, 2015
+ * @version December 12, 2016
  */
 public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
 
@@ -64,6 +64,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);

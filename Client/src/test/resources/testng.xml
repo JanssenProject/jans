@@ -122,8 +122,8 @@
     </test>
 
     <!-- SSO with Multiple Backend Services test -->
-    <test name="SSO with Multiple Backend Services test (HTTP)" enabled="false">
-        <classes>
+    <test name="SSO with Multiple Backend Services test (HTTP)" enabled="true">
+    <classes>
             <class name="org.xdi.oxauth.ws.rs.SSOWithMultipleBackendServicesHttpTest"/>
         </classes>
     </test>
@@ -567,8 +567,8 @@
             <class name="org.xdi.oxauth.interop.SupportRequestFile"/>
         </classes>
     </test>
-    <test name="OC5. FeatureTest-Support claims Request Specifying sub Value" enabled="false">
-        <classes>
+    <test name="OC5. FeatureTest-Support claims Request Specifying sub Value" enabled="true">
+    <classes>
             <class name="org.xdi.oxauth.interop.SupportClaimsRequestSpecifyingSubValue"/>
         </classes>
     </test>
