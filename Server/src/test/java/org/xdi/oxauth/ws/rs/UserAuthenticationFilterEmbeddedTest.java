@@ -37,7 +37,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  * Functional tests for the Use Authentication Filter (embedded)
  *
  * @author Javier Rojas Blum
- * @version June 28, 2016
+ * @version December 12, 2016
  */
 public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 
@@ -78,6 +78,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(responseTypes);
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
