@@ -28,7 +28,6 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import javax.ws.rs.core.MediaType;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -42,7 +41,7 @@ import static org.testng.Assert.*;
  * Test cases for the authorization code flow (embedded)
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 5, 2015
+ * @version December 12, 2016
  */
 public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
@@ -69,6 +68,7 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
+                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);

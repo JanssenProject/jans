@@ -11,7 +11,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
@@ -27,7 +26,7 @@ import static org.testng.Assert.*;
  * Functional tests for End Session Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version November 30, 2016
  */
 public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
@@ -71,32 +70,26 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        request.setState(state);
-        request.setAuthUsername(userId);
-        request.setAuthPassword(userSecret);
-        request.getPrompts().add(Prompt.NONE);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
-        authorizeClient.setRequest(request);
-        AuthorizationResponse response1 = authorizeClient.exec();
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        showClient(authorizeClient);
-        assertEquals(response1.getStatus(), 302, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getLocation(), "The location is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertEquals(response1.getState(), state);
-        assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(response1.getScope(), "The scope must be null");
-        assertNotNull(response1.getSessionState(), "The session_state is null");
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
+        assertEquals(authorizationResponse.getState(), state);
+        assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
+        assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope must be null");
+        assertNotNull(authorizationResponse.getSessionState(), "The session_state is null");
 
-        String idToken = response1.getIdToken();
+        String idToken = authorizationResponse.getIdToken();
 
         // 3. End session
         String endSessionState = UUID.randomUUID().toString();
         EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState);
-        endSessionRequest.setSessionState(response1.getSessionState());
+        endSessionRequest.setSessionState(authorizationResponse.getSessionState());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest);

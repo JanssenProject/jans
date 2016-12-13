@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.util;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.xdi.oxauth.model.common.HasParamName;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -18,7 +19,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version November 30, 2016
  */
 public class StringUtils {
 
@@ -87,6 +88,24 @@ public class StringUtils {
             for (int i = 1; i < inputList.size(); i++) {
                 sb.append(glueString);
                 sb.append(inputList.get(i));
+            }
+
+            output = sb.toString();
+        }
+
+        return output;
+    }
+
+    public static String implodeEnum(List<? extends HasParamName> inputList, String glueString) {
+        String output = EMPTY_STRING;
+
+        if (inputList != null && !inputList.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(inputList.get(0));
+
+            for (int i = 1; i < inputList.size(); i++) {
+                sb.append(glueString);
+                sb.append(inputList.get(i).getParamName());
             }
 
             output = sb.toString();
