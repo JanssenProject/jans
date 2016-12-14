@@ -935,7 +935,7 @@ class Setup(object):
             self.logIt("Running npm PM2 install in %s" % self.node_home)
             nodeEnv = os.environ.copy()
             nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
-            self.run(['npm', 'install', '-P', '-g', 'pm2'], self.node_home, nodeEnv, True)
+            self.run(['npm', 'install', '-P', '-g', 'pm2@2.1.6'], self.node_home, nodeEnv, True)
             
             pm2_os_type = self.os_type
             if self.os_initdaemon == 'systemd':
