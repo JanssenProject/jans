@@ -82,7 +82,7 @@
     "idpLdapServer":"localhost:1636",
     "idpUserFields":"",
 
-    "ldifStore":"/var/ox/oxtrust/removed",
+    "ldifStore":"/var/ox/identity/removed",
 
     "caCertsLocation":"/usr/java/latest/jre/lib/security/cacerts",
     "caCertsPassphrase":"",

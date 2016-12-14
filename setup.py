@@ -104,6 +104,30 @@ class Setup(object):
 
         self.shibboleth_version = ''
 
+        self.distFolder = '/opt/dist'
+        self.distAppFolder = '%s/app' % self.distFolder
+        self.distGluuFolder = '%s/gluu' % self.distFolder
+        self.distTmpFolder = '%s/tmp' % self.distFolder
+
+        self.setup_properties_fn = '%s/setup.properties' % self.install_dir
+        self.log = '%s/setup.log' % self.install_dir
+        self.logError = '%s/setup_error.log' % self.install_dir
+        self.savedProperties = '%s/setup.properties.last' % self.install_dir
+
+        self.gluuOptFolder = '/opt/gluu'
+        self.gluuOptBinFolder = '/opt/gluu/bin'
+        self.gluuBaseFolder = '/etc/gluu'
+        self.configFolder = '%s/conf' % self.gluuBaseFolder
+        self.certFolder = '/etc/certs'
+
+        self.oxBaseDataFolder = "/var/ox"
+        self.oxPhotosFolder = "/var/ox/photos"
+        self.oxTrustRemovedFolder = "/var/ox/identity/removed"
+        self.oxTrustCacheRefreshFolder = "/var/ox/identity/cr-snapshots"
+
+        self.etc_hosts = '/etc/hosts'
+        self.etc_hostname = '/etc/hostname'
+
         self.node_home = '/opt/node'
         self.node_base = '%s/node' % self.gluuOptFolder
         self.node_user_home = '/home/node'
@@ -145,31 +169,6 @@ class Setup(object):
                          'installed' : False
             }
         }
-
-        self.distFolder = '/opt/dist'
-        self.distAppFolder = '%s/app' % self.distFolder
-        self.distGluuFolder = '%s/gluu' % self.distFolder
-        self.distTmpFolder = '%s/tmp' % self.distFolder
-
-        self.setup_properties_fn = '%s/setup.properties' % self.install_dir
-        self.log = '%s/setup.log' % self.install_dir
-        self.logError = '%s/setup_error.log' % self.install_dir
-        self.savedProperties = '%s/setup.properties.last' % self.install_dir
-
-        self.gluuOptFolder = '/opt/gluu'
-        self.gluuOptBinFolder = '/opt/gluu/bin'
-        self.gluuBaseFolder = '/etc/gluu'
-        self.configFolder = '%s/conf' % self.gluuBaseFolder
-        self.certFolder = '/etc/certs'
-
-        self.oxBaseDataFolder = "/var/ox"
-        self.oxPhotosFolder = "/var/ox/photos"
-        self.oxTrustRemovedFolder = "/var/ox/oxtrust/removed"
-        self.oxTrustCacheRefreshFolder = "/var/ox/oxtrust/vds-snapshots"
-        self.oxCustomizationFolder = "/var/gluu/webapps"
-
-        self.etc_hosts = '/etc/hosts'
-        self.etc_hostname = '/etc/hostname'
 
         self.idp3Folder = "/opt/shibboleth-idp"
         self.idp3MetadataFolder = "/opt/shibboleth-idp/metadata"
@@ -1716,20 +1715,6 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', self.oxPhotosFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustRemovedFolder])
                 self.run([self.cmd_mkdir, '-p', self.oxTrustCacheRefreshFolder])
-
-                # Customizations folders
-                self.run([self.cmd_mkdir, '-p', self.oxCustomizationFolder])
-                self.run([self.cmd_mkdir, '-p', "%s/oxauth" % self.oxCustomizationFolder])
-                self.run([self.cmd_mkdir, '-p', "%s/oxauth/libs" % self.oxCustomizationFolder])
-                self.run([self.cmd_mkdir, '-p', "%s/oxauth/pages" % self.oxCustomizationFolder])
-                self.run([self.cmd_mkdir, '-p', "%s/oxauth/resources" % self.oxCustomizationFolder])
-
-                self.run([self.cmd_mkdir, '-p', "%s/oxtrust" % self.oxCustomizationFolder])
-                self.run([self.cmd_mkdir, '-p', "%s/oxtrust/libs" % self.oxCustomizationFolder])
-                self.run([self.cmd_mkdir, '-p', "%s/oxtrust/pages" % self.oxCustomizationFolder])
-                self.run([self.cmd_mkdir, '-p', "%s/oxtrust/resources" % self.oxCustomizationFolder])
-
-                self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxCustomizationFolder])
 
             if self.installSaml:
                 self.run([self.cmd_mkdir, '-p', self.idp3Folder])
