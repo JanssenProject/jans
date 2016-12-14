@@ -978,7 +978,7 @@ class Setup(object):
             
             self.run(['pm2', 'startup', appScript], appPackage, nodeEnv, True)
 
-            savePM2Cmd = "export PATH=$PATH:%/bin; pm2 save" % self.node_base
+            savePM2Cmd = "export PATH=$PATH:%s/bin; pm2 save" % self.node_base
             self.run(['/bin/su',
                       'node',
                       '-c',
