@@ -930,6 +930,23 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', self.jetty_base])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
+
+    def installNodeService(self):
+        try:
+            self.logIt("Running npm PM2 install in %s" % self.node_home)
+            nodeEnv = os.environ.copy()
+            nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
+            self.run(['npm', 'install', '-P', '-g', 'pm2'], self.node_home, nodeEnv, True)
+            
+            pm2_os_type = self.os_type
+            if self.os_initdaemon == 'systemd':
+                 pm2_os_type = systemd
+            
+            self.run(['pm2', 'startup', pm2_os_type, '--user', 'node', '--hp', self.node_user_home], self.node_home, nodeEnv, True)
+        except:
+            self.logIt("Error encountered running npm PM2 install in %s" % self.node_home)
+            self.logIt(traceback.format_exc(), True)
+
     def installNode(self):
         self.logIt("Installing node %s..." % self.node_version)
 
@@ -944,11 +961,14 @@ class Setup(object):
 
         self.run([self.cmd_ln, '-sf', nodeDestinationPath, self.node_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % nodeDestinationPath])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', nodeDestinationPath])
-        self.run([self.cmd_chown, '-h', 'jetty:jetty', self.node_home])
+
+        self.installNodeService()
+
+        self.run([self.cmd_chown, '-R', 'node:node', nodeDestinationPath])
+        self.run([self.cmd_chown, '-h', 'node:node', self.node_home])
 
         self.run([self.cmd_mkdir, '-p', self.node_base])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', self.node_base])
+        self.run([self.cmd_chown, '-R', 'node:node', self.node_base])
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False):
         serviceName = serviceConfiguration['name']
@@ -1628,10 +1648,12 @@ class Setup(object):
             nodeEnv = os.environ.copy()
             nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
 
-            self.run(['npm', 'install'], "%s/package" % self.gluu_passport_base, nodeEnv, True)
+            self.run(['npm', 'install', '-P'], "%s/package" % self.gluu_passport_base, nodeEnv, True)
         except:
             self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
             self.logIt(traceback.format_exc(), True)
+
+        self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
         self.logIt("Preparing Passport OpenID RP certificate...")
         passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
