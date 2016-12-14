@@ -942,6 +942,9 @@ class Setup(object):
                  pm2_os_type = systemd
             
             self.run(['pm2', 'startup', pm2_os_type, '--user', 'node', '--hp', self.node_user_home], self.node_home, nodeEnv, True)
+            
+            # Remove PM2 daemon under root process 
+            self.run(['pm2', 'kill'], self.node_home, nodeEnv, True)
         except:
             self.logIt("Error encountered running npm PM2 install in %s" % self.node_home)
             self.logIt(traceback.format_exc(), True)
