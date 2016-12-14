@@ -976,14 +976,13 @@ class Setup(object):
             nodeEnv = os.environ.copy()
             nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
             
-            self.run(['pm2', 'startup', appScript], appPackage, nodeEnv, True)
+            self.run(['pm2', 'start', appScript], appPackage, nodeEnv, True)
 
-            savePM2Cmd = "export PATH=$PATH:%s/bin; pm2 save" % self.node_base
+            savePM2Cmd = "export PATH=$PATH:%s/bin; pm2 save" % self.node_home
             self.run(['/bin/su',
                       'node',
                       '-c',
-                      savePM2Cmd
-            ])
+                      savePM2Cmd], self.node_user_home, nodeEnv, True)
         except:
             self.logIt("Error encountered running PM2 start for %s" % appName)
             self.logIt(traceback.format_exc(), True)
