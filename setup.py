@@ -930,7 +930,6 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', self.jetty_base])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
-
     def installNodeService(self):
         try:
             self.logIt("Running npm PM2 install in %s" % self.node_home)
@@ -969,6 +968,25 @@ class Setup(object):
 
         self.run([self.cmd_mkdir, '-p', self.node_base])
         self.run([self.cmd_chown, '-R', 'node:node', self.node_base])
+
+    def startNodeApplication(self, appName, appScript, appPackage):
+        try:
+            self.logIt("Running PM2 start for %s" % appName)
+
+            nodeEnv = os.environ.copy()
+            nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
+            
+            self.run(['pm2', 'startup', appScript], appPackage, nodeEnv, True)
+
+            savePM2Cmd = "export PATH=$PATH:%/bin; pm2 save" % self.node_base
+            self.run(['/bin/su',
+                      'node',
+                      '-c',
+                      savePM2Cmd
+            ])
+        except:
+            self.logIt("Error encountered running PM2 start for %s" % appName)
+            self.logIt(traceback.format_exc(), True)
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False):
         serviceName = serviceConfiguration['name']
@@ -1664,6 +1682,8 @@ class Setup(object):
 
         self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
         self.renderTemplateInOut(self.passport_config, self.templateFolder, self.configFolder)
+        
+        self.startNodeApplication('passport', 'app.js', "%s/package/server" % self.gluu_passport_base)
 
     def install_gluu_components(self):
         if self.installOxAuth:
