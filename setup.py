@@ -116,6 +116,7 @@ class Setup(object):
 
         self.gluuOptFolder = '/opt/gluu'
         self.gluuOptBinFolder = '/opt/gluu/bin'
+        self.gluuOptSystemFolder = '/opt/gluu/system'
         self.gluuBaseFolder = '/etc/gluu'
         self.configFolder = '%s/conf' % self.gluuBaseFolder
         self.certFolder = '/etc/certs'
@@ -128,7 +129,10 @@ class Setup(object):
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
+        self.jython_home = 'self.jython_home'
+
         self.node_home = '/opt/node'
+        self.node_initd_script = '%s/static/system/initd/node' % self.install_dir
         self.node_base = '%s/node' % self.gluuOptFolder
         self.node_user_home = '/home/node'
 
@@ -930,25 +934,6 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', self.jetty_base])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
 
-    def installNodeService(self):
-        try:
-            self.logIt("Running npm PM2 install in %s" % self.node_home)
-            nodeEnv = os.environ.copy()
-            nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
-            self.run(['npm', 'install', '-P', '-g', 'pm2@2.1.6'], self.node_home, nodeEnv, True)
-            
-            pm2_os_type = self.os_type
-            if self.os_initdaemon == 'systemd':
-                 pm2_os_type = systemd
-            
-            self.run(['pm2', 'startup', pm2_os_type, '--user', 'node', '--hp', self.node_user_home], self.node_home, nodeEnv, True)
-            
-            # Remove PM2 daemon under root process 
-            self.run(['pm2', 'kill'], self.node_home, nodeEnv, True)
-        except:
-            self.logIt("Error encountered running npm PM2 install in %s" % self.node_home)
-            self.logIt(traceback.format_exc(), True)
-
     def installNode(self):
         self.logIt("Installing node %s..." % self.node_version)
 
@@ -964,31 +949,19 @@ class Setup(object):
         self.run([self.cmd_ln, '-sf', nodeDestinationPath, self.node_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % nodeDestinationPath])
 
-        self.installNodeService()
+        # Create temp folder
+        self.run([self.cmd_mkdir, '-p', "%s/temp" % self.node_home])
+
+        # Copy init.d script
+        self.copyFile(self.node_initd_script, self.gluuOptSystemFolder)
+        self.run([self.cmd_chmod, '-R', "755", "%s/node" % self.gluuOptSystemFolder])
 
         self.run([self.cmd_chown, '-R', 'node:node', nodeDestinationPath])
         self.run([self.cmd_chown, '-h', 'node:node', self.node_home])
 
+
         self.run([self.cmd_mkdir, '-p', self.node_base])
         self.run([self.cmd_chown, '-R', 'node:node', self.node_base])
-
-    def startNodeApplication(self, appName, appScript, appPackage):
-        try:
-            self.logIt("Running PM2 start for %s" % appName)
-
-            nodeEnv = os.environ.copy()
-            nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
-            
-            self.run(['pm2', 'start', appScript], appPackage, nodeEnv, True)
-
-            savePM2Cmd = "export PATH=$PATH:%s/bin; pm2 save" % self.node_home
-            self.run(['/bin/su',
-                      'node',
-                      '-c',
-                      savePM2Cmd], self.node_user_home, nodeEnv, True)
-        except:
-            self.logIt("Error encountered running PM2 start for %s" % appName)
-            self.logIt(traceback.format_exc(), True)
 
     def installJettyService(self, serviceConfiguration, supportCustomizations=False):
         serviceName = serviceConfiguration['name']
@@ -1035,20 +1008,40 @@ class Setup(object):
 
         serviceConfiguration['installed'] = True
 
+    def installNodeService(self, serviceName):
+        self.logIt("Installing node service %s..." % serviceName)
+
+        nodeServiceConfiguration = '%s/node/%s' % (self.outputFolder, serviceName)
+        self.copyFile(nodeServiceConfiguration, "/etc/default")
+        self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
+
+        self.run([self.cmd_ln, '-sf', '%s/node" % self.gluuOptSystemFolder', '/etc/init.d/%s' % serviceName])
+
+        # Enable service autoload on Gluu-Server startup
+        if self.os_type in ['centos', 'fedora', 'redhat']:
+            if self.os_initdaemon == 'systemd':
+                self.run(["/usr/bin/systemctl", 'enable', serviceName])
+            else:
+                self.run(["/sbin/chkconfig", serviceName, "on"])
+        elif self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
+
+        serviceConfiguration['installed'] = True
+
     def installJython(self):
         self.logIt("Installing Jython %s..." % self.jython_version)
         jythonInstaller = 'jython-%s.jar' % self.jython_version
 
         try:
-            self.run(['rm', '-fr', '/opt/jython-%s' % self.jython_version])
+            self.run(['rm', '-fr', '/opt*-%s' % self.jython_version])
             self.run([self.cmd_java, '-jar', '%s/jython-installer-%s.jar' % (self.distAppFolder, self.jython_version), '-v', '-s', '-d', '/opt/jython-%s' % self.jython_version, '-t', 'standard', '-e', 'ensurepip'])
         except:
             self.logIt("Error installing jython-installer-%s.jar" % self.jython_version)
             self.logIt(traceback.format_exc(), True)
 
-        self.run([self.cmd_ln, '-sf', '/opt/jython-%s' % self.jython_version, '/opt/jython'])
+        self.run([self.cmd_ln, '-sf', '/opt/jython-%s' % self.jython_version, self.jython_home])
         self.run([self.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % self.jython_version])
-        self.run([self.cmd_chown, '-h', 'root:root', '/opt/jython'])
+        self.run([self.cmd_chown, '-h', 'root:root', self.jython_home])
 
     def downloadWarFiles(self):
         if self.downloadWars:
@@ -1658,6 +1651,7 @@ class Setup(object):
         try:
             self.logIt("Extracting %s into %s" % (passportArchive, self.gluu_passport_base))
             self.run(['tar', '-xzf', '%s/%s' % (self.distGluuFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run([self.cmd_mkdir, '-p', "%s/package/server/logs" % self.gluu_passport_base])
         except:
             self.logIt("Error encountered while extracting archive %s" % passportArchive)
             self.logIt(traceback.format_exc(), True)
@@ -1685,7 +1679,7 @@ class Setup(object):
         self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
         self.renderTemplateInOut(self.passport_config, self.templateFolder, self.configFolder)
         
-        self.startNodeApplication('passport', 'app.js', "%s/package/server" % self.gluu_passport_base)
+        self.installNodeService('passport')
 
     def install_gluu_components(self):
         if self.installOxAuth:
@@ -1745,6 +1739,7 @@ class Setup(object):
             # Create these folder on all instances
             self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
             self.run([self.cmd_mkdir, '-p', self.gluuOptBinFolder])
+            self.run([self.cmd_mkdir, '-p', self.gluuOptSystemFolder])
             self.run([self.cmd_mkdir, '-p', self.configFolder])
             self.run([self.cmd_mkdir, '-p', self.certFolder])
             self.run([self.cmd_mkdir, '-p', self.outputFolder])
@@ -1987,6 +1982,12 @@ class Setup(object):
 
         jettyTepmplatesFolder = '%s/jetty/' % self.templateFolder
         self.render_templates_folder(jettyTepmplatesFolder)
+
+    def render_node_templates(self):
+        self.logIt("Rendering node templates")
+
+        nodeTepmplatesFolder = '%s/node/' % self.templateFolder
+        self.render_templates_folder(nodeTepmplatesFolder)
 
     def reindent(self, text, num_spaces):
         text = string.split(text, '\n')
@@ -2529,6 +2530,7 @@ if __name__ == '__main__':
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.render_jetty_templates()
+            installObject.render_node_templates()
             installObject.install_gluu_components()
             installObject.render_test_templates()
             installObject.copy_static()

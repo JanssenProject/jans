@@ -8,4 +8,4 @@ JETTY_USER=jetty
 JETTY_ARGS="jetty.http.port=8082"
 TMPDIR=%(jetty_dist)s/temp
 
-export PYTHON_HOME=/opt/jython
+export PYTHON_HOME=%(jython_home)s
