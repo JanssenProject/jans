@@ -928,8 +928,9 @@ class Setup(object):
 
         self.run([self.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
-        self.run([self.cmd_chown, '-R', 'root:root', jettyDestinationPath])
-        self.run([self.cmd_chown, '-h', 'root:root', self.jetty_home])
+
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyDestinationPath])
+        self.run([self.cmd_chown, '-h', 'jetty:jetty', self.jetty_home])
 
         self.run([self.cmd_mkdir, '-p', self.jetty_base])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.jetty_base])
