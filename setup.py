@@ -959,7 +959,6 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'node:node', nodeDestinationPath])
         self.run([self.cmd_chown, '-h', 'node:node', self.node_home])
 
-
         self.run([self.cmd_mkdir, '-p', self.node_base])
         self.run([self.cmd_chown, '-R', 'node:node', self.node_base])
 
@@ -1012,10 +1011,10 @@ class Setup(object):
         self.logIt("Installing node service %s..." % serviceName)
 
         nodeServiceConfiguration = '%s/node/%s' % (self.outputFolder, serviceName)
-        self.copyFile(nodeServiceConfiguration, "/etc/default")
-        self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
+        self.copyFile(nodeServiceConfiguration, '/etc/default')
+        self.run([self.cmd_chown, 'root:root', '/etc/default/%s' % serviceName])
 
-        self.run([self.cmd_ln, '-sf', '%s/node" % self.gluuOptSystemFolder', '/etc/init.d/%s' % serviceName])
+        self.run([self.cmd_ln, '-sf', '%s/node' % self.gluuOptSystemFolder, '/etc/init.d/%s' % serviceName])
 
         # Enable service autoload on Gluu-Server startup
         if self.os_type in ['centos', 'fedora', 'redhat']:
@@ -1651,7 +1650,6 @@ class Setup(object):
         try:
             self.logIt("Extracting %s into %s" % (passportArchive, self.gluu_passport_base))
             self.run(['tar', '-xzf', '%s/%s' % (self.distGluuFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
-            self.run([self.cmd_mkdir, '-p', "%s/package/server/logs" % self.gluu_passport_base])
         except:
             self.logIt("Error encountered while extracting archive %s" % passportArchive)
             self.logIt(traceback.format_exc(), True)
@@ -1662,10 +1660,12 @@ class Setup(object):
             nodeEnv = os.environ.copy()
             nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
 
-            self.run(['npm', 'install', '-P'], "%s/package" % self.gluu_passport_base, nodeEnv, True)
+            self.run(['npm', 'install', '-P'], '%s/package' % self.gluu_passport_base, nodeEnv, True)
         except:
             self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
             self.logIt(traceback.format_exc(), True)
+
+        self.run([self.cmd_mkdir, '-p', '%s/package/server/logs' % self.gluu_passport_base])
 
         self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
