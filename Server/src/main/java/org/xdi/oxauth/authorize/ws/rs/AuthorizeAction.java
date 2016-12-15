@@ -51,7 +51,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version November 30, 2016
+ * @version December 14, 2016
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -65,9 +65,6 @@ public class AuthorizeAction {
 
     @In
     private ErrorResponseFactory errorResponseFactory;
-
-    @In
-    private UserGroupService userGroupService;
 
     @In
     private SessionStateService sessionStateService;
@@ -255,14 +252,6 @@ public class AuthorizeAction {
 
         final User user = userService.getUserByDn(session.getUserDn());
         log.trace("checkPermissionGranted, user = " + user);
-
-        // OXAUTH-87 : if user is not in group then deny permission
-        if (user != null && client.hasUserGroups()) {
-            // if user is not in any group then deny permissions
-            if (!userGroupService.isInAnyGroup(client.getUserGroups(), user.getDn())) {
-                permissionDenied();
-            }
-        }
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
 
