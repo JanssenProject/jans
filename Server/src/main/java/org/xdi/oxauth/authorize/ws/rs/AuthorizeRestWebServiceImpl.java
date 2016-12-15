@@ -61,7 +61,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version December 14, 2016
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -81,8 +81,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ClientService clientService;
     @In
     private UserService userService;
-    @In
-    private UserGroupService userGroupService;
     @In
     private Identity identity;
     @In
@@ -475,98 +473,91 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     return builder.build();
                                 }
 
-                                // OXAUTH-87 : Checks whether client has groups. If yes then user must be in one of these groups otherwise forbid authorization.
-                                if (checkUserGroups(user, client)) {
-                                    AuthorizationCode authorizationCode = null;
-                                    if (responseTypes.contains(ResponseType.CODE)) {
-                                        authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client,
+                                AuthorizationCode authorizationCode = null;
+                                if (responseTypes.contains(ResponseType.CODE)) {
+                                    authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client,
+                                            sessionUser.getAuthenticationTime());
+                                    authorizationGrant.setNonce(nonce);
+                                    authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                    authorizationGrant.setScopes(scopes);
+                                    authorizationGrant.setCodeChallenge(codeChallenge);
+                                    authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
+
+                                    // Store acr_values
+                                    authorizationGrant.setAcrValues(acrValuesStr);
+                                    authorizationGrant.setSessionDn(sessionUser.getDn());
+                                    authorizationGrant.save(); // call save after object modification!!!
+
+                                    authorizationCode = authorizationGrant.getAuthorizationCode();
+
+                                    redirectUriResponse.addResponseParameter("code", authorizationCode.getCode());
+                                }
+
+                                AccessToken newAccessToken = null;
+                                if (responseTypes.contains(ResponseType.TOKEN)) {
+                                    if (authorizationGrant == null) {
+                                        authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
                                                 sessionUser.getAuthenticationTime());
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
                                         authorizationGrant.setScopes(scopes);
-                                        authorizationGrant.setCodeChallenge(codeChallenge);
-                                        authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
 
                                         // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);
                                         authorizationGrant.setSessionDn(sessionUser.getDn());
                                         authorizationGrant.save(); // call save after object modification!!!
-
-                                        authorizationCode = authorizationGrant.getAuthorizationCode();
-
-                                        redirectUriResponse.addResponseParameter("code", authorizationCode.getCode());
                                     }
+                                    newAccessToken = authorizationGrant.createAccessToken();
 
-                                    AccessToken newAccessToken = null;
-                                    if (responseTypes.contains(ResponseType.TOKEN)) {
-                                        if (authorizationGrant == null) {
-                                            authorizationGrant = authorizationGrantList.createImplicitGrant(user, client,
-                                                    sessionUser.getAuthenticationTime());
-                                            authorizationGrant.setNonce(nonce);
-                                            authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
-                                            authorizationGrant.setScopes(scopes);
-
-                                            // Store acr_values
-                                            authorizationGrant.setAcrValues(acrValuesStr);
-                                            authorizationGrant.setSessionDn(sessionUser.getDn());
-                                            authorizationGrant.save(); // call save after object modification!!!
-                                        }
-                                        newAccessToken = authorizationGrant.createAccessToken();
-
-                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
-                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
-                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
-                                    }
-
-                                    if (responseTypes.contains(ResponseType.ID_TOKEN)) {
-                                        boolean includeIdTokenClaims = Boolean.TRUE.equals(configurationFactory.getConfiguration().getLegacyIdTokenClaims());
-                                        if (authorizationGrant == null) {
-                                            includeIdTokenClaims = true;
-                                            authorizationGrant = authorizationGrantList.createAuthorizationGrant(user, client,
-                                                    sessionUser.getAuthenticationTime());
-                                            authorizationGrant.setNonce(nonce);
-                                            authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
-                                            authorizationGrant.setScopes(scopes);
-
-                                            // Store authentication acr values
-                                            authorizationGrant.setAcrValues(acrValuesStr);
-                                            authorizationGrant.setSessionDn(sessionUser.getDn());
-                                            authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
-                                        }
-                                        IdToken idToken = authorizationGrant.createIdToken(
-                                                nonce, authorizationCode, newAccessToken, authorizationGrant, includeIdTokenClaims);
-
-                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
-                                    }
-
-                                    if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr)) {
-                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
-                                    }
-
-                                    //if (Boolean.valueOf(requestSessionState) && StringUtils.isBlank(sessionState) &&
-                                    if (sessionUser.getId() == null) {
-                                        final SessionState newSessionUser = sessionStateService.generateAuthenticatedSessionState(sessionUser.getUserDn(), prompt);
-                                        String newSessionState = newSessionUser.getId();
-                                        sessionUser.setId(newSessionState);
-                                        log.trace("newSessionState = {0}", newSessionState);
-                                    }
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionUser.getId());
-                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.STATE, state);
-                                    if (scope != null && !scope.isEmpty()) {
-                                        scope = authorizationGrant.checkScopesPolicy(scope);
-
-                                        redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
-                                    }
-
-                                    clientService.updatAccessTime(client, false);
-                                    oAuth2AuditLog.setSuccess(true);
-
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                } else {
-                                    redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
-                                            AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state));
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.TOKEN_TYPE, newAccessToken.getTokenType().toString());
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.EXPIRES_IN, newAccessToken.getExpiresIn() + "");
                                 }
+
+                                if (responseTypes.contains(ResponseType.ID_TOKEN)) {
+                                    boolean includeIdTokenClaims = Boolean.TRUE.equals(configurationFactory.getConfiguration().getLegacyIdTokenClaims());
+                                    if (authorizationGrant == null) {
+                                        includeIdTokenClaims = true;
+                                        authorizationGrant = authorizationGrantList.createAuthorizationGrant(user, client,
+                                                sessionUser.getAuthenticationTime());
+                                        authorizationGrant.setNonce(nonce);
+                                        authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
+                                        authorizationGrant.setScopes(scopes);
+
+                                        // Store authentication acr values
+                                        authorizationGrant.setAcrValues(acrValuesStr);
+                                        authorizationGrant.setSessionDn(sessionUser.getDn());
+                                        authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
+                                    }
+                                    IdToken idToken = authorizationGrant.createIdToken(
+                                            nonce, authorizationCode, newAccessToken, authorizationGrant, includeIdTokenClaims);
+
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ID_TOKEN, idToken.getCode());
+                                }
+
+                                if (authorizationGrant != null && StringHelper.isNotEmpty(acrValuesStr)) {
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACR_VALUES, acrValuesStr);
+                                }
+
+                                //if (Boolean.valueOf(requestSessionState) && StringUtils.isBlank(sessionState) &&
+                                if (sessionUser.getId() == null) {
+                                    final SessionState newSessionUser = sessionStateService.generateAuthenticatedSessionState(sessionUser.getUserDn(), prompt);
+                                    String newSessionState = newSessionUser.getId();
+                                    sessionUser.setId(newSessionState);
+                                    log.trace("newSessionState = {0}", newSessionState);
+                                }
+                                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionUser.getId());
+                                redirectUriResponse.addResponseParameter(AuthorizeResponseParam.STATE, state);
+                                if (scope != null && !scope.isEmpty()) {
+                                    scope = authorizationGrant.checkScopesPolicy(scope);
+
+                                    redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SCOPE, scope);
+                                }
+
+                                clientService.updatAccessTime(client, false);
+                                oAuth2AuditLog.setSuccess(true);
+
+                                builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                             }
                         } else { // Invalid redirectUri
                             builder = error(Response.Status.BAD_REQUEST,
@@ -741,22 +732,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         if (StringUtils.isNotBlank(originHeaders)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ORIGIN_HEADERS, originHeaders);
         }
-    }
-
-    /**
-     * Checks whether client has groups. If yes then user must be in one of these groups otherwise forbid authorization.
-     * (OXAUTH-87)
-     *
-     * @param p_user   user
-     * @param p_client client
-     * @return whether client has groups. If yes then user must be in one of these groups otherwise forbid authorization
-     */
-    private boolean checkUserGroups(User p_user, Client p_client) {
-        if (p_client != null && p_client.hasUserGroups()) {
-            final String[] userGroups = p_client.getUserGroups();
-            return userGroupService.isInAnyGroup(userGroups, p_user.getDn());
-        }
-        return true;
     }
 
     private void endSession(String sessionState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
