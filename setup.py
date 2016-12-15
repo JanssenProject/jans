@@ -1025,8 +1025,6 @@ class Setup(object):
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
 
-        serviceConfiguration['installed'] = True
-
     def installJython(self):
         self.logIt("Installing Jython %s..." % self.jython_version)
         jythonInstaller = 'jython-%s.jar' % self.jython_version
