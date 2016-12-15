@@ -1,0 +1,10 @@
+NODE_HOME=/opt/node
+NODE=$NODE_HOME/bin/node
+
+NODE_BASE=/opt/gluu/node/passport/package/server
+NODE_APP=app.js
+NODE_OPTIONS="PORT=8090 NODE_ENV=production NODE_CONFIG_DIR=$NODE_BASE"
+
+NODE_USER=node
+NODE_ARGS=""
+TMPDIR=/opt/node/temp
