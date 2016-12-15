@@ -454,9 +454,9 @@ class Setup(object):
         realConfigFolder = os.path.realpath(self.configFolder)
         realAsimbaJks = os.path.realpath(self.asimbaJksFn)
 
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', realCertFolder])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', realConfigFolder])
-        self.run([self.cmd_chown, '-R', 'jetty:jetty', self.oxBaseDataFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', realCertFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', realConfigFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', self.oxBaseDataFolder])
 
         # Set right permissions
         self.run([self.cmd_chmod, '-R', '550', realCertFolder])
@@ -1721,13 +1721,35 @@ class Setup(object):
             useradd = '/usr/sbin/useradd'
             self.run([useradd, '--system', '--create-home', '--user-group', '--shell', '/bin/bash', '--home-dir', homeDir, userName])
         except:
-            self.logIt("Error adding users", True)
+            self.logIt("Error adding user", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def createGroup(self, groupName):
+        try:
+            groupadd = '/usr/sbin/groupadd'
+            self.run([groupadd, groupName])
+        except:
+            self.logIt("Error adding group", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def addUserToGroup(self, groupName, userName):
+        try:
+            usermod = '/usr/sbin/usermod'
+            self.run([usermod, '-a', '-G', groupName, userName])
+        except:
+            self.logIt("Error adding group", True)
             self.logIt(traceback.format_exc(), True)
 
     def createUsers(self):
         self.createUser('ldap', self.ldap_user_home)
         self.createUser('jetty', self.jetty_user_home)
         self.createUser('node', self.node_user_home)
+
+        self.createGroup('gluu')
+        
+        self.addUserToGroup('gluu', 'ldap')
+        self.addUserToGroup('gluu', 'jetty')
+        self.addUserToGroup('gluu', 'node')
 
     def makeFolders(self):
         try:
