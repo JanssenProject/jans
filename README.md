@@ -4,7 +4,7 @@ All rights reserved -- Copyright 2015 Gluu Inc.
 
 oxd is a mediator, a service demon that listens on localhost, providing easy APIs that can be called by a web application to simplify using an OpenID Connect Provider, like Google or the [Gluu Server](http://gluu.org/docs), for authentication or authorization. oxd is not a proxy--sometimes it makes API calls on behalf of an application, but other times it just forms the right URLs and returns them to the application.
 
-There are both business and technical advantages to using oxd over the traditional model of calling federation APIs directly from within the application:
+Using oxd to support federation in an application provides both technical and business advantages:
 
 1. oxd consolidates the OAuth2 code in one package. If new vulnerabilities are discovered in OAuth2/OpenID Connect, oxd is the only component that needs to be updated. The oxd APIs remain the same, so you don’t have to change and regression test your applications;
 
