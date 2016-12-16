@@ -334,7 +334,7 @@ then
   CYGWIN*) NODE_LOGS="`cygpath -w $NODE_LOGS`";;
   esac
 
-  NODE_OPTIONS=(${NODE_OPTIONS[*]})
+  NODE_OPTIONS=(${NODE_OPTIONS[*]} "node.logging.dir=$NODE_LOGS")
 fi
 
 #####################################################
@@ -411,7 +411,7 @@ case "$ACTION" in
         CH_USER="-c$NODE_USER"
       fi
 
-      start-stop-daemon -S -p"$NODE_PID" $CH_USER -d"$NODE_BASE" -b -m -a "/bin/bash" -- -c "exec /usr/bin/env ${NODE_OPTIONS[*]} $NODE ${RUN_ARGS[*]} start-log-file=$NODE_LOGS/start.log node.logging.dir=$NODE_LOGS >> $NODE_LOGS/start.log 2>&1"
+      start-stop-daemon -S -p"$NODE_PID" $CH_USER -d"$NODE_BASE" -b -m -a "/bin/bash" -- -c "exec /usr/bin/env ${NODE_OPTIONS[*]} $NODE ${RUN_ARGS[*]} start-log-file=$NODE_LOGS/start.log >> $NODE_LOGS/start.log 2>&1"
 
     else
 
@@ -433,7 +433,7 @@ case "$ACTION" in
         chown "$NODE_USER" "$NODE_PID"
         # FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         su - "$NODE_USER" $SU_SHELL -c "
-          exec /usr/bin/env ${RUN_CMD[*]} start-log-file=$NODE_LOGS/start.log node.logging.dir=$NODE_LOGS >> $NODE_LOGS/start.log 2>&1 &
+          exec /usr/bin/env ${RUN_CMD[*]} start-log-file=$NODE_LOGS/start.log >> $NODE_LOGS/start.log 2>&1 &
           disown \$!
           echo \$! > '$NODE_PID'"
       else
