@@ -164,12 +164,17 @@ class Setup(object):
             },
                 'cas' : {'name' : 'cas',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                         'memory' : {'ratio' : 0.05, "max_allowed_mb" : 1024},
                          'installed' : False
             },
                 'oxauth-rp' : {'name' : 'oxauth-rp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
                          'memory' : {'ratio' : 0.1, "max_allowed_mb" : 512},
+                         'installed' : False
+            },
+                'passport' : {'name' : 'passport',
+                         'node' : {},
+                         'memory' : {'ratio' : 0.05, "max_allowed_mb" : 1024},
                          'installed' : False
             }
         }
@@ -1024,7 +1029,7 @@ class Setup(object):
             else:
                 self.run(["/sbin/chkconfig", serviceName, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '60', '20'])
+            self.run(["/usr/sbin/update-rc.d", serviceName, 'defaults', '70', '30'])
 
     def installJython(self):
         self.logIt("Installing Jython %s..." % self.jython_version)
@@ -1645,26 +1650,29 @@ class Setup(object):
         self.logIt("Preparing passport service base folders")
         self.run([self.cmd_mkdir, '-p', self.gluu_passport_base])
 
+        # Extract package
         passportArchive = 'passport.tgz'
         try:
             self.logIt("Extracting %s into %s" % (passportArchive, self.gluu_passport_base))
-            self.run(['tar', '-xzf', '%s/%s' % (self.distGluuFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
+            self.run(['tar', '--strip', '1', '-xzf', '%s/%s' % (self.distGluuFolder, passportArchive), '-C', self.gluu_passport_base, '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
             self.logIt("Error encountered while extracting archive %s" % passportArchive)
             self.logIt(traceback.format_exc(), True)
 
+        # Install dependencies
         try:
             self.logIt("Running npm install in %s" % self.gluu_passport_base)
 
             nodeEnv = os.environ.copy()
             nodeEnv['PATH'] = '%s/bin:' % self.node_home + nodeEnv['PATH']
 
-            self.run(['npm', 'install', '-P'], '%s/package' % self.gluu_passport_base, nodeEnv, True)
+            self.run(['npm', 'install', '-P'], self.gluu_passport_base, nodeEnv, True)
         except:
             self.logIt("Error encountered running npm install in %s" % self.gluu_passport_base)
             self.logIt(traceback.format_exc(), True)
 
-        self.run([self.cmd_mkdir, '-p', '%s/package/server/logs' % self.gluu_passport_base])
+        # Create logs folder
+        self.run([self.cmd_mkdir, '-p', '%s/server/logs' % self.gluu_passport_base])
 
         self.run([self.cmd_chown, '-R', 'node:node', self.gluu_passport_base])
 
@@ -1678,6 +1686,7 @@ class Setup(object):
         self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
         self.renderTemplateInOut(self.passport_config, self.templateFolder, self.configFolder)
         
+        # Install passport system service script
         self.installNodeService('passport')
 
     def install_gluu_components(self):
@@ -2333,6 +2342,7 @@ class Setup(object):
         installedComponents = []
         allowedApplicationsMemory = {}
 
+        # Jetty apps
         if self.installOxAuth:
             installedComponents.append(self.jetty_app_configuration['oxauth'])
         if self.installOxTrust:
@@ -2345,6 +2355,10 @@ class Setup(object):
             installedComponents.append(self.jetty_app_configuration['asimba'])
         if self.installOxAuthRP:
             installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
+
+        # Node apps
+        if self.installPassport:
+            installedComponents.append(self.jetty_app_configuration['passport'])
 
         usedRatio = 0.0
         for installedComponent in installedComponents:
