@@ -174,12 +174,11 @@ public class ClientService {
      * @return Client
      */
     public Client getClientByDn(String dn) {
-        String key = getClientDnCacheKey(dn);
-        Client client = (Client) cacheService.get(CACHE_CLIENT_NAME, key);
+        Client client = fromCache(dn);
         if (client == null) {
             try {
                 client = ldapEntryManager.find(Client.class, dn);
-                cacheService.put(CACHE_CLIENT_NAME, key, client);
+                putInCache(client);
             } catch (Exception ex) {
                 log.debug(ex.getMessage());
             }
@@ -188,6 +187,25 @@ public class ClientService {
         }
 
         return client;
+    }
+
+    private void putInCache(Client client) {
+        try {
+            cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client);
+            cacheService.put(CACHE_CLIENT_NAME, getClientIdCacheKey(client.getClientId()), client);
+        } catch (Exception e) {
+            log.error("Failed to put client in cache, client:" + client, e);
+        }
+    }
+
+    private Client fromCache(String dn) {
+        try {
+            String key = getClientDnCacheKey(dn);
+            return (Client) cacheService.get(CACHE_CLIENT_NAME, key);
+        } catch (Exception e) {
+            log.error("Failed to fetch client from cache, dn: " + dn, e);
+            return null;
+        }
     }
 
     public org.xdi.ldap.model.CustomAttribute getCustomAttribute(Client client, String attributeName) {
@@ -244,11 +262,15 @@ public class ClientService {
     }
 
     private void removeFromCache(Client client) {
-        String clientId = client.getClientId();
-        String clientDn = client.getDn();
+        try {
+            String clientId = client.getClientId();
+            String clientDn = client.getDn();
 
-        cacheService.remove(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(clientId));
-        cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
+            cacheService.remove(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(clientId));
+            cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
+        } catch (Exception e) {
+            log.error("Failed to remove client from cache.", e);
+        }
     }
 
     /**
@@ -257,8 +279,13 @@ public class ClientService {
     @Observer(EVENT_CLEAR_CLIENT_CACHE)
     public void clearClientCache() {
         log.debug("Clearing up clients cache");
-        cacheService.removeAll(CACHE_CLIENT_NAME);
-        cacheService.removeAll(CACHE_CLIENT_FILTER_NAME);
+
+        try {
+            cacheService.removeAll(CACHE_CLIENT_NAME);
+            cacheService.removeAll(CACHE_CLIENT_FILTER_NAME);
+        } catch (Exception e) {
+            log.error("Failed to clear cache.");
+        }
     }
 
     public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
@@ -286,11 +313,11 @@ public class ClientService {
         removeFromCache(client);
     }
 
-    private String getClientIdCacheKey(String clientId) {
+    private static String getClientIdCacheKey(String clientId) {
         return "client_id_" + StringHelper.toLowerCase(clientId);
     }
 
-    private String getClientDnCacheKey(String dn) {
+    private static String getClientDnCacheKey(String dn) {
         return "client_dn_" + StringHelper.toLowerCase(dn);
     }
 
