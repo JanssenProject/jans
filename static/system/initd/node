@@ -72,6 +72,9 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 # NODE_ARGS
 #   The default arguments to pass to Node.
 #
+# APP_ARGS
+#   The default arguments to pass to Application.
+#
 # NODE_USER
 #   if set, then used as a username to run the server as
 #
@@ -265,6 +268,7 @@ esac
 
 
 NODE_ARGS=(${NODE_ARGS[*]})
+APP_ARGS=(${APP_ARGS[*]})
 
 ##################################################
 # Get the list of config.xml files from node.conf
@@ -367,7 +371,7 @@ CYGWIN*) NODE_START="`cygpath -w $NODE_START`";;
 esac
 
 RUN_NODE_ARGS=(${NODE_OPTIONS[@]})
-RUN_ARGS=("$NODE_START" ${NODE_ARGS[*]})
+RUN_ARGS=(${NODE_ARGS[*]} "$NODE_START" ${APP_ARGS[*]})
 RUN_CMD=(${NODE_OPTIONS[@]} "$NODE" ${RUN_ARGS[@]})
 
 #####################################################
@@ -407,7 +411,7 @@ case "$ACTION" in
         CH_USER="-c$NODE_USER"
       fi
 
-      start-stop-daemon -S -p"$NODE_PID" $CH_USER -d"$NODE_BASE" -b -m -a "/bin/bash" -- -c "exec /usr/bin/env ${NODE_OPTIONS[*]} $NODE ${RUN_ARGS[*]} > $NODE_LOGS/start.log 2>&1" start-log-file="$NODE_LOGS/start.log" node.logging.dir="$NODE_LOGS"
+      start-stop-daemon -S -p"$NODE_PID" $CH_USER -d"$NODE_BASE" -b -m -a "/bin/bash" -- -c "exec /usr/bin/env ${NODE_OPTIONS[*]} $NODE ${RUN_ARGS[*]}  start-log-file=$NODE_LOGS/start.log node.logging.dir=$NODE_LOGS >> $NODE_LOGS/start.log 2>&1"
 
     else
 
