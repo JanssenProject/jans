@@ -334,7 +334,7 @@ then
   CYGWIN*) NODE_LOGS="`cygpath -w $NODE_LOGS`";;
   esac
 
-  NODE_OPTIONS=(${NODE_OPTIONS[*]} "node.logging.dir=$NODE_LOGS")
+  NODE_OPTIONS=(${NODE_OPTIONS[*]} "NODE_LOGGING_DIR=$NODE_LOGS")
 fi
 
 #####################################################
