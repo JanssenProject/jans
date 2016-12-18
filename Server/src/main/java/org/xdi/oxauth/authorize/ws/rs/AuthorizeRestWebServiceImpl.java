@@ -8,6 +8,8 @@ package org.xdi.oxauth.authorize.ws.rs;
 
 import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.Api;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
@@ -185,6 +187,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             } else {
                 Client client = clientService.getClient(clientId);
+                if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+                    acrValues = new ArrayList<String>();
+                    acrValues.addAll(Arrays.asList(client.getDefaultAcrValues()));
+                }
                 JwtAuthorizationRequest jwtAuthorizationRequest = null;
 
                 if (client != null) {
