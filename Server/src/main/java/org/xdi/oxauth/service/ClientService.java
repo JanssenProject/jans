@@ -289,28 +289,28 @@ public class ClientService {
     }
 
     public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
-        String clientDn = client.getDn();
-
-        CustomEntry customEntry = new CustomEntry();
-        customEntry.setDn(clientDn);
-		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
-
-        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-        CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", now);
-        customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
-
-        if (isUpdateLogonTime) {
-            CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", now);
-            customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
-        }
-
-        try {
-            ldapEntryManager.merge(customEntry);
-        } catch (EntryPersistenceException epe) {
-            log.error("Failed to update oxLastAccessTime and oxLastLoginTime of client '{0}'", clientDn);
-        }
-
-        removeFromCache(client);
+//        String clientDn = client.getDn();
+//
+//        CustomEntry customEntry = new CustomEntry();
+//        customEntry.setDn(clientDn);
+//		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
+//
+//        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+//        CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", now);
+//        customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
+//
+//        if (isUpdateLogonTime) {
+//            CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", now);
+//            customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
+//        }
+//
+//        try {
+//            ldapEntryManager.merge(customEntry);
+//        } catch (EntryPersistenceException epe) {
+//            log.error("Failed to update oxLastAccessTime and oxLastLoginTime of client '{0}'", clientDn);
+//        }
+//
+//        removeFromCache(client);
     }
 
     private static String getClientIdCacheKey(String clientId) {
