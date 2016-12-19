@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<web-app xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    version="3.0">
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
 
     <display-name>oxAuth Arquillian Server</display-name>
 
@@ -40,17 +40,17 @@
 
     <context-param>
         <param-name>javax.faces.FACELETS_RESOURCE_RESOLVER</param-name>
-        <param-value>org.gluu.oxauth.resource.custom.ExternalResourceHandler</param-value>
+        <param-value>org.xdi.service.ExternalResourceHandler</param-value>
     </context-param>
     <context-param>
         <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
         <param-value>client</param-value>
     </context-param>
-   <!-- Change to -1 when you don't want the compiler should check for changes -->
-   <context-param>
-      <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
-      <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
-   </context-param>
+    <!-- Change to -1 when you don't want the compiler should check for changes -->
+    <context-param>
+        <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
+        <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
+    </context-param>
 
     <!-- JSF -->
     <context-param>
@@ -78,15 +78,15 @@
         <auth-constraint/>
     </security-constraint>
 
-   <!-- Track session only in cookie -->
+    <!-- Track session only in cookie -->
     <session-config>
         <session-timeout>30</session-timeout>
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
 
-	<context-param>
-		<param-name>com.sun.faces.expressionFactory</param-name>
- 		<param-value>org.jboss.el.ExpressionFactoryImpl</param-value>
-	</context-param>
+    <context-param>
+        <param-name>com.sun.faces.expressionFactory</param-name>
+        <param-value>org.jboss.el.ExpressionFactoryImpl</param-value>
+    </context-param>
 
 </web-app>
