@@ -367,18 +367,18 @@ public class AuthenticationService {
     }
 
     private void updateLastLogonUserTime(User user) {
-        CustomEntry customEntry = new CustomEntry();
-        customEntry.setDn(user.getDn());
-		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
-
-        CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
-        customEntry.getCustomAttributes().add(customAttribute);
-
-        try {
-            ldapEntryManager.merge(customEntry);
-        } catch (EntryPersistenceException epe) {
-            log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
-        }
+//        CustomEntry customEntry = new CustomEntry();
+//        customEntry.setDn(user.getDn());
+//		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
+//
+//        CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
+//        customEntry.getCustomAttributes().add(customAttribute);
+//
+//        try {
+//            ldapEntryManager.merge(customEntry);
+//        } catch (EntryPersistenceException epe) {
+//            log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
+//        }
     }
 
     public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
