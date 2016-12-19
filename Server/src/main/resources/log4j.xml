@@ -83,6 +83,10 @@
     <category name="com.arjuna">
         <priority value="ERROR"/>
     </category>
+    <category name="org.gluu">
+        <priority value="ERROR"/>
+    </category>
+
 
     <!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout
     and retry the tests pass. Hide the error message -->
@@ -96,21 +100,6 @@
         <priority value="ERROR"/>
     </category>
 
-    <!--
-    <category name="org.hibernate.SQL">
-        <priority value="TRACE"/>
-    </category>
-    <category name="org.hibernate.type">
-        <priority value="TRACE"/>
-    </category>
-    <category name="org.hibernate.loader">
-        <priority value="TRACE"/>
-    </category>
-    <category name="org.hibernate.cache">
-        <priority value="TRACE"/>
-    </category>
-    -->
-
     <!-- Ajax4jsf is too noisy -->
     <category name="org.ajax4jsf.cache">
         <priority value="WARN"/>
@@ -121,7 +110,6 @@
     <category name="org.jboss.seam">
         <priority value="INFO"/>
     </category>
-
 
 
     <!-- These things are too noisy
