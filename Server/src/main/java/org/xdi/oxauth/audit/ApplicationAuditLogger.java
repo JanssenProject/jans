@@ -23,12 +23,14 @@ import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.util.ServerUtil;
 
 import com.google.common.base.Objects;
@@ -37,6 +39,8 @@ import com.google.common.base.Objects;
 @Scope(ScopeType.APPLICATION)
 @Startup
 public class ApplicationAuditLogger {
+
+	private static final String APPLICATION_AUDIT_LOGGER_REFRESH_TIMER = "applicationAuditLoggerRefreshTimer";
 
 	private final String BROKER_URL_PREFIX = "failover:(";
 	private final String BROKER_URL_SUFFIX = ")?timeout=5000&jms.useAsyncSend=true";
@@ -56,11 +60,19 @@ public class ApplicationAuditLogger {
 	@In
 	private ConfigurationFactory configurationFactory;
 
+	private Configuration configuration;
+
 	private final ReentrantLock lock = new ReentrantLock();
 
 	@Create
 	public void init() {
+		updateConfiguration();
 		tryToEstablishJMSConnection();
+	}
+
+	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	public void updateConfiguration() {
+		this.configuration = configurationFactory.getConfiguration();
 	}
 
 	@Asynchronous
@@ -179,18 +191,18 @@ public class ApplicationAuditLogger {
 	}
 
 	private Boolean isEnabledOAuthAuditnLogging() {
-		return configurationFactory.getConfiguration().getEnabledOAuthAuditLogging();
+		return configuration.getEnabledOAuthAuditLogging();
 	}
 
 	private Set<String> getJmsBrokerURISet() {
-		return configurationFactory.getConfiguration().getJmsBrokerURISet();
+		return configuration.getJmsBrokerURISet();
 	}
 
 	private String getJmsUserName() {
-		return configurationFactory.getConfiguration().getJmsUserName();
+		return configuration.getJmsUserName();
 	}
 
 	private String getJmsPassword() {
-		return configurationFactory.getConfiguration().getJmsPassword();
+		return configuration.getJmsPassword();
 	}
 }
