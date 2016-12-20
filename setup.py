@@ -259,6 +259,7 @@ class Setup(object):
         self.openldapConfFolder = '/opt/symas/etc/openldap'
         self.openldapCnConfig = '%s/slapd.d' % self.openldapConfFolder
         self.openldapRootUser = "cn=directory manager,o=gluu"
+        self.openldapSiteUser = "cn=directory manager,o=site"
         self.openldapKeyPass = None
         self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
         self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
@@ -1468,6 +1469,7 @@ class Setup(object):
         self.generate_passport_configuration()
 
         self.ldap_binddn = self.openldapRootUser
+        self.ldap_site_binddn = self.openldapSiteUser
 
         if self.installSaml:
             self.oxTrustConfigGeneration = "true"
