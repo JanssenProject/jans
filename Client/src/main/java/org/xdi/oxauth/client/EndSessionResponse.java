@@ -12,13 +12,12 @@ import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
  * Represents an end session response received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version 0.9 October 27, 2014
+ * @version December 20, 2015
  */
 public class EndSessionResponse extends BaseResponse {
 
     private String location;
     private String state;
-    private String htmlPage; // http-based logout
 
     private EndSessionErrorResponseType errorType;
     private String errorDescription;
@@ -57,16 +56,7 @@ public class EndSessionResponse extends BaseResponse {
      * @return html
      */
     public String getHtmlPage() {
-        return htmlPage;
-    }
-
-    /**
-     * Sets html of the page
-     *
-     * @param htmlPage html
-     */
-    public void setHtmlPage(String htmlPage) {
-        this.htmlPage = htmlPage;
+        return entity;
     }
 
     /**
