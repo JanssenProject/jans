@@ -1,23 +1,37 @@
 package org.xdi.oxauth.audit;
 
-import com.google.common.base.Objects;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.QueueConnection;
+import javax.jms.QueueSession;
+import javax.jms.Session;
+import javax.jms.TextMessage;
+
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.Destroy;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.jms.*;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import com.google.common.base.Objects;
 
 @Name("ApplicationAuditLogger")
 @Scope(ScopeType.APPLICATION)
@@ -42,6 +56,8 @@ public class ApplicationAuditLogger {
 	@In
 	private ConfigurationFactory configurationFactory;
 
+	private final ReentrantLock lock = new ReentrantLock();
+
 	@Create
 	public void init() {
 		tryToEstablishJMSConnection();
@@ -53,7 +69,7 @@ public class ApplicationAuditLogger {
 			return;
 		}
 
-		if (this.pooledConnectionFactory == null || isJmsConfigChanged()) {
+		if ((this.pooledConnectionFactory == null) || isJmsConfigChanged()) {
 			if (tryToEstablishJMSConnection())
 				loggingThroughJMS(oAuth2AuditLog);
 			else
@@ -71,12 +87,21 @@ public class ApplicationAuditLogger {
 		this.pooledConnectionFactory = null;
 	}
 
-	private synchronized boolean tryToEstablishJMSConnection() {
-		// Check if another thread init JMS pool already
-		if (this.pooledConnectionFactory != null && !isJmsConfigChanged()) {
-			return true;
-		}
+	private boolean tryToEstablishJMSConnection() {
+		lock.lock();
+		try {
+			// Check if another thread init JMS pool already
+			if ((this.pooledConnectionFactory != null) && !isJmsConfigChanged()) {
+				return tryToEstablishJMSConnectionImpl();
+			}
 
+	        return true;
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	private boolean tryToEstablishJMSConnectionImpl() {
 		destroy();
 
 		Set<String> jmsBrokerURISet = getJmsBrokerURISet();
