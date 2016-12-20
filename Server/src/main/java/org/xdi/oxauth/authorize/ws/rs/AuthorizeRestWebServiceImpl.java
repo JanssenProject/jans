@@ -27,6 +27,7 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.*;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
@@ -97,8 +98,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ClientAuthorizationsService clientAuthorizationsService;
     @In
     private AuthenticationService authenticationService;
-    @In
-    private ConfigurationFactory configurationFactory;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @Override
     public Response requestAuthorizationGet(
@@ -521,7 +523,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 }
 
                                 if (responseTypes.contains(ResponseType.ID_TOKEN)) {
-                                    boolean includeIdTokenClaims = Boolean.TRUE.equals(configurationFactory.getConfiguration().getLegacyIdTokenClaims());
+                                    boolean includeIdTokenClaims = Boolean.TRUE.equals(configuration.getLegacyIdTokenClaims());
                                     if (authorizationGrant == null) {
                                         includeIdTokenClaims = true;
                                         authorizationGrant = authorizationGrantList.createAuthorizationGrant(user, client,
