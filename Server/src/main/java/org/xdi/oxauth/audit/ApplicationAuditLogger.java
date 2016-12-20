@@ -33,7 +33,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import com.google.common.base.Objects;
 
-@Name("ApplicationAuditLogger")
+@Name("applicationAuditLogger")
 @Scope(ScopeType.APPLICATION)
 @Startup
 public class ApplicationAuditLogger {
