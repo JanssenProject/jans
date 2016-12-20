@@ -13,7 +13,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AbstractToken;
@@ -43,7 +43,7 @@ public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebServ
     private Log log;
 
     @In
-    private OAuth2AuditLogger oAuth2AuditLogger;
+    private ApplicationAuditLogger applicationAuditLogger;
 
     @In
     private ErrorResponseFactory errorResponseFactory;
@@ -101,7 +101,7 @@ public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebServ
             builder = Response.status(500);
             log.error(e.getMessage(), e);
         }
-        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 

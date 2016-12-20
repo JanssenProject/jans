@@ -13,7 +13,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
-import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -74,7 +74,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @In(required = false)
     private Identity identity;
     @In
-    private OAuth2AuditLogger oAuth2AuditLogger;
+    private ApplicationAuditLogger applicationAuditLogger;
 
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionState,
@@ -291,6 +291,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         oAuth2AuditLog.setClientId(authorizationGrant.getClientId());
         oAuth2AuditLog.setScope(StringUtils.join(authorizationGrant.getScopes(), " "));
         oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
-        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
     }
 }
