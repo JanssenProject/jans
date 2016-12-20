@@ -6,7 +6,20 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import com.google.common.collect.Sets;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
@@ -30,23 +43,28 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AcrChangedException;
+import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.ClientAuthorizationsService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.RedirectionUriService;
+import org.xdi.oxauth.service.ScopeService;
+import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
+import com.google.common.collect.Sets;
 
 /**
  * @author Javier Rojas Blum
@@ -95,6 +113,9 @@ public class AuthorizeAction {
 
     @In
     private Identity identity;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -255,7 +276,7 @@ public class AuthorizeAction {
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
 
-            if (ConfigurationFactory.instance().getConfiguration().getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+            if (configuration.getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                 if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
                     permissionGranted(session);
                     return;
