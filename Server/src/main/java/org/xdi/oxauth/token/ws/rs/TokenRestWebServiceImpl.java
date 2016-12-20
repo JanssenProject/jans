@@ -19,6 +19,7 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.CodeVerifier;
 import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -75,8 +76,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @In
     private AuthenticationService authenticationService;
 
-    @In
-    private ConfigurationFactory configurationFactory;
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -131,7 +132,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
                             String nonce = authorizationCodeGrant.getNonce();
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                    configurationFactory.getConfiguration().getLegacyIdTokenClaims());
+                            		configuration.getLegacyIdTokenClaims());
                             idToken = authorizationCodeGrant.createIdToken(
                                     nonce, null, accToken, authorizationCodeGrant, includeIdTokenClaims);
                         }
@@ -200,7 +201,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     IdToken idToken = null;
                     if (clientCredentialsGrant.getScopes().contains("openid")) {
                         boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                configurationFactory.getConfiguration().getLegacyIdTokenClaims());
+                        		configuration.getLegacyIdTokenClaims());
                         idToken = clientCredentialsGrant.createIdToken(
                                 null, null, null, clientCredentialsGrant, includeIdTokenClaims);
                     }
@@ -246,7 +247,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                                    configurationFactory.getConfiguration().getLegacyIdTokenClaims());
+                            		configuration.getLegacyIdTokenClaims());
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
                                     null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims);
                         }
