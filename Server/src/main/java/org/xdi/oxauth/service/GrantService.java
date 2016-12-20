@@ -13,7 +13,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -41,7 +41,7 @@ public class GrantService {
     @In
     private LdapEntryManager ldapEntryManager;
     @In
-    private OAuth2AuditLogger oAuth2AuditLogger;
+    private ApplicationAuditLogger applicationAuditLogger;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
@@ -290,7 +290,7 @@ public class GrantService {
             oAuth2AuditLog.setClientId(tokenLdap.getClientId());
             oAuth2AuditLog.setScope(tokenLdap.getScope());
             oAuth2AuditLog.setUsername(tokenLdap.getUserId());
-            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
         }
     }
 }

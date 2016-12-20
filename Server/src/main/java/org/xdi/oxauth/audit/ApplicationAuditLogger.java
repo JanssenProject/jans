@@ -19,10 +19,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-@Name("oAuth2AuditLogger")
+@Name("ApplicationAuditLogger")
 @Scope(ScopeType.APPLICATION)
 @Startup
-public class OAuth2AuditLogger {
+public class ApplicationAuditLogger {
 
 	private final String BROKER_URL_PREFIX = "failover:(";
 	private final String BROKER_URL_SUFFIX = ")?timeout=5000&jms.useAsyncSend=true";
