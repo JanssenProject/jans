@@ -47,7 +47,7 @@
                <div id="content" class="sign-in-page">
 		        <div class="row-fluid">
 			       <h:form id="loginForm" class="signin-form span6 offset3">
-			        <h:panelGroup rendered="#{not sessionStateService.sessionStateAuthenticated}">
+			        <h:panelGroup rendered="#{sessionStateService.notSessionStateAuthenticated}">
 				      <div class="inner-form-container row-fluid">
 								<ul class="offset2 span10">
 

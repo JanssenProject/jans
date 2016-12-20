@@ -613,6 +613,10 @@ public class SessionStateService {
         return false;
     }
 
+    public boolean isNotSessionStateAuthenticated() {
+        return !isSessionStateAuthenticated();
+    }
+
     private void auditLogging(SessionState sessionState) {
         HttpServletRequest httpServletRequest = ServerUtil.getRequestOrNull();
         if(httpServletRequest != null){
