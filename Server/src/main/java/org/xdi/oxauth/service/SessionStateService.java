@@ -68,6 +68,12 @@ public class SessionStateService {
     @In
     private ApplicationAuditLogger applicationAuditLogger;
 
+    @In(required = false)
+    private FacesContext facesContext;
+
+    @In(value = "#{facesContext.externalContext}", required = false)
+	private ExternalContext externalContext;
+
     public static SessionStateService instance() {
         if (!Contexts.isEventContextActive() && !Contexts.isApplicationContextActive()) {
             Lifecycle.beginCall();
@@ -176,12 +182,10 @@ public class SessionStateService {
 
     private Map<String, String> getCurrentSessionAttributes(Map<String, String> sessionAttributes) {
         // Update from request
-        FacesContext facesContext = FacesContext.getCurrentInstance();
         if (facesContext != null) {
             // Clone before replacing new attributes
             final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
 
-            final ExternalContext externalContext = facesContext.getExternalContext();
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
             Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
             for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
@@ -217,11 +221,10 @@ public class SessionStateService {
 
     public String getSessionStateFromCookie() {
         try {
-            FacesContext facesContext = FacesContext.getCurrentInstance();
             if (facesContext == null) {
                 return null;
             }
-            final HttpServletRequest request = (HttpServletRequest) facesContext.getExternalContext().getRequest();
+            final HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();
             return getSessionStateFromCookie(request);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
