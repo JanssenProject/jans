@@ -20,7 +20,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Identity;
-import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -72,7 +72,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @Logger
     private Log log;
     @In
-    private OAuth2AuditLogger oAuth2AuditLogger;
+    private ApplicationAuditLogger applicationAuditLogger;
     @In
     private ErrorResponseFactory errorResponseFactory;
     @In
@@ -216,7 +216,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             AuthorizeErrorResponseType.ACCESS_DENIED, state));
 
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
                                 } else {
                                     oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
@@ -258,7 +258,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 AuthorizeErrorResponseType.INVALID_REQUEST_URI, state));
 
                                         builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                         return builder.build();
                                     }
                                 } catch (URISyntaxException e) {
@@ -341,7 +341,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                         AuthorizeErrorResponseType.USER_MISMATCHED, state));
 
                                                 builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                                oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                                 return builder.build();
                                             }
                                         }
@@ -381,7 +381,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                         AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
 
                                                 builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                                oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                                applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                                 return builder.build();
                                             }
                                         } else {
@@ -389,7 +389,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                     AuthorizeErrorResponseType.LOGIN_REQUIRED, state));
 
                                             builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                             return builder.build();
                                         }
                                     } else {
@@ -404,7 +404,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                                                 codeChallenge, codeChallengeMethod, sessionState);
                                         builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                         return builder.build();
                                     }
                                 }
@@ -430,7 +430,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                                             codeChallenge, codeChallengeMethod, sessionState);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
                                 }
 
@@ -442,7 +442,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                                             codeChallenge, codeChallengeMethod, sessionState);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
                                 }
 
@@ -475,7 +475,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                                             codeChallenge, codeChallengeMethod, sessionState);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
                                 }
 
@@ -590,7 +590,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                     AuthorizeErrorResponseType.SESSION_SELECTION_REQUIRED, state));
             redirectUriResponse.addResponseParameter("hint", "Use prompt=login in order to alter existing session.");
-            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
             return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
         } catch (EntryPersistenceException e) { // Invalid clientId
             builder = error(Response.Status.UNAUTHORIZED, AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state);
@@ -609,7 +609,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.error(e.getMessage(), e);
         }
 
-        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
