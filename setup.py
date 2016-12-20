@@ -129,7 +129,7 @@ class Setup(object):
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
 
-        self.jython_home = 'self.jython_home'
+        self.jython_home = '/opt/jython'
 
         self.node_home = '/opt/node'
         self.node_initd_script = '%s/static/system/initd/node' % self.install_dir
