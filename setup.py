@@ -311,8 +311,9 @@ class Setup(object):
         self.asimba_conf_folder = '%s/asimba' % self.configFolder
         self.asimba_configuration_xml = '%s/asimba.xml' % self.asimba_conf_folder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
+        self.asimba_selector_configuration = '%s/asimba-selector.xml' % self.outputFolder
         self.asimba_properties = '%s/asimba.properties' % self.outputFolder
-        self.asimba_selector_configuration = '%s/asimba-selector.xml' % self.asimba_conf_folder
+        self.asimba_selector_configuration_xml = '%s/asimba-selector.xml' % self.asimba_conf_folder
 
         self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
         self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
@@ -416,7 +417,7 @@ class Setup(object):
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
-                     self.asimba_selector_configuration: True,
+                     self.asimba_selector_configuration: False,
                      self.network: False,
                      self.openldapSlapdConf: False,
                      self.openldapSymasConf: False
@@ -1586,6 +1587,9 @@ class Setup(object):
         self.removeDirs(self.asimba_conf_folder)
         self.createDirs(self.asimba_conf_folder)
         self.copyFile(self.asimba_configuration, self.asimba_configuration_xml)
+        self.copyFile(self.asimba_selector_configuration, self.asimba_selector_configuration_xml)
+        self.run([self.cmd_chmod, 'u+x', self.asimba_conf_folder])
+        self.run([self.cmd_chmod, 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
 
         self.logIt("Copying asimba.war into jetty webapps folder...")
         jettyServiceName = 'asimba'
