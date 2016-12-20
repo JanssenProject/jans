@@ -244,8 +244,8 @@ class Setup(object):
         self.loadLdifCommand = self.ldapModifyCommand
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
-        self.redhat_services = ['memcached', 'httpd']
-        self.debian_services = ['memcached', 'apache2']
+        self.redhat_services = ['httpd']
+        self.debian_services = ['apache2']
 
         self.apache_start_script = '/etc/init.d/httpd'
 
@@ -2210,12 +2210,6 @@ class Setup(object):
            self.run([service_path, 'start', apache_service_name])
         else:
            self.run([service_path, apache_service_name, 'start'])
-
-        # Memcached
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-           self.run([service_path, 'start', 'memcached.service'])
-        else:
-           self.run([service_path, 'memcached', 'start'])
 
         # Openldap
         if self.installLdap:
