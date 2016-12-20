@@ -138,11 +138,6 @@
             </auth-constraint>
     </security-constraint>
     -->
-    <listener>
-    	<listener-class>
-    		com.sun.faces.config.ConfigureListener
-    	</listener-class>
-    </listener>
 
    <!-- Track session only in cookie -->
     <session-config>
