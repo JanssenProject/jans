@@ -597,6 +597,22 @@ public class SessionStateService {
     }
 
 
+    public boolean isSessionStateAuthenticated() {
+    	SessionState sessionState = getSessionState();
+    	
+    	if (sessionState == null) {
+    		return false;
+    	}
+    	
+    	SessionIdState sessionIdState = sessionState.getState();
+    	
+    	if (SessionIdState.AUTHENTICATED.equals(sessionIdState)) {
+    		return true;
+    	}
+
+        return false;
+    }
+
     private void auditLogging(SessionState sessionState) {
         HttpServletRequest httpServletRequest = ServerUtil.getRequestOrNull();
         if(httpServletRequest != null){
