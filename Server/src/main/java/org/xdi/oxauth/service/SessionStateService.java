@@ -16,7 +16,7 @@ import org.jboss.seam.annotations.*;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
@@ -66,7 +66,7 @@ public class SessionStateService {
     @In
     private ConfigurationFactory configurationFactory;
     @In
-    private OAuth2AuditLogger oAuth2AuditLogger;
+    private ApplicationAuditLogger applicationAuditLogger;
 
     public static SessionStateService instance() {
         if (!Contexts.isEventContextActive() && !Contexts.isApplicationContextActive()) {
@@ -613,7 +613,7 @@ public class SessionStateService {
             }
             OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpServletRequest), action);
             oAuth2AuditLog.setSuccess(true);
-            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
         }
     }
 }

@@ -17,7 +17,7 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
-import org.xdi.oxauth.audit.OAuth2AuditLogger;
+import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -70,7 +70,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     @Logger
     private Log log;
     @In
-    private OAuth2AuditLogger oAuth2AuditLogger;
+    private ApplicationAuditLogger applicationAuditLogger;
     @In
     private ErrorResponseFactory errorResponseFactory;
     @In
@@ -213,7 +213,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         builder.cacheControl(ServerUtil.cacheControl(true, false));
         builder.header("Pragma", "no-cache");
-        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 
@@ -390,7 +390,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         if (request.getSubjectType() != null
                                 && !ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(request.getSubjectType())) {
                             log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
-                            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
                                     entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA)).build();
                         }
@@ -402,11 +402,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                             oAuth2AuditLog.setScope(clientScopesToString(client));
                             oAuth2AuditLog.setSuccess(true);
-                            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.OK).entity(clientAsEntity(client)).build();
                         } else {
                             log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
-                            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
                                     entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_TOKEN)).build();
                         }
@@ -415,14 +415,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
 
             log.debug("Client UPDATE : parameters are invalid. Returns BAD_REQUEST response.");
-            oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+            applicationAuditLogger.sendMessage(oAuth2AuditLog);
             return Response.status(Response.Status.BAD_REQUEST).
                     entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA)).build();
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return internalErrorResponse().build();
     }
 
@@ -473,7 +473,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         cacheControl.setNoStore(true);
         builder.cacheControl(cacheControl);
         builder.header("Pragma", "no-cache");
-        oAuth2AuditLogger.sendMessage(oAuth2AuditLog);
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
 

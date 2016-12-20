@@ -57,8 +57,8 @@
           </layout>
    </appender>
 
-    <appender name="OAUTH2_AUDIT_LOG_FILE" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="${catalina.base}/logs/oauth2_audit.log"/>
+    <appender name="OX_AUDIT_LOG_FILE" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="${catalina.base}/logs/oxauth_audit.log"/>
         <param name="DatePattern" value="'.'yyyy-MM-dd"/>
 
         <layout class="org.apache.log4j.PatternLayout">
@@ -194,9 +194,9 @@
         <appender-ref ref="OX_SCRIPT_LOG_FILE" />
     </logger>
 
-    <logger name="org.xdi.oxauth.audit.OAuth2AuditLogger" additivity="false">
+    <logger name="org.xdi.oxauth.audit.ApplicationAuditLogger" additivity="false">
         <level value="${log4j.default.log.level}"/>
-        <appender-ref ref="OAUTH2_AUDIT_LOG_FILE" />
+        <appender-ref ref="OX_AUDIT_LOG_FILE" />
     </logger>
 
     <root>
