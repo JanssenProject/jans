@@ -664,7 +664,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String sessionState) {
 
-        redirectUriResponse.setBaseRedirectUri(ConfigurationFactory.instance().getConfiguration().getAuthorizationPage());
+        redirectUriResponse.setBaseRedirectUri(configuration.getAuthorizationPage());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
 
         // oAuth parameters
