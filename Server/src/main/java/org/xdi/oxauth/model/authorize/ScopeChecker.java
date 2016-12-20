@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
@@ -37,11 +38,12 @@ public class ScopeChecker {
     @Logger
     private Log log;
 
+    @In
+    private ScopeService scopeService;
+
     public Set<String> checkScopesPolicy(Client client, String scope) {
         log.debug("Checking scopes policy for: " + scope);
         Set<String> grantedScopes = new HashSet<String>();
-
-        ScopeService scopeService = ScopeService.instance();
 
         final String[] scopesRequested = scope.split(" ");
         final String[] scopesAllowed = client.getScopes();
