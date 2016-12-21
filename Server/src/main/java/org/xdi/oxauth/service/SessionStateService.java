@@ -82,9 +82,6 @@ public class SessionStateService {
 	private ExternalContext externalContext;
 
     public static SessionStateService instance() {
-        if (!Contexts.isEventContextActive() && !Contexts.isApplicationContextActive()) {
-            Lifecycle.beginCall();
-        }
         return (SessionStateService) Component.getInstance(SessionStateService.class);
     }
 
