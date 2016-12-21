@@ -983,7 +983,14 @@ class Setup(object):
         # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module 
         if "ext" in jettyModulesList:
             self.run([self.cmd_mkdir, '-p', "%s/lib/ext" % jettyServiceBase])
-            
+
+        # Create ./custom/pages and ./custom/static folders for custom pages and static resources, only if application supports thme
+        if supportCustomizations:
+            if not os.path.exists("%s/custom" % jettyServiceBase):
+                self.run([self.cmd_mkdir, '-p', "%s/custom" % jettyServiceBase])
+            self.run([self.cmd_mkdir, '-p', "%s/custom/pages" % jettyServiceBase])
+            self.run([self.cmd_mkdir, '-p', "%s/custom/static" % jettyServiceBase])
+
         # Create ./pages folder for custom pages and resources if application supports them 
         if supportCustomizations:
             self.run([self.cmd_mkdir, '-p', "%s/pages" % jettyServiceBase])
