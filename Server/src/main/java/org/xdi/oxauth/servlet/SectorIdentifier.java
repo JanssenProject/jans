@@ -4,6 +4,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.xdi.oxauth.service.SectorIdentifierService;
 
 import javax.servlet.ServletException;
@@ -23,28 +24,36 @@ public class SectorIdentifier extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        try {
-            String urlPath = request.getPathInfo();
-            String inum = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
+        final HttpServletRequest httpRequest = request;
+        final HttpServletResponse httpResponse = response;
 
-            org.xdi.oxauth.model.ldap.SectorIdentifier sectorIdentifier = SectorIdentifierService.instance().getSectorIdentifierByInum(inum);
+        new ContextualHttpServletRequest(httpRequest) {
+            @Override
+            public void process() throws IOException {
+                httpResponse.setContentType("application/json");
+                PrintWriter out = httpResponse.getWriter();
+                try {
+                    String urlPath = httpRequest.getPathInfo();
+                    String inum = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
 
-            JSONArray jsonArray = new JSONArray();
+                    org.xdi.oxauth.model.ldap.SectorIdentifier sectorIdentifier = SectorIdentifierService.instance().getSectorIdentifierByInum(inum);
 
-            for (String redirectUri : sectorIdentifier.getRedirectUris()) {
-                jsonArray.put(redirectUri);
+                    JSONArray jsonArray = new JSONArray();
+
+                    for (String redirectUri : sectorIdentifier.getRedirectUris()) {
+                        jsonArray.put(redirectUri);
+                    }
+
+                    out.println(jsonArray.toString(4).replace("\\/", "/"));
+                } catch (JSONException e) {
+                    LOG.error(e.getMessage(), e);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                } finally {
+                    out.close();
+                }
             }
-
-            out.println(jsonArray.toString(4).replace("\\/", "/"));
-        } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            out.close();
-        }
+        }.run();
     }
 
     /**
