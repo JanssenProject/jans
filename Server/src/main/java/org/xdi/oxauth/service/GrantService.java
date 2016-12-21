@@ -56,8 +56,8 @@ public class GrantService {
     @In
     private ClientService clientService;
 
-    @In(value = "#{configurationFactory.staticConfiguration}")
-    private StaticConf staticConf;
+    @In
+    private StaticConf staticConfiguration;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
@@ -71,7 +71,7 @@ public class GrantService {
     }
 
     public String baseDn() {
-        return staticConf.getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
+        return staticConfiguration.getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
     }
 
     public static GrantService instance() {

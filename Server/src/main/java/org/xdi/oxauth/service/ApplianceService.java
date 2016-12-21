@@ -39,8 +39,8 @@ public class ApplianceService {
 	@In
 	private LdapEntryManager ldapEntryManager;
 
-    @In(value = "#{configurationFactory.staticConfiguration}")
-    private StaticConf staticConf;
+    @In
+    private StaticConf staticConfiguration;
 
     @In
     private Configuration configuration;
@@ -110,7 +110,7 @@ public class ApplianceService {
 	 * @throws Exception 
 	 */
 	public String getDnForAppliance(String inum) {
-		String baseDn = staticConf.getBaseDn().getAppliance();
+		String baseDn = staticConfiguration.getBaseDn().getAppliance();
 		if (StringHelper.isEmpty(inum)) {
 			return baseDn;
 		}
