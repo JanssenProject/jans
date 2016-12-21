@@ -88,7 +88,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @In
     private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @Override

@@ -50,7 +50,7 @@ public class GluuConfigurationWS {
     @In
     private ErrorResponseFactory errorResponseFactory;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @GET

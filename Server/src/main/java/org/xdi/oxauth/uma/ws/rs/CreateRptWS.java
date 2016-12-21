@@ -64,7 +64,7 @@ public class CreateRptWS {
     private AuthorizationService umaAuthorizationService;
     @In
     private LdapEntryManager ldapEntryManager;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @Path("rpt")

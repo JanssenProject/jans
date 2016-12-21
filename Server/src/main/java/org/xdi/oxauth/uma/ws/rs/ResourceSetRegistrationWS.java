@@ -72,7 +72,7 @@ public class ResourceSetRegistrationWS {
     private AuthorizationGrantList authorizationGrantList;
     @In
     private ScopeService umaScopeService;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @POST

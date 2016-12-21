@@ -52,7 +52,7 @@ public class ScopeService {
     private InumService inumService;
     @In
     private ErrorResponseFactory errorResponseFactory;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     public static ScopeService instance() {
