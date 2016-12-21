@@ -51,7 +51,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Api(value = "/id", description = "ID Generation")
 public class IdGenRestWebService {
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     private static class UnauthorizedResponseHolder {

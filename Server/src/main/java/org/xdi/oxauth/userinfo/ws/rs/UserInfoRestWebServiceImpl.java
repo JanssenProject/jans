@@ -98,7 +98,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     @In
     private PairwiseIdentifierService pairwiseIdentifierService;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @In(value = "#{configurationFactory.webKeys}")

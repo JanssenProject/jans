@@ -78,7 +78,7 @@ public class Authenticator implements Serializable {
     @In
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @In

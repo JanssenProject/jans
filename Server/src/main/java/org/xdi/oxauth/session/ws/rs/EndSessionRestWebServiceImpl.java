@@ -77,7 +77,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @In
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @Override

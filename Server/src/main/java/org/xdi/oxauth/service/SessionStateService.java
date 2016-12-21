@@ -78,7 +78,7 @@ public class SessionStateService {
     @In
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @In(value = "#{configurationFactory.staticConfiguration}")

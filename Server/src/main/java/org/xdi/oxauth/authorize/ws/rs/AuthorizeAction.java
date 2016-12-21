@@ -114,7 +114,7 @@ public class AuthorizeAction {
     @In
     private Identity identity;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     // OAuth 2.0 request parameters
