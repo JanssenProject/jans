@@ -6,12 +6,25 @@
 
 package org.xdi.oxauth.auth;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Install;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.intercept.BypassInterceptors;
 import org.jboss.seam.annotations.web.Filter;
@@ -27,6 +40,7 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;
@@ -38,17 +52,6 @@ import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.util.StringHelper;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -63,6 +66,13 @@ public class AuthenticationFilter extends AbstractFilter {
 
     @Logger
     private Log log;
+
+	private Configuration configuration;
+
+	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	public void updateConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
 
     private String realm;
     public static final String REALM = "oxAuth";
@@ -79,7 +89,7 @@ public class AuthenticationFilter extends AbstractFilter {
             public void process() {
                 try {
                     final String requestUrl = httpRequest.getRequestURL().toString();
-                    if (requestUrl.equals(ConfigurationFactory.instance().getConfiguration().getTokenEndpoint())) {
+                    if (requestUrl.equals(configuration.getTokenEndpoint())) {
                         if (httpRequest.getParameter("client_assertion") != null
                                 && httpRequest.getParameter("client_assertion_type") != null) {
                             processJwtAuth(httpRequest, httpResponse, filterChain);
@@ -265,7 +275,7 @@ public class AuthenticationFilter extends AbstractFilter {
                             getAuthenticator().configureSessionClient(client);
                         }
                     }
-                } else if (Boolean.TRUE.equals(ConfigurationFactory.instance().getConfiguration().getClientAuthenticationFiltersEnabled())) {
+                } else if (Boolean.TRUE.equals(configuration.getClientAuthenticationFiltersEnabled())) {
                     String clientDn = ClientFilterService.instance().processAuthenticationFilters(servletRequest.getParameterMap());
                     if (clientDn != null) {
                         Client client = getClientService().getClientByDn(clientDn);
