@@ -6,20 +6,7 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
@@ -51,20 +38,15 @@ import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AcrChangedException;
-import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.ClientAuthorizationsService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.service.SessionStateService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
-import com.google.common.collect.Sets;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum
@@ -117,6 +99,12 @@ public class AuthorizeAction {
     @In
     private Configuration configuration;
 
+    @In(required = false)
+    private FacesContext facesContext;
+
+    @In(value = "#{facesContext.externalContext}", required = false)
+    private ExternalContext externalContext;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -148,7 +136,6 @@ public class AuthorizeAction {
         if (StringUtils.isNotBlank(uiLocales)) {
             uiLocalesList = Util.splittedStringAsList(uiLocales, " ");
 
-            FacesContext facesContext = FacesContext.getCurrentInstance();
             List<Locale> supportedLocales = new ArrayList<Locale>();
             for (Iterator<Locale> it = facesContext.getApplication().getSupportedLocales(); it.hasNext(); ) {
                 supportedLocales.add(it.next());
@@ -201,7 +188,6 @@ public class AuthorizeAction {
         }
 
         if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
-            final ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
             Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
 
