@@ -99,7 +99,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     @In
     private AuthenticationService authenticationService;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @Override

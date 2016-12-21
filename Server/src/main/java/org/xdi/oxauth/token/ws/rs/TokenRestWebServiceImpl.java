@@ -76,7 +76,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @In
     private AuthenticationService authenticationService;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @Override

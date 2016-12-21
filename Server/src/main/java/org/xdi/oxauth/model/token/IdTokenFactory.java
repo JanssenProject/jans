@@ -100,7 +100,7 @@ public class IdTokenFactory {
     @In
     private PairwiseIdentifierService pairwiseIdentifierService;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,

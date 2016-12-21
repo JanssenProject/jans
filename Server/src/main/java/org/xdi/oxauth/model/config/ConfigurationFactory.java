@@ -20,6 +20,7 @@ import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.Factory;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Observer;
@@ -27,6 +28,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
+import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -199,6 +201,7 @@ public class ConfigurationFactory {
         return ldapConfiguration;
     }
 
+    @Factory(value = "configuration", scope = ScopeType.APPLICATION, autoCreate = true)
     public Configuration getConfiguration() {
         return conf;
     }
@@ -289,6 +292,9 @@ public class ConfigurationFactory {
             final Conf c = loadConfigurationFromLdap();
             if (c != null) {
                 init(c);
+
+                // Destroy old configuration
+            	Contexts.getApplicationContext().remove("configuration");
                 Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT, this.conf);
                 
                 return true;

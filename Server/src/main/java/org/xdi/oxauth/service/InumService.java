@@ -34,7 +34,7 @@ public class InumService {
     @In
     private IdGenService idGenService;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     public String generateClientInum() {
