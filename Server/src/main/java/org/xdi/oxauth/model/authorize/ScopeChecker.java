@@ -73,11 +73,6 @@ public class ScopeChecker {
      * @return ScopeChecker instance
      */
     public static ScopeChecker instance() {
-        boolean createContexts = !Contexts.isEventContextActive() && !Contexts.isApplicationContextActive();
-        if (createContexts) {
-            Lifecycle.beginCall();
-        }
-
         return (ScopeChecker) Component.getInstance(ScopeChecker.class);
     }
 
