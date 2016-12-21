@@ -63,7 +63,7 @@ public class LogoutAction {
     @In
     private JsonService jsonService;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     private String idTokenHint;
