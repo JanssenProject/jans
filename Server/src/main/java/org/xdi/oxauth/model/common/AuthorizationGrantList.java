@@ -13,6 +13,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
@@ -41,15 +43,20 @@ import java.util.List;
  * @author Javier Rojas Blum Date: 09.29.2011
  */
 @Name("authorizationGrantList")
-@Startup(depends = "appInitializer")
+@AutoCreate
 @Scope(ScopeType.APPLICATION)
 public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     private static final Log LOGGER = Logging.getLog(AuthorizationGrantList.class);
 
-    final GrantService grantServive;
-    final UserService userService;
-    final ClientService clientService;
+    @In
+    private GrantService grantService;
+
+    @In
+    private UserService userService;
+
+    @In
+    private ClientService clientService;
 
 	private Configuration configuration;
 
@@ -59,16 +66,13 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 	}
 
     public AuthorizationGrantList() {
-        grantServive = GrantService.instance();
-        userService = (UserService) Component.getInstance(UserService.class);
-        clientService = (ClientService) Component.getInstance(ClientService.class);
     }
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
         if (authorizationGrants != null && !authorizationGrants.isEmpty()) {
             for (AuthorizationGrant r : authorizationGrants) {
-                grantServive.remove(r);
+                grantService.remove(r);
             }
         }
     }
@@ -114,7 +118,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     public List<AuthorizationGrant> getAuthorizationGrant(String clientId) {
         final List<AuthorizationGrant> result = new ArrayList<AuthorizationGrant>();
         try {
-            final List<TokenLdap> entries = grantServive.getGrantsOfClient(clientId);
+            final List<TokenLdap> entries = grantService.getGrantsOfClient(clientId);
             if (entries != null && !entries.isEmpty()) {
                 for (TokenLdap t : entries) {
                     final AuthorizationGrant grant = asGrant(t);
@@ -131,7 +135,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken) {
-        final TokenLdap tokenLdap = grantServive.getGrantsByCode(accessToken);
+        final TokenLdap tokenLdap = grantService.getGrantsByCode(accessToken);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenLdap);
         }
@@ -140,7 +144,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
-        TokenLdap tokenLdap = grantServive.getGrantsByCode(idToken);
+        TokenLdap tokenLdap = grantService.getGrantsByCode(idToken);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.ID_TOKEN)) {
             return asGrant(tokenLdap);
         }
@@ -148,7 +152,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     public AuthorizationGrant load(String clientId, String p_code) {
-        return asGrant(grantServive.getGrantsByCodeAndClient(p_code, clientId));
+        return asGrant(grantService.getGrantsByCodeAndClient(p_code, clientId));
     }
 
     public static String extractClientIdFromTokenDn(String p_dn) {

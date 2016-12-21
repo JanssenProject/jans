@@ -40,19 +40,23 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@In
     private ApplianceService applianceService;
 
+	@In
+	private ConfigurationFactory configurationFactory;
+
 	private Configuration configuration;
     private StaticConf staticConfiguration;
-
-	@Create
-    public void create() {
-    	init(configuration.getMetricReporterInterval());
-    }
 
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
 	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
 		this.configuration = configuration;
 		this.staticConfiguration = staticConfiguration;
 	}
+
+    @Observer("org.jboss.seam.postInitialization")
+    public void create() {
+    	this.configuration = configurationFactory.getConfiguration();
+    	init(this.configuration.getMetricReporterInterval());
+    }
 
 	@Override
 	public String baseDn() {
