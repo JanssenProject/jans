@@ -8,10 +8,12 @@ package org.xdi.oxauth.service;
 
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.web.ServletContexts;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.util.StringHelper;
 
 /**
@@ -24,32 +26,34 @@ import org.xdi.util.StringHelper;
 @AutoCreate
 public class OxAuthConfigurationService {
 
-	public String getCssLocation(){
-		if(StringHelper.isEmpty(ConfigurationFactory.instance().getConfiguration().getCssLocation())){
+	@In(value = "#{configurationFactory.configuration}")
+	private Configuration configuration;
+
+	public String getCssLocation() {
+		if (StringHelper.isEmpty(configuration.getCssLocation())) {
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/stylesheet";
-		}else{
-			return ConfigurationFactory.instance().getConfiguration().getCssLocation();
-		}	
+		} else {
+			return configuration.getCssLocation();
+		}
 	}
-	
-	public String getJsLocation(){
-		if(StringHelper.isEmpty(ConfigurationFactory.instance().getConfiguration().getJsLocation())){
+
+	public String getJsLocation() {
+		if (StringHelper.isEmpty(configuration.getJsLocation())) {
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/js";
-		}else{
-			return ConfigurationFactory.instance().getConfiguration().getJsLocation();
-		}	
+		} else {
+			return configuration.getJsLocation();
+		}
 	}
-	
-	public String getImgLocation(){
-		if(StringHelper.isEmpty(ConfigurationFactory.instance().getConfiguration().getImgLocation())){
+
+	public String getImgLocation() {
+		if (StringHelper.isEmpty(configuration.getImgLocation())) {
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/img";
-		}else{
-			return ConfigurationFactory.instance().getConfiguration().getImgLocation();
-		}	
+		} else {
+			return configuration.getImgLocation();
+		}
 	}
-	
-}
 
+}
