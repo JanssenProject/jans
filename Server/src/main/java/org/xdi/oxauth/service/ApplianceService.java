@@ -42,7 +42,7 @@ public class ApplianceService {
     @In(value = "#{configurationFactory.staticConfiguration}")
     private StaticConf staticConf;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
 	/**

@@ -25,7 +25,7 @@ import org.xdi.util.StringHelper;
 @AutoCreate
 public class OxAuthConfigurationService {
 
-	@In(value = "#{configurationFactory.configuration}")
+	@In
 	private Configuration configuration;
 
 	public String getCssLocation() {
