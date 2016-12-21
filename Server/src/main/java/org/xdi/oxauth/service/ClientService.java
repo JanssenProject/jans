@@ -61,8 +61,8 @@ public class ClientService {
     @In
     private ClientFilterService clientFilterService;
 
-    @In(value = "#{configurationFactory.staticConfiguration}")
-    private StaticConf staticConf;
+    @In
+    private StaticConf staticConfiguration;
 
     /**
      * Get ClientService instance
@@ -134,7 +134,7 @@ public class ClientService {
     }
 
     public Client getClient(String clientId, String registrationAccessToken) {
-        String baseDN = staticConf.getBaseDn().getClients();
+        String baseDN = staticConfiguration.getBaseDn().getClients();
 
         Filter filterInum = Filter.createEqualityFilter("inum", clientId);
         Filter registrationAccessTokenInum = Filter.createEqualityFilter("oxAuthRegistrationAccessToken", registrationAccessToken);
@@ -232,7 +232,7 @@ public class ClientService {
     }
 
     public List<Client> getAllClients(String[] returnAttributes) {
-        String baseDn = staticConf.getBaseDn().getClients();
+        String baseDn = staticConfiguration.getBaseDn().getClients();
 
         List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, returnAttributes, null);
 
@@ -240,7 +240,7 @@ public class ClientService {
     }
 
     public List<Client> getAllClients(String[] returnAttributes, int size) {
-        String baseDn = staticConf.getBaseDn().getClients();
+        String baseDn = staticConfiguration.getBaseDn().getClients();
 
         List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size, size);
 
@@ -248,7 +248,7 @@ public class ClientService {
     }
 
     public List<Client> getClientsWithExpirationDate(String[] returnAttributes) {
-        String baseDN = staticConf.getBaseDn().getClients();
+        String baseDN = staticConfiguration.getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
 
         return ldapEntryManager.findEntries(baseDN, Client.class, filter);
@@ -257,7 +257,7 @@ public class ClientService {
     public String buildClientDn(String p_clientId) {
         final StringBuilder dn = new StringBuilder();
         dn.append(String.format("inum=%s,", p_clientId));
-        dn.append(staticConf.getBaseDn().getClients()); // ou=clients,o=@!1111,o=gluu
+        dn.append(staticConfiguration.getBaseDn().getClients()); // ou=clients,o=@!1111,o=gluu
         return dn.toString();
     }
 

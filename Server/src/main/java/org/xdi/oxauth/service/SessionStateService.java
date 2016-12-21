@@ -81,8 +81,8 @@ public class SessionStateService {
     @In
     private Configuration configuration;
 
-    @In(value = "#{configurationFactory.staticConfiguration}")
-    private StaticConf staticConf;
+    @In
+    private StaticConf staticConfiguration;
 
     @In(required = false)
     private FacesContext facesContext;
@@ -535,7 +535,7 @@ public class SessionStateService {
     }
 
     private String getBaseDn() {
-        return staticConf.getBaseDn().getSessionId();
+        return staticConfiguration.getBaseDn().getSessionId();
     }
 
     public boolean remove(SessionState p_sessionState) {

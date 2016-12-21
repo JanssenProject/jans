@@ -206,6 +206,7 @@ public class ConfigurationFactory {
         return conf;
     }
 
+    @Factory(value = "staticConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
     public StaticConf getStaticConfiguration() {
         return staticConf;
     }
@@ -295,7 +296,9 @@ public class ConfigurationFactory {
 
                 // Destroy old configuration
             	Contexts.getApplicationContext().remove("configuration");
-                Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT, this.conf);
+            	Contexts.getApplicationContext().remove("staticConfiguration");
+            	
+                Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT, this.conf, this.staticConf);
                 
                 return true;
             }

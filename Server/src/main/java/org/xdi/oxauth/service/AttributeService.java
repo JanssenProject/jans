@@ -37,8 +37,8 @@ public class AttributeService extends org.xdi.service.AttributeService {
     @In
     private CacheService cacheService;
 
-    @In(value = "#{configurationFactory.staticConfiguration}")
-    private StaticConf staticConf;
+    @In
+    private StaticConf staticConfiguration;
 
     /**
      * Get AttributeService instance
@@ -68,7 +68,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public GluuAttribute getByLdapName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, staticConf.getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, staticConfiguration.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
@@ -81,7 +81,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public GluuAttribute getByClaimName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, staticConf.getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, staticConfiguration.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getOxAuthClaimName() != null && gluuAttribute.getOxAuthClaimName().equals(name)) {
@@ -94,6 +94,6 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public List<GluuAttribute> getAllAttributes() {
-        return getAllAttributes(staticConf.getBaseDn().getAttributes());
+        return getAllAttributes(staticConfiguration.getBaseDn().getAttributes());
     }
 }
