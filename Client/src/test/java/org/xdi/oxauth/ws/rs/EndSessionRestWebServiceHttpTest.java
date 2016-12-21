@@ -13,6 +13,7 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import static org.testng.Assert.*;
  * Functional tests for End Session Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version December 20, 2015
  */
 public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
@@ -87,24 +88,38 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 3. End session
-        String endSessionState = UUID.randomUUID().toString();
-        EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState);
-        endSessionRequest.setSessionState(authorizationResponse.getSessionState());
+        String endSessionState1 = UUID.randomUUID().toString();
+        EndSessionRequest endSessionRequest1 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState1);
+        endSessionRequest1.setSessionState(authorizationResponse.getSessionState());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
-        endSessionClient.setRequest(endSessionRequest);
+        endSessionClient.setRequest(endSessionRequest1);
 
-        EndSessionResponse endSessionResponse = endSessionClient.exec();
+        EndSessionResponse endSessionResponse1 = endSessionClient.exec();
 
         showClient(endSessionClient);
-        assertEquals(endSessionResponse.getStatus(), 200, "Unexpected response code: " + endSessionResponse.getStatus());
-        assertNotNull(endSessionResponse.getHtmlPage(), "The HTML page is null");
+        assertEquals(endSessionResponse1.getStatus(), 200);
+        assertNotNull(endSessionResponse1.getHtmlPage(), "The HTML page is null");
 
         // silly validation of html content returned by server but at least it verifies that logout_uri and post_logout_uri are present
-        assertTrue(endSessionResponse.getHtmlPage().contains("<html>"), "The HTML page is null");
-        assertTrue(endSessionResponse.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
-        assertTrue(endSessionResponse.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
+        assertTrue(endSessionResponse1.getHtmlPage().contains("<html>"), "The HTML page is null");
+        assertTrue(endSessionResponse1.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
+        assertTrue(endSessionResponse1.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
         // assertEquals(endSessionResponse.getState(), endSessionState); // commented out, for http-based logout we get html page
+
+        // 4. End session with an already ended session
+        String endSessionState2 = UUID.randomUUID().toString();
+        EndSessionRequest endSessionRequest2 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState2);
+        endSessionRequest2.setSessionState(authorizationResponse.getSessionState());
+
+        EndSessionClient endSessionClient2 = new EndSessionClient(endSessionEndpoint);
+        endSessionClient2.setRequest(endSessionRequest2);
+
+        EndSessionResponse endSessionResponse2 = endSessionClient2.exec();
+
+        showClient(endSessionClient2);
+        assertEquals(endSessionResponse2.getStatus(), 401);
+        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT);
     }
 
     @Test
