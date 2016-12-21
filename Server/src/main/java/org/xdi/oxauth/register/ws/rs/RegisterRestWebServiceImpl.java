@@ -26,6 +26,7 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
@@ -87,6 +88,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @In
     private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @Override
     public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
@@ -102,25 +105,25 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
-            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
+            if (configuration.getDynamicRegistrationEnabled()) {
                 final RegisterRequest r = RegisterRequest.fromJson(requestParams);
 
                 log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",
                         r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
 
                 if (r.getSubjectType() == null) {
-                    SubjectType defaultSubjectType = SubjectType.fromString(ConfigurationFactory.instance().getConfiguration().getDefaultSubjectType());
+                    SubjectType defaultSubjectType = SubjectType.fromString(configuration.getDefaultSubjectType());
                     if (defaultSubjectType != null) {
                         r.setSubjectType(defaultSubjectType);
-                    } else if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
+                    } else if (configuration.getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
                         r.setSubjectType(SubjectType.PUBLIC);
-                    } else if (ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
+                    } else if (configuration.getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
                         r.setSubjectType(SubjectType.PAIRWISE);
                     }
                 }
 
                 if (r.getIdTokenSignedResponseAlg() == null) {
-                    r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(ConfigurationFactory.instance().getConfiguration().getDefaultSignatureAlgorithm()));
+                    r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(configuration.getDefaultSignatureAlgorithm()));
                 }
 
                 if (r.getIdTokenSignedResponseAlg() != SignatureAlgorithm.NONE) {
@@ -147,8 +150,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                             client.setClientIdIssuedAt(calendar.getTime());
 
-                            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime() > 0) {
-                                calendar.add(Calendar.SECOND, ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationExpirationTime());
+                            if (configuration.getDynamicRegistrationExpirationTime() > 0) {
+                                calendar.add(Calendar.SECOND, configuration.getDynamicRegistrationExpirationTime());
                                 client.setClientSecretExpiresAt(calendar.getTime());
                             }
 
@@ -173,7 +176,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             client.setLastAccessTime(currentTime);
                             client.setLastLogonTime(currentTime);
 
-                            Boolean persistClientAuthorizations = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationPersistClientAuthorizations();
+                            Boolean persistClientAuthorizations = configuration.getDynamicRegistrationPersistClientAuthorizations();
                             client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
 
                             clientService.persist(client);
@@ -341,8 +344,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         List<String> scopes = requestObject.getScopes();
         List<String> scopesDn;
         if (scopes != null && !scopes.isEmpty()
-                && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled() != null
-                && ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationScopesParamEnabled()) {
+                && configuration.getDynamicRegistrationScopesParamEnabled() != null
+                && configuration.getDynamicRegistrationScopesParamEnabled()) {
             List<String> defaultScopes = scopeService.getDefaultScopesDn();
             List<String> requestedScopes = scopeService.getScopesDn(scopes);
             if (defaultScopes.containsAll(requestedScopes)) {
@@ -388,7 +391,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                     if (redirectUrisValidated) {
                         if (request.getSubjectType() != null
-                                && !ConfigurationFactory.instance().getConfiguration().getSubjectTypesSupported().contains(request.getSubjectType())) {
+                                && !configuration.getSubjectTypesSupported().contains(request.getSubjectType())) {
                             log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
@@ -437,7 +440,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_READ);
         oAuth2AuditLog.setClientId(clientId);
         try {
-            if (ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationEnabled()) {
+            if (configuration.getDynamicRegistrationEnabled()) {
                 if (RegisterParamsValidator.validateParamsClientRead(clientId, accessToken)) {
                     Client client = clientService.getClient(clientId, accessToken);
                     if (client != null) {
@@ -489,7 +492,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), client.getClientSecret());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
-                ConfigurationFactory.instance().getConfiguration().getRegistrationEndpoint() + "?" +
+                configuration.getRegistrationEndpoint() + "?" +
                         RegisterResponseParam.CLIENT_ID.toString() + "=" + client.getClientId());
         responseJsonObject.put(CLIENT_ID_ISSUED_AT.toString(), client.getClientIdIssuedAt().getTime() / 1000);
         responseJsonObject.put(CLIENT_SECRET_EXPIRES_AT.toString(), client.getClientSecretExpiresAt() != null && client.getClientSecretExpiresAt().getTime() > 0 ?
@@ -554,13 +557,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
      */
     private void putCustomStuffIntoObject(Client p_client, JSONObject p_requestObject) throws JSONException {
         // custom object class
-        final String customOC = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationCustomObjectClass();
+        final String customOC = configuration.getDynamicRegistrationCustomObjectClass();
         if (StringUtils.isNotBlank(customOC)) {
             p_client.setCustomObjectClasses(new String[]{customOC});
         }
 
         // custom attributes (custom attributes must be in custom object class)
-        final List<String> attrList = ConfigurationFactory.instance().getConfiguration().getDynamicRegistrationCustomAttributes();
+        final List<String> attrList = configuration.getDynamicRegistrationCustomAttributes();
         if (attrList != null && !attrList.isEmpty()) {
             final Log staticLog = Logging.getLog(RegisterRestWebServiceImpl.class);
             for (String attr : attrList) {
