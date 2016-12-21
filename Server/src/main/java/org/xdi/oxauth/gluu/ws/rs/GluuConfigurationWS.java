@@ -51,6 +51,8 @@ public class GluuConfigurationWS {
     @In
     private ErrorResponseFactory errorResponseFactory;
 
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @GET
     @Produces({"application/json"})
@@ -58,8 +60,6 @@ public class GluuConfigurationWS {
     @ApiResponses(value = {@ApiResponse(code = 500, message = "Failed to build gluu configuration json object.")})
     public Response getConfiguration() {
         try {
-            final Configuration configuration = ConfigurationFactory.instance().getConfiguration();
-
             final GluuConfiguration conf = new GluuConfiguration();
 
             conf.setIdGenerationEndpoint(configuration.getIdGenerationEndpoint());
