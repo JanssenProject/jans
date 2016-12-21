@@ -6,27 +6,23 @@
 
 package org.xdi.oxauth.servlet;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.HREF;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.LINKS;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.RESOURCE;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.SUBJECT;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.jboss.seam.servlet.ContextualHttpServletRequest;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.*;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.LINKS;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013
@@ -45,36 +41,44 @@ public class WebFinger extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/jrd+json");
-        PrintWriter out = response.getWriter();
+        final HttpServletRequest httpRequest = request;
+        final HttpServletResponse httpResponse = response;
 
-        String resource = request.getParameter(RESOURCE);
-        String rel = request.getParameter(REL);
+        new ContextualHttpServletRequest(httpRequest) {
+            @Override
+            public void process() throws IOException {
+                httpResponse.setContentType("application/jrd+json");
+                PrintWriter out = httpResponse.getWriter();
 
-        logger.debug("Attempting to request OpenID Connect Discovery: " + resource + ", " + rel + ", Is Secure = " + request.isSecure());
+                String resource = httpRequest.getParameter(RESOURCE);
+                String rel = httpRequest.getParameter(REL);
 
-        try {
-            if (OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
-                if (rel == null || rel.equals(REL_VALUE)) {
-                    JSONObject jsonObj = new JSONObject();
-                    jsonObj.put(SUBJECT, resource);
+                logger.debug("Attempting to request OpenID Connect Discovery: " + resource + ", " + rel + ", Is Secure = " + httpRequest.isSecure());
 
-                    JSONArray linksJsonArray = new JSONArray();
-                    JSONObject linkJsonObject = new JSONObject();
-                    linkJsonObject.put(REL, REL_VALUE);
-                    linkJsonObject.put(HREF, ConfigurationFactory.instance().getConfiguration().getIssuer());
+                try {
+                    if (OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
+                        if (rel == null || rel.equals(REL_VALUE)) {
+                            JSONObject jsonObj = new JSONObject();
+                            jsonObj.put(SUBJECT, resource);
 
-                    linksJsonArray.put(linkJsonObject);
-                    jsonObj.put(LINKS, linksJsonArray);
+                            JSONArray linksJsonArray = new JSONArray();
+                            JSONObject linkJsonObject = new JSONObject();
+                            linkJsonObject.put(REL, REL_VALUE);
+                            linkJsonObject.put(HREF, ConfigurationFactory.instance().getConfiguration().getIssuer());
 
-                    out.println(jsonObj.toString(4).replace("\\/", "/"));
+                            linksJsonArray.put(linkJsonObject);
+                            jsonObj.put(LINKS, linksJsonArray);
+
+                            out.println(jsonObj.toString(4).replace("\\/", "/"));
+                        }
+                    }
+                } catch (JSONException e) {
+                    logger.error(e.getMessage(), e);
                 }
-            }
-        } catch (JSONException e) {
-            logger.error(e.getMessage(), e);
-        }
 
-        out.close();
+                out.close();
+            }
+        }.run();
     }
 
     /**

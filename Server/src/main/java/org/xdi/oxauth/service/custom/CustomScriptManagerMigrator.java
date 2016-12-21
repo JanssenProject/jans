@@ -6,16 +6,9 @@
 
 package org.xdi.oxauth.service.custom;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.model.ProgrammingLanguage;
 import org.xdi.model.SimpleCustomProperty;
@@ -23,9 +16,13 @@ import org.xdi.model.config.CustomAuthenticationConfiguration;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.service.LdapCustomAuthenticationConfigurationService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.util.INumGenerator;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provides actual versions of scrips
@@ -49,6 +46,21 @@ public class CustomScriptManagerMigrator {
 
 	private static final long serialVersionUID = -3225890597520443390L;
 
+	@In
+	private ConfigurationFactory configurationFactory;
+
+	private Configuration configuration;
+
+	@Create
+	public void init() {
+		updateConfiguration();
+	}
+
+	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	public void updateConfiguration() {
+		this.configuration = configurationFactory.getConfiguration();
+	}
+
     public void migrateOldConfigurations() {
     	// Check if there are new configuration
 		List<CustomScript> customScripts = customScriptService.findCustomScripts(customScriptManager.getSupportedCustomScriptTypes(), CustomScriptManager.CUSTOM_SCRIPT_CHECK_ATTRIBUTES);
@@ -64,7 +76,7 @@ public class CustomScriptManagerMigrator {
 			return;
 		}
 		
-		String basedInum = ConfigurationFactory.instance().getConfiguration().getOrganizationInum();
+		String basedInum = configuration.getOrganizationInum();
 		for (CustomAuthenticationConfiguration customAuthenticationConfiguration : customAuthenticationConfigurations) {
 			String customScriptId = basedInum + "!" + INumGenerator.generate(2);
 			String dn = customScriptService.buildDn(customScriptId);

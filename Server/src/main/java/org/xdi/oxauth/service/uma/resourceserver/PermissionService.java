@@ -8,18 +8,14 @@ package org.xdi.oxauth.service.uma.resourceserver;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.ClientService;
@@ -50,6 +46,8 @@ public class PermissionService {
     private TokenService tokenService;
     @In
     private ResourceSetPermissionManager resourceSetPermissionManager;
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     public static PermissionService instance() {
         return ServerUtil.instance(PermissionService.class);
@@ -125,7 +123,7 @@ public class PermissionService {
         r.setResourceSetId(p_resource.getId());
         r.setExpiresAt(expirationDate);
 
-        final String host = ConfigurationFactory.instance().getConfiguration().getIssuer();
+        final String host = configuration.getIssuer();
         final ResourceSetPermission permission = resourceSetPermissionManager.createResourceSetPermission(
                 host, r, expirationDate);
         // IMPORTANT : set scope dns before persistence
