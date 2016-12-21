@@ -217,7 +217,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                 if (StringUtils.isNotBlank(jwtRequest)) {
                     try {
-                        result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(jwtRequest, client));
+                        result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(configuration, jwtRequest, client));
                     } catch (Exception e) {
                         LOGGER.trace(e.getMessage(), e);
                     }
