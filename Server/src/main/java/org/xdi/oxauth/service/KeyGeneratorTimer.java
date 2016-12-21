@@ -65,6 +65,7 @@ public class KeyGeneratorTimer {
         log.debug("Initializing KeyGeneratorTimer");
 
         this.isActive = new AtomicBoolean(false);
+    	this.configuration = configurationFactory.getConfiguration();
 
         long interval = configuration.getKeyRegenerationInterval();
         if (interval <= 0) {

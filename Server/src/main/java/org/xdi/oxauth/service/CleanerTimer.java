@@ -67,6 +67,9 @@ public class CleanerTimer {
 	@In
 	private DeviceRegistrationService deviceRegistrationService;
 
+	@In
+	private ConfigurationFactory configurationFactory;
+
     private AtomicBoolean isActive;
 
     private Configuration configuration;
@@ -80,6 +83,7 @@ public class CleanerTimer {
     public void init() {
         log.debug("Initializing CleanerTimer");
         this.isActive = new AtomicBoolean(false);
+    	this.configuration = configurationFactory.getConfiguration();
 
         long interval = configuration.getCleanServiceInterval();
         if (interval <= 0) {
