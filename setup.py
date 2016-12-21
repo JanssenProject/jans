@@ -991,10 +991,6 @@ class Setup(object):
             self.run([self.cmd_mkdir, '-p', "%s/custom/pages" % jettyServiceBase])
             self.run([self.cmd_mkdir, '-p', "%s/custom/static" % jettyServiceBase])
 
-        # Create ./pages folder for custom pages and resources if application supports them 
-        if supportCustomizations:
-            self.run([self.cmd_mkdir, '-p', "%s/pages" % jettyServiceBase])
-
         self.logIt("Preparing %s service base configuration" % serviceName)
         jettyEnv = os.environ.copy()
         jettyEnv['PATH'] = '%s/bin:' % self.jre_home + jettyEnv['PATH']
