@@ -79,8 +79,6 @@ public class AuthenticationFilter extends AbstractFilter {
     private String realm;
     public static final String REALM = "oxAuth";
 
-    private final ReentrantLock lock = new ReentrantLock();
-
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                          final FilterChain filterChain) throws IOException, ServletException {
@@ -91,25 +89,13 @@ public class AuthenticationFilter extends AbstractFilter {
 
             @Override
             public void process() {
-                
-                final SessionStateService sessionStateService;
-                final Identity identity;
-                final Authenticator authenticator;
-                final ClientService clientService;
-                final ClientFilterService clientFilterService;
-                final ErrorResponseFactory errorResponseFactory;
 
-                lock.lock();
-                try {
-                	sessionStateService = SessionStateService.instance();
-                    identity = Identity.instance();
-                    authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
-                    clientService = (ClientService) Component.getInstance(ClientService.class, true);
-                    clientFilterService = ClientFilterService.instance();
-                    errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
-                } finally {
-                	lock.unlock();
-                }
+                final Identity identity = Identity.instance();
+                final SessionStateService sessionStateService = SessionStateService.instance();
+                final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
+                final ClientService clientService = (ClientService) Component.getInstance(ClientService.class, true);
+                final ClientFilterService clientFilterService = ClientFilterService.instance();
+                final ErrorResponseFactory errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
 
                 try {
                     final String requestUrl = httpRequest.getRequestURL().toString();
