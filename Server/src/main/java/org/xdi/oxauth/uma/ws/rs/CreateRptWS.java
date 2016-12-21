@@ -18,7 +18,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.token.JsonWebResponse;
@@ -64,6 +64,8 @@ public class CreateRptWS {
     private AuthorizationService umaAuthorizationService;
     @In
     private LdapEntryManager ldapEntryManager;
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @Path("rpt")
     @POST
@@ -83,7 +85,7 @@ public class CreateRptWS {
             UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost, false);
 
             String rptResponse = rpt.getCode();
-            final Boolean umaRptAsJwt = ConfigurationFactory.instance().getConfiguration().getUmaRptAsJwt();
+            final Boolean umaRptAsJwt = configuration.getUmaRptAsJwt();
             if (umaRptAsJwt != null && umaRptAsJwt) {
                 rptResponse = createJwr(rpt, authorization, Lists.<String>newArrayList()).asString();
             }
@@ -140,7 +142,7 @@ public class CreateRptWS {
             authorizeGat(request, rpt, authorization, httpRequest);
 
             String rptResponse = rpt.getCode();
-            final Boolean umaRptAsJwt = ConfigurationFactory.instance().getConfiguration().getUmaRptAsJwt();
+            final Boolean umaRptAsJwt = configuration.getUmaRptAsJwt();
             if (umaRptAsJwt != null && umaRptAsJwt) {
                 rptResponse = createJwr(rpt, authorization, request.getScopes()).asString();
             }

@@ -36,10 +36,20 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
     @In
     private LdapEntryManager ldapEntryManager;
 
+    @In
+    private ConfigurationFactory configurationFactory;
+
+    private Configuration configuration;
+
     @Create
     public void init() {
-        final Configuration conf = ConfigurationFactory.instance().getConfiguration();
-        super.init(conf.getAuthenticationFilters(), Boolean.TRUE.equals(conf.getAuthenticationFiltersEnabled()), true);
+        updateConfiguration();
+        super.init(configuration.getAuthenticationFilters(), Boolean.TRUE.equals(configuration.getAuthenticationFiltersEnabled()), true);
+    }
+
+    @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+    public void updateConfiguration() {
+        this.configuration = configurationFactory.getConfiguration();
     }
 
     public String processAuthenticationFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<?, ?> attributeValues) {

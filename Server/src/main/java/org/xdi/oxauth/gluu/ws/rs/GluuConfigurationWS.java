@@ -20,7 +20,6 @@ import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.gluu.GluuConfiguration;
@@ -51,7 +50,7 @@ public class GluuConfigurationWS {
     @In
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @In(value = "#{configurationFactory.configuration}")
     private Configuration configuration;
 
     @GET

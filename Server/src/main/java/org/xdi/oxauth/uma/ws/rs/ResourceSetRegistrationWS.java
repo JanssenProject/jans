@@ -7,11 +7,7 @@
 package org.xdi.oxauth.uma.ws.rs;
 
 import com.google.common.collect.Lists;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
@@ -20,7 +16,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetResponse;
@@ -76,6 +72,8 @@ public class ResourceSetRegistrationWS {
     private AuthorizationGrantList authorizationGrantList;
     @In
     private ScopeService umaScopeService;
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -324,7 +322,7 @@ public class ResourceSetRegistrationWS {
         ldapResourceSet.setDn(resourceSetDn);
         ldapResourceSet.setScopes(scopeDNs);
 
-        final Boolean addClient = ConfigurationFactory.instance().getConfiguration().getUmaKeepClientDuringResourceSetRegistration();
+        final Boolean addClient = configuration.getUmaKeepClientDuringResourceSetRegistration();
         if (addClient != null ? addClient : true) {
             ldapResourceSet.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
         }

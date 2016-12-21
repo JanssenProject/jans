@@ -13,7 +13,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -55,6 +55,8 @@ public class UmaValidationService {
    	private ResourceSetService resourceSetService;
     @In
     private ScopeService umaScopeService;
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     public String validateAmHost(String host) {
         if (StringHelper.isEmpty(host)) {
@@ -72,7 +74,7 @@ public class UmaValidationService {
         }
 
         try {
-            URI umaBaseEndpoint = new URI(ConfigurationFactory.instance().getConfiguration().getBaseEndpoint());
+            URI umaBaseEndpoint = new URI(configuration.getBaseEndpoint());
             if (!StringHelper.equalsIgnoreCase(host, umaBaseEndpoint.getHost())) {
                 log.error("Get request for another AM: '{0}'", host);
                 throw new WebApplicationException(Response.status(BAD_REQUEST)
