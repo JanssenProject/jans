@@ -19,6 +19,7 @@ import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
@@ -50,7 +51,7 @@ public class KeyGeneratorTimer {
     private Configuration configuration;
 
     @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration(Configuration configuration) {
+    public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
         this.configuration = configuration;
     }
 
