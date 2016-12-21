@@ -6,18 +6,19 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.List;
+
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.contexts.Lifecycle;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
-
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -45,11 +46,6 @@ public class AttributeService extends org.xdi.service.AttributeService {
      * @return AttributeService instance
      */
     public static AttributeService instance() {
-        boolean createContexts = !Contexts.isEventContextActive() && !Contexts.isApplicationContextActive();
-        if (createContexts) {
-            Lifecycle.beginCall();
-        }
-
         return (AttributeService) Component.getInstance(AttributeService.class);
     }
 
