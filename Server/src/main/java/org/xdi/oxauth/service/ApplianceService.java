@@ -19,6 +19,8 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.util.StringHelper;
 
 /**
@@ -36,6 +38,12 @@ public class ApplianceService {
 
 	@In
 	private LdapEntryManager ldapEntryManager;
+
+    @In(value = "#{configurationFactory.staticConfiguration}")
+    private StaticConf staticConf;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
 	/**
 	 * Add new appliance
@@ -102,7 +110,7 @@ public class ApplianceService {
 	 * @throws Exception 
 	 */
 	public String getDnForAppliance(String inum) {
-		String baseDn = ConfigurationFactory.instance().getBaseDn().getAppliance();
+		String baseDn = staticConf.getBaseDn().getAppliance();
 		if (StringHelper.isEmpty(inum)) {
 			return baseDn;
 		}
@@ -120,7 +128,7 @@ public class ApplianceService {
 	}
 
 	public String getApplianceInum() {
-		return ConfigurationFactory.instance().getConfiguration().getApplianceInum();
+		return configuration.getApplianceInum();
 	}
 
 	/**
