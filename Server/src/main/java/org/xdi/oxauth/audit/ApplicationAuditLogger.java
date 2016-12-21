@@ -30,6 +30,7 @@ import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -70,7 +71,7 @@ public class ApplicationAuditLogger {
 	}
 
 	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration) {
+	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
 		this.configuration = configuration;
 	}
 

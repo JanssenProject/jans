@@ -40,6 +40,7 @@ import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -70,7 +71,7 @@ public class AuthenticationFilter extends AbstractFilter {
 	private Configuration configuration;
 
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration) {
+	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
 		this.configuration = configuration;
 	}
 

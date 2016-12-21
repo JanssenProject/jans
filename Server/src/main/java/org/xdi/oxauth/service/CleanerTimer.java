@@ -72,7 +72,7 @@ public class CleanerTimer {
     private Configuration configuration;
 
     @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration(Configuration configuration) {
+    public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
         this.configuration = configuration;
     }
 

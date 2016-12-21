@@ -16,6 +16,7 @@ import org.xdi.model.config.CustomAuthenticationConfiguration;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.service.LdapCustomAuthenticationConfigurationService;
 import org.xdi.service.custom.script.CustomScriptManager;
@@ -49,7 +50,7 @@ public class CustomScriptManagerMigrator {
 	private Configuration configuration;
 
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration) {
+	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
 		this.configuration = configuration;
 	}
 
