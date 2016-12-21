@@ -6,25 +6,31 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.GluuStatus;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.token.PersistentJwt;
-import org.xdi.oxauth.model.util.Util;
-import org.xdi.util.StringHelper;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import javax.annotation.Nullable;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.seam.Component;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.log.Log;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.ldap.model.GluuStatus;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.token.PersistentJwt;
+import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.StringHelper;
+
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with users.
@@ -49,6 +55,9 @@ public class UserService {
 
     @In
     private InumService inumService;
+
+    @In(value = "#{configurationFactory.staticConfiguration}")
+    private StaticConf staticConf;
 
     /**
      * Authenticate user
@@ -121,7 +130,7 @@ public class UserService {
 
 		Filter userUidFilter = Filter.createEqualityFilter("uid", userId);
 
-		List<User> entries = ldapEntryManager.findEntries(ConfigurationFactory.instance().getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
+		List<User> entries = ldapEntryManager.findEntries(staticConf.getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
 		log.debug("Found {0} entries for user id = {1}", entries.size(), userId);
 
 		if (entries.size() > 0) {
@@ -166,7 +175,7 @@ public class UserService {
 	}
 
     public User addDefaultUser(String uid) {
-        String peopleBaseDN = ConfigurationFactory.instance().getBaseDn().getPeople();
+        String peopleBaseDN = staticConf.getBaseDn().getPeople();
 
         String inum = inumService.generatePeopleInum();
 
@@ -184,7 +193,7 @@ public class UserService {
 	}
     
     public User addUser(User user, boolean active) {
-        String peopleBaseDN = ConfigurationFactory.instance().getBaseDn().getPeople();
+        String peopleBaseDN = staticConf.getBaseDn().getPeople();
 
         String inum = inumService.generatePeopleInum();
 
@@ -203,7 +212,7 @@ public class UserService {
         log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
 
         User user = new User();
-        user.setDn(ConfigurationFactory.instance().getBaseDn().getPeople());
+        user.setDn(staticConf.getBaseDn().getPeople());
         
         List<CustomAttribute> customAttributes =  new ArrayList<CustomAttribute>();
         customAttributes.add(new CustomAttribute(attributeName, attributeValue));
@@ -394,14 +403,14 @@ public class UserService {
     }
 
     public List<User> getUsersWithPersistentJwts() {
-        String baseDN = ConfigurationFactory.instance().getBaseDn().getPeople();
+        String baseDN = staticConf.getBaseDn().getPeople();
         Filter filter = Filter.createPresenceFilter("oxAuthPersistentJWT");
 
         return ldapEntryManager.findEntries(baseDN, User.class, filter);
     }
 
     public String getDnForUser(String inum) {
-		String peopleDn = ConfigurationFactory.instance().getBaseDn().getPeople();
+		String peopleDn = staticConf.getBaseDn().getPeople();
 		if (StringHelper.isEmpty(inum)) {
 			return peopleDn;
 		}
@@ -414,7 +423,7 @@ public class UserService {
 			return null;
 		}
 
-		String peopleDn = ConfigurationFactory.instance().getBaseDn().getPeople();
+		String peopleDn = staticConf.getBaseDn().getPeople();
 		if (!dn.toLowerCase().endsWith(peopleDn.toLowerCase())) {
 			return null;
 		}
