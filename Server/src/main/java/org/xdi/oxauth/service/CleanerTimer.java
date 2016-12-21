@@ -17,6 +17,7 @@ import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
@@ -67,12 +68,27 @@ public class CleanerTimer {
 
     private AtomicBoolean isActive;
 
+    @In
+    private ConfigurationFactory configurationFactory;
+
+    private Configuration configuration;
+
+    @Create
+    public void onCreate() {
+        updateConfiguration();
+    }
+
+    @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+    public void updateConfiguration() {
+        this.configuration = configurationFactory.getConfiguration();
+    }
+
     @Observer("org.jboss.seam.postInitialization")
     public void init() {
         log.debug("Initializing CleanerTimer");
         this.isActive = new AtomicBoolean(false);
 
-        long interval = ConfigurationFactory.instance().getConfiguration().getCleanServiceInterval();
+        long interval = configuration.getCleanServiceInterval();
         if (interval <= 0) {
             interval = DEFAULT_INTERVAL;
         }
@@ -184,7 +200,7 @@ public class CleanerTimer {
     private void processMetricEntries() {
         log.debug("Start metric entries clean up");
 
-        int keepDataDays = ConfigurationFactory.instance().getConfiguration().getMetricReporterKeepDataDays();
+        int keepDataDays = configuration.getMetricReporterKeepDataDays();
 
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.DATE, -keepDataDays);

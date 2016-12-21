@@ -6,16 +6,7 @@
 
 package org.xdi.oxauth.model.token;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -30,11 +21,7 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.AccessToken;
-import org.xdi.oxauth.model.common.AuthorizationCode;
-import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -63,7 +50,9 @@ import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
-import com.google.common.collect.Lists;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.util.*;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -100,7 +89,7 @@ public class IdTokenFactory {
     @In
     private PairwiseIdentifierService pairwiseIdentifierService;
 
-    @In
+    @In(value = "#{configurationFactory.configuration}")
     private Configuration configuration;
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
@@ -248,7 +237,7 @@ public class IdTokenFactory {
             }
             jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            String openidSubAttribute = configuration.getOpenidSubAttribute();
 
             if (openidSubAttribute.equals("uid")) {
                 jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getUserId());
@@ -419,7 +408,7 @@ public class IdTokenFactory {
             }
             jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            String openidSubAttribute = configuration.getOpenidSubAttribute();
 
             if (openidSubAttribute.equals("uid")) {
                 jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getUserId());

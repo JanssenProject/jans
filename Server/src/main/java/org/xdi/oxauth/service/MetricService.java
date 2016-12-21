@@ -8,14 +8,10 @@ package org.xdi.oxauth.service;
 
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 
 /**
  * Store and retrieve metric
@@ -40,10 +36,18 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@In
 	private ConfigurationFactory configurationFactory;
 
-    @Create
+	private Configuration configuration;
+
+	@Create
     public void create() {
-    	init(configurationFactory.getConfiguration().getMetricReporterInterval());
+		updateConfiguration();
+    	init(configuration.getMetricReporterInterval());
     }
+
+	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	public void updateConfiguration() {
+		this.configuration = configurationFactory.getConfiguration();
+	}
 
 	@Override
 	public String baseDn() {
