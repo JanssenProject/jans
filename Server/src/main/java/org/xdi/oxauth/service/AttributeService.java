@@ -14,6 +14,7 @@ import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
 
 import java.util.List;
@@ -34,6 +35,9 @@ public class AttributeService extends org.xdi.service.AttributeService {
 
     @In
     private CacheService cacheService;
+
+    @In(value = "#{configurationFactory.staticConfiguration}")
+    private StaticConf staticConf;
 
     /**
      * Get AttributeService instance
@@ -68,7 +72,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public GluuAttribute getByLdapName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, ConfigurationFactory.instance().getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, staticConf.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
@@ -81,7 +85,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public GluuAttribute getByClaimName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, ConfigurationFactory.instance().getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, staticConf.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getOxAuthClaimName() != null && gluuAttribute.getOxAuthClaimName().equals(name)) {
@@ -94,6 +98,6 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public List<GluuAttribute> getAllAttributes() {
-        return getAllAttributes(ConfigurationFactory.instance().getBaseDn().getAttributes());
+        return getAllAttributes(staticConf.getBaseDn().getAttributes());
     }
 }
