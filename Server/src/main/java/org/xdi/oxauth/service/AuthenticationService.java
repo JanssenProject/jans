@@ -96,6 +96,9 @@ public class AuthenticationService {
 
     @In
     private MetricService metricService;
+    
+    @In("org.jboss.seam.core.manager")
+    private FacesManager facesManager;
 
     /**
      * Authenticate user.
@@ -510,7 +513,7 @@ public class AuthenticationService {
             result.put(SESSION_STATE, sessionUser.getId());
 
             log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, allowedParameters);
-            FacesManager.instance().redirect("/authorize.xhtml", (Map) allowedParameters, false);
+            facesManager.redirect("/authorize.xhtml", (Map) allowedParameters, false);
         }
     }
 
