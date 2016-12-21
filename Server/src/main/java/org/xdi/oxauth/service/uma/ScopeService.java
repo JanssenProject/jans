@@ -18,6 +18,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.InternalExternal;
@@ -51,6 +52,8 @@ public class ScopeService {
     private InumService inumService;
     @In
     private ErrorResponseFactory errorResponseFactory;
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     public static ScopeService instance() {
         return ServerUtil.instance(ScopeService.class);
@@ -160,7 +163,7 @@ public class ScopeService {
                 result.add(entries.get(0).getDn());
             } else { // scope is not in ldap, add it dynamically
 
-                final Boolean addAutomatically = ConfigurationFactory.instance().getConfiguration().getUmaAddScopesAutomatically();
+                final Boolean addAutomatically = configuration.getUmaAddScopesAutomatically();
 
                 if (addAutomatically != null && addAutomatically) {
                     final String inum = inumService.generateInum();
