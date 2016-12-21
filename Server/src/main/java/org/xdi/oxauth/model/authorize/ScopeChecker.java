@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.model.authorize;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -14,14 +17,9 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ScopeService;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Validates the scopes received for the authorize web service.
