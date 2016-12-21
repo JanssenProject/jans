@@ -6,16 +6,23 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
-
-import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -34,20 +41,16 @@ public class ClientFilterService extends BaseAuthFilterService {
     @In
     private LdapEntryManager ldapEntryManager;
 
-    @In
-    private ConfigurationFactory configurationFactory;
-
     private Configuration configuration;
 
     @Create
     public void init() {
-        updateConfiguration();
         super.init(configuration.getClientAuthenticationFilters(), Boolean.TRUE.equals(configuration.getClientAuthenticationFiltersEnabled()), false);
     }
 
     @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration() {
-        this.configuration = configurationFactory.getConfiguration();
+    public void updateConfiguration(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     public String processAuthenticationFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<?, ?> attributeValues) {

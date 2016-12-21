@@ -46,19 +46,11 @@ public class CustomScriptManagerMigrator {
 
 	private static final long serialVersionUID = -3225890597520443390L;
 
-	@In
-	private ConfigurationFactory configurationFactory;
-
 	private Configuration configuration;
 
-	@Create
-	public void init() {
-		updateConfiguration();
-	}
-
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration() {
-		this.configuration = configurationFactory.getConfiguration();
+	public void updateConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 
     public void migrateOldConfigurations() {
