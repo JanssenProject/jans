@@ -54,18 +54,6 @@ public class IdGenRestWebService {
     @In
     private Configuration configuration;
 
-    private static class UnauthorizedResponseHolder {
-        public static Response UNAUTHORIZED_RESPONSE = unauthorizedResponse();
-
-        public static Response unauthorizedResponse() {
-            return Response.status(Response.Status.UNAUTHORIZED).
-                    header("host_id", ConfigurationFactory.instance().getConfiguration().getIssuer()).
-                    header("as_uri", ConfigurationFactory.instance().getConfiguration().getUmaConfigurationEndpoint()).
-                    build();
-        }
-
-    }
-
     @Logger
     private Log log;
     @In
@@ -165,7 +153,7 @@ public class IdGenRestWebService {
         log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {0}",
         		configuration.getUmaConfigurationEndpoint());
 
-        return new Pair<Boolean, Response>(false, UnauthorizedResponseHolder.UNAUTHORIZED_RESPONSE);
+        return new Pair<Boolean, Response>(false, unauthorizedResponse());
     }
 
     private Response generateId(String prefix, String type, String p_authorization, String p_mediaType) {
@@ -203,5 +191,13 @@ public class IdGenRestWebService {
         log.trace("Generated id: {0}, prefix: {1}, type: {2}", id, prefix, type);
         return id;
     }
+
+    public Response unauthorizedResponse() {
+        return Response.status(Response.Status.UNAUTHORIZED).
+                header("host_id", configuration.getIssuer()).
+                header("as_uri", configuration.getUmaConfigurationEndpoint()).
+                build();
+    }
+
 }
 
