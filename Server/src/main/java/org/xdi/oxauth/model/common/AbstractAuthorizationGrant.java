@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.TokenHashUtil;
@@ -51,12 +52,15 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
 
+	private Configuration configuration;
+
     protected AbstractAuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
-                                         Date authenticationTime) {
+                                         Date authenticationTime, Configuration configuration) {
         this.authenticationTime = authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
         this.user = user;
         this.authorizationGrantType = authorizationGrantType;
         this.client = client;
+        this.configuration = configuration;
         this.scopes = new CopyOnWriteArraySet<String>();
         this.grantId = UUID.randomUUID().toString();
     }
@@ -237,7 +241,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createAccessToken() {
-        int lifetime = ConfigurationFactory.instance().getConfiguration().getShortLivedAccessTokenLifetime();
+        int lifetime = configuration.getShortLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -248,7 +252,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createLongLivedAccessToken() {
-        int lifetime = ConfigurationFactory.instance().getConfiguration().getLongLivedAccessTokenLifetime();
+        int lifetime = configuration.getLongLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -259,7 +263,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public RefreshToken createRefreshToken() {
-        int lifetime = ConfigurationFactory.instance().getConfiguration().getRefreshTokenLifetime();
+        int lifetime = configuration.getRefreshTokenLifetime();
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());

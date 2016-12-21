@@ -8,6 +8,7 @@ package org.xdi.oxauth.model.common;
 
 import java.util.Date;
 
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.registration.Client;
 
 /**
@@ -49,8 +50,8 @@ public class ImplicitGrant extends AuthorizationGrant {
      * @param authenticationTime The Claim Value is the number of seconds from 1970-01-01T0:0:0Z as measured in UTC
      *                           until the date/time that the End-User authentication occurred.
      */
-    public ImplicitGrant(User user, Client client, Date authenticationTime) {
-        super(user, AuthorizationGrantType.IMPLICIT, client, authenticationTime);
+    public ImplicitGrant(User user, Client client, Date authenticationTime, Configuration configuration) {
+        super(user, AuthorizationGrantType.IMPLICIT, client, authenticationTime, configuration);
     }
 
     /**
