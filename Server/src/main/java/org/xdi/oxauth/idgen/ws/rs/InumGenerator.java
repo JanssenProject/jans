@@ -49,8 +49,8 @@ public class InumGenerator implements IdGenerator {
     @In
     private LdapEntryManager ldapEntryManager;
 
-    @In(value = "#{configurationFactory.staticConfiguration}")
-    private StaticConf staticConf;
+    @In
+    private StaticConf staticConfigurationiguration;
 
     @Override
     public String generateId(String p_idType, String p_idPrefix) {
@@ -119,7 +119,7 @@ public class InumGenerator implements IdGenerator {
     }
 
     public String baseDn(IdType p_type) {
-        final BaseDnConfiguration baseDn = staticConf.getBaseDn();
+        final BaseDnConfiguration baseDn = staticConfigurationiguration.getBaseDn();
         switch (p_type) {
             case CLIENTS:
                 return baseDn.getClients();
