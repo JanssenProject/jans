@@ -497,11 +497,6 @@ public class ConfigurationFactory {
      * @return ConfigurationFactory instance
      */
     public static ConfigurationFactory instance() {
-        boolean createContexts = !Contexts.isEventContextActive() && !Contexts.isApplicationContextActive();
-        if (createContexts) {
-            Lifecycle.beginCall();
-        }
-
         return (ConfigurationFactory) Component.getInstance(ConfigurationFactory.class);
     }
 
