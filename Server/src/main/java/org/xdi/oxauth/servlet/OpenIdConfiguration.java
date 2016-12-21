@@ -6,12 +6,69 @@
 
 package org.xdi.oxauth.servlet;
 
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ACR_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.AUTHORIZATION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.AUTH_LEVEL_MAPPING;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CHECK_SESSION_IFRAME;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIMS_LOCALES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIMS_PARAMETER_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIMS_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLAIM_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.CLIENT_INFO_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.DISPLAY_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.END_SESSION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.GRANT_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.HTTP_LOGOUT_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_GENERATION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ISSUER;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.JWKS_URI;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.LOGOUT_SESSION_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.OP_POLICY_URI;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.OP_TOS_URI;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REGISTRATION_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_PARAMETER_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUEST_URI_PARAMETER_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REQUIRE_REQUEST_URI_REGISTRATION;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.RESPONSE_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SCOPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SCOPE_TO_CLAIMS_MAPPING;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SERVICE_DOCUMENTATION;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.SUBJECT_TYPES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.UI_LOCALES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_SIGNING_ALG_VALUES_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.VALIDATE_TOKEN_ENDPOINT;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
@@ -23,18 +80,6 @@ import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
-
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
@@ -42,354 +87,384 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
  */
 public class OpenIdConfiguration extends HttpServlet {
 
-    private final static Log LOG = Logging.getLog(OpenIdConfiguration.class);
+	private final static Log LOG = Logging.getLog(OpenIdConfiguration.class);
 
-    /**
-     * Processes requests for both HTTP
-     * <code>GET</code> and
-     * <code>POST</code> methods.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        try {
-            JSONObject jsonObj = new JSONObject();
+	/**
+	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+	 * methods.
+	 *
+	 * @param request
+	 *            servlet request
+	 * @param response
+	 *            servlet response
+	 * @throws ServletException
+	 *             if a servlet-specific error occurs
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	protected void processRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+			throws ServletException, IOException {
+		final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+		final HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
-            ConfigurationFactory configurationFactory = ConfigurationFactory.instance();
-            Configuration configuration = configurationFactory.getConfiguration();
+		new ContextualHttpServletRequest(httpRequest) {
+			@Override
+			public void process() throws IOException {
+				httpResponse.setContentType("application/json");
+				PrintWriter out = httpResponse.getWriter();
+				try {
+					JSONObject jsonObj = new JSONObject();
 
-            jsonObj.put(ISSUER, configuration.getIssuer());
-            jsonObj.put(AUTHORIZATION_ENDPOINT, configuration.getAuthorizationEndpoint());
-            jsonObj.put(TOKEN_ENDPOINT, configuration.getTokenEndpoint());
-            jsonObj.put(USER_INFO_ENDPOINT, configuration.getUserInfoEndpoint());
-            jsonObj.put(CLIENT_INFO_ENDPOINT, configuration.getClientInfoEndpoint());
-            jsonObj.put(CHECK_SESSION_IFRAME, configuration.getCheckSessionIFrame());
-            jsonObj.put(END_SESSION_ENDPOINT, configuration.getEndSessionEndpoint());
-            jsonObj.put(JWKS_URI, configuration.getJwksUri());
-            jsonObj.put(REGISTRATION_ENDPOINT, configuration.getRegistrationEndpoint());
-            jsonObj.put(VALIDATE_TOKEN_ENDPOINT, configuration.getValidateTokenEndpoint());
-            jsonObj.put(ID_GENERATION_ENDPOINT, configuration.getIdGenerationEndpoint());
-            jsonObj.put(INTROSPECTION_ENDPOINT, configuration.getIntrospectionEndpoint());
+					ConfigurationFactory configurationFactory = ConfigurationFactory.instance();
+					Configuration configuration = configurationFactory.getConfiguration();
 
-            ScopeService scopeService = ScopeService.instance();
-            JSONArray scopesSupported = new JSONArray();
-            for (Scope scope : scopeService.getAllScopesList()) {
-                boolean isUmaAuthorization = UmaScopeType.AUTHORIZATION.getValue().equals(scope.getDisplayName());
-                boolean isUmaProtection = UmaScopeType.PROTECTION.getValue().equals(scope.getDisplayName());
-                if (!isUmaAuthorization && !isUmaProtection)
-                    scopesSupported.put(scope.getDisplayName());
-            }
-            if (scopesSupported.length() > 0) {
-                jsonObj.put(SCOPES_SUPPORTED, scopesSupported);
-            }
+					jsonObj.put(ISSUER, configuration.getIssuer());
+					jsonObj.put(AUTHORIZATION_ENDPOINT, configuration.getAuthorizationEndpoint());
+					jsonObj.put(TOKEN_ENDPOINT, configuration.getTokenEndpoint());
+					jsonObj.put(USER_INFO_ENDPOINT, configuration.getUserInfoEndpoint());
+					jsonObj.put(CLIENT_INFO_ENDPOINT, configuration.getClientInfoEndpoint());
+					jsonObj.put(CHECK_SESSION_IFRAME, configuration.getCheckSessionIFrame());
+					jsonObj.put(END_SESSION_ENDPOINT, configuration.getEndSessionEndpoint());
+					jsonObj.put(JWKS_URI, configuration.getJwksUri());
+					jsonObj.put(REGISTRATION_ENDPOINT, configuration.getRegistrationEndpoint());
+					jsonObj.put(VALIDATE_TOKEN_ENDPOINT, configuration.getValidateTokenEndpoint());
+					jsonObj.put(ID_GENERATION_ENDPOINT, configuration.getIdGenerationEndpoint());
+					jsonObj.put(INTROSPECTION_ENDPOINT, configuration.getIntrospectionEndpoint());
 
-            JSONArray responseTypesSupported = new JSONArray();
-            for (String responseType : configuration.getResponseTypesSupported()) {
-                responseTypesSupported.put(responseType);
-            }
-            if (responseTypesSupported.length() > 0) {
-                jsonObj.put(RESPONSE_TYPES_SUPPORTED, responseTypesSupported);
-            }
+					ScopeService scopeService = ScopeService.instance();
+					JSONArray scopesSupported = new JSONArray();
+					for (Scope scope : scopeService.getAllScopesList()) {
+						boolean isUmaAuthorization = UmaScopeType.AUTHORIZATION.getValue()
+								.equals(scope.getDisplayName());
+						boolean isUmaProtection = UmaScopeType.PROTECTION.getValue().equals(scope.getDisplayName());
+						if (!isUmaAuthorization && !isUmaProtection)
+							scopesSupported.put(scope.getDisplayName());
+					}
+					if (scopesSupported.length() > 0) {
+						jsonObj.put(SCOPES_SUPPORTED, scopesSupported);
+					}
 
-            JSONArray grantTypesSupported = new JSONArray();
-            for (String grantType : configuration.getGrantTypesSupported()) {
-                grantTypesSupported.put(grantType);
-            }
-            if (grantTypesSupported.length() > 0) {
-                jsonObj.put(GRANT_TYPES_SUPPORTED, grantTypesSupported);
-            }
+					JSONArray responseTypesSupported = new JSONArray();
+					for (String responseType : configuration.getResponseTypesSupported()) {
+						responseTypesSupported.put(responseType);
+					}
+					if (responseTypesSupported.length() > 0) {
+						jsonObj.put(RESPONSE_TYPES_SUPPORTED, responseTypesSupported);
+					}
 
-            ExternalAuthenticationService externalAuthenticationService = ExternalAuthenticationService.instance();
-            JSONArray acrValuesSupported = new JSONArray();
-            for (String acr : externalAuthenticationService.getAcrValuesList()) {
-                acrValuesSupported.put(acr);
-            }
-            jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
-            jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
+					JSONArray grantTypesSupported = new JSONArray();
+					for (String grantType : configuration.getGrantTypesSupported()) {
+						grantTypesSupported.put(grantType);
+					}
+					if (grantTypesSupported.length() > 0) {
+						jsonObj.put(GRANT_TYPES_SUPPORTED, grantTypesSupported);
+					}
 
-            JSONArray subjectTypesSupported = new JSONArray();
-            for (String subjectType : configuration.getSubjectTypesSupported()) {
-                subjectTypesSupported.put(subjectType);
-            }
-            if (subjectTypesSupported.length() > 0) {
-                jsonObj.put(SUBJECT_TYPES_SUPPORTED, subjectTypesSupported);
-            }
+					ExternalAuthenticationService externalAuthenticationService = ExternalAuthenticationService
+							.instance();
+					JSONArray acrValuesSupported = new JSONArray();
+					for (String acr : externalAuthenticationService.getAcrValuesList()) {
+						acrValuesSupported.put(acr);
+					}
+					jsonObj.put(ACR_VALUES_SUPPORTED, acrValuesSupported);
+					jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
-            JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
-            for (String userInfoSigningAlg : configuration.getUserInfoSigningAlgValuesSupported()) {
-                userInfoSigningAlgValuesSupported.put(userInfoSigningAlg);
-            }
-            if (userInfoSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(USER_INFO_SIGNING_ALG_VALUES_SUPPORTED, userInfoSigningAlgValuesSupported);
-            }
+					JSONArray subjectTypesSupported = new JSONArray();
+					for (String subjectType : configuration.getSubjectTypesSupported()) {
+						subjectTypesSupported.put(subjectType);
+					}
+					if (subjectTypesSupported.length() > 0) {
+						jsonObj.put(SUBJECT_TYPES_SUPPORTED, subjectTypesSupported);
+					}
 
-            JSONArray userInfoEncryptionAlgValuesSupported = new JSONArray();
-            for (String userInfoEncryptionAlg : configuration.getUserInfoEncryptionAlgValuesSupported()) {
-                userInfoEncryptionAlgValuesSupported.put(userInfoEncryptionAlg);
-            }
-            if (userInfoEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED, userInfoEncryptionAlgValuesSupported);
-            }
+					JSONArray userInfoSigningAlgValuesSupported = new JSONArray();
+					for (String userInfoSigningAlg : configuration.getUserInfoSigningAlgValuesSupported()) {
+						userInfoSigningAlgValuesSupported.put(userInfoSigningAlg);
+					}
+					if (userInfoSigningAlgValuesSupported.length() > 0) {
+						jsonObj.put(USER_INFO_SIGNING_ALG_VALUES_SUPPORTED, userInfoSigningAlgValuesSupported);
+					}
 
-            JSONArray userInfoEncryptionEncValuesSupported = new JSONArray();
-            for (String userInfoEncryptionEnc : configuration.getUserInfoEncryptionEncValuesSupported()) {
-                userInfoEncryptionEncValuesSupported.put(userInfoEncryptionEnc);
-            }
-            if (userInfoEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED, userInfoEncryptionAlgValuesSupported);
-            }
+					JSONArray userInfoEncryptionAlgValuesSupported = new JSONArray();
+					for (String userInfoEncryptionAlg : configuration.getUserInfoEncryptionAlgValuesSupported()) {
+						userInfoEncryptionAlgValuesSupported.put(userInfoEncryptionAlg);
+					}
+					if (userInfoEncryptionAlgValuesSupported.length() > 0) {
+						jsonObj.put(USER_INFO_ENCRYPTION_ALG_VALUES_SUPPORTED, userInfoEncryptionAlgValuesSupported);
+					}
 
-            JSONArray idTokenSigningAlgValuesSupported = new JSONArray();
-            for (String idTokenSigningAlg : configuration.getIdTokenSigningAlgValuesSupported()) {
-                idTokenSigningAlgValuesSupported.put(idTokenSigningAlg);
-            }
-            if (idTokenSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED, idTokenSigningAlgValuesSupported);
-            }
+					JSONArray userInfoEncryptionEncValuesSupported = new JSONArray();
+					for (String userInfoEncryptionEnc : configuration.getUserInfoEncryptionEncValuesSupported()) {
+						userInfoEncryptionEncValuesSupported.put(userInfoEncryptionEnc);
+					}
+					if (userInfoEncryptionAlgValuesSupported.length() > 0) {
+						jsonObj.put(USER_INFO_ENCRYPTION_ENC_VALUES_SUPPORTED, userInfoEncryptionAlgValuesSupported);
+					}
 
-            JSONArray idTokenEncryptionAlgValuesSupported = new JSONArray();
-            for (String idTokenEncryptionAlg : configuration.getIdTokenEncryptionAlgValuesSupported()) {
-                idTokenEncryptionAlgValuesSupported.put(idTokenEncryptionAlg);
-            }
-            if (idTokenEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED, idTokenEncryptionAlgValuesSupported);
-            }
+					JSONArray idTokenSigningAlgValuesSupported = new JSONArray();
+					for (String idTokenSigningAlg : configuration.getIdTokenSigningAlgValuesSupported()) {
+						idTokenSigningAlgValuesSupported.put(idTokenSigningAlg);
+					}
+					if (idTokenSigningAlgValuesSupported.length() > 0) {
+						jsonObj.put(ID_TOKEN_SIGNING_ALG_VALUES_SUPPORTED, idTokenSigningAlgValuesSupported);
+					}
 
-            JSONArray idTokenEncryptionEncValuesSupported = new JSONArray();
-            for (String idTokenEncryptionEnc : configuration.getIdTokenEncryptionEncValuesSupported()) {
-                idTokenEncryptionEncValuesSupported.put(idTokenEncryptionEnc);
-            }
-            if (idTokenEncryptionEncValuesSupported.length() > 0) {
-                jsonObj.put(ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED, idTokenEncryptionEncValuesSupported);
-            }
+					JSONArray idTokenEncryptionAlgValuesSupported = new JSONArray();
+					for (String idTokenEncryptionAlg : configuration.getIdTokenEncryptionAlgValuesSupported()) {
+						idTokenEncryptionAlgValuesSupported.put(idTokenEncryptionAlg);
+					}
+					if (idTokenEncryptionAlgValuesSupported.length() > 0) {
+						jsonObj.put(ID_TOKEN_ENCRYPTION_ALG_VALUES_SUPPORTED, idTokenEncryptionAlgValuesSupported);
+					}
 
-            JSONArray requestObjectSigningAlgValuesSupported = new JSONArray();
-            for (String requestObjectSigningAlg : configuration.getRequestObjectSigningAlgValuesSupported()) {
-                requestObjectSigningAlgValuesSupported.put(requestObjectSigningAlg);
-            }
-            if (requestObjectSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED, requestObjectSigningAlgValuesSupported);
-            }
+					JSONArray idTokenEncryptionEncValuesSupported = new JSONArray();
+					for (String idTokenEncryptionEnc : configuration.getIdTokenEncryptionEncValuesSupported()) {
+						idTokenEncryptionEncValuesSupported.put(idTokenEncryptionEnc);
+					}
+					if (idTokenEncryptionEncValuesSupported.length() > 0) {
+						jsonObj.put(ID_TOKEN_ENCRYPTION_ENC_VALUES_SUPPORTED, idTokenEncryptionEncValuesSupported);
+					}
 
-            JSONArray requestObjectEncryptionAlgValuesSupported = new JSONArray();
-            for (String requestObjectEncryptionAlg : configuration.getRequestObjectEncryptionAlgValuesSupported()) {
-                requestObjectEncryptionAlgValuesSupported.put(requestObjectEncryptionAlg);
-            }
-            if (requestObjectEncryptionAlgValuesSupported.length() > 0) {
-                jsonObj.put(REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED, requestObjectEncryptionAlgValuesSupported);
-            }
+					JSONArray requestObjectSigningAlgValuesSupported = new JSONArray();
+					for (String requestObjectSigningAlg : configuration.getRequestObjectSigningAlgValuesSupported()) {
+						requestObjectSigningAlgValuesSupported.put(requestObjectSigningAlg);
+					}
+					if (requestObjectSigningAlgValuesSupported.length() > 0) {
+						jsonObj.put(REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED,
+								requestObjectSigningAlgValuesSupported);
+					}
 
-            JSONArray requestObjectEncryptionEncValuesSupported = new JSONArray();
-            for (String requestObjectEncryptionEnc : configuration.getRequestObjectEncryptionEncValuesSupported()) {
-                requestObjectEncryptionEncValuesSupported.put(requestObjectEncryptionEnc);
-            }
-            if (requestObjectEncryptionEncValuesSupported.length() > 0) {
-                jsonObj.put(REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED, requestObjectEncryptionEncValuesSupported);
-            }
+					JSONArray requestObjectEncryptionAlgValuesSupported = new JSONArray();
+					for (String requestObjectEncryptionAlg : configuration
+							.getRequestObjectEncryptionAlgValuesSupported()) {
+						requestObjectEncryptionAlgValuesSupported.put(requestObjectEncryptionAlg);
+					}
+					if (requestObjectEncryptionAlgValuesSupported.length() > 0) {
+						jsonObj.put(REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED,
+								requestObjectEncryptionAlgValuesSupported);
+					}
 
-            JSONArray tokenEndpointAuthMethodsSupported = new JSONArray();
-            for (String tokenEndpointAuthMethod : configuration.getTokenEndpointAuthMethodsSupported()) {
-                tokenEndpointAuthMethodsSupported.put(tokenEndpointAuthMethod);
-            }
-            if (tokenEndpointAuthMethodsSupported.length() > 0) {
-                jsonObj.put(TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED, tokenEndpointAuthMethodsSupported);
-            }
+					JSONArray requestObjectEncryptionEncValuesSupported = new JSONArray();
+					for (String requestObjectEncryptionEnc : configuration
+							.getRequestObjectEncryptionEncValuesSupported()) {
+						requestObjectEncryptionEncValuesSupported.put(requestObjectEncryptionEnc);
+					}
+					if (requestObjectEncryptionEncValuesSupported.length() > 0) {
+						jsonObj.put(REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED,
+								requestObjectEncryptionEncValuesSupported);
+					}
 
-            JSONArray tokenEndpointAuthSigningAlgValuesSupported = new JSONArray();
-            for (String tokenEndpointAuthSigningAlg : configuration.getTokenEndpointAuthSigningAlgValuesSupported()) {
-                tokenEndpointAuthSigningAlgValuesSupported.put(tokenEndpointAuthSigningAlg);
-            }
-            if (tokenEndpointAuthSigningAlgValuesSupported.length() > 0) {
-                jsonObj.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED, tokenEndpointAuthSigningAlgValuesSupported);
-            }
+					JSONArray tokenEndpointAuthMethodsSupported = new JSONArray();
+					for (String tokenEndpointAuthMethod : configuration.getTokenEndpointAuthMethodsSupported()) {
+						tokenEndpointAuthMethodsSupported.put(tokenEndpointAuthMethod);
+					}
+					if (tokenEndpointAuthMethodsSupported.length() > 0) {
+						jsonObj.put(TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED, tokenEndpointAuthMethodsSupported);
+					}
 
-            JSONArray displayValuesSupported = new JSONArray();
-            for (String display : configuration.getDisplayValuesSupported()) {
-                displayValuesSupported.put(display);
-            }
-            if (displayValuesSupported.length() > 0) {
-                jsonObj.put(DISPLAY_VALUES_SUPPORTED, displayValuesSupported);
-            }
+					JSONArray tokenEndpointAuthSigningAlgValuesSupported = new JSONArray();
+					for (String tokenEndpointAuthSigningAlg : configuration
+							.getTokenEndpointAuthSigningAlgValuesSupported()) {
+						tokenEndpointAuthSigningAlgValuesSupported.put(tokenEndpointAuthSigningAlg);
+					}
+					if (tokenEndpointAuthSigningAlgValuesSupported.length() > 0) {
+						jsonObj.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED,
+								tokenEndpointAuthSigningAlgValuesSupported);
+					}
 
-            JSONArray claimTypesSupported = new JSONArray();
-            for (String claimType : configuration.getClaimTypesSupported()) {
-                claimTypesSupported.put(claimType);
-            }
-            if (claimTypesSupported.length() > 0) {
-                jsonObj.put(CLAIM_TYPES_SUPPORTED, claimTypesSupported);
-            }
+					JSONArray displayValuesSupported = new JSONArray();
+					for (String display : configuration.getDisplayValuesSupported()) {
+						displayValuesSupported.put(display);
+					}
+					if (displayValuesSupported.length() > 0) {
+						jsonObj.put(DISPLAY_VALUES_SUPPORTED, displayValuesSupported);
+					}
 
-            JSONArray claimsSupported = new JSONArray();
-            List<GluuAttribute> gluuAttributes = AttributeService.instance().getAllAttributes();
+					JSONArray claimTypesSupported = new JSONArray();
+					for (String claimType : configuration.getClaimTypesSupported()) {
+						claimTypesSupported.put(claimType);
+					}
+					if (claimTypesSupported.length() > 0) {
+						jsonObj.put(CLAIM_TYPES_SUPPORTED, claimTypesSupported);
+					}
 
-            // Preload all scopes to avoid sending request to LDAP per claim
-            List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getAllScopesList();
+					JSONArray claimsSupported = new JSONArray();
+					List<GluuAttribute> gluuAttributes = AttributeService.instance().getAllAttributes();
 
-            for (GluuAttribute gluuAttribute : gluuAttributes) {
-                if (GluuStatus.ACTIVE.equals(gluuAttribute.getStatus())) {
-                    String claimName = gluuAttribute.getOxAuthClaimName();
-                    if (StringUtils.isNotBlank(claimName)) {
-                        List<org.xdi.oxauth.model.common.Scope> scopesByClaim = scopeService.getScopesByClaim(scopes, gluuAttribute.getDn());
-                        for (org.xdi.oxauth.model.common.Scope scope : scopesByClaim) {
-                            if (ScopeType.OPENID.equals(scope.getScopeType())) {
-                                claimsSupported.put(claimName);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+					// Preload all scopes to avoid sending request to LDAP per
+					// claim
+					List<org.xdi.oxauth.model.common.Scope> scopes = scopeService.getAllScopesList();
 
-            if (claimsSupported.length() > 0) {
-                jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
-            }
+					for (GluuAttribute gluuAttribute : gluuAttributes) {
+						if (GluuStatus.ACTIVE.equals(gluuAttribute.getStatus())) {
+							String claimName = gluuAttribute.getOxAuthClaimName();
+							if (StringUtils.isNotBlank(claimName)) {
+								List<org.xdi.oxauth.model.common.Scope> scopesByClaim = scopeService
+										.getScopesByClaim(scopes, gluuAttribute.getDn());
+								for (org.xdi.oxauth.model.common.Scope scope : scopesByClaim) {
+									if (ScopeType.OPENID.equals(scope.getScopeType())) {
+										claimsSupported.put(claimName);
+										break;
+									}
+								}
+							}
+						}
+					}
 
-            jsonObj.put(SERVICE_DOCUMENTATION, configuration.getServiceDocumentation());
+					if (claimsSupported.length() > 0) {
+						jsonObj.put(CLAIMS_SUPPORTED, claimsSupported);
+					}
 
-            JSONArray claimsLocalesSupported = new JSONArray();
-            for (String claimLocale : configuration.getClaimsLocalesSupported()) {
-                claimsLocalesSupported.put(claimLocale);
-            }
-            if (claimsLocalesSupported.length() > 0) {
-                jsonObj.put(CLAIMS_LOCALES_SUPPORTED, claimsLocalesSupported);
-            }
+					jsonObj.put(SERVICE_DOCUMENTATION, configuration.getServiceDocumentation());
 
-            JSONArray uiLocalesSupported = new JSONArray();
-            for (String uiLocale : configuration.getUiLocalesSupported()) {
-                uiLocalesSupported.put(uiLocale);
-            }
-            if (uiLocalesSupported.length() > 0) {
-                jsonObj.put(UI_LOCALES_SUPPORTED, uiLocalesSupported);
-            }
+					JSONArray claimsLocalesSupported = new JSONArray();
+					for (String claimLocale : configuration.getClaimsLocalesSupported()) {
+						claimsLocalesSupported.put(claimLocale);
+					}
+					if (claimsLocalesSupported.length() > 0) {
+						jsonObj.put(CLAIMS_LOCALES_SUPPORTED, claimsLocalesSupported);
+					}
 
-            jsonObj.put(SCOPE_TO_CLAIMS_MAPPING, createScopeToClaimsMapping());
+					JSONArray uiLocalesSupported = new JSONArray();
+					for (String uiLocale : configuration.getUiLocalesSupported()) {
+						uiLocalesSupported.put(uiLocale);
+					}
+					if (uiLocalesSupported.length() > 0) {
+						jsonObj.put(UI_LOCALES_SUPPORTED, uiLocalesSupported);
+					}
 
-            jsonObj.put(CLAIMS_PARAMETER_SUPPORTED, configuration.getClaimsParameterSupported());
-            jsonObj.put(REQUEST_PARAMETER_SUPPORTED, configuration.getRequestParameterSupported());
-            jsonObj.put(REQUEST_URI_PARAMETER_SUPPORTED, configuration.getRequestUriParameterSupported());
-            jsonObj.put(REQUIRE_REQUEST_URI_REGISTRATION, configuration.getRequireRequestUriRegistration());
-            jsonObj.put(OP_POLICY_URI, configuration.getOpPolicyUri());
-            jsonObj.put(OP_TOS_URI, configuration.getOpTosUri());
-            jsonObj.put(HTTP_LOGOUT_SUPPORTED, "true");
-            jsonObj.put(LOGOUT_SESSION_SUPPORTED, "true");
+					jsonObj.put(SCOPE_TO_CLAIMS_MAPPING, createScopeToClaimsMapping());
 
-            out.println(jsonObj.toString(4).replace("\\/", "/"));
-        } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            out.close();
-        }
-    }
+					jsonObj.put(CLAIMS_PARAMETER_SUPPORTED, configuration.getClaimsParameterSupported());
+					jsonObj.put(REQUEST_PARAMETER_SUPPORTED, configuration.getRequestParameterSupported());
+					jsonObj.put(REQUEST_URI_PARAMETER_SUPPORTED, configuration.getRequestUriParameterSupported());
+					jsonObj.put(REQUIRE_REQUEST_URI_REGISTRATION, configuration.getRequireRequestUriRegistration());
+					jsonObj.put(OP_POLICY_URI, configuration.getOpPolicyUri());
+					jsonObj.put(OP_TOS_URI, configuration.getOpTosUri());
+					jsonObj.put(HTTP_LOGOUT_SUPPORTED, "true");
+					jsonObj.put(LOGOUT_SESSION_SUPPORTED, "true");
 
-    /**
-     *  @deprecated theses params:
-     *  <ul>
-     *      <li>id_generation_endpoint</li>
-     *      <li>introspection_endpoint</li>
-     *      <li>auth_level_mapping</li>
-     *      <li>scope_to_claims_mapping</li>
-     *  </ul>
-     *  will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-     */
-    @Deprecated
-    private static JSONArray createScopeToClaimsMapping() {
-        final JSONArray result = new JSONArray();
-        try {
-            final AttributeService attributeService = AttributeService.instance();
-            final ScopeService scopeService = ScopeService.instance();
-            for (Scope scope : scopeService.getAllScopesList()) {
-                final JSONArray claimsList = new JSONArray();
-                final JSONObject mapping = new JSONObject();
-                mapping.put(scope.getDisplayName(), claimsList);
+					out.println(jsonObj.toString(4).replace("\\/", "/"));
+				} catch (JSONException e) {
+					LOG.error(e.getMessage(), e);
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+				} finally {
+					out.close();
+				}
+			}
+		}.run();
+	}
 
-                result.put(mapping);
+	/**
+	 * @deprecated theses params:
+	 *             <ul>
+	 *             <li>id_generation_endpoint</li>
+	 *             <li>introspection_endpoint</li>
+	 *             <li>auth_level_mapping</li>
+	 *             <li>scope_to_claims_mapping</li>
+	 *             </ul>
+	 *             will be moved from /.well-known/openid-configuration
+	 *             to /.well-known/gluu-configuration
+	 */
+	@Deprecated
+	private static JSONArray createScopeToClaimsMapping() {
+		final JSONArray result = new JSONArray();
+		try {
+			final AttributeService attributeService = AttributeService.instance();
+			final ScopeService scopeService = ScopeService.instance();
+			for (Scope scope : scopeService.getAllScopesList()) {
+				final JSONArray claimsList = new JSONArray();
+				final JSONObject mapping = new JSONObject();
+				mapping.put(scope.getDisplayName(), claimsList);
 
-                final List<String> claimIdList = scope.getOxAuthClaims();
-                if (claimIdList != null && !claimIdList.isEmpty()) {
-                    for (String claimDn : claimIdList) {
-                        final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
-                        final String claimName = attribute.getOxAuthClaimName();
-                        if (StringUtils.isNotBlank(claimName)) {
-                            claimsList.put(claimName);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return result;
-    }
+				result.put(mapping);
 
-    /**
-     *  @deprecated theses params:
-     *  <ul>
-     *      <li>id_generation_endpoint</li>
-     *      <li>introspection_endpoint</li>
-     *      <li>auth_level_mapping</li>
-     *      <li>scope_to_claims_mapping</li>
-     *  </ul>
-     *  will be moved from /.well-known/openid-configuration to /.well-known/gluu-configuration
-     */
-    @Deprecated
-    private JSONObject createAuthLevelMapping() {
-        final JSONObject mappings = new JSONObject();
-        try {
-            Map<Integer, Set<String>> map = ExternalAuthenticationService.instance().levelToAcrMapping();
-            for (Integer level : map.keySet())
-                mappings.put(level.toString(), map.get(level));
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        return mappings;
-    }    
+				final List<String> claimIdList = scope.getOxAuthClaims();
+				if (claimIdList != null && !claimIdList.isEmpty()) {
+					for (String claimDn : claimIdList) {
+						final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+						final String claimName = attribute.getOxAuthClaimName();
+						if (StringUtils.isNotBlank(claimName)) {
+							claimsList.put(claimName);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return result;
+	}
 
-    /**
-     * Handles the HTTP
-     * <code>GET</code> method.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+	/**
+	 * @deprecated theses params:
+	 *             <ul>
+	 *             <li>id_generation_endpoint</li>
+	 *             <li>introspection_endpoint</li>
+	 *             <li>auth_level_mapping</li>
+	 *             <li>scope_to_claims_mapping</li>
+	 *             </ul>
+	 *             will be moved from /.well-known/openid-configuration to
+	 *             /.well-known/gluu-configuration
+	 */
+	@Deprecated
+	private JSONObject createAuthLevelMapping() {
+		final JSONObject mappings = new JSONObject();
+		try {
+			Map<Integer, Set<String>> map = ExternalAuthenticationService.instance().levelToAcrMapping();
+			for (Integer level : map.keySet())
+				mappings.put(level.toString(), map.get(level));
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return mappings;
+	}
 
-    /**
-     * Handles the HTTP
-     * <code>POST</code> method.
-     *
-     * @param request  servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException      if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+	/**
+	 * Handles the HTTP <code>GET</code> method.
+	 *
+	 * @param request
+	 *            servlet request
+	 * @param response
+	 *            servlet response
+	 * @throws ServletException
+	 *             if a servlet-specific error occurs
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		processRequest(request, response);
+	}
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "OpenID Provider Configuration Information";
-    }
+	/**
+	 * Handles the HTTP <code>POST</code> method.
+	 *
+	 * @param request
+	 *            servlet request
+	 * @param response
+	 *            servlet response
+	 * @throws ServletException
+	 *             if a servlet-specific error occurs
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		processRequest(request, response);
+	}
+
+	/**
+	 * Returns a short description of the servlet.
+	 *
+	 * @return a String containing servlet description
+	 */
+	@Override
+	public String getServletInfo() {
+		return "OpenID Provider Configuration Information";
+	}
 
 }
