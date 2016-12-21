@@ -21,6 +21,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
@@ -75,6 +76,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private Identity identity;
     @In
     private ApplicationAuditLogger applicationAuditLogger;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionState,
@@ -142,7 +146,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
-        	Boolean endSessionWithAccessToken = ConfigurationFactory.instance().getConfiguration().getEndSessionWithAccessToken();
+        	Boolean endSessionWithAccessToken = configuration.getEndSessionWithAccessToken();
         	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
         		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
         	}
