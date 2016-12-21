@@ -20,7 +20,7 @@ import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.Claim;
 import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -96,10 +96,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     private ExternalDynamicScopeService externalDynamicScopeService;
 
     @In
-    private ConfigurationFactory configurationFactory;
-
-    @In
     private PairwiseIdentifierService pairwiseIdentifierService;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
+
+    @In(value = "#{configurationFactory.webKeys}")
+    private JSONWebKeySet jsonWebKeySet;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
@@ -204,13 +207,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                  Collection<String> scopes) throws Exception {
         Jwt jwt = new Jwt();
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(ConfigurationFactory.instance().getConfiguration());
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
         // Header
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        String keyId = cryptoProvider.getKeyId(ConfigurationFactory.instance().getWebKeys(), signatureAlgorithm);
+        String keyId = cryptoProvider.getKeyId(jsonWebKeySet, signatureAlgorithm);
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
@@ -297,7 +300,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
             jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            String openidSubAttribute = configuration.getOpenidSubAttribute();
             jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 
@@ -407,7 +410,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
             jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            String openidSubAttribute = configuration.getOpenidSubAttribute();
             jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 
@@ -421,7 +424,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(ConfigurationFactory.instance().getConfiguration());
+            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
             String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys), SignatureAlgorithm.RS256);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys);
 
@@ -551,7 +554,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
             jsonWebResponse.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
+            String openidSubAttribute = configuration.getOpenidSubAttribute();
             jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 
