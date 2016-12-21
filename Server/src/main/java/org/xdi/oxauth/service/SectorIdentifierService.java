@@ -10,6 +10,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.ldap.SectorIdentifier;
 import org.xdi.util.StringHelper;
 
@@ -26,6 +27,9 @@ public class SectorIdentifierService {
     private Log log;
     @In
     private LdapEntryManager ldapEntryManager;
+
+    @In
+    private StaticConf staticConfiguration;
 
     public static SectorIdentifierService instance() {
         return (SectorIdentifierService) Component.getInstance(SectorIdentifierService.class);
@@ -55,7 +59,7 @@ public class SectorIdentifierService {
      * @throws Exception
      */
     public String getDnForSectorIdentifier(String inum) {
-        String sectorIdentifierDn = ConfigurationFactory.instance().getBaseDn().getSectorIdentifiers();
+        String sectorIdentifierDn = staticConfiguration.getBaseDn().getSectorIdentifiers();
         if (StringHelper.isEmpty(inum)) {
             return sectorIdentifierDn;
         }

@@ -69,7 +69,7 @@ public class ApplicationAuditLogger {
 		tryToEstablishJMSConnection();
 	}
 
-	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
 	public void updateConfiguration(Configuration configuration) {
 		this.configuration = configuration;
 	}
