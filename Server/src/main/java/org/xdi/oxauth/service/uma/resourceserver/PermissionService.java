@@ -6,9 +6,19 @@
 
 package org.xdi.oxauth.service.uma.resourceserver;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -21,13 +31,8 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
-import org.xdi.oxauth.uma.ws.rs.PermissionRegistrationWS;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
-
-import javax.ws.rs.core.Response;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,6 +43,8 @@ import java.util.List;
 @AutoCreate
 public class PermissionService {
 
+    public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
+
     @Logger
     private Log log;
     @In
@@ -46,7 +53,7 @@ public class PermissionService {
     private TokenService tokenService;
     @In
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     public static PermissionService instance() {
@@ -116,8 +123,19 @@ public class PermissionService {
         return false;
     }
 
+    public Date rptExpirationDate() {
+        int lifeTime = configuration.getUmaRequesterPermissionTokenLifetime();
+        if (lifeTime <= 0) {
+            lifeTime = DEFAULT_PERMISSION_LIFETIME;
+        }
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, lifeTime);
+        return calendar.getTime();
+    }
+
     private String registerPermission(UmaRPT p_rpt, ResourceSet p_resource, List<RsScopeType> p_scopes) {
-        final Date expirationDate = PermissionRegistrationWS.rptExpirationDate();
+        final Date expirationDate = rptExpirationDate();
 
         final UmaPermission r = new UmaPermission();
         r.setResourceSetId(p_resource.getId());

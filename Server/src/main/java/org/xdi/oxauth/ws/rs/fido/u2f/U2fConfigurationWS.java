@@ -40,7 +40,7 @@ public class U2fConfigurationWS {
 	@Logger
 	private Log log;
 
-	@In(value = "#{configurationFactory.configuration}")
+	@In
 	private Configuration configuration;
 
 	@In
