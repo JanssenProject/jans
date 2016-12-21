@@ -50,8 +50,8 @@ public class KeyGeneratorTimer {
     private Configuration configuration;
 
     @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration() {
-        this.configuration = configurationFactory.getConfiguration();
+    public void updateConfiguration(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     @In
@@ -62,8 +62,6 @@ public class KeyGeneratorTimer {
     @Observer("org.jboss.seam.postInitialization")
     public void init() {
         log.debug("Initializing KeyGeneratorTimer");
-
-        updateConfiguration();
 
         this.isActive = new AtomicBoolean(false);
 
