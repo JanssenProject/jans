@@ -6,23 +6,27 @@
 
 package org.xdi.oxauth.model.registration;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.codehaus.jettison.json.JSONArray;
-import org.gluu.site.ldap.persistence.annotation.*;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
+import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.util.LdapUtils;
 import org.xdi.util.security.StringEncrypter;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -1031,19 +1035,6 @@ public class Client {
 
     public static Client instance() {
         return new Client();
-    }
-
-    public static String buildClientDn(String p_clientId) {
-        final StringBuilder dn = new StringBuilder();
-        dn.append(String.format("inum=%s,", p_clientId));
-        dn.append(ConfigurationFactory.instance().getBaseDn().getClients()); // ou=clients,o=@!1111,o=gluu
-        return dn.toString();
-    }
-
-    public Client setClientIdWithDn(String p_clientId) {
-        setClientId(p_clientId);
-        setDn(buildClientDn(p_clientId));
-        return this;
     }
 
     /**
