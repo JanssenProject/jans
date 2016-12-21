@@ -21,6 +21,7 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
@@ -53,7 +54,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 	private Configuration configuration;
 
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration) {
+	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
 		this.configuration = configuration;
 	}
 

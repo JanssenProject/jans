@@ -22,6 +22,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 
 /**
@@ -49,7 +50,7 @@ public class ClientFilterService extends BaseAuthFilterService {
     }
 
     @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration(Configuration configuration) {
+    public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
         this.configuration = configuration;
     }
 
