@@ -52,6 +52,9 @@ public class GrantService {
     private LdapEntryManager ldapEntryManager;
     @In
     private ApplicationAuditLogger applicationAuditLogger;
+    
+    @In
+    private ClientService clientService;
 
     @In(value = "#{configurationFactory.staticConfiguration}")
     private StaticConf staticConf;
@@ -60,10 +63,10 @@ public class GrantService {
         return UUID.randomUUID().toString();
     }
 
-    public static String buildDn(String p_uniqueIdentifier, String p_grantId, String p_clientId) {
+    public String buildDn(String p_uniqueIdentifier, String p_grantId, String p_clientId) {
         final StringBuilder dn = new StringBuilder();
         dn.append(String.format("uniqueIdentifier=%s,oxAuthGrantId=%s,", p_uniqueIdentifier, p_grantId));
-        dn.append(Client.buildClientDn(p_clientId));
+        dn.append(clientService.buildClientDn(p_clientId));
         return dn.toString();
     }
 
@@ -147,7 +150,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsOfClient(String p_clientId) {
         try {
-            final String baseDn = Client.buildClientDn(p_clientId);
+            final String baseDn = clientService.buildClientDn(p_clientId);
             return ldapEntryManager.findEntries(baseDn, TokenLdap.class, Filter.create("oxAuthTokenCode=*"));
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
@@ -156,7 +159,7 @@ public class GrantService {
     }
 
     public TokenLdap getGrantsByCodeAndClient(String p_code, String p_clientId) {
-        return load(Client.buildClientDn(p_clientId), p_code);
+        return load(clientService.buildClientDn(p_clientId), p_code);
     }
 
     public TokenLdap getGrantsByCode(String p_code) {
@@ -291,7 +294,7 @@ public class GrantService {
     private String getBaseDnForGrant(final String p_grantId, final String p_clientId) {
         final StringBuilder dn = new StringBuilder();
         dn.append(String.format("oxAuthGrantId=%s,", p_grantId));
-        dn.append(Client.buildClientDn(p_clientId));
+        dn.append(clientService.buildClientDn(p_clientId));
 
         return dn.toString();
     }
