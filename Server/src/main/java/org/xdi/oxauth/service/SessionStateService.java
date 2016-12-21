@@ -73,7 +73,6 @@ public class SessionStateService {
 
     @In(value = "#{configurationFactory.staticConfiguration}")
     private StaticConf staticConf;
-    
 
     @In(required = false)
     private FacesContext facesContext;
