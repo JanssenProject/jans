@@ -36,6 +36,7 @@ import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -99,6 +100,9 @@ public class IdTokenFactory {
     @In
     private PairwiseIdentifierService pairwiseIdentifierService;
 
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
+
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
                                      Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
@@ -106,7 +110,7 @@ public class IdTokenFactory {
         JwtSigner jwtSigner = JwtSigner.newJwtSigner(authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
 
-        int lifeTime = ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime();
+        int lifeTime = configuration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
@@ -133,8 +137,8 @@ public class IdTokenFactory {
             String accessTokenHash = accessToken.getHash(jwtSigner.getSignatureAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
-        jwt.getClaims().setClaim("oxValidationURI", ConfigurationFactory.instance().getConfiguration().getCheckSessionIFrame());
-        jwt.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.instance().getConfiguration().getOxOpenIdConnectVersion());
+        jwt.getClaims().setClaim("oxValidationURI", configuration.getCheckSessionIFrame());
+        jwt.getClaims().setClaim("oxOpenIDConnectVersion", configuration.getOxOpenIdConnectVersion());
 
         List<String> dynamicScopes = new ArrayList<String>();
         if (includeIdTokenClaims) {
@@ -299,10 +303,10 @@ public class IdTokenFactory {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
-        jwe.getClaims().setIssuer(ConfigurationFactory.instance().getConfiguration().getIssuer());
+        jwe.getClaims().setIssuer(configuration.getIssuer());
         jwe.getClaims().setAudience(authorizationGrant.getClient().getClientId());
 
-        int lifeTime = ConfigurationFactory.instance().getConfiguration().getIdTokenLifetime();
+        int lifeTime = configuration.getIdTokenLifetime();
         Calendar calendar = Calendar.getInstance();
         Date issuedAt = calendar.getTime();
         calendar.add(Calendar.SECOND, lifeTime);
@@ -329,8 +333,8 @@ public class IdTokenFactory {
             String accessTokenHash = accessToken.getHash(null);
             jwe.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
-        jwe.getClaims().setClaim("oxValidationURI", ConfigurationFactory.instance().getConfiguration().getCheckSessionIFrame());
-        jwe.getClaims().setClaim("oxOpenIDConnectVersion", ConfigurationFactory.instance().getConfiguration().getOxOpenIdConnectVersion());
+        jwe.getClaims().setClaim("oxValidationURI", configuration.getCheckSessionIFrame());
+        jwe.getClaims().setClaim("oxOpenIDConnectVersion", configuration.getOxOpenIdConnectVersion());
 
         List<String> dynamicScopes = new ArrayList<String>();
         if (includeIdTokenClaims) {
@@ -434,7 +438,7 @@ public class IdTokenFactory {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(ConfigurationFactory.instance().getConfiguration());
+            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
             String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys), SignatureAlgorithm.RS256);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys);
 

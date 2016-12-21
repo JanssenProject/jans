@@ -15,7 +15,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -34,8 +34,11 @@ public class InumService {
     @In
     private IdGenService idGenService;
 
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
+
     public String generateClientInum() {
-        return generateClientInum(ConfigurationFactory.instance().getConfiguration().getOrganizationInum());
+        return generateClientInum(configuration.getOrganizationInum());
     }
 
     public String generateClientInum(String p_organizationInum) {
@@ -43,7 +46,7 @@ public class InumService {
     }
 
     public String generatePeopleInum() {
-        return idGenService.generateId(IdType.PEOPLE, ConfigurationFactory.instance().getConfiguration().getOrganizationInum());
+        return idGenService.generateId(IdType.PEOPLE, configuration.getOrganizationInum());
     }
 
     public String generateInum() {

@@ -66,13 +66,12 @@ public class ApplicationAuditLogger {
 
 	@Create
 	public void init() {
-		updateConfiguration();
 		tryToEstablishJMSConnection();
 	}
 
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration() {
-		this.configuration = configurationFactory.getConfiguration();
+	public void updateConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	@Asynchronous
