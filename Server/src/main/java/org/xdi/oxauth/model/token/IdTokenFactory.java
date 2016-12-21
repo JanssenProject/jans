@@ -65,7 +65,7 @@ import java.util.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version October 7, 2016
+ * @version December 20, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("idTokenFactory")
@@ -236,7 +236,12 @@ public class IdTokenFactory {
             jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
             String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
-            jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+
+            if (openidSubAttribute.equals("uid")) {
+                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getUserId());
+            } else {
+                jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+            }
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
@@ -402,7 +407,12 @@ public class IdTokenFactory {
             jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
             String openidSubAttribute = configurationFactory.getConfiguration().getOpenidSubAttribute();
-            jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+
+            if (openidSubAttribute.equals("uid")) {
+                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getUserId());
+            } else {
+                jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
+            }
         }
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
