@@ -326,7 +326,7 @@ public class AuthenticationFilter extends AbstractFilter {
                 String encodedAssertion = servletRequest.getParameter("client_assertion");
 
                 if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
-                    ClientAssertion clientAssertion = new ClientAssertion(clientId, clientAssertionType, encodedAssertion);
+                    ClientAssertion clientAssertion = new ClientAssertion(configuration, clientId, clientAssertionType, encodedAssertion);
 
                     String username = clientAssertion.getSubjectIdentifier();
                     String password = clientAssertion.getClientSecret();

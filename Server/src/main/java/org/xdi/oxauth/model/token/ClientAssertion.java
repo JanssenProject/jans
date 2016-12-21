@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.Component;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -37,10 +37,10 @@ public class ClientAssertion {
     private Jwt jwt;
     private String clientSecret;
 
-    public ClientAssertion(String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    public ClientAssertion(Configuration configuration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws InvalidJwtException {
         try {
-            if (!load(clientId, clientAssertionType, encodedAssertion)) {
+            if (!load(configuration, clientId, clientAssertionType, encodedAssertion)) {
                 throw new InvalidJwtException("Cannot load the JWT");
             }
         } catch (StringEncrypter.EncryptionException e) {
@@ -58,7 +58,7 @@ public class ClientAssertion {
         return clientSecret;
     }
 
-    private boolean load(String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    private boolean load(Configuration configuration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws Exception {
         boolean result;
 
@@ -81,7 +81,7 @@ public class ClientAssertion {
                         && clientId.equals(issuer) && issuer.equals(subject))) {
 
                     // Validate audience
-                    String tokenUrl = ConfigurationFactory.instance().getConfiguration().getTokenEndpoint();
+                    String tokenUrl = configuration.getTokenEndpoint();
                     if (audience != null && audience.contains(tokenUrl)) {
 
                         // Validate expiration
@@ -111,7 +111,7 @@ public class ClientAssertion {
                                             new JSONObject(client.getJwks());
                                     String sharedSecret = client.getClientSecret();
                                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                                            ConfigurationFactory.instance().getConfiguration());
+                                            configuration);
                                     boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                                             keyId, jwks, sharedSecret, signatureAlgorithm);
 

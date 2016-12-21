@@ -70,7 +70,7 @@ public class SessionStateService {
 
     @In(value = "#{configurationFactory.configuration}")
     private Configuration configuration;
-    
+
     @In(value = "#{configurationFactory.staticConfiguration}")
     private StaticConf staticConf;
     

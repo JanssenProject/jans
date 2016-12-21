@@ -28,8 +28,8 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.AuthenticationService;
@@ -77,6 +77,9 @@ public class Authenticator implements Serializable {
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     @In
     private FacesMessages facesMessages;
@@ -515,7 +518,7 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateBySessionState(String p_sessionState) {
-        if (StringUtils.isNotBlank(p_sessionState) && ConfigurationFactory.instance().getConfiguration().getSessionIdEnabled()) {
+        if (StringUtils.isNotBlank(p_sessionState) && configuration.getSessionIdEnabled()) {
             try {
                 SessionState sessionState = sessionStateService.getSessionState(p_sessionState);
                 return authenticateBySessionState(sessionState);
