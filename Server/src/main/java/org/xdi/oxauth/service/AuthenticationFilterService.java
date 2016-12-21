@@ -14,6 +14,7 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.util.StringHelper;
 
@@ -44,7 +45,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
     }
 
     @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration(Configuration configuration) {
+    public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
         this.configuration = configuration;
     }
 
