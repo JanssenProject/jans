@@ -277,7 +277,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             boolean invalidOpenidRequestObject = false;
                             if (StringUtils.isNotBlank(request)) {
                                 try {
-                                    jwtAuthorizationRequest = new JwtAuthorizationRequest(request, client);
+                                    jwtAuthorizationRequest = new JwtAuthorizationRequest(configuration, request, client);
 
                                     if (!jwtAuthorizationRequest.getResponseTypes().containsAll(responseTypes)
                                             || !responseTypes.containsAll(jwtAuthorizationRequest.getResponseTypes())) {
