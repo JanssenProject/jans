@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
-import org.xdi.oxauth.service.uma.UmaValidationService;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
@@ -36,8 +15,28 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.Calendar;
-import java.util.Date;
+
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.UmaConstants;
+import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.service.token.TokenService;
+import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
+import org.xdi.oxauth.service.uma.UmaValidationService;
+import org.xdi.oxauth.service.uma.resourceserver.PermissionService;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -61,8 +60,6 @@ import java.util.Date;
         "The resource server uses the POST method at the endpoint. The body of the HTTP request message contains a JSON object providing the requested permission, using a format derived from the scope description format specified in [OAuth-resource-reg], as follows. The object has the following properties:")
 public class PermissionRegistrationWS {
 
-    public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
-
     @Logger
     private Log log;
     @In
@@ -73,6 +70,12 @@ public class PermissionRegistrationWS {
     private ErrorResponseFactory errorResponseFactory;
     @In
     private UmaValidationService umaValidationService;
+    
+    @In
+    private PermissionService umaRsPermissionService;
+
+    @In
+	private Configuration configuration;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -95,7 +98,7 @@ public class PermissionRegistrationWS {
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
             umaValidationService.validateResourceSet(resourceSetPermissionRequest);
 
-            final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, rptExpirationDate());
+            final ResourceSetPermission resourceSetPermissions = resourceSetPermissionManager.createResourceSetPermission(validatedAmHost, resourceSetPermissionRequest, umaRsPermissionService.rptExpirationDate());
             resourceSetPermissionManager.addResourceSetPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
@@ -110,16 +113,5 @@ public class PermissionRegistrationWS {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
-    }
-
-    public static Date rptExpirationDate() {
-        int lifeTime = ConfigurationFactory.instance().getConfiguration().getUmaRequesterPermissionTokenLifetime();
-        if (lifeTime <= 0) {
-            lifeTime = DEFAULT_PERMISSION_LIFETIME;
-        }
-
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, lifeTime);
-        return calendar.getTime();
     }
 }

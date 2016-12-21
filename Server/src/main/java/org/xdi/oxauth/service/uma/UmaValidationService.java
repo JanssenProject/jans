@@ -55,7 +55,7 @@ public class UmaValidationService {
    	private ResourceSetService resourceSetService;
     @In
     private ScopeService umaScopeService;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     public String validateAmHost(String host) {

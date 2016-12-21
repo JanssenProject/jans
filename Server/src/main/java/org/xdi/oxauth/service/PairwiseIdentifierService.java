@@ -33,7 +33,7 @@ public class PairwiseIdentifierService {
 
     @Logger
     private Log log;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     public void addBranch(final String userInum) {

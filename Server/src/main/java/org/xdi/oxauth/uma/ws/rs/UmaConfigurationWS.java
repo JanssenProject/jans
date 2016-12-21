@@ -48,7 +48,7 @@ public class UmaConfigurationWS {
     @In
     private ErrorResponseFactory errorResponseFactory;
 
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     @GET
