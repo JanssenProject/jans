@@ -8,10 +8,8 @@ package org.xdi.oxauth.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesManager;
@@ -19,7 +17,6 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
@@ -38,7 +35,7 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import javax.annotation.Nonnull;
-import javax.faces.context.FacesContext;
+import javax.faces.context.ExternalContext;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -71,6 +68,9 @@ public class AuthenticationService {
 
     @In
     private Identity identity;
+
+    @In(value = "#{facesContext.externalContext}", required = false)
+    private ExternalContext externalContext;
 
     @In(required = false, value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
     // created by app initializer
@@ -575,7 +575,7 @@ public class AuthenticationService {
     }
 
     public Map<String, String> getParametersMap(List<String> extraParameters) {
-        final Map<String, String> parameterMap = new HashMap<String, String>(FacesContext.getCurrentInstance().getExternalContext()
+        final Map<String, String> parameterMap = new HashMap<String, String>(externalContext
                 .getRequestParameterMap());
 
         return getParametersMap(extraParameters, parameterMap);
