@@ -40,7 +40,6 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.List;
@@ -83,6 +82,9 @@ public class Authenticator implements Serializable {
 
     @In
     private FacesMessages facesMessages;
+
+    @In(value = "#{facesContext.externalContext}", required = false)
+    private ExternalContext externalContext;
 
     private String authAcr;
 
@@ -214,7 +216,6 @@ public class Authenticator implements Serializable {
                 return false;
             }
 
-            ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authAcr);
             if (customScriptConfiguration == null) {
                 log.error("Failed to get CustomScriptConfiguration for acr: '{1}', auth_step: '{0}'", this.authAcr, this.authStep);
@@ -228,7 +229,7 @@ public class Authenticator implements Serializable {
                 return false;
             }
 
-            boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
+            boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, externalContext.getRequestParameterValuesMap(), this.authStep);
             log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}', credentials: '{3}'", credentials.getUsername(), this.authStep, result, System.identityHashCode(credentials));
 
             int overridenNextStep = -1;
@@ -236,7 +237,7 @@ public class Authenticator implements Serializable {
             int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
             if (apiVersion > 1) {
             	log.trace("According to API version script supports steps overriding");
-            	overridenNextStep = externalAuthenticationService.getNextStep(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
+            	overridenNextStep = externalAuthenticationService.getNextStep(customScriptConfiguration, externalContext.getRequestParameterValuesMap(), this.authStep);
             	log.debug("Get next step from script: '{0}'", apiVersion);
             }
 
@@ -489,8 +490,7 @@ public class Authenticator implements Serializable {
             return Constants.RESULT_FAILURE;
         }
 
-        ExternalContext extCtx = FacesContext.getCurrentInstance().getExternalContext();
-        Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration, extCtx.getRequestParameterValuesMap(), this.authStep);
+        Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration, externalContext.getRequestParameterValuesMap(), this.authStep);
         if ((result != null) && result) {
             // Store/Update extra parameters in session attributes map
             updateExtraParameters(customScriptConfiguration, this.authStep, sessionIdAttributes);
