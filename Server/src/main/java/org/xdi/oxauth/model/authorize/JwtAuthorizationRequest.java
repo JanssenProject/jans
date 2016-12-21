@@ -65,7 +65,7 @@ public class JwtAuthorizationRequest {
 
     private String encodedJwt;
 
-    public JwtAuthorizationRequest(String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
+    public JwtAuthorizationRequest(Configuration configuration, String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
         try {
             responseTypes = new ArrayList<ResponseType>();
             scopes = new ArrayList<String>();
@@ -92,7 +92,6 @@ public class JwtAuthorizationRequest {
 
                     JweDecrypterImpl jweDecrypter = null;
                     if ("RSA".equals(keyEncryptionAlgorithm.getFamily())) {
-                        Configuration configuration = ConfigurationFactory.instance().getConfiguration();
                         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(configuration.getKeyStoreFile(),
                                 configuration.getKeyStoreSecret(), configuration.getDnName());
                         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
