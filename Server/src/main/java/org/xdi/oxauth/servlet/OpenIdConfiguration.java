@@ -79,6 +79,7 @@ import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Javier Rojas Blum
@@ -115,8 +116,7 @@ public class OpenIdConfiguration extends HttpServlet {
 				try {
 					JSONObject jsonObj = new JSONObject();
 
-					ConfigurationFactory configurationFactory = ConfigurationFactory.instance();
-					Configuration configuration = configurationFactory.getConfiguration();
+					Configuration configuration = ServerUtil.instance("configuration");
 
 					jsonObj.put(ISSUER, configuration.getIssuer());
 					jsonObj.put(AUTHORIZATION_ENDPOINT, configuration.getAuthorizationEndpoint());

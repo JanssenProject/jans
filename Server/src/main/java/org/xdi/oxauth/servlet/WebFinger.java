@@ -12,7 +12,9 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
+import org.xdi.oxauth.util.ServerUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -56,6 +58,7 @@ public class WebFinger extends HttpServlet {
                 logger.debug("Attempting to request OpenID Connect Discovery: " + resource + ", " + rel + ", Is Secure = " + httpRequest.isSecure());
 
                 try {
+                	Configuration configuration = ServerUtil.instance("configuration");
                     if (OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
                         if (rel == null || rel.equals(REL_VALUE)) {
                             JSONObject jsonObj = new JSONObject();
@@ -64,7 +67,7 @@ public class WebFinger extends HttpServlet {
                             JSONArray linksJsonArray = new JSONArray();
                             JSONObject linkJsonObject = new JSONObject();
                             linkJsonObject.put(REL, REL_VALUE);
-                            linkJsonObject.put(HREF, ConfigurationFactory.instance().getConfiguration().getIssuer());
+                            linkJsonObject.put(HREF, configuration.getIssuer());
 
                             linksJsonArray.put(linkJsonObject);
                             jsonObj.put(LINKS, linksJsonArray);

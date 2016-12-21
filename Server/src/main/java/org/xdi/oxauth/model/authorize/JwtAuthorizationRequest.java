@@ -64,6 +64,8 @@ public class JwtAuthorizationRequest {
     private IdTokenMember idTokenMember;
 
     private String encodedJwt;
+    
+    private Configuration configuration;
 
     public JwtAuthorizationRequest(Configuration configuration, String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
         try {
@@ -320,7 +322,7 @@ public class JwtAuthorizationRequest {
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                ConfigurationFactory.instance().getConfiguration());
+        		configuration);
         boolean validSignature = cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
 
         return validSignature;
