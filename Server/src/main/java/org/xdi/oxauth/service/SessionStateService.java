@@ -22,7 +22,8 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
@@ -63,10 +64,16 @@ public class SessionStateService {
     private LdapEntryManager ldapEntryManager;
     @In
     private AuthenticationService authenticationService;
-    @In
-    private ConfigurationFactory configurationFactory;
+
     @In
     private ApplicationAuditLogger applicationAuditLogger;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
+    
+    @In(value = "#{configurationFactory.staticConfiguration}")
+    private StaticConf staticConf;
+    
 
     @In(required = false)
     private FacesContext facesContext;
@@ -335,7 +342,7 @@ public class SessionStateService {
             sessionState.setUserDn(userDn);
         }
 
-        Boolean sessionAsJwt = configurationFactory.getConfiguration().getSessionAsJwt();
+        Boolean sessionAsJwt = configuration.getSessionAsJwt();
         sessionState.setIsJwt(sessionAsJwt != null && sessionAsJwt);
 
         if (authenticationDate != null) {
@@ -411,7 +418,7 @@ public class SessionStateService {
         List<Prompt> prompts = getPromptsFromSessionState(sessionState);
 
         try {
-            final int unusedLifetime = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
+            final int unusedLifetime = configuration.getSessionIdUnusedLifetime();
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
                 sessionState.setLastUsedAt(new Date());
 
@@ -439,7 +446,7 @@ public class SessionStateService {
         List<Prompt> prompts = getPromptsFromSessionState(sessionState);
 
         try {
-            final int unusedLifetime = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
+            final int unusedLifetime = configuration.getSessionIdUnusedLifetime();
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forceUpdate) {
                 if (updateLastUsedAt) {
                     sessionState.setLastUsedAt(new Date());
@@ -456,15 +463,15 @@ public class SessionStateService {
         return true;
     }
 
-    private static boolean isPersisted(List<Prompt> prompts) {
+    private boolean isPersisted(List<Prompt> prompts) {
         if (prompts != null && prompts.contains(Prompt.NONE)) {
-            final Boolean persistOnPromptNone = ConfigurationFactory.instance().getConfiguration().getSessionIdPersistOnPromptNone();
+            final Boolean persistOnPromptNone = configuration.getSessionIdPersistOnPromptNone();
             return persistOnPromptNone != null && persistOnPromptNone;
         }
         return true;
     }
 
-    private static String dn(String p_id) {
+    private String dn(String p_id) {
         final String baseDn = getBaseDn();
         final StringBuilder sb = new StringBuilder();
         if (Util.allNotBlank(p_id, getBaseDn())) {
@@ -521,8 +528,8 @@ public class SessionStateService {
         return false;
     }
 
-    private static String getBaseDn() {
-        return ConfigurationFactory.instance().getBaseDn().getSessionId();
+    private String getBaseDn() {
+        return staticConf.getBaseDn().getSessionId();
     }
 
     public boolean remove(SessionState p_sessionState) {
@@ -543,8 +550,8 @@ public class SessionStateService {
     }
 
     public void cleanUpSessions() {
-        final int interval = ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime();
-        final int unauthenticatedInterval = ConfigurationFactory.instance().getConfiguration().getSessionIdUnauthenticatedUnusedLifetime();
+        final int interval = configuration.getSessionIdUnusedLifetime();
+        final int unauthenticatedInterval = configuration.getSessionIdUnauthenticatedUnusedLifetime();
 
         remove(getUnauthenticatedIdsOlderThan(unauthenticatedInterval));
         remove(getIdsOlderThan(interval));
@@ -580,14 +587,14 @@ public class SessionStateService {
             return false;
         }
 
-        final long sessionInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime());
-        final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(ConfigurationFactory.instance().getConfiguration().getSessionIdUnauthenticatedUnusedLifetime());
+        final long sessionInterval = TimeUnit.SECONDS.toMillis(configuration.getSessionIdUnusedLifetime());
+        final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(configuration.getSessionIdUnauthenticatedUnusedLifetime());
 
         final long timeSinceLastAccess = System.currentTimeMillis() - sessionState.getLastUsedAt().getTime();
-        if (timeSinceLastAccess > sessionInterval && ConfigurationFactory.instance().getConfiguration().getSessionIdUnusedLifetime() != -1) {
+        if (timeSinceLastAccess > sessionInterval && configuration.getSessionIdUnusedLifetime() != -1) {
             return false;
         }
-        if (sessionState.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && ConfigurationFactory.instance().getConfiguration().getSessionIdUnauthenticatedUnusedLifetime() != -1) {
+        if (sessionState.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && configuration.getSessionIdUnauthenticatedUnusedLifetime() != -1) {
             return false;
         }
 
