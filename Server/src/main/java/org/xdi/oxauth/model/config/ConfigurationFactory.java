@@ -282,10 +282,10 @@ public class ConfigurationFactory {
     private boolean createFromLdap(boolean recoverFromFiles) {
         LOG.info("Loading configuration from LDAP...");
         try {
-            final Conf conf = loadConfigurationFromLdap();
-            if (conf != null) {
-                init(conf);
-                Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT);
+            final Conf c = loadConfigurationFromLdap();
+            if (c != null) {
+                init(c);
+                Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT, this.conf);
                 
                 return true;
             }
