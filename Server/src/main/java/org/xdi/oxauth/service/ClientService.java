@@ -20,6 +20,7 @@ import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.python.jline.internal.Preconditions;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.ServerUtil;
@@ -124,7 +125,7 @@ public class ClientService {
 
     public Client getClient(String clientId) {
         if (clientId != null && !clientId.isEmpty()) {
-            Client result = getClientByDn(Client.buildClientDn(clientId));
+            Client result = getClientByDn(buildClientDn(clientId));
             log.debug("Found {0} entries for client id = {1}", result != null ? 1 : 0, clientId);
 
             return result;
@@ -251,6 +252,13 @@ public class ClientService {
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
 
         return ldapEntryManager.findEntries(baseDN, Client.class, filter);
+    }
+
+    public String buildClientDn(String p_clientId) {
+        final StringBuilder dn = new StringBuilder();
+        dn.append(String.format("inum=%s,", p_clientId));
+        dn.append(staticConf.getBaseDn().getClients()); // ou=clients,o=@!1111,o=gluu
+        return dn.toString();
     }
 
     public void remove(Client client) {
