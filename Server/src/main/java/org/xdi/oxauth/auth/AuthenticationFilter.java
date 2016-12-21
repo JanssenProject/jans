@@ -86,30 +86,31 @@ public class AuthenticationFilter extends AbstractFilter {
                          final FilterChain filterChain) throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         final HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-        
-        final SessionStateService sessionStateService;
-        final Identity identity;
-        final Authenticator authenticator;
-        final ClientService clientService;
-        final ClientFilterService clientFilterService;
-        final ErrorResponseFactory errorResponseFactory;
-
-        lock.lock();
-        try {
-        	sessionStateService = SessionStateService.instance();
-            identity = Identity.instance();
-            authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
-            clientService = (ClientService) Component.getInstance(ClientService.class, true);
-            clientFilterService = ClientFilterService.instance();
-            errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
-        } finally {
-        	lock.unlock();
-        }
 
         new ContextualHttpServletRequest(httpRequest) {
 
             @Override
             public void process() {
+                
+                final SessionStateService sessionStateService;
+                final Identity identity;
+                final Authenticator authenticator;
+                final ClientService clientService;
+                final ClientFilterService clientFilterService;
+                final ErrorResponseFactory errorResponseFactory;
+
+                lock.lock();
+                try {
+                	sessionStateService = SessionStateService.instance();
+                    identity = Identity.instance();
+                    authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
+                    clientService = (ClientService) Component.getInstance(ClientService.class, true);
+                    clientFilterService = ClientFilterService.instance();
+                    errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
+                } finally {
+                	lock.unlock();
+                }
+
                 try {
                     final String requestUrl = httpRequest.getRequestURL().toString();
                     if (requestUrl.equals(configuration.getTokenEndpoint())) {
