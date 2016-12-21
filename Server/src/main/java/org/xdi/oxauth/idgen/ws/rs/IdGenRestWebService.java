@@ -27,6 +27,7 @@ import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.RPTManager;
@@ -49,6 +50,9 @@ import com.wordnik.swagger.annotations.ApiParam;
 @Path("/id")
 @Api(value = "/id", description = "ID Generation")
 public class IdGenRestWebService {
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     private static class UnauthorizedResponseHolder {
         public static Response UNAUTHORIZED_RESPONSE = unauthorizedResponse();
@@ -159,7 +163,7 @@ public class IdGenRestWebService {
         // to facilitate authorization server configuration data discovery,
         // including discovery of the endpoint where the client can request an RPT (Section 3.4.1).
         log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {0}",
-                ConfigurationFactory.instance().getConfiguration().getUmaConfigurationEndpoint());
+        		configuration.getUmaConfigurationEndpoint());
 
         return new Pair<Boolean, Response>(false, UnauthorizedResponseHolder.UNAUTHORIZED_RESPONSE);
     }

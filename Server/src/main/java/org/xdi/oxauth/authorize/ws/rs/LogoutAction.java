@@ -25,7 +25,7 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
@@ -62,6 +62,9 @@ public class LogoutAction {
 
     @In
     private JsonService jsonService;
+
+    @In(value = "#{configurationFactory.configuration}")
+    private Configuration configuration;
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
@@ -136,7 +139,7 @@ public class LogoutAction {
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
-        	Boolean endSessionWithAccessToken = ConfigurationFactory.instance().getConfiguration().getEndSessionWithAccessToken();
+        	Boolean endSessionWithAccessToken = configuration.getEndSessionWithAccessToken();
         	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
         		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
         	}
