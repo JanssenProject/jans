@@ -14,7 +14,6 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.U2fConfiguration;
@@ -41,6 +40,9 @@ public class U2fConfigurationWS {
 	@Logger
 	private Log log;
 
+	@In(value = "#{configurationFactory.configuration}")
+	private Configuration configuration;
+
 	@In
 	private ErrorResponseFactory errorResponseFactory;
 
@@ -50,7 +52,6 @@ public class U2fConfigurationWS {
 	@ApiResponses(value = { @ApiResponse(code = 500, message = "Failed to build FIDO U2F configuration json object.") })
 	public Response getConfiguration() {
 		try {
-			final Configuration configuration = ConfigurationFactory.instance().getConfiguration();
 			final String baseEndpointUri = configuration.getBaseEndpoint();
 
 			final U2fConfiguration conf = new U2fConfiguration();
