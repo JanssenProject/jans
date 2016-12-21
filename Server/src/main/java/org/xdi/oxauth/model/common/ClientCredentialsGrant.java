@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.registration.Client;
 
 /**
@@ -29,8 +30,8 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
      * @param client An application making protected resource requests on behalf of
      *               the resource owner and with its authorization.
      */
-    public ClientCredentialsGrant(User user, Client client) {
-        super(user, AuthorizationGrantType.CLIENT_CREDENTIALS, client, null);
+    public ClientCredentialsGrant(User user, Client client, Configuration configuration) {
+        super(user, AuthorizationGrantType.CLIENT_CREDENTIALS, client, null, configuration);
     }
 
     /**
