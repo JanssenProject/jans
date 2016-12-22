@@ -36,7 +36,7 @@
                          <div class="login span4 offset6">
 							 Need a Gluu account?
 							 <a class="register,need-account"
-								href="#{'../identity/register?redirectUri='.concat(request.getRequestURL().toString().substring(0, request.getRequestURL().toString().length() - request.getRequestURI().length()))}">Sign Up!
+								href="#{'../identity/register?redirectUri='.concat(pageService.getRootUrlByRequest(request))}">Sign Up!
 							 </a>
                        	                        	 
                         </div>
