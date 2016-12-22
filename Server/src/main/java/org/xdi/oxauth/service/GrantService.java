@@ -17,7 +17,7 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.util.ServerUtil;
@@ -46,7 +46,7 @@ public class GrantService {
     private ClientService clientService;
 
     @In
-    private ConfigurationFactory configurationFactory;
+    private StaticConf staticConfiguration;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
@@ -60,7 +60,7 @@ public class GrantService {
     }
 
     public String baseDn() {
-        return configurationFactory.getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
+        return staticConfiguration.getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
     }
 
     public static GrantService instance() {

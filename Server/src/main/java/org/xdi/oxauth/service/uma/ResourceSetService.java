@@ -15,7 +15,7 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.util.StringHelper;
@@ -44,7 +44,7 @@ public class ResourceSetService {
     private Log log;
 
     @In
-    private ConfigurationFactory configurationFactory;
+    private StaticConf staticConfiguration;
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
@@ -202,7 +202,7 @@ public class ResourceSetService {
     }
 
     public String getBaseDnForResourceSet() {
-        final String umaBaseDn = configurationFactory.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
+        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
         return String.format("ou=resource_sets,%s", umaBaseDn);
     }
 

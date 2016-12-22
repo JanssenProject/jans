@@ -20,7 +20,7 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwt.Jwt;
@@ -70,7 +70,7 @@ public class SessionStateService {
     private Configuration configuration;
 
     @In
-    private ConfigurationFactory configurationFactory;
+    private StaticConf staticConfiguration;
 
     @In(required = false)
     private FacesContext facesContext;
@@ -522,7 +522,7 @@ public class SessionStateService {
     }
 
     private String getBaseDn() {
-        return configurationFactory.getBaseDn().getSessionId();
+        return staticConfiguration.getBaseDn().getSessionId();
     }
 
     public boolean remove(SessionState p_sessionState) {

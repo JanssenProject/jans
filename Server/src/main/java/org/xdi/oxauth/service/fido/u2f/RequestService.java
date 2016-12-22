@@ -11,7 +11,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 
 import java.util.Date;
@@ -34,10 +34,10 @@ public class RequestService {
 	private LdapEntryManager ldapEntryManager;
 
 	@In
-	private ConfigurationFactory configurationFactory;
+	private StaticConf staticConfiguration;
 
 	public List<RequestMessageLdap> getExpiredRequestMessages(Date expirationDate) {
-		final String u2fBaseDn = configurationFactory.getBaseDn().getU2fBase(); // ou=u2f,o=@!1111,o=gluu
+		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=u2f,o=@!1111,o=gluu
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
 		List<RequestMessageLdap> requestMessageLdap = ldapEntryManager.findEntries(u2fBaseDn, RequestMessageLdap.class, expirationFilter);
