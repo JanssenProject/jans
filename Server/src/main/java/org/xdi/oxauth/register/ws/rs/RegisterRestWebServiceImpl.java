@@ -26,7 +26,6 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -94,7 +93,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private Configuration configuration;
 
     @In
-    private StaticConf staticConfiguration;
+    private ConfigurationFactory configurationFactory;
 
     @Override
     public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
@@ -141,7 +140,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         } else {
                             RegisterParamsValidator.validateLogoutUri(r.getLogoutUris(), r.getRedirectUris(), errorResponseFactory);
 
-                            String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
+                            String clientsBaseDN = configurationFactory.getBaseDn().getClients();
 
                             String inum = inumService.generateClientInum();
                             String generatedClientSecret = UUID.randomUUID().toString();
