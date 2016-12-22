@@ -18,6 +18,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -38,7 +39,7 @@ public class ScopeService {
     private Log log;
 
     @In
-    private StaticConf staticConfiguration;
+    private ConfigurationFactory configurationFactory;
 
     /**
      * Get ScopeService instance
@@ -55,7 +56,7 @@ public class ScopeService {
      * @return list of scopes
      */
     public List<org.xdi.oxauth.model.common.Scope> getAllScopesList() {
-        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+        String scopesBaseDN = configurationFactory.getBaseDn().getScopes();
 
         return ldapEntryManager.findEntries(scopesBaseDN,
                 org.xdi.oxauth.model.common.Scope.class,
@@ -117,7 +118,7 @@ public class ScopeService {
      * @return scope
      */
     public org.xdi.oxauth.model.common.Scope getScopeByDisplayName(String DisplayName) {
-        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+        String scopesBaseDN = configurationFactory.getBaseDn().getScopes();
 
         org.xdi.oxauth.model.common.Scope scope = new org.xdi.oxauth.model.common.Scope();
         scope.setDn(scopesBaseDN);
@@ -140,7 +141,7 @@ public class ScopeService {
     public List<org.xdi.oxauth.model.common.Scope> getScopeByClaim(String claimDn) {
         Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
         
-    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+    	String scopesBaseDN = configurationFactory.getBaseDn().getScopes();
         List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scopesBaseDN, org.xdi.oxauth.model.common.Scope.class, filter);  
 
         return scopes;

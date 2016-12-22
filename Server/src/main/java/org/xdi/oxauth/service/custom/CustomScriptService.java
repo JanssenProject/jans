@@ -11,7 +11,7 @@ import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.service.custom.script.AbstractCustomScriptService;
 
 /**
@@ -25,12 +25,12 @@ import org.xdi.service.custom.script.AbstractCustomScriptService;
 public class CustomScriptService extends AbstractCustomScriptService{
 	
 	@In
-	private StaticConf staticConfiguration;
+	private ConfigurationFactory configurationFactory;
 
 	private static final long serialVersionUID = -5283102477313448031L;
 
     public String baseDn() {
-        return staticConfiguration.getBaseDn().getScripts();
+        return configurationFactory.getBaseDn().getScripts();
     }
 
 }
