@@ -10,13 +10,13 @@ import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -41,6 +41,13 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
 
     private final LdapEntryManager ldapEntryManager;
 
+    private StaticConf staticConf;
+
+    @Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+    public void updateConfiguration(Configuration configuration, StaticConf staticConf) {
+        this.staticConf = staticConf;
+    }
+
     public ResourceSetPermissionManager() {
         ldapEntryManager = ServerUtil.getLdapManager();
     }
@@ -59,7 +66,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     @Override
     public ResourceSetPermission getResourceSetPermissionByTicket(String p_ticket) {
         try {
-            final String baseDn = ConfigurationFactory.instance().getBaseDn().getClients();
+            final String baseDn = staticConf.getBaseDn().getClients();
             final Filter filter = Filter.create(String.format("&(oxTicket=%s)", p_ticket));
             final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(baseDn, ResourceSetPermission.class, filter);
             if (entries != null && !entries.isEmpty()) {
@@ -110,7 +117,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
         try {
             final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
             final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(
-                    ConfigurationFactory.instance().getBaseDn().getClients(), ResourceSetPermission.class, filter);
+                    staticConf.getBaseDn().getClients(), ResourceSetPermission.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 for (ResourceSetPermission p : entries) {
                     ldapEntryManager.remove(p);
