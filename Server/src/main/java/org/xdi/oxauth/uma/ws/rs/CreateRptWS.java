@@ -20,6 +20,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.token.JwtSigner;
@@ -64,8 +65,12 @@ public class CreateRptWS {
     private AuthorizationService umaAuthorizationService;
     @In
     private LdapEntryManager ldapEntryManager;
+
     @In
     private Configuration configuration;
+
+    @In
+    private JSONWebKeySet webKeysConfiguration;
 
     @Path("rpt")
     @POST
@@ -107,7 +112,7 @@ public class CreateRptWS {
     private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws Exception {
         final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
 
-        JwtSigner jwtSigner = JwtSigner.newJwtSigner(grant.getClient());
+        JwtSigner jwtSigner = JwtSigner.newJwtSigner(configuration, webKeysConfiguration, grant.getClient());
         Jwt jwt = jwtSigner.newJwt();
 
         jwt.getClaims().setExpirationTime(rpt.getExpirationDate());
