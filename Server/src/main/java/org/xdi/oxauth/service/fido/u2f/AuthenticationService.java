@@ -15,7 +15,7 @@ import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
@@ -66,7 +66,7 @@ public class AuthenticationService extends RequestService {
 	private ChallengeGenerator challengeGenerator;
 
 	@In
-	private ConfigurationFactory configurationFactory;
+	private StaticConf staticConfiguration;
 
 	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userInum) throws BadInputException, NoEligableDevicesException {
 		if (applicationService.isValidateApplication()) {
@@ -238,7 +238,7 @@ public class AuthenticationService extends RequestService {
 	 * Build DN string for U2F authentication request
 	 */
 	public String getDnForAuthenticateRequestMessage(String oxId) {
-		final String u2fBaseDn = configurationFactory.getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=@!1111,o=gluu
+		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=@!1111,o=gluu
 		if (StringHelper.isEmpty(oxId)) {
 			return String.format("ou=authentication_requests,%s", u2fBaseDn);
 		}

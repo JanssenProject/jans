@@ -47,7 +47,7 @@ public class PermissionService {
     private TokenService tokenService;
     @In
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In(value = "#{configurationFactory.configuration}")
+    @In
     private Configuration configuration;
 
     public static PermissionService instance() {

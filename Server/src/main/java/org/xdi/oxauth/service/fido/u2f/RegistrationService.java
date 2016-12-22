@@ -13,7 +13,7 @@ import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.*;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
@@ -63,7 +63,7 @@ public class RegistrationService extends RequestService {
 	private ChallengeGenerator challengeGenerator;
 
 	@In
-	private ConfigurationFactory configurationFactory;
+	private StaticConf staticConfiguration;
 
 	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userInum) {
 		if (applicationService.isValidateApplication()) {
@@ -209,7 +209,7 @@ public class RegistrationService extends RequestService {
 	 * Build DN string for U2F register request
 	 */
 	public String getDnForRegisterRequestMessage(String oxId) {
-		final String u2fBaseDn = configurationFactory.getBaseDn().getU2fBase(); // ou=registration_requests,ou=u2f,o=@!1111,o=gluu
+		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=registration_requests,ou=u2f,o=@!1111,o=gluu
 		if (StringHelper.isEmpty(oxId)) {
 			return String.format("ou=registration_requests,%s", u2fBaseDn);
 		}
