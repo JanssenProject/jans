@@ -65,6 +65,9 @@ public class AuthenticationService extends RequestService {
 	@In(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
+	@In
+	private ConfigurationFactory configurationFactory;
+
 	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userInum) throws BadInputException, NoEligableDevicesException {
 		if (applicationService.isValidateApplication()) {
 			applicationService.checkIsValid(appId);
@@ -235,7 +238,7 @@ public class AuthenticationService extends RequestService {
 	 * Build DN string for U2F authentication request
 	 */
 	public String getDnForAuthenticateRequestMessage(String oxId) {
-		final String u2fBaseDn = ConfigurationFactory.instance().getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=@!1111,o=gluu
+		final String u2fBaseDn = configurationFactory.getBaseDn().getU2fBase(); // ou=authentication_requests,ou=u2f,o=@!1111,o=gluu
 		if (StringHelper.isEmpty(oxId)) {
 			return String.format("ou=authentication_requests,%s", u2fBaseDn);
 		}
