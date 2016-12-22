@@ -90,8 +90,10 @@ public class AuthenticationFilter extends AbstractFilter {
             @Override
             public void process() {
             	
-            	long current = ++counter;
-            	System.out.println("AUTH_FILTER: >>> " + current);
+//            	if (log.isTraceEnabled()) {
+	            	long current = ++counter;
+	                log.trace("AUTH_FILTER: >>> {0} Active threads: ", current, Thread.activeCount());
+//            	}
 
                 final Identity identity = Identity.instance();
                 final SessionStateService sessionStateService = SessionStateService.instance();
@@ -146,8 +148,11 @@ public class AuthenticationFilter extends AbstractFilter {
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
                 }
+                
+//            	if (log.isTraceEnabled()) {
+            		log.trace("AUTH_FILTER: <<< {0} Active threads: ", current, Thread.activeCount());
+//            	}
 
-                System.out.println("AUTH_FILTER: <<< " + current);
             }
         }.run();
     }
