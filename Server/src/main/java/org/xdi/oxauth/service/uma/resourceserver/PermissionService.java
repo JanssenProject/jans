@@ -6,22 +6,11 @@
 
 package org.xdi.oxauth.service.uma.resourceserver;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.PermissionTicket;
@@ -33,6 +22,11 @@ import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
+
+import javax.ws.rs.core.Response;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -53,7 +47,7 @@ public class PermissionService {
     private TokenService tokenService;
     @In
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+    @In(value = "#{configurationFactory.configuration}")
     private Configuration configuration;
 
     public static PermissionService instance() {
@@ -88,8 +82,8 @@ public class PermissionService {
 
             log.debug("Construct response: HTTP 403 (Forbidden), entity: " + entity);
             final Response response = Response.status(Response.Status.FORBIDDEN).
-                    header("host_id", ConfigurationFactory.instance().getConfiguration().getIssuer()).
-                    header("as_uri", ConfigurationFactory.instance().getConfiguration().getUmaConfigurationEndpoint()).
+                    header("host_id", configuration.getIssuer()).
+                    header("as_uri", configuration.getUmaConfigurationEndpoint()).
                     header("error", "insufficient_scope").
                     entity(entity).
                     build();
