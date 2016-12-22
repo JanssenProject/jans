@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.jwk.ws.rs;
 
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
@@ -27,13 +28,16 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
     @Logger
     private Log log;
 
+    @In
+    private ConfigurationFactory configurationFactory;
+
     @Override
     public Response requestJwk(SecurityContext sec) {
         log.debug("Attempting to request JWK, Is Secure = {0}", sec.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            JSONWebKeySet jwks = ConfigurationFactory.instance().getWebKeys();
+            JSONWebKeySet jwks = configurationFactory.getWebKeys();
             builder.entity(jwks.toString());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
