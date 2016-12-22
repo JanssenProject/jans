@@ -11,7 +11,7 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
 
 import java.util.List;
@@ -34,8 +34,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     private CacheService cacheService;
 
     @In
-    private ConfigurationFactory configurationFactory;
-
+    private StaticConf staticConfiguration;
     /**
      * Get AttributeService instance
      *
@@ -64,7 +63,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public GluuAttribute getByLdapName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, configurationFactory.getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("gluuAttributeName", name, staticConfiguration.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
@@ -77,7 +76,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public GluuAttribute getByClaimName(String name) {
-        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, configurationFactory.getBaseDn().getAttributes());
+        List<GluuAttribute> gluuAttributes = getAttributesByAttribute("oxAuthClaimName", name, staticConfiguration.getBaseDn().getAttributes());
         if (gluuAttributes.size() > 0) {
             for (GluuAttribute gluuAttribute : gluuAttributes) {
                 if (gluuAttribute.getOxAuthClaimName() != null && gluuAttribute.getOxAuthClaimName().equals(name)) {
@@ -90,6 +89,6 @@ public class AttributeService extends org.xdi.service.AttributeService {
     }
 
     public List<GluuAttribute> getAllAttributes() {
-        return getAllAttributes(configurationFactory.getBaseDn().getAttributes());
+        return getAllAttributes(staticConfiguration.getBaseDn().getAttributes());
     }
 }
