@@ -18,7 +18,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.INumGenerator;
 
@@ -45,7 +45,7 @@ public class InumGenerator implements IdGenerator {
     private LdapEntryManager ldapEntryManager;
 
     @In
-    private ConfigurationFactory configurationFactory;
+    private StaticConf staticConfiguration;
 
     @Override
     public String generateId(String p_idType, String p_idPrefix) {
@@ -114,7 +114,7 @@ public class InumGenerator implements IdGenerator {
     }
 
     public String baseDn(IdType p_type) {
-        final BaseDnConfiguration baseDn = configurationFactory.getBaseDn();
+        final BaseDnConfiguration baseDn = staticConfiguration.getBaseDn();
         switch (p_type) {
             case CLIENTS:
                 return baseDn.getClients();

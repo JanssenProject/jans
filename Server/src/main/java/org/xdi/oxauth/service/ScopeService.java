@@ -39,8 +39,7 @@ public class ScopeService {
     private Log log;
 
     @In
-    private ConfigurationFactory configurationFactory;
-
+    private StaticConf staticConfiguration;
     /**
      * Get ScopeService instance
      *
@@ -56,7 +55,7 @@ public class ScopeService {
      * @return list of scopes
      */
     public List<org.xdi.oxauth.model.common.Scope> getAllScopesList() {
-        String scopesBaseDN = configurationFactory.getBaseDn().getScopes();
+        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 
         return ldapEntryManager.findEntries(scopesBaseDN,
                 org.xdi.oxauth.model.common.Scope.class,
@@ -118,7 +117,7 @@ public class ScopeService {
      * @return scope
      */
     public org.xdi.oxauth.model.common.Scope getScopeByDisplayName(String DisplayName) {
-        String scopesBaseDN = configurationFactory.getBaseDn().getScopes();
+        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 
         org.xdi.oxauth.model.common.Scope scope = new org.xdi.oxauth.model.common.Scope();
         scope.setDn(scopesBaseDN);
@@ -141,7 +140,7 @@ public class ScopeService {
     public List<org.xdi.oxauth.model.common.Scope> getScopeByClaim(String claimDn) {
         Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
         
-    	String scopesBaseDN = configurationFactory.getBaseDn().getScopes();
+    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
         List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scopesBaseDN, org.xdi.oxauth.model.common.Scope.class, filter);  
 
         return scopes;
