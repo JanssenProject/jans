@@ -5,5 +5,5 @@ JAVA_OPTIONS="-server -Xms256m -Xmx%(asimba_max_mem)sm -XX:+DisableExplicitGC -D
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/asimba
 JETTY_USER=jetty
-JETTY_ARGS="jetty.http.port=8084"
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8084"
 TMPDIR=%(jetty_dist)s/temp
