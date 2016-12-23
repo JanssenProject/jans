@@ -5,5 +5,5 @@ JAVA_OPTIONS="-server -Xms256m -Xmx%(cas_max_mem)sm -XX:+DisableExplicitGC -Dglu
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/cas
 JETTY_USER=jetty
-JETTY_ARGS="jetty.http.port=8083"
+JETTY_ARGS="jetty.http.host=localhost jetty.http.port=8083"
 TMPDIR=%(jetty_dist)s/temp
