@@ -79,7 +79,7 @@ class Setup(object):
         self.cmd_jar = '%s/bin/jar' % self.jre_home
 
         # Component versions
-        self.jre_version = '102'
+        self.jre_version = '112'
         self.jetty_version = '9.3.14.v20161028'
         self.jython_version = '2.7.0'
         self.node_version = '6.9.1'
