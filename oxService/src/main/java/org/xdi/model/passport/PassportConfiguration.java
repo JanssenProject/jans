@@ -1,50 +1,28 @@
 package org.xdi.model.passport;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 
 /**
  * @author Shekhar L.
  * @Date 07/17/2016
  */
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+
 public class PassportConfiguration {
+	
+	private List <FieldSet> fieldset = new ArrayList <FieldSet>();
 
-	private String provider;
-	private String clientID;
-	private String clientSecret;
-	private String callbackURL;
-
-	public String getProvider() {
-		return provider;
+	public List <FieldSet> getFieldset() {
+		return fieldset;
 	}
 
-	public void setProvider(String provider) {
-		this.provider = provider;
+	public void setFieldset(List <FieldSet> fieldset) {
+		this.fieldset = fieldset;
 	}
-
-	public String getClientID() {
-		return clientID;
-	}
-
-	public void setClientID(String clientID) {
-		this.clientID = clientID;
-	}
-
-	public String getClientSecret() {
-		return clientSecret;
-	}
-
-	public void setClientSecret(String clientSecret) {
-		this.clientSecret = clientSecret;
-	}
-
-	public String getCallbackURL() {
-		return callbackURL;
-	}
-
-	public void setCallbackURL(String callbackURL) {
-		this.callbackURL = callbackURL;
-	}
-
 }
