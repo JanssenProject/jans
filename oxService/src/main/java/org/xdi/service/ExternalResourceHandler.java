@@ -49,7 +49,7 @@ public class ExternalResourceHandler extends ResourceResolver {
 
         String externalResourceBase = System.getProperty("catalina.base");
         if (StringHelper.isNotEmpty(externalResourceBase)) {
-            externalResourceBase += "/pages";
+            externalResourceBase += "/custom/pages";
             File folder = new File(externalResourceBase);
             if (folder.exists() && folder.isDirectory()) {
                 this.externalResourceBaseFolder = folder;
