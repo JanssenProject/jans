@@ -155,6 +155,7 @@ public class LDAPConnectionProvider {
 		log.debug("Using LDAP connection pool timeout: '" + connectionPoolMaxWaitTimeSeconds + "'");
 
 		LDAPConnectionPool createdConnectionPool = null;
+		LDAPException lastException = null;
 
 		int attempt = 0;
 		long currentTime = System.currentTimeMillis();
@@ -172,6 +173,7 @@ public class LDAPConnectionProvider {
 				if (ex.getResultCode().intValue() != ResultCode.CONNECT_ERROR_INT_VALUE) {
 					throw ex;
 				}
+				lastException = ex;
 			}
 			
 			try {
@@ -182,7 +184,11 @@ public class LDAPConnectionProvider {
 			}
 			currentTime = System.currentTimeMillis();
 		} while (maxWaitTime > currentTime);
-		
+
+		if ((createdConnectionPool == null) && (lastException != null)) {
+			throw lastException;
+		}
+
 		return createdConnectionPool;
 	}
 
