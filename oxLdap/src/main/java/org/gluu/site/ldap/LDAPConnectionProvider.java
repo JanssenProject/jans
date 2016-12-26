@@ -68,13 +68,13 @@ public class LDAPConnectionProvider {
 			if (clonedProperties.getProperty("bindPassword") != null) {
 				clonedProperties.setProperty("bindPassword", "REDACTED");
 			}
-			log.error("Failed to create connection pool with properties: " + props, ex);
+			log.error("Failed to create connection pool with properties: " + clonedProperties, ex);
 		} catch (Exception ex) {
 			Properties clonedProperties = (Properties) props.clone();
 			if (clonedProperties.getProperty("bindPassword") != null) {
 				clonedProperties.setProperty("bindPassword", "REDACTED");
 			}
-			log.error("Failed to create connection pool with properties: " + props, ex);
+			log.error("Failed to create connection pool with properties: " + clonedProperties, ex);
 		}
 	}
 
