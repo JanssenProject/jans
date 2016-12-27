@@ -23,7 +23,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
  * server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version December 26, 2016
  */
 public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
 
@@ -70,7 +70,7 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
             int status = clientResponse.getStatus();
 
             setResponse(new JwkResponse(status));
-            getResponse().setHeaders(clientResponse.getHeaders());
+            getResponse().setHeaders(clientResponse.getMetadata());
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);

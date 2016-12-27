@@ -7,6 +7,7 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
 import com.wordnik.swagger.annotations.*;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +28,7 @@ import javax.ws.rs.core.SecurityContext;
  * </p>
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version December 26, 2016
  */
 @Path("/oxauth")
 @Api(value = "/oxauth", description = "The Authorization Endpoint performs Authentication of the End-User. This is done by sending the User Agent to the Authorization Server's Authorization Endpoint for Authentication and Authorization, using request parameters defined by OAuth 2.0 and additional parameters and parameter values defined by OpenID Connect.")
@@ -227,6 +228,9 @@ public interface AuthorizeRestWebService {
             @QueryParam("code_challenge_method")
             @ApiParam(value = "PKCE code challenge method.", required = false)
             String codeChallengeMethod,
+            @QueryParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS)
+            @ApiParam(value = "Custom Response Headers.", required = false)
+            String customResponseHeaders,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
@@ -330,6 +334,9 @@ public interface AuthorizeRestWebService {
             @QueryParam("code_challenge_method")
             @ApiParam(value = "PKCE code challenge method.", required = false)
             String codeChallengeMethod,
+            @QueryParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS)
+            @ApiParam(value = "Custom Response Headers.", required = false)
+            String customResponseHeaders,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);

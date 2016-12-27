@@ -48,7 +48,7 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STAT
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version September 9, 2016
+ * @version December 26, 2016
  */
 @Scope(ScopeType.STATELESS)
 @Name("authenticationService")
@@ -59,9 +59,27 @@ public class AuthenticationService {
 
     // use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
-            "scope", "response_type", "client_id", "redirect_uri", "state", "response_mode", "nonce", "display", "prompt", "max_age",
-            "ui_locales", "id_token_hint", "login_hint", "acr", "session_state", "request", "request_uri",
-            AuthorizeRequestParam.ORIGIN_HEADERS, AuthorizeRequestParam.CODE_CHALLENGE, AuthorizeRequestParam.CODE_CHALLENGE_METHOD));
+            AuthorizeRequestParam.SCOPE,
+            AuthorizeRequestParam.RESPONSE_TYPE,
+            AuthorizeRequestParam.CLIENT_ID,
+            AuthorizeRequestParam.REDIRECT_URI,
+            AuthorizeRequestParam.STATE,
+            AuthorizeRequestParam.RESPONSE_MODE,
+            AuthorizeRequestParam.NONCE,
+            AuthorizeRequestParam.DISPLAY,
+            AuthorizeRequestParam.PROMPT,
+            AuthorizeRequestParam.MAX_AGE,
+            AuthorizeRequestParam.UI_LOCALES,
+            AuthorizeRequestParam.ID_TOKEN_HINT,
+            AuthorizeRequestParam.LOGIN_HINT,
+            AuthorizeRequestParam.ACR_VALUES,
+            AuthorizeRequestParam.SESSION_STATE,
+            AuthorizeRequestParam.REQUEST,
+            AuthorizeRequestParam.REQUEST_URI,
+            AuthorizeRequestParam.ORIGIN_HEADERS,
+            AuthorizeRequestParam.CODE_CHALLENGE,
+            AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
+            AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS));
 
     @Logger
     private Log log;
@@ -96,7 +114,7 @@ public class AuthenticationService {
 
     @In
     private MetricService metricService;
-    
+
     @In("org.jboss.seam.core.manager")
     private FacesManager facesManager;
 
@@ -138,8 +156,8 @@ public class AuthenticationService {
         return authenticated;
     }
 
-	private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
-		SessionState sessionState = sessionStateService.getSessionState();
+    private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
+        SessionState sessionState = sessionStateService.getSessionState();
         if (sessionState != null) {
             Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
             if (authenticated) {
@@ -153,7 +171,7 @@ public class AuthenticationService {
                 throw new InvalidStateException("authenticate: User name and user in credentials don't match");
             }
         }
-	}
+    }
 
     private boolean localAuthenticate(Credentials credentials, String userName, String password) {
         User user = userService.getUser(userName);
@@ -242,8 +260,9 @@ public class AuthenticationService {
      */
     public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         Credentials credentials = ServerUtil.instance(Credentials.class);
-    	return authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+        return authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
     }
+
     public boolean authenticate(Credentials credentials, GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}', credentials: '{2}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
@@ -406,7 +425,7 @@ public class AuthenticationService {
         }
 
         configureEventUserContext(newSessionState);
-        
+
         return newSessionState;
     }
 
@@ -448,14 +467,14 @@ public class AuthenticationService {
         if (eventContext.isSet(EVENT_CONTEXT_AUTHENTICATED_USER)) {
             return (User) eventContext.get(EVENT_CONTEXT_AUTHENTICATED_USER);
         } else {
-    		SessionState sessionState = sessionStateService.getSessionState();
+            SessionState sessionState = sessionStateService.getSessionState();
             if (sessionState != null) {
                 Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
                 String userId = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
                 if (StringHelper.isNotEmpty(userId)) {
-                	User user = userService.getUser(userId);
+                    User user = userService.getUser(userId);
                     eventContext.set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
-                    
+
                     return user;
                 }
             }
