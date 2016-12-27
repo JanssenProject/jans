@@ -1,6 +1,7 @@
 package org.xdi.oxauth.comp;
 
 import org.codehaus.jettison.json.JSONObject;
+import org.jboss.seam.annotations.In;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -20,6 +21,9 @@ import static org.testng.Assert.*;
  * @version August 8, 2016
  */
 public class CryptoProviderTest extends BaseComponentTestAdapter {
+
+	@In
+	private ConfigurationFactory configurationFactory;
 
     private final String SIGNING_INPUT = "Signing Input";
     private final String SHARED_SECRET = "secret";
@@ -45,7 +49,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
     @Test
     public void configuration() {
         try {
-            Configuration configuration = ConfigurationFactory.instance().getConfiguration();
+            Configuration configuration = configurationFactory.getConfiguration();
             assertNotNull(configuration);
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);

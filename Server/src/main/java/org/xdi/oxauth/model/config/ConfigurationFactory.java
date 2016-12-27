@@ -214,7 +214,8 @@ public class ConfigurationFactory {
     public BaseDnConfiguration getBaseDn() {
         return getStaticConfiguration().getBaseDn();
     }
-
+    
+    @Factory(value = "webKeysConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
     public JSONWebKeySet getWebKeys() {
         return jwks;
     }
@@ -297,7 +298,8 @@ public class ConfigurationFactory {
                 // Destroy old configuration
             	Contexts.getApplicationContext().remove("configuration");
             	Contexts.getApplicationContext().remove("staticConfiguration");
-            	
+            	Contexts.getApplicationContext().remove("webKeysConfiguration");
+
                 Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT, this.conf, this.staticConf);
                 
                 return true;
@@ -502,15 +504,6 @@ public class ConfigurationFactory {
         }
 
         return null;
-    }
-
-    /**
-     * Get ConfigurationFactory instance
-     *
-     * @return ConfigurationFactory instance
-     */
-    public static ConfigurationFactory instance() {
-        return (ConfigurationFactory) Component.getInstance(ConfigurationFactory.class);
     }
 
 }

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -78,6 +77,7 @@ public class AuthenticationFilter extends AbstractFilter {
 
     private String realm;
     public static final String REALM = "oxAuth";
+    private static long counter = 0L;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
@@ -89,6 +89,11 @@ public class AuthenticationFilter extends AbstractFilter {
 
             @Override
             public void process() {
+            	
+//            	if (log.isTraceEnabled()) {
+	            	long current = ++counter;
+	                log.trace("AUTH_FILTER: >>> {0} Active threads: ", current, Thread.activeCount());
+//            	}
 
                 final Identity identity = Identity.instance();
                 final SessionStateService sessionStateService = SessionStateService.instance();
@@ -143,6 +148,11 @@ public class AuthenticationFilter extends AbstractFilter {
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
                 }
+                
+//            	if (log.isTraceEnabled()) {
+            		log.trace("AUTH_FILTER: <<< {0} Active threads: ", current, Thread.activeCount());
+//            	}
+
             }
         }.run();
     }
