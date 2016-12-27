@@ -92,11 +92,14 @@ public class IdTokenFactory {
     @In
     private Configuration configuration;
 
+    @In
+    private JSONWebKeySet webKeysConfiguration;
+
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
                                      Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
 
-        JwtSigner jwtSigner = JwtSigner.newJwtSigner(authorizationGrant.getClient());
+        JwtSigner jwtSigner = JwtSigner.newJwtSigner(configuration, webKeysConfiguration, authorizationGrant.getClient());
         Jwt jwt = jwtSigner.newJwt();
 
         int lifeTime = configuration.getIdTokenLifetime();

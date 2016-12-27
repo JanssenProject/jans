@@ -18,6 +18,7 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -39,7 +40,6 @@ public class ScopeService {
 
     @In
     private StaticConf staticConfiguration;
-
     /**
      * Get ScopeService instance
      *

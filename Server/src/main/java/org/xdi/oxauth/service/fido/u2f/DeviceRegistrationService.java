@@ -6,28 +6,23 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Provides operations with user U2F devices
@@ -47,6 +42,9 @@ public class DeviceRegistrationService {
 
 	@Logger
 	private Log log;
+
+	@In
+	private StaticConf staticConfiguration;
 
 	public void addBranch(final String userInum) {
 		SimpleBranch branch = new SimpleBranch();
@@ -182,7 +180,7 @@ public class DeviceRegistrationService {
 	}
 
 	public String getDnForOneStepU2fDevice(String deviceRegistrationId) {
-		final String u2fBaseDn = ConfigurationFactory.instance().getBaseDn().getU2fBase(); // ou=registered_devices,ou=u2f,o=@!1111,o=gluu
+		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=registered_devices,ou=u2f,o=@!1111,o=gluu
 		if (StringHelper.isEmpty(deviceRegistrationId)) {
 			return String.format("ou=registered_devices,%s", u2fBaseDn);
 		}
