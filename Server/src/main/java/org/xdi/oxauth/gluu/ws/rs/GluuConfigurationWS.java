@@ -53,6 +53,9 @@ public class GluuConfigurationWS {
     @In
     private Configuration configuration;
 
+    @In
+    private ExternalAuthenticationService externalAuthenticationService;
+
     @GET
     @Produces({"application/json"})
     @ApiOperation(value = "Provides configuration data as json document. It contains non-standard OpenID Connect discovery metadata supported by the Gluu server.", response = GluuConfiguration.class)
@@ -80,10 +83,9 @@ public class GluuConfigurationWS {
     }
 
     public Map<Integer, Set<String>> createAuthLevelMapping() {
-        ExternalAuthenticationService service = ExternalAuthenticationService.instance();
         Map<Integer, Set<String>> map = Maps.newHashMap();
         try {
-            for (CustomScriptConfiguration script : service.getCustomScriptConfigurationsMap()) {
+            for (CustomScriptConfiguration script : externalAuthenticationService.getCustomScriptConfigurationsMap()) {
                 String acr = script.getName();
                 int level = script.getLevel();
 

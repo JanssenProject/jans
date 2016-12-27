@@ -10,19 +10,15 @@ import com.google.common.base.Preconditions;
 import com.unboundid.ldap.sdk.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.xdi.util.StringHelper;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
+import org.xdi.util.StringHelper;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +42,9 @@ public class ResourceSetService {
 
     @Logger
     private Log log;
+
+    @In
+    private StaticConf staticConfiguration;
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
@@ -203,7 +202,7 @@ public class ResourceSetService {
     }
 
     public String getBaseDnForResourceSet() {
-        final String umaBaseDn = ConfigurationFactory.instance().getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
+        final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
         return String.format("ou=resource_sets,%s", umaBaseDn);
     }
 

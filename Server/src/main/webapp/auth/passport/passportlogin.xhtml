@@ -1,0 +1,233 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:s="http://jboss.org/schema/seam/taglib"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:h="http://java.sun.com/jsf/html"
+                template="/WEB-INF/incl/layout/login-template.xhtml">
+
+    <ui:define name="head">
+        <meta name="description" content="Gluu Inc."/>
+        <script type="text/javascript" src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js"></script>
+
+    </ui:define>
+
+    <ui:define name="pageTitle">
+        <h:outputText value="oxAuth - Passport Login"/>
+    </ui:define>
+
+    <ui:define name="body">
+        <header>
+            <div class="container">
+                <div id="header" class="row-fluid">
+                    <div class="logo span2">
+                        <ui:param name="client"
+                                  value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
+
+                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                            <h:graphicImage url='#{client.getLogoUri()}'/>
+                        </s:div>
+                        <s:div rendered='#{empty client.getLogoUri()}'>
+                            <a href="http://www.gluu.org/">
+                                <h:graphicImage url="../../img/logo.png"/>
+                            </a>
+                        </s:div>
+                    </div><!-- end logo-->
+
+                    <div class="login span4 offset6">
+                        Need a Gluu account?
+                        <a class="register,need-account"
+                           href="../identity/register?redirectUri=https://support.gluu.org">Sign Up!</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- end header-->
+        <div class="container">
+            <div id="content" class="sign-in-page">
+                <div class="row-fluid">
+                    <h:form id="loginForm" class="signin-form span6 offset3">
+                        <h:panelGroup rendered="#{not identity.loggedIn}">
+                            <ul style="color:red;">
+                                <li class="errormsg" style="display:none"></li>
+                            </ul>
+                            <div class="inner-form-container row-fluid">
+                                <ul class="offset2 span10">
+
+                                    <s:token allowMultiplePosts="true"/>
+                                    <h:messages style="color:red;"/>
+                                    <div class="row-fluid">
+										<span class="input-name span3"> <h:outputLabel
+                                                for="username" value="#{messages['login.username']}"/>
+										</span>
+
+                                        <div class="span6">
+                                            <h:inputText id="username" value="#{credentials.username}"
+                                                         autocomplete="off"/>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row-fluid">
+										<span class="input-name span3"> <h:outputLabel
+                                                for="password" value="#{messages['login.password']}"/>
+										</span>
+                                        <div class="span6">
+                                            <h:inputSecret id="password" value="#{credentials.password}"
+                                                           autocomplete="off"/>
+
+                                        </div>
+                                    </div>
+
+                                    <li class="row-fluid submit-container">
+                                        <div class="gradient contact-button green span2 offset3">
+                                            <div id="submit_block" class="login_input">
+                                                <h:commandButton id="loginButton" style="padding-left: 35%;"
+                                                                 value="#{messages['login.login']}"
+                                                                 action="#{authenticator.authenticate}"/>
+                                            </div>
+                                            <span class="sprite-green_click_icon"></span>
+                                        </div>
+                                    </li>
+                                    <li class="row-fluid submit-container">
+                                        <s:div
+                                                id="registerId" style="display:none">
+                                            <div class="gradient contact-button green span2 offset3">
+                                                <div id="submit_block" class="login_input">
+                                                    <h:commandButton id="registerButton"
+                                                                     style="padding-left: 35%;"
+                                                                     value="#{messages['login.register']}"
+                                                                     action="#{authenticator.authenticate}"/>
+                                                </div>
+                                                <span class="sprite-green_click_icon"></span>
+                                            </div>
+                                        </s:div>
+                                    </li>
+                                    <li class="row-fluid">
+                                        <div class="span9 offset3">
+                                            <a class="need-account,register"
+                                               href="/identity/person/passwordReminder.htm">Forgot your
+                                                password?</a>
+                                        </div>
+                                    </li>
+                                    <s:div rendered='#{!empty client.getPolicyUri()}'>
+                                        <p>
+                                            <h:outputText value="#{messages['common.agreePolicy']}"/>
+                                            <a target="_blank" href='#{client.getPolicyUri()}'>
+                                                <h:outputText
+                                                        value="#{messages['common.privacyPolicy']}"/>
+                                            </a>
+                                        </p>
+                                    </s:div>
+
+                                    <s:div rendered='#{!empty client.getTosUri()}'>
+                                        <p>
+                                            <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
+                                            <a target="_blank" href='#{client.getTosUri()}'>
+                                                <h:outputText
+                                                        value="#{messages['common.termsOfService']}"/>
+                                            </a>
+                                        </p>
+                                    </s:div>
+                                    <s:fragment
+                                            rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
+                                        <li class="row-fluid submit-container">
+                                            <div class="gradient contact-button green span2 offset3"
+                                                 style="width:220px;">
+                                                <s:fragment rendered="#{external_auth_request_uri != Null}">
+                                                    <a id="externalAuthButton"
+                                                       href="#{external_auth_request_uri}"> <input
+                                                            type="button" value="Use External Authentification"/>
+                                                    </a>
+                                                </s:fragment>
+                                                <s:fragment rendered="#{external_registration_uri != Null}">
+                                                    <a id="externalRegistrationButton"
+                                                       href="#{external_registration_uri}"> <input
+                                                            type="button" style="width:220px;"
+                                                            value="Register new user"/>
+                                                    </a>
+                                                </s:fragment>
+                                            </div>
+                                        </li>
+                                    </s:fragment>
+                                </ul>
+
+                            </div>
+                            <div id="signinButton" style="margin-left: 15%">
+                                <a data-p="twitter" class="provider" href="javascript:void(0);"
+                                   style="height:40px; width:120px">
+                                    <img alt="twitter" src="img/twitter.jpg" style="height:40px; width:40px"></img>
+                                </a>
+
+                                <a data-p="linkedin" class="provider" href="javascript:void(0);"
+                                   style="height:40px; width:120px">
+                                    <img alt="linkedin" src="img/linkedin.png" style="height:40px; width:40px"></img>
+                                </a>
+
+                                <a data-p="facebook" class="provider" href="javascript:void(0);"
+                                   style="height:40px; width:120px">
+                                    <img alt="facebook" src="img/facebook.png" style="height:40px; width:40px"></img>
+                                </a>
+
+                                <a data-p="google" class="provider" href="javascript:void(0);"
+                                   style="height:40px; width:120px">
+                                    <img alt="google" src="img/google.jpg" style="height:40px; width:40px"></img>
+                                </a>
+
+                                <a data-p="github" class="provider" href="javascript:void(0);"
+                                   style="height:40px; width:120px">
+                                    <img alt="google" src="img/github.png" style="height:40px; width:40px"></img>
+                                </a>
+
+                                <a data-p="tumblr" class="provider" href="javascript:void(0);"
+                                   style="height:40px; width:120px">
+                                    <img alt="tumblr" src="img/tumblr.png" style="height:40px; width:40px"></img>
+                                </a>
+
+                                <a data-p="yahoo" class="provider" href="javascript:void(0);"
+                                   style="height:40px; width:120px">
+                                    <img alt="yahoo" src="img/yahoo.png" style="height:40px; width:40px"></img>
+                                </a>
+                            </div>
+                        </h:panelGroup>
+                    </h:form>
+                </div>
+            </div>
+            <div id="footer">
+                <p>
+                    <h:outputText value="#{messages['common.gluuInc']}"/>
+                    , |
+                    <h:outputText value="#{messages['common.caution']}"/>
+                </p>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            jQuery(document).ready(function () {
+                var APIURL = window.location.origin;
+
+                var errormsg = window.location.href.split("=");
+                if (errormsg[1]) {
+                    history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-login');
+                    jQuery('.errormsg').html(decodeURIComponent(errormsg[1]));
+                    jQuery('.errormsg').prop('style', 'display:block');
+                }
+
+                jQuery(".provider").click(function () {
+                    provider = jQuery(this).attr("data-p");
+                    jQuery.ajax({
+                        url: APIURL + "/passport/token",
+                        success: function (result) {
+                            token = result.token_;
+                            window.location.href = APIURL + "/passport/auth/" + provider + "/" + token;
+                        },
+                        error: function (error) {
+                            jQuery('.errormsg').html("An unknown error occurred");
+                            jQuery('.errormsg').prop('style', 'display:block');
+                        }
+                    });
+                });
+            });
+        </script>
+    </ui:define>
+</ui:composition>

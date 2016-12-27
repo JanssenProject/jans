@@ -6,13 +6,31 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -23,6 +41,7 @@ import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
@@ -32,14 +51,8 @@ import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -71,6 +84,9 @@ public class SessionStateService {
 
     @In
     private StaticConf staticConfiguration;
+
+    @In
+    private JSONWebKeySet webKeysConfiguration;
 
     @In(required = false)
     private FacesContext facesContext;
@@ -366,7 +382,7 @@ public class SessionStateService {
 
     private Jwt generateJwt(SessionState sessionState, String audience) {
         try {
-            JwtSigner jwtSigner = new JwtSigner(SignatureAlgorithm.RS512, audience);
+            JwtSigner jwtSigner = new JwtSigner(configuration, webKeysConfiguration, SignatureAlgorithm.RS512, audience);
             Jwt jwt = jwtSigner.newJwt();
 
             // claims

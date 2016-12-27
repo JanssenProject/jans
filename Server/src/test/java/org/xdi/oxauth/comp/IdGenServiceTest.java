@@ -12,6 +12,7 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
+import org.jboss.seam.annotations.In;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.model.ProgrammingLanguage;
@@ -30,12 +31,15 @@ import org.xdi.util.INumGenerator;
 
 public class IdGenServiceTest extends BaseComponentTest {
 
+	@In
+	private ConfigurationFactory configurationFactory;
+
 	private String idCustomScriptDn;
 
 	private CustomScript buildIdCustomScriptEntry(String idScript) {
 		final CustomScriptService customScriptService = (CustomScriptService) Component.getInstance(CustomScriptService.class);
 
-		String basedInum = ConfigurationFactory.instance().getConfiguration().getOrganizationInum();
+		String basedInum = configurationFactory.getConfiguration().getOrganizationInum();
 		String customScriptId = basedInum + "!" + INumGenerator.generate(2);
 		String dn = customScriptService.buildDn(customScriptId);
 

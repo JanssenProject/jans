@@ -6,19 +6,15 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.List;
-
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
+
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -39,7 +35,6 @@ public class AttributeService extends org.xdi.service.AttributeService {
 
     @In
     private StaticConf staticConfiguration;
-
     /**
      * Get AttributeService instance
      *

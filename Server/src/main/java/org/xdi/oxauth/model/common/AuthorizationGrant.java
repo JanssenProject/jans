@@ -101,7 +101,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
                         t.setJwtRequest(jwtRequest.getEncodedJwt());
                     }
-                    LOGGER.trace("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
+                    LOGGER.error("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }
@@ -117,7 +117,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
             return accessToken;
         } catch (Exception e) {
-            LOGGER.trace(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }
@@ -131,7 +131,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
             return accessToken;
         } catch (Exception e) {
-            LOGGER.trace(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }
@@ -145,7 +145,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
             return refreshToken;
         } catch (Exception e) {
-            LOGGER.trace(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
     }
