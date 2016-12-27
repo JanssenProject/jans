@@ -31,15 +31,10 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String baseEndpoint;
 
-	private String schemaAddObjectClassWithoutAttributeTypesDefinition;
-	private String schemaAddObjectClassWithAttributeTypesDefinition;
-
 	private String[] personObjectClassTypes;
 	private String personCustomObjectClass;
 
 	private String[] personObjectClassDisplayNames;
-
-	private String schemaAddAttributeDefinition;
 
 	private String[] contactObjectClassTypes;
 	private String[] contactObjectClassDisplayNames;
@@ -230,24 +225,6 @@ public final class ApplicationConfiguration implements Serializable {
         this.baseEndpoint = baseEndpoint;
     }
 
-	public String getSchemaAddObjectClassWithoutAttributeTypesDefinition() {
-		return schemaAddObjectClassWithoutAttributeTypesDefinition;
-	}
-
-	public void setSchemaAddObjectClassWithoutAttributeTypesDefinition(
-			String schemaAddObjectClassWithoutAttributeTypesDefinition) {
-		this.schemaAddObjectClassWithoutAttributeTypesDefinition = schemaAddObjectClassWithoutAttributeTypesDefinition;
-	}
-
-	public String getSchemaAddObjectClassWithAttributeTypesDefinition() {
-		return schemaAddObjectClassWithAttributeTypesDefinition;
-	}
-
-	public void setSchemaAddObjectClassWithAttributeTypesDefinition(
-			String schemaAddObjectClassWithAttributeTypesDefinition) {
-		this.schemaAddObjectClassWithAttributeTypesDefinition = schemaAddObjectClassWithAttributeTypesDefinition;
-	}
-
 	public String[] getPersonObjectClassTypes() {
 		return personObjectClassTypes;
 	}
@@ -271,15 +248,6 @@ public final class ApplicationConfiguration implements Serializable {
 	public void setPersonObjectClassDisplayNames(
 			String[] personObjectClassDisplayNames) {
 		this.personObjectClassDisplayNames = personObjectClassDisplayNames;
-	}
-
-	public String getSchemaAddAttributeDefinition() {
-		return schemaAddAttributeDefinition;
-	}
-
-	public void setSchemaAddAttributeDefinition(
-			String schemaAddAttributeDefinition) {
-		this.schemaAddAttributeDefinition = schemaAddAttributeDefinition;
 	}
 
 	public String[] getContactObjectClassTypes() {
