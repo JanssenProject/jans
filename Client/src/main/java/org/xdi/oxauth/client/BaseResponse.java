@@ -6,19 +6,20 @@
 
 package org.xdi.oxauth.client;
 
-import javax.ws.rs.core.MultivaluedMap;
-
 import org.jboss.resteasy.client.ClientResponse;
 
+import javax.ws.rs.core.MultivaluedMap;
+
 /**
- * @author Javier Rojas Blum Date: 01.31.2012
+ * @author Javier Rojas Blum
+ * @version December 26, 2016
  */
 public abstract class BaseResponse {
 
     protected int status;
     protected String location;
     protected String entity;
-    protected MultivaluedMap<String, String> headers;
+    protected MultivaluedMap<String, Object> headers;
 
     public BaseResponse() {
     }
@@ -36,7 +37,7 @@ public abstract class BaseResponse {
                 location = clientResponse.getLocation().getHref();
             }
             entity = clientResponse.getEntity(String.class);
-            headers = clientResponse.getHeaders();
+            headers = clientResponse.getMetadata();
         }
     }
 
@@ -94,11 +95,11 @@ public abstract class BaseResponse {
         this.entity = entity;
     }
 
-    public MultivaluedMap<String, String> getHeaders() {
+    public MultivaluedMap<String, Object> getHeaders() {
         return headers;
     }
 
-    public void setHeaders(MultivaluedMap<String, String> headers) {
+    public void setHeaders(MultivaluedMap<String, Object> headers) {
         this.headers = headers;
     }
 }

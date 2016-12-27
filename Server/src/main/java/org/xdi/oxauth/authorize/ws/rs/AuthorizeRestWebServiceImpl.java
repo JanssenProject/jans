@@ -26,7 +26,6 @@ import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.*;
 import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -64,7 +63,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version December 14, 2016
+ * @version December 26, 2016
  */
 @Name("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -106,26 +105,28 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     public Response requestAuthorizationGet(
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
-            String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionState,
-            String sessionState, String accessToken, String originHeaders, String codeChallenge, String codeChallengeMethod,
+            String loginHint, String acrValues, String amrValues, String request, String requestUri,
+            String requestSessionState, String sessionState, String accessToken, String originHeaders,
+            String codeChallenge, String codeChallengeMethod, String customResponseHeaders,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionState, sessionState, accessToken, HttpMethod.GET, originHeaders, codeChallenge, codeChallengeMethod,
-                httpRequest, httpResponse, securityContext);
+                requestSessionState, sessionState, accessToken, HttpMethod.GET, originHeaders, codeChallenge,
+                codeChallengeMethod, customResponseHeaders, httpRequest, httpResponse, securityContext);
     }
 
     @Override
     public Response requestAuthorizationPost(
             String scope, String responseType, String clientId, String redirectUri, String state, String responseMode,
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
-            String loginHint, String acrValues, String amrValues, String request, String requestUri, String requestSessionState,
-            String sessionState, String accessToken, String originHeaders, String codeChallenge, String codeChallengeMethod,
+            String loginHint, String acrValues, String amrValues, String request, String requestUri,
+            String requestSessionState, String sessionState, String accessToken, String originHeaders,
+            String codeChallenge, String codeChallengeMethod, String customResponseHeaders,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
-                requestSessionState, sessionState, accessToken, HttpMethod.POST, originHeaders, codeChallenge, codeChallengeMethod,
-                httpRequest, httpResponse, securityContext);
+                requestSessionState, sessionState, accessToken, HttpMethod.POST, originHeaders, codeChallenge,
+                codeChallengeMethod, customResponseHeaders, httpRequest, httpResponse, securityContext);
     }
 
     public Response requestAuthorization(
@@ -133,7 +134,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
             String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionState,
             String sessionState, String accessToken, String method, String originHeaders,
-            String codeChallenge, String codeChallengeMethod,
+            String codeChallenge, String codeChallengeMethod, String customRespHeaders,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
@@ -173,6 +174,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
         try {
+            Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
+
             sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
@@ -566,6 +569,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 oAuth2AuditLog.setSuccess(true);
 
                                 builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+
+                                if (configuration.getCustomHeadersWithAuthorizationResponse()) {
+                                    for (String key : customResponseHeaders.keySet()) {
+                                        builder.header(key, customResponseHeaders.get(key));
+                                    }
+                                }
                             }
                         } else { // Invalid redirectUri
                             builder = error(Response.Status.BAD_REQUEST,
