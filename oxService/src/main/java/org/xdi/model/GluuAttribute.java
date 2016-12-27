@@ -59,7 +59,7 @@ public class GluuAttribute extends Entry implements Serializable {
     private String nameIdType;
 
     @NotNull
-    @Pattern(regexp = "^[a-zA-Z]+$", message = "Name should contain only alphabet letters")
+    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Name should contain alphabetical and numeric characters only")
     @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
     @LdapAttribute(name = "gluuAttributeName")
     private String name;

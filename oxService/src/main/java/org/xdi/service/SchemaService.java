@@ -266,9 +266,11 @@ public class SchemaService {
 			return null;
 		}
 
+		String lowerCaseAttributeType = StringHelper.toLowerCase(attributeType);
+
 		List<AttributeTypeDefinition> attributeTypes = getAttributeTypeDefinitions(schemaEntry,
-				Arrays.asList(new String[] { attributeType }));
-		AttributeTypeDefinition attributeTypeDefinition = getAttributeTypeDefinition(attributeTypes, attributeType);
+				Arrays.asList(new String[] { lowerCaseAttributeType }));
+		AttributeTypeDefinition attributeTypeDefinition = getAttributeTypeDefinition(attributeTypes, lowerCaseAttributeType);
 
 		return (attributeTypeDefinition == null) ? null : attributeTypeDefinition.toString();
 	}
@@ -310,12 +312,7 @@ public class SchemaService {
 		List<AttributeTypeDefinition> result = new ArrayList<AttributeTypeDefinition>();
 		for (String attributeTypeDefinition : schemaEntry.getAttributeTypes()) {
 			for (String name : attrs) {
-				if (attributeTypeDefinition.toLowerCase().contains(name)) { // Optimization
-																			// to
-																			// reduce
-																			// number
-																			// of
-																			// objects
+				if (attributeTypeDefinition.toLowerCase().contains(name)) {
 					try {
 						result.add(new AttributeTypeDefinition(attributeTypeDefinition));
 					} catch (Exception ex) {
