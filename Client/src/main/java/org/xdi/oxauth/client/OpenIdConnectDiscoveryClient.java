@@ -6,18 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.HREF;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.LINKS;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.RESOURCE;
-import static org.xdi.oxauth.model.discovery.WebFingerParam.SUBJECT;
-
-import java.net.URISyntaxException;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.MediaType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -28,8 +16,15 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.discovery.WebFingerLink;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
+import java.net.URISyntaxException;
+
+import static org.xdi.oxauth.model.discovery.WebFingerParam.*;
+
 /**
- * @author Javier Rojas Blum Date: 01.28.2013
+ * @author Javier Rojas Blum
+ * @version December 26, 2016
  */
 public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscoveryRequest, OpenIdConnectDiscoveryResponse> {
 
@@ -95,7 +90,7 @@ public class OpenIdConnectDiscoveryClient extends BaseClient<OpenIdConnectDiscov
 
             String entity = clientResponse1.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse1.getHeaders());
+            getResponse().setHeaders(clientResponse1.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
                 JSONObject jsonObj = new JSONObject(entity);
                 getResponse().setSubject(jsonObj.getString(SUBJECT));

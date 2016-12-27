@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -22,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 7, 2016
+ * @version December 26, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Configuration {
@@ -142,6 +141,7 @@ public class Configuration {
     private List<String> clientWhiteList;
     private List<String> clientBlackList;
     private Boolean legacyIdTokenClaims;
+    private Boolean customHeadersWithAuthorizationResponse;
 
     @XmlElement(name = "uma-rpt-as-jwt")
     public Boolean getUmaRptAsJwt() {
@@ -1228,5 +1228,17 @@ public class Configuration {
 
     public void setLegacyIdTokenClaims(Boolean legacyIdTokenClaims) {
         this.legacyIdTokenClaims = legacyIdTokenClaims;
+    }
+
+    public Boolean getCustomHeadersWithAuthorizationResponse() {
+        if (customHeadersWithAuthorizationResponse == null) {
+            return false;
+        }
+
+        return customHeadersWithAuthorizationResponse;
+    }
+
+    public void setCustomHeadersWithAuthorizationResponse(Boolean customHeadersWithAuthorizationResponse) {
+        this.customHeadersWithAuthorizationResponse = customHeadersWithAuthorizationResponse;
     }
 }
