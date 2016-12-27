@@ -23,7 +23,7 @@ import java.util.Map;
  * authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version December 20, 2015
+ * @version December 26, 2016
  */
 public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionResponse> {
 
@@ -90,7 +90,7 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
             setResponse(new EndSessionResponse(status));
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getHeaders());
+            getResponse().setHeaders(clientResponse.getMetadata());
             if (clientResponse.getLocation() != null) {
                 String location = clientResponse.getLocation().getHref();
                 getResponse().setLocation(location);

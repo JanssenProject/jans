@@ -13,6 +13,8 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
 
 /**
  * Created by eugeniuparvan on 8/12/16.
+ *
+ * @version December 26, 2016
  */
 public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest, GluuConfigurationResponse> {
 
@@ -44,7 +46,7 @@ public class GluuConfigurationClient extends BaseClient<GluuConfigurationRequest
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getHeaders());
+            getResponse().setHeaders(clientResponse.getMetadata());
             getResponse().setStatus(clientResponse.getStatus());
 
             if (StringUtils.isNotBlank(entity)) {
