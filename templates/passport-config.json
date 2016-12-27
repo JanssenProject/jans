@@ -8,5 +8,12 @@
 	"umaScope": "https://%(hostname)s/oxauth/seam/resource/restv1/uma/scopes/passport_access",
 	"passportConfigAPI": "https://%(hostname)s/identity/seam/resource/restv1/passport/config",
 	"applicationStartpoint": "https://%(hostname)s/oxauth/auth/passport/passportlogin.htm",
-	"applicationEndpoint": "https://%(hostname)s/oxauth/auth/passport/passportpostlogin.htm"
+	"applicationEndpoint": "https://%(hostname)s/oxauth/auth/passport/passportpostlogin.htm",
+    "activeMQConf": {
+        "isEnabled": false,
+        "host": "",
+        "username": "",
+        "password": "",
+        "port": ""
+    }
 }
