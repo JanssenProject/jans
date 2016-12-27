@@ -7,6 +7,7 @@
 package org.xdi.oxauth.comp;
 
 import org.apache.commons.io.IOUtils;
+import org.jboss.seam.annotations.In;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
@@ -28,13 +29,15 @@ import java.io.FileInputStream;
 
 public class ConfigurationTest extends BaseComponentTestAdapter {
 
+	@In
+	private ConfigurationFactory configurationFactory;
+
     /*
     Configuration must be present, otherwise server will not start normally... There is fallback configuration from
     file but server will not work as expected in cluster.`
      */
     @Test
     public void configurationPresence() {
-        final ConfigurationFactory configurationFactory = ConfigurationFactory.instance();
         Assert.assertTrue((configurationFactory != null) && (configurationFactory.getLdapConfiguration() != null) &&
         		(configurationFactory.getConfiguration() != null) && (configurationFactory.getErrorResponses() != null) &&
         		(configurationFactory.getStaticConfiguration() != null) && (configurationFactory.getWebKeys() != null));

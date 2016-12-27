@@ -6,22 +6,17 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.List;
-
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.util.StringHelper;
+
+import java.util.List;
 
 /**
  * GluuAppliance service
@@ -40,11 +35,10 @@ public class ApplianceService {
 	private LdapEntryManager ldapEntryManager;
 
     @In
-    private StaticConf staticConfiguration;
-
-    @In
     private Configuration configuration;
 
+	@In
+	private StaticConf staticConfiguration;
 	/**
 	 * Add new appliance
 	 * @param appliance Appliance

@@ -58,8 +58,8 @@
         </elementProp>
         <stringProp name="HTTPSampler.domain">${host}</stringProp>
         <stringProp name="HTTPSampler.port"></stringProp>
-        <stringProp name="HTTPSampler.connect_timeout">60000</stringProp>
-        <stringProp name="HTTPSampler.response_timeout">60000</stringProp>
+        <stringProp name="HTTPSampler.connect_timeout">30000</stringProp>
+        <stringProp name="HTTPSampler.response_timeout">30000</stringProp>
         <stringProp name="HTTPSampler.protocol">https</stringProp>
         <stringProp name="HTTPSampler.contentEncoding"></stringProp>
         <stringProp name="HTTPSampler.path"></stringProp>
@@ -218,7 +218,6 @@
           <IfController guiclass="IfControllerPanel" testclass="IfController" testname="check_authorization" enabled="true">
             <stringProp name="IfController.condition">${JMeterThread.last_sample_ok}</stringProp>
             <boolProp name="IfController.evaluateAll">false</boolProp>
-            <boolProp name="IfController.useExpression">true</boolProp>
           </IfController>
           <hashTree>
             <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="/oxauth/login" enabled="true">
@@ -269,10 +268,10 @@
                 </collectionProp>
               </elementProp>
               <stringProp name="HTTPSampler.domain"></stringProp>
-              <stringProp name="HTTPSampler.port">443</stringProp>
+              <stringProp name="HTTPSampler.port"></stringProp>
               <stringProp name="HTTPSampler.connect_timeout"></stringProp>
               <stringProp name="HTTPSampler.response_timeout"></stringProp>
-              <stringProp name="HTTPSampler.protocol">https</stringProp>
+              <stringProp name="HTTPSampler.protocol"></stringProp>
               <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
               <stringProp name="HTTPSampler.path">/oxauth/login</stringProp>
               <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -473,8 +472,8 @@ log.info(&quot;login post processor, code : &quot; + code + &quot;, url:&quot; +
                 <stringProp name="parameters"></stringProp>
                 <stringProp name="script">String credentials = vars.get(&quot;client_id&quot;) + &quot;:&quot; + vars.get(&quot;client_secret&quot;);
 String clientHeader = &quot;Basic &quot; + org.apache.commons.codec.binary.Base64.encodeBase64String(credentials.getBytes(&quot;UTF-8&quot;));
-log.info(&quot;Credentials: &quot; + credentials + &quot;, clientHeader: &quot; + clientHeader);
-OUT.println(&quot;Credentials: &quot; + credentials + &quot;, clientHeader: &quot; + clientHeader);
+//log.info(&quot;Credentials: &quot; + credentials + &quot;, clientHeader: &quot; + clientHeader);
+//OUT.println(&quot;Credentials: &quot; + credentials + &quot;, clientHeader: &quot; + clientHeader);
 vars.put(&quot;client_header&quot;, clientHeader);</stringProp>
                 <stringProp name="scriptLanguage">java</stringProp>
               </JSR223PreProcessor>

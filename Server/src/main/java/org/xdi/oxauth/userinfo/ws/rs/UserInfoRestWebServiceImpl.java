@@ -101,8 +101,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     @In
     private Configuration configuration;
 
-    @In(value = "#{configurationFactory.webKeys}")
-    private JSONWebKeySet jsonWebKeySet;
+    @In
+    private JSONWebKeySet webKeysConfiguration;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
@@ -213,7 +213,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        String keyId = cryptoProvider.getKeyId(jsonWebKeySet, signatureAlgorithm);
+        String keyId = cryptoProvider.getKeyId(webKeysConfiguration, signatureAlgorithm);
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }

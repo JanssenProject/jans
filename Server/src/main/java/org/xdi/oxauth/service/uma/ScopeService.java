@@ -18,6 +18,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -52,8 +53,12 @@ public class ScopeService {
     private InumService inumService;
     @In
     private ErrorResponseFactory errorResponseFactory;
+
     @In
     private Configuration configuration;
+
+    @In
+    private StaticConf staticConfiguration;
 
     public static ScopeService instance() {
         return ServerUtil.instance(ScopeService.class);
@@ -233,7 +238,7 @@ public class ScopeService {
         return result;
     }
 
-    public static List<String> getScopeUrls(List<ScopeDescription> p_scopes) {
+    public List<String> getScopeUrls(List<ScopeDescription> p_scopes) {
         final List<String> result = new ArrayList<String>();
         if (p_scopes != null && !p_scopes.isEmpty()) {
             for (ScopeDescription s : p_scopes) {
@@ -256,15 +261,15 @@ public class ScopeService {
         return result;
     }
 
-    private static String getInternalScopeUrl(ScopeDescription internalScope) {
+    private String getInternalScopeUrl(ScopeDescription internalScope) {
         if (internalScope != null && internalScope.getType() == InternalExternal.INTERNAL) {
             return getScopeEndpoint() + "/" + internalScope.getId();
         }
         return "";
     }
 
-    private static String getScopeEndpoint() {
-        return ConfigurationFactory.instance().getConfiguration().getBaseEndpoint() + UmaConfigurationWS.UMA_SCOPES_SUFFIX;
+    private String getScopeEndpoint() {
+        return configuration.getBaseEndpoint() + UmaConfigurationWS.UMA_SCOPES_SUFFIX;
     }
 
     private Filter createAnyFilterByUrls(List<String> p_scopeUrls) {
@@ -288,7 +293,7 @@ public class ScopeService {
         return null;
     }
 
-    public static String baseDn() {
-        return String.format("ou=scopes,%s", ConfigurationFactory.instance().getBaseDn().getUmaBase());
+    public String baseDn() {
+        return String.format("ou=scopes,%s", staticConfiguration.getBaseDn().getUmaBase());
     }
 }
