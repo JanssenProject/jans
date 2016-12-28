@@ -16,6 +16,7 @@ import org.python.jline.internal.Preconditions;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
@@ -47,8 +48,8 @@ public class ClientService {
     @In
     private LdapEntryManager ldapEntryManager;
 
-//    @In
-//    private CacheService cacheService;
+    @In
+    private CacheService cacheService;
 
     @In
     private ClientFilterService clientFilterService;
@@ -184,22 +185,22 @@ public class ClientService {
     }
 
     private void putInCache(Client client) {
-//        try {
-//            cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client);
-//            cacheService.put(CACHE_CLIENT_NAME, getClientIdCacheKey(client.getClientId()), client);
-//        } catch (Exception e) {
-//            log.error("Failed to put client in cache, client:" + client, e);
-//        }
+        try {
+            cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client);
+            cacheService.put(CACHE_CLIENT_NAME, getClientIdCacheKey(client.getClientId()), client);
+        } catch (Exception e) {
+            log.error("Failed to put client in cache, client:" + client, e);
+        }
     }
 
     private Client fromCache(String dn) {
-//        try {
-//            String key = getClientDnCacheKey(dn);
-//            return (Client) cacheService.get(CACHE_CLIENT_NAME, key);
-//        } catch (Exception e) {
-//            log.error("Failed to fetch client from cache, dn: " + dn, e);
+        try {
+            String key = getClientDnCacheKey(dn);
+            return (Client) cacheService.get(CACHE_CLIENT_NAME, key);
+        } catch (Exception e) {
+            log.error("Failed to fetch client from cache, dn: " + dn, e);
             return null;
-//        }
+        }
     }
 
     public org.xdi.ldap.model.CustomAttribute getCustomAttribute(Client client, String attributeName) {
@@ -263,15 +264,15 @@ public class ClientService {
     }
 
     private void removeFromCache(Client client) {
-//        try {
-//            String clientId = client.getClientId();
-//            String clientDn = client.getDn();
-//
-//            cacheService.remove(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(clientId));
-//            cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
-//        } catch (Exception e) {
-//            log.error("Failed to remove client from cache.", e);
-//        }
+        try {
+            String clientId = client.getClientId();
+            String clientDn = client.getDn();
+
+            cacheService.remove(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(clientId));
+            cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
+        } catch (Exception e) {
+            log.error("Failed to remove client from cache.", e);
+        }
     }
 
     /**
@@ -279,14 +280,14 @@ public class ClientService {
      */
     @Observer(EVENT_CLEAR_CLIENT_CACHE)
     public void clearClientCache() {
-//        log.debug("Clearing up clients cache");
-//
-//        try {
-//            cacheService.removeAll(CACHE_CLIENT_NAME);
-//            cacheService.removeAll(CACHE_CLIENT_FILTER_NAME);
-//        } catch (Exception e) {
-//            log.error("Failed to clear cache.");
-//        }
+        log.debug("Clearing up clients cache");
+
+        try {
+            cacheService.removeAll(CACHE_CLIENT_NAME);
+            cacheService.removeAll(CACHE_CLIENT_FILTER_NAME);
+        } catch (Exception e) {
+            log.error("Failed to clear cache.");
+        }
     }
 
     public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
