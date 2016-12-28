@@ -111,12 +111,12 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private String umaIssuer;
 
-	private String umaClientId;
-	private String umaClientKeyId;
-	private String umaResourceId;
-	private String umaScope;
-	private String umaClientKeyStoreFile;
-	private String umaClientKeyStorePassword;
+	private String scimUmaClientId;
+	private String scimUmaClientKeyId;
+	private String scimUmaResourceId;
+	private String scimUmaScope;
+	private String scimUmaClientKeyStoreFile;
+	private String scimUmaClientKeyStorePassword;
 
 	private String passportUmaClientId;
 	private String passportUmaClientKeyId;
@@ -620,52 +620,52 @@ public final class ApplicationConfiguration implements Serializable {
 		this.umaIssuer = umaIssuer;
 	}
 
-	public String getUmaClientId() {
-		return umaClientId;
+	public String getScimUmaClientId() {
+		return scimUmaClientId;
 	}
 
-	public void setUmaClientId(String umaClientId) {
-		this.umaClientId = umaClientId;
+	public void setScimUmaClientId(String scimUmaClientId) {
+		this.scimUmaClientId = scimUmaClientId;
 	}
 
-	public String getUmaClientKeyId() {
-		return umaClientKeyId;
+	public String getScimUmaClientKeyId() {
+		return scimUmaClientKeyId;
 	}
 
-	public void setUmaClientKeyId(String umaClientKeyId) {
-		this.umaClientKeyId = umaClientKeyId;
+	public void setScimUmaClientKeyId(String scimUmaClientKeyId) {
+		this.scimUmaClientKeyId = scimUmaClientKeyId;
 	}
 
-	public String getUmaResourceId() {
-		return umaResourceId;
+	public String getScimUmaResourceId() {
+		return scimUmaResourceId;
 	}
 
-	public void setUmaResourceId(String umaResourceId) {
-		this.umaResourceId = umaResourceId;
+	public void setScimUmaResourceId(String scimUmaResourceId) {
+		this.scimUmaResourceId = scimUmaResourceId;
 	}
 
-	public String getUmaScope() {
-		return umaScope;
+	public String getScimUmaScope() {
+		return scimUmaScope;
 	}
 
-	public void setUmaScope(String umaScope) {
-		this.umaScope = umaScope;
+	public void setScimUmaScope(String scimUmaScope) {
+		this.scimUmaScope = scimUmaScope;
 	}
 
-	public String getUmaClientKeyStoreFile() {
-		return umaClientKeyStoreFile;
+	public String getScimUmaClientKeyStoreFile() {
+		return scimUmaClientKeyStoreFile;
 	}
 
-	public void setUmaClientKeyStoreFile(String umaClientKeyStoreFile) {
-		this.umaClientKeyStoreFile = umaClientKeyStoreFile;
+	public void setScimUmaClientKeyStoreFile(String scimUmaClientKeyStoreFile) {
+		this.scimUmaClientKeyStoreFile = scimUmaClientKeyStoreFile;
 	}
 
-	public String getUmaClientKeyStorePassword() {
-		return umaClientKeyStorePassword;
+	public String getScimUmaClientKeyStorePassword() {
+		return scimUmaClientKeyStorePassword;
 	}
 
-	public void setUmaClientKeyStorePassword(String umaClientKeyStorePassword) {
-		this.umaClientKeyStorePassword = umaClientKeyStorePassword;
+	public void setScimUmaClientKeyStorePassword(String scimUmaClientKeyStorePassword) {
+		this.scimUmaClientKeyStorePassword = scimUmaClientKeyStorePassword;
 	}
 
 	public String getPassportUmaClientId() {
