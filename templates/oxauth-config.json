@@ -176,7 +176,7 @@
     "oxId":"https://%(hostname)s/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationExpirationTime":86400,
-    "dynamicRegistrationPersistClientAuthorizations":false,
+    "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
@@ -208,7 +208,7 @@
     "sessionIdUnusedLifetime":86400,
     "sessionIdUnauthenticatedUnusedLifetime":120,
     "sessionIdEnabled":true,
-    "sessionIdPersistOnPromptNone":false,
+    "sessionIdPersistOnPromptNone":true,
     "configurationUpdateInterval":3600,
     "cssLocation":"",
     "jsLocation":"",
@@ -225,5 +225,6 @@
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
-    "legacyIdTokenClaims": true
+    "legacyIdTokenClaims": true,
+    "customHeadersWithAuthorizationResponse": true
 }
