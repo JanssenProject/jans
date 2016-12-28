@@ -89,18 +89,17 @@ public class AuthenticationFilter extends AbstractFilter {
 
             @Override
             public void process() {
-            	
-//            	if (log.isTraceEnabled()) {
-	            	long current = ++counter;
-	                log.trace("AUTH_FILTER: >>> {0} Active threads: ", current, Thread.activeCount());
-//            	}
-
                 final Identity identity = Identity.instance();
                 final SessionStateService sessionStateService = SessionStateService.instance();
                 final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
                 final ClientService clientService = (ClientService) Component.getInstance(ClientService.class, true);
                 final ClientFilterService clientFilterService = ClientFilterService.instance();
                 final ErrorResponseFactory errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
+                
+                // Workaround for tomcat
+                if (configuration == null) {
+                	configuration = (Configuration) Component.getInstance("configuration", true);
+                }
 
                 try {
                     final String requestUrl = httpRequest.getRequestURL().toString();
@@ -148,11 +147,6 @@ public class AuthenticationFilter extends AbstractFilter {
                 } catch (Exception ex) {
                     log.error(ex.getMessage(), ex);
                 }
-                
-//            	if (log.isTraceEnabled()) {
-            		log.trace("AUTH_FILTER: <<< {0} Active threads: ", current, Thread.activeCount());
-//            	}
-
             }
         }.run();
     }
