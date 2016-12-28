@@ -9,8 +9,6 @@
 
     "baseEndpoint":"https://%(hostname)s/identity/seam/resource/restv1",
 
-    "authMode":"",
-
     "idpUrl":"https://%(hostname)s",
     "applianceUrl":"https://%(hostname)s",
 
@@ -93,13 +91,6 @@
     "servicesRestartTrigger":"/opt/gluu/essential_files/trigger_restart_of_services_delete_me_to_do_so",
 
     "oxAuthIssuer":"https://%(hostname)s",
-    "oxAuthAuthorizeUrl":"https://%(hostname)s/oxauth/authorize",
-	"oxAuthRegisterUrl":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/register",
-    "oxAuthTokenUrl":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/token",
-    "oxAuthTokenValidationUrl":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/validate",
-    "oxAuthEndSessionUrl":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/end_session",
-    "oxAuthUserInfo":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/userinfo",
-    "oxAuthLogoutUrl":"https://%(hostname)s/oxauth/logout",
     "oxAuthSectorIdentifierUrl":"https://%(hostname)s/oxauth/sectoridentifier",
 
     "oxAuthClientId":"%(oxauth_client_id)s",
