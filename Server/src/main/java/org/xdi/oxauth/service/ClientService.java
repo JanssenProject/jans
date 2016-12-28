@@ -186,8 +186,8 @@ public class ClientService {
 
     private void putInCache(Client client) {
         try {
+            cacheService.put(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(client.getClientId()), client);
             cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client);
-            cacheService.put(CACHE_CLIENT_NAME, getClientIdCacheKey(client.getClientId()), client);
         } catch (Exception e) {
             log.error("Failed to put client in cache, client:" + client, e);
         }
