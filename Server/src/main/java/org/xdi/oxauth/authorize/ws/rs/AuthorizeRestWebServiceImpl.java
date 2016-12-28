@@ -192,10 +192,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 }
             } else {
                 Client client = clientService.getClient(clientId);
-                if (CollectionUtils.isEmpty(acrValues) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+                if (CollectionUtils.isEmpty(acrValues) && client != null && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
                     acrValues = new ArrayList<String>();
                     acrValues.addAll(Arrays.asList(client.getDefaultAcrValues()));
                 }
+
                 JwtAuthorizationRequest jwtAuthorizationRequest = null;
 
                 if (client != null) {
