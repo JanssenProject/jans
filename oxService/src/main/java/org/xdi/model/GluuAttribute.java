@@ -24,6 +24,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.Entry;
 import org.xdi.ldap.model.GluuStatus;
+import org.xdi.util.StringHelper;
 
 /**
  * Attribute Metadata
@@ -32,104 +33,104 @@ import org.xdi.ldap.model.GluuStatus;
  * @author Javier Rojas Blum
  * @version February 9, 2015
  */
-@LdapEntry(sortBy = {"displayName"})
-@LdapObjectClass(values = {"top", "gluuAttribute"})
+@LdapEntry(sortBy = { "displayName" })
+@LdapObjectClass(values = { "top", "gluuAttribute" })
 public class GluuAttribute extends Entry implements Serializable {
 
-    private static final long serialVersionUID = 4817004894646725606L;
+	private static final long serialVersionUID = 4817004894646725606L;
 
-    private transient boolean selected;
+	private transient boolean selected;
 
-    @LdapAttribute(ignoreDuringUpdate = true)
-    private String inum;
+	@LdapAttribute(ignoreDuringUpdate = true)
+	private String inum;
 
-    @LdapAttribute(name = "oxAttributeType")
-    private String type;
+	@LdapAttribute(name = "oxAttributeType")
+	private String type;
 
-    @LdapAttribute
-    private String lifetime;
+	@LdapAttribute
+	private String lifetime;
 
-    @LdapAttribute(name = "oxSourceAttribute")
-    private String sourceAttribute;
+	@LdapAttribute(name = "oxSourceAttribute")
+	private String sourceAttribute;
 
-    @LdapAttribute
-    private String salt;
+	@LdapAttribute
+	private String salt;
 
-    @LdapAttribute(name = "oxNameIdType")
-    private String nameIdType;
+	@LdapAttribute(name = "oxNameIdType")
+	private String nameIdType;
 
-    @NotNull
-    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Name should contain alphabetical and numeric characters only")
-    @Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
-    @LdapAttribute(name = "gluuAttributeName")
-    private String name;
+	@NotNull
+	@Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Name should contain alphabetical and numeric characters only")
+	@Size(min = 1, max = 30, message = "Length of the Name should be between 1 and 30")
+	@LdapAttribute(name = "gluuAttributeName")
+	private String name;
 
-    @NotNull
-    @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
-    @LdapAttribute
-    private String displayName;
+	@NotNull
+	@Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
+	@LdapAttribute
+	private String displayName;
 
-    @NotNull
-    @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
-    @LdapAttribute
-    private String description;
+	@NotNull
+	@Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
+	@LdapAttribute
+	private String description;
 
-    @LdapAttribute(name = "gluuAttributeOrigin")
-    private String origin;
+	@LdapAttribute(name = "gluuAttributeOrigin")
+	private String origin;
 
-    @NotNull
-    @LdapAttribute(name = "gluuAttributeType")
-    private GluuAttributeDataType dataType;
+	@NotNull
+	@LdapAttribute(name = "gluuAttributeType")
+	private GluuAttributeDataType dataType;
 
-    @NotNull
-    @LdapAttribute(name = "gluuAttributeEditType")
-    private GluuUserRole[] editType;
+	@NotNull
+	@LdapAttribute(name = "gluuAttributeEditType")
+	private GluuUserRole[] editType;
 
-    @NotNull
-    @LdapAttribute(name = "gluuAttributeViewType")
-    private GluuUserRole[] viewType;
+	@NotNull
+	@LdapAttribute(name = "gluuAttributeViewType")
+	private GluuUserRole[] viewType;
 
-    @LdapAttribute(name = "gluuAttributeUsageType")
-    private GluuAttributeUsageType[] usageType;
+	@LdapAttribute(name = "gluuAttributeUsageType")
+	private GluuAttributeUsageType[] usageType;
 
-    @LdapAttribute(name = "oxAuthClaimName")
-    private String oxAuthClaimName;
+	@LdapAttribute(name = "oxAuthClaimName")
+	private String oxAuthClaimName;
 
-    @LdapAttribute(name = "seeAlso")
-    private String seeAlso;
+	@LdapAttribute(name = "seeAlso")
+	private String seeAlso;
 
-    @LdapAttribute(name = "gluuStatus")
-    private GluuStatus status;
+	@LdapAttribute(name = "gluuStatus")
+	private GluuStatus status;
 
-    @LdapAttribute(name = "gluuSAML1URI")
-    private String saml1Uri;
+	@LdapAttribute(name = "gluuSAML1URI")
+	private String saml1Uri;
 
-    @LdapAttribute(name = "gluuSAML2URI")
-    private String saml2Uri;
+	@LdapAttribute(name = "gluuSAML2URI")
+	private String saml2Uri;
 
-    @LdapAttribute(ignoreDuringUpdate = true)
-    private String urn;
+	@LdapAttribute(ignoreDuringUpdate = true)
+	private String urn;
 
-    @LdapAttribute(name = "oxSCIMCustomAttribute")
-    private ScimCustomAtribute oxSCIMCustomAttribute;
+	@LdapAttribute(name = "oxSCIMCustomAttribute")
+	private ScimCustomAtribute oxSCIMCustomAttribute;
 
-    @LdapAttribute(name = "oxMultivaluedAttribute")
-    private OxMultivalued oxMultivaluedAttribute;
+	@LdapAttribute(name = "oxMultivaluedAttribute")
+	private OxMultivalued oxMultivaluedAttribute;
 
-    @Transient
-    private boolean custom;
+	@Transient
+	private boolean custom;
 
-    @Transient
-    private boolean requred;
-    
+	@Transient
+	private boolean requred;
+
 	@LdapJsonObject
 	@LdapAttribute(name = "oxValidation")
-    private AttributeValidation attributeValidation;
+	private AttributeValidation attributeValidation;
 
-    @LdapAttribute(name = "gluuTooltip")
-    private String gluuTooltip;
+	@LdapAttribute(name = "gluuTooltip")
+	private String gluuTooltip;
 
-    public boolean isSelected() {
+	public boolean isSelected() {
 		return selected;
 	}
 
@@ -338,40 +339,40 @@ public class GluuAttribute extends Entry implements Serializable {
 	}
 
 	public boolean allowEditBy(GluuUserRole role) {
-        return GluuUserRole.containsRole(editType, role);
-    }
+		return GluuUserRole.containsRole(editType, role);
+	}
 
-    public boolean allowViewBy(GluuUserRole role) {
-        return GluuUserRole.containsRole(viewType, role);
-    }
+	public boolean allowViewBy(GluuUserRole role) {
+		return GluuUserRole.containsRole(viewType, role);
+	}
 
-    public boolean isAdminCanAccess() {
-        return isAdminCanView() | isAdminCanEdit();
-    }
+	public boolean isAdminCanAccess() {
+		return isAdminCanView() | isAdminCanEdit();
+	}
 
-    public boolean isAdminCanView() {
-        return allowViewBy(GluuUserRole.ADMIN);
-    }
+	public boolean isAdminCanView() {
+		return allowViewBy(GluuUserRole.ADMIN);
+	}
 
-    public boolean isAdminCanEdit() {
-        return allowEditBy(GluuUserRole.ADMIN);
-    }
+	public boolean isAdminCanEdit() {
+		return allowEditBy(GluuUserRole.ADMIN);
+	}
 
-    public boolean isUserCanAccess() {
-        return isUserCanView() | isUserCanEdit();
-    }
+	public boolean isUserCanAccess() {
+		return isUserCanView() | isUserCanEdit();
+	}
 
-    public boolean isUserCanView() {
-        return allowViewBy(GluuUserRole.USER);
-    }
+	public boolean isUserCanView() {
+		return allowViewBy(GluuUserRole.USER);
+	}
 
-    public boolean isWhitePagesCanView() {
-        return allowViewBy(GluuUserRole.WHITEPAGES);
-    }
+	public boolean isWhitePagesCanView() {
+		return allowViewBy(GluuUserRole.WHITEPAGES);
+	}
 
-    public boolean isUserCanEdit() {
-        return allowEditBy(GluuUserRole.USER);
-    }
+	public boolean isUserCanEdit() {
+		return allowEditBy(GluuUserRole.USER);
+	}
 
 	public AttributeValidation getAttributeValidation() {
 		return attributeValidation;
@@ -381,7 +382,9 @@ public class GluuAttribute extends Entry implements Serializable {
 		this.attributeValidation = attributeValidation;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -389,41 +392,25 @@ public class GluuAttribute extends Entry implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (custom ? 1231 : 1237);
-		result = prime * result
-				+ ((dataType == null) ? 0 : dataType.hashCode());
-		result = prime * result
-				+ ((description == null) ? 0 : description.hashCode());
-		result = prime * result
-				+ ((displayName == null) ? 0 : displayName.hashCode());
+		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
+		result = prime * result + ((description == null) ? 0 : description.hashCode());
+		result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
 		result = prime * result + Arrays.hashCode(editType);
-		result = prime * result
-				+ ((gluuTooltip == null) ? 0 : gluuTooltip.hashCode());
+		result = prime * result + ((gluuTooltip == null) ? 0 : gluuTooltip.hashCode());
 		result = prime * result + ((inum == null) ? 0 : inum.hashCode());
-		result = prime * result
-				+ ((lifetime == null) ? 0 : lifetime.hashCode());
+		result = prime * result + ((lifetime == null) ? 0 : lifetime.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result
-				+ ((nameIdType == null) ? 0 : nameIdType.hashCode());
+		result = prime * result + ((nameIdType == null) ? 0 : nameIdType.hashCode());
 		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
-		result = prime * result
-				+ ((oxAuthClaimName == null) ? 0 : oxAuthClaimName.hashCode());
-		result = prime
-				* result
-				+ ((oxMultivaluedAttribute == null) ? 0
-						: oxMultivaluedAttribute.hashCode());
-		result = prime
-				* result
-				+ ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute
-						.hashCode());
+		result = prime * result + ((oxAuthClaimName == null) ? 0 : oxAuthClaimName.hashCode());
+		result = prime * result + ((oxMultivaluedAttribute == null) ? 0 : oxMultivaluedAttribute.hashCode());
+		result = prime * result + ((oxSCIMCustomAttribute == null) ? 0 : oxSCIMCustomAttribute.hashCode());
 		result = prime * result + (requred ? 1231 : 1237);
 		result = prime * result + ((salt == null) ? 0 : salt.hashCode());
-		result = prime * result
-				+ ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
-		result = prime * result
-				+ ((saml2Uri == null) ? 0 : saml2Uri.hashCode());
+		result = prime * result + ((saml1Uri == null) ? 0 : saml1Uri.hashCode());
+		result = prime * result + ((saml2Uri == null) ? 0 : saml2Uri.hashCode());
 		result = prime * result + ((seeAlso == null) ? 0 : seeAlso.hashCode());
-		result = prime * result
-				+ ((sourceAttribute == null) ? 0 : sourceAttribute.hashCode());
+		result = prime * result + ((sourceAttribute == null) ? 0 : sourceAttribute.hashCode());
 		result = prime * result + ((status == null) ? 0 : status.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		result = prime * result + ((urn == null) ? 0 : urn.hashCode());
@@ -432,21 +419,23 @@ public class GluuAttribute extends Entry implements Serializable {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
-	 */    
+	 */
 	@Override
-    public boolean equals(Object obj){
-        if (!(obj instanceof GluuAttribute)){
-            return false;
-        }
-        GluuAttribute other = (GluuAttribute) obj;
-        if (inum == null) {
+	public boolean equals(Object obj) {
+		if (!(obj instanceof GluuAttribute)) {
+			return false;
+		}
+		GluuAttribute other = (GluuAttribute) obj;
+		if (inum == null) {
 			if (other.inum != null)
 				return false;
 		} else if (!inum.equals(other.inum))
 			return false;
-        if (custom != other.custom)
+		if (custom != other.custom)
 			return false;
 		if (dataType != other.dataType)
 			return false;
@@ -455,23 +444,21 @@ public class GluuAttribute extends Entry implements Serializable {
 				return false;
 		} else if (!description.equals(other.description))
 			return false;
-        return true;
+		return true;
 	}
-	
-	
-	public void validateAttribute(FacesContext context, UIComponent comp,
-			Object value) {
+
+	public void validateAttribute(FacesContext context, UIComponent comp, Object value) {
 		Integer minvalue = this.attributeValidation != null ? this.attributeValidation.getMinLength() : null;
 		Integer maxValue = this.attributeValidation != null ? this.attributeValidation.getMaxLength() : null;
 		String regexpValue = this.attributeValidation != null ? this.attributeValidation.getRegexp() : null;
 
 		String attribute = (String) value;
-		
-		//Minimum length validation 
-		if ((minvalue != null) ) {
+
+		// Minimum length validation
+		if (minvalue != null) {
 			int min = this.attributeValidation.getMinLength();
 
-			if ((attribute != null)  && (attribute.length() < min)) {
+			if ((attribute != null) && (attribute.length() < min)) {
 				((UIInput) comp).setValid(false);
 
 				FacesMessage message = new FacesMessage(this.displayName + " should be at least " + min + " symbols. ");
@@ -479,11 +466,15 @@ public class GluuAttribute extends Entry implements Serializable {
 				context.addMessage(comp.getClientId(context), message);
 			}
 		}
-		
-		//Maximum Length validation 
-		if ((maxValue != null)) {
+
+		if (maxValue == null) {
+			maxValue = 400;
+		}
+
+		// Maximum Length validation
+		if (maxValue != null) {
 			int max = this.attributeValidation.getMaxLength();
-			if ((attribute != null)  &&  (attribute.length() > max)) {
+			if ((attribute != null) && (attribute.length() > max)) {
 				((UIInput) comp).setValid(false);
 
 				FacesMessage message = new FacesMessage(this.displayName + " should not exceed " + max + " symbols. ");
@@ -491,21 +482,21 @@ public class GluuAttribute extends Entry implements Serializable {
 				context.addMessage(comp.getClientId(context), message);
 			}
 		}
-		
-		//Regex Pattern Validation 
-		if((regexpValue != null)  && !(regexpValue.trim().equals(""))){
-			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);
-			if((attribute != null) && !(attribute.trim().equals(""))){
-			java.util.regex.Matcher matcher = pattern.matcher(attribute);
-			boolean flag =  matcher.matches();
-			if(!flag){
-				((UIInput) comp).setValid(false);
 
-				FacesMessage message = new FacesMessage(this.displayName + " Format is invalid. ");
-				message.setSeverity(FacesMessage.SEVERITY_ERROR);
-				context.addMessage(comp.getClientId(context), message);
+		// Regex Pattern Validation
+		if ((regexpValue != null) && StringHelper.isNotEmpty(regexpValue)) {
+			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);
+			if ((attribute != null) && !(attribute.trim().equals(""))) {
+				java.util.regex.Matcher matcher = pattern.matcher(attribute);
+				boolean flag = matcher.matches();
+				if (!flag) {
+					((UIInput) comp).setValid(false);
+
+					FacesMessage message = new FacesMessage(this.displayName + " Format is invalid. ");
+					message.setSeverity(FacesMessage.SEVERITY_ERROR);
+					context.addMessage(comp.getClientId(context), message);
+				}
 			}
-		  }
 		}
 	}
 }
