@@ -45,8 +45,6 @@ public final class ApplicationConfiguration implements Serializable {
 	private int photoRepositoryCountLeveles;
 	private int photoRepositoryCountFoldersPerLevel;
 
-	private String authMode;
-
 	private String ldifStore;
 
 	private boolean updateApplianceStatus;
@@ -94,14 +92,7 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private boolean persistSVN;
 
-	private String oxAuthAuthorizeUrl;
-	private String oxAuthRegisterUrl;
-	private String oxAuthTokenUrl;
-	private String oxAuthEndSessionUrl;
-	private String oxAuthLogoutUrl;
-	private String oxAuthTokenValidationUrl;
-	private String oxAuthUserInfo;
-    private String oxAuthSectorIdentifierUrl;
+	private String oxAuthSectorIdentifierUrl;
 
 	private String oxAuthClientId;
 	private String oxAuthClientPassword;
@@ -306,14 +297,6 @@ public final class ApplicationConfiguration implements Serializable {
 	public void setPhotoRepositoryCountFoldersPerLevel(
 			int photoRepositoryCountFoldersPerLevel) {
 		this.photoRepositoryCountFoldersPerLevel = photoRepositoryCountFoldersPerLevel;
-	}
-
-	public String getAuthMode() {
-		return authMode;
-	}
-
-	public void setAuthMode(String authMode) {
-		this.authMode = authMode;
 	}
 
 	public String getLdifStore() {
@@ -549,71 +532,15 @@ public final class ApplicationConfiguration implements Serializable {
 		this.persistSVN = persistSVN;
 	}
 
-	public String getOxAuthAuthorizeUrl() {
-		return oxAuthAuthorizeUrl;
-	}
-
-	public void setOxAuthAuthorizeUrl(String oxAuthAuthorizeUrl) {
-		this.oxAuthAuthorizeUrl = oxAuthAuthorizeUrl;
-	}
-
-	public String getOxAuthRegisterUrl() {
-		return oxAuthRegisterUrl;
-	}
-
-	public void setOxAuthRegisterUrl(String oxAuthRegisterUrl) {
-		this.oxAuthRegisterUrl = oxAuthRegisterUrl;
-	}
-
-	public String getOxAuthTokenUrl() {
-		return oxAuthTokenUrl;
-	}
-
-	public void setOxAuthTokenUrl(String oxAuthTokenUrl) {
-		this.oxAuthTokenUrl = oxAuthTokenUrl;
-	}
-
-	public String getOxAuthEndSessionUrl() {
-		return oxAuthEndSessionUrl;
-	}
-
-	public void setOxAuthEndSessionUrl(String oxAuthEndSessionUrl) {
-		this.oxAuthEndSessionUrl = oxAuthEndSessionUrl;
-	}
-
-	public String getOxAuthLogoutUrl() {
-		return oxAuthLogoutUrl;
-	}
-
-	public void setOxAuthLogoutUrl(String oxAuthLogoutUrl) {
-		this.oxAuthLogoutUrl = oxAuthLogoutUrl;
-	}
-
-	public String getOxAuthTokenValidationUrl() {
-		return oxAuthTokenValidationUrl;
-	}
-
-	public void setOxAuthTokenValidationUrl(String oxAuthTokenValidationUrl) {
-		this.oxAuthTokenValidationUrl = oxAuthTokenValidationUrl;
-	}
-
-	public String getOxAuthUserInfo() {
-		return oxAuthUserInfo;
-	}
-
-	public void setOxAuthUserInfo(String oxAuthUserInfo) {
-		this.oxAuthUserInfo = oxAuthUserInfo;
-	}
-
     public String getOxAuthSectorIdentifierUrl() {
-        return oxAuthSectorIdentifierUrl;
-    }
+		return oxAuthSectorIdentifierUrl;
+	}
 
-    public void setOxAuthSectorIdentifierUrl(String oxAuthSectorIdentifierUrl) {
-        this.oxAuthSectorIdentifierUrl = oxAuthSectorIdentifierUrl;
-    }
+	public void setOxAuthSectorIdentifierUrl(String oxAuthSectorIdentifierUrl) {
+		this.oxAuthSectorIdentifierUrl = oxAuthSectorIdentifierUrl;
+	}
 
-    public String getOxAuthClientId() {
+	public String getOxAuthClientId() {
 		return oxAuthClientId;
 	}
 
