@@ -133,5 +133,8 @@
     "shibboleth3SpConfDir":"%(idp3Folder)s/sp",
     "organizationName":"%(orgName)s",
     "idp3SigningCert":"/etc/certs/idp-signing.crt",
-    "idp3EncryptionCert":"/etc/certs/idp-encryption.crt"
+    "idp3EncryptionCert":"/etc/certs/idp-encryption.crt",
+
+    "clientWhiteList": ["*"],
+    "clientBlackList": ["*.attacker.com/*"]
 }
