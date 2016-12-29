@@ -21,11 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Encapsulates functionality to make authorization request calls to an
- * authorization server via REST Services.
+ * Encapsulates functionality to make authorization request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version December 26, 2016
  */
 public class AuthorizeClient extends BaseClient<AuthorizationRequest, AuthorizationResponse> {
 
@@ -234,6 +233,7 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         addReqParam(AuthorizeRequestParam.REQUEST, getRequest().getRequest());
         addReqParam(AuthorizeRequestParam.REQUEST_URI, getRequest().getRequestUri());
         addReqParam(AuthorizeRequestParam.ACCESS_TOKEN, getRequest().getAccessToken());
+        addReqParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, getRequest().getCustomResponseHeadersAsString());
 
         // PKCE
         addReqParam(AuthorizeRequestParam.CODE_CHALLENGE, getRequest().getCodeChallenge());

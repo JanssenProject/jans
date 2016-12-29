@@ -13,14 +13,12 @@ import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.HasParamName;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 24/09/2012
+ * @author Javier Rojas Blum
+ * @version December 26, 2016
  */
 
 public class Util {
@@ -85,6 +83,22 @@ public class Util {
         return param.toString().trim();
     }
 
+    public static String mapAsString(Map<String, String> p_map) throws JSONException {
+        if (p_map == null || p_map.size() == 0) {
+            return null;
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for (String key : p_map.keySet()) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(key, p_map.get(key));
+
+            jsonArray.put(jsonObject);
+        }
+
+        return jsonArray.toString();
+    }
+
     public static boolean allNotBlank(String... p_strings) {
         if (p_strings != null && p_strings.length > 0) {
             for (String s : p_strings) {
@@ -111,24 +125,48 @@ public class Util {
     public static List<String> jsonArrayStringAsList(String jsonString) throws JSONException {
         final List<String> result = new ArrayList<String>();
         if (StringUtils.isNotBlank(jsonString)) {
-        	JSONArray jsonArray = new JSONArray(jsonString);
-        	
-        	return asList(jsonArray);
+            JSONArray jsonArray = new JSONArray(jsonString);
+
+            return asList(jsonArray);
+        }
+
+        return result;
+    }
+
+    /**
+     * @param jsonString [{"CustomHeader1":"custom_header_value_1"},.....,{"CustomHeaderN":"custom_header_value_N"}]
+     * @return
+     */
+    public static Map<String, String> jsonObjectArrayStringAsMap(String jsonString) throws JSONException {
+        Map<String, String> result = new HashMap<String, String>();
+
+        if (!isNullOrEmpty(jsonString)) {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                Iterator<String> keysIter = jsonObject.keys();
+                while (keysIter.hasNext()) {
+                    String key = keysIter.next();
+                    String value = jsonObject.getString(key);
+                    result.put(key, value);
+                }
+            }
         }
 
         return result;
     }
 
     public static <T> T firstItem(List<T> items) {
-    	if (items == null) {
-    		return null;
-    	}
+        if (items == null) {
+            return null;
+        }
 
-    	Iterator<T> iterator = items.iterator();
-    	if (iterator.hasNext()) {
-    		return iterator.next();
-    	}
-        
+        Iterator<T> iterator = items.iterator();
+        if (iterator.hasNext()) {
+            return iterator.next();
+        }
+
         return null;
     }
 

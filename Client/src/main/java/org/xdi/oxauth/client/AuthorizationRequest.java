@@ -7,6 +7,7 @@
 package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.authorize.CodeVerifier;
@@ -27,7 +28,7 @@ import java.util.Map;
  * Represents an authorization request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version December 2, 2016
+ * @version December 26, 2016
  */
 public class AuthorizationRequest extends BaseRequest {
 
@@ -61,6 +62,8 @@ public class AuthorizationRequest extends BaseRequest {
     // code verifier according to PKCE spec
     private String codeChallenge;
     private String codeChallengeMethod;
+
+    private Map<String, String> customResponseHeaders;
 
     /**
      * Constructs an authorization request.
@@ -453,6 +456,18 @@ public class AuthorizationRequest extends BaseRequest {
         return Util.listAsString(acrValues);
     }
 
+    public String getCustomResponseHeadersAsString() throws JSONException {
+        return Util.mapAsString(customResponseHeaders);
+    }
+
+    public Map<String, String> getCustomResponseHeaders() {
+        return customResponseHeaders;
+    }
+
+    public void setCustomResponseHeaders(Map<String, String> customResponseHeaders) {
+        this.customResponseHeaders = customResponseHeaders;
+    }
+
     public String getClaimsAsString() {
         if (claims != null) {
             return claims.toString();
@@ -476,6 +491,7 @@ public class AuthorizationRequest extends BaseRequest {
             final String responseTypesAsString = getResponseTypesAsString();
             final String scopesAsString = getScopesAsString();
             final String promptsAsString = getPromptsAsString();
+            final String customResponseHeadersAsString = getCustomResponseHeadersAsString();
 
             if (StringUtils.isNotBlank(responseTypesAsString)) {
                 queryStringBuilder.append(AuthorizeRequestParam.RESPONSE_TYPE)
@@ -560,7 +576,6 @@ public class AuthorizationRequest extends BaseRequest {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_URI)
                         .append("=").append(URLEncoder.encode(requestUri, Util.UTF8_STRING_ENCODING));
             }
-
             if (requestSessionState) {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_SESSION_STATE)
                         .append("=").append(URLEncoder.encode(Boolean.toString(requestSessionState), Util.UTF8_STRING_ENCODING));
@@ -581,11 +596,17 @@ public class AuthorizationRequest extends BaseRequest {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.CODE_CHALLENGE_METHOD)
                         .append("=").append(codeChallengeMethod);
             }
+            if (StringUtils.isNotBlank(customResponseHeadersAsString)) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS)
+                        .append("=").append(URLEncoder.encode(customResponseHeadersAsString, Util.UTF8_STRING_ENCODING));
+            }
             for (String key : getCustomParameters().keySet()) {
                 queryStringBuilder.append("&");
                 queryStringBuilder.append(key).append("=").append(getCustomParameters().get(key));
             }
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
@@ -601,94 +622,101 @@ public class AuthorizationRequest extends BaseRequest {
     public Map<String, String> getParameters() {
         Map<String, String> parameters = new HashMap<String, String>();
 
-        // OAuth 2.0 request parameters
-        final String responseTypesAsString = getResponseTypesAsString();
-        final String scopesAsString = getScopesAsString();
-        final String promptsAsString = getPromptsAsString();
+        try {
+            // OAuth 2.0 request parameters
+            final String responseTypesAsString = getResponseTypesAsString();
+            final String scopesAsString = getScopesAsString();
+            final String promptsAsString = getPromptsAsString();
+            final String customResponseHeadersAsString = getCustomResponseHeadersAsString();
 
-        if (StringUtils.isNotBlank(responseTypesAsString)) {
-            parameters.put(AuthorizeRequestParam.RESPONSE_TYPE, responseTypesAsString);
-        }
-        if (StringUtils.isNotBlank(clientId)) {
-            parameters.put(AuthorizeRequestParam.CLIENT_ID, clientId);
-        }
-        if (StringUtils.isNotBlank(scopesAsString)) {
-            parameters.put(AuthorizeRequestParam.SCOPE, scopesAsString);
-        }
-        if (StringUtils.isNotBlank(redirectUri)) {
-            parameters.put(AuthorizeRequestParam.REDIRECT_URI, redirectUri);
-        }
-        if (StringUtils.isNotBlank(state)) {
-            parameters.put(AuthorizeRequestParam.STATE, state);
-        }
+            if (StringUtils.isNotBlank(responseTypesAsString)) {
+                parameters.put(AuthorizeRequestParam.RESPONSE_TYPE, responseTypesAsString);
+            }
+            if (StringUtils.isNotBlank(clientId)) {
+                parameters.put(AuthorizeRequestParam.CLIENT_ID, clientId);
+            }
+            if (StringUtils.isNotBlank(scopesAsString)) {
+                parameters.put(AuthorizeRequestParam.SCOPE, scopesAsString);
+            }
+            if (StringUtils.isNotBlank(redirectUri)) {
+                parameters.put(AuthorizeRequestParam.REDIRECT_URI, redirectUri);
+            }
+            if (StringUtils.isNotBlank(state)) {
+                parameters.put(AuthorizeRequestParam.STATE, state);
+            }
 
-        // OpenID Connect request parameters
-        final String uiLocalesAsString = getUiLocalesAsString();
-        final String claimLocalesAsString = getClaimsLocalesAsString();
-        final String acrValuesAsString = getAcrValuesAsString();
-        final String claimsAsString = getClaimsAsString();
+            // OpenID Connect request parameters
+            final String uiLocalesAsString = getUiLocalesAsString();
+            final String claimLocalesAsString = getClaimsLocalesAsString();
+            final String acrValuesAsString = getAcrValuesAsString();
+            final String claimsAsString = getClaimsAsString();
 
-        if (responseMode != null) {
-            parameters.put(AuthorizeRequestParam.RESPONSE_MODE, responseMode.toString());
-        }
-        if (StringUtils.isNotBlank(nonce)) {
-            parameters.put(AuthorizeRequestParam.NONCE, nonce);
-        }
-        if (display != null) {
-            parameters.put(AuthorizeRequestParam.DISPLAY, display.toString());
-        }
-        if (StringUtils.isNotBlank(promptsAsString)) {
-            parameters.put(AuthorizeRequestParam.PROMPT, promptsAsString);
-        }
-        if (maxAge != null) {
-            parameters.put(AuthorizeRequestParam.MAX_AGE, maxAge.toString());
-        }
-        if (StringUtils.isNotBlank(uiLocalesAsString)) {
-            parameters.put(AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
-        }
-        if (StringUtils.isNotBlank(claimLocalesAsString)) {
-            parameters.put(AuthorizeRequestParam.CLAIMS_LOCALES, claimLocalesAsString);
-        }
-        if (StringUtils.isNotBlank(idTokenHint)) {
-            parameters.put(AuthorizeRequestParam.ID_TOKEN_HINT, idTokenHint);
-        }
-        if (StringUtils.isNotBlank(loginHint)) {
-            parameters.put(AuthorizeRequestParam.LOGIN_HINT, loginHint);
-        }
-        if (StringUtils.isNotBlank(acrValuesAsString)) {
-            parameters.put(AuthorizeRequestParam.ACR_VALUES, acrValuesAsString);
-        }
-        if (StringUtils.isNotBlank(claimsAsString)) {
-            parameters.put(AuthorizeRequestParam.CLAIMS, claimsAsString);
-        }
-        if (StringUtils.isNotBlank(registration)) {
-            parameters.put(AuthorizeRequestParam.REGISTRATION, registration);
-        }
-        if (StringUtils.isNotBlank(request)) {
-            parameters.put(AuthorizeRequestParam.REQUEST, request);
-        }
-        if (StringUtils.isNotBlank(requestUri)) {
-            parameters.put(AuthorizeRequestParam.REQUEST_URI, requestUri);
-        }
+            if (responseMode != null) {
+                parameters.put(AuthorizeRequestParam.RESPONSE_MODE, responseMode.toString());
+            }
+            if (StringUtils.isNotBlank(nonce)) {
+                parameters.put(AuthorizeRequestParam.NONCE, nonce);
+            }
+            if (display != null) {
+                parameters.put(AuthorizeRequestParam.DISPLAY, display.toString());
+            }
+            if (StringUtils.isNotBlank(promptsAsString)) {
+                parameters.put(AuthorizeRequestParam.PROMPT, promptsAsString);
+            }
+            if (maxAge != null) {
+                parameters.put(AuthorizeRequestParam.MAX_AGE, maxAge.toString());
+            }
+            if (StringUtils.isNotBlank(uiLocalesAsString)) {
+                parameters.put(AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
+            }
+            if (StringUtils.isNotBlank(claimLocalesAsString)) {
+                parameters.put(AuthorizeRequestParam.CLAIMS_LOCALES, claimLocalesAsString);
+            }
+            if (StringUtils.isNotBlank(idTokenHint)) {
+                parameters.put(AuthorizeRequestParam.ID_TOKEN_HINT, idTokenHint);
+            }
+            if (StringUtils.isNotBlank(loginHint)) {
+                parameters.put(AuthorizeRequestParam.LOGIN_HINT, loginHint);
+            }
+            if (StringUtils.isNotBlank(acrValuesAsString)) {
+                parameters.put(AuthorizeRequestParam.ACR_VALUES, acrValuesAsString);
+            }
+            if (StringUtils.isNotBlank(claimsAsString)) {
+                parameters.put(AuthorizeRequestParam.CLAIMS, claimsAsString);
+            }
+            if (StringUtils.isNotBlank(registration)) {
+                parameters.put(AuthorizeRequestParam.REGISTRATION, registration);
+            }
+            if (StringUtils.isNotBlank(request)) {
+                parameters.put(AuthorizeRequestParam.REQUEST, request);
+            }
+            if (StringUtils.isNotBlank(requestUri)) {
+                parameters.put(AuthorizeRequestParam.REQUEST_URI, requestUri);
+            }
+            if (requestSessionState) {
+                parameters.put(AuthorizeRequestParam.REQUEST_SESSION_STATE, Boolean.toString(requestSessionState));
+            }
+            if (StringUtils.isNotBlank(sessionState)) {
+                parameters.put(AuthorizeRequestParam.SESSION_STATE, sessionState);
+            }
+            if (StringUtils.isNotBlank(accessToken)) {
+                parameters.put(AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
+            }
+            if (StringUtils.isNotBlank(codeChallenge)) {
+                parameters.put(AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
+            }
+            if (StringUtils.isNotBlank(codeChallengeMethod)) {
+                parameters.put(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
+            }
+            if (StringUtils.isNotBlank(customResponseHeadersAsString)) {
+                parameters.put(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
+            }
 
-        if (requestSessionState) {
-            parameters.put(AuthorizeRequestParam.REQUEST_SESSION_STATE, Boolean.toString(requestSessionState));
-        }
-        if (StringUtils.isNotBlank(sessionState)) {
-            parameters.put(AuthorizeRequestParam.SESSION_STATE, sessionState);
-        }
-        if (StringUtils.isNotBlank(accessToken)) {
-            parameters.put(AuthorizeRequestParam.ACCESS_TOKEN, accessToken);
-        }
-        if (StringUtils.isNotBlank(codeChallenge)) {
-            parameters.put(AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
-        }
-        if (StringUtils.isNotBlank(codeChallengeMethod)) {
-            parameters.put(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
-        }
-
-        for (String key : getCustomParameters().keySet()) {
-            parameters.put(key, getCustomParameters().get(key));
+            for (String key : getCustomParameters().keySet()) {
+                parameters.put(key, getCustomParameters().get(key));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         return parameters;
