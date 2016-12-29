@@ -223,5 +223,6 @@
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
-    "legacyIdTokenClaims": true
+"legacyIdTokenClaims": true,
+"customHeadersWithAuthorizationResponse": true
 }
