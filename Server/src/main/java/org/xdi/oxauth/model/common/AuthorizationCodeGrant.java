@@ -6,11 +6,11 @@
 
 package org.xdi.oxauth.model.common;
 
-import org.jboss.seam.Component;
+import java.util.Date;
+
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.registration.Client;
-
-import java.util.Date;
 
 /**
  * <p>
@@ -35,8 +35,7 @@ import java.util.Date;
  * user-agent, potentially exposing it to others, including the resource owner.
  * </p>
  *
- * @author Javier Rojas Blum
- * @version December 28, 2016
+ * @author Javier Rojas Blum Date: 09.29.2011
  */
 public class AuthorizationCodeGrant extends AuthorizationGrant {
 
@@ -51,12 +50,6 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
      */
     public AuthorizationCodeGrant(User user, Client client, Date authenticationTime, Configuration configuration) {
         super(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, authenticationTime, configuration);
-
-        // Workaround for tomcat
-        if (configuration == null) {
-            configuration = (Configuration) Component.getInstance("configuration", true);
-        }
-
         setAuthorizationCode(new AuthorizationCode(configuration.getAuthorizationCodeLifetime()));
     }
 
