@@ -45,6 +45,7 @@ import java.util.List;
 @Name("authorizationGrantList")
 @AutoCreate
 @Scope(ScopeType.APPLICATION)
+@Startup
 public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     private static final Log LOGGER = Logging.getLog(AuthorizationGrantList.class);
