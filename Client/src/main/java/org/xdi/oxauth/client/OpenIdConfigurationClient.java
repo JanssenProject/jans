@@ -22,7 +22,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
  * Encapsulates functionality to make OpenId Configuration request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version 0.9 January 22, 2015
+ * @version December 26, 2016
  */
 public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationRequest, OpenIdConfigurationResponse> {
 
@@ -78,7 +78,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getHeaders());
+            getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
                 JSONObject jsonObj = new JSONObject(entity);
 
