@@ -48,15 +48,11 @@ public class KeyGeneratorTimer {
     @In
     private ConfigurationFactory configurationFactory;
 
-    private Configuration configuration;
-
-    @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
-        this.configuration = configuration;
-    }
-
     @In
     private LdapEntryManager ldapEntryManager;
+
+    @In
+    private Configuration configuration;
 
     private AtomicBoolean isActive;
 

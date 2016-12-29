@@ -59,15 +59,8 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @In
     private ClientService clientService;
 
+    @In
 	private Configuration configuration;
-
-	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
-		this.configuration = configuration;
-	}
-
-    public AuthorizationGrantList() {
-    }
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
