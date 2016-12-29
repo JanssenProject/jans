@@ -69,9 +69,10 @@ public class JwtAuthorizationRequest {
 
     public JwtAuthorizationRequest(Configuration configuration, String encodedJwt, Client client) throws InvalidJwtException, InvalidJweException {
         try {
-            responseTypes = new ArrayList<ResponseType>();
-            scopes = new ArrayList<String>();
-            prompts = new ArrayList<Prompt>();
+        	this.configuration = configuration;
+        	this.responseTypes = new ArrayList<ResponseType>();
+        	this.scopes = new ArrayList<String>();
+        	this.prompts = new ArrayList<Prompt>();
             this.encodedJwt = encodedJwt;
 
             if (encodedJwt != null && !encodedJwt.isEmpty()) {
