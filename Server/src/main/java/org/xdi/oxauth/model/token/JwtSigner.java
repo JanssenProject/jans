@@ -30,33 +30,33 @@ public class JwtSigner {
     private String audience;
     private String hmacSharedSecret;
 
-    private Configuration configuration;
+    private Configuration appConfiguration;
     private JSONWebKeySet webKeys;
 
     private Jwt jwt;
 
-    public JwtSigner(Configuration configuration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience) throws Exception {
-        this(configuration, webKeys, signatureAlgorithm, audience, null);
+    public JwtSigner(Configuration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience) throws Exception {
+        this(appConfiguration, webKeys, signatureAlgorithm, audience, null);
     }
 
-    public JwtSigner(Configuration configuration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) throws Exception {
-    	this.configuration = configuration;
+    public JwtSigner(Configuration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) throws Exception {
+    	this.appConfiguration = appConfiguration;
     	this.webKeys = webKeys;
         this.signatureAlgorithm = signatureAlgorithm;
         this.audience = audience;
         this.hmacSharedSecret = hmacSharedSecret;
 
-        cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
+        cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
     }
 
-    public static JwtSigner newJwtSigner(Configuration configuration, JSONWebKeySet webKeys, Client client) throws Exception {
+    public static JwtSigner newJwtSigner(Configuration appConfiguration, JSONWebKeySet webKeys, Client client) throws Exception {
         Preconditions.checkNotNull(client);
 
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(configuration.getDefaultSignatureAlgorithm());
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());
         if (client.getIdTokenSignedResponseAlg() != null) {
             signatureAlgorithm = SignatureAlgorithm.fromString(client.getIdTokenSignedResponseAlg());
         }
-        return new JwtSigner(configuration, webKeys, signatureAlgorithm, client.getClientId(), client.getClientSecret());
+        return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), client.getClientSecret());
     }
 
     public Jwt newJwt() throws Exception {
@@ -71,7 +71,7 @@ public class JwtSigner {
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
         // Claims
-        jwt.getClaims().setIssuer(configuration.getIssuer());
+        jwt.getClaims().setIssuer(appConfiguration.getIssuer());
         jwt.getClaims().setAudience(audience);
         return jwt;
     }

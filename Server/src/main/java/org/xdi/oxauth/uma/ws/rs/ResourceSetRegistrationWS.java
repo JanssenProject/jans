@@ -73,7 +73,7 @@ public class ResourceSetRegistrationWS {
     @In
     private ScopeService umaScopeService;
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -322,7 +322,7 @@ public class ResourceSetRegistrationWS {
         ldapResourceSet.setDn(resourceSetDn);
         ldapResourceSet.setScopes(scopeDNs);
 
-        final Boolean addClient = configuration.getUmaKeepClientDuringResourceSetRegistration();
+        final Boolean addClient = appConfiguration.getUmaKeepClientDuringResourceSetRegistration();
         if (addClient != null ? addClient : true) {
             ldapResourceSet.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
         }

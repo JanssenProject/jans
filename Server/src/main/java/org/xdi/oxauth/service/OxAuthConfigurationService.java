@@ -26,32 +26,32 @@ import org.xdi.util.StringHelper;
 public class OxAuthConfigurationService {
 
 	@In
-	private Configuration configuration;
+	private Configuration appConfiguration;
 
 	public String getCssLocation() {
-		if (StringHelper.isEmpty(configuration.getCssLocation())) {
+		if (StringHelper.isEmpty(appConfiguration.getCssLocation())) {
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/stylesheet";
 		} else {
-			return configuration.getCssLocation();
+			return appConfiguration.getCssLocation();
 		}
 	}
 
 	public String getJsLocation() {
-		if (StringHelper.isEmpty(configuration.getJsLocation())) {
+		if (StringHelper.isEmpty(appConfiguration.getJsLocation())) {
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/js";
 		} else {
-			return configuration.getJsLocation();
+			return appConfiguration.getJsLocation();
 		}
 	}
 
 	public String getImgLocation() {
-		if (StringHelper.isEmpty(configuration.getImgLocation())) {
+		if (StringHelper.isEmpty(appConfiguration.getImgLocation())) {
 			String contextPath = ServletContexts.instance().getRequest().getContextPath();
 			return contextPath + "/img";
 		} else {
-			return configuration.getImgLocation();
+			return appConfiguration.getImgLocation();
 		}
 	}
 
