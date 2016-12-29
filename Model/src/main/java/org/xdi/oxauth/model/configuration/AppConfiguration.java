@@ -9,19 +9,17 @@ package org.xdi.oxauth.model.configuration;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.oxauth.model.common.WebKeyStorage;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Represents the configuration XML file.
+ * Represents the configuration JSON file.
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version December 26, 2016
+ * @version December 29, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration {
@@ -111,6 +109,7 @@ public class AppConfiguration {
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
+    private Boolean sessionStateHttpOnly;
     private int configurationUpdateInterval;
 
     private String cssLocation;
@@ -143,7 +142,6 @@ public class AppConfiguration {
     private Boolean legacyIdTokenClaims;
     private Boolean customHeadersWithAuthorizationResponse;
 
-    @XmlElement(name = "uma-rpt-as-jwt")
     public Boolean getUmaRptAsJwt() {
         return umaRptAsJwt;
     }
@@ -152,7 +150,6 @@ public class AppConfiguration {
         this.umaRptAsJwt = umaRptAsJwt;
     }
 
-    @XmlElement(name = "session-as-jwt")
     public Boolean getSessionAsJwt() {
         return sessionAsJwt;
     }
@@ -161,7 +158,6 @@ public class AppConfiguration {
         this.sessionAsJwt = sessionAsJwt;
     }
 
-    @XmlElement(name = "uma-keep-client-during-resource-set-registration")
     public Boolean getUmaKeepClientDuringResourceSetRegistration() {
         return umaKeepClientDuringResourceSetRegistration;
     }
@@ -170,7 +166,6 @@ public class AppConfiguration {
         umaKeepClientDuringResourceSetRegistration = p_umaKeepClientDuringResourceSetRegistration;
     }
 
-    @XmlElement(name = "uma-add-scopes-automatically")
     public Boolean getUmaAddScopesAutomatically() {
         return umaAddScopesAutomatically;
     }
@@ -184,7 +179,6 @@ public class AppConfiguration {
      *
      * @return The issuer identifier.
      */
-    @XmlElement(name = "issuer")
     public String getIssuer() {
         return issuer;
     }
@@ -203,7 +197,6 @@ public class AppConfiguration {
      *
      * @return The URL of the login page.
      */
-    @XmlElement(name = "login-page")
     public String getLoginPage() {
         return loginPage;
     }
@@ -222,7 +215,6 @@ public class AppConfiguration {
      *
      * @return The URL of the authorization page.
      */
-    @XmlElement(name = "authorization-page")
     public String getAuthorizationPage() {
         return authorizationPage;
     }
@@ -241,7 +233,6 @@ public class AppConfiguration {
      *
      * @return The base URI of endpoints.
      */
-    @XmlElement(name = "base-endpoint")
     public String getBaseEndpoint() {
         return baseEndpoint;
     }
@@ -260,7 +251,6 @@ public class AppConfiguration {
      *
      * @return The URL of the Authentication and Authorization endpoint.
      */
-    @XmlElement(name = "authorization-endpoint")
     public String getAuthorizationEndpoint() {
         return authorizationEndpoint;
     }
@@ -279,7 +269,6 @@ public class AppConfiguration {
      *
      * @return The URL of the Token endpoint.
      */
-    @XmlElement(name = "token-endpoint")
     public String getTokenEndpoint() {
         return tokenEndpoint;
     }
@@ -298,7 +287,6 @@ public class AppConfiguration {
      *
      * @return The URL of the User Info endpoint.
      */
-    @XmlElement(name = "userinfo-endpoint")
     public String getUserInfoEndpoint() {
         return userInfoEndpoint;
     }
@@ -317,7 +305,6 @@ public class AppConfiguration {
      *
      * @return The URL of the Client Info endpoint.
      */
-    @XmlElement(name = "clientinfo-endpoint")
     public String getClientInfoEndpoint() {
         return clientInfoEndpoint;
     }
@@ -337,7 +324,6 @@ public class AppConfiguration {
      *
      * @return The Check Session iFrame URL.
      */
-    @XmlElement(name = "check-session-iframe")
     public String getCheckSessionIFrame() {
         return checkSessionIFrame;
     }
@@ -357,7 +343,6 @@ public class AppConfiguration {
      *
      * @return The URL of the End Session endpoint.
      */
-    @XmlElement(name = "end-session-endpoint")
     public String getEndSessionEndpoint() {
         return endSessionEndpoint;
     }
@@ -376,7 +361,6 @@ public class AppConfiguration {
      *
      * @return The URL of the End Session page.
      */
-    @XmlElement(name = "end-session-page")
     public String getEndSessionPage() {
         return endSessionPage;
     }
@@ -398,7 +382,6 @@ public class AppConfiguration {
      *
      * @return The URL of the OP's JSON Web Key Set (JWK) document.
      */
-    @XmlElement(name = "jwks-uri")
     public String getJwksUri() {
         return jwksUri;
     }
@@ -420,7 +403,6 @@ public class AppConfiguration {
      *
      * @return The URL of the Dynamic Client Registration endpoint.
      */
-    @XmlElement(name = "registration-endpoint")
     public String getRegistrationEndpoint() {
         return registrationEndpoint;
     }
@@ -434,7 +416,6 @@ public class AppConfiguration {
         this.registrationEndpoint = registrationEndpoint;
     }
 
-    @XmlElement(name = "validate-token-endpoint")
     public String getValidateTokenEndpoint() {
         return validateTokenEndpoint;
     }
@@ -443,7 +424,6 @@ public class AppConfiguration {
         this.validateTokenEndpoint = validateTokenEndpoint;
     }
 
-    @XmlElement(name = "openid-discovery-endpoint")
     public String getOpenIdDiscoveryEndpoint() {
         return openIdDiscoveryEndpoint;
     }
@@ -452,7 +432,6 @@ public class AppConfiguration {
         this.openIdDiscoveryEndpoint = openIdDiscoveryEndpoint;
     }
 
-    @XmlElement(name = "uma-configuration-endpoint")
     public String getUmaConfigurationEndpoint() {
         return umaConfigurationEndpoint;
     }
@@ -461,7 +440,6 @@ public class AppConfiguration {
         umaConfigurationEndpoint = p_umaConfigurationEndpoint;
     }
 
-    @XmlElement(name = "openid-sub-attribute")
     public String getOpenidSubAttribute() {
         return openidSubAttribute;
     }
@@ -470,7 +448,6 @@ public class AppConfiguration {
         this.openidSubAttribute = openidSubAttribute;
     }
 
-    @XmlElement(name = "id-generation-endpoint")
     public String getIdGenerationEndpoint() {
         return idGenerationEndpoint;
     }
@@ -479,7 +456,6 @@ public class AppConfiguration {
         idGenerationEndpoint = p_idGenerationEndpoint;
     }
 
-    @XmlElement(name = "introspection-endpoint")
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
     }
@@ -488,7 +464,6 @@ public class AppConfiguration {
         introspectionEndpoint = p_introspectionEndpoint;
     }
 
-    @XmlElement(name = "openid-configuration-endpoint")
     public String getOpenIdConfigurationEndpoint() {
         return openIdConfigurationEndpoint;
     }
@@ -497,8 +472,6 @@ public class AppConfiguration {
         this.openIdConfigurationEndpoint = openIdConfigurationEndpoint;
     }
 
-    @XmlElementWrapper(name = "response-types-supported")
-    @XmlElement(name = "response-type")
     public List<String> getResponseTypesSupported() {
         return responseTypesSupported;
     }
@@ -507,8 +480,6 @@ public class AppConfiguration {
         this.responseTypesSupported = responseTypesSupported;
     }
 
-    @XmlElementWrapper(name = "grant-types-supported")
-    @XmlElement(name = "grant-type")
     public List<String> getGrantTypesSupported() {
         return grantTypesSupported;
     }
@@ -517,8 +488,6 @@ public class AppConfiguration {
         this.grantTypesSupported = grantTypesSupported;
     }
 
-    @XmlElementWrapper(name = "subject-types-supported")
-    @XmlElement(name = "subject-type")
     public List<String> getSubjectTypesSupported() {
         return subjectTypesSupported;
     }
@@ -527,7 +496,6 @@ public class AppConfiguration {
         this.subjectTypesSupported = subjectTypesSupported;
     }
 
-    @XmlElement(name = "default-subject-type")
     public String getDefaultSubjectType() {
         return defaultSubjectType;
     }
@@ -536,8 +504,6 @@ public class AppConfiguration {
         this.defaultSubjectType = defaultSubjectType;
     }
 
-    @XmlElementWrapper(name = "userinfo-signing-alg-values-supported")
-    @XmlElement(name = "userinfo-signing-alg")
     public List<String> getUserInfoSigningAlgValuesSupported() {
         return userInfoSigningAlgValuesSupported;
     }
@@ -546,8 +512,6 @@ public class AppConfiguration {
         this.userInfoSigningAlgValuesSupported = userInfoSigningAlgValuesSupported;
     }
 
-    @XmlElementWrapper(name = "userinfo-encryption-alg-values-supported")
-    @XmlElement(name = "userinfo-encryption-alg")
     public List<String> getUserInfoEncryptionAlgValuesSupported() {
         return userInfoEncryptionAlgValuesSupported;
     }
@@ -556,8 +520,6 @@ public class AppConfiguration {
         this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
     }
 
-    @XmlElementWrapper(name = "userinfo-encryption-enc-values-supported")
-    @XmlElement(name = "userinfo-encryption-enc")
     public List<String> getUserInfoEncryptionEncValuesSupported() {
         return userInfoEncryptionEncValuesSupported;
     }
@@ -566,8 +528,6 @@ public class AppConfiguration {
         this.userInfoEncryptionEncValuesSupported = userInfoEncryptionEncValuesSupported;
     }
 
-    @XmlElementWrapper(name = "id-token-signing-alg-values-supported")
-    @XmlElement(name = "id-token-signing-alg")
     public List<String> getIdTokenSigningAlgValuesSupported() {
         return idTokenSigningAlgValuesSupported;
     }
@@ -576,8 +536,6 @@ public class AppConfiguration {
         this.idTokenSigningAlgValuesSupported = idTokenSigningAlgValuesSupported;
     }
 
-    @XmlElementWrapper(name = "id-token-encryption-alg-values-supported")
-    @XmlElement(name = "id-token-encryption-alg")
     public List<String> getIdTokenEncryptionAlgValuesSupported() {
         return idTokenEncryptionAlgValuesSupported;
     }
@@ -586,8 +544,6 @@ public class AppConfiguration {
         this.idTokenEncryptionAlgValuesSupported = idTokenEncryptionAlgValuesSupported;
     }
 
-    @XmlElementWrapper(name = "id-token-encryption-enc-values-supported")
-    @XmlElement(name = "id-token-encryption-enc")
     public List<String> getIdTokenEncryptionEncValuesSupported() {
         return idTokenEncryptionEncValuesSupported;
     }
@@ -596,8 +552,6 @@ public class AppConfiguration {
         this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
     }
 
-    @XmlElementWrapper(name = "request-object-signing-alg-values-supported")
-    @XmlElement(name = "request-object-signing-alg")
     public List<String> getRequestObjectSigningAlgValuesSupported() {
         return requestObjectSigningAlgValuesSupported;
     }
@@ -606,8 +560,6 @@ public class AppConfiguration {
         this.requestObjectSigningAlgValuesSupported = requestObjectSigningAlgValuesSupported;
     }
 
-    @XmlElementWrapper(name = "request-object-encryption-alg-values-supported")
-    @XmlElement(name = "request-object-encryption-alg")
     public List<String> getRequestObjectEncryptionAlgValuesSupported() {
         return requestObjectEncryptionAlgValuesSupported;
     }
@@ -616,8 +568,6 @@ public class AppConfiguration {
         this.requestObjectEncryptionAlgValuesSupported = requestObjectEncryptionAlgValuesSupported;
     }
 
-    @XmlElementWrapper(name = "request-object-encryption-enc-values-supported")
-    @XmlElement(name = "request-object-encryption-enc")
     public List<String> getRequestObjectEncryptionEncValuesSupported() {
         return requestObjectEncryptionEncValuesSupported;
     }
@@ -626,8 +576,6 @@ public class AppConfiguration {
         this.requestObjectEncryptionEncValuesSupported = requestObjectEncryptionEncValuesSupported;
     }
 
-    @XmlElementWrapper(name = "token-endpoint-auth-methods-supported")
-    @XmlElement(name = "token-endpoint-auth-method")
     public List<String> getTokenEndpointAuthMethodsSupported() {
         return tokenEndpointAuthMethodsSupported;
     }
@@ -636,8 +584,6 @@ public class AppConfiguration {
         this.tokenEndpointAuthMethodsSupported = tokenEndpointAuthMethodsSupported;
     }
 
-    @XmlElementWrapper(name = "token-endpoint-auth-signing-alg-values-supported")
-    @XmlElement(name = "token-endpoint-auth-signing-alg")
     public List<String> getTokenEndpointAuthSigningAlgValuesSupported() {
         return tokenEndpointAuthSigningAlgValuesSupported;
     }
@@ -646,8 +592,6 @@ public class AppConfiguration {
         this.tokenEndpointAuthSigningAlgValuesSupported = tokenEndpointAuthSigningAlgValuesSupported;
     }
 
-    @XmlElementWrapper(name = "dynamic-registration-custom-attribute-supported")
-    @XmlElement(name = "dynamic-registration-custom-attribute")
     public List<String> getDynamicRegistrationCustomAttributes() {
         return dynamicRegistrationCustomAttributes;
     }
@@ -656,8 +600,6 @@ public class AppConfiguration {
         dynamicRegistrationCustomAttributes = p_dynamicRegistrationCustomAttributes;
     }
 
-    @XmlElementWrapper(name = "display-values-supported")
-    @XmlElement(name = "display-value")
     public List<String> getDisplayValuesSupported() {
         return displayValuesSupported;
     }
@@ -666,8 +608,6 @@ public class AppConfiguration {
         this.displayValuesSupported = displayValuesSupported;
     }
 
-    @XmlElementWrapper(name = "claim-types-supported")
-    @XmlElement(name = "claim-type")
     public List<String> getClaimTypesSupported() {
         return claimTypesSupported;
     }
@@ -676,7 +616,6 @@ public class AppConfiguration {
         this.claimTypesSupported = claimTypesSupported;
     }
 
-    @XmlElement(name = "service-documentation")
     public String getServiceDocumentation() {
         return serviceDocumentation;
     }
@@ -685,8 +624,6 @@ public class AppConfiguration {
         this.serviceDocumentation = serviceDocumentation;
     }
 
-    @XmlElementWrapper(name = "claims-locales-supported")
-    @XmlElement(name = "claim-locale")
     public List<String> getClaimsLocalesSupported() {
         return claimsLocalesSupported;
     }
@@ -695,8 +632,6 @@ public class AppConfiguration {
         this.claimsLocalesSupported = claimsLocalesSupported;
     }
 
-    @XmlElementWrapper(name = "ui-locales-supported")
-    @XmlElement(name = "ui-locale")
     public List<String> getUiLocalesSupported() {
         return uiLocalesSupported;
     }
@@ -705,7 +640,6 @@ public class AppConfiguration {
         this.uiLocalesSupported = uiLocalesSupported;
     }
 
-    @XmlElement(name = "claims-parameter-supported")
     public Boolean getClaimsParameterSupported() {
         return claimsParameterSupported;
     }
@@ -714,7 +648,6 @@ public class AppConfiguration {
         this.claimsParameterSupported = claimsParameterSupported;
     }
 
-    @XmlElement(name = "request-parameter-supported")
     public Boolean getRequestParameterSupported() {
         return requestParameterSupported;
     }
@@ -723,7 +656,6 @@ public class AppConfiguration {
         this.requestParameterSupported = requestParameterSupported;
     }
 
-    @XmlElement(name = "request-uri-parameter-supported")
     public Boolean getRequestUriParameterSupported() {
         return requestUriParameterSupported;
     }
@@ -732,7 +664,6 @@ public class AppConfiguration {
         this.requestUriParameterSupported = requestUriParameterSupported;
     }
 
-    @XmlElement(name = "require-request-uri-registration")
     public Boolean getRequireRequestUriRegistration() {
         return requireRequestUriRegistration;
     }
@@ -741,7 +672,6 @@ public class AppConfiguration {
         this.requireRequestUriRegistration = requireRequestUriRegistration;
     }
 
-    @XmlElement(name = "op-policy-uri")
     public String getOpPolicyUri() {
         return opPolicyUri;
     }
@@ -750,7 +680,6 @@ public class AppConfiguration {
         this.opPolicyUri = opPolicyUri;
     }
 
-    @XmlElement(name = "op-tos-uri")
     public String getOpTosUri() {
         return opTosUri;
     }
@@ -759,7 +688,6 @@ public class AppConfiguration {
         this.opTosUri = opTosUri;
     }
 
-    @XmlElement(name = "authorization-code-lifetime")
     public int getAuthorizationCodeLifetime() {
         return authorizationCodeLifetime;
     }
@@ -768,7 +696,6 @@ public class AppConfiguration {
         this.authorizationCodeLifetime = authorizationCodeLifetime;
     }
 
-    @XmlElement(name = "refresh-token-lifetime")
     public int getRefreshTokenLifetime() {
         return refreshTokenLifetime;
     }
@@ -777,7 +704,6 @@ public class AppConfiguration {
         this.refreshTokenLifetime = refreshTokenLifetime;
     }
 
-    @XmlElement(name = "id-token-lifetime")
     public int getIdTokenLifetime() {
         return idTokenLifetime;
     }
@@ -786,7 +712,6 @@ public class AppConfiguration {
         this.idTokenLifetime = idTokenLifetime;
     }
 
-    @XmlElement(name = "short-lived-access-token-lifetime")
     public int getShortLivedAccessTokenLifetime() {
         return shortLivedAccessTokenLifetime;
     }
@@ -795,7 +720,6 @@ public class AppConfiguration {
         this.shortLivedAccessTokenLifetime = shortLivedAccessTokenLifetime;
     }
 
-    @XmlElement(name = "long-lived-access-token-lifetime")
     public int getLongLivedAccessTokenLifetime() {
         return longLivedAccessTokenLifetime;
     }
@@ -804,7 +728,6 @@ public class AppConfiguration {
         this.longLivedAccessTokenLifetime = longLivedAccessTokenLifetime;
     }
 
-    @XmlElement(name = "uma-requester-permission-token-lifetime")
     public int getUmaRequesterPermissionTokenLifetime() {
         return umaRequesterPermissionTokenLifetime;
     }
@@ -813,7 +736,6 @@ public class AppConfiguration {
         this.umaRequesterPermissionTokenLifetime = umaRequesterPermissionTokenLifetime;
     }
 
-    @XmlElement(name = "clean-service-interval")
     public int getCleanServiceInterval() {
         return cleanServiceInterval;
     }
@@ -822,7 +744,6 @@ public class AppConfiguration {
         cleanServiceInterval = p_cleanServiceInterval;
     }
 
-    @XmlElement(name = "key-regeneration-enabled")
     public Boolean getKeyRegenerationEnabled() {
         return keyRegenerationEnabled;
     }
@@ -831,7 +752,6 @@ public class AppConfiguration {
         this.keyRegenerationEnabled = keyRegenerationEnabled;
     }
 
-    @XmlElement(name = "key-regeneration-interval")
     public int getKeyRegenerationInterval() {
         return keyRegenerationInterval;
     }
@@ -840,7 +760,6 @@ public class AppConfiguration {
         this.keyRegenerationInterval = keyRegenerationInterval;
     }
 
-    @XmlElement(name = "default-signature-algorithm")
     public String getDefaultSignatureAlgorithm() {
         return defaultSignatureAlgorithm;
     }
@@ -849,7 +768,6 @@ public class AppConfiguration {
         this.defaultSignatureAlgorithm = defaultSignatureAlgorithm;
     }
 
-    @XmlElement(name = "oxOpenIDConnectVersion")
     public String getOxOpenIdConnectVersion() {
         return oxOpenIdConnectVersion;
     }
@@ -858,7 +776,6 @@ public class AppConfiguration {
         this.oxOpenIdConnectVersion = oxOpenIdConnectVersion;
     }
 
-    @XmlElement(name = "organization-inum")
     public String getOrganizationInum() {
         return organizationInum;
     }
@@ -867,7 +784,6 @@ public class AppConfiguration {
         this.organizationInum = organizationInum;
     }
 
-    @XmlElement(name = "oxID")
     public String getOxId() {
         return oxId;
     }
@@ -876,7 +792,6 @@ public class AppConfiguration {
         this.oxId = oxId;
     }
 
-    @XmlElement(name = "dynamic-registration-enabled")
     public Boolean getDynamicRegistrationEnabled() {
         return dynamicRegistrationEnabled;
     }
@@ -885,7 +800,6 @@ public class AppConfiguration {
         this.dynamicRegistrationEnabled = dynamicRegistrationEnabled;
     }
 
-    @XmlElement(name = "dynamic-registration-expiration-time")
     public int getDynamicRegistrationExpirationTime() {
         return dynamicRegistrationExpirationTime;
     }
@@ -894,7 +808,6 @@ public class AppConfiguration {
         this.dynamicRegistrationExpirationTime = dynamicRegistrationExpirationTime;
     }
 
-    @XmlElement(name = "dynamic-registration-persist-client-authorizations")
     public Boolean getDynamicRegistrationPersistClientAuthorizations() {
         return dynamicRegistrationPersistClientAuthorizations;
     }
@@ -903,7 +816,6 @@ public class AppConfiguration {
         this.dynamicRegistrationPersistClientAuthorizations = dynamicRegistrationPersistClientAuthorizations;
     }
 
-    @XmlElement(name = "trusted-client-enabled")
     public Boolean getTrustedClientEnabled() {
         return trustedClientEnabled;
     }
@@ -912,7 +824,6 @@ public class AppConfiguration {
         this.trustedClientEnabled = trustedClientEnabled;
     }
 
-    @XmlElement(name = "dynamic-registration-scopes-param-enabled")
     public Boolean getDynamicRegistrationScopesParamEnabled() {
         return dynamicRegistrationScopesParamEnabled;
     }
@@ -921,7 +832,6 @@ public class AppConfiguration {
         this.dynamicRegistrationScopesParamEnabled = dynamicRegistrationScopesParamEnabled;
     }
 
-    @XmlElement(name = "dynamic-registration-custom-object-class")
     public String getDynamicRegistrationCustomObjectClass() {
         return dynamicRegistrationCustomObjectClass;
     }
@@ -930,7 +840,6 @@ public class AppConfiguration {
         dynamicRegistrationCustomObjectClass = p_dynamicRegistrationCustomObjectClass;
     }
 
-    @XmlElement(name = "auth-filters-enabled")
     public Boolean getAuthenticationFiltersEnabled() {
         return authenticationFiltersEnabled;
     }
@@ -939,7 +848,6 @@ public class AppConfiguration {
         this.authenticationFiltersEnabled = authenticationFiltersEnabled;
     }
 
-    @XmlElement(name = "client-auth-filters-enabled")
     public Boolean getClientAuthenticationFiltersEnabled() {
         return clientAuthenticationFiltersEnabled;
     }
@@ -948,8 +856,6 @@ public class AppConfiguration {
         clientAuthenticationFiltersEnabled = p_clientAuthenticationFiltersEnabled;
     }
 
-    @XmlElementWrapper(name = "auth-filters")
-    @XmlElement(name = "auth-filter")
     public List<AuthenticationFilter> getAuthenticationFilters() {
         if (authenticationFilters == null) {
             authenticationFilters = new ArrayList<AuthenticationFilter>();
@@ -958,8 +864,6 @@ public class AppConfiguration {
         return authenticationFilters;
     }
 
-    @XmlElementWrapper(name = "client-auth-filters")
-    @XmlElement(name = "client-auth-filter")
     public List<ClientAuthenticationFilter> getClientAuthenticationFilters() {
         if (clientAuthenticationFilters == null) {
             clientAuthenticationFilters = new ArrayList<ClientAuthenticationFilter>();
@@ -968,7 +872,6 @@ public class AppConfiguration {
         return clientAuthenticationFilters;
     }
 
-    @XmlElement(name = "appliance-inum")
     public String getApplianceInum() {
         return applianceInum;
     }
@@ -977,7 +880,6 @@ public class AppConfiguration {
         this.applianceInum = applianceInum;
     }
 
-    @XmlElement(name = "session-id-unused-lifetime")
     public int getSessionIdUnusedLifetime() {
         return sessionIdUnusedLifetime;
     }
@@ -986,7 +888,6 @@ public class AppConfiguration {
         sessionIdUnusedLifetime = p_sessionIdUnusedLifetime;
     }
 
-    @XmlElement(name = "session-id-unauthenticated-unused-lifetime")
     public int getSessionIdUnauthenticatedUnusedLifetime() {
         return sessionIdUnauthenticatedUnusedLifetime;
     }
@@ -995,7 +896,6 @@ public class AppConfiguration {
         this.sessionIdUnauthenticatedUnusedLifetime = sessionIdUnauthenticatedUnusedLifetime;
     }
 
-    @XmlElement(name = "session-id-persist-on-prompt-none")
     public Boolean getSessionIdPersistOnPromptNone() {
         return sessionIdPersistOnPromptNone;
     }
@@ -1004,7 +904,18 @@ public class AppConfiguration {
         this.sessionIdPersistOnPromptNone = sessionIdPersistOnPromptNone;
     }
 
-    @XmlElement(name = "session-id-enabled")
+    public Boolean getSessionStateHttpOnly() {
+        if (sessionStateHttpOnly == null) {
+            return false;
+        }
+
+        return sessionStateHttpOnly;
+    }
+
+    public void setSessionStateHttpOnly(Boolean sessionStateHttpOnly) {
+        this.sessionStateHttpOnly = sessionStateHttpOnly;
+    }
+
     public Boolean getSessionIdEnabled() {
         return sessionIdEnabled;
     }
@@ -1013,7 +924,6 @@ public class AppConfiguration {
         sessionIdEnabled = p_sessionIdEnabled;
     }
 
-    @XmlElement(name = "configuration-update-interval")
     public int getConfigurationUpdateInterval() {
         return configurationUpdateInterval;
     }
@@ -1022,7 +932,6 @@ public class AppConfiguration {
         configurationUpdateInterval = p_configurationUpdateInterval;
     }
 
-    @XmlElement(name = "jsLocation")
     public String getJsLocation() {
         return jsLocation;
     }
@@ -1031,7 +940,6 @@ public class AppConfiguration {
         this.jsLocation = jsLocation;
     }
 
-    @XmlElement(name = "cssLocation")
     public String getCssLocation() {
         return cssLocation;
     }
@@ -1040,7 +948,6 @@ public class AppConfiguration {
         this.cssLocation = cssLocation;
     }
 
-    @XmlElement(name = "imgLocation")
     public String getImgLocation() {
         return imgLocation;
     }
@@ -1049,7 +956,6 @@ public class AppConfiguration {
         this.imgLocation = imgLocation;
     }
 
-    @XmlElement(name = "metric-reporter-interval")
     public int getMetricReporterInterval() {
         return metricReporterInterval;
     }
@@ -1058,7 +964,6 @@ public class AppConfiguration {
         this.metricReporterInterval = metricReporterInterval;
     }
 
-    @XmlElement(name = "metric-reporter-keep-data-days")
     public int getMetricReporterKeepDataDays() {
         return metricReporterKeepDataDays;
     }
@@ -1067,7 +972,6 @@ public class AppConfiguration {
         this.metricReporterKeepDataDays = metricReporterKeepDataDays;
     }
 
-    @XmlElement(name = "pairwise-id-type")
     public String getPairwiseIdType() {
         return pairwiseIdType;
     }
@@ -1076,7 +980,6 @@ public class AppConfiguration {
         this.pairwiseIdType = pairwiseIdType;
     }
 
-    @XmlElement(name = "pairwise-calculation-key")
     public String getPairwiseCalculationKey() {
         return pairwiseCalculationKey;
     }
@@ -1085,7 +988,6 @@ public class AppConfiguration {
         this.pairwiseCalculationKey = pairwiseCalculationKey;
     }
 
-    @XmlElement(name = "pairwise-calculation-salt")
     public String getPairwiseCalculationSalt() {
         return pairwiseCalculationSalt;
     }
@@ -1094,7 +996,6 @@ public class AppConfiguration {
         this.pairwiseCalculationSalt = pairwiseCalculationSalt;
     }
 
-    @XmlElement(name = "web-keys-storage")
     public WebKeyStorage getWebKeysStorage() {
         return webKeysStorage;
     }
@@ -1103,7 +1004,6 @@ public class AppConfiguration {
         this.webKeysStorage = webKeysStorage;
     }
 
-    @XmlElement(name = "dn-name")
     public String getDnName() {
         return dnName;
     }
@@ -1112,7 +1012,6 @@ public class AppConfiguration {
         this.dnName = dnName;
     }
 
-    @XmlElement(name = "key-store-file")
     public String getKeyStoreFile() {
         return keyStoreFile;
     }
@@ -1121,7 +1020,6 @@ public class AppConfiguration {
         this.keyStoreFile = keyStoreFile;
     }
 
-    @XmlElement(name = "key-store-secret")
     public String getKeyStoreSecret() {
         return keyStoreSecret;
     }
@@ -1130,7 +1028,6 @@ public class AppConfiguration {
         this.keyStoreSecret = keyStoreSecret;
     }
 
-    @XmlElement(name = "oxeleven-generate-key-endpoint")
     public String getOxElevenGenerateKeyEndpoint() {
         return oxElevenGenerateKeyEndpoint;
     }
@@ -1139,7 +1036,6 @@ public class AppConfiguration {
         this.oxElevenGenerateKeyEndpoint = oxElevenGenerateKeyEndpoint;
     }
 
-    @XmlElement(name = "oxeleven-sign-endpoint")
     public String getOxElevenSignEndpoint() {
         return oxElevenSignEndpoint;
     }
@@ -1148,7 +1044,6 @@ public class AppConfiguration {
         this.oxElevenSignEndpoint = oxElevenSignEndpoint;
     }
 
-    @XmlElement(name = "oxeleven-verify-signature-endpoint")
     public String getOxElevenVerifySignatureEndpoint() {
         return oxElevenVerifySignatureEndpoint;
     }
@@ -1157,7 +1052,6 @@ public class AppConfiguration {
         this.oxElevenVerifySignatureEndpoint = oxElevenVerifySignatureEndpoint;
     }
 
-    @XmlElement(name = "oxeleven-delete-key-endpoint")
     public String getOxElevenDeleteKeyEndpoint() {
         return oxElevenDeleteKeyEndpoint;
     }
