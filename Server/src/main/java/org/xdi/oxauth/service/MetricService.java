@@ -8,7 +8,7 @@ package org.xdi.oxauth.service;
 
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
@@ -27,6 +27,7 @@ import org.xdi.oxauth.model.configuration.Configuration;
  */
 @Scope(ScopeType.APPLICATION)
 @Name(MetricService.METRIC_SERVICE_COMPONENT_NAME)
+@AutoCreate
 @Startup
 public class MetricService extends org.xdi.service.metric.MetricService {
 	
@@ -43,14 +44,11 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@In
 	private ConfigurationFactory configurationFactory;
 
+	@In
 	private Configuration configuration;
-    private StaticConf staticConfiguration;
 
-	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
-		this.configuration = configuration;
-		this.staticConfiguration = staticConfiguration;
-	}
+	@In
+    private StaticConf staticConfiguration;
 
     @Observer("org.jboss.seam.postInitialization")
     public void create() {

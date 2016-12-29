@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Name("cleanerTimer")
 @AutoCreate
 @Scope(ScopeType.APPLICATION)
+@Startup
 public class CleanerTimer {
 
     private final static String EVENT_TYPE = "CleanerTimerEvent";
@@ -72,12 +73,8 @@ public class CleanerTimer {
 
     private AtomicBoolean isActive;
 
+    @In
     private Configuration configuration;
-
-    @Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-    public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
-        this.configuration = configuration;
-    }
 
     @Observer("org.jboss.seam.postInitialization")
     public void init() {
