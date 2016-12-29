@@ -13,7 +13,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -56,7 +56,7 @@ public class UmaValidationService {
     @In
     private ScopeService umaScopeService;
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     public String validateAmHost(String host) {
         if (StringHelper.isEmpty(host)) {

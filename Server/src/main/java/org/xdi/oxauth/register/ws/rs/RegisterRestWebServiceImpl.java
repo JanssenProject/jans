@@ -83,7 +83,7 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
@@ -137,7 +137,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private RegisterParamsValidator registerParamsValidator;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @In
     private StaticConf staticConfiguration;

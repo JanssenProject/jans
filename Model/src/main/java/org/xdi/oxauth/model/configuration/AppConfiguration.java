@@ -24,7 +24,7 @@ import java.util.Set;
  * @version December 26, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Configuration {
+public class AppConfiguration {
 
     private String issuer;
     private String loginPage;

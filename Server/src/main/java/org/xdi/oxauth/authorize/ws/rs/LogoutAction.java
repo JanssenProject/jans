@@ -25,7 +25,7 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.session.EndSessionRequestParam;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.Util;
@@ -64,7 +64,7 @@ public class LogoutAction {
     private JsonService jsonService;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     private String idTokenHint;
     private String postLogoutRedirectUri;

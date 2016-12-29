@@ -14,7 +14,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.U2fConfiguration;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
@@ -41,7 +41,7 @@ public class U2fConfigurationWS {
 	private Log log;
 
 	@In
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
 	@In
 	private ErrorResponseFactory errorResponseFactory;

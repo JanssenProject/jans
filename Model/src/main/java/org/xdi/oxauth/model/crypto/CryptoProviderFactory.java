@@ -7,7 +7,7 @@
 package org.xdi.oxauth.model.crypto;
 
 import org.xdi.oxauth.model.common.WebKeyStorage;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
  * @author Javier Rojas Blum
@@ -15,7 +15,7 @@ import org.xdi.oxauth.model.configuration.Configuration;
  */
 public class CryptoProviderFactory {
 
-    public static AbstractCryptoProvider getCryptoProvider(Configuration configuration) throws Exception {
+    public static AbstractCryptoProvider getCryptoProvider(AppConfiguration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = null;
         WebKeyStorage webKeyStorage = configuration.getWebKeysStorage();
 

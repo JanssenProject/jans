@@ -5,7 +5,7 @@ import org.jboss.seam.annotations.In;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -49,7 +49,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
     @Test
     public void configuration() {
         try {
-            Configuration appConfiguration = configurationFactory.getConfiguration();
+            AppConfiguration appConfiguration = configurationFactory.getConfiguration();
             assertNotNull(appConfiguration);
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);

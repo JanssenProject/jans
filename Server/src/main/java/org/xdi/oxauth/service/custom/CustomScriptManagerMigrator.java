@@ -22,7 +22,7 @@ import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.model.CustomScript;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.LdapCustomAuthenticationConfigurationService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.util.INumGenerator;
@@ -50,7 +50,7 @@ public class CustomScriptManagerMigrator {
 	private static final long serialVersionUID = -3225890597520443390L;
 
 	@In
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
     public void migrateOldConfigurations() {
     	// Check if there are new configuration

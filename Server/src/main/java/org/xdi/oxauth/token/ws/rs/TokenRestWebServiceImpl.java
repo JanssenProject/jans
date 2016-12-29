@@ -36,7 +36,7 @@ import org.xdi.oxauth.model.common.RefreshToken;
 import org.xdi.oxauth.model.common.ResourceOwnerPasswordCredentialsGrant;
 import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -91,7 +91,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private AuthenticationService authenticationService;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @Override
     public Response requestAccessToken(String grantType, String code,

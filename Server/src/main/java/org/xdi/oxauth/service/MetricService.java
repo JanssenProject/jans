@@ -18,7 +18,7 @@ import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
  * Store and retrieve metric
@@ -45,7 +45,7 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	private ConfigurationFactory configurationFactory;
 
 	@In
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
 	@In
     private StaticConf staticConfiguration;

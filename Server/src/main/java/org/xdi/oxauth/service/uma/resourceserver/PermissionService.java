@@ -11,7 +11,7 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -48,7 +48,7 @@ public class PermissionService {
     @In
     private ResourceSetPermissionManager resourceSetPermissionManager;
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     public static PermissionService instance() {
         return ServerUtil.instance(PermissionService.class);

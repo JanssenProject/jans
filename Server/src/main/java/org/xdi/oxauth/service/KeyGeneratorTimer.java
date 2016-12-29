@@ -20,7 +20,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 
@@ -52,7 +52,7 @@ public class KeyGeneratorTimer {
     private LdapEntryManager ldapEntryManager;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     private AtomicBoolean isActive;
 
