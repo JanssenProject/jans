@@ -209,6 +209,7 @@
     "sessionIdUnauthenticatedUnusedLifetime":120,
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
+    "sessionStateHttpOnly": false,
     "configurationUpdateInterval":3600,
     "cssLocation":"",
     "jsLocation":"",
