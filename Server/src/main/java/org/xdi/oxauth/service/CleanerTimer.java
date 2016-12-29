@@ -74,15 +74,14 @@ public class CleanerTimer {
     private AtomicBoolean isActive;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @Observer("org.jboss.seam.postInitialization")
     public void init() {
         log.debug("Initializing CleanerTimer");
         this.isActive = new AtomicBoolean(false);
-    	this.configuration = configurationFactory.getConfiguration();
 
-        long interval = configuration.getCleanServiceInterval();
+        long interval = appConfiguration.getCleanServiceInterval();
         if (interval <= 0) {
             interval = DEFAULT_INTERVAL;
         }
@@ -194,7 +193,7 @@ public class CleanerTimer {
     private void processMetricEntries() {
         log.debug("Start metric entries clean up");
 
-        int keepDataDays = configuration.getMetricReporterKeepDataDays();
+        int keepDataDays = appConfiguration.getMetricReporterKeepDataDays();
 
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.DATE, -keepDataDays);

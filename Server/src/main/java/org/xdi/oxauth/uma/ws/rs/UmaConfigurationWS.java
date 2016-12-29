@@ -49,7 +49,7 @@ public class UmaConfigurationWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @GET
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
@@ -62,11 +62,11 @@ public class UmaConfigurationWS {
     })
     public Response getConfiguration() {
         try {
-            final String baseEndpointUri = configuration.getBaseEndpoint();
+            final String baseEndpointUri = appConfiguration.getBaseEndpoint();
 
             final UmaConfiguration c = new UmaConfiguration();
             c.setVersion("1.0");
-            c.setIssuer(configuration.getIssuer());
+            c.setIssuer(appConfiguration.getIssuer());
             c.setPatProfilesSupported(new String[]{TokenType.BEARER.getName()});
             c.setAatProfilesSupported(new String[]{TokenType.BEARER.getName()});
             c.setRptProfilesSupported(new String[]{RptProfiles.BEARER.getIdentifyingUri()});
@@ -92,7 +92,7 @@ public class UmaConfigurationWS {
             c.setRptEndpoint(baseEndpointUri + "/requester/rpt");
             c.setGatEndpoint(baseEndpointUri + "/requester/gat");
             c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
-            c.setRptAsJwt(configuration.getUmaRptAsJwt());
+            c.setRptAsJwt(appConfiguration.getUmaRptAsJwt());
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);

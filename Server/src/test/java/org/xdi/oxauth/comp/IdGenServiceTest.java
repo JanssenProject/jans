@@ -22,6 +22,7 @@ import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.service.custom.CustomScriptService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.INumGenerator;
 
 /**
@@ -38,6 +39,7 @@ public class IdGenServiceTest extends BaseComponentTest {
 
 	private CustomScript buildIdCustomScriptEntry(String idScript) {
 		final CustomScriptService customScriptService = (CustomScriptService) Component.getInstance(CustomScriptService.class);
+    	ConfigurationFactory configurationFactory = ServerUtil.instance(ConfigurationFactory.class);
 
 		String basedInum = configurationFactory.getConfiguration().getOrganizationInum();
 		String customScriptId = basedInum + "!" + INumGenerator.generate(2);

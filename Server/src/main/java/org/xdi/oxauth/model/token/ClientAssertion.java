@@ -37,10 +37,10 @@ public class ClientAssertion {
     private Jwt jwt;
     private String clientSecret;
 
-    public ClientAssertion(Configuration configuration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    public ClientAssertion(Configuration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws InvalidJwtException {
         try {
-            if (!load(configuration, clientId, clientAssertionType, encodedAssertion)) {
+            if (!load(appConfiguration, clientId, clientAssertionType, encodedAssertion)) {
                 throw new InvalidJwtException("Cannot load the JWT");
             }
         } catch (StringEncrypter.EncryptionException e) {
@@ -58,7 +58,7 @@ public class ClientAssertion {
         return clientSecret;
     }
 
-    private boolean load(Configuration configuration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    private boolean load(Configuration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws Exception {
         boolean result;
 
@@ -81,7 +81,7 @@ public class ClientAssertion {
                         && clientId.equals(issuer) && issuer.equals(subject))) {
 
                     // Validate audience
-                    String tokenUrl = configuration.getTokenEndpoint();
+                    String tokenUrl = appConfiguration.getTokenEndpoint();
                     if (audience != null && audience.contains(tokenUrl)) {
 
                         // Validate expiration
@@ -111,7 +111,7 @@ public class ClientAssertion {
                                             new JSONObject(client.getJwks());
                                     String sharedSecret = client.getClientSecret();
                                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                                            configuration);
+                                    		appConfiguration);
                                     boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                                             keyId, jwks, sharedSecret, signatureAlgorithm);
 

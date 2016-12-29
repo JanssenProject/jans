@@ -29,15 +29,13 @@ import java.io.FileInputStream;
 
 public class ConfigurationTest extends BaseComponentTestAdapter {
 
-	@In
-	private ConfigurationFactory configurationFactory;
-
     /*
     Configuration must be present, otherwise server will not start normally... There is fallback configuration from
     file but server will not work as expected in cluster.`
      */
     @Test
     public void configurationPresence() {
+    	ConfigurationFactory configurationFactory = ServerUtil.instance(ConfigurationFactory.class);
         Assert.assertTrue((configurationFactory != null) && (configurationFactory.getLdapConfiguration() != null) &&
         		(configurationFactory.getConfiguration() != null) && (configurationFactory.getErrorResponses() != null) &&
         		(configurationFactory.getStaticConfiguration() != null) && (configurationFactory.getWebKeys() != null));

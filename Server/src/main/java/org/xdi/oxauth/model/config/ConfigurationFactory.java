@@ -201,7 +201,7 @@ public class ConfigurationFactory {
         return ldapConfiguration;
     }
 
-    @Factory(value = "configuration", scope = ScopeType.APPLICATION, autoCreate = true)
+    @Factory(value = "appConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
     public Configuration getConfiguration() {
         return conf;
     }
@@ -296,7 +296,7 @@ public class ConfigurationFactory {
                 init(c);
 
                 // Destroy old configuration
-            	Contexts.getApplicationContext().remove("configuration");
+            	Contexts.getApplicationContext().remove("appConfiguration");
             	Contexts.getApplicationContext().remove("staticConfiguration");
             	Contexts.getApplicationContext().remove("webKeysConfiguration");
 

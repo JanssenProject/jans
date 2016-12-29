@@ -78,7 +78,7 @@ public class Authenticator implements Serializable {
     private ExternalAuthenticationService externalAuthenticationService;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @In
     private FacesMessages facesMessages;
@@ -518,7 +518,7 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateBySessionState(String p_sessionState) {
-        if (StringUtils.isNotBlank(p_sessionState) && configuration.getSessionIdEnabled()) {
+        if (StringUtils.isNotBlank(p_sessionState) && appConfiguration.getSessionIdEnabled()) {
             try {
                 SessionState sessionState = sessionStateService.getSessionState(p_sessionState);
                 return authenticateBySessionState(sessionState);

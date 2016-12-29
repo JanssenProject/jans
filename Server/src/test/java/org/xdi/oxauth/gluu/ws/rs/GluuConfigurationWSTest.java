@@ -24,7 +24,7 @@ public class GluuConfigurationWSTest extends BaseTest {
     public void getConfigurationTest(String gluuConfigurationPath) throws Exception {
         final BaseTest baseTest = this;
         new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.GET, gluuConfigurationPath) {
-            private GluuConfiguration configuration;
+            private GluuConfiguration appConfiguration;
 
             @Override
             protected void prepareRequest(EnhancedMockHttpServletRequest request) {
@@ -39,12 +39,12 @@ public class GluuConfigurationWSTest extends BaseTest {
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
                 try {
-                    configuration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), GluuConfiguration.class);
-                    assertNotNull(configuration, "Meta data configuration is null");
-                    assertNotNull(configuration.getIdGenerationEndpoint());
-                    assertNotNull(configuration.getIntrospectionEndpoint());
-                    assertNotNull(configuration.getAuthLevelMapping());
-                    assertNotNull(configuration.getScopeToClaimsMapping());
+                	appConfiguration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), GluuConfiguration.class);
+                    assertNotNull(appConfiguration, "Meta data configuration is null");
+                    assertNotNull(appConfiguration.getIdGenerationEndpoint());
+                    assertNotNull(appConfiguration.getIntrospectionEndpoint());
+                    assertNotNull(appConfiguration.getAuthLevelMapping());
+                    assertNotNull(appConfiguration.getScopeToClaimsMapping());
                 } catch (IOException e) {
                     e.printStackTrace();
                     fail();

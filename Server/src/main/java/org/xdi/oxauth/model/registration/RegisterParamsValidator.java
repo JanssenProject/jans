@@ -55,7 +55,7 @@ public class RegisterParamsValidator {
     private Log log;
 
 	@In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     //private static final String HTTP = "http";
     private static final String HTTPS = "https";
@@ -75,7 +75,7 @@ public class RegisterParamsValidator {
                                                        List<String> redirectUris, String sectorIdentifierUrl) {
         boolean valid = applicationType != null && redirectUris != null && !redirectUris.isEmpty();
 
-        if (subjectType == null || !configuration.getSubjectTypesSupported().contains(subjectType.toString())) {
+        if (subjectType == null || !appConfiguration.getSubjectTypesSupported().contains(subjectType.toString())) {
             log.debug("Parameter subject_type is not valid.");
             valid = false;
         }
@@ -211,7 +211,7 @@ public class RegisterParamsValidator {
      */
     private boolean checkWhiteListRedirectUris(List<String> redirectUris) {
         boolean valid = true;
-        List<String> whiteList = configuration.getClientWhiteList();
+        List<String> whiteList = appConfiguration.getClientWhiteList();
         URLPatternList urlPatternList = new URLPatternList(whiteList);
 
         for (String redirectUri : redirectUris) {
@@ -226,7 +226,7 @@ public class RegisterParamsValidator {
      */
     private boolean checkBlackListRedirectUris(List<String> redirectUris) {
         boolean valid = true;
-        List<String> blackList = configuration.getClientBlackList();
+        List<String> blackList = appConfiguration.getClientBlackList();
         URLPatternList urlPatternList = new URLPatternList(blackList);
 
         for (String redirectUri : redirectUris) {

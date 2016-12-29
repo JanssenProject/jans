@@ -52,15 +52,15 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
 
-	private Configuration configuration;
+	private Configuration appConfiguration;
 
     protected AbstractAuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
-                                         Date authenticationTime, Configuration configuration) {
+                                         Date authenticationTime, Configuration appConfiguration) {
         this.authenticationTime = authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
         this.user = user;
         this.authorizationGrantType = authorizationGrantType;
         this.client = client;
-        this.configuration = configuration;
+        this.appConfiguration = appConfiguration;
         this.scopes = new CopyOnWriteArraySet<String>();
         this.grantId = UUID.randomUUID().toString();
     }
@@ -241,7 +241,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createAccessToken() {
-        int lifetime = configuration.getShortLivedAccessTokenLifetime();
+        int lifetime = appConfiguration.getShortLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -252,7 +252,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createLongLivedAccessToken() {
-        int lifetime = configuration.getLongLivedAccessTokenLifetime();
+        int lifetime = appConfiguration.getLongLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -263,7 +263,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public RefreshToken createRefreshToken() {
-        int lifetime = configuration.getRefreshTokenLifetime();
+        int lifetime = appConfiguration.getRefreshTokenLifetime();
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());

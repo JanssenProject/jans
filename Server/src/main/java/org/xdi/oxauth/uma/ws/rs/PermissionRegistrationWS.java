@@ -75,7 +75,7 @@ public class PermissionRegistrationWS {
     private PermissionService umaRsPermissionService;
 
     @In
-	private Configuration configuration;
+	private Configuration appConfiguration;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})

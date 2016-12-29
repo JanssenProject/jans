@@ -68,11 +68,11 @@ public class AuthenticationFilter extends AbstractFilter {
     @Logger
     private Log log;
 
-	private Configuration configuration;
+	private Configuration appConfiguration;
 
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
-		this.configuration = configuration;
+	public void updateConfiguration(Configuration appConfiguration, StaticConf staticConfiguration) {
+		this.appConfiguration = appConfiguration;
 	}
 
     private String realm;
@@ -97,13 +97,13 @@ public class AuthenticationFilter extends AbstractFilter {
                 final ErrorResponseFactory errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
                 
                 // Workaround for tomcat
-                if (configuration == null) {
-                	configuration = (Configuration) Component.getInstance("configuration", true);
+                if (appConfiguration == null) {
+                	appConfiguration = (Configuration) Component.getInstance("appConfiguration", true);
                 }
 
                 try {
                     final String requestUrl = httpRequest.getRequestURL().toString();
-                    if (requestUrl.equals(configuration.getTokenEndpoint())) {
+                    if (requestUrl.equals(appConfiguration.getTokenEndpoint())) {
                         if (httpRequest.getParameter("client_assertion") != null
                                 && httpRequest.getParameter("client_assertion_type") != null) {
                             processJwtAuth(authenticator, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
@@ -285,7 +285,7 @@ public class AuthenticationFilter extends AbstractFilter {
                         	authenticator.configureSessionClient(client);
                         }
                     }
-                } else if (Boolean.TRUE.equals(configuration.getClientAuthenticationFiltersEnabled())) {
+                } else if (Boolean.TRUE.equals(appConfiguration.getClientAuthenticationFiltersEnabled())) {
                     String clientDn = clientFilterService.processAuthenticationFilters(servletRequest.getParameterMap());
                     if (clientDn != null) {
                         Client client = clientService.getClientByDn(clientDn);
@@ -334,7 +334,7 @@ public class AuthenticationFilter extends AbstractFilter {
                 String encodedAssertion = servletRequest.getParameter("client_assertion");
 
                 if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
-                    ClientAssertion clientAssertion = new ClientAssertion(configuration, clientId, clientAssertionType, encodedAssertion);
+                    ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, clientId, clientAssertionType, encodedAssertion);
 
                     String username = clientAssertion.getSubjectIdentifier();
                     String password = clientAssertion.getClientSecret();
