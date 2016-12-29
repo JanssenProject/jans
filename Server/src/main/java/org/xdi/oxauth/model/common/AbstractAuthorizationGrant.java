@@ -7,9 +7,9 @@
 package org.xdi.oxauth.model.common;
 
 import org.apache.log4j.Logger;
-import org.jboss.seam.Component;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 28, 2016
+ * @version November 11, 2016
  */
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
@@ -52,7 +52,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
 
-    private Configuration configuration;
+	private Configuration configuration;
 
     protected AbstractAuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
                                          Date authenticationTime, Configuration configuration) {
@@ -218,7 +218,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      * authorization grant to limit the issued token scopes.
      *
      * @param requestedScopes A space-delimited list of values in which the order of
-     *                        values does not matter.
+     *              values does not matter.
      * @return A space-delimited list of scopes
      */
     @Override
@@ -241,7 +241,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createAccessToken() {
-        int lifetime = getConfiguration().getShortLivedAccessTokenLifetime();
+        int lifetime = configuration.getShortLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -252,7 +252,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public AccessToken createLongLivedAccessToken() {
-        int lifetime = getConfiguration().getLongLivedAccessTokenLifetime();
+        int lifetime = configuration.getLongLivedAccessTokenLifetime();
         AccessToken accessToken = new AccessToken(lifetime);
 
         accessToken.setAuthMode(getAcrValues());
@@ -263,7 +263,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public RefreshToken createRefreshToken() {
-        int lifetime = getConfiguration().getRefreshTokenLifetime();
+        int lifetime = configuration.getRefreshTokenLifetime();
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());
@@ -395,7 +395,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      *
      * @param refreshTokenCode The code of the refresh token.
      * @return The refresh token instance or
-     * <code>null</code> if not found.
+     *         <code>null</code> if not found.
      */
     @Override
     public RefreshToken getRefreshToken(String refreshTokenCode) {
@@ -413,7 +413,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      *
      * @param tokenCode The code of the access token.
      * @return The access token instance or
-     * <code>null</code> if not found.
+     *         <code>null</code> if not found.
      */
     @Override
     public AbstractToken getAccessToken(String tokenCode) {
@@ -435,14 +435,5 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         }
 
         return accessTokens.get(hashedTokenCode);
-    }
-
-    private Configuration getConfiguration() {
-        // Workaround for tomcat
-        if (configuration == null) {
-            configuration = (Configuration) Component.getInstance("configuration", true);
-        }
-
-        return configuration;
     }
 }
