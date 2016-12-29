@@ -6,31 +6,13 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -51,14 +33,20 @@ import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version December 29, 2016
  */
 
 @Scope(ScopeType.STATELESS)
@@ -92,7 +80,7 @@ public class SessionStateService {
     private FacesContext facesContext;
 
     @In(value = "#{facesContext.externalContext}", required = false)
-	private ExternalContext externalContext;
+    private ExternalContext externalContext;
 
     public static SessionStateService instance() {
         return (SessionStateService) Component.getInstance(SessionStateService.class);
@@ -256,6 +244,11 @@ public class SessionStateService {
         String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
         header += "; Path=/";
         header += "; Secure";
+
+        if (appConfiguration.getSessionStateHttpOnly()) {
+            header += "; HttpOnly";
+        }
+
         httpResponse.addHeader("Set-Cookie", header);
     }
 
@@ -326,7 +319,7 @@ public class SessionStateService {
     }
 
     public SessionState generateUnauthenticatedSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
-    	return generateSessionState(userDn, authenticationDate, state, sessionIdAttributes, persist);
+        return generateSessionState(userDn, authenticationDate, state, sessionIdAttributes, persist);
     }
 
     private SessionState generateSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
@@ -617,17 +610,17 @@ public class SessionStateService {
 
 
     public boolean isSessionStateAuthenticated() {
-    	SessionState sessionState = getSessionState();
-    	
-    	if (sessionState == null) {
-    		return false;
-    	}
-    	
-    	SessionIdState sessionIdState = sessionState.getState();
-    	
-    	if (SessionIdState.AUTHENTICATED.equals(sessionIdState)) {
-    		return true;
-    	}
+        SessionState sessionState = getSessionState();
+
+        if (sessionState == null) {
+            return false;
+        }
+
+        SessionIdState sessionIdState = sessionState.getState();
+
+        if (SessionIdState.AUTHENTICATED.equals(sessionIdState)) {
+            return true;
+        }
 
         return false;
     }
@@ -638,9 +631,9 @@ public class SessionStateService {
 
     private void auditLogging(SessionState sessionState) {
         HttpServletRequest httpServletRequest = ServerUtil.getRequestOrNull();
-        if(httpServletRequest != null){
+        if (httpServletRequest != null) {
             Action action;
-            switch(sessionState.getState()){
+            switch (sessionState.getState()) {
                 case AUTHENTICATED:
                     action = Action.SESSION_AUTHENTICATED;
                     break;
