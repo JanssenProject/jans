@@ -6,15 +6,6 @@
 
 package org.xdi.oxauth.client;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.core.Cookie;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
@@ -25,10 +16,19 @@ import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.common.HasParamName;
 import org.xdi.oxauth.model.util.Util;
 
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.Cookie;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Allows to retrieve HTTP requests to the authorization server and responses from it for display purposes.
  *
- * @author Javier Rojas Blum Date: 01.31.2012
+ * @author Javier Rojas Blum
+ * @version December 26, 2016
  */
 public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> {
 
@@ -59,13 +59,21 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         this.url = url;
     }
 
-    public T getRequest() { return request;}
+    public T getRequest() {
+        return request;
+    }
 
-    public void setRequest(T request) { this.request = request; }
+    public void setRequest(T request) {
+        this.request = request;
+    }
 
-    public V getResponse() { return  response; }
+    public V getResponse() {
+        return response;
+    }
 
-    public void setResponse(V response) { this.response = response; }
+    public void setResponse(V response) {
+        this.response = response;
+    }
 
     public ClientExecutor getExecutor() {
         return executor;
@@ -196,22 +204,12 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
         if (response != null) {
             sb.append("HTTP/1.1 ").append(response.getStatus());
             if (response.getHeaders() != null) {
-                if (response.getHeaders().containsKey("Content-Type")) {
-                    sb.append("\n");
-                    sb.append("Content-Type: ").append(response.getHeaders().get("Content-Type").toString().replace("[", "").replace("]", ""));
+                for (String key : response.getHeaders().keySet()) {
+                    sb.append("\n")
+                            .append(key)
+                            .append(": ")
+                            .append(response.getHeaders().get(key).get(0));
                 }
-                if (response.getHeaders().containsKey("Cache-Control")) {
-                    sb.append("\n");
-                    sb.append("Cache-Control: ").append(response.getHeaders().get("Cache-Control").toString().replace("[", "").replace("]", ""));
-                }
-                if (response.getHeaders().containsKey("Pragma")) {
-                    sb.append("\n");
-                    sb.append("Pragma: ").append(response.getHeaders().get("Pragma").toString().replace("[", "").replace("]", ""));
-                }
-            }
-            if (response.getLocation() != null && response.getStatus() == 302) {
-                sb.append("\n");
-                sb.append("Location: ").append(response.getLocation());
             }
             if (response.getEntity() != null) {
                 sb.append("\n");

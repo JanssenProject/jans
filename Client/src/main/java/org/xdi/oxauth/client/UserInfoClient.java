@@ -29,7 +29,7 @@ import java.util.List;
  * Encapsulates functionality to make user info request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version July 29, 2016
+ * @version December 26, 2016
  */
 public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse> {
 
@@ -111,7 +111,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
 
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
-            getResponse().setHeaders(clientResponse.getHeaders());
+            getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
                 List<String> contentType = clientResponse.getHeaders().get("Content-Type");
                 if (contentType != null && contentType.contains("application/jwt")) {
