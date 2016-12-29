@@ -19,7 +19,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.InternalExternal;
@@ -55,7 +55,7 @@ public class ScopeService {
     private ErrorResponseFactory errorResponseFactory;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @In
     private StaticConf staticConfiguration;

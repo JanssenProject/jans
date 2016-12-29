@@ -16,7 +16,7 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.TokenType;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.RptProfiles;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
@@ -49,7 +49,7 @@ public class UmaConfigurationWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @GET
     @Produces({UmaConstants.JSON_MEDIA_TYPE})

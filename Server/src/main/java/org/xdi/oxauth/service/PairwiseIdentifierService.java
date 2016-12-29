@@ -8,7 +8,7 @@ import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.PairwiseIdType;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.util.StringHelper;
@@ -34,7 +34,7 @@ public class PairwiseIdentifierService {
     @Logger
     private Log log;
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     public void addBranch(final String userInum) {
         SimpleBranch branch = new SimpleBranch();

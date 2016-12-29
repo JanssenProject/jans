@@ -41,7 +41,7 @@ import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.registration.Client;
@@ -68,10 +68,10 @@ public class AuthenticationFilter extends AbstractFilter {
     @Logger
     private Log log;
 
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
 	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration appConfiguration, StaticConf staticConfiguration) {
+	public void updateConfiguration(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
 		this.appConfiguration = appConfiguration;
 	}
 
@@ -98,7 +98,7 @@ public class AuthenticationFilter extends AbstractFilter {
                 
                 // Workaround for tomcat
                 if (appConfiguration == null) {
-                	appConfiguration = (Configuration) Component.getInstance("appConfiguration", true);
+                	appConfiguration = (AppConfiguration) Component.getInstance("appConfiguration", true);
                 }
 
                 try {

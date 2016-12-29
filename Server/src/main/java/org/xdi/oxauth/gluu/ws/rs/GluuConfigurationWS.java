@@ -20,7 +20,7 @@ import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.gluu.GluuConfiguration;
 import org.xdi.oxauth.model.gluu.GluuErrorResponseType;
@@ -51,7 +51,7 @@ public class GluuConfigurationWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;

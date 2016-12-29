@@ -14,7 +14,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
@@ -49,7 +49,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private final GrantService grantService = GrantService.instance();
 
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
-                              Date authenticationTime, Configuration appConfiguration) {
+                              Date authenticationTime, AppConfiguration appConfiguration) {
         super(user, authorizationGrantType, client, authenticationTime, appConfiguration);
     }
 

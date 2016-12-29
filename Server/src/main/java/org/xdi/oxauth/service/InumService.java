@@ -15,7 +15,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.common.IdType;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.Pair;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -35,7 +35,7 @@ public class InumService {
     private IdGenService idGenService;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     public String generateClientInum() {
         return generateClientInum(appConfiguration.getOrganizationInum());

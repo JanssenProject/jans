@@ -8,7 +8,7 @@ package org.xdi.oxauth.model.token;
 
 import org.python.jline.internal.Preconditions;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -30,16 +30,16 @@ public class JwtSigner {
     private String audience;
     private String hmacSharedSecret;
 
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
     private JSONWebKeySet webKeys;
 
     private Jwt jwt;
 
-    public JwtSigner(Configuration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience) throws Exception {
+    public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience) throws Exception {
         this(appConfiguration, webKeys, signatureAlgorithm, audience, null);
     }
 
-    public JwtSigner(Configuration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) throws Exception {
+    public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience, String hmacSharedSecret) throws Exception {
     	this.appConfiguration = appConfiguration;
     	this.webKeys = webKeys;
         this.signatureAlgorithm = signatureAlgorithm;
@@ -49,7 +49,7 @@ public class JwtSigner {
         cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
     }
 
-    public static JwtSigner newJwtSigner(Configuration appConfiguration, JSONWebKeySet webKeys, Client client) throws Exception {
+    public static JwtSigner newJwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, Client client) throws Exception {
         Preconditions.checkNotNull(client);
 
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());

@@ -32,7 +32,7 @@ import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
@@ -55,7 +55,7 @@ public class RegisterParamsValidator {
     private Log log;
 
 	@In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     //private static final String HTTP = "http";
     private static final String HTTPS = "https";

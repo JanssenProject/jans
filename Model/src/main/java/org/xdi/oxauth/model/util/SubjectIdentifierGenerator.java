@@ -1,6 +1,6 @@
 package org.xdi.oxauth.model.util;
 
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -12,7 +12,7 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 public class SubjectIdentifierGenerator {
 
     public static String generatePairwiseSubjectIdentifier(String sectorIdentifier, String localAccountId, String key,
-                                                           String salt, Configuration configuration) throws Exception {
+                                                           String salt, AppConfiguration configuration) throws Exception {
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
         String signingInput = sectorIdentifier + localAccountId + salt;
