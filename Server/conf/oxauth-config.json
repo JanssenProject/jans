@@ -207,6 +207,7 @@
     "sessionIdUnauthenticatedUnusedLifetime":60,
     "sessionIdEnabled":true,
 "sessionIdPersistOnPromptNone":true,
+"sessionStateHttpOnly": false,
     "configurationUpdateInterval":3600,
     "cssLocation":"${config.oxauth.contextPath}/stylesheet",
     "jsLocation":"${config.oxauth.contextPath}/js",
