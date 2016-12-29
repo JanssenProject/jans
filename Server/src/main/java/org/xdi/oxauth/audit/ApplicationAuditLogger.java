@@ -18,6 +18,7 @@ import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
@@ -38,6 +39,7 @@ import com.google.common.base.Objects;
 
 @Name("applicationAuditLogger")
 @Scope(ScopeType.APPLICATION)
+@AutoCreate
 @Startup
 public class ApplicationAuditLogger {
 
