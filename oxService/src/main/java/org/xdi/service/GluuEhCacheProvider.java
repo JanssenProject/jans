@@ -1,19 +1,21 @@
 package org.xdi.service;
 
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.intercept.BypassInterceptors;
-import org.jboss.seam.cache.EhCacheProvider;
-
 import static org.jboss.seam.ScopeType.APPLICATION;
-import static org.jboss.seam.annotations.Install.BUILT_IN;
+
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.cache.EhCacheProvider;
 
 /**
  * Created by eugeniuparvan on 12/28/16.
+ * 
+ * @author eugeniuparvan
+ * @author Yuriy Movchan
  */
-@Name("org.jboss.seam.cache.cacheProvider")
+@Name("gluuCacheProvider")
 @Scope(APPLICATION)
-@BypassInterceptors
-@Install(value = false, precedence = BUILT_IN, classDependencies="net.sf.ehcache.Cache")
 @AutoCreate
 @Startup
 public class GluuEhCacheProvider extends EhCacheProvider{

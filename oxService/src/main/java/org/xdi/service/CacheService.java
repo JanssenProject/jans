@@ -28,7 +28,7 @@ import org.jboss.seam.log.Log;
 @AutoCreate
 public class CacheService {
 
-	@In
+	@In(value = "gluuCacheProvider")
 	private CacheProvider<?> cacheProvider;
 
     @Logger
