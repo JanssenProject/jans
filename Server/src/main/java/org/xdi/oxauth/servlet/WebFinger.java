@@ -58,7 +58,7 @@ public class WebFinger extends HttpServlet {
                 logger.debug("Attempting to request OpenID Connect Discovery: " + resource + ", " + rel + ", Is Secure = " + httpRequest.isSecure());
 
                 try {
-                	Configuration configuration = ServerUtil.instance("configuration");
+                	Configuration appConfiguration = ServerUtil.instance("appConfiguration");
                     if (OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
                         if (rel == null || rel.equals(REL_VALUE)) {
                             JSONObject jsonObj = new JSONObject();
@@ -67,7 +67,7 @@ public class WebFinger extends HttpServlet {
                             JSONArray linksJsonArray = new JSONArray();
                             JSONObject linkJsonObject = new JSONObject();
                             linkJsonObject.put(REL, REL_VALUE);
-                            linkJsonObject.put(HREF, configuration.getIssuer());
+                            linkJsonObject.put(HREF, appConfiguration.getIssuer());
 
                             linksJsonArray.put(linkJsonObject);
                             jsonObj.put(LINKS, linksJsonArray);

@@ -49,8 +49,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private final GrantService grantService = GrantService.instance();
 
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
-                              Date authenticationTime, Configuration configuration) {
-        super(user, authorizationGrantType, client, authenticationTime, configuration);
+                              Date authenticationTime, Configuration appConfiguration) {
+        super(user, authorizationGrantType, client, authenticationTime, appConfiguration);
     }
 
     public static IdToken createIdToken(

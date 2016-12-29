@@ -99,7 +99,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     private PairwiseIdentifierService pairwiseIdentifierService;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @In
     private JSONWebKeySet webKeysConfiguration;
@@ -207,7 +207,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                  Collection<String> scopes) throws Exception {
         Jwt jwt = new Jwt();
-        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
+        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
 
         // Header
         jwt.getHeader().setType(JwtType.JWT);
@@ -300,7 +300,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
             jwt.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configuration.getOpenidSubAttribute();
+            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
             jwt.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 
@@ -410,7 +410,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
             jwe.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configuration.getOpenidSubAttribute();
+            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
             jwe.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 
@@ -424,7 +424,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
-            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
+            AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
             String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys), SignatureAlgorithm.RS256);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys);
 
@@ -554,7 +554,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
             jsonWebResponse.getClaims().setSubjectIdentifier(pairwiseIdentifier.getId());
         } else {
-            String openidSubAttribute = configuration.getOpenidSubAttribute();
+            String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
             jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute(openidSubAttribute));
         }
 

@@ -99,7 +99,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AuthenticationService authenticationService;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @Override
     public Response requestAuthorizationGet(
@@ -281,7 +281,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                             boolean invalidOpenidRequestObject = false;
                             if (StringUtils.isNotBlank(request)) {
                                 try {
-                                    jwtAuthorizationRequest = new JwtAuthorizationRequest(configuration, request, client);
+                                    jwtAuthorizationRequest = new JwtAuthorizationRequest(appConfiguration, request, client);
 
                                     if (!jwtAuthorizationRequest.getResponseTypes().containsAll(responseTypes)
                                             || !responseTypes.containsAll(jwtAuthorizationRequest.getResponseTypes())) {
@@ -527,7 +527,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 }
 
                                 if (responseTypes.contains(ResponseType.ID_TOKEN)) {
-                                    boolean includeIdTokenClaims = Boolean.TRUE.equals(configuration.getLegacyIdTokenClaims());
+                                    boolean includeIdTokenClaims = Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims());
                                     if (authorizationGrant == null) {
                                         includeIdTokenClaims = true;
                                         authorizationGrant = authorizationGrantList.createAuthorizationGrant(user, client,
@@ -571,7 +571,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                 builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
 
-                                if (configuration.getCustomHeadersWithAuthorizationResponse()) {
+                                if (appConfiguration.getCustomHeadersWithAuthorizationResponse()) {
                                     for (String key : customResponseHeaders.keySet()) {
                                         builder.header(key, customResponseHeaders.get(key));
                                     }
@@ -674,7 +674,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String sessionState) {
 
-        redirectUriResponse.setBaseRedirectUri(configuration.getAuthorizationPage());
+        redirectUriResponse.setBaseRedirectUri(appConfiguration.getAuthorizationPage());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
 
         // oAuth parameters

@@ -78,7 +78,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private ApplicationAuditLogger applicationAuditLogger;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionState,
@@ -146,7 +146,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
-        	Boolean endSessionWithAccessToken = configuration.getEndSessionWithAccessToken();
+        	Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
         	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
         		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
         	}

@@ -43,11 +43,11 @@ public class ClientFilterService extends BaseAuthFilterService {
     private LdapEntryManager ldapEntryManager;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @Create
     public void init() {
-        super.init(configuration.getClientAuthenticationFilters(), Boolean.TRUE.equals(configuration.getClientAuthenticationFiltersEnabled()), false);
+        super.init(appConfiguration.getClientAuthenticationFilters(), Boolean.TRUE.equals(appConfiguration.getClientAuthenticationFiltersEnabled()), false);
     }
 
     public String processAuthenticationFilter(AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<?, ?> attributeValues) {

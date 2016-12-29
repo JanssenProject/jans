@@ -50,7 +50,7 @@ public class CustomScriptManagerMigrator {
 	private static final long serialVersionUID = -3225890597520443390L;
 
 	@In
-	private Configuration configuration;
+	private Configuration appConfiguration;
 
     public void migrateOldConfigurations() {
     	// Check if there are new configuration
@@ -67,7 +67,7 @@ public class CustomScriptManagerMigrator {
 			return;
 		}
 		
-		String basedInum = configuration.getOrganizationInum();
+		String basedInum = appConfiguration.getOrganizationInum();
 		for (CustomAuthenticationConfiguration customAuthenticationConfiguration : customAuthenticationConfigurations) {
 			String customScriptId = basedInum + "!" + INumGenerator.generate(2);
 			String dn = customScriptService.buildDn(customScriptId);

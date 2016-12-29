@@ -51,7 +51,7 @@ public class GluuConfigurationWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @In
     private ExternalAuthenticationService externalAuthenticationService;
@@ -64,8 +64,8 @@ public class GluuConfigurationWS {
         try {
             final GluuConfiguration conf = new GluuConfiguration();
 
-            conf.setIdGenerationEndpoint(configuration.getIdGenerationEndpoint());
-            conf.setIntrospectionEndpoint(configuration.getIntrospectionEndpoint());
+            conf.setIdGenerationEndpoint(appConfiguration.getIdGenerationEndpoint());
+            conf.setIntrospectionEndpoint(appConfiguration.getIntrospectionEndpoint());
             conf.setAuthLevelMapping(createAuthLevelMapping());
             conf.setScopeToClaimsMapping(createScopeToClaimsMapping());
 

@@ -56,7 +56,7 @@ public class UmaValidationService {
     @In
     private ScopeService umaScopeService;
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     public String validateAmHost(String host) {
         if (StringHelper.isEmpty(host)) {
@@ -74,7 +74,7 @@ public class UmaValidationService {
         }
 
         try {
-            URI umaBaseEndpoint = new URI(configuration.getBaseEndpoint());
+            URI umaBaseEndpoint = new URI(appConfiguration.getBaseEndpoint());
             if (!StringHelper.equalsIgnoreCase(host, umaBaseEndpoint.getHost())) {
                 log.error("Get request for another AM: '{0}'", host);
                 throw new WebApplicationException(Response.status(BAD_REQUEST)
