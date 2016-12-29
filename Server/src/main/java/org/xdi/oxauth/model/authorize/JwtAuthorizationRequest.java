@@ -11,10 +11,10 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.Component;
 import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
@@ -321,12 +321,6 @@ public class JwtAuthorizationRequest {
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());
-
-        // Workaround for tomcat
-        if (configuration == null) {
-            configuration = (Configuration) Component.getInstance("configuration", true);
-        }
-
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
         		configuration);
         boolean validSignature = cryptoProvider.verifySignature(signingInput, signature, keyId, jwks, sharedSecret, signatureAlgorithm);
