@@ -20,7 +20,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -75,7 +75,7 @@ public class PermissionRegistrationWS {
     private PermissionService umaRsPermissionService;
 
     @In
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})

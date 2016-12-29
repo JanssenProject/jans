@@ -18,7 +18,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
@@ -74,7 +74,7 @@ public class CleanerTimer {
     private AtomicBoolean isActive;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @Observer("org.jboss.seam.postInitialization")
     public void init() {

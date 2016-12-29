@@ -33,7 +33,7 @@ import org.jboss.seam.core.Events;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.exception.ConfigurationException;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -94,7 +94,7 @@ public class ConfigurationFactory {
     private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
     private FileConfiguration ldapConfiguration;
-    private Configuration conf;
+    private AppConfiguration conf;
     private StaticConf staticConf;
     private JSONWebKeySet jwks;
     private String cryptoConfigurationSalt;
@@ -202,7 +202,7 @@ public class ConfigurationFactory {
     }
 
     @Factory(value = "appConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-    public Configuration getConfiguration() {
+    public AppConfiguration getConfiguration() {
         return conf;
     }
 
@@ -276,7 +276,7 @@ public class ConfigurationFactory {
     }
 
     private boolean reloadConfFromFile() {
-        final Configuration configFromFile = loadConfFromFile();
+        final AppConfiguration configFromFile = loadConfFromFile();
         if (configFromFile != null) {
             LOG.info("Reloaded configuration from file: " + configFilePath);
             conf = configFromFile;
@@ -396,7 +396,7 @@ public class ConfigurationFactory {
 
     private void initConfigurationFromJson(String p_configurationJson) {
         try {
-            final Configuration c = ServerUtil.createJsonMapper().readValue(p_configurationJson, Configuration.class);
+            final AppConfiguration c = ServerUtil.createJsonMapper().readValue(p_configurationJson, AppConfiguration.class);
             if (c != null) {
                 conf = c;
             }
@@ -444,9 +444,9 @@ public class ConfigurationFactory {
         return LDAP_DEFAULT_FILE_PATH;
     }
 
-    private Configuration loadConfFromFile() {
+    private AppConfiguration loadConfFromFile() {
         try {
-            return ServerUtil.createJsonMapper().readValue(new File(configFilePath), Configuration.class);
+            return ServerUtil.createJsonMapper().readValue(new File(configFilePath), AppConfiguration.class);
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
         }

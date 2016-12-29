@@ -24,7 +24,7 @@ import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.Util;
@@ -60,7 +60,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     private ClientService clientService;
 
     @In
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {

@@ -26,7 +26,7 @@ import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.*;
 import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
@@ -99,7 +99,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AuthenticationService authenticationService;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @Override
     public Response requestAuthorizationGet(

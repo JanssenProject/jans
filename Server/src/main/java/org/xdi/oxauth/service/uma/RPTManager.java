@@ -19,7 +19,7 @@ import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.token.TokenService;

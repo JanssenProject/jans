@@ -12,7 +12,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.web.ServletContexts;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
 /**
@@ -26,7 +26,7 @@ import org.xdi.util.StringHelper;
 public class OxAuthConfigurationService {
 
 	@In
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
 	public String getCssLocation() {
 		if (StringHelper.isEmpty(appConfiguration.getCssLocation())) {

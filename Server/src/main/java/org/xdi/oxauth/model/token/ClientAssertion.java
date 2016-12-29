@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.Component;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -37,7 +37,7 @@ public class ClientAssertion {
     private Jwt jwt;
     private String clientSecret;
 
-    public ClientAssertion(Configuration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    public ClientAssertion(AppConfiguration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws InvalidJwtException {
         try {
             if (!load(appConfiguration, clientId, clientAssertionType, encodedAssertion)) {
@@ -58,7 +58,7 @@ public class ClientAssertion {
         return clientSecret;
     }
 
-    private boolean load(Configuration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
+    private boolean load(AppConfiguration appConfiguration, String clientId, ClientAssertionType clientAssertionType, String encodedAssertion)
             throws Exception {
         boolean result;
 
