@@ -19,8 +19,10 @@ import java.util.Map;
 public enum ScopeType implements LdapEnum {
 
     LDAP("ldap", "Ldap"),
-	DYNAMIC("dynamic", "Dynamic"),
-    OPENID("openid", "Openid");
+    DYNAMIC("dynamic", "Dynamic"),
+    OPENID("openid", "Openid"),
+    OAUTH("oauth", "OAuth"),
+    UMA("uma", "UMA");
 
     private final String value;
 	private final String displayName;
