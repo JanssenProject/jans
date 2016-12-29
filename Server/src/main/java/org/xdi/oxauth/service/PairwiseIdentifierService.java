@@ -34,7 +34,7 @@ public class PairwiseIdentifierService {
     @Logger
     private Log log;
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     public void addBranch(final String userInum) {
         SimpleBranch branch = new SimpleBranch();
@@ -56,7 +56,7 @@ public class PairwiseIdentifierService {
     }
 
     public PairwiseIdentifier findPairWiseIdentifier(String userInum, String sectorIdentifierUri) throws Exception {
-        PairwiseIdType pairwiseIdType = PairwiseIdType.fromString(configuration.getPairwiseIdType());
+        PairwiseIdType pairwiseIdType = PairwiseIdType.fromString(appConfiguration.getPairwiseIdType());
         String sectorIdentifier = URI.create(sectorIdentifierUri).getHost();
 
         if (PairwiseIdType.PERSISTENT == pairwiseIdType) {
@@ -77,11 +77,11 @@ public class PairwiseIdentifierService {
                 return entries.get(0);
             }
         } else { // PairwiseIdType.ALGORITHMIC
-            String key = configuration.getPairwiseCalculationKey();
-            String salt = configuration.getPairwiseCalculationSalt();
+            String key = appConfiguration.getPairwiseCalculationKey();
+            String salt = appConfiguration.getPairwiseCalculationSalt();
 
             String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(
-                    sectorIdentifierUri, userInum, key, salt, configuration);
+                    sectorIdentifierUri, userInum, key, salt, appConfiguration);
 
             PairwiseIdentifier pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifierUri);
             pairwiseIdentifier.setId(calculatedSub);

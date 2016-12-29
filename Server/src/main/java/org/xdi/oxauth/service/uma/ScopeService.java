@@ -55,7 +55,7 @@ public class ScopeService {
     private ErrorResponseFactory errorResponseFactory;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @In
     private StaticConf staticConfiguration;
@@ -168,7 +168,7 @@ public class ScopeService {
                 result.add(entries.get(0).getDn());
             } else { // scope is not in ldap, add it dynamically
 
-                final Boolean addAutomatically = configuration.getUmaAddScopesAutomatically();
+                final Boolean addAutomatically = appConfiguration.getUmaAddScopesAutomatically();
 
                 if (addAutomatically != null && addAutomatically) {
                     final String inum = inumService.generateInum();
@@ -269,7 +269,7 @@ public class ScopeService {
     }
 
     private String getScopeEndpoint() {
-        return configuration.getBaseEndpoint() + UmaConfigurationWS.UMA_SCOPES_SUFFIX;
+        return appConfiguration.getBaseEndpoint() + UmaConfigurationWS.UMA_SCOPES_SUFFIX;
     }
 
     private Filter createAnyFilterByUrls(List<String> p_scopeUrls) {

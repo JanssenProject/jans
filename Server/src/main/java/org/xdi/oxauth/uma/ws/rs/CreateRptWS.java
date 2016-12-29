@@ -67,7 +67,7 @@ public class CreateRptWS {
     private LdapEntryManager ldapEntryManager;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @In
     private JSONWebKeySet webKeysConfiguration;
@@ -90,7 +90,7 @@ public class CreateRptWS {
             UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost, false);
 
             String rptResponse = rpt.getCode();
-            final Boolean umaRptAsJwt = configuration.getUmaRptAsJwt();
+            final Boolean umaRptAsJwt = appConfiguration.getUmaRptAsJwt();
             if (umaRptAsJwt != null && umaRptAsJwt) {
                 rptResponse = createJwr(rpt, authorization, Lists.<String>newArrayList()).asString();
             }
@@ -112,7 +112,7 @@ public class CreateRptWS {
     private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws Exception {
         final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
 
-        JwtSigner jwtSigner = JwtSigner.newJwtSigner(configuration, webKeysConfiguration, grant.getClient());
+        JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, grant.getClient());
         Jwt jwt = jwtSigner.newJwt();
 
         jwt.getClaims().setExpirationTime(rpt.getExpirationDate());
@@ -147,7 +147,7 @@ public class CreateRptWS {
             authorizeGat(request, rpt, authorization, httpRequest);
 
             String rptResponse = rpt.getCode();
-            final Boolean umaRptAsJwt = configuration.getUmaRptAsJwt();
+            final Boolean umaRptAsJwt = appConfiguration.getUmaRptAsJwt();
             if (umaRptAsJwt != null && umaRptAsJwt) {
                 rptResponse = createJwr(rpt, authorization, request.getScopes()).asString();
             }

@@ -48,9 +48,9 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
      * @param authenticationTime The Claim Value is the number of seconds from 1970-01-01T0:0:0Z as measured in UTC
      *                           until the date/time that the End-User authentication occurred.
      */
-    public AuthorizationCodeGrant(User user, Client client, Date authenticationTime, Configuration configuration) {
-        super(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, authenticationTime, configuration);
-        setAuthorizationCode(new AuthorizationCode(configuration.getAuthorizationCodeLifetime()));
+    public AuthorizationCodeGrant(User user, Client client, Date authenticationTime, Configuration appConfiguration) {
+        super(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, authenticationTime, appConfiguration);
+        setAuthorizationCode(new AuthorizationCode(appConfiguration.getAuthorizationCodeLifetime()));
     }
 
     /**

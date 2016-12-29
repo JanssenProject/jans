@@ -35,7 +35,7 @@ public class ApplianceService {
 	private LdapEntryManager ldapEntryManager;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
 	@In
 	private StaticConf staticConfiguration;
@@ -122,7 +122,7 @@ public class ApplianceService {
 	}
 
 	public String getApplianceInum() {
-		return configuration.getApplianceInum();
+		return appConfiguration.getApplianceInum();
 	}
 
 	/**

@@ -60,7 +60,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     private ClientService clientService;
 
     @In
-	private Configuration configuration;
+	private Configuration appConfiguration;
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
@@ -73,29 +73,29 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant createAuthorizationGrant(User user, Client client, Date authenticationTime) {
-        return new AuthorizationGrant(user, null, client, authenticationTime, configuration);
+        return new AuthorizationGrant(user, null, client, authenticationTime, appConfiguration);
     }
 
     @Override
     public AuthorizationCodeGrant createAuthorizationCodeGrant(User user, Client client, Date authenticationTime) {
-        final AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, configuration);
+        final AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
         grant.persist(grant.getAuthorizationCode());
         return grant;
     }
 
     @Override
     public ImplicitGrant createImplicitGrant(User user, Client client, Date authenticationTime) {
-        return new ImplicitGrant(user, client, authenticationTime, configuration);
+        return new ImplicitGrant(user, client, authenticationTime, appConfiguration);
     }
 
     @Override
     public ClientCredentialsGrant createClientCredentialsGrant(User user, Client client) {
-        return new ClientCredentialsGrant(user, client, configuration);
+        return new ClientCredentialsGrant(user, client, appConfiguration);
     }
 
     @Override
     public ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client) {
-        return new ResourceOwnerPasswordCredentialsGrant(user, client, configuration);
+        return new ResourceOwnerPasswordCredentialsGrant(user, client, appConfiguration);
     }
 
     @Override
@@ -184,16 +184,16 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 AuthorizationGrant result;
                 switch (grantType) {
                     case AUTHORIZATION_CODE:
-                        result = new AuthorizationCodeGrant(user, client, authenticationTime, configuration);
+                        result = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
                         break;
                     case CLIENT_CREDENTIALS:
-                        result = new ClientCredentialsGrant(user, client, configuration);
+                        result = new ClientCredentialsGrant(user, client, appConfiguration);
                         break;
                     case IMPLICIT:
-                        result = new ImplicitGrant(user, client, authenticationTime, configuration);
+                        result = new ImplicitGrant(user, client, authenticationTime, appConfiguration);
                         break;
                     case RESOURCE_OWNER_PASSWORD_CREDENTIALS:
-                        result = new ResourceOwnerPasswordCredentialsGrant(user, client, configuration);
+                        result = new ResourceOwnerPasswordCredentialsGrant(user, client, appConfiguration);
                         break;
                     default:
                         return null;
@@ -216,7 +216,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                 if (StringUtils.isNotBlank(jwtRequest)) {
                     try {
-                        result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(configuration, jwtRequest, client));
+                        result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(appConfiguration, jwtRequest, client));
                     } catch (Exception e) {
                         LOGGER.trace(e.getMessage(), e);
                     }

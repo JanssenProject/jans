@@ -30,8 +30,8 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
      * @param client An application making protected resource requests on behalf of
      *               the resource owner and with its authorization.
      */
-    public ClientCredentialsGrant(User user, Client client, Configuration configuration) {
-        super(user, AuthorizationGrantType.CLIENT_CREDENTIALS, client, null, configuration);
+    public ClientCredentialsGrant(User user, Client client, Configuration appConfiguration) {
+        super(user, AuthorizationGrantType.CLIENT_CREDENTIALS, client, null, appConfiguration);
     }
 
     /**

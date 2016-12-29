@@ -64,7 +64,7 @@ public class LogoutAction {
     private JsonService jsonService;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
@@ -139,7 +139,7 @@ public class LogoutAction {
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
-        	Boolean endSessionWithAccessToken = configuration.getEndSessionWithAccessToken();
+        	Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
         	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
         		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
         	}

@@ -91,7 +91,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private AuthenticationService authenticationService;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -145,7 +145,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         if (authorizationCodeGrant.getScopes().contains("openid")) {
                             String nonce = authorizationCodeGrant.getNonce();
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                            		configuration.getLegacyIdTokenClaims());
+                            		appConfiguration.getLegacyIdTokenClaims());
                             idToken = authorizationCodeGrant.createIdToken(
                                     nonce, null, accToken, authorizationCodeGrant, includeIdTokenClaims);
                         }
@@ -214,7 +214,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     IdToken idToken = null;
                     if (clientCredentialsGrant.getScopes().contains("openid")) {
                         boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                        		configuration.getLegacyIdTokenClaims());
+                        		appConfiguration.getLegacyIdTokenClaims());
                         idToken = clientCredentialsGrant.createIdToken(
                                 null, null, null, clientCredentialsGrant, includeIdTokenClaims);
                     }
@@ -260,7 +260,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         IdToken idToken = null;
                         if (resourceOwnerPasswordCredentialsGrant.getScopes().contains("openid")) {
                             boolean includeIdTokenClaims = Boolean.TRUE.equals(
-                            		configuration.getLegacyIdTokenClaims());
+                            		appConfiguration.getLegacyIdTokenClaims());
                             idToken = resourceOwnerPasswordCredentialsGrant.createIdToken(
                                     null, null, null, resourceOwnerPasswordCredentialsGrant, includeIdTokenClaims);
                         }

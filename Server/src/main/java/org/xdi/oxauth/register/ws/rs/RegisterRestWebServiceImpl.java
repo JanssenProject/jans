@@ -137,7 +137,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     private RegisterParamsValidator registerParamsValidator;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @In
     private StaticConf staticConfiguration;
@@ -156,25 +156,25 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
-            if (configuration.getDynamicRegistrationEnabled()) {
+            if (appConfiguration.getDynamicRegistrationEnabled()) {
                 final RegisterRequest r = RegisterRequest.fromJson(requestParams);
 
                 log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",
                         r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
 
                 if (r.getSubjectType() == null) {
-                    SubjectType defaultSubjectType = SubjectType.fromString(configuration.getDefaultSubjectType());
+                    SubjectType defaultSubjectType = SubjectType.fromString(appConfiguration.getDefaultSubjectType());
                     if (defaultSubjectType != null) {
                         r.setSubjectType(defaultSubjectType);
-                    } else if (configuration.getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
+                    } else if (appConfiguration.getSubjectTypesSupported().contains(SubjectType.PUBLIC.toString())) {
                         r.setSubjectType(SubjectType.PUBLIC);
-                    } else if (configuration.getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
+                    } else if (appConfiguration.getSubjectTypesSupported().contains(SubjectType.PAIRWISE.toString())) {
                         r.setSubjectType(SubjectType.PAIRWISE);
                     }
                 }
 
                 if (r.getIdTokenSignedResponseAlg() == null) {
-                    r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(configuration.getDefaultSignatureAlgorithm()));
+                    r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
                 }
 
                 if (r.getIdTokenSignedResponseAlg() != SignatureAlgorithm.NONE) {
@@ -201,8 +201,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                             client.setClientIdIssuedAt(calendar.getTime());
 
-                            if (configuration.getDynamicRegistrationExpirationTime() > 0) {
-                                calendar.add(Calendar.SECOND, configuration.getDynamicRegistrationExpirationTime());
+                            if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) {
+                                calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
                                 client.setClientSecretExpiresAt(calendar.getTime());
                             }
 
@@ -227,7 +227,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             client.setLastAccessTime(currentTime);
                             client.setLastLogonTime(currentTime);
 
-                            Boolean persistClientAuthorizations = configuration.getDynamicRegistrationPersistClientAuthorizations();
+                            Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
                             client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
 
                             clientService.persist(client);
@@ -395,8 +395,8 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         List<String> scopes = requestObject.getScopes();
         List<String> scopesDn;
         if (scopes != null && !scopes.isEmpty()
-                && configuration.getDynamicRegistrationScopesParamEnabled() != null
-                && configuration.getDynamicRegistrationScopesParamEnabled()) {
+                && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
+                && appConfiguration.getDynamicRegistrationScopesParamEnabled()) {
             List<String> defaultScopes = scopeService.getDefaultScopesDn();
             List<String> requestedScopes = scopeService.getScopesDn(scopes);
             if (defaultScopes.containsAll(requestedScopes)) {
@@ -442,7 +442,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                     if (redirectUrisValidated) {
                         if (request.getSubjectType() != null
-                                && !configuration.getSubjectTypesSupported().contains(request.getSubjectType())) {
+                                && !appConfiguration.getSubjectTypesSupported().contains(request.getSubjectType())) {
                             log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
@@ -491,7 +491,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_READ);
         oAuth2AuditLog.setClientId(clientId);
         try {
-            if (configuration.getDynamicRegistrationEnabled()) {
+            if (appConfiguration.getDynamicRegistrationEnabled()) {
                 if (registerParamsValidator.validateParamsClientRead(clientId, accessToken)) {
                     Client client = clientService.getClient(clientId, accessToken);
                     if (client != null) {
@@ -543,7 +543,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), client.getClientSecret());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
-                configuration.getRegistrationEndpoint() + "?" +
+        		appConfiguration.getRegistrationEndpoint() + "?" +
                         RegisterResponseParam.CLIENT_ID.toString() + "=" + client.getClientId());
         responseJsonObject.put(CLIENT_ID_ISSUED_AT.toString(), client.getClientIdIssuedAt().getTime() / 1000);
         responseJsonObject.put(CLIENT_SECRET_EXPIRES_AT.toString(), client.getClientSecretExpiresAt() != null && client.getClientSecretExpiresAt().getTime() > 0 ?
@@ -608,13 +608,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
      */
     private void putCustomStuffIntoObject(Client p_client, JSONObject p_requestObject) throws JSONException {
         // custom object class
-        final String customOC = configuration.getDynamicRegistrationCustomObjectClass();
+        final String customOC = appConfiguration.getDynamicRegistrationCustomObjectClass();
         if (StringUtils.isNotBlank(customOC)) {
             p_client.setCustomObjectClasses(new String[]{customOC});
         }
 
         // custom attributes (custom attributes must be in custom object class)
-        final List<String> attrList = configuration.getDynamicRegistrationCustomAttributes();
+        final List<String> attrList = appConfiguration.getDynamicRegistrationCustomAttributes();
         if (attrList != null && !attrList.isEmpty()) {
             final Log staticLog = Logging.getLog(RegisterRestWebServiceImpl.class);
             for (String attr : attrList) {

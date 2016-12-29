@@ -97,7 +97,7 @@ public class AuthorizeAction {
     private Identity identity;
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @In(required = false)
     private FacesContext facesContext;
@@ -262,7 +262,7 @@ public class AuthorizeAction {
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
 
-            if (configuration.getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
+            if (appConfiguration.getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                 if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
                     permissionGranted(session);
                     return;

@@ -58,7 +58,7 @@ public class ApplicationAuditLogger {
 	private Log logger;
 
 	@In
-	private Configuration configuration;
+	private Configuration appConfiguration;
 
 	private final ReentrantLock lock = new ReentrantLock();
 
@@ -183,18 +183,18 @@ public class ApplicationAuditLogger {
 	}
 
 	private Boolean isEnabledOAuthAuditnLogging() {
-		return configuration.getEnabledOAuthAuditLogging();
+		return appConfiguration.getEnabledOAuthAuditLogging();
 	}
 
 	private Set<String> getJmsBrokerURISet() {
-		return configuration.getJmsBrokerURISet();
+		return appConfiguration.getJmsBrokerURISet();
 	}
 
 	private String getJmsUserName() {
-		return configuration.getJmsUserName();
+		return appConfiguration.getJmsUserName();
 	}
 
 	private String getJmsPassword() {
-		return configuration.getJmsPassword();
+		return appConfiguration.getJmsPassword();
 	}
 }

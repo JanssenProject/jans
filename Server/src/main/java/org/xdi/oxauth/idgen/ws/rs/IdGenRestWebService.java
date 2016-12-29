@@ -52,7 +52,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class IdGenRestWebService {
 
     @In
-    private Configuration configuration;
+    private Configuration appConfiguration;
 
     @Logger
     private Log log;
@@ -151,7 +151,7 @@ public class IdGenRestWebService {
         // to facilitate authorization server configuration data discovery,
         // including discovery of the endpoint where the client can request an RPT (Section 3.4.1).
         log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {0}",
-        		configuration.getUmaConfigurationEndpoint());
+        		appConfiguration.getUmaConfigurationEndpoint());
 
         return new Pair<Boolean, Response>(false, unauthorizedResponse());
     }
@@ -194,8 +194,8 @@ public class IdGenRestWebService {
 
     public Response unauthorizedResponse() {
         return Response.status(Response.Status.UNAUTHORIZED).
-                header("host_id", configuration.getIssuer()).
-                header("as_uri", configuration.getUmaConfigurationEndpoint()).
+                header("host_id", appConfiguration.getIssuer()).
+                header("as_uri", appConfiguration.getUmaConfigurationEndpoint()).
                 build();
     }
 
