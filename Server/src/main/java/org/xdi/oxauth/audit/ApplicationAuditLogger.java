@@ -24,14 +24,11 @@ import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -61,8 +58,6 @@ public class ApplicationAuditLogger {
 	private Log logger;
 
 	@In
-	private ConfigurationFactory configurationFactory;
-
 	private Configuration configuration;
 
 	private final ReentrantLock lock = new ReentrantLock();
@@ -70,11 +65,6 @@ public class ApplicationAuditLogger {
 	@Create
 	public void init() {
 		tryToEstablishJMSConnection();
-	}
-
-	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(Configuration configuration, StaticConf staticConfiguration) {
-		this.configuration = configuration;
 	}
 
 	@Asynchronous
