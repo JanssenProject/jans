@@ -13,7 +13,7 @@ import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public class ApplianceService {
 	private LdapEntryManager ldapEntryManager;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
 	@In
 	private StaticConf staticConfiguration;

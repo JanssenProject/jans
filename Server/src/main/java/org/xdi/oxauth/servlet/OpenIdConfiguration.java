@@ -74,7 +74,7 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.ScopeType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
@@ -116,7 +116,7 @@ public class OpenIdConfiguration extends HttpServlet {
 				try {
 					JSONObject jsonObj = new JSONObject();
 
-					Configuration appConfiguration = ServerUtil.instance("appConfiguration");
+					AppConfiguration appConfiguration = ServerUtil.instance("appConfiguration");
 
 					jsonObj.put(ISSUER, appConfiguration.getIssuer());
 					jsonObj.put(AUTHORIZATION_ENDPOINT, appConfiguration.getAuthorizationEndpoint());

@@ -27,7 +27,7 @@ import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.RPTManager;
@@ -52,7 +52,7 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class IdGenRestWebService {
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @Logger
     private Log log;

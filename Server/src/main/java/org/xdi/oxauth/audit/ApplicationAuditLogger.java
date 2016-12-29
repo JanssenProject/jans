@@ -29,7 +29,7 @@ import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
 import com.google.common.base.Objects;
@@ -58,7 +58,7 @@ public class ApplicationAuditLogger {
 	private Log logger;
 
 	@In
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
 	private final ReentrantLock lock = new ReentrantLock();
 

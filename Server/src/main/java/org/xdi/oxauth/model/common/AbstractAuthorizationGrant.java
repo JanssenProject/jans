@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.TokenHashUtil;
@@ -52,10 +52,10 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     protected final ConcurrentMap<String, AccessToken> accessTokens = new ConcurrentHashMap<String, AccessToken>();
     protected final ConcurrentMap<String, RefreshToken> refreshTokens = new ConcurrentHashMap<String, RefreshToken>();
 
-	private Configuration appConfiguration;
+	private AppConfiguration appConfiguration;
 
     protected AbstractAuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
-                                         Date authenticationTime, Configuration appConfiguration) {
+                                         Date authenticationTime, AppConfiguration appConfiguration) {
         this.authenticationTime = authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
         this.user = user;
         this.authorizationGrantType = authorizationGrantType;

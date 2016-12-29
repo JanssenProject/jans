@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.xml.bind.JAXBContext;
@@ -67,9 +67,9 @@ public class ConfigurationTest extends BaseComponentTestAdapter {
         getLdapManager().persist(c);
     }
 
-    private static Configuration loadConfFromFile(String p_filePath) throws JAXBException {
-        final JAXBContext jc = JAXBContext.newInstance(Configuration.class);
+    private static AppConfiguration loadConfFromFile(String p_filePath) throws JAXBException {
+        final JAXBContext jc = JAXBContext.newInstance(AppConfiguration.class);
         final Unmarshaller u = jc.createUnmarshaller();
-        return (Configuration) u.unmarshal(new File(p_filePath));
+        return (AppConfiguration) u.unmarshal(new File(p_filePath));
     }
 }

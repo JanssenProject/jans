@@ -15,7 +15,7 @@ import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
 import java.util.Map;
@@ -38,7 +38,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
     private LdapEntryManager ldapEntryManager;
 
     @In
-    private Configuration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @Create
     public void init() {
