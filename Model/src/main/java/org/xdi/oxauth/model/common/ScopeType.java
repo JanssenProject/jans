@@ -13,8 +13,10 @@ import java.util.Map;
 
 /**
  * Scope types
- * 
- * @author Yuriy Movchan Date: 06/30/2015
+ *
+ * @author Yuriy Movchan
+ * @author Javier Rojas Blum
+ * @version December 29, 2016
  */
 public enum ScopeType implements LdapEnum {
 
@@ -25,15 +27,15 @@ public enum ScopeType implements LdapEnum {
     UMA("uma", "UMA");
 
     private final String value;
-	private final String displayName;
+    private final String displayName;
 
-	private static Map<String, ScopeType> mapByValues = new HashMap<String, ScopeType>();
+    private static Map<String, ScopeType> mapByValues = new HashMap<String, ScopeType>();
 
-	static {
-		for (ScopeType enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (ScopeType enumType : values()) {
+            mapByValues.put(enumType.getValue(), enumType);
+        }
+    }
 
     private ScopeType(String value, String displayName) {
         this.value = value;
@@ -41,30 +43,30 @@ public enum ScopeType implements LdapEnum {
     }
 
     public static ScopeType fromString(String param) {
-    	return getByValue(param);
+        return getByValue(param);
     }
 
-	@Override
-	public String getValue() {
-		return value;
-	}
+    @Override
+    public String getValue() {
+        return value;
+    }
 
-	/**
+    /**
      * Gets display name
      *
      * @return display name name
      */
     public String getDisplayName() {
-		return displayName;
-	}
+        return displayName;
+    }
 
-	public static ScopeType getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static ScopeType getByValue(String value) {
+        return mapByValues.get(value);
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
     @Override
     public String toString() {
