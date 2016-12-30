@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
+import org.gluu.site.ldap.exception.InvalidSimplePageControlException;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SortOrder;
 import org.xdi.ldap.model.VirtualListViewResponse;
@@ -202,8 +203,12 @@ public class OperationsFacade {
 		return search(dn, filter, SearchScope.SUB, searchLimit, sizeLimit, controls, attributes);
 	}
 
-	
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+		throws LDAPSearchException {
+		return search(dn, filter, scope, 0, searchLimit, sizeLimit, controls, attributes);
+	}
+	
+	public SearchResult search(String dn, Filter filter, SearchScope scope, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
 		
@@ -233,8 +238,18 @@ public class OperationsFacade {
 		List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
 		List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
 		
-		if (searchLimit > 0) {
+		if ((searchLimit > 0) || (startIndex > 0)) {
+			if (searchLimit == 0) {
+				searchLimit = 100;
+			}
 			ASN1OctetString cookie = null;
+			if (startIndex > 0) {
+				try {
+					cookie = scrollSimplePagedResultsControl(dn, searchRequest, filter, scope, controls, startIndex);
+				} catch (InvalidSimplePageControlException ex) {
+					throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
+				}
+			}
 			do {
 				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(searchLimit, cookie) });
 				setControls(searchRequest, controls);
@@ -265,7 +280,34 @@ public class OperationsFacade {
 			setControls(searchRequest, controls);
 			searchResult = getConnectionPool().search(searchRequest);
 		}
+
 		return searchResult;
+	}
+
+	private ASN1OctetString scrollSimplePagedResultsControl(String dn, SearchRequest searchRequest2, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPSearchException, InvalidSimplePageControlException {
+		SearchRequest searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, "dn");
+
+		int currentStartIndex = startIndex;
+		ASN1OctetString cookie = null;
+		do {
+			int pageSize = Math.min(currentStartIndex, 100);
+			searchRequest.setControls(new Control[] { new SimplePagedResultsControl(pageSize, cookie, true) });
+			setControls(searchRequest, controls);
+			SearchResult searchResult = getConnectionPool().search(searchRequest);
+			
+			currentStartIndex -= searchResult.getEntryCount();
+			try {
+				SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
+				if (c != null) {
+					cookie = c.getCookie();
+				}
+			} catch (LDAPException ex) {
+				log.error("Error while accessing cookie" + ex.getMessage());
+				throw new InvalidSimplePageControlException("Error while accessing cookie");
+			}
+		} while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
+		
+		return cookie;
 	}
 
 	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {

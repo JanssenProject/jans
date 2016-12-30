@@ -306,6 +306,10 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	}
 
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, 0, searchLimit, sizeLimit);
+	}
+
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int startIndex, int searchLimit, int sizeLimit) {
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
 		}
@@ -328,7 +332,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, startIndex, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
