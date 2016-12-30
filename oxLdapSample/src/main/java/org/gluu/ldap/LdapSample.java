@@ -10,8 +10,10 @@ import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.ldap.model.SearchScope;
 import org.apache.log4j.Logger;
 
+import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.ResultCode;
 
 /**
@@ -35,10 +37,10 @@ public class LdapSample {
 	private Properties getSampleConnectionProperties() {
 		Properties connectionProperties = new Properties();
 
-		connectionProperties.put("bindDN", "cn=directory manager");
+		connectionProperties.put("bindDN", "cn=directory manager, o=gluu");
 		connectionProperties.put("bindPassword", "secret");
-		connectionProperties.put("servers", "localhost:31389");
-		connectionProperties.put("useSSL", "false");
+		connectionProperties.put("servers", "u144.gluu.info:1636");
+		connectionProperties.put("useSSL", "true");
 		connectionProperties.put("maxconnections", "3");
 
 		return connectionProperties;
@@ -98,7 +100,7 @@ public class LdapSample {
 		for (SimpleUser user : users) {
 			log.debug("User with uid: " + user.getUserId());
 		}
-
+		
 		if (users.size() > 0) {
 			// Add attribute "streetAddress" to first user
 			SimpleUser user = users.get(0);
@@ -106,6 +108,12 @@ public class LdapSample {
 					.add(new CustomAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
 
 			ldapEntryManager.merge(user);
+		}
+
+		Filter filter = Filter.createEqualityFilter("gluuStatus", "active");
+		List<SimpleAttribute> attributes = ldapEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, 10, 0, 0);
+		for (SimpleAttribute attribute : attributes) {
+			log.debug("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
 		}
 	}
 
