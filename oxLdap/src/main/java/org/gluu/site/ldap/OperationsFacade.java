@@ -245,7 +245,7 @@ public class OperationsFacade {
 			ASN1OctetString cookie = null;
 			if (startIndex > 0) {
 				try {
-					cookie = scrollSimplePagedResultsControl(dn, searchRequest, filter, scope, controls, startIndex);
+					cookie = scrollSimplePagedResultsControl(dn, filter, scope, controls, startIndex);
 				} catch (InvalidSimplePageControlException ex) {
 					throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
 				}
@@ -284,7 +284,7 @@ public class OperationsFacade {
 		return searchResult;
 	}
 
-	private ASN1OctetString scrollSimplePagedResultsControl(String dn, SearchRequest searchRequest2, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPSearchException, InvalidSimplePageControlException {
+	private ASN1OctetString scrollSimplePagedResultsControl(String dn, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPSearchException, InvalidSimplePageControlException {
 		SearchRequest searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, "dn");
 
 		int currentStartIndex = startIndex;
