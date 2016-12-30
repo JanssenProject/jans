@@ -161,7 +161,6 @@
                 var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
                 if (userName) {
                     userNameField.value = userName;
-                    userNameField.readOnly = true;
                     passwordField.focus();
                 } else {
                     userNameField.focus();
