@@ -57,5 +57,6 @@ public interface ConfigurationResponseClaim {
     public static final String CLAIMS_KEY = "claims";
     public static final String HTTP_LOGOUT_SUPPORTED = "http_logout_supported";
     public static final String LOGOUT_SESSION_SUPPORTED = "logout_session_supported";
-    public static final String AUTH_LEVEL_MAPPING = "auth_level_mapping";    
+    public static final String AUTH_LEVEL_MAPPING = "auth_level_mapping";
+    public static final String FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED="frontchannel_logout_session_supported";
 }
