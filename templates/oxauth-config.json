@@ -227,5 +227,6 @@
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
     "legacyIdTokenClaims": true,
-    "customHeadersWithAuthorizationResponse": true
+    "customHeadersWithAuthorizationResponse": true,
+    "frontChannelLogoutSessionSupported":true
 }
