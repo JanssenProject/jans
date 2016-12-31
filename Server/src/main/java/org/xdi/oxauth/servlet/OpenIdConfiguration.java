@@ -50,6 +50,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_ENDPOINT;
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.USER_INFO_SIGNING_ALG_VALUES_SUPPORTED;
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.VALIDATE_TOKEN_ENDPOINT;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -343,6 +344,7 @@ public class OpenIdConfiguration extends HttpServlet {
 					jsonObj.put(OP_TOS_URI, appConfiguration.getOpTosUri());
 					jsonObj.put(HTTP_LOGOUT_SUPPORTED, "true");
 					jsonObj.put(LOGOUT_SESSION_SUPPORTED, "true");
+					jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED, appConfiguration.getFrontChannelLogoutSessionSupported());
 
 					out.println(jsonObj.toString(4).replace("\\/", "/"));
 				} catch (JSONException e) {

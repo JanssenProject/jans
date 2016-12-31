@@ -141,8 +141,19 @@ public class AppConfiguration {
     private List<String> clientBlackList;
     private Boolean legacyIdTokenClaims;
     private Boolean customHeadersWithAuthorizationResponse;
+    private Boolean frontChannelLogoutSessionSupported; 
+    
 
-    public Boolean getUmaRptAsJwt() {
+    public Boolean getFrontChannelLogoutSessionSupported() {
+		return frontChannelLogoutSessionSupported;
+	}
+
+	public void setFrontChannelLogoutSessionSupported(
+			Boolean frontChannelLogoutSessionSupported) {
+		this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+	}
+
+	public Boolean getUmaRptAsJwt() {
         return umaRptAsJwt;
     }
 
