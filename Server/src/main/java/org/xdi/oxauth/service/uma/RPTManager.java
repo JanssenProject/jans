@@ -13,17 +13,18 @@ import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.batch.BatchService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -101,19 +102,27 @@ public class RPTManager extends AbstractRPTManager {
     }
 
     @Override
-    public void cleanupRPTs(Date now) {
-        try {
-            final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-            final List<UmaRPT> entries = ldapEntryManager.findEntries(
-            		staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter);
-            if (entries != null && !entries.isEmpty()) {
+    public void cleanupRPTs(final Date now) {
+        BatchService<UmaRPT> rptBatchService = new BatchService<UmaRPT>(CleanerTimer.BATCH_SIZE) {
+            @Override
+            protected List<UmaRPT> getChunkOrNull(int offset, int chunkSize) {
+                try {
+                    final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
+                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter, SearchScope.SUB, null, offset, chunkSize, chunkSize);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void performAction(List<UmaRPT> entries) {
                 for (UmaRPT p : entries) {
                     ldapEntryManager.remove(p);
                 }
             }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
+        };
+        rptBatchService.execute();
     }
 
     @Override
