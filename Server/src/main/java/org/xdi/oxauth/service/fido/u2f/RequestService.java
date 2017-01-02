@@ -11,8 +11,10 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
+import org.xdi.oxauth.service.CleanerTimer;
 
 import java.util.Date;
 import java.util.List;
@@ -36,11 +38,11 @@ public class RequestService {
 	@In
 	private StaticConf staticConfiguration;
 
-	public List<RequestMessageLdap> getExpiredRequestMessages(Date expirationDate) {
+	public List<RequestMessageLdap> getExpiredRequestMessages(int startIndex, Date expirationDate) {
 		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=u2f,o=@!1111,o=gluu
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<RequestMessageLdap> requestMessageLdap = ldapEntryManager.findEntries(u2fBaseDn, RequestMessageLdap.class, expirationFilter);
+		List<RequestMessageLdap> requestMessageLdap = ldapEntryManager.findEntries(u2fBaseDn, RequestMessageLdap.class, expirationFilter, SearchScope.SUB, null, startIndex, CleanerTimer.BATCH_SIZE, CleanerTimer.BATCH_SIZE);
 
 		return requestMessageLdap;
 	}
