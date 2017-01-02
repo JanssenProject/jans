@@ -17,7 +17,6 @@ import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
@@ -26,6 +25,7 @@ import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
+import org.xdi.service.batch.BatchService;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,6 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Startup
 public class CleanerTimer {
 
+    public final static int BATCH_SIZE = 100;
     private final static String EVENT_TYPE = "CleanerTimerEvent";
     private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
@@ -127,25 +128,34 @@ public class CleanerTimer {
     private void processRegisteredClients() {
         log.debug("Start Client clean up");
 
-        List<Client> clientList = clientService.getClientsWithExpirationDate(new String[]{"inum", "oxAuthClientSecretExpiresAt"});
+        // Cleaning oxAuthToken
+        BatchService<Client> clientBatchService = new BatchService<Client>(CleanerTimer.BATCH_SIZE) {
+            @Override
+            protected List<Client> getChunkOrNull(int offset, int chunkSize) {
+                return clientService.getClientsWithExpirationDate(offset, chunkSize, chunkSize);
+            }
 
-        if (clientList != null && !clientList.isEmpty()) {
-            for (Client client : clientList) {
-                GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                expirationDate.setTime(client.getClientSecretExpiresAt());
+            @Override
+            protected void performAction(List<Client> entries) {
+                for (Client client : entries) {
+                    GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                    GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                    expirationDate.setTime(client.getClientSecretExpiresAt());
 
-                if (expirationDate.before(now)) {
-                    List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
-                    authorizationGrantList.removeAuthorizationGrants(toRemove);
+                    if (expirationDate.before(now)) {
+                        List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
+                        authorizationGrantList.removeAuthorizationGrants(toRemove);
 
-                    log.debug("Removing Client: {0}, Expiration date: {1}",
-                            client.getClientId(),
-                            client.getClientSecretExpiresAt());
-                    clientService.remove(client);
+                        log.debug("Removing Client: {0}, Expiration date: {1}",
+                                client.getClientId(),
+                                client.getClientSecretExpiresAt());
+                        clientService.remove(client);
+                    }
                 }
             }
-        }
+
+        };
+        clientBatchService.execute();
 
         log.debug("End Client clean up");
     }
@@ -155,18 +165,25 @@ public class CleanerTimer {
 
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.SECOND, -90);
-        Date expirationDate = calendar.getTime();
+        final Date expirationDate = calendar.getTime();
 
-        List<RequestMessageLdap> expiredRequestMessage = u2fRequestService.getExpiredRequestMessages(expirationDate);
-        if ((expiredRequestMessage != null) && !expiredRequestMessage.isEmpty()) {
-            for (RequestMessageLdap requestMessageLdap : expiredRequestMessage) {
-                log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
-                        requestMessageLdap.getRequestId(),
-                        requestMessageLdap.getCreationDate());
-                u2fRequestService.removeRequestMessage(requestMessageLdap);
+        BatchService<RequestMessageLdap> requestMessageLdapBatchService= new BatchService<RequestMessageLdap>(CleanerTimer.BATCH_SIZE) {
+            @Override
+            protected List<RequestMessageLdap> getChunkOrNull(int offset, int chunkSize) {
+                return u2fRequestService.getExpiredRequestMessages(offset, expirationDate);
             }
-        }
 
+            @Override
+            protected void performAction(List<RequestMessageLdap> entries) {
+                for (RequestMessageLdap requestMessageLdap : entries) {
+                    log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
+                            requestMessageLdap.getRequestId(),
+                            requestMessageLdap.getCreationDate());
+                    u2fRequestService.removeRequestMessage(requestMessageLdap);
+                }
+            }
+        };
+        requestMessageLdapBatchService.execute();
         log.debug("End U2F request clean up");
     }
 
@@ -175,17 +192,25 @@ public class CleanerTimer {
 
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.SECOND, -90);
-        Date expirationDate = calendar.getTime();
+        final Date expirationDate = calendar.getTime();
 
-        List<DeviceRegistration> deviceRegistrations = deviceRegistrationService.getExpiredDeviceRegistrations(expirationDate);
-        if ((deviceRegistrations != null) && !deviceRegistrations.isEmpty()) {
-            for (DeviceRegistration deviceRegistration : deviceRegistrations) {
-                log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
-                		deviceRegistration.getId(),
-                		deviceRegistration.getCreationDate());
-                deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
+        BatchService<DeviceRegistration> deviceRegistrationBatchService= new BatchService<DeviceRegistration>(CleanerTimer.BATCH_SIZE) {
+            @Override
+            protected List<DeviceRegistration> getChunkOrNull(int offset, int chunkSize) {
+                return deviceRegistrationService.getExpiredDeviceRegistrations(offset, expirationDate);
             }
-        }
+
+            @Override
+            protected void performAction(List<DeviceRegistration> entries) {
+                for (DeviceRegistration deviceRegistration : entries) {
+                    log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
+                            deviceRegistration.getId(),
+                            deviceRegistration.getCreationDate());
+                    deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
+                }
+            }
+        };
+        deviceRegistrationBatchService.execute();
 
         log.debug("End U2F request clean up");
     }

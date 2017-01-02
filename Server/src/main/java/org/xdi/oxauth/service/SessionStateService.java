@@ -6,32 +6,15 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -49,10 +32,17 @@ import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.batch.BatchService;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.util.StaticUtils;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -562,8 +552,47 @@ public class SessionStateService {
         final int interval = appConfiguration.getSessionIdUnusedLifetime();
         final int unauthenticatedInterval = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
 
-        remove(getUnauthenticatedIdsOlderThan(unauthenticatedInterval));
-        remove(getIdsOlderThan(interval));
+        BatchService<SessionState> unauthenticatedIdsBatchService = new BatchService<SessionState>(CleanerTimer.BATCH_SIZE) {
+            @Override
+            protected List<SessionState> getChunkOrNull(int offset, int chunkSize) {
+                try {
+                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(unauthenticatedInterval);
+                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
+                    final Filter filter = Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
+                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, offset, chunkSize, chunkSize);
+                } catch (Exception e) {
+                    log.trace(e.getMessage(), e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void performAction(List<SessionState> entries) {
+                remove(entries);
+            }
+        };
+        unauthenticatedIdsBatchService.execute();
+
+        BatchService<SessionState> idsBatchService = new BatchService<SessionState>(CleanerTimer.BATCH_SIZE) {
+            @Override
+            protected List<SessionState> getChunkOrNull(int offset, int chunkSize) {
+                try {
+                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(interval);
+                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
+                    final Filter filter = Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
+                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, offset, chunkSize, chunkSize);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void performAction(List<SessionState> entries) {
+                remove(entries);
+            }
+        };
+        idsBatchService.execute();
     }
 
     public List<SessionState> getUnauthenticatedIdsOlderThan(int p_intervalInSeconds) {
