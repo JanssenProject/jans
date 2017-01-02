@@ -41,9 +41,13 @@ public class GetTokensByCodeTest {
 
         final String state = CoreUtils.secureRandomString();
 
+        String code = codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce);
+
+        notEmpty(code);
+
         final GetTokensByCodeParams commandParams = new GetTokensByCodeParams();
         commandParams.setOxdId(site.getOxdId());
-        commandParams.setCode(codeRequest(client, site.getOxdId(), userId, userSecret, state, nonce));
+        commandParams.setCode(code);
         commandParams.setState(state);
 
         final Command command = new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(commandParams);
