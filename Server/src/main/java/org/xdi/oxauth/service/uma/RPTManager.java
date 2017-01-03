@@ -103,7 +103,7 @@ public class RPTManager extends AbstractRPTManager {
 
     @Override
     public void cleanupRPTs(final Date now) {
-        BatchService<UmaRPT> rptBatchService = new BatchService<UmaRPT>(CleanerTimer.BATCH_SIZE) {
+        BatchService<UmaRPT> rptBatchService = new BatchService<UmaRPT>() {
             @Override
             protected List<UmaRPT> getChunkOrNull(int offset, int chunkSize) {
                 try {
@@ -122,7 +122,7 @@ public class RPTManager extends AbstractRPTManager {
                 }
             }
         };
-        rptBatchService.execute();
+        rptBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     @Override
