@@ -552,7 +552,7 @@ public class SessionStateService {
         final int interval = appConfiguration.getSessionIdUnusedLifetime();
         final int unauthenticatedInterval = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
 
-        BatchService<SessionState> unauthenticatedIdsBatchService = new BatchService<SessionState>(CleanerTimer.BATCH_SIZE) {
+        BatchService<SessionState> unauthenticatedIdsBatchService = new BatchService<SessionState>() {
             @Override
             protected List<SessionState> getChunkOrNull(int offset, int chunkSize) {
                 try {
@@ -571,9 +571,9 @@ public class SessionStateService {
                 remove(entries);
             }
         };
-        unauthenticatedIdsBatchService.execute();
+        unauthenticatedIdsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
-        BatchService<SessionState> idsBatchService = new BatchService<SessionState>(CleanerTimer.BATCH_SIZE) {
+        BatchService<SessionState> idsBatchService = new BatchService<SessionState>() {
             @Override
             protected List<SessionState> getChunkOrNull(int offset, int chunkSize) {
                 try {
@@ -592,7 +592,7 @@ public class SessionStateService {
                 remove(entries);
             }
         };
-        idsBatchService.execute();
+        idsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     public List<SessionState> getUnauthenticatedIdsOlderThan(int p_intervalInSeconds) {

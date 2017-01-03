@@ -229,7 +229,7 @@ public class GrantService {
     public void cleanUp() {
 
         // Cleaning oxAuthToken
-        BatchService<TokenLdap> tokenBatchService = new BatchService<TokenLdap>(CleanerTimer.BATCH_SIZE) {
+        BatchService<TokenLdap> tokenBatchService = new BatchService<TokenLdap>() {
             @Override
             protected List<TokenLdap> getChunkOrNull(int offset, int chunkSize) {
                 try {
@@ -247,10 +247,10 @@ public class GrantService {
                 remove(entries);
             }
         };
-        tokenBatchService.execute();
+        tokenBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
         // Cleaning oxAuthGrant
-        BatchService<Grant> grantBatchService = new BatchService<Grant>(CleanerTimer.BATCH_SIZE) {
+        BatchService<Grant> grantBatchService = new BatchService<Grant>() {
             @Override
             protected List<Grant> getChunkOrNull(int offset, int chunkSize) {
                 try {
@@ -270,11 +270,11 @@ public class GrantService {
                 removeGrants(entries);
             }
         };
-        grantBatchService.execute();
+        grantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
         // Cleaning old oxAuthGrant
         // Note: This block should be removed, it is used only to delete old legacy data.
-        BatchService<Grant> oldGrantBatchService = new BatchService<Grant>(CleanerTimer.BATCH_SIZE) {
+        BatchService<Grant> oldGrantBatchService = new BatchService<Grant>() {
             @Override
             protected List<Grant> getChunkOrNull(int offset, int chunkSize) {
                 try {
@@ -291,7 +291,7 @@ public class GrantService {
                 removeGrants(entries);
             }
         };
-        oldGrantBatchService.execute();
+        oldGrantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     private void addGrantBranch(final String p_grantId, final String p_clientId) {

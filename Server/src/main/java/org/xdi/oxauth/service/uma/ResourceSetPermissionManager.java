@@ -110,7 +110,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
 
     @Override
     public void cleanupResourceSetPermissions(final Date now) {
-        BatchService<ResourceSetPermission> resourceSetPermissionBatchService = new BatchService<ResourceSetPermission>(CleanerTimer.BATCH_SIZE) {
+        BatchService<ResourceSetPermission> resourceSetPermissionBatchService = new BatchService<ResourceSetPermission>() {
             @Override
             protected List<ResourceSetPermission> getChunkOrNull(int offset, int chunkSize) {
                 try {
@@ -129,7 +129,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 }
             }
         };
-        resourceSetPermissionBatchService.execute();
+        resourceSetPermissionBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     public void addBranch(String clientDn) {
