@@ -129,7 +129,7 @@ public class CleanerTimer {
         log.debug("Start Client clean up");
 
         // Cleaning oxAuthToken
-        BatchService<Client> clientBatchService = new BatchService<Client>(CleanerTimer.BATCH_SIZE) {
+        BatchService<Client> clientBatchService = new BatchService<Client>() {
             @Override
             protected List<Client> getChunkOrNull(int offset, int chunkSize) {
                 return clientService.getClientsWithExpirationDate(offset, chunkSize, chunkSize);
@@ -155,7 +155,7 @@ public class CleanerTimer {
             }
 
         };
-        clientBatchService.execute();
+        clientBatchService.iterateAllByChunks(BATCH_SIZE);
 
         log.debug("End Client clean up");
     }
@@ -167,7 +167,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchService<RequestMessageLdap> requestMessageLdapBatchService= new BatchService<RequestMessageLdap>(CleanerTimer.BATCH_SIZE) {
+        BatchService<RequestMessageLdap> requestMessageLdapBatchService= new BatchService<RequestMessageLdap>() {
             @Override
             protected List<RequestMessageLdap> getChunkOrNull(int offset, int chunkSize) {
                 return u2fRequestService.getExpiredRequestMessages(offset, expirationDate);
@@ -183,7 +183,7 @@ public class CleanerTimer {
                 }
             }
         };
-        requestMessageLdapBatchService.execute();
+        requestMessageLdapBatchService.iterateAllByChunks(BATCH_SIZE);
         log.debug("End U2F request clean up");
     }
 
@@ -194,7 +194,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchService<DeviceRegistration> deviceRegistrationBatchService= new BatchService<DeviceRegistration>(CleanerTimer.BATCH_SIZE) {
+        BatchService<DeviceRegistration> deviceRegistrationBatchService= new BatchService<DeviceRegistration>() {
             @Override
             protected List<DeviceRegistration> getChunkOrNull(int offset, int chunkSize) {
                 return deviceRegistrationService.getExpiredDeviceRegistrations(offset, expirationDate);
@@ -210,7 +210,7 @@ public class CleanerTimer {
                 }
             }
         };
-        deviceRegistrationBatchService.execute();
+        deviceRegistrationBatchService.iterateAllByChunks(BATCH_SIZE);
 
         log.debug("End U2F request clean up");
     }
