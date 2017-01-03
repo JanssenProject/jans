@@ -467,12 +467,10 @@ public class GluuAttribute extends Entry implements Serializable {
 			}
 		}
 
-		if (maxValue == null) {
-			maxValue = 400;
-		}
+		
 
 		// Maximum Length validation
-		if (maxValue != null) {
+		if (maxValue != null ) {
 			int max = this.attributeValidation.getMaxLength();
 			if ((attribute != null) && (attribute.length() > max)) {
 				((UIInput) comp).setValid(false);
@@ -481,6 +479,8 @@ public class GluuAttribute extends Entry implements Serializable {
 				message.setSeverity(FacesMessage.SEVERITY_ERROR);
 				context.addMessage(comp.getClientId(context), message);
 			}
+		}else{
+			maxValue = 400;
 		}
 
 		// Regex Pattern Validation
