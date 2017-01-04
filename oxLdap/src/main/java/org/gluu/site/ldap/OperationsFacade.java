@@ -310,6 +310,57 @@ public class OperationsFacade {
 		return cookie;
 	}
 
+	public SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int startIndex, int count, int searchLimit, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {
+
+		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
+			(new Exception()).printStackTrace();
+		}
+
+		SearchRequest searchRequest;
+		if (attributes == null) {
+			searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter);
+		} else {
+			searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, attributes);
+		}
+
+		List<SearchResult> searchResultList = new ArrayList<SearchResult>();
+		List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
+		List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
+
+		searchRequest.setControls(new SimplePagedResultsControl(searchLimit));
+		SearchResult searchResult = getConnectionPool().search(searchRequest);
+		int totalResults = searchResult.getSearchEntries().size();
+
+		List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
+
+		if (startIndex <= totalResults) {
+
+			int diff = (totalResults - startIndex);
+			if (diff <= count) {
+				count = (diff + 1) >= count ? count : (diff + 1);
+			}
+
+			int startZeroIndex = startIndex - 1;
+			searchResultEntryList = searchResult.getSearchEntries().subList(startZeroIndex, startZeroIndex + count);
+		}
+
+		searchResultList.add(searchResult);
+		searchResultEntries.addAll(searchResultEntryList);
+		searchResultReferences.addAll(searchResult.getSearchReferences());
+
+		SearchResult searchResultTemp = searchResultList.get(0);
+		searchResult = new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(), searchResultTemp.getDiagnosticMessage(),
+				                        searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(), searchResultEntries, searchResultReferences,
+				                        searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
+
+		// Get results info
+		vlvResponse.setItemsPerPage(count);
+		vlvResponse.setTotalResults(totalResults);
+		vlvResponse.setStartIndex(startIndex);
+
+		return searchResult;
+	}
+
 	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {
 
 		if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {

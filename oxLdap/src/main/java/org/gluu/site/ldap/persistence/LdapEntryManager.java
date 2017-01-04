@@ -355,6 +355,51 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return entries;
 	}
 
+	public <T> List<T> findEntriesSearchSearchResult(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int searchLimit, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String[] ldapReturnAttributes) {
+
+		if (StringHelper.isEmptyString(baseDN)) {
+			throw new MappingException("Base DN to find entries is null");
+		}
+
+		// Check entry class
+		checkEntryClass(entryClass, false);
+		String[] objectClasses = getTypeObjectClasses(entryClass);
+		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+		String[] currentLdapReturnAttributes = ldapReturnAttributes;
+		if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
+			currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+		}
+
+		// Find entries
+		Filter searchFilter;
+		if (objectClasses.length > 0) {
+			searchFilter = addObjectClassFilter(filter, objectClasses);
+		} else {
+			searchFilter = filter;
+		}
+
+		SearchResult searchResult = null;
+		try {
+
+			searchResult = this.ldapOperationService.searchSearchResult(baseDN, searchFilter, SearchScope.SUB, startIndex, count, searchLimit, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+
+			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
+			}
+
+		} catch (Exception ex) {
+			throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+		}
+
+		if (searchResult.getEntryCount() == 0) {
+			return new ArrayList<T>(0);
+		}
+
+		List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations, searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
+
+		return entries;
+	}
+
 	public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String[] ldapReturnAttributes) {
 
 		if (StringHelper.isEmptyString(baseDN)) {
