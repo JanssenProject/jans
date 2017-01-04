@@ -466,21 +466,20 @@ public class GluuAttribute extends Entry implements Serializable {
 				context.addMessage(comp.getClientId(context), message);
 			}
 		}
-
 		
+		//default maxlength
+		int max = 400;
+		if (maxValue != null) {
+			max = this.attributeValidation.getMaxLength();
+		}
 
 		// Maximum Length validation
-		if (maxValue != null ) {
-			int max = this.attributeValidation.getMaxLength();
-			if ((attribute != null) && (attribute.length() > max)) {
-				((UIInput) comp).setValid(false);
-
-				FacesMessage message = new FacesMessage(this.displayName + " should not exceed " + max + " symbols. ");
-				message.setSeverity(FacesMessage.SEVERITY_ERROR);
-				context.addMessage(comp.getClientId(context), message);
-			}
-		}else{
-			maxValue = 400;
+		if ((attribute != null) && (attribute.length() > max)) {
+			((UIInput) comp).setValid(false);
+		
+			FacesMessage message = new FacesMessage(this.displayName + " should not exceed " + max + " symbols. ");
+			message.setSeverity(FacesMessage.SEVERITY_ERROR);
+			context.addMessage(comp.getClientId(context), message);
 		}
 
 		// Regex Pattern Validation
