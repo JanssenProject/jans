@@ -11,10 +11,12 @@ import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.SearchScope;
+import org.xdi.ldap.model.VirtualListViewResponse;
 import org.apache.log4j.Logger;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchResult;
 
 /**
  * @author Yuriy Movchan
@@ -38,8 +40,8 @@ public class LdapSample {
 		Properties connectionProperties = new Properties();
 
 		connectionProperties.put("bindDN", "cn=directory manager, o=gluu");
-		connectionProperties.put("bindPassword", "secret");
-		connectionProperties.put("servers", "u144.gluu.info:1636");
+		connectionProperties.put("bindPassword", "9lQoXSINUsnP");
+		connectionProperties.put("servers", "xeon.gluu.info:1636");
 		connectionProperties.put("useSSL", "true");
 		connectionProperties.put("maxconnections", "3");
 
@@ -94,8 +96,7 @@ public class LdapSample {
 		// Create LDAP entry manager
 		LdapEntryManager ldapEntryManager = ldapSample.createLdapEntryManager();
 
-		// Find all users which have specified object classes defined in
-		// SimpleUser
+		// Find all users which have specified object classes defined in SimpleUser
 		List<SimpleUser> users = ldapEntryManager.findEntries("o=gluu", SimpleUser.class, null);
 		for (SimpleUser user : users) {
 			log.debug("User with uid: " + user.getUserId());
@@ -114,6 +115,22 @@ public class LdapSample {
 		List<SimpleAttribute> attributes = ldapEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, 10, 0, 0);
 		for (SimpleAttribute attribute : attributes) {
 			log.debug("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
+		}
+
+		List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, 10, 0, 0);
+		log.debug("Found sessions: " + sessions.size());
+
+		List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, 0, 0, 0);
+		log.debug("Found grants: " + grants.size());
+
+		try {
+			VirtualListViewResponse virtualListViewResponse = new VirtualListViewResponse();
+			SearchResult searchResult = ldapEntryManager.getLdapOperationService().searchSearchResult("o=gluu", Filter.createEqualityFilter("objectClass", "gluuPerson"), SearchScope.SUB, 10, 100, 100000, "displayName", null, virtualListViewResponse, "uid", "displayName", "gluuStatus");
+			
+			log.debug("Found persons: " + virtualListViewResponse.getTotalResults());
+			System.out.println(searchResult.getSearchEntries());
+		} catch (Exception ex) {
+			log.error("Failed to search", ex);
 		}
 	}
 
