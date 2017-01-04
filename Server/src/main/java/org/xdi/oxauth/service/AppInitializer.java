@@ -516,7 +516,7 @@ public class AppInitializer {
 			return;
 		}
 
-		Level level = Level.toLevel(appConfiguration.getLoggingLevel(), Level.INFO); 
+		Level level = Level.toLevel(loggingLevel, Level.INFO); 
 		
 		Enumeration<org.apache.log4j.Logger> currentLoggers = LogManager.getCurrentLoggers();
 		while(currentLoggers.hasMoreElements()) {
