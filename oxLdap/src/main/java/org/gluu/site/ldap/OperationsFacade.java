@@ -6,14 +6,21 @@
 
 package org.gluu.site.ldap;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
 import org.gluu.site.ldap.exception.InvalidSimplePageControlException;
+import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
+import org.gluu.site.ldap.persistence.exception.MappingException;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SortOrder;
 import org.xdi.ldap.model.VirtualListViewResponse;
@@ -39,7 +46,12 @@ import com.unboundid.ldap.sdk.SearchRequest;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchResultReference;
-import com.unboundid.ldap.sdk.controls.*;
+import com.unboundid.ldap.sdk.controls.ServerSideSortRequestControl;
+import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
+import com.unboundid.ldap.sdk.controls.SortKey;
+import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
+import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
+import com.unboundid.ldap.sdk.controls.VirtualListViewResponseControl;
 import com.unboundid.ldif.LDIFChangeRecord;
 
 /**
@@ -329,7 +341,10 @@ public class OperationsFacade {
 
 		searchRequest.setControls(new SimplePagedResultsControl(searchLimit));
 		SearchResult searchResult = getConnectionPool().search(searchRequest);
-		int totalResults = searchResult.getSearchEntries().size();
+		List<SearchResultEntry> resultSearchResultEntries = searchResult.getSearchEntries();
+		int totalResults = resultSearchResultEntries.size();
+		
+		sortListByAttributes(searchResultEntries, false, sortBy);
 
 		List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
 
@@ -341,7 +356,7 @@ public class OperationsFacade {
 			}
 
 			int startZeroIndex = startIndex - 1;
-			searchResultEntryList = searchResult.getSearchEntries().subList(startZeroIndex, startZeroIndex + count);
+			searchResultEntryList = resultSearchResultEntries.subList(startZeroIndex, startZeroIndex + count);
 		}
 
 		searchResultList.add(searchResult);
@@ -625,6 +640,84 @@ public class OperationsFacade {
 
 	public boolean isBinaryAttribute(String attributeName) {
 		return this.connectionProvider.isBinaryAttribute(attributeName);
+	}
+
+	public <T> void sortListByAttributes(List<T> searchResultEntries, boolean caseSensetive, String... sortByAttributes) {
+		// Check input parameters
+		if (searchResultEntries == null) {
+			throw new MappingException("Entries list to sort is null");
+		}
+
+		if ((searchResultEntries == null) || (searchResultEntries.size() == 0)) {
+			return;
+		}
+
+		if ((sortByAttributes == null) || (sortByAttributes.length == 0)) {
+			throw new InvalidArgumentException("Invalid list of sortBy properties " + Arrays.toString(sortByAttributes));
+		}
+
+		SearchResultEntryComparator<T> comparator = new SearchResultEntryComparator<T>(sortByAttributes, caseSensetive);
+		Collections.sort(searchResultEntries, comparator);
+	}
+
+	private static final class SearchResultEntryComparator<T> implements Comparator<T>, Serializable {
+
+		private static final long serialVersionUID = 574848841116711467L;
+		private String[] sortByAttributes;
+		private boolean caseSensetive;
+
+		private SearchResultEntryComparator(String[] sortByAttributes, boolean caseSensetive) {
+			this.sortByAttributes = sortByAttributes;
+			this.caseSensetive = caseSensetive;
+		}
+
+		public int compare(T entry1, T entry2) {
+			if ((entry1 == null) && (entry2 == null)) {
+				return 0;
+			}
+			if ((entry1 == null) && (entry2 != null)) {
+				return -1;
+			} else if ((entry1 != null) && (entry2 == null)) {
+				return 1;
+			}
+
+			int result = 0;
+			for (String currSortByAttribute : sortByAttributes) {
+				result = compare(entry1, entry2, currSortByAttribute);
+				if (result != 0) {
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public int compare(T entry1, T entry2, String attributeName) {
+			Object value1 = ((SearchResultEntry) entry1).getAttribute(attributeName);
+			Object value2 = ((SearchResultEntry) entry2).getAttribute(attributeName);
+
+			if ((value1 == null) && (value2 == null)) {
+				return 0;
+			}
+			if ((value1 == null) && (value2 != null)) {
+				return -1;
+			} else if ((value1 != null) && (value2 == null)) {
+				return 1;
+			}
+
+			if (value1 instanceof Date) {
+				return ((Date) value1).compareTo((Date) value2);
+			} else if (value1 instanceof Integer) {
+				return ((Integer) value1).compareTo((Integer) value2);
+			} else if (value1 instanceof String && value2 instanceof String) {
+				if (caseSensetive) {
+					return ((String) value1).compareTo((String) value2);
+				} else {
+					return ((String) value1).toLowerCase().compareTo(((String) value2).toLowerCase());
+				}
+			}
+            return 0;
+		}
 	}
 
 }
