@@ -1790,9 +1790,9 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', osDefault])
 
             if self.installOxTrust | self.installOxAuth:
-                self.run([self.cmd_mkdir, '-m', '755', '-p', self.oxPhotosFolder])
-                self.run([self.cmd_mkdir, '-m', '755', '-p', self.oxTrustRemovedFolder])
-                self.run([self.cmd_mkdir, '-m', '755', '-p', self.oxTrustCacheRefreshFolder])
+                self.run([self.cmd_mkdir, '-m', '775', '-p', self.oxPhotosFolder])
+                self.run([self.cmd_mkdir, '-m', '775', '-p', self.oxTrustRemovedFolder])
+                self.run([self.cmd_mkdir, '-m', '775', '-p', self.oxTrustCacheRefreshFolder])
 
                 self.run([self.cmd_chown, '-R', 'root:gluu', self.oxPhotosFolder])
                 self.run([self.cmd_chown, '-R', 'root:gluu', self.oxTrustRemovedFolder])
