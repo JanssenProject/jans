@@ -10,10 +10,14 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
@@ -41,7 +45,9 @@ import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.service.custom.CustomScriptManagerMigrator;
 import org.xdi.oxauth.util.ServerUtil;
@@ -500,11 +506,28 @@ public class AppInitializer {
 
 		return clazzObject;
 	}
+	
+	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT)
+	public void updateLoggingSeverity(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
+		String loggingLevel = appConfiguration.getLoggingLevel();
+		log.info("Setting loggers level to: '{0}'", loggingLevel);
+		
+		if (StringHelper.equalsIgnoreCase("DEFAULT", loggingLevel)) {
+			return;
+		}
 
-	public static AppInitializer instance() {
-        return ServerUtil.instance(AppInitializer.class);
-    }
-
+		Level level = Level.toLevel(appConfiguration.getLoggingLevel(), Level.INFO); 
+		
+		Enumeration<org.apache.log4j.Logger> currentLoggers = LogManager.getCurrentLoggers();
+		while(currentLoggers.hasMoreElements()) {
+			org.apache.log4j.Logger logger = (org.apache.log4j.Logger) currentLoggers.nextElement();
+			String loggerName = logger.getName();
+			if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu")) {
+				logger.setLevel(level);
+			}
+		}
+	}
+	
 	private class LdapConnectionProviders {
 		private LdapConnectionService connectionProvider;
 		private LdapConnectionService connectionBindProvider;
