@@ -57,14 +57,6 @@ public class ClientService {
     @In
     private StaticConf staticConfiguration;
 
-    /**
-     * Get ClientService instance
-     *
-     * @return ClientService instance
-     */
-    public static ClientService instance() {
-        return ServerUtil.instance(ClientService.class);
-    }
 
     public void persist(Client client) {
         ldapEntryManager.persist(client);
