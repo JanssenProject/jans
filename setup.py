@@ -257,7 +257,6 @@ class Setup(object):
         self.openldapBaseFolder = '/opt/symas'
         self.openldapBinFolder = '/opt/symas/bin'
         self.openldapConfFolder = '/opt/symas/etc/openldap'
-        self.openldapCnConfig = '%s/slapd.d' % self.openldapConfFolder
         self.openldapRootUser = "cn=directory manager,o=gluu"
         self.openldapSiteUser = "cn=directory manager,o=site"
         self.openldapKeyPass = None
@@ -267,7 +266,6 @@ class Setup(object):
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.openldapSchemaFolder = "%s/schema/openldap" % self.gluuOptFolder
-        self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
         self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
@@ -2316,9 +2314,6 @@ class Setup(object):
                 self.run([cmd, '-b', 'o=site', '-f', config, '-l', ldif])
             else:
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
-        # Generate the cn=config directory
-        self.run([self.cmd_mkdir, '-p', self.openldapCnConfig])
-        self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
     def setup_openldap_logging(self):
         self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
