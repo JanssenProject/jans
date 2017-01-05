@@ -144,6 +144,8 @@ public final class ApplicationConfiguration implements Serializable {
 	
 	private List<String> clientWhiteList;
     private List<String> clientBlackList;
+    
+    private String loggingLevel;
 
 	public boolean isOxIncommonFlag() {
 		return oxIncommonFlag;
@@ -867,4 +869,13 @@ public final class ApplicationConfiguration implements Serializable {
 	public void setClientBlackList(List<String> clientBlackList) {
 		this.clientBlackList = clientBlackList;
 	}
+
+	public String getLoggingLevel() {
+		return loggingLevel;
+	}
+
+	public void setLoggingLevel(String loggingLevel) {
+		this.loggingLevel = loggingLevel;
+	}
+
 }
