@@ -40,10 +40,6 @@ public class IdGenService implements IdGenerator {
     @In
     private ExternalIdGeneratorService externalIdGeneratorService;
 
-    public static IdGenService instance() {
-        return ServerUtil.instance(IdGenService.class);
-    }
-
     public String generateId(IdType p_idType, String p_idPrefix) {
         return generateId(p_idType.getType(), p_idPrefix);
     }

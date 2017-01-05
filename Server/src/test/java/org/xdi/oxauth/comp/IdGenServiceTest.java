@@ -87,7 +87,7 @@ public class IdGenServiceTest extends BaseComponentTest {
 
 	@Test
 	public void testCustomIdGenerationByPythonScript() {
-		final IdGenService instance = IdGenService.instance();
+		final IdGenService instance = ServerUtil.instance(IdGenService.class);
 
 		final String uuid = instance.generateId("test", "");
 		System.out.println("Generated Id: " + uuid);
