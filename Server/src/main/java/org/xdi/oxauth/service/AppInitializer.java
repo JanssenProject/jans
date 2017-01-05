@@ -6,18 +6,21 @@
 
 package org.xdi.oxauth.service;
 
+import java.net.URL;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.helpers.Loader;
+import org.apache.log4j.helpers.LogLog;
+import org.apache.log4j.helpers.OptionConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
@@ -50,7 +53,6 @@ import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.service.custom.CustomScriptManagerMigrator;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
@@ -513,6 +515,7 @@ public class AppInitializer {
 		log.info("Setting loggers level to: '{0}'", loggingLevel);
 		
 		if (StringHelper.equalsIgnoreCase("DEFAULT", loggingLevel)) {
+			resetLog4jConfiguration();
 			return;
 		}
 
@@ -526,6 +529,22 @@ public class AppInitializer {
 				logger.setLevel(level);
 			}
 		}
+	}
+	
+	private void resetLog4jConfiguration() {
+		URL url = Loader.getResource("log4j.xml");
+		if(url == null) {
+		    LogLog.debug("Could not find resource: 'log4j.xml'");
+		}
+	      
+		// If we have a non-null url, then delegate the rest of the configuration to the OptionConverter.selectAndConfigure method.
+	    LogLog.debug("Using URL ["+url+"] for automatic log4j configuration.");
+	    try {
+	    	LogManager.getLoggerRepository().resetConfiguration();
+	        OptionConverter.selectAndConfigure(url, null, LogManager.getLoggerRepository());
+	    } catch (NoClassDefFoundError e) {
+	        LogLog.warn("Error during default initialization", e);
+	    }
 	}
 	
 	private class LdapConnectionProviders {
