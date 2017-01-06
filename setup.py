@@ -2281,7 +2281,7 @@ class Setup(object):
                 packageName = "%s/%s" % ( openLdapDistFolder, file )
 
         if packageName == None:
-            raise Exception('Failed to find OpenLDAP package in folder %s !' % directory)
+            self.logIt('Failed to find OpenLDAP package in folder %s !' % directory, True)
 
         self.logIt("Found package '%s' for install" % packageName)
         if packageRpm:
