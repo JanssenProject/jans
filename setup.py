@@ -245,7 +245,7 @@ class Setup(object):
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.redhat_services = ['httpd']
-        self.debian_services = ['apache2']
+        self.debian_services = ['apache2', 'rsyslog']
 
         self.apache_start_script = '/etc/init.d/httpd'
 
@@ -2195,7 +2195,7 @@ class Setup(object):
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             for service in self.debian_services:
-                self.run(["/usr/sbin/update-rc.d", service, 'enable'])
+                self.run(["/usr/sbin/update-rc.d", service, 'defaults'])
 
 
     def start_services(self):
