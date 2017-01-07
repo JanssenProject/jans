@@ -483,6 +483,12 @@ public class GluuAttribute extends Entry implements Serializable {
 		}
 
 		// Regex Pattern Validation
+		
+		if( (this.name.equalsIgnoreCase("mail")   && ((regexpValue == null) || (StringHelper.isEmpty(regexpValue))))){
+			regexpValue = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@" +
+		            "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
+		}
+		
 		if ((regexpValue != null) && StringHelper.isNotEmpty(regexpValue)) {
 			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);
 			if ((attribute != null) && !(attribute.trim().equals(""))) {
