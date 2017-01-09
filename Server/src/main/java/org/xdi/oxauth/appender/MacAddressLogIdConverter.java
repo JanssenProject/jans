@@ -6,14 +6,14 @@ import org.apache.logging.log4j.core.pattern.ConverterKeys;
 import org.apache.logging.log4j.core.pattern.LogEventPatternConverter;
 import org.xdi.oxauth.util.ServerUtil;
 
-@Plugin(name = MacAddressLogIdConverter.PLUGIN_NAME, category = "Converter")
-@ConverterKeys({ "macAddr" })
 /**
  * Append to log mac address of server
  *
  * @author Yuriy Movchan
  * @version Jan 09, 2017
  */
+@Plugin(name = MacAddressLogIdConverter.PLUGIN_NAME, category = "Converter")
+@ConverterKeys({ "macAddr" })
 public class MacAddressLogIdConverter extends LogEventPatternConverter {
 
 	public static final String PLUGIN_NAME = "MacAddressLogIdConverter";
