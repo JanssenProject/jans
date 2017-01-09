@@ -6,11 +6,27 @@
 
 package org.xdi.oxauth.util;
 
-import org.apache.commons.cli.*;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.LogManager;
+import static org.xdi.oxauth.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
+import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
+import static org.xdi.oxauth.model.jwk.JWKParameter.X;
+import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
+//import org.apache.log4j.SimpleLayout;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
@@ -22,12 +38,6 @@ import org.xdi.oxauth.model.jwk.KeyType;
 import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.model.util.StringUtils;
-
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 
 /**
@@ -51,24 +61,13 @@ public class KeyGenerator {
     private static final String OXELEVEN_GENERATE_KEY_ENDPOINT = "ox11";
     private static final String EXPIRATION = "expiration";
     private static final String HELP = "h";
-    private static final Logger log;
-
-    static {
-        // Add console appender
-        LogManager.getRootLogger().removeAllAppenders();
-
-        ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
-        LogManager.getRootLogger().addAppender(consoleAppender);
-
-        log = Logger.getLogger(KeyGenerator.class);
-    }
+    private static final Logger log = Logger.getLogger(KeyGenerator.class);
 
     public static void main(String[] args) throws Exception {
         new Cli(args).parse();
     }
 
     public static class Cli {
-        private static final Logger log = Logger.getLogger(Cli.class.getName());
         private String[] args = null;
         private Options options = new Options();
 
