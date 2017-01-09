@@ -12,7 +12,10 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.VirtualListViewResponse;
+import org.xdi.log.LoggingHelper;
 import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.status.StatusLogger;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.ResultCode;
@@ -27,12 +30,7 @@ public class LdapSample {
 	private static final Logger log;
 
 	static {
-		// Add console appender
-		LogManager.getRootLogger().removeAllAppenders();
-
-//		ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
-//		LogManager.getRootLogger().addAppender(consoleAppender);
-
+		LoggingHelper.configureConsoleAppender();
 		log = Logger.getLogger(LdapSample.class);
 	}
 
@@ -120,8 +118,8 @@ public class LdapSample {
 		List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, 10, 0, 0);
 		log.debug("Found sessions: " + sessions.size());
 
-//		List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, 0, 0, 0);
-//		log.debug("Found grants: " + grants.size());
+		List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, 0, 0, 0);
+		log.debug("Found grants: " + grants.size());
 
 		try {
 			VirtualListViewResponse virtualListViewResponse = new VirtualListViewResponse();
