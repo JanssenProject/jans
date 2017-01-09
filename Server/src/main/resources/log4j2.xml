@@ -6,9 +6,16 @@
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 		</Console>
 
-		<File name="FILE" fileName="${sys:catalina.base}/logs/oxauth.log" append="false">
+		<RollingFile name="OX_PERSISTENCE_FILE" fileName="${sys:catalina.base}/logs/oxauth.log" filePattern="${sys:catalina.base}/logs/oxauth-%d{yyyy-MM-dd}-%i.log">
+
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
-		</File>
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
 
 		<RollingFile name="OX_PERSISTENCE_FILE" fileName="${sys:catalina.base}/logs/oxauth_persistence.log" filePattern="${sys:catalina.base}/logs/oxauth_persistence-%d{yyyy-MM-dd}-%i.log">
 
