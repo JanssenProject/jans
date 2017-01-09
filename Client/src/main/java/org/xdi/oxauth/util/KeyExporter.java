@@ -17,10 +17,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.WordUtils;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
 import org.bouncycastle.util.encoders.Base64;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -46,24 +43,13 @@ public class KeyExporter {
     private static final String KEY_ALIAS = "alias";
     private static final String EXPORT_FILE = "exportfile";
     private static final String HELP = "h";
-    private static final Logger log;
-
-    static {
-        // Add console appender
-        LogManager.getRootLogger().removeAllAppenders();
-
-        ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
-        LogManager.getRootLogger().addAppender(consoleAppender);
-
-        log = Logger.getLogger(KeyExporter.class);
-    }
+    private static final Logger log = Logger.getLogger(KeyExporter.class);
 
     public static void main(String[] args) throws Exception {
         new Cli(args).parse();
     }
 
     public static class Cli {
-        private static final Logger log = Logger.getLogger(Cli.class.getName());
         private String[] args = null;
         private Options options = new Options();
 
