@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.service;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.Provider;
 import java.security.Security;
@@ -18,9 +21,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.apache.log4j.helpers.Loader;
-import org.apache.log4j.helpers.LogLog;
-import org.apache.log4j.helpers.OptionConverter;
+
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
+import org.apache.logging.log4j.core.util.Loader;
+import org.apache.logging.log4j.status.StatusLogger;
+import org.apache.logging.log4j.util.LoaderUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
@@ -532,19 +539,23 @@ public class AppInitializer {
 	}
 	
 	private void resetLog4jConfiguration() {
-		URL url = Loader.getResource("log4j.xml");
-		if(url == null) {
-		    LogLog.debug("Could not find resource: 'log4j.xml'");
+		StatusLogger logger = StatusLogger.getLogger(); 
+		URL url = Loader.getClassLoader().getResource("log4j.xml");
+		InputStream logConfigInputStream = Loader.getClassLoader().getResourceAsStream("log4j.xml");
+		if(logConfigInputStream == null) {
+			logger.debug("Could not find resource: 'log4j.xml'");
 		}
-	      
+		
 		// If we have a non-null url, then delegate the rest of the configuration to the OptionConverter.selectAndConfigure method.
-	    LogLog.debug("Using URL ["+url+"] for automatic log4j configuration.");
+		logger.debug("Using URL ["+url+"] for automatic log4j configuration.");
 	    try {
+	    	LogManager.shutdown();
 	    	LogManager.getLoggerRepository().resetConfiguration();
-	        OptionConverter.selectAndConfigure(url, null, LogManager.getLoggerRepository());
-	    } catch (NoClassDefFoundError e) {
-	        LogLog.warn("Error during default initialization", e);
-	    }
+			ConfigurationSource source = new ConfigurationSource(logConfigInputStream);
+			Configurator.initialize(null, source);
+	    } catch (IOException ex) {
+	    	logger.warn("Error during default initialization", ex);
+		}
 	}
 	
 	private class LdapConnectionProviders {
