@@ -1,5 +1,9 @@
 package org.xdi.net;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +22,9 @@ public class InetAddressUtility {
 		VALID_IPV6_PATTERN = Pattern.compile(ipv6Pattern, Pattern.CASE_INSENSITIVE);
 	}
 
+	private static String macAddress;
+	private static boolean macAddressSet = false;
+
 	/**
 	 * Determine if the given string is a valid IPv4 or IPv6 address
 	 */
@@ -31,6 +38,34 @@ public class InetAddressUtility {
 		Matcher m2 = VALID_IPV6_PATTERN.matcher(ipAddress);
 
 		return m2.matches();
+	}
+
+    public static String getMACAddressOrNull() {
+    	if (!macAddressSet) {
+    		macAddress = getMACAddressOrNullImpl();
+    		macAddressSet = true;
+    	}
+
+    	return macAddress;
+    }
+
+	private static synchronized String getMACAddressOrNullImpl() {
+		try {
+            InetAddress ip = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+
+            byte[] mac = network.getHardwareAddress();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+            }
+            return sb.toString();
+        } catch (UnknownHostException e) {
+            return null;
+        } catch (SocketException e) {
+            return null;
+        }
 	}
 
 }
