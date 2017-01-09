@@ -3,9 +3,9 @@ package org.gluu.ldap;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.ConsoleAppender;
+//import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.LogManager;
-import org.apache.log4j.SimpleLayout;
+//import org.apache.log4j.SimpleLayout;
 import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -30,8 +30,8 @@ public class LdapSample {
 		// Add console appender
 		LogManager.getRootLogger().removeAllAppenders();
 
-		ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
-		LogManager.getRootLogger().addAppender(consoleAppender);
+//		ConsoleAppender consoleAppender = new ConsoleAppender(new SimpleLayout(), ConsoleAppender.SYSTEM_OUT);
+//		LogManager.getRootLogger().addAppender(consoleAppender);
 
 		log = Logger.getLogger(LdapSample.class);
 	}
@@ -120,8 +120,8 @@ public class LdapSample {
 		List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, 10, 0, 0);
 		log.debug("Found sessions: " + sessions.size());
 
-		List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, 0, 0, 0);
-		log.debug("Found grants: " + grants.size());
+//		List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, 0, 0, 0);
+//		log.debug("Found grants: " + grants.size());
 
 		try {
 			VirtualListViewResponse virtualListViewResponse = new VirtualListViewResponse();
