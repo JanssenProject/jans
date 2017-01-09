@@ -46,8 +46,6 @@ import java.util.concurrent.ThreadFactory;
 public class ServerUtil {
 
     private final static Log LOG = Logging.getLog(ServerUtil.class);
-	private static String macAddress;
-	private static boolean macAddressSet = false;
 
     private ServerUtil() {
     }
@@ -225,33 +223,5 @@ public class ServerUtil {
             return null;
         return (HttpServletRequest) request;
     }
-
-    public static String getMACAddressOrNull() {
-    	if (!macAddressSet) {
-    		macAddress = getMACAddressOrNullImpl();
-    		macAddressSet = true;
-    	}
-
-    	return macAddress;
-    }
-
-	private static synchronized String getMACAddressOrNullImpl() {
-		try {
-            InetAddress ip = InetAddress.getLocalHost();
-            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-
-            byte[] mac = network.getHardwareAddress();
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < mac.length; i++) {
-                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-            }
-            return sb.toString();
-        } catch (UnknownHostException e) {
-            return null;
-        } catch (SocketException e) {
-            return null;
-        }
-	}
 
 }
