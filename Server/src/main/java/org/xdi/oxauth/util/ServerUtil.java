@@ -46,6 +46,8 @@ import java.util.concurrent.ThreadFactory;
 public class ServerUtil {
 
     private final static Log LOG = Logging.getLog(ServerUtil.class);
+	private static String macAddress;
+	private static boolean macAddressSet = false;
 
     private ServerUtil() {
     }
@@ -225,7 +227,16 @@ public class ServerUtil {
     }
 
     public static String getMACAddressOrNull() {
-        try {
+    	if (!macAddressSet) {
+    		macAddress = getMACAddressOrNullImpl();
+    		macAddressSet = true;
+    	}
+
+    	return macAddress;
+    }
+
+	private static synchronized String getMACAddressOrNullImpl() {
+		try {
             InetAddress ip = InetAddress.getLocalHost();
             NetworkInterface network = NetworkInterface.getByInetAddress(ip);
 
@@ -241,6 +252,6 @@ public class ServerUtil {
         } catch (SocketException e) {
             return null;
         }
-    }
+	}
 
 }
