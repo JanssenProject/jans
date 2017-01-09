@@ -1,10 +1,10 @@
 package org.xdi.oxauth.model.audit;
 
-import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.util.ServerUtil;
-
 import java.util.Date;
+
+import org.apache.commons.lang.StringUtils;
+import org.xdi.net.InetAddressUtility;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
 
 
 public class OAuth2AuditLog {
@@ -25,7 +25,7 @@ public class OAuth2AuditLog {
         this.ip = ip;
         this.action = action;
         this.timestamp = new Date();
-        this.macAddress = ServerUtil.getMACAddressOrNull();
+        this.macAddress = InetAddressUtility.getMACAddressOrNull();
         this.isSuccess = false;
     }
 
