@@ -19,13 +19,14 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.Level;
 import org.apache.log4j.LogManager;
-
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
 import org.apache.logging.log4j.core.util.Loader;
+import org.apache.logging.log4j.spi.LoggerRegistry;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.apache.logging.log4j.util.LoaderUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -521,40 +522,21 @@ public class AppInitializer {
 		String loggingLevel = appConfiguration.getLoggingLevel();
 		log.info("Setting loggers level to: '{0}'", loggingLevel);
 		
+		LoggerContext loggerContext = LoggerContext.getContext(false);
+
 		if (StringHelper.equalsIgnoreCase("DEFAULT", loggingLevel)) {
-			resetLog4jConfiguration();
+			log.info("Reloadming log4j configuration");
+			loggerContext.reconfigure();
 			return;
 		}
 
-		Level level = Level.toLevel(loggingLevel, Level.INFO); 
-		
-		Enumeration<org.apache.log4j.Logger> currentLoggers = LogManager.getCurrentLoggers();
-		while(currentLoggers.hasMoreElements()) {
-			org.apache.log4j.Logger logger = (org.apache.log4j.Logger) currentLoggers.nextElement();
+		Level level = Level.toLevel(loggingLevel, Level.INFO);
+
+		for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
 			String loggerName = logger.getName();
 			if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu")) {
 				logger.setLevel(level);
 			}
-		}
-	}
-	
-	private void resetLog4jConfiguration() {
-		StatusLogger logger = StatusLogger.getLogger(); 
-		URL url = Loader.getClassLoader().getResource("log4j.xml");
-		InputStream logConfigInputStream = Loader.getClassLoader().getResourceAsStream("log4j.xml");
-		if(logConfigInputStream == null) {
-			logger.debug("Could not find resource: 'log4j.xml'");
-		}
-		
-		// If we have a non-null url, then delegate the rest of the configuration to the OptionConverter.selectAndConfigure method.
-		logger.debug("Using URL ["+url+"] for automatic log4j configuration.");
-	    try {
-	    	LogManager.shutdown();
-	    	LogManager.getLoggerRepository().resetConfiguration();
-			ConfigurationSource source = new ConfigurationSource(logConfigInputStream);
-			Configurator.initialize(null, source);
-	    } catch (IOException ex) {
-	    	logger.warn("Error during default initialization", ex);
 		}
 	}
 	
