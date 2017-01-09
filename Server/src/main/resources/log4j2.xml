@@ -66,13 +66,14 @@
 	<Loggers>
 		<!-- ############### oxAuth ################# -->
 		<Logger name="org.xdi.oxauth" level="${log4j.default.log.level}" />
-
 		<Logger name="org.xdi.service" level="${log4j.default.log.level}" />
+
+		<!-- ############### Gluu ################# -->
+		<Logger name="org.gluu" level="${log4j.default.log.level}" />
 
 		<!-- ############### Embedded JBoss AS ################# -->
 		<Logger name="org.jboss" level="error" />
 		<Logger name="com.arjuna" level="error" />
-		<Logger name="org.gluu" level="error" />
 
 		<!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message -->
 		<Logger name="jboss.resource.adapter.jms.inflow.JmsActivation" level="error" />
