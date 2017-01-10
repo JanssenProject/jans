@@ -3,9 +3,9 @@ package org.gluu.ldap;
 import java.util.List;
 import java.util.Properties;
 
-//import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.LogManager;
-//import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -13,9 +13,6 @@ import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.log.LoggingHelper;
-import org.apache.log4j.Logger;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.status.StatusLogger;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.ResultCode;
@@ -30,6 +27,7 @@ public class LdapSample {
 	private static final Logger log;
 
 	static {
+		StatusLogger.getLogger().setLevel(Level.OFF);
 		LoggingHelper.configureConsoleAppender();
 		log = Logger.getLogger(LdapSample.class);
 	}
