@@ -245,7 +245,7 @@ class Setup(object):
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
         self.redhat_services = ['httpd']
-        self.debian_services = ['apache2']
+        self.debian_services = ['apache2', 'rsyslog']
 
         self.apache_start_script = '/etc/init.d/httpd'
 
@@ -257,7 +257,6 @@ class Setup(object):
         self.openldapBaseFolder = '/opt/symas'
         self.openldapBinFolder = '/opt/symas/bin'
         self.openldapConfFolder = '/opt/symas/etc/openldap'
-        self.openldapCnConfig = '%s/slapd.d' % self.openldapConfFolder
         self.openldapRootUser = "cn=directory manager,o=gluu"
         self.openldapSiteUser = "cn=directory manager,o=site"
         self.openldapKeyPass = None
@@ -267,7 +266,6 @@ class Setup(object):
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.openldapSchemaFolder = "%s/schema/openldap" % self.gluuOptFolder
-        self.slaptest = '%s/slaptest' % self.openldapBinFolder
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
         self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
@@ -1790,9 +1788,13 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', osDefault])
 
             if self.installOxTrust | self.installOxAuth:
-                self.run([self.cmd_mkdir, '-p', self.oxPhotosFolder])
-                self.run([self.cmd_mkdir, '-p', self.oxTrustRemovedFolder])
-                self.run([self.cmd_mkdir, '-p', self.oxTrustCacheRefreshFolder])
+                self.run([self.cmd_mkdir, '-m', '775', '-p', self.oxPhotosFolder])
+                self.run([self.cmd_mkdir, '-m', '775', '-p', self.oxTrustRemovedFolder])
+                self.run([self.cmd_mkdir, '-m', '775', '-p', self.oxTrustCacheRefreshFolder])
+
+                self.run([self.cmd_chown, '-R', 'root:gluu', self.oxPhotosFolder])
+                self.run([self.cmd_chown, '-R', 'root:gluu', self.oxTrustRemovedFolder])
+                self.run([self.cmd_chown, '-R', 'root:gluu', self.oxTrustCacheRefreshFolder])
 
             if self.installSaml:
                 self.run([self.cmd_mkdir, '-p', self.idp3Folder])
@@ -2193,7 +2195,7 @@ class Setup(object):
                 self.run(["/sbin/chkconfig", service, "on"])
         elif self.os_type in ['ubuntu', 'debian']:
             for service in self.debian_services:
-                self.run(["/usr/sbin/update-rc.d", service, 'enable'])
+                self.run(["/usr/sbin/update-rc.d", service, 'defaults'])
 
 
     def start_services(self):
@@ -2279,7 +2281,8 @@ class Setup(object):
                 packageName = "%s/%s" % ( openLdapDistFolder, file )
 
         if packageName == None:
-            raise Exception('Failed to find OpenLDAP package in folder %s !' % directory)
+            self.logIt('Failed to find OpenLDAP package in folder %s !' % openLdapDistFolder)
+	    return
 
         self.logIt("Found package '%s' for install" % packageName)
         if packageRpm:
@@ -2312,9 +2315,6 @@ class Setup(object):
                 self.run([cmd, '-b', 'o=site', '-f', config, '-l', ldif])
             else:
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
-        # Generate the cn=config directory
-        self.run([self.cmd_mkdir, '-p', self.openldapCnConfig])
-        self.run([self.slaptest, '-f', self.openldapSlapdConf, '-F', self.openldapCnConfig])
 
     def setup_openldap_logging(self):
         self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
