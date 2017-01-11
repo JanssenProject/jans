@@ -103,7 +103,7 @@ public class RPTManager extends AbstractRPTManager {
 
     @Override
     public void cleanupRPTs(final Date now) {
-        BatchOperation<UmaRPT> rptBatchService = new BatchOperation<UmaRPT>() {
+        BatchOperation<UmaRPT> rptBatchService = new BatchOperation<UmaRPT>(ldapEntryManager) {
             @Override
             protected List<UmaRPT> getChunkOrNull(int chunkSize) {
                 try {

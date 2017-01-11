@@ -229,7 +229,7 @@ public class GrantService {
     public void cleanUp() {
 
         // Cleaning oxAuthToken
-        BatchOperation<TokenLdap> tokenBatchService = new BatchOperation<TokenLdap>() {
+        BatchOperation<TokenLdap> tokenBatchService = new BatchOperation<TokenLdap>(ldapEntryManager) {
             @Override
             protected List<TokenLdap> getChunkOrNull(int chunkSize) {
                 try {
@@ -250,7 +250,7 @@ public class GrantService {
         tokenBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
         // Cleaning oxAuthGrant
-        BatchOperation<Grant> grantBatchService = new BatchOperation<Grant>() {
+        BatchOperation<Grant> grantBatchService = new BatchOperation<Grant>(ldapEntryManager) {
             @Override
             protected List<Grant> getChunkOrNull(int chunkSize) {
                 try {
@@ -274,7 +274,7 @@ public class GrantService {
 
         // Cleaning old oxAuthGrant
         // Note: This block should be removed, it is used only to delete old legacy data.
-        BatchOperation<Grant> oldGrantBatchService = new BatchOperation<Grant>() {
+        BatchOperation<Grant> oldGrantBatchService = new BatchOperation<Grant>(ldapEntryManager) {
             @Override
             protected List<Grant> getChunkOrNull(int chunkSize) {
                 try {
