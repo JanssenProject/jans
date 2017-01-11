@@ -148,15 +148,15 @@ public class LogoutAction {
 			return ExternalLogoutResult.FAILURE;
 		}
 
-		String authMode = authorizationGrant.getAcrValues();
+		String acrValues = authorizationGrant.getAcrValues();
 
-		boolean isExternalAuthenticatorLogoutPresent = StringHelper.isNotEmpty(authMode);
+		boolean isExternalAuthenticatorLogoutPresent = StringHelper.isNotEmpty(acrValues);
 		if (isExternalAuthenticatorLogoutPresent) {
-			log.debug("Attemptinmg to execute logout method of '{0}' external authenticator.", authMode);
+			log.debug("Attemptinmg to execute logout method of '{0}' external authenticator.", acrValues);
 
-			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfigurationByName(authMode);
+			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfigurationByName(acrValues);
 			if (customScriptConfiguration == null) {
-				log.error("Failed to get ExternalAuthenticatorConfiguration. auth_mode: {0}", authMode);
+				log.error("Failed to get ExternalAuthenticatorConfiguration. acr_values: {0}", acrValues);
 				return ExternalLogoutResult.FAILURE;
 			} else {
 				String userId = authorizationGrant.getUser().getUserId();
