@@ -37,7 +37,7 @@ import com.google.common.base.Objects;
 @Name("applicationAuditLogger")
 @Scope(ScopeType.APPLICATION)
 @AutoCreate
-@Startup
+@Startup(depends = "appInitializer")
 public class ApplicationAuditLogger {
 
 	private static final String APPLICATION_AUDIT_LOGGER_REFRESH_TIMER = "applicationAuditLoggerRefreshTimer";
