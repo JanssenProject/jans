@@ -6,41 +6,24 @@
 
 package org.gluu.site.ldap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+import com.unboundid.asn1.ASN1OctetString;
+import com.unboundid.ldap.sdk.*;
+import com.unboundid.ldap.sdk.controls.*;
+import com.unboundid.ldif.LDIFChangeRecord;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
 import org.gluu.site.ldap.exception.InvalidSimplePageControlException;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SortOrder;
 import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.asn1.ASN1OctetString;
-import com.unboundid.ldap.sdk.Attribute;
-import com.unboundid.ldap.sdk.BindResult;
-import com.unboundid.ldap.sdk.Control;
-import com.unboundid.ldap.sdk.DeleteRequest;
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.LDAPConnectionPool;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.LDAPResult;
-import com.unboundid.ldap.sdk.LDAPSearchException;
-import com.unboundid.ldap.sdk.Modification;
-import com.unboundid.ldap.sdk.ModificationType;
-import com.unboundid.ldap.sdk.ModifyRequest;
-import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.SearchRequest;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.SearchResultReference;
-import com.unboundid.ldap.sdk.controls.*;
-import com.unboundid.ldif.LDIFChangeRecord;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * OperationsFacade is the base class that performs all the ldap operations
@@ -205,10 +188,10 @@ public class OperationsFacade {
 
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 		throws LDAPSearchException {
-		return search(dn, filter, scope, 0, searchLimit, sizeLimit, controls, attributes);
+		return search(dn, filter, scope, null, searchLimit, sizeLimit, controls, attributes);
 	}
 	
-	public SearchResult search(String dn, Filter filter, SearchScope scope, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation batchOperation, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
 		
@@ -238,18 +221,10 @@ public class OperationsFacade {
 		List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
 		List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
 		
-		if ((searchLimit > 0) || (startIndex > 0)) {
-			if (searchLimit == 0) {
-				searchLimit = 100;
-			}
+		if (searchLimit > 0) {
 			ASN1OctetString cookie = null;
-			if (startIndex > 0) {
-				try {
-					cookie = scrollSimplePagedResultsControl(dn, searchRequest, filter, scope, controls, startIndex);
-				} catch (InvalidSimplePageControlException ex) {
-					throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
-				}
-			}
+			if (batchOperation != null)
+				cookie = batchOperation.getCookie();
 			do {
 				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(searchLimit, cookie) });
 				setControls(searchRequest, controls);
@@ -257,11 +232,14 @@ public class OperationsFacade {
 				searchResultList.add(searchResult);
 				searchResultEntries.addAll(searchResult.getSearchEntries());
 				searchResultReferences.addAll(searchResult.getSearchReferences());
-				cookie = null;
 				try {
 					SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
 					if (c != null) {
 						cookie = c.getCookie();
+						if (batchOperation != null) {
+							batchOperation.setCookie(cookie);
+							batchOperation.setMoreResultsToReturn(c.moreResultsToReturn());
+						}
 					}
 				} catch (LDAPException ex) {
 					log.error("Error while accessing cookies" + ex.getMessage());
