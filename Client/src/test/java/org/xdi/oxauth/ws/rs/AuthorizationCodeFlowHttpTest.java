@@ -102,9 +102,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
-        assertNotNull(jwt.getClaims().getClaimAsString("user_name"));
-        assertNull(jwt.getClaims().getClaimAsString("org_name"));
-        assertNull(jwt.getClaims().getClaimAsString("work_phone"));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -129,13 +126,15 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 6. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response2.getClaim(JwtClaimName.NAME));
-        assertNotNull(response2.getClaim("user_name"));
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim("user_name"));
+        assertNull(userInfoResponse.getClaim("org_name"));
+        assertNull(userInfoResponse.getClaim("work_phone"));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -154,6 +153,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
         String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization and receive the authorization code.
         List<String> authorizationScopes = Arrays.asList("openid", "profile", "address", "email", "user_name", "mobile_phone");
@@ -161,6 +161,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, authorizationScopes, clientId, nonce);
 
         String idToken = authorizationResponse.getIdToken();
+        String authorizationCode = authorizationResponse.getCode();
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
@@ -175,8 +176,38 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
-        assertNotNull(jwt.getClaims().getClaimAsString("user_name"));
-        assertNull(jwt.getClaims().getClaimAsString("phone_mobile_number"));
+
+        // 4. Request access token
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+
+        String accessToken = tokenResponse.getAccessToken();
+
+        // 5. Request user info
+        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
+
+        showClient(userInfoClient);
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim("user_name"));
+        assertNull(userInfoResponse.getClaim("phone_mobile_number"));
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
@@ -580,9 +611,6 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
         assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
         assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
-        assertNotNull(jwt.getClaims().getClaimAsString("user_name"));
-        assertNull(jwt.getClaims().getClaimAsString("org_name"));
-        assertNull(jwt.getClaims().getClaimAsString("work_phone"));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -607,13 +635,15 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
         // 6. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        UserInfoResponse response2 = userInfoClient.execUserInfo(accessToken);
+        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(response2.getStatus(), 200, "Unexpected response code: " + response2.getStatus());
-        assertNotNull(response2.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(response2.getClaim(JwtClaimName.NAME));
-        assertNotNull(response2.getClaim("user_name"));
+        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
+        assertNotNull(userInfoResponse.getClaim("user_name"));
+        assertNull(userInfoResponse.getClaim("org_name"));
+        assertNull(userInfoResponse.getClaim("work_phone"));
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
