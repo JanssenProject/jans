@@ -85,7 +85,7 @@ public class AppInitializer {
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
-    public static final String DEFAULT_AUTH_MODE_NAME = "defaultAuthModeName";
+    public static final String DEFAULT_ACR_VALUES = "defaultAuthModeName";
 
     public static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
 
@@ -432,7 +432,7 @@ public class AppInitializer {
 			authenticationMode = appliance.getAuthenticationMode();
 		}
 
-		Contexts.getApplicationContext().set(DEFAULT_AUTH_MODE_NAME, authenticationMode);
+		Contexts.getApplicationContext().set(DEFAULT_ACR_VALUES, authenticationMode);
 	}
 
 	private GluuAppliance loadAppliance(LdapEntryManager localLdapEntryManager, String ... ldapReturnAttributes) {
