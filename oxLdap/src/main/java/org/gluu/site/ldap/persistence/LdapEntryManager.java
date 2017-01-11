@@ -6,10 +6,10 @@
 
 package org.gluu.site.ldap.persistence;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.*;
-
+import com.unboundid.asn1.ASN1OctetString;
+import com.unboundid.ldap.sdk.*;
+import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
+import com.unboundid.util.StaticUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.exception.ConnectionException;
@@ -30,20 +30,9 @@ import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.asn1.ASN1OctetString;
-import com.unboundid.ldap.sdk.Attribute;
-import com.unboundid.ldap.sdk.Control;
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.LDAPSearchException;
-import com.unboundid.ldap.sdk.Modification;
-import com.unboundid.ldap.sdk.ModificationType;
-import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.util.StaticUtils;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * LDAP Entry Manager
@@ -334,10 +323,10 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	}
 
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
-		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, 0, searchLimit, sizeLimit);
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, searchLimit, sizeLimit);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int startIndex, int searchLimit, int sizeLimit) {
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int searchLimit, int sizeLimit) {
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
 		}
@@ -360,7 +349,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, startIndex, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, batchOperation, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
