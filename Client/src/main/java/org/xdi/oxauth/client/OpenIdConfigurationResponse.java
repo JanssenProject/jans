@@ -63,6 +63,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 	private Boolean requestParameterSupported;
 	private Boolean requestUriParameterSupported;
 	private Boolean requireRequestUriRegistration;
+	private Boolean frontChannelLogoutSupported;
+	private Boolean frontChannelLogoutSessionSupported;
 	private String opPolicyUri;
 	private String opTosUri;
 	private Map<String, List<String>> scopeToClaimsMapping = new HashMap<String, List<String>>();
@@ -993,6 +995,22 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 		this.opTosUri = opTosUri;
 	}
 
+	public Boolean getFrontChannelLogoutSupported() {
+		return frontChannelLogoutSupported;
+	}
+
+	public void setFrontChannelLogoutSupported(Boolean frontChannelLogoutSupported) {
+		this.frontChannelLogoutSupported = frontChannelLogoutSupported;
+	}
+
+	public Boolean getFrontChannelLogoutSessionSupported() {
+		return frontChannelLogoutSessionSupported;
+	}
+
+	public void setFrontChannelLogoutSessionSupported(Boolean frontChannelLogoutSessionSupported) {
+		this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+	}
+
 	@Override
 	public String toString() {
 		return "OpenIdConfigurationResponse{" +
@@ -1033,6 +1051,8 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 				", claimsParameterSupported=" + claimsParameterSupported +
 				", requestParameterSupported=" + requestParameterSupported +
 				", requestUriParameterSupported=" + requestUriParameterSupported +
+				", frontChannelLogoutSupported=" + frontChannelLogoutSupported +
+				", frontChannelLogoutSessionSupported=" + frontChannelLogoutSessionSupported +
 				", requireRequestUriRegistration=" + requireRequestUriRegistration +
 				", opPolicyUri='" + opPolicyUri + '\'' +
 				", opTosUri='" + opTosUri + '\'' +
