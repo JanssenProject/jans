@@ -6,18 +6,9 @@
 
 package org.xdi.oxauth.model.registration;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.codehaus.jettison.json.JSONArray;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.site.ldap.persistence.annotation.*;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -27,6 +18,10 @@ import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.util.LdapUtils;
 import org.xdi.util.security.StringEncrypter;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -46,7 +41,7 @@ public class Client {
     private String encodedClientSecret;
 
     @LdapAttribute(name = "oxAuthLogoutURI")
-    private String[] logoutUri;
+    private String[] frontChannelLogoutUri;
 
     @LdapAttribute(name = "oxAuthLogoutSessionRequired")
     private Boolean logoutSessionRequired;
@@ -212,17 +207,17 @@ public class Client {
      *
      * @return logout uri
      */
-    public String[] getLogoutUri() {
-        return logoutUri;
+    public String[] getFrontChannelLogoutUri() {
+        return frontChannelLogoutUri;
     }
 
     /**
      * Sets logout uri.
      *
-     * @param logoutUri logout uri
+     * @param frontChannelLogoutUri logout uri
      */
-    public void setLogoutUri(String[] logoutUri) {
-        this.logoutUri = logoutUri;
+    public void setFrontChannelLogoutUri(String[] frontChannelLogoutUri) {
+        this.frontChannelLogoutUri = frontChannelLogoutUri;
     }
 
     /**

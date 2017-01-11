@@ -43,7 +43,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
-        registerRequest.setLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);

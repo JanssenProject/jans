@@ -64,7 +64,7 @@ public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
                             StringUtils.spaceSeparatedToList(redirectUris));
                     registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
                     registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
-                    registerRequest.setLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
+                    registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
                     registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
                     request.setContentType(MediaType.APPLICATION_JSON);
