@@ -108,7 +108,6 @@
 		<Logger name="org.hibernate.event.def.AbstractFlushingEventListener" level="debug" />
 		-->
 
-
 		<logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
 		</logger>
