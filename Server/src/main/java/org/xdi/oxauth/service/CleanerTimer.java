@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.service;
 
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.Observer;
@@ -25,7 +26,6 @@ import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
-import org.xdi.service.batch.BatchService;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -129,10 +129,10 @@ public class CleanerTimer {
         log.debug("Start Client clean up");
 
         // Cleaning oxAuthToken
-        BatchService<Client> clientBatchService = new BatchService<Client>() {
+        BatchOperation<Client> clientBatchService = new BatchOperation<Client>() {
             @Override
-            protected List<Client> getChunkOrNull(int offset, int chunkSize) {
-                return clientService.getClientsWithExpirationDate(offset, chunkSize, chunkSize);
+            protected List<Client> getChunkOrNull(int chunkSize) {
+                return clientService.getClientsWithExpirationDate(this, chunkSize, chunkSize);
             }
 
             @Override
@@ -141,7 +141,6 @@ public class CleanerTimer {
                     GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                     GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
                     expirationDate.setTime(client.getClientSecretExpiresAt());
-
                     if (expirationDate.before(now)) {
                         List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
                         authorizationGrantList.removeAuthorizationGrants(toRemove);
@@ -167,10 +166,10 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchService<RequestMessageLdap> requestMessageLdapBatchService= new BatchService<RequestMessageLdap>() {
+        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService= new BatchOperation<RequestMessageLdap>() {
             @Override
-            protected List<RequestMessageLdap> getChunkOrNull(int offset, int chunkSize) {
-                return u2fRequestService.getExpiredRequestMessages(offset, expirationDate);
+            protected List<RequestMessageLdap> getChunkOrNull(int chunkSize) {
+                return u2fRequestService.getExpiredRequestMessages(this, expirationDate);
             }
 
             @Override
@@ -194,10 +193,10 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchService<DeviceRegistration> deviceRegistrationBatchService= new BatchService<DeviceRegistration>() {
+        BatchOperation<DeviceRegistration> deviceRegistrationBatchService= new BatchOperation<DeviceRegistration>() {
             @Override
-            protected List<DeviceRegistration> getChunkOrNull(int offset, int chunkSize) {
-                return deviceRegistrationService.getExpiredDeviceRegistrations(offset, expirationDate);
+            protected List<DeviceRegistration> getChunkOrNull(int chunkSize) {
+                return deviceRegistrationService.getExpiredDeviceRegistrations(this, expirationDate);
             }
 
             @Override
