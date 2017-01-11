@@ -34,17 +34,18 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version January 11, 2017
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
     /**
      * Test for the complete Authorization Code Flow.
      */
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void authorizationCodeFlow(final String userId, final String userSecret, final String redirectUris,
-                                      final String redirectUri) throws Exception {
+    public void authorizationCodeFlow(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationCodeFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -53,7 +54,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -137,10 +138,11 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(response2.getClaim("user_name"));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void authorizationCodeWithNotAllowedScopeFlow(final String userId, final String userSecret, final String redirectUris,
-                                                         final String redirectUri) throws Exception {
+    public void authorizationCodeWithNotAllowedScopeFlow(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationCodeWithNotAllowedScopeFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -149,7 +151,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
         String clientId = registerResponse.getClientId();
 
@@ -177,10 +179,11 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNull(jwt.getClaims().getClaimAsString("phone_mobile_number"));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void authorizationCodeDynamicScopeFlow(final String userId, final String userSecret, final String redirectUris,
-                                                  final String redirectUri) throws Exception {
+    public void authorizationCodeDynamicScopeFlow(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationCodeDynamicScopeFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -189,7 +192,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name", "org_name", "work_phone");
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
         String clientId = registerResponse.getClientId();
 
@@ -472,10 +475,11 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(response7.getErrorDescription(), "Unexpected result: errorDescription not found");
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void authorizationCodeFlowLoginHint(final String userId, final String userSecret, final String redirectUris,
-                                               final String redirectUri) throws Exception {
+    public void authorizationCodeFlowLoginHint(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
         showTitle("authorizationCodeFlowLoginHint");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -484,7 +488,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -597,12 +601,14 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         return authorizationResponse;
     }
 
-    private RegisterResponse registerClient(final String redirectUris, List<ResponseType> responseTypes, List<String> scopes) {
+    private RegisterResponse registerClient(
+            final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setScopes(scopes);
-        registerRequest.setSubjectType(SubjectType.PUBLIC);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

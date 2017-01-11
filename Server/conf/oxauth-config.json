@@ -206,8 +206,8 @@
     "sessionIdUnusedLifetime":86400,
     "sessionIdUnauthenticatedUnusedLifetime":60,
     "sessionIdEnabled":true,
-"sessionIdPersistOnPromptNone":true,
-"sessionStateHttpOnly": false,
+    "sessionIdPersistOnPromptNone":true,
+    "sessionStateHttpOnly": false,
     "configurationUpdateInterval":3600,
     "cssLocation":"${config.oxauth.contextPath}/stylesheet",
     "jsLocation":"${config.oxauth.contextPath}/js",
@@ -224,6 +224,6 @@
     "endSessionWithAccessToken":false,
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
-"legacyIdTokenClaims": true,
-"customHeadersWithAuthorizationResponse": true
+    "legacyIdTokenClaims": false,
+    "customHeadersWithAuthorizationResponse": true
 }
