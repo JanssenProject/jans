@@ -8,6 +8,7 @@ package org.xdi.oxauth.service.uma;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -21,7 +22,6 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.CleanerTimer;
-import org.xdi.service.batch.BatchService;
 
 import java.util.Date;
 import java.util.List;
@@ -110,12 +110,12 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
 
     @Override
     public void cleanupResourceSetPermissions(final Date now) {
-        BatchService<ResourceSetPermission> resourceSetPermissionBatchService = new BatchService<ResourceSetPermission>() {
+        BatchOperation<ResourceSetPermission> resourceSetPermissionBatchService = new BatchOperation<ResourceSetPermission>() {
             @Override
-            protected List<ResourceSetPermission> getChunkOrNull(int offset, int chunkSize) {
+            protected List<ResourceSetPermission> getChunkOrNull(int chunkSize) {
                 try {
                     final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, filter, SearchScope.SUB, null, offset, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
