@@ -8,6 +8,7 @@ package org.xdi.oxauth.service.uma;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
@@ -24,7 +25,6 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.batch.BatchService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -103,12 +103,12 @@ public class RPTManager extends AbstractRPTManager {
 
     @Override
     public void cleanupRPTs(final Date now) {
-        BatchService<UmaRPT> rptBatchService = new BatchService<UmaRPT>() {
+        BatchOperation<UmaRPT> rptBatchService = new BatchOperation<UmaRPT>() {
             @Override
-            protected List<UmaRPT> getChunkOrNull(int offset, int chunkSize) {
+            protected List<UmaRPT> getChunkOrNull(int chunkSize) {
                 try {
                     final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter, SearchScope.SUB, null, offset, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }

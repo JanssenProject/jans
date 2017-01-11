@@ -9,6 +9,7 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -32,7 +33,6 @@ import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.batch.BatchService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -552,14 +552,14 @@ public class SessionStateService {
         final int interval = appConfiguration.getSessionIdUnusedLifetime();
         final int unauthenticatedInterval = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
 
-        BatchService<SessionState> unauthenticatedIdsBatchService = new BatchService<SessionState>() {
+        BatchOperation<SessionState> unauthenticatedIdsBatchService = new BatchOperation<SessionState>() {
             @Override
-            protected List<SessionState> getChunkOrNull(int offset, int chunkSize) {
+            protected List<SessionState> getChunkOrNull(int chunkSize) {
                 try {
                     final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(unauthenticatedInterval);
                     String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
                     final Filter filter = Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
-                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, offset, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
                 }
@@ -573,14 +573,14 @@ public class SessionStateService {
         };
         unauthenticatedIdsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
-        BatchService<SessionState> idsBatchService = new BatchService<SessionState>() {
+        BatchOperation<SessionState> idsBatchService = new BatchOperation<SessionState>() {
             @Override
-            protected List<SessionState> getChunkOrNull(int offset, int chunkSize) {
+            protected List<SessionState> getChunkOrNull(int chunkSize) {
                 try {
                     final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(interval);
                     String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
                     final Filter filter = Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
-                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, offset, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
