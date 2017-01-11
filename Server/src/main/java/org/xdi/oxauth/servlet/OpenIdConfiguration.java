@@ -26,7 +26,7 @@ import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ID_T
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.INTROSPECTION_ENDPOINT;
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.ISSUER;
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.JWKS_URI;
-import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.LOGOUT_SESSION_SUPPORTED;
+import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED;
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.OP_POLICY_URI;
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.OP_TOS_URI;
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.REGISTRATION_ENDPOINT;
@@ -342,7 +342,7 @@ public class OpenIdConfiguration extends HttpServlet {
 					jsonObj.put(OP_POLICY_URI, appConfiguration.getOpPolicyUri());
 					jsonObj.put(OP_TOS_URI, appConfiguration.getOpTosUri());
 					jsonObj.put(FRONTCHANNEL_LOGOUT_SUPPORTED, "true");
-					jsonObj.put(LOGOUT_SESSION_SUPPORTED, "true");
+					jsonObj.put(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED, "true");
 					jsonObj.put(FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED, appConfiguration.getFrontChannelLogoutSessionSupported());
 
 					out.println(jsonObj.toString(4).replace("\\/", "/"));
