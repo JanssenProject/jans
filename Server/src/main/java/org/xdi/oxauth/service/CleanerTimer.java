@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.Observer;
@@ -47,6 +48,8 @@ public class CleanerTimer {
 
     @Logger
     private Log log;
+    @In
+    private LdapEntryManager ldapEntryManager;
     @In
     private AuthorizationGrantList authorizationGrantList;
     @In
@@ -129,7 +132,7 @@ public class CleanerTimer {
         log.debug("Start Client clean up");
 
         // Cleaning oxAuthToken
-        BatchOperation<Client> clientBatchService = new BatchOperation<Client>() {
+        BatchOperation<Client> clientBatchService = new BatchOperation<Client>(ldapEntryManager) {
             @Override
             protected List<Client> getChunkOrNull(int chunkSize) {
                 return clientService.getClientsWithExpirationDate(this, chunkSize, chunkSize);
@@ -166,7 +169,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService= new BatchOperation<RequestMessageLdap>() {
+        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService= new BatchOperation<RequestMessageLdap>(ldapEntryManager) {
             @Override
             protected List<RequestMessageLdap> getChunkOrNull(int chunkSize) {
                 return u2fRequestService.getExpiredRequestMessages(this, expirationDate);
@@ -193,7 +196,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchOperation<DeviceRegistration> deviceRegistrationBatchService= new BatchOperation<DeviceRegistration>() {
+        BatchOperation<DeviceRegistration> deviceRegistrationBatchService= new BatchOperation<DeviceRegistration>(ldapEntryManager) {
             @Override
             protected List<DeviceRegistration> getChunkOrNull(int chunkSize) {
                 return deviceRegistrationService.getExpiredDeviceRegistrations(this, expirationDate);

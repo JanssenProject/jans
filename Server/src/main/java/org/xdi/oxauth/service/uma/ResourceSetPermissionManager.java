@@ -110,7 +110,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
 
     @Override
     public void cleanupResourceSetPermissions(final Date now) {
-        BatchOperation<ResourceSetPermission> resourceSetPermissionBatchService = new BatchOperation<ResourceSetPermission>() {
+        BatchOperation<ResourceSetPermission> resourceSetPermissionBatchService = new BatchOperation<ResourceSetPermission>(ldapEntryManager) {
             @Override
             protected List<ResourceSetPermission> getChunkOrNull(int chunkSize) {
                 try {
