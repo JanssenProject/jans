@@ -49,6 +49,9 @@ public class PermissionService {
     private ResourceSetPermissionManager resourceSetPermissionManager;
     @In
     private AppConfiguration appConfiguration;
+    
+    @In
+    private ClientService clientService;
 
     public static PermissionService instance() {
         return ServerUtil.instance(PermissionService.class);
@@ -140,7 +143,7 @@ public class PermissionService {
                 host, r, expirationDate);
         // IMPORTANT : set scope dns before persistence
         permission.setScopeDns(umaRsResourceService.getScopeDns(p_scopes));
-        final Client client = ClientService.instance().getClient(p_rpt.getClientId());
+        final Client client = clientService.getClient(p_rpt.getClientId());
         resourceSetPermissionManager.addResourceSetPermission(permission, client.getDn());
         return permission.getTicket();
     }
