@@ -84,7 +84,7 @@ public class AuthorizeAction {
     @In
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In(value = AppInitializer.DEFAULT_AUTH_MODE_NAME, required = false)
+    @In(value = AppInitializer.DEFAULT_ACR_VALUES, required = false)
     private String defaultAuthenticationMethod;
 
     @In("org.jboss.seam.international.localeSelector")
