@@ -57,9 +57,10 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	private static final Logger log = LoggerFactory.getLogger(LdapEntryManager.class);
 
 	private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = { String.class, Date.class, Integer.class, LdapEnum.class };
-	private static final Class<?>[] SUM_BY_ALLOWED_DATA_TYPES = { int.class, Integer.class, float.class, Float.class, double.class,
-			Double.class };
+	private static final Class<?>[] SUM_BY_ALLOWED_DATA_TYPES = { int.class, Integer.class, float.class, Float.class, double.class, Double.class };
 	private static final String[] NO_STRINGS = new String[0];
+	
+	private static final Comparator<String> LINE_LENGHT_COMPARATOR = new LineLenghtComparator<String>(false);
 
 	private transient OperationsFacade ldapOperationService;
 	private transient List<DeleteNotifier> subscribers;
@@ -213,19 +214,46 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
     @Override
     public void removeWithSubtree(String dn) {
         try {
-            for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
-            }
-            this.ldapOperationService.deleteWithSubtree(dn);
-            for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
-            }
+            if (this.ldapOperationService.getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
+	            for (DeleteNotifier subscriber : subscribers) {
+	                subscriber.onBeforeRemove(dn);
+	            }
+	            	this.ldapOperationService.deleteWithSubtree(dn);
+	            for (DeleteNotifier subscriber : subscribers) {
+	                subscriber.onAfterRemove(dn);
+	            }
+            } else {
+            	removeSubtreeThroughIteration(dn);
+	        }
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
-    @Override
+    private void removeSubtreeThroughIteration(String dn) {
+    	SearchResult searchResult = null;
+    	try {
+    		searchResult = this.ldapOperationService.search(dn, Filter.createPresenceFilter("objectClass"), 0, 0, null, "dn");
+			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+				throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn));
+			}
+		} catch (LDAPSearchException ex) {
+            throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
+		}
+
+    	List<String> removeEntriesDn = new ArrayList<String>(searchResult.getEntryCount());
+    	for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
+    		removeEntriesDn.add(searchResultEntry.getDN());
+    	}
+    	
+    	Collections.sort(removeEntriesDn, LINE_LENGHT_COMPARATOR);
+
+    	for (String removeEntryDn : removeEntriesDn) {
+    		remove(removeEntryDn);
+    	}
+	}
+
+	@Override
 	protected List<AttributeData> find(String dn, String ... ldapReturnAttributes) {
 		// Load entry
 
@@ -835,6 +863,34 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 				}
 			}
             return 0;
+		}
+	}
+
+	private static final class LineLenghtComparator<T> implements Comparator<T>, Serializable {
+
+		private static final long serialVersionUID = 575848841116711467L;
+		private boolean ascending;
+		
+		public LineLenghtComparator(boolean ascending) {
+			this.ascending = ascending;
+		}
+
+		public int compare(T entry1, T entry2) {
+			if ((entry1 == null) && (entry2 == null)) {
+				return 0;
+			}
+			if ((entry1 == null) && (entry2 != null)) {
+				return -1;
+			} else if ((entry1 != null) && (entry2 == null)) {
+				return 1;
+			}
+			
+			int result = entry1.toString().length() - entry2.toString().length();
+			if (ascending) {
+				return result;
+			} else {
+				return -result;
+			}
 		}
 	}
 

@@ -55,6 +55,8 @@ public class LDAPConnectionProvider {
 
 	private ArrayList<String> binaryAttributes;
 
+	private boolean supportsSubtreeDeleteRequestControl;
+
 	@SuppressWarnings("unused")
 	private LDAPConnectionProvider() {}
 
@@ -143,6 +145,7 @@ public class LDAPConnectionProvider {
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
 		this.subschemaSubentry = determineSubschemaSubentry();
+		this.supportsSubtreeDeleteRequestControl = supportsSubtreeDeleteRequestControl();
 		this.creationResultCode = ResultCode.SUCCESS;
 	}
 	private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
@@ -243,12 +246,9 @@ public class LDAPConnectionProvider {
 
 	private int determineSupportedLdapVersion() {
 		int resultSupportedLDAPVersion = LDAPConnectionProvider.DEFAULT_SUPPORTED_LDAP_VERSION;
-		
-		if (StringHelper.isEmptyString(bindDn) || StringHelper.isEmptyString(bindPassword)) {
-			return resultSupportedLDAPVersion;
-		}
 
-		if (connectionPool == null) {
+		boolean validConnection = isValidConnection();
+		if (!validConnection) {
 			return resultSupportedLDAPVersion;
 		}
 
@@ -270,12 +270,9 @@ public class LDAPConnectionProvider {
 
 	private String determineSubschemaSubentry() {
 		String resultSubschemaSubentry = LDAPConnectionProvider.DEFAULT_SUBSCHEMA_SUBENTRY;
-		
-		if (StringHelper.isEmptyString(bindDn) || StringHelper.isEmptyString(bindPassword)) {
-			return resultSubschemaSubentry;
-		}
 
-		if (connectionPool == null) {
+		boolean validConnection = isValidConnection();
+		if (!validConnection) {
 			return resultSubschemaSubentry;
 		}
 
@@ -292,12 +289,45 @@ public class LDAPConnectionProvider {
 		return resultSubschemaSubentry;
 	}
 
+	private boolean supportsSubtreeDeleteRequestControl() {
+		boolean supportsSubtreeDeleteRequestControl = false;
+
+		boolean validConnection = isValidConnection();
+		if (!validConnection) {
+			return supportsSubtreeDeleteRequestControl;
+		}
+
+		try {
+			supportsSubtreeDeleteRequestControl = connectionPool.getRootDSE().supportsControl(com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl.SUBTREE_DELETE_REQUEST_OID);
+		} catch (Exception ex) {
+			log.error("Failed to determine if LDAP server supports Subtree Delete Request Control", ex);
+		}
+
+		return supportsSubtreeDeleteRequestControl;
+	}
+
+	private boolean isValidConnection() {
+		if (StringHelper.isEmptyString(bindDn) || StringHelper.isEmptyString(bindPassword)) {
+			return false;
+		}
+
+		if (connectionPool == null) {
+			return false;
+		}
+		
+		return true;
+	}
+
 	public int getSupportedLDAPVersion() {
 		return supportedLDAPVersion;
 	}
 
 	public String getSubschemaSubentry() {
 		return subschemaSubentry;
+	}
+
+	public boolean isSupportsSubtreeDeleteRequestControl() {
+		return supportsSubtreeDeleteRequestControl;
 	}
 
 	/**
