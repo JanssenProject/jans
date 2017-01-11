@@ -109,8 +109,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         // Validate redirectUri
         String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
 
-        final Set<String> logoutUris = getRpLogoutUris(pair);
-        final String html = constructPage(logoutUris, redirectUri, state);
+        final Set<String> frontchannelLogoutUris = getRpFrontchannelLogoutUris(pair);
+        final String html = constructPage(frontchannelLogoutUris, redirectUri, state);
         log.debug("Constructed http logout page: " + html);
         return Response.ok().
                 cacheControl(ServerUtil.cacheControl(true, true)).
@@ -186,7 +186,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return new Pair<SessionState, AuthorizationGrant>(ldapSessionState, authorizationGrant);
     }
 
-    private Set<String> getRpLogoutUris(Pair<SessionState, AuthorizationGrant> pair) {
+    private Set<String> getRpFrontchannelLogoutUris(Pair<SessionState, AuthorizationGrant> pair) {
         final Set<String> result = Sets.newHashSet();
 
         SessionState sessionState = pair.getFirst();
@@ -213,7 +213,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                     continue; // skip client if logout_uri is blank
                 }
 
-                if (client.getLogoutSessionRequired() != null && client.getLogoutSessionRequired()) {
+                if (client.getFrontChannelLogoutSessionRequired() != null && client.getFrontChannelLogoutSessionRequired()) {
                     if (logoutUri.contains("?")) {
                         logoutUri = logoutUri + "&sid=" + sessionState.getId();
                     } else {

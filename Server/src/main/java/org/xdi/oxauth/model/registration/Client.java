@@ -44,7 +44,7 @@ public class Client {
     private String[] frontChannelLogoutUri;
 
     @LdapAttribute(name = "oxAuthLogoutSessionRequired")
-    private Boolean logoutSessionRequired;
+    private Boolean frontChannelLogoutSessionRequired;
 
     @LdapAttribute(name = "oxAuthRegistrationAccessToken")
     private String registrationAccessToken;
@@ -189,17 +189,17 @@ public class Client {
      *
      * @return logout session required
      */
-    public Boolean getLogoutSessionRequired() {
-        return logoutSessionRequired;
+    public Boolean getFrontChannelLogoutSessionRequired() {
+        return frontChannelLogoutSessionRequired;
     }
 
     /**
-     * Sets logout session required.
+     * Sets frontchannel logout session required.
      *
-     * @param logoutSessionRequired logout session required
+     * @param frontChannelLogoutSessionRequired frontchannel logout session required
      */
-    public void setLogoutSessionRequired(Boolean logoutSessionRequired) {
-        this.logoutSessionRequired = logoutSessionRequired;
+    public void setFrontChannelLogoutSessionRequired(Boolean frontChannelLogoutSessionRequired) {
+        this.frontChannelLogoutSessionRequired = frontChannelLogoutSessionRequired;
     }
 
     /**
