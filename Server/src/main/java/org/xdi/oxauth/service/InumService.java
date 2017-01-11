@@ -62,7 +62,4 @@ public class InumService {
         return new Pair<String, String>(inum, dn);
     }
 
-    public static InumService instance() {
-        return ServerUtil.instance(InumService.class);
-    }
 }
