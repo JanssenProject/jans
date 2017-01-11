@@ -8,11 +8,13 @@ package org.xdi.oxauth.service;
 
 import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.Filter;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.python.jline.internal.Preconditions;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.util.ServerUtil;
@@ -232,11 +234,10 @@ public class ClientService {
         return result;
     }
 
-    public List<Client> getClientsWithExpirationDate(String[] returnAttributes) {
+    public List<Client> getClientsWithExpirationDate(BatchOperation<Client> batchOperation, int searchLimit, int sizeLimit){
         String baseDN = staticConfiguration.getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
-
-        return ldapEntryManager.findEntries(baseDN, Client.class, filter);
+        return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, null, batchOperation, searchLimit, sizeLimit);
     }
 
     public String buildClientDn(String p_clientId) {
