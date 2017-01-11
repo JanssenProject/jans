@@ -79,8 +79,8 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setRequestUris(Arrays.asList("http://www.gluu.org/request"));
-        registerRequest.setLogoutUris(Lists.newArrayList(logoutUri));
-        registerRequest.setLogoutSessionRequired(true);
+        registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
+        registerRequest.setFrontChannelLogoutSessionRequired(true);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
         registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
@@ -105,10 +105,10 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
         assertNotNull(response.getClaims().get(SCOPES.toString()));
-        assertNotNull(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString()));
-        assertTrue(Boolean.parseBoolean(response.getClaims().get(LOGOUT_SESSION_REQUIRED.toString())));
-        assertNotNull(response.getClaims().get(LOGOUT_URI.toString()));
-        assertTrue(new JSONArray(response.getClaims().get(LOGOUT_URI.toString())).getString(0).equals(logoutUri));
+        assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
+        assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
+        assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
+        assertTrue(new JSONArray(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString())).getString(0).equals(logoutUri));
         assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
         assertEquals(SignatureAlgorithm.RS512,
                 SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
