@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service.fido.u2f;
 
 import com.unboundid.ldap.sdk.Filter;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
@@ -156,11 +157,11 @@ public class DeviceRegistrationService {
 		ldapEntryManager.remove(deviceRegistration);
 	}
 
-	public List<DeviceRegistration> getExpiredDeviceRegistrations(int startIndex, Date expirationDate) {
+	public List<DeviceRegistration> getExpiredDeviceRegistrations(BatchOperation<DeviceRegistration> batchOperation, Date expirationDate) {
 		final String u2fBaseDn = getDnForOneStepU2fDevice(null);
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, null, startIndex, CleanerTimer.BATCH_SIZE, CleanerTimer.BATCH_SIZE);
+		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, null, batchOperation, CleanerTimer.BATCH_SIZE, CleanerTimer.BATCH_SIZE);
 
 		return deviceRegistrations;
 	}

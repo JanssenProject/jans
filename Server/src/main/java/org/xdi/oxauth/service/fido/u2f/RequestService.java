@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service.fido.u2f;
 
 import com.unboundid.ldap.sdk.Filter;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
@@ -38,11 +39,11 @@ public class RequestService {
 	@In
 	private StaticConf staticConfiguration;
 
-	public List<RequestMessageLdap> getExpiredRequestMessages(int startIndex, Date expirationDate) {
+	public List<RequestMessageLdap> getExpiredRequestMessages(BatchOperation<RequestMessageLdap> batchOperation, Date expirationDate) {
 		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=u2f,o=@!1111,o=gluu
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<RequestMessageLdap> requestMessageLdap = ldapEntryManager.findEntries(u2fBaseDn, RequestMessageLdap.class, expirationFilter, SearchScope.SUB, null, startIndex, CleanerTimer.BATCH_SIZE, CleanerTimer.BATCH_SIZE);
+		List<RequestMessageLdap> requestMessageLdap = ldapEntryManager.findEntries(u2fBaseDn, RequestMessageLdap.class, expirationFilter, SearchScope.SUB, null, batchOperation, CleanerTimer.BATCH_SIZE, CleanerTimer.BATCH_SIZE);
 
 		return requestMessageLdap;
 	}
