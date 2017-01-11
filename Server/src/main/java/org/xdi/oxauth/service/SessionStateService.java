@@ -552,7 +552,7 @@ public class SessionStateService {
         final int interval = appConfiguration.getSessionIdUnusedLifetime();
         final int unauthenticatedInterval = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
 
-        BatchOperation<SessionState> unauthenticatedIdsBatchService = new BatchOperation<SessionState>() {
+        BatchOperation<SessionState> unauthenticatedIdsBatchService = new BatchOperation<SessionState>(ldapEntryManager) {
             @Override
             protected List<SessionState> getChunkOrNull(int chunkSize) {
                 try {
@@ -573,7 +573,7 @@ public class SessionStateService {
         };
         unauthenticatedIdsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
-        BatchOperation<SessionState> idsBatchService = new BatchOperation<SessionState>() {
+        BatchOperation<SessionState> idsBatchService = new BatchOperation<SessionState>(ldapEntryManager) {
             @Override
             protected List<SessionState> getChunkOrNull(int chunkSize) {
                 try {
