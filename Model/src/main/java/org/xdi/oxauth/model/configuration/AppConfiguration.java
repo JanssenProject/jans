@@ -142,7 +142,8 @@ public class AppConfiguration {
     private Boolean legacyIdTokenClaims;
     private Boolean customHeadersWithAuthorizationResponse;
     private Boolean frontChannelLogoutSessionSupported; 
-    
+
+    private String loggingLevel;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
 		return frontChannelLogoutSessionSupported;
@@ -1146,4 +1147,13 @@ public class AppConfiguration {
     public void setCustomHeadersWithAuthorizationResponse(Boolean customHeadersWithAuthorizationResponse) {
         this.customHeadersWithAuthorizationResponse = customHeadersWithAuthorizationResponse;
     }
+
+	public String getLoggingLevel() {
+		return loggingLevel;
+	}
+
+	public void setLoggingLevel(String loggingLevel) {
+		this.loggingLevel = loggingLevel;
+	}
+
 }
