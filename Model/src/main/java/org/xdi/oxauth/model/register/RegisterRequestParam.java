@@ -196,13 +196,13 @@ public enum RegisterRequestParam {
      * A sid (session ID) query parameter MAY be included by the OP to enable the RP to validate the request and
      * to determine which of the potentially multiple sessions is to be logged out.
      */
-    LOGOUT_URI("logout_uri"),
+    FRONT_CHANNEL_LOGOUT_URI("frontchannel_logout_uri"),
 
     /**
      * Boolean value specifying whether the RP requires that a sid (session ID) query parameter be included
      * to identify the RP session at the OP when the logout_uri is used. If omitted, the default value is false.
      */
-    LOGOUT_SESSION_REQUIRED("logout_session_required"),
+    FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED("frontchannel_logout_session_required"),
 
     /**
      * Array of request_uri values that are pre-registered by the Client for use at the Authorization Server.
