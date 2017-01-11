@@ -8,17 +8,20 @@ package org.xdi.oxauth.service.uma;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.oxauth.service.CleanerTimer;
 
 import java.util.Date;
 import java.util.List;
@@ -106,19 +109,27 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     }
 
     @Override
-    public void cleanupResourceSetPermissions(Date now) {
-        try {
-            final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-            final List<ResourceSetPermission> entries = ldapEntryManager.findEntries(
-            		staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, filter);
-            if (entries != null && !entries.isEmpty()) {
+    public void cleanupResourceSetPermissions(final Date now) {
+        BatchOperation<ResourceSetPermission> resourceSetPermissionBatchService = new BatchOperation<ResourceSetPermission>(ldapEntryManager) {
+            @Override
+            protected List<ResourceSetPermission> getChunkOrNull(int chunkSize) {
+                try {
+                    final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
+                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void performAction(List<ResourceSetPermission> entries) {
                 for (ResourceSetPermission p : entries) {
                     ldapEntryManager.remove(p);
                 }
             }
-        } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
-        }
+        };
+        resourceSetPermissionBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     public void addBranch(String clientDn) {
