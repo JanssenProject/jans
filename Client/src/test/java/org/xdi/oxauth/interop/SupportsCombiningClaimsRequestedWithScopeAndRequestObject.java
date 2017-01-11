@@ -34,7 +34,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Supports Combining Claims Requested with scope and Request Object
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version January 11, 2017
  */
 public class SupportsCombiningClaimsRequestedWithScopeAndRequestObject extends BaseTest {
 
@@ -111,7 +111,6 @@ public class SupportsCombiningClaimsRequestedWithScopeAndRequestObject extends B
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,

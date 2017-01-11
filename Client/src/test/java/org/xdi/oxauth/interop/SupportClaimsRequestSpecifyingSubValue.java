@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
  * If that user is logged in, the request succeeds, otherwise it fails.
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version January 11, 2017
  */
 public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
 
@@ -134,7 +134,6 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,

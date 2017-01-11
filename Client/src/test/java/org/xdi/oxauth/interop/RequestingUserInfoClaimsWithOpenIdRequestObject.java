@@ -32,7 +32,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Requesting UserInfo Claims with OpenID Request Object
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version January 11, 2017
  */
 public class RequestingUserInfoClaimsWithOpenIdRequestObject extends BaseTest {
 
@@ -106,14 +106,6 @@ public class RequestingUserInfoClaimsWithOpenIdRequestObject extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.GIVEN_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.FAMILY_NAME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EMAIL));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ZONEINFO));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.LOCALE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.PICTURE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ADDRESS));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
