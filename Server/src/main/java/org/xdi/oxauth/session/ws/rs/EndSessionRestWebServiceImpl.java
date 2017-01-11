@@ -19,7 +19,6 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -203,7 +202,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         clientsByDns.add(pair.getSecond().getClient());
 
         for (Client client : clientsByDns) {
-            String[] logoutUris = client.getLogoutUri();
+            String[] logoutUris = client.getFrontChannelLogoutUri();
 
             if (logoutUris == null) {
                 continue;

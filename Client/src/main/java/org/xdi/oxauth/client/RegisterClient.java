@@ -189,14 +189,14 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                     requestBody.put(POST_LOGOUT_REDIRECT_URIS.toString(), getRequest().getPostLogoutRedirectUris());
                 }
                 if (getRequest().getLogoutUris() != null && !getRequest().getLogoutUris().isEmpty()) {
-                    requestBody.put(LOGOUT_URI.getName(), getRequest().getLogoutUris());
+                    requestBody.put(FRONT_CHANNEL_LOGOUT_URI.getName(), getRequest().getLogoutUris());
                 }
                 if (getRequest().getClientSecretExpiresAt() != null) {
                     requestBody.put(CLIENT_SECRET_EXPIRES_AT_.toString(), getRequest().getClientSecretExpiresAt().getTime());
                 }
                 
                 if (getRequest().getLogoutSessionRequired() != null) {
-                    requestBody.put(LOGOUT_SESSION_REQUIRED.getName(), getRequest().getLogoutSessionRequired());
+                    requestBody.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getLogoutSessionRequired());
                 }
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));

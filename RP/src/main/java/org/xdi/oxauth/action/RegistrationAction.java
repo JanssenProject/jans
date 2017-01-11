@@ -122,8 +122,8 @@ public class RegistrationAction {
             request.setInitiateLoginUri(initiateLoginUri);
             request.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(postLogoutRedirectUris));
             request.setRequestUris(StringUtils.spaceSeparatedToList(requestUris));
-            request.setLogoutUris(Lists.newArrayList(logoutUri));
-            request.setLogoutSessionRequired(logoutSessionRequired);
+            request.setFrontChannelLogoutUris(Lists.newArrayList(logoutUri));
+            request.setFrontChannelLogoutSessionRequired(logoutSessionRequired);
 
             RegisterClient client = new RegisterClient(registrationEndpoint);
             client.setRequest(request);
