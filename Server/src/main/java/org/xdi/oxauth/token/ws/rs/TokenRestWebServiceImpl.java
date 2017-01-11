@@ -181,7 +181,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         new refresh token.
                         */
                         RefreshToken reToken = authorizationGrant.createRefreshToken();
-                        GrantService grantService = GrantService.instance();
                         grantService.removeByCode(refreshToken, client.getClientId());
 
                         if (scope != null && !scope.isEmpty()) {

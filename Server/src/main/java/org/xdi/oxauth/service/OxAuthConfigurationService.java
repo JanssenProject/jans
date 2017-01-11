@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.service;
 
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.In;
@@ -30,7 +33,11 @@ public class OxAuthConfigurationService {
 
 	public String getCssLocation() {
 		if (StringHelper.isEmpty(appConfiguration.getCssLocation())) {
-			String contextPath = ServletContexts.instance().getRequest().getContextPath();
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			if (ctx == null) {
+				return "";
+			}
+			String contextPath = ctx.getExternalContext().getRequestContextPath();
 			return contextPath + "/stylesheet";
 		} else {
 			return appConfiguration.getCssLocation();

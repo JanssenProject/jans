@@ -6,14 +6,29 @@
 
 package org.xdi.oxauth.service;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.logging.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
+import org.apache.logging.log4j.core.util.Loader;
+import org.apache.logging.log4j.spi.LoggerRegistry;
+import org.apache.logging.log4j.status.StatusLogger;
+import org.apache.logging.log4j.util.LoaderUtil;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
@@ -41,10 +56,11 @@ import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.service.custom.CustomScriptManagerMigrator;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
@@ -500,11 +516,30 @@ public class AppInitializer {
 
 		return clazzObject;
 	}
+	
+	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT)
+	public void updateLoggingSeverity(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
+		String loggingLevel = appConfiguration.getLoggingLevel();
+		log.info("Setting loggers level to: '{0}'", loggingLevel);
+		
+		LoggerContext loggerContext = LoggerContext.getContext(false);
 
-	public static AppInitializer instance() {
-        return ServerUtil.instance(AppInitializer.class);
-    }
+		if (StringHelper.equalsIgnoreCase("DEFAULT", loggingLevel)) {
+			log.info("Reloadming log4j configuration");
+			loggerContext.reconfigure();
+			return;
+		}
 
+		Level level = Level.toLevel(loggingLevel, Level.INFO);
+
+		for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
+			String loggerName = logger.getName();
+			if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu")) {
+				logger.setLevel(level);
+			}
+		}
+	}
+	
 	private class LdapConnectionProviders {
 		private LdapConnectionService connectionProvider;
 		private LdapConnectionService connectionBindProvider;
