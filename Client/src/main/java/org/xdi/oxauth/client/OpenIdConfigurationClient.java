@@ -154,6 +154,12 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 if (jsonObj.has(REQUEST_URI_PARAMETER_SUPPORTED)) {
                     getResponse().setRequestUriParameterSupported(jsonObj.getBoolean(REQUEST_URI_PARAMETER_SUPPORTED));
                 }
+                if (jsonObj.has(FRONTCHANNEL_LOGOUT_SUPPORTED)) {
+                    getResponse().setFrontChannelLogoutSupported(jsonObj.getBoolean(FRONTCHANNEL_LOGOUT_SUPPORTED));
+                }
+                if (jsonObj.has(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED)) {
+                    getResponse().setFrontChannelLogoutSessionSupported(jsonObj.getBoolean(FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED));
+                }
                 if (jsonObj.has(REQUIRE_REQUEST_URI_REGISTRATION)) {
                     getResponse().setRequireRequestUriRegistration(jsonObj.getBoolean(REQUIRE_REQUEST_URI_REGISTRATION));
                 }
