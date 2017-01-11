@@ -141,7 +141,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode());
                             builder.entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_REDIRECT_URI));
                         } else {
-                            registerParamsValidator.validateLogoutUri(r.getLogoutUris(), r.getRedirectUris(), errorResponseFactory);
+                            registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
 
                             String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
 
@@ -337,10 +337,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setPostLogoutRedirectUris(postLogoutRedirectUris.toArray(new String[postLogoutRedirectUris.size()]));
         }
 
-        if (requestObject.getLogoutUris() != null && !requestObject.getLogoutUris().isEmpty()) {
-            p_client.setFrontChannelLogoutUri(requestObject.getLogoutUris().toArray(new String[requestObject.getLogoutUris().size()]));
+        if (requestObject.getFrontChannelLogoutUris() != null && !requestObject.getFrontChannelLogoutUris().isEmpty()) {
+            p_client.setFrontChannelLogoutUri(requestObject.getFrontChannelLogoutUris().toArray(new String[requestObject.getFrontChannelLogoutUris().size()]));
         }
-        p_client.setLogoutSessionRequired(requestObject.getLogoutSessionRequired());
+        p_client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
 
         List<String> requestUris = requestObject.getRequestUris();
         if (requestUris != null && !requestUris.isEmpty()) {
@@ -539,7 +539,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
         // Logout params
         Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_URI.toString(), client.getFrontChannelLogoutUri());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getLogoutSessionRequired());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), client.getFrontChannelLogoutSessionRequired());
 
         // Custom Params
         String[] scopeNames = null;
