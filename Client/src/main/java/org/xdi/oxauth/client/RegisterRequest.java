@@ -45,8 +45,8 @@ public class RegisterRequest extends BaseRequest {
     private String logoUri;
     private String clientUri;
     private String policyUri;
-    private List<String> logoutUris;
-    private Boolean logoutSessionRequired;
+    private List<String> frontChannelLogoutUris;
+    private Boolean frontChannelLogoutSessionRequired;
     private String tosUri;
     private String jwksUri;
     private String jwks;
@@ -143,8 +143,8 @@ public class RegisterRequest extends BaseRequest {
      *
      * @return logout uri
      */
-    public List<String> getLogoutUris() {
-        return logoutUris;
+    public List<String> getFrontChannelLogoutUris() {
+        return frontChannelLogoutUris;
     }
 
     /**
@@ -153,7 +153,7 @@ public class RegisterRequest extends BaseRequest {
      * @param logoutUris logout uri
      */
     public void setFrontChannelLogoutUris(List<String> logoutUris) {
-        this.logoutUris = logoutUris;
+        this.frontChannelLogoutUris = logoutUris;
     }
 
     /**
@@ -179,17 +179,17 @@ public class RegisterRequest extends BaseRequest {
      *
      * @return logout session required
      */
-    public Boolean getLogoutSessionRequired() {
-        return logoutSessionRequired;
+    public Boolean getFrontChannelLogoutSessionRequired() {
+        return frontChannelLogoutSessionRequired;
     }
 
     /**
-     * Sets logout session required.
+     * Sets front channel logout session required.
      *
-     * @param logoutSessionRequired logout session required
+     * @param frontChannelLogoutSessionRequired front channel logout session required
      */
-    public void setFrontChannelLogoutSessionRequired(Boolean logoutSessionRequired) {
-        this.logoutSessionRequired = logoutSessionRequired;
+    public void setFrontChannelLogoutSessionRequired(Boolean frontChannelLogoutSessionRequired) {
+        this.frontChannelLogoutSessionRequired = frontChannelLogoutSessionRequired;
     }
 
     /**
@@ -922,11 +922,11 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
         }
-        if (logoutUris != null && !logoutUris.isEmpty()) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), toJSONArray(logoutUris).toString());
+        if (frontChannelLogoutUris != null && !frontChannelLogoutUris.isEmpty()) {
+            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), toJSONArray(frontChannelLogoutUris).toString());
         }
-        if (logoutSessionRequired != null) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), logoutSessionRequired.toString());
+        if (frontChannelLogoutSessionRequired != null) {
+            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
@@ -1221,11 +1221,11 @@ public class RegisterRequest extends BaseRequest {
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
             parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
         }
-        if (logoutUris != null && !logoutUris.isEmpty()) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), toJSONArray(logoutUris));
+        if (frontChannelLogoutUris != null && !frontChannelLogoutUris.isEmpty()) {
+            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), toJSONArray(frontChannelLogoutUris));
         }
-        if (logoutSessionRequired != null) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), logoutSessionRequired.toString());
+        if (frontChannelLogoutSessionRequired != null) {
+            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
         if (requestUris != null && !requestUris.isEmpty()) {
             parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris));
