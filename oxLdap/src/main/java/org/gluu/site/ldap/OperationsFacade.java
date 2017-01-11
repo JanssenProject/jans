@@ -13,7 +13,6 @@ import com.unboundid.ldif.LDIFChangeRecord;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
-import org.gluu.site.ldap.exception.InvalidSimplePageControlException;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SortOrder;
@@ -228,7 +227,10 @@ public class OperationsFacade {
 			do {
 				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(searchLimit, cookie) });
 				setControls(searchRequest, controls);
-				searchResult = getConnectionPool().search(searchRequest);
+				if (batchOperation != null)
+					searchResult = batchOperation.getLdapConnection().search(searchRequest);
+				else
+					searchResult = getConnectionPool().search(searchRequest);
 				searchResultList.add(searchResult);
 				searchResultEntries.addAll(searchResult.getSearchEntries());
 				searchResultReferences.addAll(searchResult.getSearchReferences());
@@ -260,32 +262,6 @@ public class OperationsFacade {
 		}
 
 		return searchResult;
-	}
-
-	private ASN1OctetString scrollSimplePagedResultsControl(String dn, SearchRequest searchRequest2, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPSearchException, InvalidSimplePageControlException {
-		SearchRequest searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, "dn");
-
-		int currentStartIndex = startIndex;
-		ASN1OctetString cookie = null;
-		do {
-			int pageSize = Math.min(currentStartIndex, 100);
-			searchRequest.setControls(new Control[] { new SimplePagedResultsControl(pageSize, cookie, true) });
-			setControls(searchRequest, controls);
-			SearchResult searchResult = getConnectionPool().search(searchRequest);
-			
-			currentStartIndex -= searchResult.getEntryCount();
-			try {
-				SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
-				if (c != null) {
-					cookie = c.getCookie();
-				}
-			} catch (LDAPException ex) {
-				log.error("Error while accessing cookie" + ex.getMessage());
-				throw new InvalidSimplePageControlException("Error while accessing cookie");
-			}
-		} while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
-		
-		return cookie;
 	}
 
 	public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {
