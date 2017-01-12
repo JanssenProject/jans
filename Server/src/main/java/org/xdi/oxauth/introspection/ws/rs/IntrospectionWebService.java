@@ -18,6 +18,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -77,7 +78,8 @@ public class IntrospectionWebService {
                 final AuthorizationGrant authorizationGrant = tokenService.getAuthorizationGrant(p_authorization);
                 if (authorizationGrant != null) {
                     final AbstractToken accessToken = authorizationGrant.getAccessToken(tokenService.getTokenFromAuthorizationParameter(p_authorization));
-                    if (accessToken != null && accessToken.isValid()) {
+                    boolean isPat = authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue()); // #432
+                    if (accessToken != null && accessToken.isValid() && isPat) {
                         final IntrospectionResponse response = new IntrospectionResponse(false);
 
                         final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(p_token);
@@ -88,10 +90,15 @@ public class IntrospectionWebService {
                                 response.setExpiresAt(tokenToIntrospect.getExpirationDate());
                                 response.setIssuedAt(tokenToIntrospect.getCreationDate());
                                 response.setAcrValues(tokenToIntrospect.getAuthMode());
+                                response.setScopes(grantOfIntrospectionToken.getScopes()); // #433
                             }
                         }
                         return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();
+                    } else {
+                        log.error("Access token is not valid. Valid: " + (accessToken != null && accessToken.isValid()) + ", isPat:" + isPat);
                     }
+                } else {
+                    log.error("Authorization grant is null.");
                 }
 
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED)).build();
