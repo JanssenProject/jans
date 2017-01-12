@@ -10,31 +10,36 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/09/2013
  */
-@JsonPropertyOrder({"active", "exp", "iat", "acr_values"})
+@JsonPropertyOrder({"active", "exp", "iat", "acr_values", "scopes"})
 // ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
 public class IntrospectionResponse {
 
     @JsonProperty(value = "active")
-    private boolean m_active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
+    private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
     @JsonProperty(value = "exp")
     private Date expiresAt;
     @JsonProperty(value = "iat")
     private Date issuedAt;
     @JsonProperty(value = "acr_values")
     private String acrValues;
+    @JsonProperty(value = "scopes")
+    private List<String> scopes;
 
     public IntrospectionResponse() {
     }
 
     public IntrospectionResponse(boolean p_active) {
-        m_active = p_active;
+        active = p_active;
     }
 
     public String getAcrValues() {
@@ -46,11 +51,19 @@ public class IntrospectionResponse {
     }
 
     public boolean isActive() {
-        return m_active;
+        return active;
     }
 
     public void setActive(boolean p_active) {
-        m_active = p_active;
+        active = p_active;
+    }
+
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(Collection<String> scopes) {
+        this.scopes = new ArrayList<String>(scopes);
     }
 
     public Date getExpiresAt() {
