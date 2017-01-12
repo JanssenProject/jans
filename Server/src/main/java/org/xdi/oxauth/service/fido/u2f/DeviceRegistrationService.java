@@ -7,16 +7,19 @@
 package org.xdi.oxauth.service.fido.u2f;
 
 import com.unboundid.ldap.sdk.Filter;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
 
@@ -46,6 +49,15 @@ public class DeviceRegistrationService {
 	@In
 	private StaticConf staticConfiguration;
 
+	/**
+	 * Get DeviceRegistrationService instance
+	 *
+	 * @return DeviceRegistrationService instance
+	 */
+	public static DeviceRegistrationService instance() {
+		return (DeviceRegistrationService) Component.getInstance(DeviceRegistrationService.class);
+	}
+
 	public void addBranch(final String userInum) {
 		SimpleBranch branch = new SimpleBranch();
 		branch.setOrganizationalUnitName("fido");
@@ -67,7 +79,7 @@ public class DeviceRegistrationService {
 
 	public DeviceRegistration findUserDeviceRegistration(String userInum, String deviceId, String... returnAttributes) {
 		prepareBranch(userInum);
-		
+
 		String deviceDn = getDnForU2fDevice(userInum, deviceId);
 
 		return ldapEntryManager.find(DeviceRegistration.class, deviceDn, returnAttributes);
@@ -95,8 +107,8 @@ public class DeviceRegistrationService {
 		Filter deviceHashCodeFilter = Filter.createEqualityFilter("oxDeviceHashCode", String.valueOf(getKeyHandleHashCode(keyHandleDecoded)));
 		Filter deviceKeyHandleFilter = Filter.createEqualityFilter("oxDeviceKeyHandle", keyHandle);
 		Filter appIdFilter = Filter.createEqualityFilter("oxApplication", appId);
-		
-		Filter filter = Filter.createANDFilter(deviceObjectClassFilter, deviceHashCodeFilter, appIdFilter, deviceKeyHandleFilter); 
+
+		Filter filter = Filter.createANDFilter(deviceObjectClassFilter, deviceHashCodeFilter, appIdFilter, deviceKeyHandleFilter);
 
 		return ldapEntryManager.findEntries(baseDn, DeviceRegistration.class, returnAttributes, filter);
 	}
@@ -121,16 +133,16 @@ public class DeviceRegistrationService {
 		if (deviceRegistration == null) {
 			return false;
 		}
-		
+
 		// Remove temporary stored device registration
 		removeUserDeviceRegistration(deviceRegistration);
-		
+
 		// Attach user device registration to user
 		String deviceDn = getDnForU2fDevice(userInum, deviceRegistration.getId());
 
 		deviceRegistration.setDn(deviceDn);
 		addUserDeviceRegistration(userInum, deviceRegistration);
-		
+
 		return true;
 	}
 
@@ -154,11 +166,11 @@ public class DeviceRegistrationService {
 		ldapEntryManager.remove(deviceRegistration);
 	}
 
-	public List<DeviceRegistration> getExpiredDeviceRegistrations(Date expirationDate) {
+	public List<DeviceRegistration> getExpiredDeviceRegistrations(BatchOperation<DeviceRegistration> batchOperation, Date expirationDate) {
 		final String u2fBaseDn = getDnForOneStepU2fDevice(null);
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter);
+		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, null, batchOperation, 0, CleanerTimer.BATCH_SIZE, CleanerTimer.BATCH_SIZE);
 
 		return deviceRegistrations;
 	}
@@ -190,25 +202,16 @@ public class DeviceRegistrationService {
 
     /*
      * Generate non unique hash code to split keyHandle among small cluster with 10-20 elements
-     * 
-     * This hash code will be used to generate small LDAP indexes 
+     *
+     * This hash code will be used to generate small LDAP indexes
      */
     public int getKeyHandleHashCode(byte[] keyHandle) {
 		int hash = 0;
 		for (int j = 0; j < keyHandle.length; j++) {
 			hash += keyHandle[j]*j;
 		}
-		
+
 		return hash;
     }
-
-	/**
-	 * Get DeviceRegistrationService instance
-	 *
-	 * @return DeviceRegistrationService instance
-	 */
-	public static DeviceRegistrationService instance() {
-		return (DeviceRegistrationService) Component.getInstance(DeviceRegistrationService.class);
-	}
 
 }
