@@ -257,7 +257,7 @@ public class GrantService {
                     Calendar calendar = Calendar.getInstance();
                     calendar.add(Calendar.SECOND, 60);
 
-                    final Filter filter = Filter.create(String.format("(&(oxAuthCreation<=%s)(numsubordinates=0))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
+                    final Filter filter = Filter.create(String.format("(&(oxAuthCreation<=%s)(|(numsubordinates=0)(hasSubordinates=FALSE)))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
                     return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
