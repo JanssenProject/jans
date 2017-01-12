@@ -35,12 +35,14 @@ import java.util.*;
  */
 public class OperationsFacade {
 
+	private static final Logger log = Logger.getLogger(OperationsFacade.class);
+
 	public static final String dn = "dn";
 	public static final String uid = "uid";
 	public static final String success = "success";
 	public static final String userPassword = "userPassword";
 	public static final String objectClass = "objectClass";
-	private static final Logger log = Logger.getLogger(OperationsFacade.class);
+
 	private LDAPConnectionProvider connectionProvider;
 	private LDAPConnectionProvider bindConnectionProvider;
 
@@ -190,7 +192,7 @@ public class OperationsFacade {
 		return search(dn, filter, scope, null, 0, searchLimit, sizeLimit, controls, attributes);
 	}
 
-	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation batchOperation, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation<?> batchOperation, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
 
@@ -200,7 +202,6 @@ public class OperationsFacade {
 				log.trace("Search in whole LDAP tree", new Exception());
 			}
 		}
-
 
 		if (attributes == null) {
 			searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter);
@@ -220,7 +221,12 @@ public class OperationsFacade {
 		List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
 		List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
 
-		if (searchLimit > 0) {
+		if ((searchLimit > 0) || (startIndex > 0)) {
+			if (searchLimit == 0) {
+				// Default page size
+				searchLimit = 100;
+			}
+
 			ASN1OctetString cookie = null;
 			if (startIndex > 0) {
 				try {
@@ -229,15 +235,19 @@ public class OperationsFacade {
 					throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
 				}
 			}
-			if (batchOperation != null)
+
+			if (batchOperation != null) {
 				cookie = batchOperation.getCookie();
+			}
+
 			do {
 				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(searchLimit, cookie) });
 				setControls(searchRequest, controls);
-				if (batchOperation != null)
+				if (batchOperation != null) {
 					searchResult = batchOperation.getLdapConnection().search(searchRequest);
-				else
+				} else {
 					searchResult = getConnectionPool().search(searchRequest);
+				}
 				searchResultList.add(searchResult);
 				searchResultEntries.addAll(searchResult.getSearchEntries());
 				searchResultReferences.addAll(searchResult.getSearchReferences());
@@ -259,6 +269,7 @@ public class OperationsFacade {
 					break;
 				}
 			} while ((cookie != null) && (cookie.getValueLength() > 0));
+
 			SearchResult searchResultTemp = searchResultList.get(0);
 			searchResult = new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(),
 					searchResultTemp.getDiagnosticMessage(), searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(),
