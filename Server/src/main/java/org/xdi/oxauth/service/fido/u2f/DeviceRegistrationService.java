@@ -49,15 +49,6 @@ public class DeviceRegistrationService {
 	@In
 	private StaticConf staticConfiguration;
 
-	/**
-	 * Get DeviceRegistrationService instance
-	 *
-	 * @return DeviceRegistrationService instance
-	 */
-	public static DeviceRegistrationService instance() {
-		return (DeviceRegistrationService) Component.getInstance(DeviceRegistrationService.class);
-	}
-
 	public void addBranch(final String userInum) {
 		SimpleBranch branch = new SimpleBranch();
 		branch.setOrganizationalUnitName("fido");
