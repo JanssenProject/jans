@@ -6,19 +6,15 @@
 
 package org.gluu.site.ldap;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
+import com.unboundid.asn1.ASN1OctetString;
+import com.unboundid.ldap.sdk.*;
+import com.unboundid.ldap.sdk.controls.*;
+import com.unboundid.ldif.LDIFChangeRecord;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
 import org.gluu.site.ldap.exception.InvalidSimplePageControlException;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
 import org.gluu.site.ldap.persistence.exception.MappingException;
 import org.xdi.ldap.model.SearchScope;
@@ -27,32 +23,8 @@ import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.asn1.ASN1OctetString;
-import com.unboundid.ldap.sdk.Attribute;
-import com.unboundid.ldap.sdk.BindResult;
-import com.unboundid.ldap.sdk.Control;
-import com.unboundid.ldap.sdk.DeleteRequest;
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.LDAPConnectionPool;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.LDAPResult;
-import com.unboundid.ldap.sdk.LDAPSearchException;
-import com.unboundid.ldap.sdk.Modification;
-import com.unboundid.ldap.sdk.ModificationType;
-import com.unboundid.ldap.sdk.ModifyRequest;
-import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.SearchRequest;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.SearchResultReference;
-import com.unboundid.ldap.sdk.controls.ServerSideSortRequestControl;
-import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.ldap.sdk.controls.SortKey;
-import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
-import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
-import com.unboundid.ldap.sdk.controls.VirtualListViewResponseControl;
-import com.unboundid.ldif.LDIFChangeRecord;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * OperationsFacade is the base class that performs all the ldap operations
@@ -68,11 +40,9 @@ public class OperationsFacade {
 	public static final String success = "success";
 	public static final String userPassword = "userPassword";
 	public static final String objectClass = "objectClass";
-
+	private static final Logger log = Logger.getLogger(OperationsFacade.class);
 	private LDAPConnectionProvider connectionProvider;
 	private LDAPConnectionProvider bindConnectionProvider;
-
-	private static final Logger log = Logger.getLogger(OperationsFacade.class);
 
 	@SuppressWarnings("unused")
 	private OperationsFacade() {
@@ -217,13 +187,13 @@ public class OperationsFacade {
 
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 		throws LDAPSearchException {
-		return search(dn, filter, scope, 0, searchLimit, sizeLimit, controls, attributes);
+		return search(dn, filter, scope, null, 0, searchLimit, sizeLimit, controls, attributes);
 	}
-	
-	public SearchResult search(String dn, Filter filter, SearchScope scope, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+
+	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation batchOperation, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
-		
+
 		if (log.isTraceEnabled()) {
 			// Find whole tree search
 			if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
@@ -249,11 +219,8 @@ public class OperationsFacade {
 		List<SearchResult> searchResultList = new ArrayList<SearchResult>();
 		List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
 		List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
-		
-		if ((searchLimit > 0) || (startIndex > 0)) {
-			if (searchLimit == 0) {
-				searchLimit = 100;
-			}
+
+		if (searchLimit > 0) {
 			ASN1OctetString cookie = null;
 			if (startIndex > 0) {
 				try {
@@ -262,10 +229,15 @@ public class OperationsFacade {
 					throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
 				}
 			}
+			if (batchOperation != null)
+				cookie = batchOperation.getCookie();
 			do {
 				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(searchLimit, cookie) });
 				setControls(searchRequest, controls);
-				searchResult = getConnectionPool().search(searchRequest);
+				if (batchOperation != null)
+					searchResult = batchOperation.getLdapConnection().search(searchRequest);
+				else
+					searchResult = getConnectionPool().search(searchRequest);
 				searchResultList.add(searchResult);
 				searchResultEntries.addAll(searchResult.getSearchEntries());
 				searchResultReferences.addAll(searchResult.getSearchReferences());
@@ -274,11 +246,15 @@ public class OperationsFacade {
 					SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
 					if (c != null) {
 						cookie = c.getCookie();
+						if (batchOperation != null) {
+							batchOperation.setCookie(cookie);
+							batchOperation.setMoreResultsToReturn(c.moreResultsToReturn());
+						}
 					}
 				} catch (LDAPException ex) {
 					log.error("Error while accessing cookies" + ex.getMessage());
 				}
-				
+
 				if (useSizeLimit) {
 					break;
 				}
@@ -306,7 +282,7 @@ public class OperationsFacade {
 			searchRequest.setControls(new Control[] { new SimplePagedResultsControl(pageSize, cookie, true) });
 			setControls(searchRequest, controls);
 			SearchResult searchResult = getConnectionPool().search(searchRequest);
-			
+
 			currentStartIndex -= searchResult.getEntryCount();
 			try {
 				SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
@@ -318,7 +294,7 @@ public class OperationsFacade {
 				throw new InvalidSimplePageControlException("Error while accessing cookie");
 			}
 		} while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
-		
+
 		return cookie;
 	}
 
@@ -343,7 +319,7 @@ public class OperationsFacade {
 		SearchResult searchResult = getConnectionPool().search(searchRequest);
 		List<SearchResultEntry> resultSearchResultEntries = searchResult.getSearchEntries();
 		int totalResults = resultSearchResultEntries.size();
-		
+
 		sortListByAttributes(searchResultEntries, false, sortBy);
 
 		List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
@@ -625,8 +601,8 @@ public class OperationsFacade {
         	log.error("Failed to close connection pool correctly");
         	result = false;
         }
-		
-		if (bindConnectionProvider != null) { 
+
+		if (bindConnectionProvider != null) {
 	        try {
 	        	bindConnectionProvider.closeConnectionPool();
 	        } catch (Exception ex) {
@@ -634,7 +610,7 @@ public class OperationsFacade {
 	        	result = false;
 	        }
 		}
-		
+
 		return result;
 	}
 
