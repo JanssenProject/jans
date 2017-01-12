@@ -54,15 +54,15 @@ public class LdapSample {
 		}
 
 		Filter filter = Filter.createEqualityFilter("gluuStatus", "active");
-		List<SimpleAttribute> attributes = ldapEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 0, 0);
+		List<SimpleAttribute> attributes = ldapEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
 		for (SimpleAttribute attribute : attributes) {
 			log.debug("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
 		}
 
-		List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 0, 0);
+		List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
 		log.debug("Found sessions: " + sessions.size());
 
-		List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, null, 0, 0);
+		List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "oxAuthGrantId" }, null, 10, 0, 0);
 		log.debug("Found grants: " + grants.size());
 
 		try {

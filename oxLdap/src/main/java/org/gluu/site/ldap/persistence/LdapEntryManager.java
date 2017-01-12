@@ -323,10 +323,10 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	}
 
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
-		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, searchLimit, sizeLimit);
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, 0, searchLimit, sizeLimit);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int searchLimit, int sizeLimit) {
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int startIndex, int searchLimit, int sizeLimit) {
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
 		}
@@ -349,7 +349,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, batchOperation, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, batchOperation, startIndex, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -795,94 +795,6 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		sortListByProperties(entryClass, entries, false, sortByProperties);
 	}
 
-	private static final class PropertyComparator<T> implements Comparator<T>, Serializable {
-
-		private static final long serialVersionUID = 574848841116711467L;
-		private Getter[][] propertyGetters;
-		private boolean caseSensetive;
-
-		private PropertyComparator(Getter[][] propertyGetters, boolean caseSensetive) {
-			this.propertyGetters = propertyGetters;
-			this.caseSensetive = caseSensetive;
-		}
-
-		public int compare(T entry1, T entry2) {
-			if ((entry1 == null) && (entry2 == null)) {
-				return 0;
-			}
-			if ((entry1 == null) && (entry2 != null)) {
-				return -1;
-			} else if ((entry1 != null) && (entry2 == null)) {
-				return 1;
-			}
-
-			int result = 0;
-			for (Getter[] curPropertyGetters : propertyGetters) {
-				result = compare(entry1, entry2, curPropertyGetters);
-				if (result != 0) {
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public int compare(T entry1, T entry2, Getter[] propertyGetters) {
-			Object value1 = ReflectHelper.getPropertyValue(entry1, propertyGetters);
-			Object value2 = ReflectHelper.getPropertyValue(entry2, propertyGetters);
-
-			if ((value1 == null) && (value2 == null)) {
-				return 0;
-			}
-			if ((value1 == null) && (value2 != null)) {
-				return -1;
-			} else if ((value1 != null) && (value2 == null)) {
-				return 1;
-			}
-
-			if (value1 instanceof Date) {
-				return ((Date) value1).compareTo((Date) value2);
-			} else if (value1 instanceof Integer) {
-				return ((Integer) value1).compareTo((Integer) value2);
-			} else if (value1 instanceof String && value2 instanceof String) {
-				if (caseSensetive) {
-					return ((String) value1).compareTo((String) value2);
-				} else {
-					return ((String) value1).toLowerCase().compareTo(((String) value2).toLowerCase());
-				}
-			}
-            return 0;
-		}
-	}
-
-	private static final class LineLenghtComparator<T> implements Comparator<T>, Serializable {
-
-		private static final long serialVersionUID = 575848841116711467L;
-		private boolean ascending;
-		
-		public LineLenghtComparator(boolean ascending) {
-			this.ascending = ascending;
-		}
-
-		public int compare(T entry1, T entry2) {
-			if ((entry1 == null) && (entry2 == null)) {
-				return 0;
-			}
-			if ((entry1 == null) && (entry2 != null)) {
-				return -1;
-			} else if ((entry1 != null) && (entry2 == null)) {
-				return 1;
-			}
-			
-			int result = entry1.toString().length() - entry2.toString().length();
-			if (ascending) {
-				return result;
-			} else {
-				return -result;
-			}
-		}
-	}
-
 	public <T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String groupByProperties,
 			String sumByProperties) {
 		// Check input parameters
@@ -1117,6 +1029,94 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 	public int getSupportedLDAPVersion() {
 		return this.ldapOperationService.getSupportedLDAPVersion();
+	}
+
+	private static final class PropertyComparator<T> implements Comparator<T>, Serializable {
+
+		private static final long serialVersionUID = 574848841116711467L;
+		private Getter[][] propertyGetters;
+		private boolean caseSensetive;
+
+		private PropertyComparator(Getter[][] propertyGetters, boolean caseSensetive) {
+			this.propertyGetters = propertyGetters;
+			this.caseSensetive = caseSensetive;
+		}
+
+		public int compare(T entry1, T entry2) {
+			if ((entry1 == null) && (entry2 == null)) {
+				return 0;
+			}
+			if ((entry1 == null) && (entry2 != null)) {
+				return -1;
+			} else if ((entry1 != null) && (entry2 == null)) {
+				return 1;
+			}
+
+			int result = 0;
+			for (Getter[] curPropertyGetters : propertyGetters) {
+				result = compare(entry1, entry2, curPropertyGetters);
+				if (result != 0) {
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public int compare(T entry1, T entry2, Getter[] propertyGetters) {
+			Object value1 = ReflectHelper.getPropertyValue(entry1, propertyGetters);
+			Object value2 = ReflectHelper.getPropertyValue(entry2, propertyGetters);
+
+			if ((value1 == null) && (value2 == null)) {
+				return 0;
+			}
+			if ((value1 == null) && (value2 != null)) {
+				return -1;
+			} else if ((value1 != null) && (value2 == null)) {
+				return 1;
+			}
+
+			if (value1 instanceof Date) {
+				return ((Date) value1).compareTo((Date) value2);
+			} else if (value1 instanceof Integer) {
+				return ((Integer) value1).compareTo((Integer) value2);
+			} else if (value1 instanceof String && value2 instanceof String) {
+				if (caseSensetive) {
+					return ((String) value1).compareTo((String) value2);
+				} else {
+					return ((String) value1).toLowerCase().compareTo(((String) value2).toLowerCase());
+				}
+			}
+            return 0;
+		}
+	}
+
+	private static final class LineLenghtComparator<T> implements Comparator<T>, Serializable {
+
+		private static final long serialVersionUID = 575848841116711467L;
+		private boolean ascending;
+
+		public LineLenghtComparator(boolean ascending) {
+			this.ascending = ascending;
+		}
+
+		public int compare(T entry1, T entry2) {
+			if ((entry1 == null) && (entry2 == null)) {
+				return 0;
+			}
+			if ((entry1 == null) && (entry2 != null)) {
+				return -1;
+			} else if ((entry1 != null) && (entry2 == null)) {
+				return 1;
+			}
+
+			int result = entry1.toString().length() - entry2.toString().length();
+			if (ascending) {
+				return result;
+			} else {
+				return -result;
+			}
+		}
 	}
 
 }

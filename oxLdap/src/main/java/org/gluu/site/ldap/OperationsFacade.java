@@ -13,6 +13,7 @@ import com.unboundid.ldif.LDIFChangeRecord;
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
+import org.gluu.site.ldap.exception.InvalidSimplePageControlException;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
 import org.gluu.site.ldap.persistence.exception.MappingException;
@@ -186,13 +187,13 @@ public class OperationsFacade {
 
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 		throws LDAPSearchException {
-		return search(dn, filter, scope, null, searchLimit, sizeLimit, controls, attributes);
+		return search(dn, filter, scope, null, 0, searchLimit, sizeLimit, controls, attributes);
 	}
-	
-	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation batchOperation, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+
+	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation batchOperation, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws LDAPSearchException {
 		SearchRequest searchRequest;
-		
+
 		if (log.isTraceEnabled()) {
 			// Find whole tree search
 			if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
@@ -218,9 +219,16 @@ public class OperationsFacade {
 		List<SearchResult> searchResultList = new ArrayList<SearchResult>();
 		List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
 		List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
-		
+
 		if (searchLimit > 0) {
 			ASN1OctetString cookie = null;
+			if (startIndex > 0) {
+				try {
+					cookie = scrollSimplePagedResultsControl(dn, filter, scope, controls, startIndex);
+				} catch (InvalidSimplePageControlException ex) {
+					throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
+				}
+			}
 			if (batchOperation != null)
 				cookie = batchOperation.getCookie();
 			do {
@@ -246,7 +254,7 @@ public class OperationsFacade {
 				} catch (LDAPException ex) {
 					log.error("Error while accessing cookies" + ex.getMessage());
 				}
-				
+
 				if (useSizeLimit) {
 					break;
 				}
@@ -262,6 +270,32 @@ public class OperationsFacade {
 		}
 
 		return searchResult;
+	}
+
+	private ASN1OctetString scrollSimplePagedResultsControl(String dn, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPSearchException, InvalidSimplePageControlException {
+		SearchRequest searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, "dn");
+
+		int currentStartIndex = startIndex;
+		ASN1OctetString cookie = null;
+		do {
+			int pageSize = Math.min(currentStartIndex, 100);
+			searchRequest.setControls(new Control[] { new SimplePagedResultsControl(pageSize, cookie, true) });
+			setControls(searchRequest, controls);
+			SearchResult searchResult = getConnectionPool().search(searchRequest);
+
+			currentStartIndex -= searchResult.getEntryCount();
+			try {
+				SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
+				if (c != null) {
+					cookie = c.getCookie();
+				}
+			} catch (LDAPException ex) {
+				log.error("Error while accessing cookie" + ex.getMessage());
+				throw new InvalidSimplePageControlException("Error while accessing cookie");
+			}
+		} while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
+
+		return cookie;
 	}
 
 	public SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int startIndex, int count, int searchLimit, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String... attributes) throws Exception {
@@ -567,8 +601,8 @@ public class OperationsFacade {
         	log.error("Failed to close connection pool correctly");
         	result = false;
         }
-		
-		if (bindConnectionProvider != null) { 
+
+		if (bindConnectionProvider != null) {
 	        try {
 	        	bindConnectionProvider.closeConnectionPool();
 	        } catch (Exception ex) {
@@ -576,7 +610,7 @@ public class OperationsFacade {
 	        	result = false;
 	        }
 		}
-		
+
 		return result;
 	}
 
