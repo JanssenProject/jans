@@ -564,7 +564,7 @@ public class SessionStateService {
                     final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(unauthenticatedInterval);
                     String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
                     final Filter filter = Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
-                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
                 }
@@ -585,7 +585,7 @@ public class SessionStateService {
                     final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(interval);
                     String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
                     final Filter filter = Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
-                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
