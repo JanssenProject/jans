@@ -8,20 +8,21 @@ package org.xdi.oxauth.service.uma;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
+import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -58,6 +59,14 @@ public class RPTManager extends AbstractRPTManager {
 
     public RPTManager() {
         ldapEntryManager = ServerUtil.getLdapManager();
+    }
+
+    public static String getDn(String clientDn, String uniqueIdentifier) {
+        return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
+    }
+
+    public static String branchDn(String clientDn) {
+        return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
     }
 
     @Override
@@ -101,19 +110,27 @@ public class RPTManager extends AbstractRPTManager {
     }
 
     @Override
-    public void cleanupRPTs(Date now) {
-        try {
-            final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-            final List<UmaRPT> entries = ldapEntryManager.findEntries(
-            		staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter);
-            if (entries != null && !entries.isEmpty()) {
+    public void cleanupRPTs(final Date now) {
+        BatchOperation<UmaRPT> rptBatchService = new BatchOperation<UmaRPT>(ldapEntryManager) {
+            @Override
+            protected List<UmaRPT> getChunkOrNull(int chunkSize) {
+                try {
+                    final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
+                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+                return null;
+            }
+
+            @Override
+            protected void performAction(List<UmaRPT> entries) {
                 for (UmaRPT p : entries) {
                     ldapEntryManager.remove(p);
                 }
             }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
+        };
+        rptBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     @Override
@@ -195,14 +212,6 @@ public class RPTManager extends AbstractRPTManager {
 
     public boolean containsBranch(String clientDn) {
         return ldapEntryManager.contains(SimpleBranch.class, branchDn(clientDn));
-    }
-
-    public static String getDn(String clientDn, String uniqueIdentifier) {
-        return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
-    }
-
-    public static String branchDn(String clientDn) {
-        return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
     }
 
 }
