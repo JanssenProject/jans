@@ -162,10 +162,6 @@ public class LdapEntryReporter extends ScheduledReporter {
                        SortedMap<String, Timer> timers) {
         final Date currentRunTime = new Date(clock.getTime());
 
-        if (!(Contexts.isEventContextActive() || Contexts.isApplicationContextActive())) {
-			Lifecycle.beginCall();
-		}
-
 		MetricService metricService = (MetricService) Component.getInstance(metricServiceComponentName);
 
 

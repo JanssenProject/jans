@@ -98,10 +98,6 @@ public abstract class AbstractCustomScriptService implements Serializable {
      * @return CustomScriptService instance
      */
     public static AbstractCustomScriptService instance() {
-        if (!(Contexts.isEventContextActive() || Contexts.isApplicationContextActive())) {
-            Lifecycle.beginCall();
-        }
-
         return (AbstractCustomScriptService) Component.getInstance(AbstractCustomScriptService.class);
     }
 

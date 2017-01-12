@@ -5,20 +5,28 @@ package org.xdi.service.metric;
  * Copyright (c) 2014, Gluu
  */
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
-import com.unboundid.ldap.sdk.Filter;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.Component;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.contexts.Lifecycle;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
@@ -27,11 +35,10 @@ import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.ldap.MetricEntry;
 import org.xdi.util.StringHelper;
 
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Metric service
@@ -59,19 +66,6 @@ public abstract class MetricService implements Serializable {
 
 	@In
 	private LdapEntryManager ldapEntryManager;
-
-	/**
-	 * Get MetricService instance
-	 *
-	 * @return MetricService instance
-	 */
-	public static MetricService instance() {
-		if (!(Contexts.isEventContextActive() || Contexts.isApplicationContextActive())) {
-			Lifecycle.beginCall();
-		}
-
-		return (MetricService) Component.getInstance(MetricService.class);
-	}
 
     public void init(int metricInterval) {
     	this.metricRegistry = new MetricRegistry();
