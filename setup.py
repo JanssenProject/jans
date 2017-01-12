@@ -269,7 +269,8 @@ class Setup(object):
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
         self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
-
+        self.openldapSetupAccessLog = False
+        self.accessLogConfFile = "%s/static/openldap/accesslog.conf" % self.install_dir
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
@@ -418,8 +419,6 @@ class Setup(object):
                      self.asimba_properties: False,
                      self.asimba_selector_configuration: False,
                      self.network: False,
-                     self.openldapSlapdConf: False,
-                     self.openldapSymasConf: False
                      }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -2292,19 +2291,36 @@ class Setup(object):
 
     def configure_openldap(self):
         self.logIt("Configuring OpenLDAP")
-        # 1. Copy the conf files to
+        # 1. Render templates
+        self.templateRenderingDict['openldap_accesslog_conf'] = ""
+        if self.openldapSetupAccessLog:
+            self.templateRenderingDict['openldap_accesslog_conf'] = self.readFile(self.accessLogConfFile)
+        self.renderTemplate(self.openldapSlapdConf)
+        self.renderTemplate(self.openldapSymasConf)
+
+        # 2. Copy the conf files to
         self.copyFile(self.openldapSlapdConf, self.openldapConfFolder)
         self.copyFile(self.openldapSymasConf, self.openldapConfFolder)
-        # 2. Copy the schema files into place
+
+        # 3. Copy the schema files into place
         self.createDirs(self.openldapSchemaFolder)
         self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, self.openldapSchemaFolder)
         self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, self.openldapSchemaFolder)
-        # 4. Create the PEM file from key and crt
+
+        # 5. Create the PEM file from key and crt
         with open(self.openldapTLSCACert, 'w') as pem:
             with open(self.openldapTLSCert, 'r') as crt:
                 pem.write(crt.read())
             with open(self.openldapTLSKey, 'r') as key:
                 pem.write(key.read())
+
+        # 6. Setup Logging
+        self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
+        self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
+        if not os.path.isdir('/etc/rsyslog.d/'):
+            self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
+        self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
+        self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
 
     def import_ldif_openldap(self):
         self.logIt("Importing LDIF files into OpenLDAP")
@@ -2316,14 +2332,6 @@ class Setup(object):
             else:
                 self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
 
-    def setup_openldap_logging(self):
-        self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
-        self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
-        if not os.path.isdir('/etc/rsyslog.d/'):
-            self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
-        self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
-        self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
-
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
 
@@ -2334,7 +2342,6 @@ class Setup(object):
         installObject.deleteLdapPw()
 
         self.logIt("Running OpenLDAP Setup")
-        installObject.setup_openldap_logging()
         installObject.install_openldap()
         installObject.configure_openldap()
         installObject.import_ldif_openldap()
