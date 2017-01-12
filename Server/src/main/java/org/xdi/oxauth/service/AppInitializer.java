@@ -520,6 +520,10 @@ public class AppInitializer {
 	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT)
 	public void updateLoggingSeverity(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
 		String loggingLevel = appConfiguration.getLoggingLevel();
+		if (loggingLevel == null) {
+			return;
+		}
+
 		log.info("Setting loggers level to: '{0}'", loggingLevel);
 		
 		LoggerContext loggerContext = LoggerContext.getContext(false);
