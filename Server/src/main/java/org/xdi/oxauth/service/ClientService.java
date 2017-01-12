@@ -17,7 +17,6 @@ import org.python.jline.internal.Preconditions;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
@@ -59,6 +58,13 @@ public class ClientService {
     @In
     private StaticConf staticConfiguration;
 
+    private static String getClientIdCacheKey(String clientId) {
+        return "client_id_" + StringHelper.toLowerCase(clientId);
+    }
+
+    private static String getClientDnCacheKey(String dn) {
+        return "client_dn_" + StringHelper.toLowerCase(dn);
+    }
 
     public void persist(Client client) {
         ldapEntryManager.persist(client);
@@ -138,7 +144,6 @@ public class ClientService {
     public Set<Client> getClientsByDns(Collection<String> dnList) {
         return getClientsByDns(dnList, true);
     }
-
 
     public Set<Client> getClientsByDns(Collection<String> dnList, boolean silently) {
         Preconditions.checkNotNull(dnList);
@@ -237,7 +242,7 @@ public class ClientService {
     public List<Client> getClientsWithExpirationDate(BatchOperation<Client> batchOperation, int searchLimit, int sizeLimit){
         String baseDN = staticConfiguration.getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
-        return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, null, batchOperation, searchLimit, sizeLimit);
+        return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, null, batchOperation, 0, searchLimit, sizeLimit);
     }
 
     public String buildClientDn(String p_clientId) {
@@ -306,14 +311,6 @@ public class ClientService {
 //        }
 //
 //        removeFromCache(client);
-    }
-
-    private static String getClientIdCacheKey(String clientId) {
-        return "client_id_" + StringHelper.toLowerCase(clientId);
-    }
-
-    private static String getClientDnCacheKey(String dn) {
-        return "client_dn_" + StringHelper.toLowerCase(dn);
     }
 
 }

@@ -48,6 +48,14 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     @In
     private StaticConf staticConfiguration;
 
+    public static String getDn(String clientDn, String ticket) {
+        return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));
+    }
+
+    public static String getBranchDn(String clientDn) {
+        return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_SET_PERMISSION, clientDn);
+    }
+
     @Override
     public void addResourceSetPermission(ResourceSetPermission resourceSetPermission, String clientDn) {
         try {
@@ -115,7 +123,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
             protected List<ResourceSetPermission> getChunkOrNull(int chunkSize) {
                 try {
                     final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -147,13 +155,5 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
 
     public boolean containsBranch(String clientDn) {
         return ldapEntryManager.contains(SimpleBranch.class, getBranchDn(clientDn));
-    }
-
-    public static String getDn(String clientDn, String ticket) {
-        return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));
-    }
-
-    public static String getBranchDn(String clientDn) {
-        return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_SET_PERMISSION, clientDn);
     }
 }

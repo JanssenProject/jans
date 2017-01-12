@@ -226,7 +226,7 @@ public class CleanerTimer {
         calendar.add(Calendar.DATE, -keepDataDays);
         Date expirationDate = calendar.getTime();
 
-        metricService.removeExpiredMetricEntries(expirationDate, ApplicationType.OX_AUTH, metricService.applianceInum());
+        metricService.removeExpiredMetricEntries(BATCH_SIZE, expirationDate, ApplicationType.OX_AUTH, metricService.applianceInum());
 
         log.debug("End metric entries clean up");
     }

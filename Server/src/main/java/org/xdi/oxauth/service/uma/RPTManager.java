@@ -61,6 +61,14 @@ public class RPTManager extends AbstractRPTManager {
         ldapEntryManager = ServerUtil.getLdapManager();
     }
 
+    public static String getDn(String clientDn, String uniqueIdentifier) {
+        return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
+    }
+
+    public static String branchDn(String clientDn) {
+        return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
+    }
+
     @Override
     public void addRPT(UmaRPT p_rpt, String p_clientDn) {
         try {
@@ -108,7 +116,7 @@ public class RPTManager extends AbstractRPTManager {
             protected List<UmaRPT> getChunkOrNull(int chunkSize) {
                 try {
                     final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -204,14 +212,6 @@ public class RPTManager extends AbstractRPTManager {
 
     public boolean containsBranch(String clientDn) {
         return ldapEntryManager.contains(SimpleBranch.class, branchDn(clientDn));
-    }
-
-    public static String getDn(String clientDn, String uniqueIdentifier) {
-        return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
-    }
-
-    public static String branchDn(String clientDn) {
-        return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
     }
 
 }

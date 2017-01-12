@@ -54,6 +54,10 @@ public class GrantService {
         return UUID.randomUUID().toString();
     }
 
+    public static GrantService instance() {
+        return ServerUtil.instance(GrantService.class);
+    }
+
     public String buildDn(String p_uniqueIdentifier, String p_grantId, String p_clientId) {
         final StringBuilder dn = new StringBuilder();
         dn.append(String.format("uniqueIdentifier=%s,oxAuthGrantId=%s,", p_uniqueIdentifier, p_grantId));
@@ -63,10 +67,6 @@ public class GrantService {
 
     public String baseDn() {
         return staticConfiguration.getBaseDn().getClients();  // ou=clients,o=@!1111,o=gluu
-    }
-
-    public static GrantService instance() {
-        return ServerUtil.instance(GrantService.class);
     }
 
     public void merge(TokenLdap p_token) {
@@ -234,7 +234,7 @@ public class GrantService {
             protected List<TokenLdap> getChunkOrNull(int chunkSize) {
                 try {
                     final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(new Date())));
-                    return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
                 }
@@ -258,7 +258,7 @@ public class GrantService {
                     calendar.add(Calendar.SECOND, 60);
 
                     final Filter filter = Filter.create(String.format("(&(oxAuthCreation<=%s)(numsubordinates=0))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
-                    return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
                 }
@@ -279,7 +279,7 @@ public class GrantService {
             protected List<Grant> getChunkOrNull(int chunkSize) {
                 try {
                     final Filter filter = Filter.create("(&(!(oxAuthCreation=*))(numsubordinates=0))");
-                    return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, chunkSize, chunkSize);
+                    return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
                 }
