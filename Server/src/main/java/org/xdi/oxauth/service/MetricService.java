@@ -70,8 +70,4 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 		return METRIC_SERVICE_COMPONENT_NAME;
 	}
 
-    public static MetricService instance() {
-        return (MetricService) Component.getInstance(MetricService.class);
-    }
-
 }
