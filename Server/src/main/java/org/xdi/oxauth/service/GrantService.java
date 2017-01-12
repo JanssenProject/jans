@@ -278,7 +278,7 @@ public class GrantService {
             @Override
             protected List<Grant> getChunkOrNull(int chunkSize) {
                 try {
-                    final Filter filter = Filter.create("(&(!(oxAuthCreation=*))(numsubordinates=0))");
+                    final Filter filter = Filter.create("(&(!(oxAuthCreation=*))(|(numsubordinates=0)(hasSubordinates=FALSE)))");
                     return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
