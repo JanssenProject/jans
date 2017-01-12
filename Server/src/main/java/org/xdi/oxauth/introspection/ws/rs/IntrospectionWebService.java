@@ -94,7 +94,11 @@ public class IntrospectionWebService {
                             }
                         }
                         return Response.status(Response.Status.OK).entity(ServerUtil.asJson(response)).build();
+                    } else {
+                        log.error("Access token is not valid. Valid: " + (accessToken != null && accessToken.isValid()) + ", isPat:" + isPat);
                     }
+                } else {
+                    log.error("Authorization grant is null.");
                 }
 
                 return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED)).build();
