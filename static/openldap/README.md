@@ -57,8 +57,6 @@ objectclass ( oxObjectClass:999 NAME 'myObjectClass' SUP top
     ```
     cd <parent dir of community-edition-setup>
     wget https://raw.githubusercontent.com/ludomp/opendj-utils/master/schema-convert.py
-    python schema-convert.py -o community-edition-setup/static/opendj/deprecated/101-ox.ldif community-edition-setup/static/openldap/gluu.schema
-    cd community-edition-setup
-    git commit <whatever>
-    git push origin
+    python schema-convert.py -o gluu.ldif community-edition-setup/static/openldap/gluu.schema
     ```
+    Compare the gluu.ldif file with the `community-edition-setup/static/opendj/deprecated/101-ox.ldif` and copy the headers from 101-ox.ldif to the new gluu.ldif file. Now rename `gluu.ldif` to `101-ox.ldif` and replace the `101-ox.ldif` file inside the `community-edition-setup` with this new file, commit and push.
