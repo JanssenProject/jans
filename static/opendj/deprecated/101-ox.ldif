@@ -1,3 +1,4 @@
+# Macros defining the OID structure
 # NOTES:     photo1 changed to picture
 #            oxTrustMiddleName changed to middleName
 #            oxTrustLocale changed to locale
@@ -2154,7 +2155,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.4 NAME 'gluuOrganization' SUP top STRUCTU
   $ gluuManageIdentityPermission $ gluuManager $ gluuManagerGroup $ gluuOrgProfileMgt
   $ gluuOrgShortName $ gluuPaidUntil $ gluuPaymentProcessorTimestamp
   $ gluuProStoresUser $ gluuStatus $ gluuTempFaviconImage $ gluuThemeColor
-  $ gluuWhitePagesEnabled $ iname $ inum $ l $ mail $ memberOf $ nonProfit $ o $ objectClass
+  $ gluuWhitePagesEnabled $ iname $ inum $ l $ mail $ memberOf $ nonProfit $ o
   $ oxCreationTimestamp $ oxLinkLinktrack $ oxLinktrackEnabled $ oxLinktrackLogin
   $ oxLinktrackPassword $ oxRegistrationConfiguration $ postalCode $ proStoresToken
   $ prostoresTimestamp $ scimAuthMode $ scimGroup $ scimStatus $ st $ street $ telephoneNumber
@@ -2186,7 +2187,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.6 NAME 'gluuAttribute' SUP top STRUCTURAL
   ( description $ displayName $ gluuAttributeEditType $ gluuAttributeName $ gluuAttributeOrigin
   $ gluuAttributeSystemEditType $ gluuAttributeType $ oxAuthClaimName
   $ gluuAttributeUsageType $ gluuAttributeViewType $ gluuCategory $ gluuSAML1URI
-  $ gluuSAML2URI $ gluuStatus $ iname $ inum $ objectClass $ oxAttributeType $ oxMultivaluedAttribute
+  $ gluuSAML2URI $ gluuStatus $ iname $ inum $ oxAttributeType $ oxMultivaluedAttribute
   $ oxNameIdType $ oxSCIMCustomAttribute $ oxSourceAttribute $ seeAlso $ urn $ gluuRegExp $ gluuTooltip $ oxValidation )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.7 NAME 'gluuSAMLconfig' SUP top STRUCTURAL MUST objectClasses: MAY 
@@ -2195,7 +2196,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.7 NAME 'gluuSAMLconfig' SUP top STRUCTURA
   $ gluuRulesAccepted $ gluuSAMLMetaDataFilter $ gluuSAMLTrustEngine $ gluuSAMLmaxRefreshDelay
   $ gluuSAMLspMetaDataFN $ gluuSAMLspMetaDataSourceType $ gluuSAMLspMetaDataURL
   $ gluuSpecificRelyingPartyConfig $ gluuStatus $ gluuTrustContact $ gluuTrustDeconstruction
-  $ gluuValidationLog $ gluuValidationStatus $ iname $ inum $ o $ objectClass $ oxAuthPostLogoutRedirectURI
+  $ gluuValidationLog $ gluuValidationStatus $ iname $ inum $ o $ oxAuthPostLogoutRedirectURI
   $ url $ researchAndScholarshipEnabled $ gluuEntityType )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.8 NAME 'gluuInumMap' SUP top STRUCTURAL MUST objectClasses: MAY 
@@ -2335,19 +2336,19 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.42 NAME 'oxSectorIdentifier' SUP top STRU
   ( inum $ oxAuthRedirectURI $ oxAuthClientId )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.43 NAME 'oxAsimbaConfiguration' SUP top STRUCTURAL MUST ( objectClasses: )
-  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxConfApplication $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxAsimbaEntry $ oxConfApplication $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.44 NAME 'oxAsimbaSelector' SUP top STRUCTURAL MUST ( objectClasses: )
-  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ organizationId $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ organizationId $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.45 NAME 'oxAsimbaIDP' SUP top STRUCTURAL MUST ( objectClasses: )
-  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.46 NAME 'oxAsimbaRequestorPool' SUP top STRUCTURAL MUST ( objectClasses: )
-  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.47 NAME 'oxAsimbaSPRequestor' SUP top STRUCTURAL MUST ( objectClasses: )
-  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ objectClass $ oxAsimbaEntry $ oxRevision)
+  MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxAsimbaEntry $ oxRevision)
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.48 NAME 'oxPassportConfiguration' SUP top STRUCTURAL MUST objectClasses: MAY 
   ( ou $ gluuPassportConfiguration $ gluuStatus)
