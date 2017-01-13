@@ -1,21 +1,18 @@
 package org.gluu.ldap;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.SearchResult;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.site.ldap.LDAPConnectionProvider;
-import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.log.LoggingHelper;
 
-import java.util.List;
-import java.util.Properties;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.SearchResult;
 
 /**
  * @author Yuriy Movchan
@@ -33,10 +30,10 @@ public class LdapSample {
 
 	public static void main(String[] args) {
 		// Prepare sample connection details
-		LdapSample ldapSample = new LdapSample();
+		LdapSampleEntryManager ldapSampleEntryManager = new LdapSampleEntryManager();
 
 		// Create LDAP entry manager
-		LdapEntryManager ldapEntryManager = ldapSample.createLdapEntryManager();
+		LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
 
 		// Find all users which have specified object classes defined in SimpleUser
 		List<SimpleUser> users = ldapEntryManager.findEntries("o=gluu", SimpleUser.class, null);
@@ -76,57 +73,5 @@ public class LdapSample {
 		}
 	}
 
-	private Properties getSampleConnectionProperties() {
-		Properties connectionProperties = new Properties();
-
-		connectionProperties.put("bindDN", "cn=directory manager, o=gluu");
-		connectionProperties.put("bindPassword", "9lQoXSINUsnP");
-		connectionProperties.put("servers", "xeon.gluu.info:1636");
-		connectionProperties.put("useSSL", "true");
-		connectionProperties.put("maxconnections", "3");
-
-		return connectionProperties;
-	}
-
-	private LDAPConnectionProvider createConnectionProvider(Properties connectionProperties) {
-		LDAPConnectionProvider connectionProvider = new LDAPConnectionProvider(connectionProperties);
-
-		return connectionProvider;
-	}
-
-	private LDAPConnectionProvider createBindConnectionProvider(Properties bindConnectionProperties,
-			Properties connectionProperties) {
-		LDAPConnectionProvider bindConnectionProvider = createConnectionProvider(bindConnectionProperties);
-		if (ResultCode.INAPPROPRIATE_AUTHENTICATION.equals(bindConnectionProvider.getCreationResultCode())) {
-			log.warn(
-					"It's not possible to create authentication LDAP connection pool using anonymous bind. Attempting to create it using binDN/bindPassword");
-			bindConnectionProvider = createConnectionProvider(connectionProperties);
-		}
-
-		return bindConnectionProvider;
-	}
-
-	private Properties prepareBindConnectionProperties(Properties connectionProperties) {
-		Properties bindProperties = (Properties) connectionProperties.clone();
-		bindProperties.remove("bindDN");
-		bindProperties.remove("bindPassword");
-
-		return bindProperties;
-	}
-
-	public LdapEntryManager createLdapEntryManager() {
-		Properties connectionProperties = getSampleConnectionProperties();
-		LDAPConnectionProvider connectionProvider = createConnectionProvider(connectionProperties);
-
-		Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
-		LDAPConnectionProvider bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties,
-				connectionProperties);
-
-		LdapEntryManager ldapEntryManager = new LdapEntryManager(
-				new OperationsFacade(connectionProvider, bindConnectionProvider));
-		log.debug("Created LdapEntryManager: " + ldapEntryManager);
-
-		return ldapEntryManager;
-	}
 
 }
