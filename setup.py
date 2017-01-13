@@ -80,7 +80,7 @@ class Setup(object):
 
         # Component versions
         self.jre_version = '112'
-        self.jetty_version = '9.3.14.v20161028'
+        self.jetty_version = '9.3.15.v20161220'
         self.jython_version = '2.7.0'
         self.node_version = '6.9.1'
         self.apache_version = None
