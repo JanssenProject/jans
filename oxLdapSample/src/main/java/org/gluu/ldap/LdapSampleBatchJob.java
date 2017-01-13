@@ -59,7 +59,6 @@ public class LdapSampleBatchJob {
 	                    processedCount++;
     				} catch (EntryPersistenceException ex) {
     					log.error("Failed to update entry", ex);
-    					
     				}
                 }
             }
@@ -88,7 +87,6 @@ public class LdapSampleBatchJob {
 	                    processedCount++;
 					} catch (EntryPersistenceException ex) {
 						log.error("Failed to update entry", ex);
-						
 					}
                 }
             }
