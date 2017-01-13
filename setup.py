@@ -2195,6 +2195,7 @@ class Setup(object):
         elif self.os_type in ['ubuntu', 'debian']:
             for service in self.debian_services:
                 self.run(["/usr/sbin/update-rc.d", service, 'defaults'])
+                self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
 
     def start_services(self):
