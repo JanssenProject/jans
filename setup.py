@@ -269,7 +269,7 @@ class Setup(object):
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
         self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
-        self.openldapSetupAccessLog = False
+        self.openldapSetupAccessLog = True
         self.accessLogConfFile = "%s/static/openldap/accesslog.conf" % self.install_dir
 
         # Stuff that gets rendered; filename is necessary. Full path should
