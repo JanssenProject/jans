@@ -164,7 +164,7 @@ class Migration(object):
         ldif_writer = LDIFWriter(processed_fp)
 
         currentDNs = self.getDns(self.installDataGluu)
-        old_dn_map = self.getOldEntryMap(self.backupDir)
+        old_dn_map = self.getOldEntryMap()
 
         ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
         multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
