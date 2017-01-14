@@ -1592,6 +1592,7 @@ class Setup(object):
         self.copyFile(self.asimba_configuration, self.asimba_configuration_xml)
         self.copyFile(self.asimba_selector_configuration, self.asimba_selector_configuration_xml)
         self.run([self.cmd_chmod, 'uga+x', self.asimba_conf_folder])
+        self.run([self.cmd_chmod, 'u+w', self.asimba_conf_folder])
         self.run([self.cmd_chmod, 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
 
         self.logIt("Copying asimba.war into jetty webapps folder...")
