@@ -52,3 +52,11 @@ objectclass ( oxObjectClass:999 NAME 'myObjectClass' SUP top
 
 * While defining the schema, use a `colon` followed by the number NOT a `dot`
 * The file `custom.schema` starts with the `oxAttribute:1001` and `oxObjectClass:101`. Kindly keep this in mind when expanding `gluu.schema` so as not to run into the custom schema number space.
+* In order to keep the OpenLDAP and OpenDJ schema files it sync, after a definition is added or removed from the gluu.schema file, do the following
+
+    ```
+    cd <parent dir of community-edition-setup>
+    wget https://raw.githubusercontent.com/ludomp/opendj-utils/master/schema-convert.py
+    python schema-convert.py -o gluu.ldif community-edition-setup/static/openldap/gluu.schema
+    ```
+    Compare the gluu.ldif file with the `community-edition-setup/static/opendj/deprecated/101-ox.ldif` and copy the headers from 101-ox.ldif to the new gluu.ldif file. Now rename `gluu.ldif` to `101-ox.ldif` and replace the `101-ox.ldif` file inside the `community-edition-setup` with this new file, commit and push.
