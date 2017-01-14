@@ -67,6 +67,8 @@ class Migration(object):
         self.slapcat = "/opt/symas/bin/slapcat"
         self.slapadd = "/opt/symas/bin/slapadd"
 
+        self.ldapDataFile = "/opt/gluu/data/data.mdb"
+
     def verifyBackupData(self):
         if not os.path.exists(self.backupDir):
             logging.error("Backup folder %s doesn't exist! Quitting migration",
@@ -115,9 +117,13 @@ class Migration(object):
 
     def exportInstallData(self):
         logging.info("Exporting LDAP data.")
-        self.installDataLdif = os.path.join(self.workingDir, 'o_gluu.ldif')
+        self.installDataGluu = os.path.join(self.workingDir, 'o_gluu.ldif')
+        self.installDataSite = os.path.join(self.workingDir, 'o_site.ldif')
         output = self.getOutput([self.slapcat, '-f', self.slapdConf, '-b',
-                                'o=gluu', '-l', self.installDataLdif])
+                                'o=gluu', '-l', self.installDataGluu])
+        logging.debug(output)
+        output = self.getOutput([self.slapcat, '-f', self.slapdConf, '-b',
+                                'o=site', '-l', self.installDataGluu])
         logging.debug(output)
 
     def getEntry(self, fn, dn):
@@ -157,7 +163,7 @@ class Migration(object):
         processed_fp = open(self.processTempFile, 'w')
         ldif_writer = LDIFWriter(processed_fp)
 
-        currentDNs = self.getDns(self.installDataLdif)
+        currentDNs = self.getDns(self.installDataGluu)
         old_dn_map = self.getOldEntryMap(self.backupDir)
 
         ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
@@ -167,7 +173,7 @@ class Migration(object):
 
         # Rewriting all the new DNs in the new installation to ldif file
         for dn in currentDNs:
-            new_entry = self.getEntry(self.installDataLdif, dn)
+            new_entry = self.getEntry(self.installDataGluu, dn)
             if dn not in old_dn_map.keys():
                 #  Write to the file if there is no matching old DN data
                 ldif_writer.unparse(dn, new_entry)
@@ -233,8 +239,16 @@ class Migration(object):
 
     def importProcessedData(self):
         logging.info("Importing Processed LDAP data.")
+        count = len(os.listdir('/opt/gluu/data/'))
+        backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
+        logging.debug("Moving %s to %s.", self.ldapDataFile, backupfile)
+        shutil.move(self.ldapDataFile, backupfile)
+
         output = self.getOutput([self.slapadd, '-c', '-b', 'o=gluu', '-f',
                                 self.slapdConf, '-l', self.processedLDIF])
+        logging.debug(output)
+        output = self.getOutput([self.slapadd, '-c', '-b', 'o=site', '-f',
+                                self.slapdConf, '-l', self.installDataSite])
         logging.debug(output)
 
     def migrate(self):
