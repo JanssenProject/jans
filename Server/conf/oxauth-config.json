@@ -225,5 +225,8 @@
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
     "legacyIdTokenClaims": false,
-    "customHeadersWithAuthorizationResponse": true
+    "customHeadersWithAuthorizationResponse": true,
+    "updateUserLastLogonTime": true,
+    "updateClientAccessTime":true
+
 }
