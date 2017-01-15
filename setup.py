@@ -271,6 +271,7 @@ class Setup(object):
         self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
         self.openldapSetupAccessLog = True
         self.accessLogConfFile = "%s/static/openldap/accesslog.conf" % self.install_dir
+        self.gluuAccessLogConf = "%s/static/openldap/o_gluu_accesslog.conf" % self.install_dir
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
@@ -2295,8 +2296,10 @@ class Setup(object):
         self.logIt("Configuring OpenLDAP")
         # 1. Render templates
         self.templateRenderingDict['openldap_accesslog_conf'] = ""
+        self.templateRenderingDict['openldap_gluu_accesslog'] = ""
         if self.openldapSetupAccessLog:
             self.templateRenderingDict['openldap_accesslog_conf'] = self.readFile(self.accessLogConfFile)
+            self.templateRenderingDict['openldap_gluu_accesslog'] = self.readFile(self.gluuAccessLogConf)
         self.renderTemplate(self.openldapSlapdConf)
         self.renderTemplate(self.openldapSymasConf)
 
