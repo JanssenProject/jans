@@ -10,20 +10,23 @@ import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.log.Log;
 import org.python.jline.internal.Preconditions;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides operations with clients.
@@ -54,6 +57,9 @@ public class ClientService {
 
     @In
     private ClientFilterService clientFilterService;
+
+    @In
+    private AppConfiguration appConfiguration;
 
     @In
     private StaticConf staticConfiguration;
@@ -289,28 +295,30 @@ public class ClientService {
     }
 
     public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
-//        String clientDn = client.getDn();
-//
-//        CustomEntry customEntry = new CustomEntry();
-//        customEntry.setDn(clientDn);
-//		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
-//
-//        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-//        CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", now);
-//        customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
-//
-//        if (isUpdateLogonTime) {
-//            CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", now);
-//            customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
-//        }
-//
-//        try {
-//            ldapEntryManager.merge(customEntry);
-//        } catch (EntryPersistenceException epe) {
-//            log.error("Failed to update oxLastAccessTime and oxLastLoginTime of client '{0}'", clientDn);
-//        }
-//
-//        removeFromCache(client);
+        if(!appConfiguration.getUpdateAccessTime())
+            return;
+        String clientDn = client.getDn();
+
+        CustomEntry customEntry = new CustomEntry();
+        customEntry.setDn(clientDn);
+		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
+
+        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+        CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", now);
+        customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
+
+        if (isUpdateLogonTime) {
+            CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", now);
+            customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
+        }
+
+        try {
+            ldapEntryManager.merge(customEntry);
+        } catch (EntryPersistenceException epe) {
+            log.error("Failed to update oxLastAccessTime and oxLastLoginTime of client '{0}'", clientDn);
+        }
+
+        removeFromCache(client);
     }
 
 }
