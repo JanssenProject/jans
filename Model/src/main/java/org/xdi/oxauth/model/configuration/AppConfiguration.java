@@ -142,9 +142,9 @@ public class AppConfiguration {
     private Boolean legacyIdTokenClaims;
     private Boolean customHeadersWithAuthorizationResponse;
     private Boolean frontChannelLogoutSessionSupported; 
-    private Boolean updateLastLogonUserTime;
-    private Boolean updateAccessTime;
     private String loggingLevel;
+    private Boolean updateUserLastLogonTime;
+    private Boolean updateClientAccessTime;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
 		return frontChannelLogoutSessionSupported;
@@ -1149,20 +1149,20 @@ public class AppConfiguration {
         this.customHeadersWithAuthorizationResponse = customHeadersWithAuthorizationResponse;
     }
 
-    public Boolean getUpdateLastLogonUserTime() {
-        return updateLastLogonUserTime;
+    public Boolean getUpdateUserLastLogonTime() {
+        return updateUserLastLogonTime;
     }
 
-    public void setUpdateLastLogonUserTime(Boolean updateLastLogonUserTime) {
-        this.updateLastLogonUserTime = updateLastLogonUserTime;
+    public void setUpdateUserLastLogonTime(Boolean updateUserLastLogonTime) {
+        this.updateUserLastLogonTime = updateUserLastLogonTime;
     }
 
-    public Boolean getUpdateAccessTime() {
-        return updateAccessTime;
+    public Boolean getUpdateClientAccessTime() {
+        return updateClientAccessTime;
     }
 
-    public void setUpdateAccessTime(Boolean updateAccessTime) {
-        this.updateAccessTime = updateAccessTime;
+    public void setUpdateClientAccessTime(Boolean updateClientAccessTime) {
+        this.updateClientAccessTime = updateClientAccessTime;
     }
 
     public String getLoggingLevel() {

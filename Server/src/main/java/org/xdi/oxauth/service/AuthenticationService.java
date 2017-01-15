@@ -397,7 +397,7 @@ public class AuthenticationService {
     }
 
     private void updateLastLogonUserTime(User user) {
-		if (!appConfiguration.getUpdateLastLogonUserTime()) {
+		if (!appConfiguration.getUpdateUserLastLogonTime()) {
 			return;
 		}
 

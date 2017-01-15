@@ -295,7 +295,7 @@ public class ClientService {
     }
 
     public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
-		if (!appConfiguration.getUpdateAccessTime()) {
+		if (!appConfiguration.getUpdateClientAccessTime()) {
 			return;
 		}
 
