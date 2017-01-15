@@ -168,16 +168,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
-//        overrideUnauthenticatedSessionParameters(httpRequest, prompts);
-
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
         try {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
 
-            sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
-
+			sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
+            	 
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
                     RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);

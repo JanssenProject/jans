@@ -88,7 +88,7 @@ public class SessionStateService {
         return (SessionStateService) Component.getInstance(SessionStateService.class);
     }
 
-    public static String getAcr(SessionState session) {
+    public String getAcr(SessionState session) {
         if (session == null || session.getSessionAttributes() == null) {
             return null;
         }
