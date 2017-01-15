@@ -69,6 +69,11 @@ class Migration(object):
 
         self.ldapDataFile = "/opt/gluu/data/data.mdb"
 
+        self.currentData = os.path.join(self.workingDir, 'current.ldif')
+        self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
+        self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
+        self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
+
     def verifyBackupData(self):
         if not os.path.exists(self.backupDir):
             logging.error("Backup folder %s doesn't exist! Quitting migration",
@@ -117,13 +122,8 @@ class Migration(object):
 
     def exportInstallData(self):
         logging.info("Exporting LDAP data.")
-        self.installDataGluu = os.path.join(self.workingDir, 'o_gluu.ldif')
-        self.installDataSite = os.path.join(self.workingDir, 'o_site.ldif')
-        output = self.getOutput([self.slapcat, '-f', self.slapdConf, '-b',
-                                'o=gluu', '-l', self.installDataGluu])
-        logging.debug(output)
-        output = self.getOutput([self.slapcat, '-f', self.slapdConf, '-b',
-                                'o=site', '-l', self.installDataGluu])
+        output = self.getOutput([self.slapcat, '-f', self.slapdConf,
+                                 '-l', self.currentData])
         logging.debug(output)
 
     def getEntry(self, fn, dn):
@@ -158,12 +158,10 @@ class Migration(object):
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
 
-        self.processedLDIF = os.path.join(self.workingDir, "processed.ldif")
-        self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
         processed_fp = open(self.processTempFile, 'w')
         ldif_writer = LDIFWriter(processed_fp)
 
-        currentDNs = self.getDns(self.installDataGluu)
+        currentDNs = self.getDns(self.currentData)
         old_dn_map = self.getOldEntryMap()
 
         ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
@@ -173,8 +171,10 @@ class Migration(object):
 
         # Rewriting all the new DNs in the new installation to ldif file
         for dn in currentDNs:
-            new_entry = self.getEntry(self.installDataGluu, dn)
-            if dn not in old_dn_map.keys():
+            new_entry = self.getEntry(self.currentData, dn)
+            if "o=site" in dn:
+                continue  # skip all the o=site DNs
+            elif dn not in old_dn_map.keys():
                 #  Write to the file if there is no matching old DN data
                 ldif_writer.unparse(dn, new_entry)
                 continue
@@ -231,7 +231,7 @@ class Migration(object):
 
         # Update the Schema change for lastModifiedTime
         with open(self.processTempFile, 'r') as infile:
-            with open(self.processedLDIF, 'w') as outfile:
+            with open(self.o_gluu, 'w') as outfile:
                 for line in infile:
                     line.replace("lastModifiedTime", "oxLastAccessTime")
                     line.replace("cn=directory manager", "cn=directory manager,o=gluu")
@@ -245,10 +245,10 @@ class Migration(object):
         shutil.move(self.ldapDataFile, backupfile)
 
         output = self.getOutput([self.slapadd, '-c', '-b', 'o=gluu', '-f',
-                                self.slapdConf, '-l', self.processedLDIF])
+                                self.slapdConf, '-l', self.o_gluu])
         logging.debug(output)
         output = self.getOutput([self.slapadd, '-c', '-b', 'o=site', '-f',
-                                self.slapdConf, '-l', self.installDataSite])
+                                self.slapdConf, '-l', self.o_site])
         logging.debug(output)
 
     def migrate(self):
