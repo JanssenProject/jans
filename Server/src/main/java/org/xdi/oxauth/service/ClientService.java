@@ -295,9 +295,11 @@ public class ClientService {
     }
 
     public void updatAccessTime(Client client, boolean isUpdateLogonTime) {
-        if(!appConfiguration.getUpdateAccessTime())
-            return;
-        String clientDn = client.getDn();
+		if (!appConfiguration.getUpdateAccessTime()) {
+			return;
+		}
+
+		String clientDn = client.getDn();
 
         CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(clientDn);

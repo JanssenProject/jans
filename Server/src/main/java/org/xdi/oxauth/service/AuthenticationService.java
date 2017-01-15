@@ -397,9 +397,11 @@ public class AuthenticationService {
     }
 
     private void updateLastLogonUserTime(User user) {
-        if(!appConfiguration.getUpdateLastLogonUserTime())
-            return;
-        CustomEntry customEntry = new CustomEntry();
+		if (!appConfiguration.getUpdateLastLogonUserTime()) {
+			return;
+		}
+
+		CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
 		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
 
