@@ -8,6 +8,7 @@ package org.xdi.oxauth.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.contexts.Context;
@@ -17,6 +18,7 @@ import org.jboss.seam.log.Log;
 import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
@@ -26,6 +28,7 @@ import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.exception.InvalidStateException;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
@@ -55,8 +58,6 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STAT
 @AutoCreate
 public class AuthenticationService {
 
-    private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
-
     // use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
@@ -80,9 +81,12 @@ public class AuthenticationService {
             AuthorizeRequestParam.CODE_CHALLENGE,
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS));
-
+    private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
     @Logger
     private Log log;
+
+    @In
+    private AppConfiguration appConfiguration;
 
     @In
     private Identity identity;
@@ -117,6 +121,10 @@ public class AuthenticationService {
 
     @In("org.jboss.seam.core.manager")
     private FacesManager facesManager;
+
+    public static AuthenticationService instance() {
+        return ServerUtil.instance(AuthenticationService.class);
+    }
 
     /**
      * Authenticate user.
@@ -389,18 +397,20 @@ public class AuthenticationService {
     }
 
     private void updateLastLogonUserTime(User user) {
-//        CustomEntry customEntry = new CustomEntry();
-//        customEntry.setDn(user.getDn());
-//		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
-//
-//        CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
-//        customEntry.getCustomAttributes().add(customAttribute);
-//
-//        try {
-//            ldapEntryManager.merge(customEntry);
-//        } catch (EntryPersistenceException epe) {
-//            log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
-//        }
+        if(!appConfiguration.getUpdateLastLogonUserTime())
+            return;
+        CustomEntry customEntry = new CustomEntry();
+        customEntry.setDn(user.getDn());
+		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
+
+        CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
+        customEntry.getCustomAttributes().add(customAttribute);
+
+        try {
+            ldapEntryManager.merge(customEntry);
+        } catch (EntryPersistenceException epe) {
+            log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
+        }
     }
 
     public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
@@ -649,11 +659,6 @@ public class AuthenticationService {
 
     public boolean isParameterExists(String p_name) {
         return Contexts.getEventContext().isSet(p_name);
-    }
-
-
-    public static AuthenticationService instance() {
-        return ServerUtil.instance(AuthenticationService.class);
     }
 
 }
