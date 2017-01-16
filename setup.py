@@ -115,8 +115,8 @@ class Setup(object):
         self.savedProperties = '%s/setup.properties.last' % self.install_dir
 
         self.gluuOptFolder = '/opt/gluu'
-        self.gluuOptBinFolder = '%s/bin' % gluuOptFolder
-        self.gluuOptSystemFolder = '%s/system' % gluuOptFolder
+        self.gluuOptBinFolder = '%s/bin' % self.gluuOptFolder
+        self.gluuOptSystemFolder = '%s/system' % self.gluuOptFolder
         self.gluuOptPythonFolder = '%s/python' % self.gluuOptFolder
         self.gluuBaseFolder = '/etc/gluu'
         self.configFolder = '%s/conf' % self.gluuBaseFolder
