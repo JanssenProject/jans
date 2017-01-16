@@ -270,7 +270,7 @@ class Setup(object):
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
         self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
-        self.openldapSetupAccessLog = True
+        self.openldapSetupAccessLog = False
         self.accessLogConfFile = "%s/static/openldap/accesslog.conf" % self.install_dir
         self.gluuAccessLogConf = "%s/static/openldap/o_gluu_accesslog.conf" % self.install_dir
 
@@ -623,6 +623,15 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
         return inFilePathText
+
+    def commentOutText(self, text):
+        textLines = text.split('\n')
+
+        lines = []
+        for textLines in textLines:
+            lines.append('#%s' % textLines)
+    
+        return "\n".join(lines)
 
     def writeFile(self, outFilePath, text):
         inFilePathText = None
@@ -2307,11 +2316,12 @@ class Setup(object):
     def configure_openldap(self):
         self.logIt("Configuring OpenLDAP")
         # 1. Render templates
-        self.templateRenderingDict['openldap_accesslog_conf'] = ""
-        self.templateRenderingDict['openldap_gluu_accesslog'] = ""
-        if self.openldapSetupAccessLog:
-            self.templateRenderingDict['openldap_accesslog_conf'] = self.readFile(self.accessLogConfFile)
-            self.templateRenderingDict['openldap_gluu_accesslog'] = self.readFile(self.gluuAccessLogConf)
+        self.templateRenderingDict['openldap_accesslog_conf'] = self.readFile(self.accessLogConfFile)
+        self.templateRenderingDict['openldap_gluu_accesslog'] = self.readFile(self.gluuAccessLogConf)
+        if not self.openldapSetupAccessLog:
+            self.templateRenderingDict['openldap_accesslog_conf'] = self.commentOutText(self.templateRenderingDict['openldap_accesslog_conf'])
+            self.templateRenderingDict['openldap_gluu_accesslog'] = self.commentOutText(self.templateRenderingDict['openldap_gluu_accesslog'])
+
         self.renderTemplate(self.openldapSlapdConf)
         self.renderTemplate(self.openldapSymasConf)
 
