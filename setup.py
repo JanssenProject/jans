@@ -1587,13 +1587,13 @@ class Setup(object):
         distAsimbaPath = '%s/%s' % (self.distGluuFolder, asimbaWar)
         
         self.logIt("Configuring Asimba...")
-        self.removeDirs(self.asimba_conf_folder)
-        self.createDirs(self.asimba_conf_folder)
         self.copyFile(self.asimba_configuration, self.asimba_configuration_xml)
         self.copyFile(self.asimba_selector_configuration, self.asimba_selector_configuration_xml)
-        self.run([self.cmd_chmod, 'uga+x', self.asimba_conf_folder])
-        self.run([self.cmd_chmod, 'u+w', self.asimba_conf_folder])
-        self.run([self.cmd_chmod, 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
+        self.run([self.cmd_chmod, '-R', 'uga+x', self.asimba_conf_folder])
+        self.run([self.cmd_chmod, '-R', 'ug+w', self.asimba_conf_folder])
+        self.run([self.cmd_chmod, '-R', 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
+        self.run([self.cmd_chown, '-R', 'jetty', self.asimba_conf_folder+'/metadata'])
+        
 
         self.logIt("Copying asimba.war into jetty webapps folder...")
         jettyServiceName = 'asimba'
@@ -1810,6 +1810,13 @@ class Setup(object):
 
             if self.installLdap:
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data'])
+                
+            if self.installAsimba:
+                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder])
+                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata'])
+                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/idp'])
+                self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/sp'])
+                
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
