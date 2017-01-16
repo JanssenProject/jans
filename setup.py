@@ -115,8 +115,9 @@ class Setup(object):
         self.savedProperties = '%s/setup.properties.last' % self.install_dir
 
         self.gluuOptFolder = '/opt/gluu'
-        self.gluuOptBinFolder = '/opt/gluu/bin'
-        self.gluuOptSystemFolder = '/opt/gluu/system'
+        self.gluuOptBinFolder = '%s/bin' % gluuOptFolder
+        self.gluuOptSystemFolder = '%s/system' % gluuOptFolder
+        self.gluuOptPythonFolder = '%s/python' % self.gluuOptFolder
         self.gluuBaseFolder = '/etc/gluu'
         self.configFolder = '%s/conf' % self.gluuBaseFolder
         self.certFolder = '/etc/certs'
@@ -282,7 +283,8 @@ class Setup(object):
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
         self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
         self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
-        self.gluu_python_readme = '%s/conf/python/python.txt' % self.gluuBaseFolder
+        self.gluu_python_base = '%s/python' % self.gluuOptFolder
+        self.gluu_python_readme = '%s/libs/python.txt' % self.gluuOptPythonFolder
         self.ox_ldap_properties = '%s/ox-ldap.properties' % self.configFolder
         self.oxauth_static_conf_json = '%s/oxauth-static-conf.json' % self.outputFolder
         self.oxTrust_log_rotation_configuration = "%s/conf/oxTrustLogRotationConfiguration.xml" % self.gluuBaseFolder
@@ -457,11 +459,13 @@ class Setup(object):
         self.logIt("Changing ownership")
         realCertFolder = os.path.realpath(self.certFolder)
         realConfigFolder = os.path.realpath(self.configFolder)
+        realOptPythonFolderFolder = os.path.realpath(self.gluuOptPythonFolder)
         realAsimbaJks = os.path.realpath(self.asimbaJksFn)
 
         self.run([self.cmd_chown, '-R', 'root:gluu', realCertFolder])
         self.run([self.cmd_chown, '-R', 'root:gluu', realConfigFolder])
         self.run([self.cmd_chown, '-R', 'root:gluu', self.oxBaseDataFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', self.realOptPythonFolderFolder])
 
         # Set right permissions
         self.run([self.cmd_chmod, '-R', '550', realCertFolder])
@@ -827,7 +831,7 @@ class Setup(object):
             self.copyFile("%s/static/idp3/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
 
         if self.installOxAuth:
-            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/conf/python/" % self.gluuBaseFolder)
+            self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/libs" % self.gluuOptPythonFolder)
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/super_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
@@ -1778,6 +1782,7 @@ class Setup(object):
             self.run([self.cmd_mkdir, '-p', self.gluuOptFolder])
             self.run([self.cmd_mkdir, '-p', self.gluuOptBinFolder])
             self.run([self.cmd_mkdir, '-p', self.gluuOptSystemFolder])
+            self.run([self.cmd_mkdir, '-p', self.gluuOptPythonFolder])
             self.run([self.cmd_mkdir, '-p', self.configFolder])
             self.run([self.cmd_mkdir, '-p', self.certFolder])
             self.run([self.cmd_mkdir, '-p', self.outputFolder])
