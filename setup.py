@@ -464,8 +464,8 @@ class Setup(object):
 
         self.run([self.cmd_chown, '-R', 'root:gluu', realCertFolder])
         self.run([self.cmd_chown, '-R', 'root:gluu', realConfigFolder])
+        self.run([self.cmd_chown, '-R', 'root:gluu', realOptPythonFolderFolder])
         self.run([self.cmd_chown, '-R', 'root:gluu', self.oxBaseDataFolder])
-        self.run([self.cmd_chown, '-R', 'root:gluu', self.realOptPythonFolderFolder])
 
         # Set right permissions
         self.run([self.cmd_chmod, '-R', '550', realCertFolder])
