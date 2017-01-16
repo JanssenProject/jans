@@ -49,12 +49,12 @@ public class PythonService implements Serializable {
 	/*
 	 * Initialize singleton instance during startup
 	 */
-	public boolean initPythonInterpreter() {
+	public boolean initPythonInterpreter(String pythonModulesDir) {
 		boolean result = false;
 
 		if (isInitInterpreter()) {
 	        try {
-	    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(), null);
+	    		PythonInterpreter.initialize(getPreProperties(), getPostProperties(pythonModulesDir), null);
 	            this.pythonInterpreter = new PythonInterpreter();
 	            
 	            // Init output redirect for all new interpreters
@@ -96,7 +96,7 @@ public class PythonService implements Serializable {
 		return clonedProps;
 	}
 
-	private Properties getPostProperties() {
+	private Properties getPostProperties(String pythonModulesDir) {
 		Properties props = getPreProperties();
 
 		String catalinaTmpFolder = System.getProperty("java.io.tmpdir") + File.separator + "python" + File.separator + "cachedir";
@@ -108,8 +108,9 @@ public class PythonService implements Serializable {
 		}
 		
 		// Register custom python modules
-		String oxAuthPythonModulesPath = System.getProperty("catalina.home") + File.separator + "conf" + File.separator + "python";
-		props.setProperty("python.path", oxAuthPythonModulesPath);
+		if (StringHelper.isNotEmpty(pythonModulesDir)) {
+			props.setProperty("python.path", pythonModulesDir);
+		}
 
 		return props;
 	}
