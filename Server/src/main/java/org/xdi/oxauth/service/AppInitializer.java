@@ -129,7 +129,7 @@ public class AppInitializer {
         setDefaultAuthenticationMethod(localLdapEntryManager);
 
         addSecurityProviders();
-        PythonService.instance().initPythonInterpreter();
+        PythonService.instance().initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
     }
 
 
