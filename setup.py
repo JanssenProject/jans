@@ -1594,7 +1594,6 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
         self.run([self.cmd_chown, '-R', 'jetty', self.asimba_conf_folder+'/metadata'])
         
-
         self.logIt("Copying asimba.war into jetty webapps folder...")
         jettyServiceName = 'asimba'
         self.installJettyService(self.jetty_app_configuration[jettyServiceName])
