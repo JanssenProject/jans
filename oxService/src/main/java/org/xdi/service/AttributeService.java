@@ -27,7 +27,7 @@ import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
  * @author Oleksiy Tataryn
  * @author Yuriy Movchan Date: 01/06/2015
  */
-public class AttributeService {
+public abstract class AttributeService {
 
 	@Logger
 	protected Log log;
@@ -45,6 +45,7 @@ public class AttributeService {
     	  String[] targetArray = new String[] { attributeValue };
     	  Filter filter = Filter.createSubstringFilter(attributeName, null, targetArray, null);
     	  List<GluuAttribute> result = ldapEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
+
     	  return result;
     }
     
@@ -57,7 +58,35 @@ public class AttributeService {
 
 		return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
     }
-    
+
+	/**
+	 * Get attribute by name
+	 * 
+	 * @return Attribute
+	 */
+	public GluuAttribute getAttributeByName(String name) {
+		return getAttributeByName(name, getAllAttributes());
+	}
+
+	/**
+	 * Get attribute by name
+	 * 
+	 * @return Attribute
+	 */
+	public GluuAttribute getAttributeByName(String name, List<GluuAttribute> attributes) {
+		for (GluuAttribute attribute : attributes) {
+			if (attribute.getName().equals(name)) {
+				return attribute;
+			}
+		}
+
+		return null;
+	}
+
+	public List<GluuAttribute> getAllAttributes() {
+		return getAllAttributes(getDnForAttribute(null));
+	}
+
 	@SuppressWarnings("unchecked")
 	public List<GluuAttribute> getAllAttributes(String baseDn) {
 		List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(OxConstants.CACHE_ATTRIBUTE_NAME,
@@ -75,5 +104,7 @@ public class AttributeService {
 
 		return attributeList;
 	}
+
+	public abstract String getDnForAttribute(String inum);
 
 }

@@ -60,6 +60,7 @@
         <module>oxTomcat</module>
         <module>oxServer</module>
         <module>oxGwt</module>
+        <module>oxJsfUtil</module>
     </modules>
 
     <dependencyManagement>
