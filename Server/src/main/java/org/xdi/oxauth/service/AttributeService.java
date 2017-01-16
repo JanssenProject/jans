@@ -6,15 +6,20 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.List;
+
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
-
-import java.util.List;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum
@@ -91,4 +96,14 @@ public class AttributeService extends org.xdi.service.AttributeService {
     public List<GluuAttribute> getAllAttributes() {
         return getAllAttributes(staticConfiguration.getBaseDn().getAttributes());
     }
+
+	public String getDnForAttribute(String inum) {
+		String attributesDn = staticConfiguration.getBaseDn().getAttributes();
+		if (StringHelper.isEmpty(inum)) {
+			return attributesDn;
+		}
+
+		return String.format("inum=%s,%s", inum, attributesDn);
+	}
+
 }
