@@ -60,8 +60,11 @@ class Migration(object):
         self.ldifDir = os.path.join(backup, 'ldif')
         self.currentDir = os.path.dirname(os.path.realpath(__file__))
         self.workingDir = os.path.join(self.currentDir, 'migration')
-        # TODO get the correct service command based on the OS
+        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os = self.detect_os_type()
         self.service = "/usr/sbin/service"
+        if self.os is 'centos':
+            self.service = "/sbin/service"
 
         self.slapdConf = "/opt/symas/etc/openldap/slapd.conf"
         self.slapcat = "/opt/symas/bin/slapcat"
@@ -73,6 +76,21 @@ class Migration(object):
         self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
         self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
         self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
+
+    def detect_os_type(self):
+        distro_info = self.readFile('/etc/redhat-release')
+        if distro_info is None:
+            distro_info = self.readFile('/etc/os-release')
+        if 'CentOS' in distro_info:
+            return self.os_types[0]
+        elif 'Red Hat' in distro_info:
+            return self.os_types[1]
+        elif 'Ubuntu' in distro_info:
+            return self.os_types[3]
+        elif 'Debian' in distro_info:
+            return self.os_types[4]
+        else:
+            return self.choose_from_list(self.os_types, "Operating System")
 
     def verifyBackupData(self):
         if not os.path.exists(self.backupDir):
@@ -104,20 +122,24 @@ class Migration(object):
 
     def stopSolserver(self):
         logging.info("Stopping OpenLDAP Server.")
-        output = self.getOutput([self.service, 'solserver', 'stop'])
-        if "Symas OpenLDAP LDAP services slapd stopping....  done." in output:
+        stop_msg = self.getOutput([self.service, 'solserver', 'stop'])
+        output = self.getOutput([self.service, 'solserver', 'status'])
+        if "is not running" in output:
             return
         else:
-            logging.error(output)
+            logging.error("Couldn't stop the OpenLDAP server.")
+            logging.error(stop_msg)
             sys.exit(1)
 
     def startSolserver(self):
         logging.info("Starting OpenLDAP Server.")
-        output = self.getOutput([self.service, 'solserver', 'start'])
-        if "Symas OpenLDAP LDAP services slapd starting...  done." in output:
+        start_msg = self.getOutput([self.service, 'solserver', 'start'])
+        output = self.getOutput([self.service, 'solserver', 'status'])
+        if "is running" in output:
             return
         else:
-            logging.error(output)
+            logging.error("Couldn't start the OpenLDAP server.")
+            logging.error(start_msg)
             sys.exit(1)
 
     def exportInstallData(self):
