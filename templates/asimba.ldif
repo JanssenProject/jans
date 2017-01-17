@@ -3,7 +3,7 @@
 ####################################
 dn: ou=oxasimba,o=%(inumOrg)s,o=gluu
 objectClass: top
-objectClass: oxAsimbaConfiguration
+objectClass: organizationalUnit
 ou: oxasimba
 oxRevision: 1
 
