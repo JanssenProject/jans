@@ -172,12 +172,6 @@ public class AuthenticationService {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
             sessionStateService.updateSessionState(sessionState);
-
-            // TODO: Remove after 2.4.5
-            String sessionAuthUser = getAuthenticatedUserId();
-            if (authenticated && (sessionAuthUser != null) && !StringHelper.equalsIgnoreCase(userName, sessionAuthUser)) {
-                throw new InvalidStateException("authenticate: User name and user in credentials don't match");
-            }
         }
     }
 
@@ -428,9 +422,6 @@ public class AuthenticationService {
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-            if ((sessionAuthUser != null) && !StringHelper.equalsIgnoreCase(user.getUserId(), sessionAuthUser)) {
-                throw new InvalidStateException("configureSessionUser: User in session and in credentials don't match");
-            }
             log.trace("configureSessionUser sessionState: '{0}', sessionState.auth_user: '{1}'", sessionState, sessionAuthUser);
 
             newSessionState = sessionStateService.setSessionStateAuthenticated(sessionState, user.getDn());
