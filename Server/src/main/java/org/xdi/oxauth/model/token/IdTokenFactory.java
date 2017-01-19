@@ -132,12 +132,12 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim("oxValidationURI", appConfiguration.getCheckSessionIFrame());
         jwt.getClaims().setClaim("oxOpenIDConnectVersion", appConfiguration.getOxOpenIdConnectVersion());
 
-        List<String> dynamicScopes = new ArrayList<String>();
+        List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
         if (includeIdTokenClaims) {
             for (String scopeName : scopes) {
                 org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
                 if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
-                    dynamicScopes.add(scope.getDisplayName());
+                    dynamicScopes.add(scope);
                     continue;
                 }
 
@@ -328,12 +328,12 @@ public class IdTokenFactory {
         jwe.getClaims().setClaim("oxValidationURI", appConfiguration.getCheckSessionIFrame());
         jwe.getClaims().setClaim("oxOpenIDConnectVersion", appConfiguration.getOxOpenIdConnectVersion());
 
-        List<String> dynamicScopes = new ArrayList<String>();
+        List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
         if (includeIdTokenClaims) {
             for (String scopeName : scopes) {
                 org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
                 if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-                    dynamicScopes.add(scope.getDisplayName());
+                    dynamicScopes.add(scope);
                     continue;
                 }
 
