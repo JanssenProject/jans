@@ -68,12 +68,12 @@ public class CleanerTimer {
 
     @In
     private MetricService metricService;
-	
-	@In
-	private DeviceRegistrationService deviceRegistrationService;
 
-	@In
-	private ConfigurationFactory configurationFactory;
+    @In
+    private DeviceRegistrationService deviceRegistrationService;
+
+    @In
+    private ConfigurationFactory configurationFactory;
 
     private AtomicBoolean isActive;
 
@@ -131,7 +131,6 @@ public class CleanerTimer {
     private void processRegisteredClients() {
         log.debug("Start Client clean up");
 
-        // Cleaning oxAuthToken
         BatchOperation<Client> clientBatchService = new BatchOperation<Client>(ldapEntryManager) {
             @Override
             protected List<Client> getChunkOrNull(int chunkSize) {
@@ -141,21 +140,24 @@ public class CleanerTimer {
             @Override
             protected void performAction(List<Client> entries) {
                 for (Client client : entries) {
-                    GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                    GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                    expirationDate.setTime(client.getClientSecretExpiresAt());
-                    if (expirationDate.before(now)) {
-                        List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
-                        authorizationGrantList.removeAuthorizationGrants(toRemove);
+                    try {
+                        GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                        GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                        expirationDate.setTime(client.getClientSecretExpiresAt());
+                        if (expirationDate.before(now)) {
+                            List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
+                            authorizationGrantList.removeAuthorizationGrants(toRemove);
 
-                        log.debug("Removing Client: {0}, Expiration date: {1}",
-                                client.getClientId(),
-                                client.getClientSecretExpiresAt());
-                        clientService.remove(client);
+                            log.debug("Removing Client: {0}, Expiration date: {1}",
+                                    client.getClientId(),
+                                    client.getClientSecretExpiresAt());
+                            clientService.remove(client);
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to remove entry", e);
                     }
                 }
             }
-
         };
         clientBatchService.iterateAllByChunks(BATCH_SIZE);
 
@@ -169,7 +171,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService= new BatchOperation<RequestMessageLdap>(ldapEntryManager) {
+        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new BatchOperation<RequestMessageLdap>(ldapEntryManager) {
             @Override
             protected List<RequestMessageLdap> getChunkOrNull(int chunkSize) {
                 return u2fRequestService.getExpiredRequestMessages(this, expirationDate);
@@ -178,10 +180,14 @@ public class CleanerTimer {
             @Override
             protected void performAction(List<RequestMessageLdap> entries) {
                 for (RequestMessageLdap requestMessageLdap : entries) {
-                    log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
-                            requestMessageLdap.getRequestId(),
-                            requestMessageLdap.getCreationDate());
-                    u2fRequestService.removeRequestMessage(requestMessageLdap);
+                    try {
+                        log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
+                                requestMessageLdap.getRequestId(),
+                                requestMessageLdap.getCreationDate());
+                        u2fRequestService.removeRequestMessage(requestMessageLdap);
+                    } catch (Exception e) {
+                        log.error("Failed to remove entry", e);
+                    }
                 }
             }
         };
@@ -196,7 +202,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchOperation<DeviceRegistration> deviceRegistrationBatchService= new BatchOperation<DeviceRegistration>(ldapEntryManager) {
+        BatchOperation<DeviceRegistration> deviceRegistrationBatchService = new BatchOperation<DeviceRegistration>(ldapEntryManager) {
             @Override
             protected List<DeviceRegistration> getChunkOrNull(int chunkSize) {
                 return deviceRegistrationService.getExpiredDeviceRegistrations(this, expirationDate);
@@ -205,10 +211,15 @@ public class CleanerTimer {
             @Override
             protected void performAction(List<DeviceRegistration> entries) {
                 for (DeviceRegistration deviceRegistration : entries) {
-                    log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
-                            deviceRegistration.getId(),
-                            deviceRegistration.getCreationDate());
-                    deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
+                    try {
+                        log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
+                                deviceRegistration.getId(),
+                                deviceRegistration.getCreationDate());
+                        deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
+                    }
+                    catch (Exception e){
+                        log.error("Failed to remove entry", e);
+                    }
                 }
             }
         };
