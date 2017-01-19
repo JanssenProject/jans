@@ -54,17 +54,6 @@ public class Scope implements Serializable {
     @LdapAttribute(name = "oxScript")
     private List<String> dynamicScopeScripts;
 
-    public List<String> getDynamicScopeScripts() {
-        if (dynamicScopeScripts == null) {
-            dynamicScopeScripts = Lists.newArrayList();
-        }
-        return dynamicScopeScripts;
-    }
-
-    public void setDynamicScopeScripts(List<String> dynamicScopeScripts) {
-        this.dynamicScopeScripts = dynamicScopeScripts;
-    }
-
     public String getDn() {
         return dn;
     }
@@ -151,6 +140,14 @@ public class Scope implements Serializable {
         }
         this.isGroupClaims = false;
         return this.isGroupClaims;
+    }
+
+    public List<String> getDynamicScopeScripts() {
+		return dynamicScopeScripts;
+	}
+
+	public void setDynamicScopeScripts(List<String> dynamicScopeScripts) {
+        this.dynamicScopeScripts = dynamicScopeScripts;
     }
 
     @Override
