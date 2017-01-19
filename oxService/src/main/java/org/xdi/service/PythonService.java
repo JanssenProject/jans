@@ -129,6 +129,7 @@ public class PythonService implements Serializable {
         try {
         	currentPythonInterpreter.execfile(scriptName);
 		} catch (Exception ex) {
+			log.error("Failed to load python file", ex.getMessage());
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptName), ex);
 		}
 
@@ -144,6 +145,7 @@ public class PythonService implements Serializable {
         try {
         	currentPythonInterpreter.execfile(scriptFile);
 		} catch (Exception ex) {
+			log.error("Failed to load python file", ex.getMessage());
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
 		}
 
@@ -163,6 +165,7 @@ public class PythonService implements Serializable {
         try {
         	scriptPythonTypeClass = scriptPythonTypeObject.__call__(constructorArgs);
 		} catch (Exception ex) {
+			log.error("Failed to initialize python class", ex.getMessage());
 			throw new PythonException(String.format("Failed to initialize python class '%s'", scriptPythonType), ex);
 		}
 

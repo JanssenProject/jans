@@ -6,6 +6,7 @@
 
 package org.xdi.service.metric;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,9 +17,13 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
 import org.jboss.seam.Component;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
+import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.counter.CounterMetricData;
@@ -160,10 +165,18 @@ public class LdapEntryReporter extends ScheduledReporter {
                        SortedMap<String, Histogram> histograms,
                        SortedMap<String, Meter> meters,
                        SortedMap<String, Timer> timers) {
+        Lifecycle.beginCall();
+        try {
+            reportImpl(counters, timers);
+        } finally {
+			Lifecycle.endCall();
+		}
+
+    }
+
+	private void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
         final Date currentRunTime = new Date(clock.getTime());
-
-		MetricService metricService = (MetricService) Component.getInstance(metricServiceComponentName);
-
+		final MetricService metricService = (MetricService) Component.getInstance(metricServiceComponentName);
 
         List<MetricEntry> metricEntries = new ArrayList<MetricEntry>();
         if (counters != null && !counters.isEmpty()) {
@@ -191,7 +204,7 @@ public class LdapEntryReporter extends ScheduledReporter {
 		startTime = currentRunTime;
         
         metricService.add(metricEntries, creationTime);
-    }
+	}
 
 	private List<MetricEntry> builCounterEntries(SortedMap<String, Counter> counters, Set<MetricType> registeredMetricTypes) {
         List<MetricEntry> result = new ArrayList<MetricEntry>();
