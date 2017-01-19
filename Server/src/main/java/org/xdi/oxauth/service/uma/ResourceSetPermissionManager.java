@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service.uma;
 
 import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -121,19 +122,26 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
         BatchOperation<ResourceSetPermission> resourceSetPermissionBatchService = new BatchOperation<ResourceSetPermission>(ldapEntryManager) {
             @Override
             protected List<ResourceSetPermission> getChunkOrNull(int chunkSize) {
-                try {
-                    final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                    return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-                } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
-                }
-                return null;
+                return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), ResourceSetPermission.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
             protected void performAction(List<ResourceSetPermission> entries) {
                 for (ResourceSetPermission p : entries) {
-                    ldapEntryManager.remove(p);
+                    try {
+                        ldapEntryManager.remove(p);
+                    } catch (Exception e) {
+                        LOG.error("Failed to remove entry", e);
+                    }
+                }
+            }
+
+            private Filter getFilter() {
+                try {
+                    return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
+                }catch (LDAPException e) {
+                    LOG.trace(e.getMessage(), e);
+                    return Filter.createPresenceFilter("oxAuthExpiration");
                 }
             }
         };
