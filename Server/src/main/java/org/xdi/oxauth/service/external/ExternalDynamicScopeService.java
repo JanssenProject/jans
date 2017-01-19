@@ -20,6 +20,7 @@ import org.xdi.model.custom.script.type.scope.DynamicScopeType;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.service.custom.script.ExternalScriptService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,7 +57,10 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 	private Set<CustomScriptConfiguration> getScriptsToExecute(DynamicScopeExternalContext context) {
         Set<String> allowedScripts = Sets.newHashSet();
 		for (org.xdi.oxauth.model.common.Scope scope : context.getDynamicScopes()) {
-	        allowedScripts.addAll(scope.getDynamicScopeScripts());
+			List<String> scopeScripts = scope.getDynamicScopeScripts();
+			if (scopeScripts != null) { 
+				allowedScripts.addAll(scopeScripts);
+			}
 		}
 
 		Set<CustomScriptConfiguration> result = Sets.newHashSet();
