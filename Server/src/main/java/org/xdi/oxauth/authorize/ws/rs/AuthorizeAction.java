@@ -51,7 +51,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 14, 2016
+ * @version January 19, 2017
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -639,6 +639,10 @@ public class AuthorizeAction {
                 clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
             }
             final Client client = clientService.getClient(clientId);
+
+            if (scope == null) {
+                scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
+            }
 
             if (client.getPersistClientAuthorizations()) {
                 final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
