@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service;
 
 import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
@@ -549,7 +550,11 @@ public class SessionStateService {
 
     public void remove(List<SessionState> list) {
         for (SessionState id : list) {
-            remove(id);
+            try {
+                remove(id);
+            } catch (Exception e) {
+                log.error("Failed to remove entry", e);
+            }
         }
     }
 
@@ -560,20 +565,23 @@ public class SessionStateService {
         BatchOperation<SessionState> unauthenticatedIdsBatchService = new BatchOperation<SessionState>(ldapEntryManager) {
             @Override
             protected List<SessionState> getChunkOrNull(int chunkSize) {
-                try {
-                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(unauthenticatedInterval);
-                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
-                    final Filter filter = Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
-                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-                } catch (Exception e) {
-                    log.trace(e.getMessage(), e);
-                }
-                return null;
+                return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
             protected void performAction(List<SessionState> entries) {
                 remove(entries);
+            }
+
+            private Filter getFilter() {
+                try {
+                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(unauthenticatedInterval);
+                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
+                    return Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
+                }catch (LDAPException e) {
+                    log.trace(e.getMessage(), e);
+                    return Filter.createPresenceFilter("oxLastAccessTime");
+                }
             }
         };
         unauthenticatedIdsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
@@ -581,20 +589,23 @@ public class SessionStateService {
         BatchOperation<SessionState> idsBatchService = new BatchOperation<SessionState>(ldapEntryManager) {
             @Override
             protected List<SessionState> getChunkOrNull(int chunkSize) {
-                try {
-                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(interval);
-                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
-                    final Filter filter = Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
-                    return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-                return null;
+                return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
             protected void performAction(List<SessionState> entries) {
                 remove(entries);
+            }
+
+            private Filter getFilter() {
+                try {
+                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(interval);
+                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
+                    return Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
+                }catch (LDAPException e) {
+                    log.trace(e.getMessage(), e);
+                    return Filter.createPresenceFilter("oxLastAccessTime");
+                }
             }
         };
         idsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);

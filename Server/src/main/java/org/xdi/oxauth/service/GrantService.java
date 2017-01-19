@@ -108,7 +108,11 @@ public class GrantService {
     public void removeGrants(List<Grant> entries) {
         if (entries != null && !entries.isEmpty()) {
             for (Grant g : entries) {
-                remove(g);
+                try {
+                    remove(g);
+                } catch (Exception e) {
+                    log.error("Failed to remove entry", e);
+                }
             }
         }
     }
@@ -116,7 +120,11 @@ public class GrantService {
     public void remove(List<TokenLdap> p_entries) {
         if (p_entries != null && !p_entries.isEmpty()) {
             for (TokenLdap t : p_entries) {
-                remove(t);
+                try {
+                    remove(t);
+                } catch (Exception e){
+                    log.error("Failed to remove entry", e);
+                }
             }
         }
     }
@@ -232,19 +240,22 @@ public class GrantService {
         BatchOperation<TokenLdap> tokenBatchService = new BatchOperation<TokenLdap>(ldapEntryManager) {
             @Override
             protected List<TokenLdap> getChunkOrNull(int chunkSize) {
-                try {
-                    final Filter filter = Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(new Date())));
-                    return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-                } catch (Exception e) {
-                    log.trace(e.getMessage(), e);
-                }
-                return null;
+                return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
             protected void performAction(List<TokenLdap> entries) {
                 auditLogging(entries);
                 remove(entries);
+            }
+
+            private Filter getFilter() {
+                try {
+                    return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(new Date())));
+                }catch (LDAPException e) {
+                    log.trace(e.getMessage(), e);
+                    return Filter.createPresenceFilter("oxAuthExpiration");
+                }
             }
         };
         tokenBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
@@ -253,21 +264,23 @@ public class GrantService {
         BatchOperation<Grant> grantBatchService = new BatchOperation<Grant>(ldapEntryManager) {
             @Override
             protected List<Grant> getChunkOrNull(int chunkSize) {
-                try {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.SECOND, 60);
-
-                    final Filter filter = Filter.create(String.format("(&(oxAuthCreation<=%s)(|(numsubordinates=0)(hasSubordinates=FALSE)))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
-                    return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-                } catch (Exception e) {
-                    log.trace(e.getMessage(), e);
-                }
-                return null;
+                return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
             protected void performAction(List<Grant> entries) {
                 removeGrants(entries);
+            }
+
+            private Filter getFilter() {
+                try {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.SECOND, 60);
+                    return Filter.create(String.format("(&(oxAuthCreation<=%s)(|(numsubordinates=0)(hasSubordinates=FALSE)))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
+                }catch (LDAPException e) {
+                    log.trace(e.getMessage(), e);
+                    return Filter.createPresenceFilter("oxAuthCreation");
+                }
             }
         };
         grantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
@@ -277,18 +290,21 @@ public class GrantService {
         BatchOperation<Grant> oldGrantBatchService = new BatchOperation<Grant>(ldapEntryManager) {
             @Override
             protected List<Grant> getChunkOrNull(int chunkSize) {
-                try {
-                    final Filter filter = Filter.create("(&(!(oxAuthCreation=*))(|(numsubordinates=0)(hasSubordinates=FALSE)))");
-                    return ldapEntryManager.findEntries(baseDn(), Grant.class, filter, SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-                } catch (Exception e) {
-                    log.trace(e.getMessage(), e);
-                }
-                return null;
+                return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
             protected void performAction(List<Grant> entries) {
                 removeGrants(entries);
+            }
+
+            private Filter getFilter() {
+                try {
+                    return Filter.create("(&(!(oxAuthCreation=*))(|(numsubordinates=0)(hasSubordinates=FALSE)))");
+                }catch (LDAPException e) {
+                    log.trace(e.getMessage(), e);
+                    return Filter.createPresenceFilter("oxAuthCreation");
+                }
             }
         };
         oldGrantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
