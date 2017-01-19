@@ -97,6 +97,7 @@ class Setup(object):
         self.installOxAuthRP = False
         self.installPassport = False
         self.allowPreReleasedApplications = False
+        self.allowDeprecatedApplications = False
 
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
@@ -1947,12 +1948,6 @@ class Setup(object):
         else:
             self.installAsimba = False
 
-        promptForCAS = self.getPrompt("Install CAS?", "No")[0].lower()
-        if promptForCAS == 'y':
-            self.installCas = True
-        else:
-            self.installCas = False
-
         promptForOxAuthRP = self.getPrompt("Install oxAuth RP?", "No")[0].lower()
         if promptForOxAuthRP == 'y':
             self.installOxAuthRP = True
@@ -1964,6 +1959,13 @@ class Setup(object):
             self.installPassport = True
         else:
             self.installPassport = False
+            
+        if self.allowDeprecatedApplications:
+            promptForCAS = self.getPrompt("Install CAS? [WARNING: Deprecated Application]", "No")[0].lower()
+            if promptForCAS == 'y':
+                self.installCas = True
+            else:
+                self.installCas = False
 
     def get_filepaths(self, directory):
         file_paths = []
@@ -2436,7 +2438,6 @@ def print_help():
     print ""
     print "    -a   Install Asimba"
     print "    -r   Install oxAuth RP"
-    print "    -c   Install CAS"
     print "    -p   Install Passport"
     print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
     print "    -f   specify setup.properties file"
@@ -2447,18 +2448,17 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    --allow_pre_released_applications"
+    print "    --allow_deprecated_applications"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "acd:f:hNnsuwr", ['allow_pre_released_applications'])
+        opts, args = getopt.getopt(argv, "ad:f:hNnsuwr", ['allow_pre_released_applications', 'allow_deprecated_applications'])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-a':
             setupOptions['installAsimba'] = True
-        elif opt == '-c':
-            setupOptions['installCas'] = True
         elif opt == '-d':
             if os.path.exists(arg):
                 setupOptions['install_dir'] = arg
@@ -2492,6 +2492,8 @@ def getOpts(argv, setupOptions):
             setupOptions['installPassport'] = True
         elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
+        elif opt == '--allow_deprecated_applications':
+            setupOptions['allowDeprecatedApplications'] = True
     return setupOptions
 
 if __name__ == '__main__':
@@ -2510,7 +2512,8 @@ if __name__ == '__main__':
         'installCas': False,
         'installOxAuthRP': False,
         'installPassport': False,
-        'allowPreReleasedApplications': False
+        'allowPreReleasedApplications': False,
+        'allowDeprecatedApplications': False
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
@@ -2529,6 +2532,7 @@ if __name__ == '__main__':
     installObject.installOxAuthRP = setupOptions['installOxAuthRP']
     installObject.installPassport = setupOptions['installPassport']
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
+    installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
 
     # Get the OS type
     installObject.os_type = installObject.detect_os_type()
