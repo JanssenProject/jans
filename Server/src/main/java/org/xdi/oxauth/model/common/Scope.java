@@ -51,7 +51,7 @@ public class Scope implements Serializable {
     @LdapAttribute(name = "oxAuthGroupClaims")
     private String oxAuthGroupClaims;
 
-    @LdapAttribute(name = "oxScript")
+    @LdapAttribute(name = "oxScriptDn")
     private List<String> dynamicScopeScripts;
 
     public String getDn() {
