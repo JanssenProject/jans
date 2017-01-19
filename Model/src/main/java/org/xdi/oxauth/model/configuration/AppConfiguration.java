@@ -1131,7 +1131,7 @@ public class AppConfiguration {
     }
 
     public Boolean getUpdateUserLastLogonTime() {
-        return updateUserLastLogonTime;
+        return updateUserLastLogonTime != null ? updateUserLastLogonTime : false;
     }
 
     public void setUpdateUserLastLogonTime(Boolean updateUserLastLogonTime) {
@@ -1139,7 +1139,7 @@ public class AppConfiguration {
     }
 
     public Boolean getUpdateClientAccessTime() {
-        return updateClientAccessTime;
+        return updateClientAccessTime != null ? updateClientAccessTime : false;
     }
 
     public void setUpdateClientAccessTime(Boolean updateClientAccessTime) {
