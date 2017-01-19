@@ -77,6 +77,19 @@ class Migration(object):
         self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
         self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
 
+    def readFile(self, inFilePath):
+        inFilePathText = None
+
+        try:
+            f = open(inFilePath)
+            inFilePathText = f.read()
+            f.close
+        except:
+            logging.warning("Error reading %s" % inFilePathText)
+            logging.debug(traceback.format_exc())
+
+        return inFilePathText
+
     def detect_os_type(self):
         distro_info = self.readFile('/etc/redhat-release')
         if distro_info is None:
