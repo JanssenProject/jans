@@ -2452,7 +2452,7 @@ def print_help():
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "ad:f:hNnsuwr", ['allow_pre_released_applications', 'allow_deprecated_applications'])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwr", ['allow_pre_released_applications', 'allow_deprecated_applications'])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
