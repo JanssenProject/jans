@@ -2626,7 +2626,7 @@ objectclass ( oxObjectClass:17 NAME 'oxAuthClient' SUP top STRUCTURAL MUST objec
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:18 NAME 'oxAuthCustomScope' SUP top STRUCTURAL MUST objectclass MAY 
-	( defaultScope $ description $ displayName $ inum $ oxScopeType $ oxAuthClaim $ oxAuthGroupClaims )
+	( defaultScope $ description $ displayName $ inum $ oxScopeType $ oxAuthClaim $ oxScript $ oxAuthGroupClaims )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:19 NAME 'oxAuthSessionId' SUP top STRUCTURAL MUST objectclass MAY 
