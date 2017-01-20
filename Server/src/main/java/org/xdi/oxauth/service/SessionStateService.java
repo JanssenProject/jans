@@ -111,11 +111,8 @@ public class SessionStateService {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
-            String sessionAcr = sessionAttributes.get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
-            if (StringUtils.isBlank(sessionAcr)) {
-                sessionAcr = sessionAttributes.get("acr_values");
-            }
-
+            String sessionAcr = getAcr(session);
+            
             if (StringUtils.isBlank(sessionAcr)) {
                 log.error("Failed to fetch acr from session, attributes: " + sessionAttributes);
                 return session;
