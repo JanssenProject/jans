@@ -56,7 +56,7 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 
 	private Set<CustomScriptConfiguration> getScriptsToExecute(DynamicScopeExternalContext context) {
         Set<String> allowedScripts = Sets.newHashSet();
-		for (org.xdi.oxauth.model.common.Scope scope : context.getDynamicScopes()) {
+		for (org.xdi.oxauth.model.common.Scope scope : context.getScopes()) {
 			List<String> scopeScripts = scope.getDynamicScopeScripts();
 			if (scopeScripts != null) { 
 				allowedScripts.addAll(scopeScripts);
