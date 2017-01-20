@@ -181,6 +181,30 @@ class Setup(object):
             }
         }
 
+        self.app_custom_changes = {
+            'jetty' : {
+                'name' : 'jetty', 
+                'files' : [{
+                       'path' : '%s/etc/webdefault.xml' % self.jetty_home,
+                       'replace' : [
+                           {
+                               'pattern' : r'(\<param-name\>dirAllowed<\/param-name\>)(\s*)(\<param-value\>)true(\<\/param-value\>)',
+                               'update' : r'\1\2\3false\4'
+                            }
+                        ]
+                },
+                {
+                       'path' : '%s/etc/jetty.xml' % self.jetty_home,
+                       'replace' : [
+                           {
+                               'pattern' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
+                               'update' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>'
+                            }
+                        ]
+                }]
+            }
+        }
+
         self.idp3Folder = "/opt/shibboleth-idp"
         self.idp3MetadataFolder = "/opt/shibboleth-idp/metadata"
         self.idp3LogsFolder = "/opt/shibboleth-idp/logs"
@@ -625,15 +649,6 @@ class Setup(object):
 
         return inFilePathText
 
-    def commentOutText(self, text):
-        textLines = text.split('\n')
-
-        lines = []
-        for textLines in textLines:
-            lines.append('#%s' % textLines)
-    
-        return "\n".join(lines)
-
     def writeFile(self, outFilePath, text):
         inFilePathText = None
 
@@ -647,6 +662,33 @@ class Setup(object):
 
         return inFilePathText
 
+    def commentOutText(self, text):
+        textLines = text.split('\n')
+
+        lines = []
+        for textLine in textLines:
+            lines.append('#%s' % textLine)
+    
+        return "\n".join(lines)
+
+    def replaceInText(self, text, pattern, update):
+        return re.sub(pattern, update, text, flags=re.DOTALL | re.M)
+
+    def applyChangesInFiles(self, changes):
+        self.logIt("Applying changes to %s files..." % changes['name'])
+        for change in changes['files']:
+            file = change['path']
+
+            text = self.readFile(file)
+            file_backup = '%s.bak' % file
+            self.writeFile(file_backup, text)
+            self.logIt("Created backup of %s file %s..." % (changes['name'], file_backup))
+
+            for replace in change['replace']:
+                text = self.replaceInText(text, replace['pattern'], replace['update'])
+            
+            self.writeFile(file, text)
+            self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
 
     def copyFile(self, inFile, destFolder):
         try:
@@ -947,6 +989,8 @@ class Setup(object):
 
         self.run([self.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
+
+        self.applyChangesInFiles(self.app_custom_changes['jetty'])
 
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyDestinationPath])
         self.run([self.cmd_chown, '-h', 'jetty:jetty', self.jetty_home])
