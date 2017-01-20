@@ -52,6 +52,7 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 /**
@@ -104,7 +105,7 @@ public class AuthenticationFilter extends AbstractFilter {
                 try {
                     final String requestUrl = httpRequest.getRequestURL().toString();
 					log.trace("Get request to: '{0}'", requestUrl);
-                    if (requestUrl.equals(appConfiguration.getTokenEndpoint())) {
+                    if (requestUrl.endsWith("/token") && ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) {
                     	log.debug("Starting token endpoint authentication");
                         if (httpRequest.getParameter("client_assertion") != null
                                 && httpRequest.getParameter("client_assertion_type") != null) {
