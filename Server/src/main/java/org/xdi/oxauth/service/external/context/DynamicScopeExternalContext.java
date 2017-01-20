@@ -11,6 +11,7 @@ import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,7 +34,22 @@ public class DynamicScopeExternalContext extends ExternalScriptContext {
     	this.authorizationGrant = authorizationGrant;
     }
 
-	public List<Scope> getDynamicScopes() {
+	/**
+	 * This method is used by scripts.
+	 * @return dynamic scopes as string
+	 *
+	 */
+	public List<String> getDynamicScopes() {
+		List<String> scopes = new ArrayList<String>();
+		if (dynamicScopes != null) {
+			for (Scope scope : dynamicScopes) {
+				scopes.add(scope.getDisplayName());
+			}
+		}
+		return scopes;
+	}
+
+	public List<Scope> getScopes() {
 		return dynamicScopes;
 	}
 
