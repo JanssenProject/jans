@@ -24,7 +24,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.2 NAME 'associatedPerson'
   DESC 'Reference the dn of a person.'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.3 NAME 'blowfishPassword'
   DESC 'Blowfish crypted text'
@@ -1122,7 +1122,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.186 NAME 'oxAuthUserDN'
   DESC 'oxAuth User DN'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.187 NAME 'oxAuthUserId'
   DESC 'oxAuth user id'
@@ -1351,7 +1351,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.225 NAME 'oxPolicyScriptDn'
   DESC 'OX policy script Dn'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.226 NAME 'oxProxConf'
   DESC 'oxProx Configuration'
@@ -1515,7 +1515,7 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.252 NAME 'oxScript' DESC 'Attribute that
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.253 NAME 'oxScriptDn' DESC 'Script object DN'
   SUBSTR caseIgnoreSubstringsMatch
   EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
   X-ORIGIN 'Gluu created attribute' )
 attributeTypes: ( 1.3.6.1.4.1.48710.1.3.254 NAME 'oxScriptType'
   DESC 'Attribute that contains script type (e.g. python, java script)'
