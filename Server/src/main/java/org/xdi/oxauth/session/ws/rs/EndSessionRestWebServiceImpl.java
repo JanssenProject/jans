@@ -6,7 +6,14 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import com.google.common.collect.Sets;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
@@ -26,27 +33,17 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionParamsValidator;
-import org.xdi.oxauth.model.session.EndSessionResponseParam;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.SessionStateService;
-import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
-import org.xdi.oxauth.util.RedirectUri;
-import org.xdi.oxauth.util.RedirectUtil;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 /**
  * @author Javier Rojas Blum
@@ -56,8 +53,6 @@ import java.util.Set;
  */
 @Name("endSessionRestWebService")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
-
-    private static final boolean HTTP_BASED = true; // for now always true but maybe we will want to make is configurable?
 
     @Logger
     private Log log;
@@ -99,11 +94,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         auditLogging(httpRequest, pair);
 
-        if (HTTP_BASED) {
-            return httpBased(postLogoutRedirectUri, state, pair);
-        } else {
-            return simpleLogout(postLogoutRedirectUri, state, httpRequest, pair);
-        }
+        return httpBased(postLogoutRedirectUri, state, pair);
     }
 
 
@@ -124,29 +115,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 cacheControl(ServerUtil.cacheControl(true, true)).
                 header("Pragma", "no-cache").
                 type(MediaType.TEXT_HTML_TYPE).entity(html).
-                build();
-    }
-
-    private Response simpleLogout(String postLogoutRedirectUri, String state, HttpServletRequest httpRequest, Pair<SessionState, AuthorizationGrant> pair) {
-        if (!Util.isNullOrEmpty(postLogoutRedirectUri)) {
-
-            // Validate redirectUri
-            String redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
-
-            if (StringUtils.isNotBlank(redirectUri)) {
-                RedirectUri redirectUriResponse = new RedirectUri(redirectUri);
-                if (StringUtils.isNotBlank(state)) {
-                    redirectUriResponse.addResponseParameter(EndSessionResponseParam.STATE, state);
-                }
-
-                return RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest).build();
-            } else {
-                errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
-            }
-        }
-        return Response.ok().
-                cacheControl(ServerUtil.cacheControl(true, true)).
-                header("Pragma", "no-cache").
                 build();
     }
 
