@@ -23,6 +23,7 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.util.ArrayHelper;
+import org.xdi.util.StringHelper;
 import org.xdi.util.Util;
 
 import javax.faces.context.ExternalContext;
@@ -222,6 +223,17 @@ public class ServerUtil {
         if (request == null || !(request instanceof HttpServletRequest))
             return null;
         return (HttpServletRequest) request;
+    }
+
+    public static boolean isSameRequestPath(String url1, String url2) throws MalformedURLException {
+    	if ((url1 == null) || (url2 == null)) {
+    		return false;
+    	}
+    	
+    	URL parsedUrl1 = new URL(url1);
+    	URL parsedUrl2 = new URL(url2);
+    	
+    	return StringHelper.equals(parsedUrl1.getPath(), parsedUrl2.getPath());
     }
 
 }
