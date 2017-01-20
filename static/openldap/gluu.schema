@@ -28,7 +28,7 @@ attributetype ( oxAttribute:2 NAME 'associatedPerson'
 	DESC 'Reference the dn of a person.'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:3 NAME 'blowfishPassword'
@@ -1310,7 +1310,7 @@ attributetype ( oxAttribute:186 NAME 'oxAuthUserDN'
 	DESC 'oxAuth User DN'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:187 NAME 'oxAuthUserId'
@@ -1578,7 +1578,7 @@ attributetype ( oxAttribute:225 NAME 'oxPolicyScriptDn'
 	DESC 'OX policy script Dn'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:226 NAME 'oxProxConf'
@@ -1770,7 +1770,7 @@ attributetype ( oxAttribute:252 NAME 'oxScript' DESC 'Attribute that contains sc
 attributetype ( oxAttribute:253 NAME 'oxScriptDn' DESC 'Script object DN'
 	SUBSTR caseIgnoreSubstringsMatch
 	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:254 NAME 'oxScriptType'
