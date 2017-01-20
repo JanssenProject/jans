@@ -62,7 +62,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version January 20, 2016
  */
 public abstract class BaseTest {
 
@@ -282,7 +282,7 @@ public abstract class BaseTest {
         driver.navigate().to(authorizationRequestUrl);
 
         if (userSecret != null) {
-            if (userId != null && userSecret != null) {
+            if (userId != null) {
                 WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
                 usernameElement.sendKeys(userId);
             }
@@ -460,6 +460,73 @@ public abstract class BaseTest {
             sessionState = sessionStateCookie.getValue();
         }
         System.out.println("authorizationRequestAndDenyAccess: sessionState:" + sessionState);
+
+        stopSelenium();
+
+        AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
+        if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
+            authorizationResponse.setResponseMode(ResponseMode.FORM_POST);
+        }
+        authorizeClient.setResponse(authorizationResponse);
+        showClientUserAgent(authorizeClient);
+
+        return authorizationResponse;
+    }
+
+    /**
+     * The authorization server authenticates the resource owner (via the user-agent)
+     * No authorization page.
+     */
+    public AuthorizationResponse authenticateResourceOwner(
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
+        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
+        authorizeClient.setRequest(authorizationRequest);
+
+        System.out.println("authenticateResourceOwner: authorizationRequestUrl:" + authorizationRequestUrl);
+        startSelenium();
+        if (cleanupCookies) {
+            System.out.println("authenticateResourceOwner: Cleaning cookies");
+            deleteAllCookies();
+        }
+        driver.navigate().to(authorizationRequestUrl);
+
+        if (userSecret != null) {
+            if (userId != null) {
+                WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
+                usernameElement.sendKeys(userId);
+            }
+
+            WebElement passwordElement = driver.findElement(By.name(loginFormPassword));
+            passwordElement.sendKeys(userSecret);
+
+            WebElement loginButton = driver.findElement(By.name(loginFormLoginButton));
+
+            loginButton.click();
+        }
+
+        String authorizationResponseStr = driver.getCurrentUrl();
+
+        /*WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
+
+        final String previousURL = driver.getCurrentUrl();
+        allowButton.click();
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(WebDriver d) {
+                return (d.getCurrentUrl() != previousURL);
+            }
+        });
+
+        authorizationResponseStr = driver.getCurrentUrl();*/
+
+        Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
+        String sessionState = null;
+        if (sessionStateCookie != null) {
+            sessionState = sessionStateCookie.getValue();
+        }
+        System.out.println("authenticateResourceOwner: sessionState:" + sessionState);
 
         stopSelenium();
 
