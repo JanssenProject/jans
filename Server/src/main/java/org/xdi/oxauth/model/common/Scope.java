@@ -6,13 +6,14 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
@@ -49,6 +50,9 @@ public class Scope implements Serializable {
 
     @LdapAttribute(name = "oxAuthGroupClaims")
     private String oxAuthGroupClaims;
+
+    @LdapAttribute(name = "oxScriptDn")
+    private List<String> dynamicScopeScripts;
 
     public String getDn() {
         return dn;
@@ -136,6 +140,14 @@ public class Scope implements Serializable {
         }
         this.isGroupClaims = false;
         return this.isGroupClaims;
+    }
+
+    public List<String> getDynamicScopeScripts() {
+		return dynamicScopeScripts;
+	}
+
+	public void setDynamicScopeScripts(List<String> dynamicScopeScripts) {
+        this.dynamicScopeScripts = dynamicScopeScripts;
     }
 
     @Override
