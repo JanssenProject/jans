@@ -99,13 +99,15 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
 
     public Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionState, AuthorizationGrant> pair) {
+        SessionState sessionState = pair.getFirst();
+        AuthorizationGrant authorizationGrant = pair.getSecond();
 
         // Validate redirectUri
         String redirectUri;
-        if (pair.getSecond() == null) {
-        	redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getFirst(), postLogoutRedirectUri);
+        if (authorizationGrant == null) {
+        	redirectUri = redirectionUriService.validatePostLogoutRedirectUri(sessionState, postLogoutRedirectUri);
         } else {
-        	redirectUri = redirectionUriService.validatePostLogoutRedirectUri(pair.getSecond().getClient().getClientId(), postLogoutRedirectUri);
+        	redirectUri = redirectionUriService.validatePostLogoutRedirectUri(authorizationGrant.getClient().getClientId(), postLogoutRedirectUri);
         }
 
         final Set<String> frontchannelLogoutUris = getRpFrontchannelLogoutUris(pair);
@@ -280,7 +282,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 	        oAuth2AuditLog.setScope(StringUtils.join(authorizationGrant.getScopes(), " "));
 	        oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
         } else {
-	        oAuth2AuditLog.setClientId(sessionState.getInvolvedClients().getClientIds(true).toString());
+	        oAuth2AuditLog.setClientId(sessionState.getPermissionGrantedMap().getClientIds(true).toString());
 	        oAuth2AuditLog.setScope(sessionState.getSessionAttributes().get(AuthorizeRequestParam.SCOPE));
 	        oAuth2AuditLog.setUsername(sessionState.getUserDn());
         }
