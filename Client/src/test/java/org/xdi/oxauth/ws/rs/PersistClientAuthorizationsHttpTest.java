@@ -26,7 +26,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version January 20, 2017
  */
 public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
@@ -63,6 +63,8 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         String sessionState = null;
         {
             // 2. Request authorization
+            // Scopes: openid, profile
+            // Authenticate user with login password then authorize.
             List<String> scopes = Arrays.asList("openid", "profile");
             String nonce = UUID.randomUUID().toString();
             String state = UUID.randomUUID().toString();
@@ -104,15 +106,17 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
         {
             // 4. Request authorization
-            List<String> scopes = Arrays.asList("openid", "address", "email");
+            // Scopes: openid, profile
+            // Authenticate user with login password, do not show authorize page because those scopes are already authorized.
+            List<String> scopes = Arrays.asList("openid", "profile");
             String nonce = UUID.randomUUID().toString();
             String state = UUID.randomUUID().toString();
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
 
-            AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                    authorizationEndpoint, authorizationRequest, userId, userSecret);
+            AuthorizationResponse authorizationResponse = authenticateResourceOwner(
+                    authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
             assertNotNull(authorizationResponse.getLocation());
             assertNotNull(authorizationResponse.getCode());
@@ -144,6 +148,94 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
         {
             // 6. Request authorization
+            // Scopes: openid, address, email
+            // Authenticate user with login password then authorize.
+            // It shows authorize page because those scopes are not yet authorized.
+            List<String> scopes = Arrays.asList("openid", "address", "email");
+            String nonce = UUID.randomUUID().toString();
+            String state = UUID.randomUUID().toString();
+
+            AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+            authorizationRequest.setState(state);
+
+            AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                    authorizationEndpoint, authorizationRequest, userId, userSecret, false);
+
+            assertNotNull(authorizationResponse.getLocation());
+            assertNotNull(authorizationResponse.getCode());
+            assertNotNull(authorizationResponse.getIdToken());
+            assertNotNull(authorizationResponse.getState());
+
+            String authorizationCode = authorizationResponse.getCode();
+
+            // 7. Request access token using the authorization code.
+            TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+            tokenRequest.setCode(authorizationCode);
+            tokenRequest.setRedirectUri(redirectUri);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setAuthPassword(clientSecret);
+            tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+
+            TokenClient tokenClient = new TokenClient(tokenEndpoint);
+            tokenClient.setRequest(tokenRequest);
+            TokenResponse tokenResponse = tokenClient.exec();
+
+            showClient(tokenClient);
+            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+            assertNotNull(tokenResponse.getEntity());
+            assertNotNull(tokenResponse.getAccessToken());
+            assertNotNull(tokenResponse.getExpiresIn());
+            assertNotNull(tokenResponse.getTokenType());
+            assertNotNull(tokenResponse.getRefreshToken());
+        }
+
+        {
+            // 8. Request authorization
+            // Scopes: openid, profile, address, email
+            // Authenticate user with login password, do not show authorize page because those scopes are already authorized.
+            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+            String nonce = UUID.randomUUID().toString();
+            String state = UUID.randomUUID().toString();
+
+            AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+            authorizationRequest.setState(state);
+
+            AuthorizationResponse authorizationResponse = authenticateResourceOwner(
+                    authorizationEndpoint, authorizationRequest, userId, userSecret, false);
+
+            assertNotNull(authorizationResponse.getLocation());
+            assertNotNull(authorizationResponse.getCode());
+            assertNotNull(authorizationResponse.getIdToken());
+            assertNotNull(authorizationResponse.getState());
+
+            String authorizationCode = authorizationResponse.getCode();
+
+            // 9. Request access token using the authorization code.
+            TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+            tokenRequest.setCode(authorizationCode);
+            tokenRequest.setRedirectUri(redirectUri);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setAuthPassword(clientSecret);
+            tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+
+            TokenClient tokenClient = new TokenClient(tokenEndpoint);
+            tokenClient.setRequest(tokenRequest);
+            TokenResponse tokenResponse = tokenClient.exec();
+
+            showClient(tokenClient);
+            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+            assertNotNull(tokenResponse.getEntity());
+            assertNotNull(tokenResponse.getAccessToken());
+            assertNotNull(tokenResponse.getExpiresIn());
+            assertNotNull(tokenResponse.getTokenType());
+            assertNotNull(tokenResponse.getRefreshToken());
+        }
+
+        {
+            // 10. Request authorization
+            // Scopes: openid, profile, address, email
+            // Do not show authenticate page because we are including the session_state in the authorization request and the session is already authenticated.
+            // Do not show authorize page because those scopes are already authorized.
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
             String state = UUID.randomUUID().toString();
@@ -165,7 +257,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
             String authorizationCode = authorizationResponse.getCode();
 
-            // 7. Get Access Token
+            // 11. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(authorizationCode);
             tokenRequest.setRedirectUri(redirectUri);
@@ -185,5 +277,77 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             assertNotNull(tokenResponse.getTokenType(), "The token type is null");
             assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
         }
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void doNotPersistAuthorizationWhenPreAuthorized(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("doNotPersistAuthorizationWhenPreAuthorized");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request authorization
+        // Scopes: openid, profile
+        // Authenticate user with login password, do not show authorize page because the client is pre-authorized.
+        List<String> scopes = Arrays.asList("openid", "profile");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwner(
+                authorizationEndpoint, authorizationRequest, userId, userSecret, false);
+
+        assertNotNull(authorizationResponse.getLocation());
+        assertNotNull(authorizationResponse.getCode());
+        assertNotNull(authorizationResponse.getIdToken());
+        assertNotNull(authorizationResponse.getState());
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 3. Request access token using the authorization code.
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity());
+        assertNotNull(tokenResponse.getAccessToken());
+        assertNotNull(tokenResponse.getExpiresIn());
+        assertNotNull(tokenResponse.getTokenType());
+        assertNotNull(tokenResponse.getRefreshToken());
     }
 }

@@ -51,7 +51,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 14, 2016
+ * @version January 20, 2017
  */
 @Name("authorizeAction")
 @Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
@@ -640,7 +640,15 @@ public class AuthorizeAction {
             }
             final Client client = clientService.getClient(clientId);
 
-            if (client.getPersistClientAuthorizations()) {
+            if (scope == null) {
+                scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
+            }
+
+            // oxAuth #441 Pre-Authorization + Persist Authorizations... don't write anything
+            // If a client has pre-authorization=true, there is no point to create the entry under
+            // ou=clientAuthorizations it will negatively impact performance, grow the size of the
+            // ldap database, and serve no purpose.
+            if (client.getPersistClientAuthorizations() && !client.getTrustedClient()) {
                 final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
                 clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
             }
