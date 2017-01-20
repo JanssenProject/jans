@@ -68,6 +68,7 @@ public class LogoutAction {
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
+	private SessionState sessionState;
 
 
     public String getIdTokenHint() {
@@ -120,6 +121,10 @@ public class LogoutAction {
             sb.append(EndSessionRequestParam.ID_TOKEN_HINT + "=").append(idTokenHint);
         }
 
+        if (sessionState != null && !postLogoutRedirectUri.isEmpty()) {
+            sb.append("&"+EndSessionRequestParam.SESSION_STATE+"=").append(sessionState.getId());
+        }
+
         if (postLogoutRedirectUri != null && !postLogoutRedirectUri.isEmpty()) {
             sb.append("&"+EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI+"=").append(postLogoutRedirectUri);
         }
@@ -128,7 +133,7 @@ public class LogoutAction {
     }
 
 	private boolean validateParameters() {
-		return StringHelper.isNotEmpty(idTokenHint) && StringHelper.isNotEmpty(postLogoutRedirectUri);
+		return (StringHelper.isNotEmpty(idTokenHint) || (sessionState != null)) && StringHelper.isNotEmpty(postLogoutRedirectUri);
 	}
 
 	private ExternalLogoutResult processExternalAuthenticatorLogOut(SessionState sessionState) {
@@ -219,6 +224,7 @@ public class LogoutAction {
 			return false;
 		}
 
+		this.sessionState = sessionState;
 		Map<String, String> sessionAttributes = sessionState.getSessionAttributes(); 
 
 		boolean restoreParameters = sessionAttributes.containsKey(EXTERNAL_LOGOUT);
