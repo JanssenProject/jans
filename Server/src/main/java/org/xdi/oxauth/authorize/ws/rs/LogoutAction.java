@@ -144,11 +144,16 @@ public class LogoutAction {
         		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
         	}
         }
-		if (authorizationGrant == null) {
+		if ((authorizationGrant == null) && (sessionState == null)) {
 			return ExternalLogoutResult.FAILURE;
 		}
 
-		String acrValues = authorizationGrant.getAcrValues();
+		String acrValues;
+		if (authorizationGrant == null) {
+			acrValues = sessionStateService.getAcr(sessionState);
+		} else {
+			acrValues = authorizationGrant.getAcrValues();
+		}
 
 		boolean isExternalAuthenticatorLogoutPresent = StringHelper.isNotEmpty(acrValues);
 		if (isExternalAuthenticatorLogoutPresent) {
@@ -159,25 +164,19 @@ public class LogoutAction {
 				log.error("Failed to get ExternalAuthenticatorConfiguration. acr_values: {0}", acrValues);
 				return ExternalLogoutResult.FAILURE;
 			} else {
-				String userId = authorizationGrant.getUser().getUserId();
 				boolean scriptExternalLogoutResult = externalAuthenticationService.executeExternalLogout(customScriptConfiguration, null);
 				ExternalLogoutResult externalLogoutResult = scriptExternalLogoutResult ? ExternalLogoutResult.SUCCESS : ExternalLogoutResult.FAILURE;
-				log.debug("Logout result is '{0}' for user '{1}'", externalLogoutResult, userId);
+				log.debug("Logout result is '{0}' for session '{1}', userDn: '{2}'", externalLogoutResult, sessionState.getId(), sessionState.getUserDn());					
 
 				int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
 	            if (apiVersion < 3) {
 	            	// Not support redirect to external system at logout
 					return externalLogoutResult;
 	            }
-
-				if (sessionState == null) {
-					log.warn("Session was expired. Redirect to external URL is not possible.");
-					return ExternalLogoutResult.FAILURE;
-				}
 	            	
             	log.trace("According to API version script supports logout redirects");
             	String logoutExternalUrl = externalAuthenticationService.getLogoutExternalUrl(customScriptConfiguration, null);
-				log.debug("External logout result is '{0}' for user '{1}'", logoutExternalUrl, userId);
+            	log.debug("External logout result is '{0}' for user '{1}'", logoutExternalUrl, sessionState.getUserDn());
 				
 				if (StringHelper.isEmpty(logoutExternalUrl)) {
 					return externalLogoutResult;
