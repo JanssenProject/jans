@@ -36,7 +36,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
     public void requestEndSession(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String postLogoutRedirectUri, final String logoutUri, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestEndSession");
+        showTitle("requestEndSession by id_token");
 
         // 1. OpenID Connect Dynamic Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -127,7 +127,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
     public void requestEndSessionWithSessionState(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String postLogoutRedirectUri, final String logoutUri, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestEndSession");
+        showTitle("requestEndSession by session_state");
 
         // 1. OpenID Connect Dynamic Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
