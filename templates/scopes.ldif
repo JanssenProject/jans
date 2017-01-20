@@ -135,3 +135,4 @@ displayName: permission
 inum: %(inumOrg)s!0009!C4F5.F66C
 oxAuthClaim: inum=%(inumOrg)s!0005!6049,ou=attributes,o=%(inumOrg)s,o=gluu
 oxScopeType: dynamic
+oxScriptDn: inum=%(inumOrg)s!CB5B.3211,ou=scripts,o=%(inumOrg)s,o=gluu
