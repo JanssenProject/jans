@@ -219,11 +219,11 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Claims
-        List<String> dynamicScopes = new ArrayList<String>();
+        List<Scope> dynamicScopes = new ArrayList<Scope>();
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeByDisplayName(scopeName);
             if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-                dynamicScopes.add(scope.getDisplayName());
+                dynamicScopes.add(scope);
                 continue;
             }
 
@@ -329,11 +329,11 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
-        List<String> dynamicScopes = new ArrayList<String>();
+        List<Scope> dynamicScopes = new ArrayList<Scope>();
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeByDisplayName(scopeName);
             if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
-                dynamicScopes.add(scope.getDisplayName());
+                dynamicScopes.add(scope);
                 continue;
             }
 
@@ -460,11 +460,11 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         JsonWebResponse jsonWebResponse = new JsonWebResponse();
 
         // Claims
-        List<String> dynamicScopes = new ArrayList<String>();
+        List<Scope> dynamicScopes = new ArrayList<Scope>();
         for (String scopeName : scopes) {
             org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
             if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
-                dynamicScopes.add(scope.getDisplayName());
+                dynamicScopes.add(scope);
                 continue;
             }
 

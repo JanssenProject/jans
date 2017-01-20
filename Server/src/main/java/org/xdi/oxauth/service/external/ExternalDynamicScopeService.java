@@ -6,9 +6,7 @@
 
 package org.xdi.oxauth.service.external;
 
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Sets;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
@@ -19,11 +17,12 @@ import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.scope.DynamicScopeType;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.jwe.Jwe;
-import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.service.custom.script.ExternalScriptService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Provides factory methods needed to create dynamic scope extension
@@ -55,9 +54,27 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 		return false;
 	}
 
+	private Set<CustomScriptConfiguration> getScriptsToExecute(DynamicScopeExternalContext context) {
+        Set<String> allowedScripts = Sets.newHashSet();
+		for (org.xdi.oxauth.model.common.Scope scope : context.getScopes()) {
+			List<String> scopeScripts = scope.getDynamicScopeScripts();
+			if (scopeScripts != null) { 
+				allowedScripts.addAll(scopeScripts);
+			}
+		}
+
+		Set<CustomScriptConfiguration> result = Sets.newHashSet();
+		for (CustomScriptConfiguration script : this.customScriptConfigurations) {
+			if (allowedScripts.contains(script.getCustomScript().getDn())) {
+				result.add(script);
+			}
+		}
+		return result;
+	}
+
 	public boolean executeExternalUpdateMethods(DynamicScopeExternalContext dynamicScopeContext) {
 		boolean result = true;
-		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+		for (CustomScriptConfiguration customScriptConfiguration : getScriptsToExecute(dynamicScopeContext)) {
 			result &= executeExternalUpdateMethod(customScriptConfiguration, dynamicScopeContext);
 			if (!result) {
 				return result;
