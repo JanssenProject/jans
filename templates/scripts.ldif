@@ -378,7 +378,7 @@ dn: inum=%(inumOrg)s!0011!031C.5621,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for org_name
-displayName: dynamic_scope
+displayName: org_name
 gluuStatus: false
 inum: %(inumOrg)s!0011!031C.5621
 oxLevel: 100
@@ -407,7 +407,7 @@ dn: inum=%(inumOrg)s!0011!031C.5622,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Dynamic Scope script for work_phone
-displayName: dynamic_scope
+displayName: work_phone
 gluuStatus: false
 inum: %(inumOrg)s!0011!031C.5622
 oxLevel: 100
