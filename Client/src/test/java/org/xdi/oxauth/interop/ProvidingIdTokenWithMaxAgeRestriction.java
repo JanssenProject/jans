@@ -35,7 +35,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Providing ID Token with max age Restriction
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version January 20, 2017
  */
 public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
@@ -300,8 +300,8 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             String authJwt = jwtAuthorizationRequest.getEncodedJwt();
             authorizationRequest.setRequest(authJwt);
 
-            AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                    authorizationEndpoint, authorizationRequest, userId, userSecret);
+            AuthorizationResponse authorizationResponse = authenticateResourceOwner(
+                    authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
             assertNotNull(authorizationResponse.getLocation());
             assertNotNull(authorizationResponse.getCode());

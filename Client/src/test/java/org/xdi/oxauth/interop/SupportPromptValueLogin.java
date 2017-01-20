@@ -28,7 +28,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Support prompt value login
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version January 20, 2017
  */
 public class SupportPromptValueLogin extends BaseTest {
 
@@ -115,8 +115,8 @@ public class SupportPromptValueLogin extends BaseTest {
             authorizationRequest.getPrompts().add(Prompt.LOGIN);
             authorizationRequest.setSessionState(sessionState);
 
-            AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                    authorizationEndpoint, authorizationRequest, userId, userSecret);
+            AuthorizationResponse authorizationResponse = authenticateResourceOwner(
+                    authorizationEndpoint, authorizationRequest, userId, userSecret, false);
 
             assertNotNull(authorizationResponse.getLocation());
             assertNotNull(authorizationResponse.getCode());
