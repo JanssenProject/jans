@@ -26,8 +26,7 @@ attributetype ( oxAttribute:1 NAME ( 'oxAssociatedClient' 'associatedClient' )
 
 attributetype ( oxAttribute:2 NAME 'associatedPerson'
 	DESC 'Reference the dn of a person.'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
+	EQUALITY distinguishedNameMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
@@ -1308,8 +1307,7 @@ attributetype ( oxAttribute:185 NAME 'oxAuthUmaScope'
 
 attributetype ( oxAttribute:186 NAME 'oxAuthUserDN'
 	DESC 'oxAuth User DN'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
+	EQUALITY distinguishedNameMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
@@ -1576,8 +1574,7 @@ attributetype ( oxAttribute:224 NAME 'oxPolicyRule'
 
 attributetype ( oxAttribute:225 NAME 'oxPolicyScriptDn'
 	DESC 'OX policy script Dn'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
+	EQUALITY distinguishedNameMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
@@ -1768,8 +1765,7 @@ attributetype ( oxAttribute:252 NAME 'oxScript' DESC 'Attribute that contains sc
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:253 NAME 'oxScriptDn' DESC 'Script object DN'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
+	EQUALITY distinguishedNameMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
