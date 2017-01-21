@@ -58,6 +58,7 @@ class Migration(object):
         logging.info("Starting migration.")
         self.backupDir = backup
         self.ldifDir = os.path.join(backup, 'ldif')
+        self.certsDir = os.path.join(backup, 'etc')
         self.currentDir = os.path.dirname(os.path.realpath(__file__))
         self.workingDir = os.path.join(self.currentDir, 'migration')
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
@@ -85,10 +86,24 @@ class Migration(object):
             inFilePathText = f.read()
             f.close
         except:
-            logging.warning("Error reading %s" % inFilePathText)
+            logging.warning("Error reading %s", inFilePath)
             logging.debug(traceback.format_exc())
 
         return inFilePathText
+
+    def walk_function(self, a, directory, files):
+        for f in files:
+            fn = "%s/%s" % (directory, f)
+            targetFn = fn.replace(self.backupDir, '')
+            if os.path.isdir(fn):
+                if not os.path.exists(targetFn):
+                    os.mkdir(targetFn)
+            else:
+                try:
+                    logging.debug("copying %s", targetFn)
+                    shutil.copyfile(fn, targetFn)
+                except:
+                    logging.error("Error copying %s", targetFn)
 
     def detect_os_type(self):
         distro_info = self.readFile('/etc/redhat-release')
@@ -132,6 +147,10 @@ class Migration(object):
             logging.error("Error running command : %s" % " ".join(args))
             logging.error(traceback.format_exc())
             sys.exit(1)
+
+    def copyCertificates(self):
+        logging.info("Copying the Certificates.")
+        os.path.walk("%s/etc" % self.backupDir, self.walk_function, None)
 
     def stopSolserver(self):
         logging.info("Stopping OpenLDAP Server.")
@@ -289,6 +308,7 @@ class Migration(object):
     def migrate(self):
         """Main function for the migration of backup data
         """
+        self.copyCertificates()
         self.verifyBackupData()
         self.setupWorkDirectory()
         self.stopSolserver()
