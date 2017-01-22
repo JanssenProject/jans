@@ -81,6 +81,8 @@ class Migration(object):
         self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
         self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
         self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
+        self.attrs = 1000
+        self.objclasses = 1000
 
     def readFile(self, inFilePath):
         inFilePathText = None
@@ -261,7 +263,8 @@ class Migration(object):
         schema_100 = os.path.join(sloc, '100-user.ldif')
 
         new_user = os.path.join(self.workingDir, 'new_99.ldif')
-        outfile = open(os.path.join(self.workingDir, 'user.schema'), 'w')
+        user_file = os.path.join(self.workingDir, 'user.schema')
+        outfile = open(user_file, 'w')
         output = ""
 
         if os.path.isfile(schema_99):
@@ -275,7 +278,7 @@ class Migration(object):
 
         outfile.write(output)
         outfile.close()
-        shutil.copyFile(outfile, '/opt/gluu/schema/openldap/user.schema')
+        shutil.copyfile(user_file, '/opt/gluu/schema/openldap/user.schema')
 
     def getEntry(self, fn, dn):
         parser = MyLDIF(open(fn, 'rb'), sys.stdout)
