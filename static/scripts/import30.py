@@ -70,6 +70,9 @@ class Migration(object):
         self.slapdConf = "/opt/symas/etc/openldap/slapd.conf"
         self.slapcat = "/opt/symas/bin/slapcat"
         self.slapadd = "/opt/symas/bin/slapadd"
+        self.keytool = "/opt/jre/bin/keytool"
+        self.keystore = "/opt/jre/jre/lib/security/cacerts"
+        self.etc_hostname = "/etc/hostname"
 
         self.ldapDataFile = "/opt/gluu/data/data.mdb"
 
@@ -151,6 +154,30 @@ class Migration(object):
     def copyCertificates(self):
         logging.info("Copying the Certificates.")
         os.path.walk("%s/etc" % self.backupDir, self.walk_function, None)
+
+        logging.info("Updating the CA Certs Keystore.")
+        keys = ['httpd', 'idp-signing', 'idp-encryption', 'shibidp', 'asimba',
+                'openldap']
+        hostname = self.readFile(self.etc_hostname).strip()
+        # import all the keys into the keystore
+        for key in keys:
+            alias = "{0}_{1}".format(hostname, key)
+            filename = "/etc/certs/{0}.crt".format(key)
+            if not os.path.isfile(filename):
+                continue  # skip the non-existant certs
+
+            logging.debug('Deleting new %s', alias)
+            result = self.getOutput(
+                [self.keytool, '-delete', '-alias', alias, '-keystore',
+                 self.key_store, '-storepass', 'changeit', '-noprompt'])
+            logging.error(result) if 'error' in result else logging.debug('Delete operation success.')
+
+            logging.debug('Importing old %s', alias)
+            result = self.getOutput(
+                [self.keytool, '-import', '-trustcacerts', '-file', filename,
+                 '-alias', alias, '-keystore', self.key_store, '-storepass',
+                 'changeit', '-noprompt'])
+            logging.error(result) if 'error' in result else logging.debug('Certificate import success.')
 
     def stopSolserver(self):
         logging.info("Stopping OpenLDAP Server.")
