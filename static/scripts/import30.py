@@ -5,6 +5,7 @@ import logging
 import traceback
 import shutil
 import json
+import re
 
 from ldif import LDIFParser, LDIFWriter
 from jsonmerge import merge
@@ -207,6 +208,75 @@ class Migration(object):
                                  '-l', self.currentData])
         logging.debug(output)
 
+    def convertSchema(self, f):
+        infile = open(f, 'r')
+        output = ""
+
+        for line in infile:
+            if re.match('^dn:', line) or re.match('^objectClass:', line) or \
+                    re.match('^cn:', line):
+                continue
+            # empty lines and the comments are copied as such
+            if re.match('^#', line) or re.match('^\s*$', line):
+                pass
+            elif re.match('^\s\s', line):  # change the space indendation to tabs
+                line = re.sub('^\s\s', '\t', line)
+            elif re.match('^\s', line):
+                line = re.sub('^\s', '\t', line)
+            # Change the keyword for attributetype
+            elif re.match('^attributeTypes:\s', line, re.IGNORECASE):
+                line = re.sub('^attributeTypes:', '\nattributetype', line, 1,
+                              re.IGNORECASE)
+                oid = 'oxAttribute:' + str(self.attrs+1)
+                line = re.sub('\s[\d]+\s', ' '+oid+' ', line, 1, re.IGNORECASE)
+                self.attrs += 1
+            # Change the keyword for objectclass
+            elif re.match('^objectClasses:\s', line, re.IGNORECASE):
+                line = re.sub('^objectClasses:', '\nobjectclass', line, 1,
+                              re.IGNORECASE)
+                oid = 'oxObjectClass:' + str(self.objclasses+1)
+                line = re.sub('ox-[\w]+-oid', oid, line, 1, re.IGNORECASE)
+                self.objclasses += 1
+            else:
+                logging.warning("Skipping Line: {}".format(line.strip()))
+                line = ""
+
+            output += line
+
+        infile.close()
+        return output
+
+    def updateUserSchema(self, infile, outfile):
+        with open(infile, 'r') as olduser:
+            with open(outfile, 'w') as newuser:
+                for line in olduser:
+                    if 'SUP top' in line:
+                        line = line.replace('SUP top', 'SUP gluuPerson')
+                    newuser.write(line)
+
+    def copyCustomSchema(self):
+        logging.info("Converting Schema files of custom attributes.")
+        sloc = os.path.join(self.backupDir, 'opt', 'opendj', 'config', 'schema')
+        schema_99 = os.path.join(sloc, '99-user.ldif')
+        schema_100 = os.path.join(sloc, '100-user.ldif')
+
+        new_user = os.path.join(self.workingDir, 'new_99.ldif')
+        outfile = open(os.path.join(self.workingDir, 'user.schema'), 'w')
+        output = ""
+
+        if os.path.isfile(schema_99):
+            output = self.convertSchema(schema_100)
+            self.updateUserSchema(schema_99, new_user)
+            output = output + "\n" + self.convertSchema(new_user)
+        else:
+            # If there is no 99-user file, then the schema def is in 100-user
+            self.updateUserSchema(schema_100, new_user)
+            output = self.convertSchema(new_user)
+
+        outfile.write(output)
+        outfile.close()
+        shutil.copyFile(outfile, '/opt/gluu/schema/openldap/user.schema')
+
     def getEntry(self, fn, dn):
         parser = MyLDIF(open(fn, 'rb'), sys.stdout)
         parser.targetDN = dn
@@ -335,10 +405,11 @@ class Migration(object):
     def migrate(self):
         """Main function for the migration of backup data
         """
-        self.copyCertificates()
         self.verifyBackupData()
+        self.copyCertificates()
         self.setupWorkDirectory()
         self.stopSolserver()
+        self.copyCustomSchema()
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
