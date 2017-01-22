@@ -71,7 +71,7 @@ class Migration(object):
         self.slapcat = "/opt/symas/bin/slapcat"
         self.slapadd = "/opt/symas/bin/slapadd"
         self.keytool = "/opt/jre/bin/keytool"
-        self.keystore = "/opt/jre/jre/lib/security/cacerts"
+        self.key_store = "/opt/jre/jre/lib/security/cacerts"
         self.etc_hostname = "/etc/hostname"
 
         self.ldapDataFile = "/opt/gluu/data/data.mdb"
