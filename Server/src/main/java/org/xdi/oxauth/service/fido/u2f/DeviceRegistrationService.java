@@ -19,8 +19,10 @@ import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
+import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import java.util.ArrayList;
@@ -203,6 +205,10 @@ public class DeviceRegistrationService {
 		}
 
 		return hash;
+    }
+
+    public static AuthenticationService instance() {
+        return ServerUtil.instance(DeviceRegistrationService.class);
     }
 
 }
