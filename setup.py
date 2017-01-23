@@ -2330,6 +2330,7 @@ class Setup(object):
             self.run(['/bin/hostname', self.hostname])
 
         self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
+        self.run(['/bin/chmod', '-R', '644', self.etc_hosts, self.etc_hostname])
 
     def install_openldap(self):
         self.logIt("Installing OpenLDAP from package")
