@@ -61,6 +61,7 @@ import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.service.custom.CustomScriptManagerMigrator;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
@@ -194,6 +195,7 @@ public class AppInitializer {
 		
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
 			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
+			Events.instance().raiseEvent(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
 		}
 
 		setDefaultAuthenticationMethod(localLdapEntryManager);
@@ -461,9 +463,7 @@ public class AppInitializer {
 		}
 
 		try {
-			if (configuration.getType().equalsIgnoreCase("ldap")) {
-				return mapOldLdapConfig(configuration);
-			} else if (configuration.getType().equalsIgnoreCase("auth")) {
+			if (configuration.getType().equalsIgnoreCase("auth")) {
 				return mapLdapConfig(configuration.getConfig());
 			}
 		} catch (Exception ex) {
@@ -483,27 +483,12 @@ public class AppInitializer {
 
 		for (oxIDPAuthConf ldapIdpAuthConfig : ldapIdpAuthConfigs) {
 			GluuLdapConfiguration ldapAuthConfig = loadLdapAuthConfig(ldapIdpAuthConfig);
-			if (ldapAuthConfig != null) {
+			if ((ldapAuthConfig != null) && ldapAuthConfig.isEnabled()) {
 				ldapAuthConfigs.add(ldapAuthConfig);
 			}
 		}
 		
 		return ldapAuthConfigs; 
-	}
-
-	@Deprecated
-	// Remove it after 2013/10/01
-	private GluuLdapConfiguration mapOldLdapConfig(oxIDPAuthConf oneConf) {
-		GluuLdapConfiguration ldapConfig = new GluuLdapConfiguration();
-		ldapConfig.setServers(Arrays.asList(
-				new SimpleProperty(oneConf.getFields().get(0).getValues().get(0) + ":" + oneConf.getFields().get(1).getValues().get(0))));
-		ldapConfig.setBindDN(oneConf.getFields().get(2).getValues().get(0));
-		ldapConfig.setBindPassword(oneConf.getFields().get(3).getValues().get(0));
-		ldapConfig.setUseSSL(Boolean.valueOf(oneConf.getFields().get(4).getValues().get(0)));
-		ldapConfig.setMaxConnections(3);
-		ldapConfig.setConfigId("auth_ldap_server");
-		ldapConfig.setEnabled(oneConf.getEnabled());
-		return ldapConfig;
 	}
 
 	private GluuLdapConfiguration mapLdapConfig(String config) throws Exception {
