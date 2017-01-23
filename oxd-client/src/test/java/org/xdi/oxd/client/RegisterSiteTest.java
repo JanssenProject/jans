@@ -131,15 +131,16 @@ public class RegisterSiteTest {
 
     public static RegisterSiteResponse registerSite(CommandClient client, String opHost, String redirectUrl, String postLogoutRedirectUrl, String logoutUri) {
 
-        final RegisterSiteParams commandParams = new RegisterSiteParams();
-        commandParams.setOpHost(opHost);
-        commandParams.setAuthorizationRedirectUri(redirectUrl);
-        commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        commandParams.setClientLogoutUri(Lists.newArrayList(logoutUri));
-        commandParams.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization"));
+        final RegisterSiteParams params = new RegisterSiteParams();
+        params.setOpHost(opHost);
+        params.setAuthorizationRedirectUri(redirectUrl);
+        params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
+        params.setClientLogoutUri(Lists.newArrayList(logoutUri));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization"));
+        params.setTrustedClient(true);
 
         final Command command = new Command(CommandType.REGISTER_SITE);
-        command.setParamsObject(commandParams);
+        command.setParamsObject(params);
 
         final RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
         assertNotNull(resp);
@@ -149,7 +150,7 @@ public class RegisterSiteTest {
 
     public static void main(String[] args) {
         Date date = new Date();
-        date.setTime( 1475178003981L);
+        date.setTime(1475178003981L);
         System.out.println(date);
     }
 
