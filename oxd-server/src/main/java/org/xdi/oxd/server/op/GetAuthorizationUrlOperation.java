@@ -3,6 +3,8 @@ package org.xdi.oxd.server.op;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
@@ -10,6 +12,7 @@ import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.SiteConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +22,7 @@ import java.util.List;
 
 public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorizationUrlParams> {
 
-//    private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GetAuthorizationUrlOperation.class);
 
     /**
      * Base constructor
@@ -66,6 +69,12 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     }
 
     private List<String> acrValues(SiteConfiguration site, GetAuthorizationUrlParams params) {
-        return params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : site.getAcrValues();
+        List<String> acrList = params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : site.getAcrValues();
+        if (acrList != null) {
+            return acrList;
+        } else {
+            LOG.error("acr value is null for site: " + site);
+            return new ArrayList<>();
+        }
     }
 }
