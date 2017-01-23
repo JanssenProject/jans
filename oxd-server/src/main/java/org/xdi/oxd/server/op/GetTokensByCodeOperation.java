@@ -12,7 +12,6 @@ import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -63,33 +62,43 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         ClientUtils.showClient(tokenClient);
 
         if (response.getStatus() == 200 || response.getStatus() == 302) { // success or redirect
-            if (Util.allNotBlank(response.getAccessToken())) {
-                final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
-                opResponse.setAccessToken(response.getAccessToken());
-                opResponse.setIdToken(response.getIdToken());
-                opResponse.setRefreshToken(response.getRefreshToken());
-                opResponse.setExpiresIn(response.getExpiresIn());
 
-                final Jwt jwt = Jwt.parse(response.getIdToken());
-                final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
-                if (!getStateService().isNonceValid(nonceFromToken)) {
-                    throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
-                }
+            if (Strings.isNullOrEmpty(response.getIdToken())) {
+                LOG.error("id_token is not returned. Please check whether 'openid' scope is present for 'get_authorization_url' command");
+                throw new ErrorResponseException(ErrorResponseCode.NO_ID_TOKEN_RETURNED);
+            }
 
-                if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken, site.getClientId())) {
-                    final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
-                    opResponse.setIdTokenClaims(claims);
+            if (Strings.isNullOrEmpty(response.getAccessToken())) {
+                LOG.error("access_token is not returned");
+                throw new ErrorResponseException(ErrorResponseCode.NO_ACCESS_TOKEN_RETURNED);
+            }
 
-                    // persist tokens
-                    site.setIdToken(response.getIdToken());
-                    site.setAccessToken(response.getAccessToken());
-                    getSiteService().update(site);
-                    getStateService().invalidateState(params.getState());
 
-                    return okResponse(opResponse);
-                } else {
-                    LOG.error("ID Token is not valid, token: " + response.getIdToken());
-                }
+            final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
+            opResponse.setAccessToken(response.getAccessToken());
+            opResponse.setIdToken(response.getIdToken());
+            opResponse.setRefreshToken(response.getRefreshToken());
+            opResponse.setExpiresIn(response.getExpiresIn());
+
+            final Jwt jwt = Jwt.parse(response.getIdToken());
+            final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
+            if (!getStateService().isNonceValid(nonceFromToken)) {
+                throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
+            }
+
+            if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken, site.getClientId())) {
+                final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
+                opResponse.setIdTokenClaims(claims);
+
+                // persist tokens
+                site.setIdToken(response.getIdToken());
+                site.setAccessToken(response.getAccessToken());
+                getSiteService().update(site);
+                getStateService().invalidateState(params.getState());
+
+                return okResponse(opResponse);
+            } else {
+                LOG.error("ID Token is not valid, token: " + response.getIdToken());
             }
         } else {
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
