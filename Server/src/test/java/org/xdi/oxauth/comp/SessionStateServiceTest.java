@@ -7,11 +7,13 @@
 package org.xdi.oxauth.comp;
 
 import org.testng.Assert;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.service.UserService;
 
 import java.util.*;
 
@@ -26,27 +28,31 @@ import static org.testng.Assert.*;
 public class SessionStateServiceTest extends BaseComponentTest {
 
     private SessionStateService m_service;
+    private UserService userService;
 
     @Override
     public void beforeClass() {
         m_service = SessionStateService.instance();
+        userService = UserService.instance();
     }
 
     @Override
     public void afterClass() {
     }
 
-    private SessionState generateSession() {
-        return m_service.generateUnauthenticatedSessionState("dummyDn", new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
+    private SessionState generateSession(String userInum) {
+    	String userDn = userService.getDnForUser(userInum);
+        return m_service.generateUnauthenticatedSessionState(userDn, new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
     }
 
+    @Parameters({"userInum"})
     @Test
-    public void checkOutdatedUnauthenticatedSessionIdentification() {
+    public void checkOutdatedUnauthenticatedSessionIdentification(String userInum) {
 
         // set time -1 hour
         Calendar c = Calendar.getInstance();
         c.add(Calendar.HOUR, -1);
-        SessionState m_sessionState = generateSession();
+        SessionState m_sessionState = generateSession(userInum);
         m_sessionState.setLastUsedAt(c.getTime());
         m_service.updateSessionState(m_sessionState, false);
 
@@ -56,11 +62,12 @@ public class SessionStateServiceTest extends BaseComponentTest {
 
     }
 
+    @Parameters({"userInum"})
     @Test
-    public void statePersistence() {
+    public void statePersistence(String userInum) {
         SessionState newId = null;
         try {
-            newId = m_service.generateAuthenticatedSessionState("dummyDn1");
+            newId = m_service.generateAuthenticatedSessionState(userInum);
 
             Assert.assertEquals(newId.getState(), SessionIdState.AUTHENTICATED);
 
@@ -81,9 +88,10 @@ public class SessionStateServiceTest extends BaseComponentTest {
         }
     }
 
+    @Parameters({"userInum"})
     @Test
-    public void testUpdateLastUsedDate() {
-        SessionState m_sessionState = generateSession();
+    public void testUpdateLastUsedDate(String userInum) {
+        SessionState m_sessionState = generateSession(userInum);
         final SessionState fromLdap1 = m_service.getSessionByDN(m_sessionState.getDn());
         final Date createdDate = m_sessionState.getLastUsedAt();
         System.out.println("Created date = " + createdDate);
@@ -97,9 +105,10 @@ public class SessionStateServiceTest extends BaseComponentTest {
         Assert.assertTrue(createdDate.before(fromLdap2.getLastUsedAt()));
     }
 
+    @Parameters({"userInum"})
     @Test
-    public void testUpdateAttributes() {
-        SessionState m_sessionState = generateSession();
+    public void testUpdateAttributes(String userInum) {
+        SessionState m_sessionState = generateSession(userInum);
         final String clientId = "testClientId";
         final SessionState fromLdap1 = m_service.getSessionByDN(m_sessionState.getDn());
         final Date createdDate = m_sessionState.getLastUsedAt();
@@ -118,9 +127,10 @@ public class SessionStateServiceTest extends BaseComponentTest {
     }
 
 
+    @Parameters({"userInum"})
     @Test
-    public void testOldSessionsIdentification() {
-        SessionState m_sessionState = generateSession();
+    public void testOldSessionsIdentification(String userInum) {
+        SessionState m_sessionState = generateSession(userInum);
 
         sleepSeconds(2);
         Assert.assertTrue(m_service.getIdsOlderThan(1).contains(m_sessionState));
