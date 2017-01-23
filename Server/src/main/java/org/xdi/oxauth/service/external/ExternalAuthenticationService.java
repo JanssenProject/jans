@@ -6,12 +6,19 @@
 
 package org.xdi.oxauth.service.external;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.xdi.model.AuthenticationScriptUsageType;
@@ -22,17 +29,15 @@ import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
-import org.xdi.oxauth.model.appliance.GluuAppliance;
-import org.xdi.oxauth.model.config.oxIDPAuthConf;
-import org.xdi.oxauth.service.ApplianceService;
+import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
-import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.OxConstants;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
-import java.util.Map.Entry;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Provides factory methods needed to create external authenticator
@@ -45,6 +50,11 @@ import java.util.Map.Entry;
 @Startup
 public class ExternalAuthenticationService extends ExternalScriptService {
 
+	public final static String MODIFIED_INTERNAL_TYPES_EVENT_TYPE = "CustomScriptModifiedInternlTypesEvent";
+
+    @In(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    private List<GluuLdapConfiguration> ldapAuthConfigs;
+
 	private static final long serialVersionUID = 7339887464253044927L;
 
 	private Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> customScriptConfigurationsMapByUsageType;
@@ -54,6 +64,11 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		super(CustomScriptType.PERSON_AUTHENTICATION);
 	}
 
+	@Observer(MODIFIED_INTERNAL_TYPES_EVENT_TYPE)
+	public void reload() {
+		super.reload();
+	}
+
 	@Override
 	protected void reloadExternal() {
 		// Group external authenticator configurations by usage type
@@ -61,6 +76,17 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 		// Determine default authenticator for every usage type
 		this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurationsMap(this.customScriptConfigurationsNameMap);
+	}
+
+	@Override
+	protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
+		if ((ldapAuthConfigs == null) || (ldapAuthConfigs.size() == 0)) {
+			newCustomScriptConfigurations.add(getInternalCustomScriptConfiguration());
+		} else {
+			for (GluuLdapConfiguration ldapAuthConfig : ldapAuthConfigs) {
+				newCustomScriptConfigurations.add(getInternalCustomScriptConfiguration(ldapAuthConfig));
+			}
+		}
 	}
 
 	private Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsMapByUsageType(Map<String,  CustomScriptConfiguration> customScriptConfigurationsMap) {
@@ -90,7 +116,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurationsMapByUsageType.get(usageType)) {
 				// Determine default authenticator
 				if ((defaultExternalAuthenticator == null) ||
-						(defaultExternalAuthenticator.getLevel() >= customScriptConfiguration.getLevel())) {
+						(defaultExternalAuthenticator.getLevel() < customScriptConfiguration.getLevel())) {
 					defaultExternalAuthenticator = customScriptConfiguration;
 				}
 			}
@@ -242,14 +268,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public boolean isEnabled(AuthenticationScriptUsageType usageType) {
-		if(this.customScriptConfigurationsMapByUsageType != null)
-			if(usageType == AuthenticationScriptUsageType.INTERACTIVE)
-				return true;
-			else
-				return this.customScriptConfigurationsMapByUsageType.get(usageType).size() > 0;
-		else 
-			return false;
-	}
+		return this.customScriptConfigurationsMapByUsageType != null &&
+                this.customScriptConfigurationsMapByUsageType.get(usageType).size() > 0;
+    }
 
 	public CustomScriptConfiguration getExternalAuthenticatorByAuthLevel(AuthenticationScriptUsageType usageType, int authLevel) {
 		CustomScriptConfiguration resultDefaultExternalAuthenticator = null;
@@ -264,8 +285,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			}
 		}
 
-		if(usageType == AuthenticationScriptUsageType.INTERACTIVE && authLevel == -1)
-			return getInternalCustomScriptConfiguration();
 		return resultDefaultExternalAuthenticator;
 	}
 
@@ -285,10 +304,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public CustomScriptConfiguration determineCustomScriptConfiguration(AuthenticationScriptUsageType usageType, List<String> acrValues) {
-		CustomScriptConfiguration internalScriptConfiguration = getInternalCustomScriptConfiguration();
-		List<String> authModes = getAuthModesByAcrValues(acrValues, internalScriptConfiguration);
-		if(authModes.contains(internalScriptConfiguration.getName()))
-			return internalScriptConfiguration;
+		List<String> authModes = getAuthModesByAcrValues(acrValues);
 		
 		if (authModes.size() > 0) {
 			for (String authMode : authModes) {
@@ -303,21 +319,16 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		return null;
 	}
 
-	private List<String> getAuthModesByAcrValues(List<String> acrValues, CustomScriptConfiguration internalScriptConfiguration) {
+	public List<String> getAuthModesByAcrValues(List<String> acrValues) {
 		List<String> authModes = new ArrayList<String>();
 
-		boolean containsInternal = false;
 		for (String acrValue : acrValues) {
 			if (StringHelper.isNotEmpty(acrValue)) {
 				if (customScriptConfigurationsNameMap.containsKey(StringHelper.toLowerCase(acrValue))) {
 					authModes.add(acrValue);
 				}
 			}
-	        if (acrValue.equalsIgnoreCase(internalScriptConfiguration.getName())) containsInternal = true;
 		}
-
-		if(containsInternal)
-			authModes.add(internalScriptConfiguration.getName());
 		return authModes;
 	}
 
@@ -348,8 +359,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     }
 
 	public CustomScriptConfiguration getDefaultExternalAuthenticator(AuthenticationScriptUsageType usageType) {
-		if(usageType == AuthenticationScriptUsageType.INTERACTIVE)
-			return getInternalCustomScriptConfiguration();
 		return this.defaultExternalAuthenticators.get(usageType);
 	}
 
@@ -359,10 +368,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 				return customScriptConfiguration;
 			}
 		}
-
-		CustomScriptConfiguration customScriptConfiguration = getInternalCustomScriptConfiguration();
-		if(usageType == AuthenticationScriptUsageType.INTERACTIVE && customScriptConfiguration.getName().equals(name))
-			return customScriptConfiguration;
 		
 		return null;
 	}
@@ -374,15 +379,11 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 			}
 		}
 
-		CustomScriptConfiguration customScriptConfiguration = getInternalCustomScriptConfiguration();
-		if(customScriptConfiguration.equals(name))
-			return customScriptConfiguration;
 		return null;
 	}
 
 	public List<CustomScriptConfiguration> getCustomScriptConfigurationsMap() {
 		List<CustomScriptConfiguration> configurations = new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurationsNameMap.values());
-		configurations.add(getInternalCustomScriptConfiguration());
 		return configurations;
 	}
 
@@ -451,7 +452,14 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		return map;
 	}
 	
-	private CustomScriptConfiguration getInternalCustomScriptConfiguration(){
+	private CustomScriptConfiguration getInternalCustomScriptConfiguration(GluuLdapConfiguration ldapAuthConfig) {
+		CustomScriptConfiguration customScriptConfiguration = getInternalCustomScriptConfiguration();
+		customScriptConfiguration.getCustomScript().setName(ldapAuthConfig.getConfigId());
+		
+		return customScriptConfiguration;
+	}
+	
+	private CustomScriptConfiguration getInternalCustomScriptConfiguration() {
 		PersonAuthenticationType personAuthenticationType = new InternalDefaultPersonAuthenticationType();
 		CustomScript customScript = new AuthenticationCustomScript() {
 			@Override
@@ -463,19 +471,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		customScript.setName(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 		customScript.setLevel(-1);
 
-		GluuAppliance appliance = ApplianceService.instance().getAppliance();
-		List<String> idpConfs = appliance.getOxIDPAuthentication();
-		if (idpConfs != null && idpConfs.size() > 0) {
-			for (String idpConfString : idpConfs) {
-				oxIDPAuthConf idpConf = ServerUtil.asObjectSilently(idpConfString, oxIDPAuthConf.class);
-				if (idpConf.getType().equalsIgnoreCase("auth")) {
-					GluuLdapConfiguration ldapConfig = ServerUtil.asObjectSilently(idpConf.getConfig(), GluuLdapConfiguration.class);
-					customScript.setName(ldapConfig.getConfigId());
-					break;
-				}
-			}
-		}
-		return new CustomScriptConfiguration(customScript, personAuthenticationType, new HashMap<String, SimpleCustomProperty>(0));
+		return new CustomScriptConfiguration(customScript, personAuthenticationType,
+				new HashMap<String, SimpleCustomProperty>(0));
 	}
 
 }

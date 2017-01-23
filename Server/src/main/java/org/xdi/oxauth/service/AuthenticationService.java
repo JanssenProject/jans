@@ -94,14 +94,13 @@ public class AuthenticationService {
     @In(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
 
-    @In(required = false, value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
-    // created by app initializer
+    @In(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @In
     private LdapEntryManager ldapEntryManager;
 
-    @In(required = true, value = AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    @In(value = AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
     private List<LdapEntryManager> ldapAuthEntryManagers;
 
     @In
@@ -141,7 +140,7 @@ public class AuthenticationService {
 
         com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
         try {
-            if (this.ldapAuthConfigs == null) {
+            if ((this.ldapAuthConfigs == null) || (this.ldapAuthConfigs.size() == 0)) {
                 authenticated = localAuthenticate(credentials, userName, password);
             } else {
                 authenticated = externalAuthenticate(credentials, userName, password);
