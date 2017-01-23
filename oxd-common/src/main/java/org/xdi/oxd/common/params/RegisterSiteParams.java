@@ -54,8 +54,18 @@ public class RegisterSiteParams implements IParams {
     private List<String> grantType;
     @JsonProperty(value = "contacts")
     private List<String> contacts;
+    @JsonProperty(value = "trusted_client")
+    private Boolean trustedClient = false;
 
     public RegisterSiteParams() {
+    }
+
+    public Boolean getTrustedClient() {
+        return trustedClient;
+    }
+
+    public void setTrustedClient(Boolean trustedClient) {
+        this.trustedClient = trustedClient;
     }
 
     public String getClientName() {

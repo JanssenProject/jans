@@ -249,6 +249,10 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setScopes(params.getScope());
         request.setDefaultAcrValues(params.getAcrValues());
 
+        if (params.getTrustedClient() != null && params.getTrustedClient()) {
+            request.addCustomAttribute("oxAuthTrustedClient", "true");
+        }
+
         List<GrantType> grantTypes = Lists.newArrayList();
         for (String grantType : params.getGrantType()) {
             grantTypes.add(GrantType.fromString(grantType));
