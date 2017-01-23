@@ -66,6 +66,9 @@ public class SessionStateService {
     private LdapEntryManager ldapEntryManager;
     @In
     private AuthenticationService authenticationService;
+    
+    @In
+    private ExternalAuthenticationService externalAuthenticationService;
 
     @In
     private ApplicationAuditLogger applicationAuditLogger;
@@ -120,7 +123,7 @@ public class SessionStateService {
 
             boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAcr);
             if (isAcrChanged) {
-                Map<String, Integer> acrToLevel = ExternalAuthenticationService.instance().acrToLevelMapping();
+                Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
                 Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
                 Integer currentAcrLevel = acrToLevel.get(acrValuesStr);
 
