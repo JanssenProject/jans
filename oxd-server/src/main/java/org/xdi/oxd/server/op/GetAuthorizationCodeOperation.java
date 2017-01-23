@@ -43,17 +43,18 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         final SiteConfiguration site = getSite();
 
         String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
+        String state = Strings.isNullOrEmpty(params.getState()) ? UUID.randomUUID().toString() : params.getState();
 
         final AuthorizationRequest request = new AuthorizationRequest(responseTypes(site.getResponseTypes()),
                 site.getClientId(), site.getScope(), site.getAuthorizationRedirectUri(), nonce);
-        request.setState(params.getState());
+        request.setState(state);
         request.setAuthUsername(params.getUsername());
         request.setAuthPassword(params.getPassword());
         request.getPrompts().add(Prompt.NONE);
         request.setAcrValues(acrValues(params, site));
 
         getStateService().putNonce(nonce);
-        getStateService().putState(params.getState());
+        getStateService().putState(state);
 
         final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
