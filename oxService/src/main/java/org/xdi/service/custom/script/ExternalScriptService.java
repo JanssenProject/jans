@@ -56,7 +56,7 @@ public class ExternalScriptService implements Serializable {
 		// Determine default configuration
 		this.defaultExternalCustomScript = determineDefaultCustomScriptConfiguration(this.customScriptConfigurations);
 		
-		// Allow to executu additional logic
+		// Allow to execute additional logic
 		reloadExternal();
 	}
 
