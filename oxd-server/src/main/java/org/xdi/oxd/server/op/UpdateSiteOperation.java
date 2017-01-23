@@ -145,7 +145,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
 
         if (params.getClientLogoutUri() != null && !params.getClientLogoutUri().isEmpty()) {
-            request.setLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
+            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
         }
 
         if (params.getClientRequestUris() != null && !params.getClientRequestUris().isEmpty()) {
