@@ -43,9 +43,17 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
+        String postLogoutRedirectUrl = params.getPostLogoutRedirectUri();
+        if (Strings.isNullOrEmpty(postLogoutRedirectUrl)) {
+            postLogoutRedirectUrl = site.getPostLogoutRedirectUri();
+        }
+        if (Strings.isNullOrEmpty(postLogoutRedirectUrl)) {
+            postLogoutRedirectUrl = "";
+        }
+
         if (Strings.isNullOrEmpty(endSessionEndpoint)) {
             if (site.getOpHost().startsWith(GOOGLE_OP_HOST) && getInstance(ConfigurationService.class).get().getSupportGoogleLogout()) {
-                String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + site.getPostLogoutRedirectUri();
+                String logoutUrl = "https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=" + postLogoutRedirectUrl;
                 return okResponse(new LogoutResponse(logoutUrl));
             }
 
@@ -56,7 +64,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         String uri = endSessionEndpoint +
                 "?id_token_hint=" + getIdToken(params, site);
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-            uri += "&post_logout_redirect_uri=" + URLEncoder.encode(params.getPostLogoutRedirectUri(), "UTF-8");
+            uri += "&post_logout_redirect_uri=" + URLEncoder.encode(postLogoutRedirectUrl, "UTF-8");
         }
         if (!Strings.isNullOrEmpty(params.getState())) {
             uri += "&state=" + params.getState();

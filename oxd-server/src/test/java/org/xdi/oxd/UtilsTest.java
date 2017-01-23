@@ -8,6 +8,8 @@ import org.xdi.util.security.StringEncrypter;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -26,6 +28,16 @@ public class UtilsTest {
     public void decrypt() throws StringEncrypter.EncryptionException {
         StringEncrypter stringEncrypter = StringEncrypter.instance("123456789012345678901234");
         System.out.println(stringEncrypter.decrypt(""));
+    }
+
+    @Test
+    public void hoursDiff() {
+        Calendar calendar = Calendar.getInstance();
+        Date today = new Date();
+
+        calendar.add(Calendar.HOUR, 13);
+
+        Assert.assertEquals(Utils.hoursDiff(today, calendar.getTime()), 13);
     }
 
     public static void main(String[] args) {
