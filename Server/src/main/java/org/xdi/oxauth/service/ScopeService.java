@@ -18,8 +18,9 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.service.CacheService;
+import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
 
@@ -32,14 +33,20 @@ import com.unboundid.ldap.sdk.Filter;
 @AutoCreate
 public class ScopeService {
 
-    @In
-    LdapEntryManager ldapEntryManager;
+    private static final String CACHE_SCOPE_NAME = "ScopeCache";
 
     @Logger
     private Log log;
 
+	@In
+	private CacheService cacheService;
+
+    @In
+    private LdapEntryManager ldapEntryManager;
+
     @In
     private StaticConf staticConfiguration;
+
     /**
      * Get ScopeService instance
      *
@@ -93,7 +100,13 @@ public class ScopeService {
      * @return Scope
      */
     public org.xdi.oxauth.model.common.Scope getScopeByDn(String dn) {
-        return ldapEntryManager.find(org.xdi.oxauth.model.common.Scope.class, dn);
+        org.xdi.oxauth.model.common.Scope scope = fromCacheByDn(dn);
+        if (scope == null) {
+        	scope = ldapEntryManager.find(org.xdi.oxauth.model.common.Scope.class, dn);
+        	putInCache(scope);
+        }
+        
+        return scope;
     }
 
     /**
@@ -116,19 +129,24 @@ public class ScopeService {
      * @param DisplayName
      * @return scope
      */
-    public org.xdi.oxauth.model.common.Scope getScopeByDisplayName(String DisplayName) {
-        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-
-        org.xdi.oxauth.model.common.Scope scope = new org.xdi.oxauth.model.common.Scope();
-        scope.setDn(scopesBaseDN);
-        scope.setDisplayName(DisplayName);
-
-        List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scope);
-        if ((scopes != null) && (scopes.size() > 0)) {
-            return scopes.get(0);
+    public org.xdi.oxauth.model.common.Scope getScopeByDisplayName(String displayName) {
+        org.xdi.oxauth.model.common.Scope scope = fromCacheByName(displayName);
+        if (scope == null) {
+	        String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+	
+	        org.xdi.oxauth.model.common.Scope scopeExample = new org.xdi.oxauth.model.common.Scope();
+	        scopeExample.setDn(scopesBaseDN);
+	        scopeExample.setDisplayName(displayName);
+	
+	        List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scopeExample);
+	        if ((scopes != null) && (scopes.size() > 0)) {
+	        	scope = scopes.get(0);
+	        }
+	        
+	        putInCache(scope);
         }
 
-        return null;
+        return scope;
     }    
     
     /**
@@ -138,10 +156,15 @@ public class ScopeService {
      * @return List of scope
      */
     public List<org.xdi.oxauth.model.common.Scope> getScopeByClaim(String claimDn) {
-        Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
-        
-    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-        List<org.xdi.oxauth.model.common.Scope> scopes = ldapEntryManager.findEntries(scopesBaseDN, org.xdi.oxauth.model.common.Scope.class, filter);  
+    	List<org.xdi.oxauth.model.common.Scope> scopes = fromCacheByClaimDn(claimDn);
+    	if (scopes == null) {
+	        Filter filter = Filter.createEqualityFilter("oxAuthClaim", claimDn);
+	        
+	    	String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
+	        scopes = ldapEntryManager.findEntries(scopesBaseDN, org.xdi.oxauth.model.common.Scope.class, filter);  
+	
+	        putInCache(claimDn, scopes);
+    	}
 
         return scopes;
     }
@@ -153,8 +176,77 @@ public class ScopeService {
 			if ((claims != null) && claims.contains(claimDn)) {
 				result.add(scope);
 			}
+			
 		}
 
 		return result;
 	}
+
+    private void putInCache(org.xdi.oxauth.model.common.Scope scope) {
+    	if (scope == null) {
+    		return;
+    	}
+
+    	try {
+            cacheService.put(CACHE_SCOPE_NAME, getScopeNameCacheKey(scope.getDisplayName()), scope);
+            cacheService.put(CACHE_SCOPE_NAME, getScopeDnCacheKey(scope.getDn()), scope);
+        } catch (Exception ex) {
+            log.error("Failed to put scope in cache, scope: '{0}'", scope, ex);
+        }
+    }
+    private void putInCache(String claimDn, List<org.xdi.oxauth.model.common.Scope> scopes) {
+    	if (scopes == null) {
+    		return;
+    	}
+
+    	try {
+        	String key = getClaimDnCacheKey(claimDn);
+            cacheService.put(CACHE_SCOPE_NAME, key, scopes);
+        } catch (Exception ex) {
+            log.error("Failed to put scopes in cache, claimDn: '{0}'", claimDn, ex);
+        }
+    }
+
+    private org.xdi.oxauth.model.common.Scope fromCacheByDn(String dn) {
+        try {
+            String key = getScopeDnCacheKey(dn);
+            return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
+        } catch (Exception ex) {
+            log.error("Failed to get scope from cache, scopeDn: '{0}'", dn, ex);
+            return null;
+        }
+    }
+
+    private org.xdi.oxauth.model.common.Scope fromCacheByName(String name) {
+        try {
+            String key = getScopeNameCacheKey(name);
+            return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
+        } catch (Exception ex) {
+            log.error("Failed to get scope from cache, name: '{0}'", name, ex);
+            return null;
+        }
+    }
+
+    private List<org.xdi.oxauth.model.common.Scope> fromCacheByClaimDn(String claimDn) {
+        try {
+        	String key = getClaimDnCacheKey(claimDn);
+            return (List<org.xdi.oxauth.model.common.Scope>) cacheService.get(CACHE_SCOPE_NAME, key);
+        } catch (Exception ex) {
+            log.error("Failed to get scopes from cache, claimDn: '{0}'", claimDn, ex);
+            return null;
+        }
+    }
+
+    private static String getClaimDnCacheKey(String claimDn) {
+        return "claim_dn" + StringHelper.toLowerCase(claimDn);
+    }
+
+    private static String getScopeNameCacheKey(String name) {
+        return "scope_name_" + StringHelper.toLowerCase(name);
+    }
+
+    private static String getScopeDnCacheKey(String dn) {
+        return "scope_dn_" + StringHelper.toLowerCase(dn);
+    }
+
 }
