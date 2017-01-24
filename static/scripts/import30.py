@@ -62,6 +62,7 @@ class Migration(object):
         self.certsDir = os.path.join(backup, 'etc')
         self.currentDir = os.path.dirname(os.path.realpath(__file__))
         self.workingDir = os.path.join(self.currentDir, 'migration')
+        self.jettyDir = "/opt/gluu/jetty/"
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os = self.detect_os_type()
         self.service = "/usr/sbin/service"
@@ -203,6 +204,54 @@ class Migration(object):
             logging.error("Couldn't start the OpenLDAP server.")
             logging.error(start_msg)
             sys.exit(1)
+
+    def copyCustomFiles(self):
+        logging.info("Copying the custom pages and assets of webapps.")
+        bu_custom = os.path.join(self.backupDir, 'var', 'gluu', 'webapps')
+
+        dir_map = {'oxauth': 'oxauth', 'oxtrust': 'identity',
+                   'pages': 'custom/pages', 'resources': 'custom/static',
+                   'libs': 'lib/ext'}
+        apps = ['oxauth', 'oxtrust']  # old names
+        dirs = ['pages', 'resources', 'libs']  # old names
+
+        for app in apps:
+            for d in dirs:
+                source = os.path.join(bu_custom, app, d)
+                dest = os.path.join(self.jettyDir, dir_map[app], dir_map[d])
+                for f in os.listdir(source):
+                    if os.path.isdir(os.path.join(source, f)):
+                        shutil.copytree(os.path.join(source, f), os.path.join(dest, f))
+                    else:
+                        shutil.copy(os.path.join(source, f), dest)
+
+    def stopWebapps(self):
+        logging.info("Stopping Webapps oxAuth and Identity.")
+        stop_msg = self.getOutput([self.service, 'oxauth', 'stop'])
+        status = self.getOutput([self.service, 'oxauth', 'status'])
+        if 'Jetty NOT running' not in status:
+            logging.error("Couldn't stop oxAuth.")
+            logging.error(stop_msg)
+
+        stop_msg = self.getOutput([self.service, 'identity', 'stop'])
+        status = self.getOutput([self.service, 'identity', 'status'])
+        if 'Jetty NOT running' not in status:
+            logging.error("Couldn't stop Identity.")
+            logging.error(stop_msg)
+
+    def startWebapps(self):
+        logging.info("Starting Webapps oxAuth and Identity.")
+        start_msg = self.getOutput([self.service, 'oxauth', 'start'])
+        status = self.getOutput([self.service, 'oxauth', 'status'])
+        if 'Jetty running pid' not in status:
+            logging.error("Couldn't stop oxAuth.")
+            logging.error(start_msg)
+
+        start_msg = self.getOutput([self.service, 'identity', 'start'])
+        status = self.getOutput([self.service, 'identity', 'status'])
+        if 'Jetty running pid' not in status:
+            logging.error("Couldn't stop Identity.")
+            logging.error(start_msg)
 
     def exportInstallData(self):
         logging.info("Exporting LDAP data.")
@@ -409,14 +458,17 @@ class Migration(object):
         """Main function for the migration of backup data
         """
         self.verifyBackupData()
-        self.copyCertificates()
         self.setupWorkDirectory()
+        self.stopWebapps()
         self.stopSolserver()
+        self.copyCertificates()
+        self.copyCustomFiles()
         self.copyCustomSchema()
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
         self.startSolserver()
+        self.startWebapps()
 
 
 if __name__ == "__main__":
