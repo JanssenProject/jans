@@ -35,7 +35,8 @@ folders_to_backup = ['/opt/tomcat/conf',
                      '/opt/opendj/config',
                      '/etc/certs',
                      '/opt/idp/conf',
-                     '/opt/idp/metadata']
+                     '/opt/idp/metadata',
+                     '/var/gluu/webapps']
 
 # LDAP Stuff
 password_file = tempfile.mkstemp()[1]
