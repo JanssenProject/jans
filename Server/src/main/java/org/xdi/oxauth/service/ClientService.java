@@ -190,6 +190,10 @@ public class ClientService {
     }
 
     private void putInCache(Client client) {
+    	if (client == null) {
+    		return;
+    	}
+
         try {
             cacheService.put(CACHE_CLIENT_FILTER_NAME, getClientIdCacheKey(client.getClientId()), client);
             cacheService.put(CACHE_CLIENT_NAME, getClientDnCacheKey(client.getDn()), client);
