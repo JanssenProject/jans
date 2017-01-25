@@ -33,7 +33,7 @@ public class LdapSampleSimpleSessionSample {
 		try {
 
 			// Create LDAP entry manager
-			String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad557";
+			String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad558";
 			final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 			final String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 
@@ -45,7 +45,6 @@ public class LdapSampleSimpleSessionSample {
 			ldapEntryManager.persist(simpleSessionState);
 			System.out.println("Persisted");
 
-			final SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
 
 			int threadCount = 500;
 			ExecutorService executorService = Executors.newFixedThreadPool(threadCount, daemonThreadFactory());
@@ -55,6 +54,8 @@ public class LdapSampleSimpleSessionSample {
 					@Override
 					public void run() {
 						try {
+							final SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
+
 							String randomUserDn = count % 2 == 0 ? userDn : "";
 
 							simpleSessionStateFromLdap.setUserDn(randomUserDn);
