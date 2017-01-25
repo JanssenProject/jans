@@ -9,6 +9,7 @@ import org.xdi.log.LoggingHelper;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Movchan
@@ -44,8 +45,8 @@ public class LdapSampleSimpleSessionSample {
 			ldapEntryManager.persist(simpleSessionState);
 			System.out.println("Persisted");
 
-			int threadCount = 100;
-			ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+			int threadCount = 500;
+			ExecutorService executorService = Executors.newFixedThreadPool(threadCount, daemonThreadFactory());
 			for (int i = 0; i < threadCount; i++) {
 				final int count = i;
 				executorService.execute(new Runnable() {
@@ -67,6 +68,16 @@ public class LdapSampleSimpleSessionSample {
 		} finally {
 			ldapEntryManager.getLdapOperationService().getConnectionPool().close();
 		}
+	}
+
+	public static ThreadFactory daemonThreadFactory() {
+		return new ThreadFactory() {
+			public Thread newThread(Runnable p_r) {
+				Thread thread = new Thread(p_r);
+				thread.setDaemon(true);
+				return thread;
+			}
+		};
 	}
 
 
