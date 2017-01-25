@@ -504,7 +504,7 @@ public class SessionStateService {
 					log.debug("LDAP exception resultCode: '{0}'", parentEx.getResultCode().intValue());
 					if ((parentEx.getResultCode().intValue() == ResultCode.NO_SUCH_ATTRIBUTE_INT_VALUE) ||
 						(parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE)) {
-						log.warn("Sessoion entry update attempt '{0}' was unsuccessfull", i);
+						log.warn("Session entry update attempt '{0}' was unsuccessfull", i);
 						continue;
 					}
 				}
@@ -513,6 +513,7 @@ public class SessionStateService {
 			}
 		}
 		
+		log.error("Session entry update attempt was unsuccessfull after '{0}' attempts", maxAttempts);
 		throw lastException;
 	}
 
