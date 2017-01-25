@@ -75,6 +75,10 @@ public class ApplicationAuditLogger {
 
 	@Create
 	public void init() {
+		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging())) {
+			return;
+		}
+
 		tryToEstablishJMSConnection();
 	}
 
