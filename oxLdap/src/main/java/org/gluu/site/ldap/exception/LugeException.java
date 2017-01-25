@@ -19,7 +19,7 @@ public class LugeException extends Exception {
 	/**
 	 * Wrapped LDAP exception
 	 */
-	Exception e = null;
+	Throwable e = null;
 	/**
 	 * LDAP error code
 	 */
@@ -36,6 +36,17 @@ public class LugeException extends Exception {
 	}
 
 	/**
+	 * Constructor with wrapped exception
+	 * 
+	 * @param e
+	 *            Wrapped LDAP exception
+	 */
+	public LugeException(final Throwable e) {
+		super(e);
+		this.e = e;
+	}
+
+	/**
 	 * Constructor with error and wrapped exception
 	 * 
 	 * @param message
@@ -43,8 +54,8 @@ public class LugeException extends Exception {
 	 * @param e
 	 *            Wrapped LDAP exception
 	 */
-	public LugeException(final String message, final Exception e) {
-		super(message);
+	public LugeException(final String message, final Throwable e) {
+		super(message, e);
 		this.e = e;
 	}
 
@@ -62,7 +73,7 @@ public class LugeException extends Exception {
 	 * 
 	 * @return The wrapped exception
 	 */
-	public Exception getException() {
+	public Throwable getException() {
 		return e;
 	}
 

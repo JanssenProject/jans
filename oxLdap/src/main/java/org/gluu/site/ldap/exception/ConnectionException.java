@@ -40,8 +40,8 @@ public class ConnectionException extends LugeException {
 	 * @param e
 	 *            Underlying exception
 	 */
-	public ConnectionException(final Exception ex) {
-		super("Connection exception: " + ex.getMessage(), ex);
+	public ConnectionException(final Throwable root) {
+		super(root);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class ConnectionException extends LugeException {
 	 * @param e
 	 *            Exception
 	 */
-	public ConnectionException(final String msg, final Exception ex) {
-		super(msg + ": " + ex.getMessage(), ex);
+	public ConnectionException(final String msg, final Throwable root) {
+		super(msg, root);
 	}
 }
