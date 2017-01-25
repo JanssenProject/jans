@@ -8,11 +8,13 @@ package org.xdi.oxauth.service;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
@@ -476,7 +478,7 @@ public class SessionStateService {
             	
             	if (update) {
             		try {
-						ldapEntryManager.merge(sessionState);
+						mergeWithRetry(sessionState, 3);
 					} catch (EmptyEntryPersistenceException ex) {
 						log.warn("Faield to update session entry '{0}': '{1}'", sessionState.getId(), ex.getMessage());
 					}
@@ -489,6 +491,25 @@ public class SessionStateService {
 
         return true;
     }
+
+	private void mergeWithRetry(final SessionState sessionState, int maxAttempts) {
+		for (int i = 1; i <+ maxAttempts; i++) {
+			try {
+				ldapEntryManager.merge(sessionState);
+			} catch (EntryPersistenceException ex) {
+				if (ex.getCause() instanceof LDAPException) {
+					if (((LDAPException) ex.getCause()).getResultCode() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS) {
+						log.warn("Attempt '{0}' session entry was unsuccessfull", i);
+						continue;
+					}
+				}
+				
+				throw ex;
+			}
+
+			break;
+		}
+	}
 
 	public void updateSessionStateIfNeeded(SessionState sessionState, boolean modified) {
 		updateSessionState(sessionState, true, false, modified);
