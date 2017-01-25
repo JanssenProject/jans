@@ -492,11 +492,13 @@ public class SessionStateService {
         return true;
     }
 
-	private void mergeWithRetry(final SessionState sessionState, int maxAttempts) {
+	private SessionState mergeWithRetry(final SessionState sessionState, int maxAttempts) {
+		EntryPersistenceException lastException = null;
 		for (int i = 1; i <= maxAttempts; i++) {
 			try {
-				ldapEntryManager.merge(sessionState);
+				return ldapEntryManager.merge(sessionState);
 			} catch (EntryPersistenceException ex) {
+				lastException = ex;
 				if (ex.getCause() instanceof LDAPException) {
 					LDAPException parentEx = ((LDAPException) ex.getCause());
 					log.debug("LDAPException resultCode: '{0}'", parentEx.getResultCode().intValue());
@@ -509,9 +511,9 @@ public class SessionStateService {
 				
 				throw ex;
 			}
-
-			break;
 		}
+		
+		throw lastException;
 	}
 
 	public void updateSessionStateIfNeeded(SessionState sessionState, boolean modified) {
