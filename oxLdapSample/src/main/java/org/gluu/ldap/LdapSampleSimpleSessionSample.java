@@ -52,14 +52,19 @@ public class LdapSampleSimpleSessionSample {
 				executorService.execute(new Runnable() {
 					@Override
 					public void run() {
-						SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
+						try {
+							SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
 
-						String randomUserDn = count % 2 == 0 ? userDn : "";
+							String randomUserDn = count % 2 == 0 ? userDn : "";
 
-						simpleSessionStateFromLdap.setUserDn(randomUserDn);
-						simpleSessionState.setLastUsedAt(new Date());
-						ldapEntryManager.merge(simpleSessionState);
-						System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn);
+							simpleSessionStateFromLdap.setUserDn(randomUserDn);
+							simpleSessionState.setLastUsedAt(new Date());
+							ldapEntryManager.merge(simpleSessionState);
+							System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn);
+						} catch (Throwable e) {
+							System.out.println("ERROR !!!, thread: " + count + ", " + e.getMessage());
+							e.printStackTrace();
+						}
 					}
 				});
 			}
