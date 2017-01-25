@@ -499,7 +499,7 @@ public class SessionStateService {
 			} catch (EntryPersistenceException ex) {
 				if (ex.getCause() instanceof LDAPException) {
 					LDAPException parentEx = ((LDAPException) ex.getCause());
-					log.debug("Parent entry is LDAPException with resultCode: '{0}'", parentEx.getResultCode().intValue());
+					log.debug("LDAPException resultCode: '{0}'", parentEx.getResultCode().intValue());
 					if ((parentEx.getResultCode().intValue() == ResultCode.NO_SUCH_ATTRIBUTE_INT_VALUE) ||
 						(parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE)) {
 						log.warn("Attempt '{0}' session entry update was unsuccessfull", i);
