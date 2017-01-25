@@ -508,9 +508,10 @@ public class OperationsFacade {
 	 * @param dn
 	 * @param attrs
 	 * @return
-	 * @throws LDAPException
+	 * @throws ConnectionException 
+	 * @throws DuplicateEntryException 
 	 */
-	public boolean updateEntry(String dn, Collection<Attribute> attrs) throws LDAPException {
+	public boolean updateEntry(String dn, Collection<Attribute> attrs) throws DuplicateEntryException, ConnectionException {
 		List<Modification> mods = new ArrayList<Modification>();
 
 		for (Attribute attribute : attrs) {
@@ -530,7 +531,7 @@ public class OperationsFacade {
 		return updateEntry(dn, mods);
 	}
 
-	public boolean updateEntry(String dn, List<Modification> modifications) throws LDAPException {
+	public boolean updateEntry(String dn, List<Modification> modifications) throws DuplicateEntryException, ConnectionException {
 		ModifyRequest modifyRequest = new ModifyRequest(dn, modifications);
 		return modifyEntry(modifyRequest);
 	}
@@ -540,18 +541,28 @@ public class OperationsFacade {
 	 *
 	 * @param modifyRequest
 	 * @return true if modification is successful
-	 * @throws LDAPException
+	 * @throws DuplicateEntryException 
+	 * @throws ConnectionException 
 	 */
-	protected boolean modifyEntry(ModifyRequest modifyRequest) throws LDAPException {
+	protected boolean modifyEntry(ModifyRequest modifyRequest) throws DuplicateEntryException, ConnectionException {
 		LDAPResult modifyResult = null;
 		try {
 			modifyResult = getConnectionPool().modify(modifyRequest);
 			return ResultCode.SUCCESS.equals(modifyResult.getResultCode());
-		} catch (LDAPException e) {
-			log.error("Entry can't be modified" , e);
-		}
+		} catch (final LDAPException ex) {
+			int errorCode = ex.getResultCode().intValue();
+			if (errorCode == ResultCode.INSUFFICIENT_ACCESS_RIGHTS_INT_VALUE) {
+				throw new ConnectionException("LDAP config error: insufficient access rights.", ex);
+			}
+			if (errorCode == ResultCode.TIME_LIMIT_EXCEEDED_INT_VALUE) {
+				throw new ConnectionException("LDAP Error: time limit exceeded", ex);
+			}
+			if (errorCode == ResultCode.OBJECT_CLASS_VIOLATION_INT_VALUE) {
+				throw new ConnectionException("LDAP config error: schema violation contact LDAP admin.", ex);
+			}
 
-		return false;
+			throw new ConnectionException("Error updating object in directory. LDAP error number " + errorCode, ex);
+		}
 	}
 
 	/**

@@ -93,6 +93,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			if (!result) {
 				throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
 			}
+		} catch (ConnectionException ex) {
+            throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn), ex.getCause());
 		} catch (Exception ex) {
 			throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn), ex);
 		}
@@ -174,11 +176,11 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			if (modifications.size() > 0) {
 				boolean result = this.ldapOperationService.updateEntry(dn, modifications);
 				if (!result) {
-					throw new EmptyEntryPersistenceException(String.format("Failed to update entry: %s. There are no changes.", dn));
+					throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn));
 				}
 			}
-		} catch (LDAPException e) {
-            throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), e);
+		} catch (ConnectionException ex) {
+            throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex.getCause());
         } catch (Exception ex) {
 			throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn), ex);
 		}
