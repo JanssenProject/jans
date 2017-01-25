@@ -6,12 +6,18 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.AutoCreate;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Logger;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.log.Log;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
@@ -21,11 +27,10 @@ import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with user U2F devices
@@ -203,6 +208,10 @@ public class DeviceRegistrationService {
 		}
 
 		return hash;
+    }
+
+    public static DeviceRegistrationService instance() {
+        return ServerUtil.instance(DeviceRegistrationService.class);
     }
 
 }
