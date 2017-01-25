@@ -1,19 +1,14 @@
 package org.gluu.ldap;
 
-import java.util.Date;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.SearchScope;
-import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.log.LoggingHelper;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.SearchResult;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author Yuriy Movchan
@@ -29,28 +24,49 @@ public class LdapSampleSimpleSessionSample {
 		log = Logger.getLogger(LdapSampleSimpleSessionSample.class);
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		// Prepare sample connection details
 		LdapSampleEntryManager ldapSampleEntryManager = new LdapSampleEntryManager();
+		final LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
 
-		// Create LDAP entry manager
-		LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
-		String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad550";
-		String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
-		String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu"; 
+		try {
 
-		SimpleSessionState simpleSessionState = new SimpleSessionState();
-		simpleSessionState.setDn(sessionDn);
-		simpleSessionState.setId(sessionId);
-		simpleSessionState.setLastUsedAt(new Date());
+			// Create LDAP entry manager
+			String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad553";
+			final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
+			final String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 
-		ldapEntryManager.persist(simpleSessionState);
-		
-		SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
-		
-		simpleSessionStateFromLdap.setUserDn(userDn);
-		simpleSessionState.setLastUsedAt(new Date());
-		ldapEntryManager.merge(simpleSessionState);
+			final SimpleSessionState simpleSessionState = new SimpleSessionState();
+			simpleSessionState.setDn(sessionDn);
+			simpleSessionState.setId(sessionId);
+			simpleSessionState.setLastUsedAt(new Date());
+
+			ldapEntryManager.persist(simpleSessionState);
+			System.out.println("Persisted");
+
+			int threadCount = 100;
+			ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+			for (int i = 0; i < threadCount; i++) {
+				final int count = i;
+				executorService.execute(new Runnable() {
+					@Override
+					public void run() {
+						SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
+
+						String randomUserDn = count % 2 == 0 ? userDn : "";
+
+						simpleSessionStateFromLdap.setUserDn(randomUserDn);
+						simpleSessionState.setLastUsedAt(new Date());
+						ldapEntryManager.merge(simpleSessionState);
+						System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn);
+					}
+				});
+			}
+
+			Thread.sleep(5000L);
+		} finally {
+			ldapEntryManager.getLdapOperationService().getConnectionPool().close();
+		}
 	}
 
 
