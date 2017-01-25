@@ -498,7 +498,9 @@ public class SessionStateService {
 				ldapEntryManager.merge(sessionState);
 			} catch (EntryPersistenceException ex) {
 				if (ex.getCause() instanceof LDAPException) {
-					if (((LDAPException) ex.getCause()).getResultCode() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS) {
+					LDAPException parentEx = ((LDAPException) ex.getCause());
+					log.debug("Parent entry is LDAPException with resultCode: '{0}'", parentEx.getResultCode().intValue());
+					if (parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE) {
 						log.warn("Attempt '{0}' session entry update was unsuccessfull", i);
 						continue;
 					}
