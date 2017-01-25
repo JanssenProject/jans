@@ -187,7 +187,7 @@ public class AuthorizeAction {
             }
         }
 
-        if (session == null || session.getUserDn() == null || SessionIdState.AUTHENTICATED != session.getState()) {
+        if (session == null || StringUtils.isBlank(session.getUserDn()) || SessionIdState.AUTHENTICATED != session.getState()) {
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
             Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
 
