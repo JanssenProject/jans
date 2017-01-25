@@ -457,9 +457,12 @@ public class SessionStateService {
 
             	if (updateLastUsedAt) {
             		Date lastUsedAt = new Date();
-            		if (!lastUsedAt.equals(sessionState.getLastUsedAt())) {
-                		update = true;
-                        sessionState.setLastUsedAt(lastUsedAt);
+            		if (sessionState.getLastUsedAt() != null) {
+                        long diff = lastUsedAt.getTime() - sessionState.getLastUsedAt().getTime();
+                        if (diff > 500) { // update only if diff is more than 500ms
+                            update = true;
+                            sessionState.setLastUsedAt(lastUsedAt);
+                        }
             		}
                 }
 
