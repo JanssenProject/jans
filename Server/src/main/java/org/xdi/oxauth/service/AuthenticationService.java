@@ -170,7 +170,7 @@ public class AuthenticationService {
             if (authenticated) {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
-            sessionStateService.updateSessionState(sessionState);
+            sessionStateService.updateSessionStateIfNeeded(sessionState, authenticated);
         }
     }
 

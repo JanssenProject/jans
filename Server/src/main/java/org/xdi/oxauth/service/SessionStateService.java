@@ -12,6 +12,7 @@ import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
@@ -62,8 +63,10 @@ public class SessionStateService {
 
     @Logger
     private Log log;
+
     @In
     private LdapEntryManager ldapEntryManager;
+
     @In
     private AuthenticationService authenticationService;
     
@@ -160,7 +163,7 @@ public class SessionStateService {
 
             session.setSessionAttributes(currentSessionAttributes);
 
-            boolean updateResult = updateSessionState(session, true, true);
+            boolean updateResult = updateSessionState(session, true, true, true);
             if (!updateResult) {
                 log.debug("Failed to update session entry: '{0}'", session.getId());
             }
@@ -182,7 +185,7 @@ public class SessionStateService {
 
         sessionAttributes.put("auth_step", String.valueOf(resetToStep));
 
-        boolean updateResult = updateSessionState(session, true, true);
+        boolean updateResult = updateSessionState(session, true, true, true);
         if (!updateResult) {
             log.debug("Failed to update session entry: '{0}'", session.getId());
         }
@@ -405,7 +408,7 @@ public class SessionStateService {
         sessionState.setAuthenticationTime(new Date());
         sessionState.setState(SessionIdState.AUTHENTICATED);
 
-        boolean persisted = updateSessionState(sessionState, true, true);
+        boolean persisted = updateSessionState(sessionState, true, true, true);
 
         auditLogging(sessionState);
         log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionState.getId(), sessionState.getState(), persisted);
@@ -441,21 +444,37 @@ public class SessionStateService {
     }
 
     public boolean updateSessionState(final SessionState sessionState, boolean updateLastUsedAt) {
-        return updateSessionState(sessionState, updateLastUsedAt, false);
+        return updateSessionState(sessionState, updateLastUsedAt, false, true);
     }
 
-    public boolean updateSessionState(final SessionState sessionState, boolean updateLastUsedAt, boolean forceUpdate) {
+    public boolean updateSessionState(final SessionState sessionState, boolean updateLastUsedAt, boolean forceUpdate, boolean modified) {
         List<Prompt> prompts = getPromptsFromSessionState(sessionState);
 
         try {
             final int unusedLifetime = appConfiguration.getSessionIdUnusedLifetime();
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forceUpdate) {
-                if (updateLastUsedAt) {
-                    sessionState.setLastUsedAt(new Date());
+            	boolean update = modified;
+
+            	if (updateLastUsedAt) {
+            		Date lastUsedAt = new Date();
+            		if (!lastUsedAt.equals(sessionState.getLastUsedAt())) {
+                		update = true;
+                        sessionState.setLastUsedAt(lastUsedAt);
+            		}
                 }
 
-                sessionState.setPersisted(true);
-                ldapEntryManager.merge(sessionState);
+            	if (!sessionState.isPersisted()) {
+            		update = true;
+            		sessionState.setPersisted(true);
+            	}
+            	
+            	if (update) {
+            		try {
+						ldapEntryManager.merge(sessionState);
+					} catch (EmptyEntryPersistenceException ex) {
+						log.warn("Faield to update session entry '{0}': '{1}'", sessionState.getId(), ex.getMessage());
+					}
+            	}
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -464,6 +483,10 @@ public class SessionStateService {
 
         return true;
     }
+
+	public void updateSessionStateIfNeeded(SessionState sessionState, boolean modified) {
+		updateSessionState(sessionState, true, false, modified);
+	}
 
     private boolean isPersisted(List<Prompt> prompts) {
         if (prompts != null && prompts.contains(Prompt.NONE)) {
