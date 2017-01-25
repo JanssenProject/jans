@@ -33,7 +33,7 @@ public class LdapSampleSimpleSessionSample {
 		try {
 
 			// Create LDAP entry manager
-			String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad558";
+			String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad561";
 			final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 			final String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 
@@ -53,18 +53,18 @@ public class LdapSampleSimpleSessionSample {
 				executorService.execute(new Runnable() {
 					@Override
 					public void run() {
+						final SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
+						String beforeUserDn = simpleSessionStateFromLdap.getUserDn();
+						String randomUserDn = count % 2 == 0 ? userDn : "";
+
 						try {
-							final SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
-
-							String randomUserDn = count % 2 == 0 ? userDn : "";
-
 							simpleSessionStateFromLdap.setUserDn(randomUserDn);
 							simpleSessionStateFromLdap.setLastUsedAt(new Date());
 							ldapEntryManager.merge(simpleSessionStateFromLdap);
-							System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn);
+							System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn);
 						} catch (Throwable e) {
-							System.out.println("ERROR !!!, thread: " + count + ", " + e.getMessage());
-							e.printStackTrace();
+							System.out.println("ERROR !!!, thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn + ", error:" + e.getMessage());
+//							e.printStackTrace();
 						}
 					}
 				});
