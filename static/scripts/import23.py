@@ -1,4 +1,6 @@
 #!/usr/bin/python
+"""import23.py - Script to import the data into Gluu Server 2.3.x
+"""
 
 # Requires JSON Merge library
 # wget https://github.com/avian2/jsonmerge/archive/master.zip

@@ -1,6 +1,11 @@
 #!/usr/bin/python
+"""Script to encrypt a plaintext password to LDAP SSHA format.
+
+Usage: python ldap_encrypt.py password
+"""
 
 import os, hashlib, sys
+
 
 def ldap_encode(password):
         salt = os.urandom(4)
