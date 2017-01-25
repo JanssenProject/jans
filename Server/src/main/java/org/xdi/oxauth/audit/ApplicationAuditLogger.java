@@ -77,11 +77,6 @@ public class ApplicationAuditLogger {
 	public void init() {
 		tryToEstablishJMSConnection();
 	}
-	
-	@Observer
-	public void updateState() {
-		
-	}
 
 	@Asynchronous
 	public void sendMessage(OAuth2AuditLog oAuth2AuditLog) {
