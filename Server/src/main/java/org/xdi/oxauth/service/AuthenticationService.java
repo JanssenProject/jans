@@ -169,8 +169,8 @@ public class AuthenticationService {
             Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
             if (authenticated) {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
-                sessionStateService.updateSessionState(sessionState);
             }
+            sessionStateService.updateSessionStateIfNeeded(sessionState, authenticated);
         }
     }
 
