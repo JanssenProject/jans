@@ -173,7 +173,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			if (modifications.size() > 0) {
 				boolean result = this.ldapOperationService.updateEntry(dn, modifications);
 				if (!result) {
-					throw new EntryPersistenceException(String.format("Failed to update entry: %s", dn));
+					throw new EntryPersistenceException(String.format("Failed to update entry: %s. There are no changes.", dn));
 				}
 			}
 		} catch (LDAPException e) {
