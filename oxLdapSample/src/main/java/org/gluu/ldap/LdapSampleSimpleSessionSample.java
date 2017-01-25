@@ -35,8 +35,8 @@ public class LdapSampleSimpleSessionSample {
 
 		// Create LDAP entry manager
 		LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
-		String sessionId = "xyzcyzx1-a41a-45ad-8a83-61485dbad550";
-		String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu cannot be modified because it would have resulted in one or more duplicate values for attribute oxAuthUserDN: inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
+		String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad550";
+		String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 		String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu"; 
 
 		SimpleSessionState simpleSessionState = new SimpleSessionState();
@@ -47,11 +47,10 @@ public class LdapSampleSimpleSessionSample {
 		ldapEntryManager.persist(simpleSessionState);
 		
 		SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
-//		
-//		simpleSessionStateFromLdap.setUserDn(userDn);
-//		simpleSessionState.setLastUsedAt(new Date());
-//		ldapEntryManager.merge(simpleSessionState);
-
+		
+		simpleSessionStateFromLdap.setUserDn(userDn);
+		simpleSessionState.setLastUsedAt(new Date());
+		ldapEntryManager.merge(simpleSessionState);
 	}
 
 
