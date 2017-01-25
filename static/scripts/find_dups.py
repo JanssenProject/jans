@@ -1,4 +1,5 @@
 #!/usr/bin/python
+"""Script to find the duplicate attributes in a LDIF file"""
 
 import sys
 from ldif import LDIFParser

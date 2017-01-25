@@ -1,6 +1,13 @@
 #!/usr/bin/python
+"""export23.py - A script to export the data from Gluu Server 2.3.x
+"""
 
-import time, subprocess, traceback, sys, os, shutil, hashlib
+import time
+import traceback
+import sys
+import os
+import shutil
+import hashlib
 
 # Unix commands
 mkdir = '/bin/mkdir'
@@ -231,10 +238,11 @@ def makeFolders():
             logIt(traceback.format_exc(), True)
             sys.exit(3)
 
-makeFolders()
-backupFiles()
-getLdif()
-genProperties()
-backupCustomizations()
-backupTrustStores()
+if __name__ == '__main__':
+    makeFolders()
+    backupFiles()
+    getLdif()
+    genProperties()
+    backupCustomizations()
+    backupTrustStores()
 

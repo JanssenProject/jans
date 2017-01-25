@@ -1,4 +1,22 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+"""export24.py - A script to export all the data from Gluu Server 2.4.x
+
+Usage: python export24.py
+
+Running this creates a folder named `backup_24` which contains all the data
+needed for migration of Gluu Server to a higher version. This script backs up
+the following data:
+    1. LDAP data
+    2. Configurations of Tomcat and OpenDJ
+    3. CA certificates in /etc/certs
+    4. Webapp Customization files
+
+This backup folder should be used as the input for the `import___.py` script
+of appropriate version to migrate to that version.
+
+Read complete migration procedure at:
+    https://www.gluu.org/docs/deployment/upgrading/
+"""
 
 import traceback
 import sys

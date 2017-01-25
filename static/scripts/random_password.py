@@ -1,4 +1,5 @@
 #!/usr/bin/python
+"""Script to generate a random password"""
 
 import os
 
