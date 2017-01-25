@@ -12,6 +12,7 @@ import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
@@ -62,8 +63,10 @@ public class SessionStateService {
 
     @Logger
     private Log log;
+
     @In
     private LdapEntryManager ldapEntryManager;
+
     @In
     private AuthenticationService authenticationService;
     
@@ -469,7 +472,11 @@ public class SessionStateService {
             	}
             	
             	if (update) {
-            		ldapEntryManager.merge(sessionState);
+            		try {
+						ldapEntryManager.merge(sessionState);
+					} catch (EmptyEntryPersistenceException ex) {
+						log.error("Faield to update session entry: '{0}'", sessionState.getId(), ex);
+					}
             	}
             }
         } catch (Exception e) {
