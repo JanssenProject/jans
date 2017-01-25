@@ -463,7 +463,10 @@ public class SessionStateService {
                             update = true;
                             sessionState.setLastUsedAt(lastUsedAt);
                         }
-            		}
+            		} else {
+                        update = true;
+                        sessionState.setLastUsedAt(lastUsedAt);
+                    }
                 }
 
             	if (!sessionState.isPersisted()) {
