@@ -24,11 +24,14 @@ import org.jboss.seam.annotations.Destroy;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -62,8 +65,20 @@ public class ApplicationAuditLogger {
 
 	private final ReentrantLock lock = new ReentrantLock();
 
+	private boolean updateState;
+	private Boolean enabledOAuthAuditnLogging;
+
+	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	public void updateConfiguration(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
+		this.updateState = true;
+	}
+
 	@Create
 	public void init() {
+		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging())) {
+			return;
+		}
+
 		tryToEstablishJMSConnection();
 	}
 
@@ -183,7 +198,11 @@ public class ApplicationAuditLogger {
 	}
 
 	private Boolean isEnabledOAuthAuditnLogging() {
-		return appConfiguration.getEnabledOAuthAuditLogging();
+		if (this.updateState) {
+			this.enabledOAuthAuditnLogging = appConfiguration.getEnabledOAuthAuditLogging();
+		}
+
+		return this.enabledOAuthAuditnLogging;
 	}
 
 	private Set<String> getJmsBrokerURISet() {
