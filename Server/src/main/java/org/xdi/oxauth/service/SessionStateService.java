@@ -499,7 +499,7 @@ public class SessionStateService {
 			} catch (EntryPersistenceException ex) {
 				if (ex.getCause() instanceof LDAPException) {
 					if (((LDAPException) ex.getCause()).getResultCode() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS) {
-						log.warn("Attempt '{0}' session entry was unsuccessfull", i);
+						log.warn("Attempt '{0}' session entry update was unsuccessfull", i);
 						continue;
 					}
 				}
