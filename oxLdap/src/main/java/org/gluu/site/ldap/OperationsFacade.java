@@ -496,7 +496,7 @@ public class OperationsFacade {
 				throw new ConnectionException("LDAP config error: schema violation contact LDAP admin.", ex);
 			}
 
-			throw new ConnectionException("Error adding object to directory. LDAP error number " + errorCode, ex);
+			throw new ConnectionException("Error adding entry to directory. LDAP error number " + errorCode, ex);
 		}
 
 		return false;
@@ -561,7 +561,7 @@ public class OperationsFacade {
 				throw new ConnectionException("LDAP config error: schema violation contact LDAP admin.", ex);
 			}
 
-			throw new ConnectionException("Error updating object in directory. LDAP error number " + errorCode, ex);
+			throw new ConnectionException("Error updating entry in directory. LDAP error number " + errorCode, ex);
 		}
 	}
 
