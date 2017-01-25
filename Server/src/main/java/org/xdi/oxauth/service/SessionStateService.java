@@ -501,10 +501,10 @@ public class SessionStateService {
 				lastException = ex;
 				if (ex.getCause() instanceof LDAPException) {
 					LDAPException parentEx = ((LDAPException) ex.getCause());
-					log.debug("LDAPException resultCode: '{0}'", parentEx.getResultCode().intValue());
+					log.debug("LDAP exception resultCode: '{0}'", parentEx.getResultCode().intValue());
 					if ((parentEx.getResultCode().intValue() == ResultCode.NO_SUCH_ATTRIBUTE_INT_VALUE) ||
 						(parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE)) {
-						log.warn("Attempt '{0}' session entry update was unsuccessfull", i);
+						log.warn("Sessoion entry update attempt '{0}' was unsuccessfull", i);
 						continue;
 					}
 				}
