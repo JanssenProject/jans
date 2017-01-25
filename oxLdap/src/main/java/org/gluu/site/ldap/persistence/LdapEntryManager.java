@@ -16,6 +16,7 @@ import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.persistence.AttributeDataModification.AttributeModificationType;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
+import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
 import org.gluu.site.ldap.persistence.exception.MappingException;
@@ -173,7 +174,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			if (modifications.size() > 0) {
 				boolean result = this.ldapOperationService.updateEntry(dn, modifications);
 				if (!result) {
-					throw new EntryPersistenceException(String.format("Failed to update entry: %s. There are no changes.", dn));
+					throw new EmptyEntryPersistenceException(String.format("Failed to update entry: %s. There are no changes.", dn));
 				}
 			}
 		} catch (LDAPException e) {
