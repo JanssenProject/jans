@@ -493,7 +493,7 @@ public class SessionStateService {
     }
 
 	private void mergeWithRetry(final SessionState sessionState, int maxAttempts) {
-		for (int i = 1; i <+ maxAttempts; i++) {
+		for (int i = 1; i <= maxAttempts; i++) {
 			try {
 				ldapEntryManager.merge(sessionState);
 			} catch (EntryPersistenceException ex) {
