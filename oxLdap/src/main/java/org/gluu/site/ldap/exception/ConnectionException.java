@@ -25,16 +25,6 @@ public class ConnectionException extends LugeException {
 	}
 
 	/**
-	 * Wrap an exception
-	 * 
-	 * @param e
-	 *            Underlying exception
-	 */
-	public ConnectionException(final Exception e) {
-		super("Connection exception: " + e.getMessage());
-	}
-
-	/**
 	 * Wrap a message
 	 * 
 	 * @param msg
@@ -45,6 +35,16 @@ public class ConnectionException extends LugeException {
 	}
 
 	/**
+	 * Wrap an exception
+	 * 
+	 * @param e
+	 *            Underlying exception
+	 */
+	public ConnectionException(final Exception ex) {
+		super("Connection exception: " + ex.getMessage(), ex);
+	}
+
+	/**
 	 * Wrap a message and exception
 	 * 
 	 * @param msg
@@ -52,7 +52,7 @@ public class ConnectionException extends LugeException {
 	 * @param e
 	 *            Exception
 	 */
-	public ConnectionException(final String msg, final Exception e) {
-		this(msg + ": " + e.getMessage());
+	public ConnectionException(final String msg, final Exception ex) {
+		super(msg + ": " + ex.getMessage(), ex);
 	}
 }
