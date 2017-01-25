@@ -139,7 +139,7 @@ public class SessionState implements Serializable {
     }
 
     public void setUserDn(String p_userDn) {
-        userDn = p_userDn;
+        userDn = p_userDn != null ? p_userDn : "";
     }
 
     public Date getAuthenticationTime() {
