@@ -475,7 +475,7 @@ public class SessionStateService {
             		try {
 						ldapEntryManager.merge(sessionState);
 					} catch (EmptyEntryPersistenceException ex) {
-						log.error("Faield to update session entry: '{0}'", sessionState.getId(), ex);
+						log.warn("Faield to update session entry '{0}': '{1}'", sessionState.getId(), ex.getMessage());
 					}
             	}
             }
