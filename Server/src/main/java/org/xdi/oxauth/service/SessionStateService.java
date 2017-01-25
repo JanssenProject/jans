@@ -342,10 +342,7 @@ public class SessionStateService {
         final SessionState sessionState = new SessionState();
         sessionState.setId(uuid);
         sessionState.setDn(dn);
-
-        if (StringUtils.isNotBlank(userDn)) {
-            sessionState.setUserDn(userDn);
-        }
+        sessionState.setUserDn(userDn);
 
         Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
         sessionState.setIsJwt(sessionAsJwt != null && sessionAsJwt);
