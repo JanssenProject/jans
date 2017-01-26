@@ -377,6 +377,7 @@ public class Authenticator implements Serializable {
                     log.info("Authentication success for User: '{0}'", credentials.getUsername());
                     return true;
                 }
+                log.info("Authentication failed for User: '{0}'", credentials.getUsername());
             }
         }
 
@@ -389,6 +390,7 @@ public class Authenticator implements Serializable {
                 log.info("Authentication success for User: '{0}'", credentials.getUsername());
                 return true;
             }
+            log.info("Authentication failed for User: '{0}'", credentials.getUsername());
         }
 
         return false;
