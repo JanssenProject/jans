@@ -175,25 +175,32 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                             updateClientFromRequestObject(client, r);
 
+                            boolean registerClient = true;
                             if (externalDynamicClientRegistrationService.isEnabled()) {
-                                externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
+                            	registerClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
                             }
-
-                            Date currentTime = Calendar.getInstance().getTime();
-                            client.setLastAccessTime(currentTime);
-                            client.setLastLogonTime(currentTime);
-
-                            Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
-                            client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
-
-                            clientService.persist(client);
-
-                            JSONObject jsonObject = getJSONObject(client);
-                            builder.entity(jsonObject.toString(4).replace("\\/", "/"));
-
-                            oAuth2AuditLog.setClientId(client.getClientId());
-                            oAuth2AuditLog.setScope(clientScopesToString(client));
-                            oAuth2AuditLog.setSuccess(true);
+                            
+                            if (registerClient) {
+	                            Date currentTime = Calendar.getInstance().getTime();
+	                            client.setLastAccessTime(currentTime);
+	                            client.setLastLogonTime(currentTime);
+	
+	                            Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
+	                            client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
+	
+	                            clientService.persist(client);
+	
+	                            JSONObject jsonObject = getJSONObject(client);
+	                            builder.entity(jsonObject.toString(4).replace("\\/", "/"));
+	
+	                            oAuth2AuditLog.setClientId(client.getClientId());
+	                            oAuth2AuditLog.setScope(clientScopesToString(client));
+	                            oAuth2AuditLog.setSuccess(true);
+                            } else {
+                                log.trace("Client parameters are invalid, returns invalid_request error.");
+                                builder = Response.status(Response.Status.BAD_REQUEST).
+                                        entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
+                            }
                         }
                     } else {
                         log.trace("Client parameters are invalid, returns invalid_request error.");
