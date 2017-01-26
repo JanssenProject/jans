@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.util;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.ResponseMode;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -21,7 +22,7 @@ import java.util.StringTokenizer;
 
 /**
  * @author Javier Rojas Blum
- * @version October 1, 2015
+ * @version January 25, 2017
  */
 public class RedirectUri {
 
@@ -147,12 +148,13 @@ public class RedirectUri {
             if (responseMode == ResponseMode.FORM_POST) {
                 sb = new StringBuilder();
                 sb.append("<html>");
-                sb.append("<head><title>Submit This Form</title></head>");
+                sb.append("<head><title>oxAuth - Submit This Form</title></head>");
                 sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
                 //sb.append("<body>");
                 sb.append("<form method=\"post\" action=\"" + baseRedirectUri + "\">");
                 for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-                    sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entry.getValue() + "\"/>");
+                    String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
+                    sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entryValue + "\"/>");
                 }
                 sb.append("</form>");
                 sb.append("</body>");
