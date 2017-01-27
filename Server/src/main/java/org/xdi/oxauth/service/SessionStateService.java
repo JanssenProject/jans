@@ -533,7 +533,7 @@ public class SessionStateService {
         final String baseDn = getBaseDn();
         final StringBuilder sb = new StringBuilder();
         if (Util.allNotBlank(p_id, getBaseDn())) {
-            sb.append("uniqueIdentifier=").append(p_id).append(",").append(baseDn);
+            sb.append("oxAuthSessionId=").append(p_id).append(",").append(baseDn);
         }
         return sb.toString();
     }
