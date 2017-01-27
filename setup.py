@@ -672,7 +672,8 @@ class Setup(object):
         return "\n".join(lines)
 
     def replaceInText(self, text, pattern, update):
-        return re.sub(pattern, update, text, flags=re.DOTALL | re.M)
+        rePattern = re.compile(pattern,  flags=re.DOTALL | re.M)
+        return rePattern.sub(update, text)
 
     def applyChangesInFiles(self, changes):
         self.logIt("Applying changes to %s files..." % changes['name'])
