@@ -1,0 +1,5214 @@
+{
+    "attributeTypes": [
+        {
+            "desc": "Associate the dn of an OAuth2 client with a person or UMA Resource Set.", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "oxAssociatedClient", 
+                "associatedClient"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.1", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Reference the dn of a person.", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "associatedPerson"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.2", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Blowfish crypted text", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "blowfishPassword"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.3", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ISO 3166-1 Alpha-2 Country Code", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "county"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.4", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Creation Date used for password reset requests", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "creationDate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.5", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Track the default scope for an custom OAuth2 Scope.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "defaultScope"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.6", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Track which appliances are deployed at an organization.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "deployedAppliances"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.7", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Track rules for the federation in Gluu SAML config. Deprecated  as multi-party federation management should move to Jagger.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "federationRules"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.8", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Organizational attribute to control whether new users can be added  via the oxTrust GUI.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAddPersonCapability"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.9", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Track bandwidth requirements for the Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAdditionalBandwidth"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.10", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Track additional memory requirements for the Gluu Server instance.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAdditionalMemory"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.11", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO : use unclear", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAdditionalUsers"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.12", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Persist the DNS server that should be used for the Gluu Server instance.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuApplianceDnsServer"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.13", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Set the frequency of the health status update of the Gluu Server", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAppliancePollingInterval"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.14", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Used by the Gluu Server to request an update", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuApplianceUpdateRequestList", 
+                "gluuApplianceUpdateReuestList"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.15", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Specify in oxTrust who can view an attribute, admin or user", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAttributeViewType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.16", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Specify in oxTrust who can update an attribute, admin or user", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAttributeEditType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.17", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Specify an identifier for an attribute. May be multi-value  where an attribute has two names, like givenName and first-name.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAttributeName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.18", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Specify the person objectclass associated with the attribute,  used for display purposes in oxTrust.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAttributeOrigin"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.19", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - still required?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAttributeSystemEditType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.20", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Data type of attribute. Values can be string, photo, numeric, date", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAttributeType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.21", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - Usage? Value can be OpenID", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuAttributeUsageType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.22", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Track data received by the Gluu Server", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuBandwidthRX"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.23", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Track data sent by the Gluu Server", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuBandwidthTX"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.24", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use? Used to group attributes together.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuCategory"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.25", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML Trust Relationship federation info", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "gluuContainerFederation"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.26", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust custom welcome message", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuCustomMessage"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.27", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitor health of the instance LDAP server.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuDSstatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.28", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Specifies SAML trust relationship entity ID", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuEntityId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.29", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - Stores URL of favicon", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuFaviconImage"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.30", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust flag for the federation feature. Values enabled or disabled.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuFederationHostingEnabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.31", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitor free disk space on the Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuFreeDiskSpace"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.32", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitor free memory on the Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuFreeMemory"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.33", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitor swap space on the Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuFreeSwap"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.34", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitor HTTP availability of the Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuHTTPstatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.35", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitor the number of groups. TODO - Remove?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuGroupCount"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.36", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Type of Group. Not used.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuGroupType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.37", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Group visibility. Not used.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuGroupVisibility"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.38", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "The hostname of the Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuHostname"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.39", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuInvoiceAmount"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.40", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "gluuInvoiceDate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.41", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuInvoiceLineItemName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.42", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuInvoiceNo"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.43", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuInvoiceNumber"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.44", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuInvoiceProductNumber"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.45", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuInvoiceQuantity"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.46", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuInvoiceStatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.47", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "IP address of the Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuIpAddress"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.48", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Used in oxTrust to specify if a SAML Trust Relationship is a federation.  It could also be a website", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuIsFederation"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.49", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitors last time the server was able to connect to  the monitoring system.", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "gluuLastUpdate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.50", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuLifeRay", 
+                "TODO-remove"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.51", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Montior the average CPU load for a Gluu Server instance.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuLoadAvg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.52", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Logo used by oxTrust for default look and feel.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuLogoImage"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.53", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuManageIdentityPermission"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.54", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Used to track with which organizations a person is associated", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuManagedOrganizations"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.55", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Used to specify if a person has the manager role", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuManager"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.56", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Used in organizatoin entry to specifies the dn of the group that  has admin priviledges in oxTrust.", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "gluuManagerGroup"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.57", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Maximum Log File Size", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuMaxLogSize"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.58", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "White pages attributes restricted by person in oxTrust profile management", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuOptOuts"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.59", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "enable or disable profile management feature in oxTrust", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuOrgProfileMgt"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.60", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Short description, as few letters as possible, no spaces.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuOrgShortName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.61", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuPaidUntil"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.62", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuPaymentProcessorTimestamp"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.63", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitor the number of people in the LDAP severs for a Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuPersonCount"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.64", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuPrivate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.65", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - remove", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuProStoresUser"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.66", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML Trust Relationship attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuProfileConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.67", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Gluu Server flag to publish the IDP metadata via the web server", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuPublishIdpMetadata"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.68", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust reference for the dn of the released attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuReleasedAttribute"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.69", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuResizeInitiated"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.70", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - use unknown for Gluu SAML config", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuRulesAccepted"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.71", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML 1 uri of attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAML1URI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.72", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML 2 uri of attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAML2URI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.73", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Metadata filter in SAML trust relationship", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAMLMetaDataFilter"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.74", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML trust relationship configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAMLTrustEngine"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.75", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML trust relationship refresh time", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAMLmaxRefreshDelay"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.76", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML Trust Relationship file location of metadata", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAMLspMetaDataFN"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.77", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML Trust Relationship SP metadata type - file, URI, federation", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAMLspMetaDataSourceType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.78", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML Trust Relationship URI location of metadata", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSAMLspMetaDataURL"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.79", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Specifies if the person has the SLA manager role", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSLAManager"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.80", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSPTR"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.81", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust SCIM feature - enabled or disabled", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuScimEnabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.82", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitors activity of Gluu Server Shibboleth IDP", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuShibAssertionsIssued"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.83", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitors failed login attempts on Gluu Server Shibboleth IDP", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuShibFailedAuth"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.84", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitors security events on Gluu Server Shibboleth IDP", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuShibSecurityEvents"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.85", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitors login attempts on Gluu Server Shibboleth IDP", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuShibSuccessfulAuths"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.86", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Gluu Server SMTP configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpFromEmailAddress"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.87", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP From Name", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpFromName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.88", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP Host", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpHost"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.89", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP User Password", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpPassword"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.90", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP Port", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpPort"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.91", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP Requires Authentication", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpRequiresAuthentication"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.92", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP Requires SSL", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpRequiresSsl"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.93", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP User Name", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSmtpUserName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.94", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML Trust Relationship configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSpecificRelyingPartyConfig"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.95", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SAML Trust Relationship configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSslExpiry"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.96", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Status of the entry, used by many objectclasses", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuStatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.97", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitors how long the Gluu Server instance has been running.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuSystemUptime"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.98", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Monitors total available RAM on Gluu Server instance", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuTargetRAM"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.99", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Store location for upload of Favicon", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuTempFaviconImage"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.100", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust login page configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuThemeColor"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.101", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust login page configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuTrustContact"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.102", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuTrustDeconstruction"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.103", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Gluu instance URL", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuUrl"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.104", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust VDS enabled or disabled", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuVDSenabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.105", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Gluu VDS configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuVDSstatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.106", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuValidationLog"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.107", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuValidationStatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.108", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuVdsCacheRefreshEnabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.109", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "gluuVdsCacheRefreshLastUpdate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.110", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuVdsCacheRefreshLastUpdateCount"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.111", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuVdsCacheRefreshPollingInterval"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.112", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuVdsCacheRefreshProblemCount"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.113", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuWhitePagesEnabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.114", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Allow Publication", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuWhitePagesListed"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.115", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "iname"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.116", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "XRI i-number", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "inum"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.117", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "XRI i-number sans punctuation", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "inumFN"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.118", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX literalValue", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "literalBinaryValue"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.119", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX literalValue", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "literalValue"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.120", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "memberOf"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.121", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TODO - in use?", 
+            "equality": "booleanMatch", 
+            "names": [
+                "nonProfit"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.122", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.7", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX organizationalOwner", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "organizationalOwner"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.123", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "am host", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAmHost"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.124", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "NameId or attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAttributeType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.125", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Used by oxAuth in conjunction with gluuttributeName to map claims to attributes in LDAP.", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthClaimName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.126", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth App Type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthAppType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.127", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Authentication Time", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxAuthAuthenticationTime"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.128", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth authorization code", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthAuthorizationCode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.129", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Attribute Claim", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthClaim"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.130", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Group Attribute Claims (true or false)", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthGroupClaims"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.131", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Client id", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthClientId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.132", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Client Issued At", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthClientIdIssuedAt"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.133", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Client Secret", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthClientSecret"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.134", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Date client expires", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxAuthClientSecretExpiresAt"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.135", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Client URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthClientURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.136", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Dynamic Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthConfDynamic"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.137", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Errors Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthConfErrors"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.138", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Static Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthConfStatic"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.139", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Web Keys Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthConfWebKeys"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.140", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Contact", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthContact"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.141", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Creation", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxAuthCreation"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.142", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Default Acr Values", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthDefaultAcrValues"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.143", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Default Max Age", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthDefaultMaxAge"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.144", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Expiration", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxAuthExpiration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.145", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth grant id", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthGrantId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.146", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Grant Type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthGrantType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.147", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth ID Token Encrypted Response Alg", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthIdTokenEncryptedResponseAlg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.148", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth ID Token Encrypted Response Enc", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthIdTokenEncryptedResponseEnc"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.149", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth ID Token Signed Response Alg", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthIdTokenSignedResponseAlg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.150", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Initiate Login URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthInitiateLoginURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.151", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth JWKs URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthJwksURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.152", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth JWKs", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthJwks"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.153", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth JWT Request", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthJwtRequest"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.154", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Logo URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthLogoURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.155", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth nonce", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthNonce"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.156", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Permission Granted", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthPermissionGranted"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.157", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Permission Granted Map", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthPermissionGrantedMap"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.158", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Persistent JWT", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthPersistentJWT"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.159", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Policy URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthPolicyURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.160", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Policy URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthLogoutURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.161", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Policy URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthLogoutSessionRequired"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.162", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Post Logout Redirect URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthPostLogoutRedirectURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.163", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Redirect URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthRedirectURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.164", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Registration Access Token", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthRegistrationAccessToken"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.165", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth released scope attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthReleasedScope"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.166", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Request Object Signing Alg", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthRequestObjectSigningAlg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.167", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Request Object Encryption Alg", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthRequestObjectEncryptionAlg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.168", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Request Object Encryption Enc", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthRequestObjectEncryptionEnc"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.169", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Request URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthRequestURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.170", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Require Authentication Time", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthRequireAuthTime"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.171", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Response Type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthResponseType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.172", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Attribute Scope", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthScope"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.173", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX Attribute Scope type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxScopeType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.174", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Sector Identifier URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthSectorIdentifierURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.175", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Signed Response Alg", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthSignedResponseAlg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.176", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth skip authorization attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthSkipAuthorization"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.177", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Subject Type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthSubjectType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.178", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Token Code", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthTokenCode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.179", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Token Endpoint Auth Method", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthTokenEndpointAuthMethod"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.180", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Token Endpoint Auth Signing Alg", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthTokenEndpointAuthSigningAlg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.181", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Token Type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthTokenType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.182", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth TOS URI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthTosURI"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.183", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Trusted Client", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthTrustedClient"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.184", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "URI reference of scope descriptor", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthUmaScope"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.185", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth User DN", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "oxAuthUserDN"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.186", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth user id", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthUserId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.187", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth User Info Encrypted Response Alg", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthUserInfoEncryptedResponseAlg"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.188", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth User Info Encrypted Response Enc", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthUserInfoEncryptedResponseEnc"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.189", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth additional configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthExtraConf"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.190", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth x509 in PEM format", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthX509PEM"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.191", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth x509 URL", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthX509URL"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.192", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthenticationMode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.193", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustAuthenticationMode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.194", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox configuration code", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxConfigurationCode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.195", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Registration time", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxCreationTimestamp"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.196", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "domain", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxDomain"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.197", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxExternalUid"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.198", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "URI for a graphic icon", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxFaviconImage"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.199", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "User group", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxGroup"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.200", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "A random string to mark temporary tokens", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxGuid"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.201", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox host", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxHost"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.202", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Custom IDP authentication configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxIDPAuthentication"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.203", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox icon url", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxIconUrl"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.204", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Identifier", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.205", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Boolean field to indicate whether object is used as JWT", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAsJwt"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.206", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "JWT representation of the object or otherwise jwt associated with the object", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxJwt"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.207", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Involved clients", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxInvolvedClients"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.208", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Last access time", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxLastAccessTime"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.209", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Last logon time", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxLastLogonTime"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.210", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Link Creator", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinkCreator"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.211", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Link Expiration Date", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxLinkExpirationDate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.212", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Linktrack link", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinkLinktrack"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.213", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Is Link Moderated?", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinkModerated"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.214", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Link Moderators", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinkModerators"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.215", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Pending Registrations", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinkPending"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.216", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Is Linktrack API configured", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinktrackEnabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.217", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Linktrack API login", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinktrackLogin"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.218", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Linktrack API password", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLinktrackPassword"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.219", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Log viewer configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLogViewerConfig"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.220", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxMultivaluedAttribute"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.221", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Name", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.222", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "NameId Type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxNameIdType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.223", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Policy Rule", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxPolicyRule"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.224", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX policy script Dn", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "oxPolicyScriptDn"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.225", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxProx Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxProxConf"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.226", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxProx access token", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxProxyAccessToken"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.227", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxProx claim mapping", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxProxyClaimMapping"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.228", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxState", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxState"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.229", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxCounter", 
+            "equality": "integerMatch", 
+            "names": [
+                "oxCounter"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.230", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxStatus", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxStatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.231", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxApplication", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxApplication"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.232", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxDeviceRegistrationConf", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxDeviceRegistrationConf"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.233", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxDeviceKeyHandle", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxDeviceKeyHandle"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.234", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxDeviceHashCode", 
+            "equality": "integerMatch", 
+            "names": [
+                "oxDeviceHashCode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.235", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.27", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxRequest", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxRequest"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.236", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxRequestId", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxRequestId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.237", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxDeviceData", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxDeviceData"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.238", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxEnrollmentCode", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxEnrollmentCode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.239", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxProx client id", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxProxyClientId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.240", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxProx scope", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxProxyScope"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.241", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxProx client mapping to op client", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxProxyToOpClientMapping"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.242", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxPush application DN", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "oxPushApplication"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.243", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxPush application configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxPushApplicationConf"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.244", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxPush device configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxPushDeviceConf"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.245", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Registration Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxRegistrationConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.246", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Host path", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxResource"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.247", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox resource set id", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxResourceSetId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.248", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Revision", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxRevision"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.249", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Level", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxLevel"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.250", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxSCIMCustomAttribute"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.251", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Attribute that contains script (python, java script)", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxScript"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.252", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Script object DN", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "oxScriptDn"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.253", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Attribute that contains script type (e.g. python, java script)", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxScriptType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.254", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SMTP configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxSmtpConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.255", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Source Attribute for this Attribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxSourceAttribute"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.256", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox ticket", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTicket"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.257", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustActive"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.258", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustCacheRefreshServerIpAddress"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.259", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Specifies the oxTrust server which should run Cache refresh"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustAddresses"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.260", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust Application Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustConfApplication"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.261", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust Cache Refresh Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustConfCacheRefresh"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.262", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox Application Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxConfApplication"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.263", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "scim status", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustCustAttrB"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.264", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustEmail"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.265", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustEntitlements"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.266", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustExternalId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.267", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustImsValue"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.268", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustMetaCreated"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.269", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustMetaLastModified"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.270", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustMetaLocation"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.271", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustMetaVersion"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.272", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustNameFormatted"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.273", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustPhoneValue"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.274", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustPhotos"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.275", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustProfileURL"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.276", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustRole"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.277", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxPush device configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustStoreCert"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.278", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxPush application configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustStoreConf"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.279", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustTitle"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.280", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustUserType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.281", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrusthonorificPrefix"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.282", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrusthonorificSuffix"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.283", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustx509Certificate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.284", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.285", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox uma permission", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxUmaPermission"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.286", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox url", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxUrl"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.287", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "x509 in PEM format", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxX509PEM"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.288", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "x509 URL", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxX509URL"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.289", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Is password reset mechanics allowed", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "passwordResetAllowed"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.290", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "PersistentId", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "persistentId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.291", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Persistent ID reserved for SAML"
+        }, 
+        {
+            "desc": "Inum of a person", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "personInum"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.292", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Primary Key Attribute Name", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "primaryKeyAttrName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.293", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Primary Key Value", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "primaryKeyValue"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.294", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "proStoresToken"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.295", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "programming language", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "programmingLanguage"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.296", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "prostoresTimestamp"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.297", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Registration date", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "registrationDate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.298", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Role", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "role"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.299", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "SCIM Authorization mode", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "scimAuthMode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.300", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "scim Group", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "scimGroup"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.301", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "scim status", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "scimStatus"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.302", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Secondary Key Attribute Name", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "secondaryKeyAttrName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.303", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Secondary Key Value", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "secondaryKeyValue"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.304", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Secret Answer", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "secretAnswer"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.305", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Secret Question", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "secretQuestion"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.306", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "softwareVersion"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.307", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX SourceRelationalXdiStatement", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "sourceRelationalXdiStatement"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.308", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX TargetRelationalXdiStatement", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "targetRelationalXdiStatement"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.309", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Tertiary Key Attribute Name", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "tertiaryKeyAttrName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.310", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Tertiary Key Value", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "tertiaryKeyValue"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.311", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "TransientId", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "transientId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.312", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "url"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.313", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "urn"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.314", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX XRI Component", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "x"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.315", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX xdiStatement", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "xdiStatement"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.316", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX XRI address", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "xri"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.317", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Middle name(s)", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "middleName", 
+                "oxTrustMiddleName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.318", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Casual name of the End-User", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "nickname", 
+                "oxTrustnickname"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.319", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Shorthand Name", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "preferredUsername"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.320", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Profile page URL of the person", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "profile"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.321", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Profile picture URL of the person", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "picture", 
+                "photo1"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.322", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Web page or blog URL of the person", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "website"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.323", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "True if the e-mail address of the person has been verified; otherwise false", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "emailVerified"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.324", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Gender of the person either female or male", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gender"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.325", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Birthday of the person, represented as an ISO 8601:2004 [ISO8601\u20112004] YYYY-MM-DD format", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "birthdate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.326", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Time zone database representing the End-Users time zone. For example, Europe/Paris or America/Los_Angeles", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "zoneinfo", 
+                "timezone"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.327", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Locale of the person, represented as a BCP47 [RFC5646] language tag", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "locale", 
+                "oxTrustLocale"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.328", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "True if the phone number of the person has been verified, otherwise false", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "phoneNumberVerified"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.329", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OpenID Connect formatted JSON object representing the address of the person", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "address"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.330", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Time the information of the person was last updated. Seconds from 1970-01-01T0:0:0Z", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "updatedAt"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.331", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Regular expression used to validate attribute data", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuRegExp"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.332", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Custom tooltip to be shown on the UI", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuTooltip"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.333", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "OpenID Connect 1.0 Standard Claim"
+        }, 
+        {
+            "desc": "Module property", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxModuleProperty"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.334", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Configuration property", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxConfigurationProperty"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.335", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuthSessionAttribute", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthSessionAttribute"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.336", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Trust relationship attribute to show that InCommon R&S activated", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "researchAndScholarshipEnabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.337", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Start date", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxStartDate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.338", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "End date", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxEndDate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.339", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Application type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxApplicationType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.340", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Metric type", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxMetricType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.341", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX data", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxData"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.342", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX PKCE code challenge", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxCodeChallenge"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.343", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "OX PKCE code challenge method", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxCodeChallengeMethod"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.344", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox Sector Identifier", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxSectorIdentifier"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.345", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "ox Persist Client Authorizations", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxPersistClientAuthorizations"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.346", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust Import Person Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxTrustConfImportPerson"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.347", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxSessionStateId", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxSessionStateId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.348", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Session DN", 
+            "equality": "distinguishedNameMatch", 
+            "names": [
+                "oxAuthSessionDn"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.349", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.12", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Password Expiration date, represented as an ISO 8601 (YYYY-MM-DD) format", 
+            "equality": "generalizedTimeMatch", 
+            "names": [
+                "oxPasswordExpirationDate"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.350", 
+            "ordering": "generalizedTimeOrderingMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.24", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAsimba friendlyName field", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "friendlyName"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.351", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAsimba IDP organizationId field", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "organizationId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.352", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAsimba configuration JSON/XML serialization field", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAsimbaEntry"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.353", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Invalid login attempts count", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxCountInvalidLogin"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.354", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "This data has information about your imap connection", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuIMAPData"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.355", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxTrust Passport Strategy Configuration", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuPassportConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.356", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuPassportEnabled"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.357", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "This data has information about attribute Validation", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxValidation"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.358", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "This data has information about TR EntityType", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "gluuEntityType"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.359", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "Persistent Pairwise ID for OpenID Connect", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxPPID"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.360", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }, 
+        {
+            "desc": "oxAuth Session Id", 
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "oxAuthSessionId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.3.361", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu created attribute"
+        }
+    ], 
+    "objectClasses": [
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxId", 
+                "oxSectorIdentifier"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "pairwiseIdentifier"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.1", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "associatedClient", 
+                "c", 
+                "displayName", 
+                "givenName", 
+                "gluuManagedOrganizations", 
+                "gluuOptOuts", 
+                "gluuStatus", 
+                "gluuWhitePagesListed", 
+                "iname", 
+                "inum", 
+                "mail", 
+                "gluuSLAManager", 
+                "memberOf", 
+                "o", 
+                "oxAuthPersistentJWT", 
+                "oxCreationTimestamp", 
+                "oxExternalUid", 
+                "oxLastLogonTime", 
+                "oxTrustActive", 
+                "oxTrustAddresses", 
+                "oxTrustEmail", 
+                "oxTrustEntitlements", 
+                "oxTrustExternalId", 
+                "oxTrustImsValue", 
+                "oxTrustMetaCreated", 
+                "oxTrustMetaLastModified", 
+                "oxTrustMetaLocation", 
+                "oxTrustMetaVersion", 
+                "oxTrustNameFormatted", 
+                "oxTrustPhoneValue", 
+                "oxTrustPhotos", 
+                "oxTrustProfileURL", 
+                "oxTrustRole", 
+                "oxTrustTitle", 
+                "oxTrustUserType", 
+                "oxTrusthonorificPrefix", 
+                "oxTrusthonorificSuffix", 
+                "oxTrustx509Certificate", 
+                "oxPasswordExpirationDate", 
+                "persistentId", 
+                "middleName", 
+                "nickname", 
+                "preferredUsername", 
+                "profile", 
+                "picture", 
+                "website", 
+                "emailVerified", 
+                "gender", 
+                "birthdate", 
+                "zoneinfo", 
+                "locale", 
+                "phoneNumberVerified", 
+                "address", 
+                "updatedAt", 
+                "preferredLanguage", 
+                "role", 
+                "secretAnswer", 
+                "secretQuestion", 
+                "seeAlso", 
+                "sn", 
+                "cn", 
+                "transientId", 
+                "uid", 
+                "userPassword", 
+                "st", 
+                "street", 
+                "l", 
+                "oxCountInvalidLogin", 
+                "oxEnrollmentCode", 
+                "gluuIMAPData", 
+                "oxPPID"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuPerson"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.2", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "c", 
+                "description", 
+                "displayName", 
+                "gluuGroupType", 
+                "gluuGroupVisibility", 
+                "gluuStatus", 
+                "iname", 
+                "inum", 
+                "member", 
+                "o", 
+                "owner", 
+                "seeAlso", 
+                "oxTrustMetaCreated", 
+                "oxTrustMetaLastModified", 
+                "oxTrustMetaLocation", 
+                "oxTrustMetaVersion"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuGroup"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.3", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "c", 
+                "county", 
+                "deployedAppliances", 
+                "description", 
+                "displayName", 
+                "gluuAddPersonCapability", 
+                "gluuAdditionalUsers", 
+                "gluuApplianceUpdateRequestList", 
+                "gluuCustomMessage", 
+                "gluuFaviconImage", 
+                "gluuFederationHostingEnabled", 
+                "gluuInvoiceNo", 
+                "gluuLogoImage", 
+                "gluuManageIdentityPermission", 
+                "gluuManager", 
+                "gluuManagerGroup", 
+                "gluuOrgProfileMgt", 
+                "gluuOrgShortName", 
+                "gluuPaidUntil", 
+                "gluuPaymentProcessorTimestamp", 
+                "gluuProStoresUser", 
+                "gluuStatus", 
+                "gluuTempFaviconImage", 
+                "gluuThemeColor", 
+                "gluuWhitePagesEnabled", 
+                "iname", 
+                "inum", 
+                "l", 
+                "mail", 
+                "memberOf", 
+                "nonProfit", 
+                "o", 
+                "oxCreationTimestamp", 
+                "oxLinkLinktrack", 
+                "oxLinktrackEnabled", 
+                "oxLinktrackLogin", 
+                "oxLinktrackPassword", 
+                "oxRegistrationConfiguration", 
+                "postalCode", 
+                "proStoresToken", 
+                "prostoresTimestamp", 
+                "scimAuthMode", 
+                "scimGroup", 
+                "scimStatus", 
+                "st", 
+                "street", 
+                "telephoneNumber", 
+                "title", 
+                "uid", 
+                "userPassword"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuOrganization"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.4", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "blowfishPassword", 
+                "c", 
+                "description", 
+                "displayName", 
+                "gluuAdditionalBandwidth", 
+                "gluuAdditionalMemory", 
+                "gluuApplianceDnsServer", 
+                "gluuAppliancePollingInterval", 
+                "gluuBandwidthRX", 
+                "gluuBandwidthTX", 
+                "gluuDSstatus", 
+                "gluuFederationHostingEnabled", 
+                "gluuFreeDiskSpace", 
+                "gluuFreeMemory", 
+                "gluuFreeSwap", 
+                "gluuGroupCount", 
+                "gluuHTTPstatus", 
+                "gluuHostname", 
+                "gluuInvoiceNo", 
+                "gluuIpAddress", 
+                "gluuLastUpdate", 
+                "gluuLifeRay", 
+                "gluuLoadAvg", 
+                "gluuManageIdentityPermission", 
+                "gluuManager", 
+                "gluuMaxLogSize", 
+                "gluuOrgProfileMgt", 
+                "gluuPaidUntil", 
+                "gluuPaymentProcessorTimestamp", 
+                "gluuPersonCount", 
+                "gluuPrivate", 
+                "gluuPublishIdpMetadata", 
+                "gluuResizeInitiated", 
+                "gluuSPTR", 
+                "gluuScimEnabled", 
+                "gluuShibAssertionsIssued", 
+                "gluuShibFailedAuth", 
+                "gluuShibSecurityEvents", 
+                "gluuShibSuccessfulAuths", 
+                "oxTrustEmail", 
+                "gluuSmtpFromEmailAddress", 
+                "gluuSmtpFromName", 
+                "gluuSmtpHost", 
+                "gluuSmtpPassword", 
+                "gluuSmtpPort", 
+                "gluuSmtpRequiresAuthentication", 
+                "gluuSmtpRequiresSsl", 
+                "gluuSmtpUserName", 
+                "gluuSslExpiry", 
+                "gluuStatus", 
+                "gluuSystemUptime", 
+                "gluuTargetRAM", 
+                "gluuUrl", 
+                "gluuVDSenabled", 
+                "gluuVDSstatus", 
+                "gluuVdsCacheRefreshEnabled", 
+                "gluuVdsCacheRefreshLastUpdate", 
+                "gluuVdsCacheRefreshLastUpdateCount", 
+                "gluuVdsCacheRefreshPollingInterval", 
+                "gluuVdsCacheRefreshProblemCount", 
+                "gluuWhitePagesEnabled", 
+                "iname", 
+                "inum", 
+                "inumFN", 
+                "o", 
+                "oxAuthenticationMode", 
+                "oxTrustAuthenticationMode", 
+                "oxIDPAuthentication", 
+                "oxLogViewerConfig", 
+                "oxSmtpConfiguration", 
+                "oxTrustStoreCert", 
+                "oxTrustStoreConf", 
+                "passwordResetAllowed", 
+                "softwareVersion", 
+                "userPassword", 
+                "oxTrustCacheRefreshServerIpAddress", 
+                "gluuPassportEnabled"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuAppliance"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.5", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "description", 
+                "displayName", 
+                "gluuAttributeEditType", 
+                "gluuAttributeName", 
+                "gluuAttributeOrigin", 
+                "gluuAttributeSystemEditType", 
+                "gluuAttributeType", 
+                "oxAuthClaimName", 
+                "gluuAttributeUsageType", 
+                "gluuAttributeViewType", 
+                "gluuCategory", 
+                "gluuSAML1URI", 
+                "gluuSAML2URI", 
+                "gluuStatus", 
+                "iname", 
+                "inum", 
+                "oxAttributeType", 
+                "oxMultivaluedAttribute", 
+                "oxNameIdType", 
+                "oxSCIMCustomAttribute", 
+                "oxSourceAttribute", 
+                "seeAlso", 
+                "urn", 
+                "gluuRegExp", 
+                "gluuTooltip", 
+                "oxValidation"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuAttribute"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.6", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "description", 
+                "displayName", 
+                "federationRules", 
+                "gluuContainerFederation", 
+                "gluuEntityId", 
+                "gluuIsFederation", 
+                "gluuProfileConfiguration", 
+                "gluuReleasedAttribute", 
+                "gluuRulesAccepted", 
+                "gluuSAMLMetaDataFilter", 
+                "gluuSAMLTrustEngine", 
+                "gluuSAMLmaxRefreshDelay", 
+                "gluuSAMLspMetaDataFN", 
+                "gluuSAMLspMetaDataSourceType", 
+                "gluuSAMLspMetaDataURL", 
+                "gluuSpecificRelyingPartyConfig", 
+                "gluuStatus", 
+                "gluuTrustContact", 
+                "gluuTrustDeconstruction", 
+                "gluuValidationLog", 
+                "gluuValidationStatus", 
+                "iname", 
+                "inum", 
+                "o", 
+                "oxAuthPostLogoutRedirectURI", 
+                "url", 
+                "researchAndScholarshipEnabled", 
+                "gluuEntityType"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuSAMLconfig"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.7", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "gluuStatus", 
+                "inum", 
+                "primaryKeyAttrName", 
+                "primaryKeyValue", 
+                "secondaryKeyAttrName", 
+                "secondaryKeyValue", 
+                "tertiaryKeyAttrName", 
+                "tertiaryKeyValue"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuInumMap"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.8", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "gluuInvoiceAmount", 
+                "gluuInvoiceDate", 
+                "gluuInvoiceLineItemName", 
+                "gluuInvoiceNumber", 
+                "gluuInvoiceProductNumber", 
+                "gluuInvoiceQuantity", 
+                "gluuInvoiceStatus", 
+                "inum"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuInvoice"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.9", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "creationDate", 
+                "oxGuid", 
+                "personInum"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "gluuPasswordResetRequest"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.10", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "description", 
+                "oxGuid", 
+                "oxLinkCreator", 
+                "oxLinkExpirationDate", 
+                "oxLinkLinktrack", 
+                "oxLinkModerated", 
+                "oxLinkModerators", 
+                "oxLinkPending"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxLink"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.11", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "vdapcontainer"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.12", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "o"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "vdDirectoryView"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.13", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "o"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "vdlabel"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.14", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "displayName", 
+                "iname", 
+                "inum"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxEntry"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.15", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "organizationalOwner", 
+                "owner", 
+                "sourceRelationalXdiStatement", 
+                "targetRelationalXdiStatement", 
+                "x", 
+                "xdiStatement", 
+                "xri"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxNode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.16", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "associatedPerson", 
+                "displayName", 
+                "inum", 
+                "oxAuthAppType", 
+                "oxAuthClientIdIssuedAt", 
+                "oxAuthClientSecret", 
+                "oxAuthClientSecretExpiresAt", 
+                "oxAuthClientURI", 
+                "oxAuthContact", 
+                "oxAuthDefaultAcrValues", 
+                "oxAuthDefaultMaxAge", 
+                "oxAuthGrantType", 
+                "oxAuthIdTokenEncryptedResponseAlg", 
+                "oxAuthIdTokenEncryptedResponseEnc", 
+                "oxAuthIdTokenSignedResponseAlg", 
+                "oxAuthInitiateLoginURI", 
+                "oxAuthJwksURI", 
+                "oxAuthJwks", 
+                "oxAuthLogoURI", 
+                "oxAuthPolicyURI", 
+                "oxAuthPostLogoutRedirectURI", 
+                "oxAuthRedirectURI", 
+                "oxAuthRegistrationAccessToken", 
+                "oxAuthRequestObjectSigningAlg", 
+                "oxAuthRequestObjectEncryptionAlg", 
+                "oxAuthRequestObjectEncryptionEnc", 
+                "oxAuthRequestURI", 
+                "oxAuthRequireAuthTime", 
+                "oxAuthResponseType", 
+                "oxAuthScope", 
+                "oxAuthSectorIdentifierURI", 
+                "oxAuthSignedResponseAlg", 
+                "oxAuthSubjectType", 
+                "oxAuthTokenEndpointAuthMethod", 
+                "oxAuthTokenEndpointAuthSigningAlg", 
+                "oxAuthTosURI", 
+                "oxAuthTrustedClient", 
+                "oxAuthUserInfoEncryptedResponseAlg", 
+                "oxAuthUserInfoEncryptedResponseEnc", 
+                "oxAuthExtraConf", 
+                "oxLastAccessTime", 
+                "oxLastLogonTime", 
+                "oxPersistClientAuthorizations", 
+                "oxAuthLogoutURI", 
+                "oxAuthLogoutSessionRequired"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthClient"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.17", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "defaultScope", 
+                "description", 
+                "displayName", 
+                "inum", 
+                "oxScopeType", 
+                "oxAuthClaim", 
+                "oxScriptDn", 
+                "oxAuthGroupClaims"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthCustomScope"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.18", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxLastAccessTime", 
+                "oxAuthAuthenticationTime", 
+                "oxAuthPermissionGranted", 
+                "oxAuthPermissionGrantedMap", 
+                "oxAuthUserDN", 
+                "oxAuthSessionId", 
+                "oxState", 
+                "oxAuthSessionAttribute", 
+                "oxAsJwt", 
+                "oxJwt", 
+                "oxInvolvedClients"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthSessionId"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.19", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "oxAuthConfDynamic", 
+                "oxAuthConfErrors", 
+                "oxAuthConfStatic", 
+                "oxAuthConfWebKeys", 
+                "oxRevision"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.20", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "oxTrustConfApplication", 
+                "oxTrustConfCacheRefresh", 
+                "oxRevision", 
+                "oxTrustConfImportPerson"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxTrustConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.21", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "oxConfApplication", 
+                "oxRevision"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxApplicationConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.22", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "displayName", 
+                "inum", 
+                "owner", 
+                "oxAssociatedClient", 
+                "oxAuthUmaScope", 
+                "oxFaviconImage", 
+                "oxGroup", 
+                "oxId", 
+                "oxResource", 
+                "oxRevision", 
+                "oxType", 
+                "oxUrl"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthUmaResourceSet"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.23", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "displayName", 
+                "inum", 
+                "owner", 
+                "oxFaviconImage", 
+                "oxIconUrl", 
+                "oxId", 
+                "oxPolicyRule", 
+                "oxPolicyScriptDn", 
+                "oxRevision", 
+                "oxType", 
+                "oxUrl"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthUmaScopeDescription"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.24", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxAmHost", 
+                "oxAuthExpiration", 
+                "oxAuthUmaScope", 
+                "oxConfigurationCode", 
+                "oxHost", 
+                "oxResourceSetId", 
+                "oxTicket"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthUmaResourceSetPermission"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.25", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxAuthGrantId", 
+                "oxAuthCreation"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthGrant"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.26", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxAuthAuthenticationTime", 
+                "oxAuthAuthorizationCode", 
+                "oxAuthCreation", 
+                "oxAuthExpiration", 
+                "oxAuthGrantId", 
+                "oxAuthGrantType", 
+                "oxAuthJwtRequest", 
+                "oxAuthNonce", 
+                "oxAuthScope", 
+                "oxAuthTokenCode", 
+                "oxAuthTokenType", 
+                "oxAuthUserId", 
+                "oxAuthClientId", 
+                "oxAuthenticationMode", 
+                "uniqueIdentifier", 
+                "oxCodeChallenge", 
+                "oxCodeChallengeMethod", 
+                "oxAuthSessionDn"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthToken"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.27", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxAmHost", 
+                "oxAuthAuthenticationTime", 
+                "oxAuthClientId", 
+                "oxAuthCreation", 
+                "oxAuthExpiration", 
+                "oxAuthTokenCode", 
+                "oxAuthUserId", 
+                "oxUmaPermission", 
+                "uniqueIdentifier"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAuthUmaRPT"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.28", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "literalBinaryValue", 
+                "literalValue", 
+                "organizationalOwner", 
+                "owner", 
+                "targetRelationalXdiStatement", 
+                "x", 
+                "xdiStatement", 
+                "xri"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxLiteralNode"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.29", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "oxProxConf", 
+                "oxScriptDn"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxProxConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.30", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "c", 
+                "displayName", 
+                "inum", 
+                "l", 
+                "oxDomain", 
+                "oxId", 
+                "oxX509PEM", 
+                "oxX509URL"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxProxOp"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.31", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "displayName", 
+                "inum", 
+                "oxProxyClaimMapping", 
+                "oxProxyScope", 
+                "oxProxyToOpClientMapping"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxProxClient"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.32", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxAuthCreation", 
+                "oxAuthExpiration", 
+                "oxProxyAccessToken", 
+                "oxProxyClientId"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxProxAccessToken"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.33", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "inum", 
+                "oxScript", 
+                "oxScriptType"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxScript"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.34", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "displayName", 
+                "oxId", 
+                "oxName", 
+                "oxPushApplicationConf"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxPushApplication"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.35", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxAuthUserId", 
+                "oxId", 
+                "oxPushApplication", 
+                "oxPushDeviceConf", 
+                "oxType"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxPushDevice"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.36", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "inum", 
+                "displayName", 
+                "description", 
+                "oxScript", 
+                "oxScriptType", 
+                "programmingLanguage", 
+                "oxModuleProperty", 
+                "oxConfigurationProperty", 
+                "oxLevel", 
+                "oxRevision", 
+                "gluuStatus"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxCustomScript"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.37", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxId", 
+                "displayName", 
+                "description", 
+                "oxDeviceKeyHandle", 
+                "oxDeviceHashCode", 
+                "oxApplication", 
+                "oxDeviceRegistrationConf", 
+                "oxDeviceData", 
+                "oxCounter", 
+                "oxStatus", 
+                "creationDate", 
+                "oxLastAccessTime", 
+                "oxTrustMetaLastModified", 
+                "oxTrustMetaLocation", 
+                "oxTrustMetaVersion"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxDeviceRegistration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.38", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxId", 
+                "oxRequestId", 
+                "oxRequest", 
+                "oxSessionStateId", 
+                "personInum", 
+                "creationDate"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxU2fRequest"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.39", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "uniqueIdentifier", 
+                "oxStartDate", 
+                "oxEndDate", 
+                "oxApplicationType", 
+                "oxMetricType", 
+                "creationDate", 
+                "oxData"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxMetric"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.40", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "oxId", 
+                "oxAuthClientId", 
+                "oxAuthScope"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxClientAuthorizations"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.41", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "inum", 
+                "oxAuthRedirectURI", 
+                "oxAuthClientId"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxSectorIdentifier"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.42", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "friendlyName", 
+                "uniqueIdentifier", 
+                "inum", 
+                "oxAsimbaEntry", 
+                "oxConfApplication", 
+                "oxRevision"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAsimbaConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.43", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "friendlyName", 
+                "uniqueIdentifier", 
+                "inum", 
+                "organizationId", 
+                "oxAsimbaEntry", 
+                "oxRevision"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAsimbaSelector"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.44", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "friendlyName", 
+                "uniqueIdentifier", 
+                "inum", 
+                "oxAsimbaEntry", 
+                "oxRevision"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAsimbaIDP"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.45", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "friendlyName", 
+                "uniqueIdentifier", 
+                "inum", 
+                "oxAsimbaEntry", 
+                "oxRevision"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAsimbaRequestorPool"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.46", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "friendlyName", 
+                "uniqueIdentifier", 
+                "inum", 
+                "oxAsimbaEntry", 
+                "oxRevision"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxAsimbaSPRequestor"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.47", 
+            "sup": [
+                "top"
+            ]
+        }, 
+        {
+            "kind": "STRUCTURAL", 
+            "may": [
+                "ou", 
+                "gluuPassportConfiguration", 
+                "gluuStatus"
+            ], 
+            "must": [
+                "objectclass"
+            ], 
+            "names": [
+                "oxPassportConfiguration"
+            ], 
+            "oid": "1.3.6.1.4.1.48710.1.4.48", 
+            "sup": [
+                "top"
+            ]
+        }
+    ]
+}

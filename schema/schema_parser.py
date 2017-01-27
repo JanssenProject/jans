@@ -42,6 +42,7 @@ class LDAPSchemaParser(object):
         blocks = f.read().split('\n\n')
 
         for block in blocks:
+            block = block.strip()
             if 'objectIdentifier' in block:
                 oid_macros = self.__parseOIDMacros(block)
             elif re.match('^objectclass', block):
