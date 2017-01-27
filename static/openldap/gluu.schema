@@ -19,9 +19,8 @@ objectIdentifier oxObjectClass oxPublished:4
 
 attributetype ( oxAttribute:1 NAME ( 'oxAssociatedClient' 'associatedClient' )
 	DESC 'Associate the dn of an OAuth2 client with a person or UMA Resource Set.'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	EQUALITY distinguishedNameMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:2 NAME 'associatedPerson'
@@ -417,9 +416,8 @@ attributetype ( oxAttribute:56 NAME 'gluuManager'
 attributetype ( oxAttribute:57 NAME 'gluuManagerGroup'
 	DESC 'Used in organizatoin entry to specifies the dn of the group that
 	has admin priviledges in oxTrust.'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	EQUALITY distinguishedNameMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:58 NAME 'gluuMaxLogSize'
@@ -855,9 +853,8 @@ attributetype ( oxAttribute:120 NAME 'literalValue'
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:121 NAME 'memberOf'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	EQUALITY distinguishedNameMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:122 NAME 'nonProfit'
@@ -868,9 +865,8 @@ attributetype ( oxAttribute:122 NAME 'nonProfit'
 
 attributetype ( oxAttribute:123 NAME 'organizationalOwner'
 	DESC 'OX organizationalOwner'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	EQUALITY distinguishedNameMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:124 NAME 'oxAmHost'
@@ -2070,9 +2066,8 @@ attributetype ( oxAttribute:300 NAME 'scimAuthMode'
 
 attributetype ( oxAttribute:301 NAME 'scimGroup'
 	DESC 'scim Group'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	EQUALITY distinguishedNameMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:302 NAME 'scimStatus'
@@ -2402,9 +2397,8 @@ attributetype ( oxAttribute:348 NAME 'oxSessionStateId'
 
 attributetype ( oxAttribute:349 NAME 'oxAuthSessionDn'
 	DESC 'oxAuth Session DN'
-	SUBSTR caseIgnoreSubstringsMatch
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	EQUALITY distinguishedNameMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:350 NAME 'oxPasswordExpirationDate'
