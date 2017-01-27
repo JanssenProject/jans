@@ -143,11 +143,11 @@ public class SessionState implements Serializable {
     }
 
     public Date getAuthenticationTime() {
-        return authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
+        return authenticationTime;
     }
 
     public void setAuthenticationTime(Date authenticationTime) {
-        this.authenticationTime = authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
+        this.authenticationTime = authenticationTime;
     }
 
     public Boolean getPermissionGranted() {

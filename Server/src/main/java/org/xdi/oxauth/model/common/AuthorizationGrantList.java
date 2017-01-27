@@ -178,7 +178,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
             if (grantType != null) {
                 final User user = userService.getUser(tokenLdap.getUserId());
                 final Client client = clientService.getClient(extractClientIdFromTokenDn(tokenLdap.getDn()));
-                final Date authenticationTime = org.xdi.oxauth.model.util.StringUtils.parseSilently(tokenLdap.getAuthenticationTime());
+                final Date authenticationTime = tokenLdap.getAuthenticationTime();
                 final String nonce = tokenLdap.getNonce();
 
                 AuthorizationGrant result;

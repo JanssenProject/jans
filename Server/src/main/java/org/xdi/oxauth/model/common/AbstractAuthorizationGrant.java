@@ -332,11 +332,11 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public Date getAuthenticationTime() {
-        return authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
+        return authenticationTime;
     }
 
     public void setAuthenticationTime(Date authenticationTime) {
-        this.authenticationTime = authenticationTime != null ? new Date(authenticationTime.getTime()) : null;
+        this.authenticationTime = authenticationTime;
     }
 
 
