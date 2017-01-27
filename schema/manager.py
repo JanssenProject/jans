@@ -66,7 +66,7 @@ def make_json(filename):
 
     schema_dict['objectClasses'] = objectclasses
     schema_dict['attributeTypes'] = attributetypes
-    print json.dumps(schema_dict)
+    print json.dumps(schema_dict, indent=4, sort_keys=True)
 
 
 if __name__ == '__main__':
