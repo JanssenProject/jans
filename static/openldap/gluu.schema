@@ -2477,6 +2477,13 @@ attributetype ( oxAttribute:360 NAME 'oxPPID'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
+attributetype ( oxAttribute:361 NAME 'oxAuthSessionId'
+	DESC 'oxAuth Session Id'
+	SUBSTR caseIgnoreSubstringsMatch
+	EQUALITY caseIgnoreMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu created attribute' )
+
 objectclass ( oxObjectClass:1 NAME 'pairwiseIdentifier' SUP top STRUCTURAL MUST objectclass MAY
 	 ( oxId $ oxSectorIdentifier )
 	  X-ORIGIN 'Gluu created objectclass' )
@@ -2621,7 +2628,7 @@ objectclass ( oxObjectClass:18 NAME 'oxAuthCustomScope' SUP top STRUCTURAL MUST 
 
 objectclass ( oxObjectClass:19 NAME 'oxAuthSessionId' SUP top STRUCTURAL MUST objectclass MAY 
 	( oxLastAccessTime $ oxAuthAuthenticationTime $ oxAuthPermissionGranted
-	$ oxAuthPermissionGrantedMap $ oxAuthUserDN $ uniqueIdentifier $ oxState $ oxAuthSessionAttribute
+	$ oxAuthPermissionGrantedMap $ oxAuthUserDN $ oxAuthSessionId $ oxState $ oxAuthSessionAttribute
 	$ oxAsJwt $ oxJwt $ oxInvolvedClients )
 	X-ORIGIN 'Gluu created objectclass' )
 
