@@ -753,7 +753,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private void endSession(String sessionState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         identity.logout();
         sessionUser.setUserDn(null);
-        sessionUser.setAuthenticationTime(null);
+       	sessionUser.setAuthenticationTime(null);
 
 
         String id = sessionState;
