@@ -1,5 +1,6 @@
-# Script to convert OpenDJ LDIF Schema file to a OpenLDAP *.schema file
-
+#!/usr/bin/env python
+"""Script to convert OpenDJ LDIF Schema file to a OpenLDAP *.schema file
+"""
 
 import re
 
@@ -75,12 +76,12 @@ def convert(in_file, out_file, add_header=False):
 
 
 if __name__ == '__main__':
-    ox101 = './static/opendj/deprecated/101-ox.ldif'
-    gluu_schema = './static/openldap/gluu.schema'
+    ox101 = '../opendj/deprecated/101-ox.ldif'
+    gluu_schema = '../openldap/gluu.schema'
     convert(ox101, gluu_schema, True)
 
     attrs = 1000
     objclasses = 100
-    custom77 = './static/opendj/deprecated/77-customAttributes.ldif'
-    custom_schema = './static/openldap/custom.schema'
+    custom77 = '../opendj/deprecated/77-customAttributes.ldif'
+    custom_schema = '../openldap/custom.schema'
     convert(custom77, custom_schema)
