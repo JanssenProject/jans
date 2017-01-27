@@ -57,6 +57,7 @@ class Setup(object):
         self.asimba_war = 'http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war' % (self.oxVersion, self.oxVersion)
         self.cas_war = 'http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
+        self.java_1_8_jce_zip = 'http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip'
 
         self.downloadWars = None
         self.templateRenderingDict = {}
@@ -467,6 +468,7 @@ class Setup(object):
                 + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
                 + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
                 + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
+                + 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n" \
                 + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
                 + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
                 + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
@@ -699,7 +701,7 @@ class Setup(object):
             self.logIt("Error copying %s to %s" % (inFile, destFolder), True)
             self.logIt(traceback.format_exc(), True)
 
-    def copyTree(self, src, dst, symlinks=False, ignore=None):
+    def copyTree(self, src, dst, overwrite=False):
         try:
             if not os.path.exists(dst):
                 os.makedirs(dst)
@@ -708,8 +710,11 @@ class Setup(object):
                 s = os.path.join(src, item)
                 d = os.path.join(dst, item)
                 if os.path.isdir(s):
-                    self.copyTree(s, d, symlinks, ignore)
+                    self.copyTree(s, d, overwrite)
                 else:
+                    if overwrite and os.path.exists(d):
+                        self.removeFile(d)
+
                     if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                         shutil.copy2(s, d)
 
@@ -955,6 +960,18 @@ class Setup(object):
             self.logIt("Error encountered while extracting archive %s" % jreArchive)
             self.logIt(traceback.format_exc(), True)
 
+        jceArchive = 'jce_policy-8.zip'
+        jceArchivePath = '%s/%s' % (self.distAppFolder, jceArchive)
+        if self.installJce or os.path.exists(jceArchivePath):
+            try:
+                self.logIt("Unzipping %s in /tmp" % jceArchive)
+                self.run(['unzip', '-n', '-q', jceArchivePath, '-d', '/tmp' ])
+                self.copyTree('/tmp/UnlimitedJCEPolicyJDK8', '%s/jre/lib/security' % jreDestinationPath, True)
+                self.removeDirs('/tmp/UnlimitedJCEPolicyJDK8')
+            except:
+                self.logIt("Error encountered while doing unzip %s -d /tmp" % jceArchivePath)
+                self.logIt(traceback.format_exc(), True)
+
         self.run([self.cmd_ln, '-sf', jreDestinationPath, self.jre_home])
         self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % jreDestinationPath])
         self.run([self.cmd_chown, '-R', 'root:root', jreDestinationPath])
@@ -1140,6 +1157,11 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/idp3_cml_keygenerator.jar'])
             print "Downloading Shibboleth IDP v3 binary distributive file..."
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
+
+        if self.installJce:
+            print "Downloading JCE 1.8 zip file..."
+            self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', '%s/jce_policy-8.zip' % self.distAppFolder])
+            
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
@@ -1974,6 +1996,16 @@ class Setup(object):
         else:
             self.installLdap = False
 
+        promptForJCE = self.getPrompt("Install JCE 1.8?", "Yes")[0].lower()
+        if promptForJCE == 'y':
+            promptForJCELicense = self.getPrompt("You must accept the Oracle Binary Code License Agreement for the Java SE Platform Products to download this software. Accept License Agreement?", "Yes")[0].lower()
+            if promptForJCELicense == 'y':
+                self.installJce = True
+            else:
+                self.installJce = False
+        else:
+            self.installJce = False
+
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
         if promptForHTTPD == 'y':
             self.installHttpd = True
@@ -2493,12 +2525,13 @@ def print_help():
     print "    -s   Install the Shibboleth IDP"
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
+    print "    -e   Download JCE 1.8 and install it"
     print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwr", ['allow_pre_released_applications', 'allow_deprecated_applications'])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwre", ['allow_pre_released_applications', 'allow_deprecated_applications'])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -2540,6 +2573,8 @@ def getOpts(argv, setupOptions):
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
             setupOptions['allowDeprecatedApplications'] = True
+        elif opt == "-e":
+            setupOptions['installJce'] = True
     return setupOptions
 
 if __name__ == '__main__':
@@ -2559,7 +2594,8 @@ if __name__ == '__main__':
         'installOxAuthRP': False,
         'installPassport': False,
         'allowPreReleasedApplications': False,
-        'allowDeprecatedApplications': False
+        'allowDeprecatedApplications': False,
+        'installJce': False
     }
     if len(sys.argv) > 1:
         setupOptions = getOpts(sys.argv[1:], setupOptions)
@@ -2579,6 +2615,7 @@ if __name__ == '__main__':
     installObject.installPassport = setupOptions['installPassport']
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
     installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
+    installObject.installJce = setupOptions['installJce']
 
     # Get the OS type
     installObject.os_type = installObject.detect_os_type()
