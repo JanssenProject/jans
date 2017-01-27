@@ -361,7 +361,9 @@ public class SessionStateService {
         }
 
         sessionState.setSessionAttributes(sessionIdAttributes);
-        sessionState.setLastUsedAt(new Date());
+        if (appConfiguration.getUpdateSessionAccessTime()) {
+        	sessionState.setLastUsedAt(new Date());
+        }
 
         if (sessionState.getIsJwt()) {
             sessionState.setJwt(generateJwt(sessionState, userDn).asString());
@@ -407,7 +409,7 @@ public class SessionStateService {
 
     public SessionState setSessionStateAuthenticated(SessionState sessionState, String p_userDn) {
         sessionState.setUserDn(p_userDn);
-        sessionState.setAuthenticationTime(new Date());
+       	sessionState.setAuthenticationTime(new Date());
         sessionState.setState(SessionIdState.AUTHENTICATED);
 
         boolean persisted = updateSessionState(sessionState, true, true, true);
@@ -427,7 +429,9 @@ public class SessionStateService {
         try {
             final int unusedLifetime = appConfiguration.getSessionIdUnusedLifetime();
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
-                sessionState.setLastUsedAt(new Date());
+                if (appConfiguration.getUpdateSessionAccessTime()) {
+                	sessionState.setLastUsedAt(new Date());
+                }
 
                 sessionState.setPersisted(true);
                 log.trace("sessionStateAttributes: " + sessionState.getPermissionGrantedMap());
@@ -457,7 +461,7 @@ public class SessionStateService {
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forceUpdate) {
             	boolean update = modified;
 
-            	if (updateLastUsedAt) {
+            	if (updateLastUsedAt && appConfiguration.getUpdateSessionAccessTime()) {
             		Date lastUsedAt = new Date();
             		if (sessionState.getLastUsedAt() != null) {
                         long diff = lastUsedAt.getTime() - sessionState.getLastUsedAt().getTime();
