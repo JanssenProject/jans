@@ -229,5 +229,6 @@
     "customHeadersWithAuthorizationResponse": true,
     "frontChannelLogoutSessionSupported":true,
     "updateUserLastLogonTime": true,
-    "updateClientAccessTime":true
+    "updateClientAccessTime":true,
+    "updateSessionAccessTime":true
 }
