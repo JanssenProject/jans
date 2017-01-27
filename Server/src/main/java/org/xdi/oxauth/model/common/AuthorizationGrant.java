@@ -93,7 +93,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     t.setScope(scopes);
                     t.setAuthMode(getAcrValues());
                     t.setSessionDn(getSessionDn());
-                    t.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
+                    t.setAuthenticationTime(getAuthenticationTime());
                     t.setCodeChallenge(getCodeChallenge());
                     t.setCodeChallengeMethod(getCodeChallengeMethod());
 
@@ -234,7 +234,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setScope(getScopesAsString());
         result.setAuthMode(p_token.getAuthMode());
         result.setSessionDn(p_token.getSessionDn());
-        result.setAuthenticationTime(getAuthenticationTime() != null ? getAuthenticationTime().toString() : "");
+        result.setAuthenticationTime(getAuthenticationTime());
 
         final AuthorizationGrantType grantType = getAuthorizationGrantType();
         if (grantType != null) {
