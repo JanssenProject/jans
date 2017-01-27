@@ -38,7 +38,7 @@ public class TokenLdap {
     @LdapAttribute(name = "oxAuthExpiration")
     private Date expirationDate;
     @LdapAttribute(name = "oxAuthAuthenticationTime")
-    private String authenticationTime;
+    private Date authenticationTime;
     @LdapAttribute(name = "oxAuthScope")
     private String scope;
     @LdapAttribute(name = "oxAuthTokenCode")
@@ -99,11 +99,11 @@ public class TokenLdap {
         grantId = p_grantId;
     }
 
-    public String getAuthenticationTime() {
+    public Date getAuthenticationTime() {
         return authenticationTime;
     }
 
-    public void setAuthenticationTime(String p_authenticationTime) {
+    public void setAuthenticationTime(Date p_authenticationTime) {
         authenticationTime = p_authenticationTime;
     }
 
