@@ -144,7 +144,6 @@ public class AppConfiguration {
     private String loggingLevel;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
-    private Boolean updateSessionAccessTime;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
 		return frontChannelLogoutSessionSupported;
@@ -1146,14 +1145,6 @@ public class AppConfiguration {
     public void setUpdateClientAccessTime(Boolean updateClientAccessTime) {
         this.updateClientAccessTime = updateClientAccessTime;
     }
-
-    public Boolean getUpdateSessionAccessTime() {
-        return updateSessionAccessTime != null ? updateSessionAccessTime : false;
-	}
-
-	public void setUpdateSessionAccessTime(Boolean updateSessionAccessTime) {
-		this.updateSessionAccessTime = updateSessionAccessTime;
-	}
 
 	public String getLoggingLevel() {
 		return loggingLevel;
