@@ -127,11 +127,11 @@ public class SessionState implements Serializable {
     }
 
     public Date getLastUsedAt() {
-        return lastUsedAt != null ? new Date(lastUsedAt.getTime()) : null;
+        return lastUsedAt;
     }
 
     public void setLastUsedAt(Date p_lastUsedAt) {
-        lastUsedAt = p_lastUsedAt != null ? new Date(p_lastUsedAt.getTime()) : null;
+        lastUsedAt = p_lastUsedAt;
     }
 
     public String getUserDn() {
