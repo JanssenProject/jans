@@ -100,7 +100,9 @@ class Setup(object):
         self.allowPreReleasedApplications = False
         self.allowDeprecatedApplications = False
 
-        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+	self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
+
+	self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
         self.os_initdaemon = None
 
@@ -508,6 +510,28 @@ class Setup(object):
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
+
+    def set_permissions(self):
+        self.logIt("Changing permissions")
+
+        ### Below commands help us to set permissions readable if umask is set as 077
+        self.run(['find', "%s" % self.gluuOptFolder, '-perm', '700', '-exec', 'chmod', "755", '{}',  ';'])
+        self.run(['find', "%s" % self.gluuOptFolder, '-perm', '600', '-exec', 'chmod', "644", '{}',  ';'])
+
+        self.run(['find', '/opt/jython-%s' % self.jython_version, '-perm', '700', '-exec', self.cmd_chmod,"755", '{}', ';'])
+        self.run(['find', '/opt/jython-%s' % self.jython_version, '-perm', '600', '-exec', self.cmd_chmod,"644", '{}', ';'])
+
+        self.run(['find', "%s" % self.jreDestinationPath, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
+        self.run(['find', "%s" % self.jreDestinationPath, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
+        self.run(['find', "%s" % self.jreDestinationPath, '-perm', '400', '-exec', self.cmd_chmod, "644", '{}', ';'])
+
+        self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
+        self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
+
+        self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
+        self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
+
+        self.run(['/bin/chmod', '-R', '644', self.etc_hosts, self.etc_hostname])
 
     def get_ip(self):
         testIP = None
@@ -952,8 +976,8 @@ class Setup(object):
         self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
         jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
-        jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
-        try:
+        
+	try:
             self.logIt("Extracting %s into /opt/" % jreArchive)
             self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
@@ -966,15 +990,15 @@ class Setup(object):
             try:
                 self.logIt("Unzipping %s in /tmp" % jceArchive)
                 self.run(['unzip', '-n', '-q', jceArchivePath, '-d', '/tmp' ])
-                self.copyTree('/tmp/UnlimitedJCEPolicyJDK8', '%s/jre/lib/security' % jreDestinationPath, True)
+                self.copyTree('/tmp/UnlimitedJCEPolicyJDK8', '%s/jre/lib/security' % self.jreDestinationPath, True)
                 self.removeDirs('/tmp/UnlimitedJCEPolicyJDK8')
             except:
                 self.logIt("Error encountered while doing unzip %s -d /tmp" % jceArchivePath)
                 self.logIt(traceback.format_exc(), True)
 
-        self.run([self.cmd_ln, '-sf', jreDestinationPath, self.jre_home])
-        self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % jreDestinationPath])
-        self.run([self.cmd_chown, '-R', 'root:root', jreDestinationPath])
+        self.run([self.cmd_ln, '-sf', self.jreDestinationPath, self.jre_home])
+        self.run([self.cmd_chmod, '-R', "755", "%s/bin/" % self.jreDestinationPath])
+        self.run([self.cmd_chown, '-R', 'root:root', self.jreDestinationPath])
         self.run([self.cmd_chown, '-h', 'root:root', self.jre_home])
 
     def extractOpenDJ(self):
@@ -2694,6 +2718,7 @@ if __name__ == '__main__':
             installObject.render_test_templates()
             installObject.copy_static()
             installObject.set_ownership()
+            installObject.set_permissions()
             installObject.start_services()
             installObject.save_properties()
         except:
