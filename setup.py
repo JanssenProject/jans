@@ -133,6 +133,8 @@ class Setup(object):
 
         self.etc_hosts = '/etc/hosts'
         self.etc_hostname = '/etc/hostname'
+        # OS /etc/default folder
+        self.osDefault = '/etc/default'
 
         self.jython_home = '/opt/jython'
 
@@ -527,6 +529,9 @@ class Setup(object):
 
         self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
         self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
+
+	self.run(['find', "%s" % self.osDefault, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
+        self.run(['find', "%s" % self.osDefault, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
 
         self.run(['/bin/chmod', '-R', '644', self.etc_hosts, self.etc_hostname])
 
@@ -1885,10 +1890,8 @@ class Setup(object):
             self.run([self.cmd_mkdir, '-p', self.outputFolder])
             self.run([self.cmd_mkdir, '-p', self.jetty_user_home_lib])
 
-            # OS /etc/default folder
-            osDefault = "/etc/default"
-            if not os.path.exists(osDefault):
-                self.run([self.cmd_mkdir, '-p', osDefault])
+            if not os.path.exists(self.osDefault):
+                self.run([self.cmd_mkdir, '-p', self.osDefault])
 
             if self.installOxTrust | self.installOxAuth:
                 self.run([self.cmd_mkdir, '-m', '775', '-p', self.oxPhotosFolder])
