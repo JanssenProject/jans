@@ -8,16 +8,20 @@ import argparse
 import json
 
 from schema_parser import LDAPSchemaParser
+from generator import SchemaGenerator
 
 
-def generate(schema_type=None):
+def generate(infile, schema_type=None):
     """Function generates the LDAP schema definitions from the JSON data
 
     Args:
         schmea_type (str): The schema type to be generated (openldap, opendj)
     """
-    # TODO
-    pass
+    fp = open(infile, 'r')
+    json_text = fp.read()
+    gen = SchemaGenerator(json_text)
+    schema_str = gen.generate_schema()
+    print schema_str.encode('utf-8')
 
 
 def run_tests():
@@ -78,16 +82,18 @@ if __name__ == '__main__':
         "--type", help="the schema type you want to generate",
         choices=["openldap", "opendj"])
     parser.add_argument(
-        "--filename", help="the schema file to generate JSON."
-        " Required for argument {makejson}")
+        "--filename", help="the input file for various actions")
     args = parser.parse_args()
 
     if args.action == 'generate':
-        generate(args.type)
+        if args.filename:
+            generate(args.filename, args.type)
+        else:
+            print "No JSON Input. Specify a JSON file with --filename"
     elif args.action == 'test':
         run_tests()
     elif args.action == 'makejson':
         if args.filename:
             make_json(args.filename)
         else:
-            print "No Schema Input. Specify schema file with --file <filename>"
+            print "No Schema Input. Specify schema file with --filename"
