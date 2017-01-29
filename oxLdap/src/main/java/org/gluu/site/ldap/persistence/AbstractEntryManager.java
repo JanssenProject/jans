@@ -818,7 +818,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 		}
 
 		if (attributeValues.length == 0) {
-			attributeValues = new String[] { null };
+			attributeValues = new String[] { };
 		} else if ((attributeValues.length == 1) && StringHelper.isEmpty(attributeValues[0])) {
 			return null;
 		}
