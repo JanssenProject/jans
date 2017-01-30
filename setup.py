@@ -517,15 +517,9 @@ class Setup(object):
         self.logIt("Changing permissions")
 
         ### Below commands help us to set permissions readable if umask is set as 077
-        self.run(['find', "%s" % self.gluuOptFolder, '-perm', '700', '-exec', 'chmod', "755", '{}',  ';'])
-        self.run(['find', "%s" % self.gluuOptFolder, '-perm', '600', '-exec', 'chmod', "644", '{}',  ';'])
-
-        self.run(['find', '/opt/jython-%s' % self.jython_version, '-perm', '700', '-exec', self.cmd_chmod,"755", '{}', ';'])
-        self.run(['find', '/opt/jython-%s' % self.jython_version, '-perm', '600', '-exec', self.cmd_chmod,"644", '{}', ';'])
-
-        self.run(['find', "%s" % self.jreDestinationPath, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
-        self.run(['find', "%s" % self.jreDestinationPath, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
-        self.run(['find', "%s" % self.jreDestinationPath, '-perm', '400', '-exec', self.cmd_chmod, "644", '{}', ';'])
+        self.run(['find', "/opt", '-user', 'root', '-perm', '700', '-exec', 'chmod', "755", '{}',  ';'])
+        self.run(['find', "/opt", '-user', 'root', '-perm', '600', '-exec', 'chmod', "644", '{}',  ';'])
+        self.run(['find', "/opt", '-user', 'root', '-perm', '400', '-exec', 'chmod', "444", '{}',  ';'])
 
         self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
         self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
