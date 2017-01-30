@@ -4,6 +4,7 @@
 """
 
 import re
+import logging
 
 from ldap.schema.models import ObjectClass, AttributeType
 
@@ -68,14 +69,26 @@ class LDAPSchemaParser(object):
                 self.attrTypes.append(att)
 
         if expand_oid_macros:
+            error_msg = "You requested for the expansion of OID macros." \
+                + " The definition for macro `{}` was  not found." \
+                + " Storing it without expansion."
             for obj in self.objClasses:
                 if ':' in obj.oid:
                     macro, index = obj.oid.split(':')
-                    obj.oid = oid_macros[macro] + '.' + index
+                    try:
+                        obj.oid = oid_macros[macro] + '.' + index
+                    except KeyError, e:
+                        logging.warning(error_msg, macro)
+                        logging.debug(e, exc_info=True)
+
             for att in self.attrTypes:
                 if ':' in att.oid:
                     macro, index = att.oid.split(':')
-                    att.oid = oid_macros[macro] + '.' + index
+                    try:
+                        att.oid = oid_macros[macro] + '.' + index
+                    except KeyError, e:
+                        logging.warning(error_msg, macro)
+                        logging.debug(e, exc_info=True)
 
     def __parseLDIF(self):
         """Parser for .ldif files, like the one from OpenDJ"""
