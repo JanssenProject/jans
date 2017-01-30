@@ -13,6 +13,7 @@ class LDAPSchemaParser(object):
         self.filename = filename
         self.objClasses = []
         self.attrTypes = []
+        self.macros = {}
 
     def __parseOIDMacros(self, text):
         """Parses a block of text and build a dict containing OID macros with
@@ -30,7 +31,18 @@ class LDAPSchemaParser(object):
                 macros[macro] = oid
         return macros
 
-    def __parseSchema(self):
+    def __getMacroDefinitions(self, text):
+        """Parses a block of text and built a dict of the OID macros as they
+        are definied in the schema file"""
+        lines = text.split('\n')
+        macros = {}
+        for line in lines:
+            if re.match('^objectIdentifier', line):
+                keyword, macro, definition = line.split()
+                macros[macro] = definition
+        return macros
+
+    def __parseSchema(self, expand_oid_macros=False):
         """Parser for .schema files, like the one from OpenLDAP"""
         obj_str = 'objectclass'
         obj_len = len(obj_str)
@@ -45,6 +57,7 @@ class LDAPSchemaParser(object):
             block = block.strip()
             if 'objectIdentifier' in block:
                 oid_macros = self.__parseOIDMacros(block)
+                self.macros = self.__getMacroDefinitions(block)
             elif re.match('^objectclass', block):
                 block = block.replace('\n', ' ').replace('\t', ' ').strip()
                 obj = ObjectClass(block[obj_len:])
@@ -54,22 +67,27 @@ class LDAPSchemaParser(object):
                 att = AttributeType(block[att_len:])
                 self.attrTypes.append(att)
 
-        for obj in self.objClasses:
-            if ':' in obj.oid:
-                macro, index = obj.oid.split(':')
-                obj.oid = oid_macros[macro] + '.' + index
-
-        for att in self.attrTypes:
-            if ':' in att.oid:
-                macro, index = att.oid.split(':')
-                att.oid = oid_macros[macro] + '.' + index
+        if expand_oid_macros:
+            for obj in self.objClasses:
+                if ':' in obj.oid:
+                    macro, index = obj.oid.split(':')
+                    obj.oid = oid_macros[macro] + '.' + index
+            for att in self.attrTypes:
+                if ':' in att.oid:
+                    macro, index = att.oid.split(':')
+                    att.oid = oid_macros[macro] + '.' + index
 
     def __parseLDIF(self):
         """Parser for .ldif files, like the one from OpenDJ"""
         pass
 
-    def parse(self):
+    def parse(self, expand_oid_macros=False):
         """Function to parse the LDAP Schema File and collect the information
+
+        Args:
+            expand_oid_macros (bool) - Set to true of you want to expand
+                OpenLDAP style OID macros to be expanded to dot seperated int
+                format. Default False, just copies the OID text.
 
         Returns:
             dict: A dictionary containing all the AttributeType and ObjectClass
@@ -83,7 +101,12 @@ class LDAPSchemaParser(object):
                  'attributeTypes': [
                         <obj of type ldap.schema.models.AttributeType>,
                         <obj of type ldap.schema.models.AttributeType>,
-                        ...]
+                        ...],
+                'oidMacros': {
+                        'macro_1': 'OID definition',
+                        'macro_2': 'OID definition',
+                        ...
+                    }
                 }
         """
         with open(self.filename, 'r') as ldapfile:
@@ -95,5 +118,5 @@ class LDAPSchemaParser(object):
                     self.__parseSchema()
                     break
         return {'objectClasses': self.objClasses,
-                'attributeTypes': self.attrTypes}
-
+                'attributeTypes': self.attrTypes,
+                'oidMacros': self.macros}

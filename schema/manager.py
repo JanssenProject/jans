@@ -73,6 +73,7 @@ def make_json(filename):
 
     schema_dict['objectClasses'] = objectclasses
     schema_dict['attributeTypes'] = attributetypes
+    schema_dict['oidMacros'] = definitions['oidMacros']
     print json.dumps(schema_dict, indent=4, sort_keys=True)
 
 
