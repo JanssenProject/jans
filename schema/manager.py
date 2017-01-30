@@ -20,7 +20,10 @@ def generate(infile, schema_type=None):
     fp = open(infile, 'r')
     json_text = fp.read()
     gen = SchemaGenerator(json_text)
-    schema_str = gen.generate_schema()
+    if schema_type == 'opendj':
+        schema_str = gen.generate_ldif()
+    else:
+        schema_str = gen.generate_schema()
     print schema_str.encode('utf-8')
 
 
