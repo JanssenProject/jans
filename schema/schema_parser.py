@@ -62,6 +62,12 @@ class LDAPSchemaParser(object):
             elif re.match('^objectclass', block):
                 block = block.replace('\n', ' ').replace('\t', ' ').strip()
                 obj = ObjectClass(block[obj_len:])
+                # Extra parsing to get the X-ORIGIN values as the python-ldap
+                # parser isn't parsing the value for objectClasses
+                if 'X-ORIGIN' in block:
+                    waste, originstr = block.split('X-ORIGIN')
+                    parts = originstr.strip().split('\'')
+                    obj.x_origin = parts[1]
                 self.objClasses.append(obj)
             elif re.match('^attributetype', block):
                 block = block.replace('\n', ' ').replace('\t', ' ').strip()
