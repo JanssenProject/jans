@@ -11,10 +11,36 @@ class SchemaGenerator(object):
         self.data = json.loads(jsontext)
         self.outString = header if header else u''
 
+    def __compare_defs(self, m1, m2):
+        n1 = int(m1[1].split(':')[1])
+        n2 = int(m2[1].split(':')[1])
+        return n1 - n2
+
+    def __get_macro_order(self, macros, parent):
+        children = [(k, v) for k, v in macros.items() if parent in v]
+        items = [parent]
+        for k, v in sorted(children, cmp=self.__compare_defs):
+            items.extend(self.__get_macro_order(macros, k))
+        return items
+
     def generate_schema(self):
         """Function that generates the schema and returns it as a string"""
         if len(self.outString):
             self.outString += u"\n"
+        if len(self.data['oidMacros']) > 0:
+            macros = self.data['oidMacros']
+            root = ''
+            for definition in macros:
+                if '.' in macros[definition]:
+                    root = definition
+                    break
+            order = self.__get_macro_order(macros, root)
+
+            for oid in order:
+                self.outString += u"objectIdentifier {:15} {}\n".format(
+                        oid, macros[oid])
+            self.outString += '\n'
+
         for attr in self.data['attributeTypes']:
             attr_str = u"attributetype ( {} NAME ".format(attr['oid'])
             if len(attr['names']) > 1:
