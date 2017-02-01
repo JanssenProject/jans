@@ -15,6 +15,7 @@ from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.oxauth.model.config import Constants
 from org.jboss.resteasy.client import ClientResponseFailure
+from org.jboss.resteasy.client.exception import ResteasyClientException
 from javax.ws.rs.core import Response
 from java.util import Arrays
 
@@ -42,6 +43,13 @@ class PersonAuthentication(PersonAuthenticationType):
             except ClientResponseFailure, ex:
                 # Detect if last try or we still get Service Unavailable HTTP error
                 if (attempt == max_attempts) or (ex.getResponse().getResponseStatus() != Response.Status.SERVICE_UNAVAILABLE):
+                    raise ex
+
+                java.lang.Thread.sleep(3000)
+                print "Attempting to load metadata: %d" % attempt
+            except ResteasyClientException, ex:
+                # Detect if last try or we still get Service Unavailable HTTP error
+                if attempt == max_attempts:
                     raise ex
 
                 java.lang.Thread.sleep(3000)
