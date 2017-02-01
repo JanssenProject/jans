@@ -54,7 +54,7 @@ class PersonAuthentication(PersonAuthenticationType):
         context = Contexts.getEventContext()
         authenticationService = AuthenticationService.instance()
         userService = UserService.instance()
-        httpService = HttpService.instance();
+        httpService = HttpService.instance()
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
