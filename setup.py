@@ -1996,16 +1996,6 @@ class Setup(object):
         else:
             self.installLdap = False
 
-        promptForJCE = self.getPrompt("Install JCE 1.8?", "Yes")[0].lower()
-        if promptForJCE == 'y':
-            promptForJCELicense = self.getPrompt("You must accept the Oracle Binary Code License Agreement for the Java SE Platform Products to download this software. Accept License Agreement?", "Yes")[0].lower()
-            if promptForJCELicense == 'y':
-                self.installJce = True
-            else:
-                self.installJce = False
-        else:
-            self.installJce = False
-
         promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
         if promptForHTTPD == 'y':
             self.installHttpd = True
@@ -2043,6 +2033,16 @@ class Setup(object):
                 self.installCas = True
             else:
                 self.installCas = False
+
+        promptForJCE = self.getPrompt("Install JCE 1.8?", "Yes")[0].lower()
+        if promptForJCE == 'y':
+            promptForJCELicense = self.getPrompt("You must accept the Oracle Binary Code License Agreement for the Java SE Platform Products to download this software. Accept License Agreement?", "Yes")[0].lower()
+            if promptForJCELicense == 'y':
+                self.installJce = True
+            else:
+                self.installJce = False
+        else:
+            self.installJce = False
 
     def get_filepaths(self, directory):
         file_paths = []
