@@ -55,6 +55,9 @@ public class InetAddressUtility {
             NetworkInterface network = NetworkInterface.getByInetAddress(ip);
 
             byte[] mac = network.getHardwareAddress();
+            if (mac == null) {
+            	return null;
+            }
 
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
