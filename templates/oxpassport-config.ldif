@@ -3,12 +3,24 @@ objectClass: top
 objectClass: oxPassportConfiguration
 ou: oxpassport
 gluuPassportConfiguration: {
-   "provider":"facebook",
-   "clientID":"facebook_client_id",
-   "clientSecret":"facebook_client_secret"
-  }
+	"strategy": "facebook",
+	"fieldset": [{
+		"key": "clientID",
+		"value": "facebook_client_id"
+	},
+	{
+		"key": "clientSecret",
+		"value": "facebook_client_secret"
+	}]
+}
 gluuPassportConfiguration: {
-   "provider":"linkedin",
-   "clientID":"linkedin_client_id",
-   "clientSecret":"linkedin_client_secret"
-  }
+	"strategy": "linkedin",
+	"fieldset": [{
+		"key": "clientID",
+		"value": "linkedin_client_id"
+	},
+	{
+		"key": "clientSecret",
+		"value": "linkedin_client_secret"
+	}]
+}
