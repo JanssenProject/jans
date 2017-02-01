@@ -158,7 +158,7 @@ public abstract class AbstractEntryManager implements EntityManager {
                     // Add entry attribute or change schema
 					if (isSchemaUpdate
 							&& (attributeToPersist.getValue() == null && Arrays.equals(attributeToPersist.getValues(),
-									new String[] { null }))) {
+									new String[] { }))) {
 						continue;
 					}
 					AttributeModificationType modType = isSchemaUpdate ? schemaModificationType : AttributeModificationType.ADD;
@@ -235,7 +235,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 							attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
 									attributeToPersist));
 						}
-					} else if ((attributeFromLdap != null) && (Arrays.equals(attributeToPersist.getValues(), new String[] { null }))) {
+					} else if ((attributeFromLdap != null) && (Arrays.equals(attributeToPersist.getValues(), new String[] { }))) {
 
 						attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
 								attributeFromLdap));
