@@ -1,0 +1,53 @@
+{
+    "attributeTypes": [
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "myCustomAttr1"
+            ], 
+            "oid": "oxAttribute:1001", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu - dynamic registration custom attribute"
+        }, 
+        {
+            "equality": "caseIgnoreMatch", 
+            "names": [
+                "myCustomAttr2"
+            ], 
+            "oid": "oxAttribute:1002", 
+            "substr": "caseIgnoreSubstringsMatch", 
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15", 
+            "x_origin": "Gluu - dynamic registration custom attribute"
+        }
+    ], 
+    "objectClasses": [
+        {
+            "kind": "AUXILIARY", 
+            "names": [
+                "gluuCustomPerson"
+            ], 
+            "oid": "oxObjectClass:101", 
+            "sup": [
+                "top"
+            ], 
+            "x_origin": "Gluu - Custom persom objectclass"
+        }, 
+        {
+            "kind": "AUXILIARY", 
+            "may": [
+                "myCustomAttr1", 
+                "myCustomAttr2"
+            ], 
+            "names": [
+                "oxAuthClientCustomAttributes"
+            ], 
+            "oid": "oxObjectClass:102", 
+            "sup": [
+                "top"
+            ], 
+            "x_origin": "Gluu - Custom client objectclass"
+        }
+    ], 
+    "oidMacros": {}
+}

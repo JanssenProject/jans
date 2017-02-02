@@ -1,15 +1,47 @@
+attributetype ( oxAttribute:1001 NAME 'myCustomAttr1'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu - dynamic registration custom attribute' )
+
+attributetype ( oxAttribute:1002 NAME 'myCustomAttr2'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu - dynamic registration custom attribute' )
+
+objectclass ( oxObjectClass:101 NAME 'gluuCustomPerson'
+	SUP ( top )
+	AUXILIARY
+	X-ORIGIN 'Gluu - Custom persom objectclass' )
+
+objectclass ( oxObjectClass:102 NAME 'oxAuthClientCustomAttributes'
+	SUP ( top )
+	AUXILIARY
+	MAY ( myCustomAttr1 $ myCustomAttr2 )
+	X-ORIGIN 'Gluu - Custom client objectclass' )
+
 dn: cn=schema
 objectClass: top
 objectClass: ldapSubentry
 objectClass: subschema
 cn: schema
-attributeTypes: ( myCustomAttr1-oid NAME 'myCustomAttr1'
-  SUBSTR caseIgnoreSubstringsMatch EQUALITY caseIgnoreMatch
+attributeTypes: ( oxAttribute:1001 NAME 'myCustomAttr1'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu - dynamic registration custom attribute' )
-attributeTypes: ( myCustomAttr2-oid NAME 'myCustomAttr2'
-  SUBSTR caseIgnoreSubstringsMatch EQUALITY caseIgnoreMatch
+attributeTypes: ( oxAttribute:1002 NAME 'myCustomAttr2'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu - dynamic registration custom attribute' )
-objectClasses: ( oxAuthClientCustomAttributes-oid NAME 'oxAuthClientCustomAttributes' SUP top AUXILIARY MAY ( myCustomAttr1 $ myCustomAttr2) X-ORIGIN 'Gluu - Custom objectclass' )
-
+objectClasses: ( oxObjectClass:101 NAME 'gluuCustomPerson'
+  SUP ( top )
+  AUXILIARY
+  X-ORIGIN 'Gluu - Custom persom objectclass' )
+objectClasses: ( oxObjectClass:102 NAME 'oxAuthClientCustomAttributes'
+  SUP ( top )
+  AUXILIARY
+  MAY ( myCustomAttr1 $ myCustomAttr2 )
+  X-ORIGIN 'Gluu - Custom client objectclass' )
