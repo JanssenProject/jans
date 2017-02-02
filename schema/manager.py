@@ -6,6 +6,7 @@ manager.py - Script which acts as the user interface for schema management.
 
 import argparse
 import json
+import os
 
 from schema_parser import LDAPSchemaParser
 from generator import SchemaGenerator
@@ -15,16 +16,45 @@ def generate(infile, schema_type=None):
     """Function generates the LDAP schema definitions from the JSON data
 
     Args:
-        schmea_type (str): The schema type to be generated (openldap, opendj)
+        schema_type (str): The schema type to be generated (openldap, opendj)
     """
     fp = open(infile, 'r')
     json_text = fp.read()
+    fp.close()
     gen = SchemaGenerator(json_text)
     if schema_type == 'opendj':
         schema_str = gen.generate_ldif()
     else:
         schema_str = gen.generate_schema()
     print schema_str.encode('utf-8')
+
+
+def autogenerate():
+    """Function that generates the LDAP schemas for OpenDJ, OpenLDAP from the
+    gluu_schema.json and custom_schema.json and puts them in their respective
+    folders.
+    """
+    openldap_folder = '../static/openldap/'
+    opendj_folder = '../static/opendj/deprecated/'
+
+    fp = open('gluu_schema.json', 'r')
+    gluu_json = fp.read()
+    fp.close()
+    gen = SchemaGenerator(gluu_json)
+    with open(os.path.join(openldap_folder, 'gluu.schema'), 'w') as f:
+        f.write(gen.generate_schema().encode('utf-8'))
+    with open(os.path.join(opendj_folder, '101-ox.ldif'), 'w') as f:
+        f.write(gen.generate_ldif().encode('utf-8'))
+
+    fp = open('custom_schema.json', 'r')
+    custom_json = fp.read()
+    fp.close()
+    gen = SchemaGenerator(custom_json)
+    with open(os.path.join(openldap_folder, 'custom.schema'), 'w') as f:
+        f.write(gen.generate_schema().encode('utf-8'))
+    with open(os.path.join(opendj_folder, '77-customAttributes.ldif'), 'w') \
+            as f:
+        f.write(gen.generate_ldif().encode('utf-8'))
 
 
 def run_tests():
@@ -81,7 +111,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "action", help="the action you want to perform.",
-        choices=["generate", "makejson", "test"])
+        choices=["autogenerate", "generate", "makejson", "test"])
     parser.add_argument(
         "--type", help="the schema type you want to generate",
         choices=["openldap", "opendj"])
@@ -101,3 +131,5 @@ if __name__ == '__main__':
             make_json(args.filename)
         else:
             print "No Schema Input. Specify schema file with --filename"
+    elif args.action == 'autogenerate':
+        autogenerate()
