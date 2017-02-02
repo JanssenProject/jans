@@ -60,8 +60,10 @@ public class CacheService {
 
 	@Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
 	public void removeAll(String name) {
-		if (cacheProvider != null) {
+		if (cacheProvider instanceof EhCacheProvider) {
 			((CacheManager) cacheProvider.getDelegate()).getCache(name).removeAll();
+		} else {
+			cacheProvider.clear(); // for non ehcache clear all cache (e.g. in memcache we don't have regions)
 		}
 	}
 
