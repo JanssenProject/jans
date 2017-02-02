@@ -22,13 +22,29 @@ public class MemcacheManual {
 
         client.set("myKey", 30, testState());
 
-        Object fromCache = client.get("myKey");
+        System.out.println(client.get("myKey"));
 
-        System.out.println(fromCache);
+        sleep(20);
+        System.out.println(client.get("myKey"));
+
+        client.set("myKey", 30, testState());
+
+        sleep(12);
+        System.out.println(client.get("myKey"));
+
+        sleep(12);
+        System.out.println(client.get("myKey"));
 
         client.shutdown();
     }
 
+    private static void sleep(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private static SessionState testState() {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("mapKey", "mapValue");
