@@ -16,19 +16,21 @@ import org.jboss.seam.annotations.Logger;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.cache.CacheProvider;
+import org.jboss.seam.cache.EhCacheProvider;
 import org.jboss.seam.log.Log;
 
 /**
  * Provides operations with cache
  * 
  * @author Yuriy Movchan Date: 01.24.2012
+ * @author Yuriy Zabrovarnyy Date: 02.02.2017
  */
 @Scope(ScopeType.APPLICATION)
 @Name("cacheService")
 @AutoCreate
 public class CacheService {
 
-	@In(value = "gluuCacheProvider")
+	@In(value = "memcachedProvider")
 	private CacheProvider<?> cacheProvider;
 
     @Logger
@@ -56,15 +58,23 @@ public class CacheService {
 		cacheProvider.remove(region, key);
 	}
 
+	@Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
 	public void removeAll(String name) {
 		if (cacheProvider != null) {
 			((CacheManager) cacheProvider.getDelegate()).getCache(name).removeAll();
 		}
 	}
 
+	public void clear() {
+		if (cacheProvider != null) {
+			cacheProvider.clear();
+		}
+	}
+
+	@Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
 	public Cache getCacheRegion(String regionName) {
 		Cache cache = null;
-		if (cacheProvider != null) {
+		if (cacheProvider instanceof EhCacheProvider) {
 			CacheManager cacheManager = (CacheManager) cacheProvider.getDelegate();
 			cache = cacheManager.getCache(regionName);
 			if (cache == null) {
@@ -73,6 +83,10 @@ public class CacheService {
 		}
 
 		return cache;
+	}
+
+	public CacheProvider<?> getCacheProvider() {
+		return cacheProvider;
 	}
 
 	public static CacheService instance() {
