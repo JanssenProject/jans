@@ -323,7 +323,7 @@ objectClass: oxCustomScript
 objectClass: top
 description: Permission Dynamic Scope script
 displayName: dynamic_permission
-gluuStatus: false
+gluuStatus: true
 inum: %(inumOrg)s!CB5B.3211
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
