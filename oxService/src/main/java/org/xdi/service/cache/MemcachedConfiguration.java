@@ -14,7 +14,7 @@ public class MemcachedConfiguration implements Serializable {
     private String servers; // server1:11211 server2:11211
 
     @XmlElement(name = "maxOperationQueueLength")
-    private int maxOperationQueueLength = 100000;
+    private int maxOperationQueueLength = 99999999;
 
     @XmlElement(name = "bufferSize")
     private int bufferSize = 32768;
