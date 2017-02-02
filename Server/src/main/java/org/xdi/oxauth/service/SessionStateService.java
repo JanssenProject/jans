@@ -37,6 +37,7 @@ import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -92,6 +93,9 @@ public class SessionStateService {
 
     @In(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
+
+    @In
+    private CacheService cacheService;
 
     public static SessionStateService instance() {
         return (SessionStateService) Component.getInstance(SessionStateService.class);
