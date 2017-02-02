@@ -80,6 +80,6 @@ public class MemcachedProvider extends CacheProvider<MemcachedClient> {
 
     @Override
     public void clear() {
-        client.flush()
+        client.flush();
     }
 }
