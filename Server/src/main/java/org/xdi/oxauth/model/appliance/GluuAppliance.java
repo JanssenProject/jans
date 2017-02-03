@@ -34,16 +34,9 @@ public class GluuAppliance extends InumEntry implements Serializable {
 	@LdapJsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	// todo remove after initialized from ldap
-	private static final MemcachedConfiguration MEMCACHED_CONF = new MemcachedConfiguration();
-	static {
-		MEMCACHED_CONF.setServers("localhost:11211");
-	}
-
-	// todo read from ldap
-//	@LdapAttribute(name = "oxMemcachedConfiguration")
-//	@LdapJsonObject
-	private MemcachedConfiguration memcachedConfiguration = MEMCACHED_CONF;
+	@LdapAttribute(name = "oxMemcachedConfiguration")
+	@LdapJsonObject
+	private MemcachedConfiguration memcachedConfiguration;
 	
 	@LdapAttribute(name = "oxIDPAuthentication")
 	private List<String> oxIDPAuthentication;
@@ -65,6 +58,10 @@ public class GluuAppliance extends InumEntry implements Serializable {
 
 	public MemcachedConfiguration getMemcachedConfiguration() {
 		return memcachedConfiguration;
+	}
+
+	public void setMemcachedConfiguration(MemcachedConfiguration memcachedConfiguration) {
+		this.memcachedConfiguration = memcachedConfiguration;
 	}
 
 	public void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {
