@@ -1179,9 +1179,11 @@ class Setup(object):
             print "Downloading Shibboleth IDP v3 binary distributive file..."
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
-        if self.installJce:
+        jceArchive = 'jce_policy-8.zip'
+        jceArchivePath = '%s/%s' % (self.distAppFolder, jceArchive)
+        if self.installJce and not os.path.exists(jceArchivePath):
             print "Downloading JCE 1.8 zip file..."
-            self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', '%s/jce_policy-8.zip' % self.distAppFolder])
+            self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', jceArchivePath])
             
 
     def encode_passwords(self):
@@ -2466,9 +2468,9 @@ class Setup(object):
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         for ldif in self.ldif_files:
             if 'site.ldif' in ldif:
-                self.run(['/bin/su', 'ldap', '-c', cmd, '-b', 'o=site', '-f', config, '-l', ldif])
+                self.run(['/bin/su', 'ldap', '-c', " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
             else:
-                self.run(['/bin/su', 'ldap', '-c', cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
+                self.run(['/bin/su', 'ldap', '-c', " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
