@@ -297,7 +297,8 @@ class Setup(object):
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
-        self.openldapSchemaFolder = "%s/schema/openldap" % self.gluuOptFolder
+        self.openldapRootSchemaFolder = "%s/schema" % self.gluuOptFolder
+        self.openldapSchemaFolder = "%s/openldap" % self.openldapRootSchemaFolder
         self.openldapLogDir = "/var/log/openldap/"
         self.openldapSyslogConf = "%s/static/openldap/openldap-syslog.conf" % self.install_dir
         self.openldapLogrotate = "%s/static/openldap/openldap_logrotate" % self.install_dir
@@ -2445,8 +2446,10 @@ class Setup(object):
         self.createDirs(self.openldapSchemaFolder)
         self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, self.openldapSchemaFolder)
         self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, self.openldapSchemaFolder)
+
         self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/data'])
-        self.run([self.cmd_chown, '-R', 'ldap:ldap', self.openldapSchemaFolder])
+        self.run([self.cmd_chmod, '-R', 'a+rX', openldapRootSchemaFolder])
+        self.run([self.cmd_chown, '-R', 'ldap:ldap', self.openldapRootSchemaFolder])
 
         # 5. Create the PEM file from key and crt
         with open(self.openldapTLSCACert, 'w') as pem:
