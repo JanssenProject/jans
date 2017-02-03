@@ -2467,11 +2467,12 @@ class Setup(object):
         self.logIt("Importing LDIF files into OpenLDAP")
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
+        realInstallDir = os.path.realpath(self.install_dir)
         for ldif in self.ldif_files:
             if 'site.ldif' in ldif:
-                self.run(['/bin/su', 'ldap', '-c', "cd " + self.install_dir + "; " + " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
+                self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
             else:
-                self.run(['/bin/su', 'ldap', '-c', "cd " + self.install_dir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
+                self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
