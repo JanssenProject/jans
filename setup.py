@@ -1914,6 +1914,7 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/main_db'])
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
                 self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/data'])
+                self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/schema/openldap'])
                 
             if self.installAsimba:
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder])
