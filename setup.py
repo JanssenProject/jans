@@ -2448,7 +2448,7 @@ class Setup(object):
         self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, self.openldapSchemaFolder)
 
         self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/data'])
-        self.run([self.cmd_chmod, '-R', 'a+rX', openldapRootSchemaFolder])
+        self.run([self.cmd_chmod, '-R', 'a+rX', self.openldapRootSchemaFolder])
         self.run([self.cmd_chown, '-R', 'ldap:ldap', self.openldapRootSchemaFolder])
 
         # 5. Create the PEM file from key and crt
