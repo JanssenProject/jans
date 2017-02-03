@@ -1913,8 +1913,6 @@ class Setup(object):
             if self.installLdap:
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/main_db'])
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
-                self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/data'])
-                self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/schema/openldap'])
                 
             if self.installAsimba:
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder])
@@ -2447,7 +2445,8 @@ class Setup(object):
         self.createDirs(self.openldapSchemaFolder)
         self.copyFile("%s/static/openldap/gluu.schema" % self.install_dir, self.openldapSchemaFolder)
         self.copyFile("%s/static/openldap/custom.schema" % self.install_dir, self.openldapSchemaFolder)
-        self.run([self.cmd_chgrp, '-R', 'ldap', self.openldapSchemaFolder])
+        self.run([self.cmd_chown, '-R', 'ldap:ldap', '/opt/gluu/data'])
+        self.run([self.cmd_chown, '-R', 'ldap:ldap', self.openldapSchemaFolder])
 
         # 5. Create the PEM file from key and crt
         with open(self.openldapTLSCACert, 'w') as pem:
