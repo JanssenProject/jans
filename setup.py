@@ -2469,9 +2469,9 @@ class Setup(object):
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         for ldif in self.ldif_files:
             if 'site.ldif' in ldif:
-                self.run(['/bin/su', 'ldap', '-c', " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
+                self.run(['/bin/su', 'ldap', '-c', "cd " + self.install_dir + "; " + " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
             else:
-                self.run(['/bin/su', 'ldap', '-c', " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
+                self.run(['/bin/su', 'ldap', '-c', "cd " + self.install_dir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
