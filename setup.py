@@ -66,6 +66,7 @@ class Setup(object):
         self.cmd_ln = '/bin/ln'
         self.cmd_chmod = '/bin/chmod'
         self.cmd_chown = '/bin/chown'
+        self.cmd_chgrp = '/bin/chgrp'
         self.cmd_mkdir = '/bin/mkdir'
         self.cmd_rpm = '/bin/rpm'
         self.cmd_dpkg = '/usr/bin/dpkg'
@@ -2419,6 +2420,10 @@ class Setup(object):
         else:
            self.run([self.cmd_dpkg, '--install', packageName])
 
+        openldapRunFolder = '/var/symas/run'
+        self.run([self.cmd_chmod, '-R', '775', openldapRunFolder])
+        self.run([self.cmd_chgrp, '-R', 'ldap', openldapRunFolder])
+
     def configure_openldap(self):
         self.logIt("Configuring OpenLDAP")
         # 1. Render templates
@@ -2461,9 +2466,9 @@ class Setup(object):
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         for ldif in self.ldif_files:
             if 'site.ldif' in ldif:
-                self.run([cmd, '-b', 'o=site', '-f', config, '-l', ldif])
+                self.run(['/bin/su', 'ldap', '-c', cmd, '-b', 'o=site', '-f', config, '-l', ldif])
             else:
-                self.run([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
+                self.run(['/bin/su', 'ldap', '-c', cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])
 
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
