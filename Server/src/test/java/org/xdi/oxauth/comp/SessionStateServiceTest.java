@@ -15,7 +15,9 @@ import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.UserService;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.testng.Assert.*;
 
@@ -41,35 +43,28 @@ public class SessionStateServiceTest extends BaseComponentTest {
     }
 
     private SessionState generateSession(String userInum) {
-    	String userDn = userService.getDnForUser(userInum);
+        String userDn = userService.getDnForUser(userInum);
         return m_service.generateUnauthenticatedSessionState(userDn, new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);
     }
 
     @Parameters({"userInum"})
     @Test
     public void statePersistence(String userInum) {
-        SessionState newId = null;
-        try {
-        	String userDn = userService.getDnForUser(userInum);
-            newId = m_service.generateAuthenticatedSessionState(userDn);
+        String userDn = userService.getDnForUser(userInum);
+        SessionState newId = m_service.generateAuthenticatedSessionState(userDn);
 
-            Assert.assertEquals(newId.getState(), SessionIdState.AUTHENTICATED);
+        Assert.assertEquals(newId.getState(), SessionIdState.AUTHENTICATED);
 
-            Map<String, String> sessionAttributes = new HashMap<String, String>();
-            sessionAttributes.put("k1", "v1");
-            newId.setSessionAttributes(sessionAttributes);
+        Map<String, String> sessionAttributes = new HashMap<String, String>();
+        sessionAttributes.put("k1", "v1");
+        newId.setSessionAttributes(sessionAttributes);
 
-            m_service.updateSessionState(newId);
+        m_service.updateSessionState(newId);
 
-            final SessionState fresh = m_service.getSessionById(newId.getId());
-            Assert.assertEquals(fresh.getState(), SessionIdState.AUTHENTICATED);
-            Assert.assertTrue(fresh.getSessionAttributes().containsKey("k1"));
-            Assert.assertTrue(fresh.getSessionAttributes().containsValue("v1"));
-        } finally {
-            if (newId != null) {
-                getLdapManager().remove(newId);
-            }
-        }
+        final SessionState fresh = m_service.getSessionById(newId.getId());
+        Assert.assertEquals(fresh.getState(), SessionIdState.AUTHENTICATED);
+        Assert.assertTrue(fresh.getSessionAttributes().containsKey("k1"));
+        Assert.assertTrue(fresh.getSessionAttributes().containsValue("v1"));
     }
 
     @Parameters({"userInum"})
