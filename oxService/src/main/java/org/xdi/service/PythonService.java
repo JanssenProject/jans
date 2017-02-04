@@ -117,7 +117,12 @@ public class PythonService implements Serializable {
 
 	private boolean isInitInterpreter() {
 		String pythonHome = System.getenv("PYTHON_HOME");
-		return StringHelper.isNotEmpty(pythonHome);
+		if (StringHelper.isNotEmpty(pythonHome)) {
+			System.setProperty("python.home", pythonHome);
+		}
+
+		String pythonHomeProperty = System.getProperty("python.home");
+		return StringHelper.isNotEmpty(pythonHomeProperty);
 	}
 
 	public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs) throws PythonException {
