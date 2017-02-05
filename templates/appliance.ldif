@@ -10,6 +10,7 @@ gluuFederationHostingEnabled: disabled
 gluuVdsCacheRefreshEnabled: disabled
 gluuScimEnabled: disabled
 gluuPassportEnabled: disabled
+oxMemcachedConfiguration: {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":1000000, "putExpiration":86400}
 oxTrustStoreConf: {"useJreCertificates":true}
 oxTrustCacheRefreshServerIpAddress: 255.255.255.255
 oxIDPAuthentication: {"type": "auth",
