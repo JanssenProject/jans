@@ -2811,6 +2811,13 @@ objectclass ( oxObjectClass:48 NAME 'oxPassportConfiguration'
 	MAY ( ou $ gluuPassportConfiguration $ gluuStatus )
 	X-ORIGIN 'Gluu created objectclass' )
 
+objectclass ( oxObjectClass:49 NAME 'oxShibbolethCASProtocolConfiguration'
+    SUP ( top )
+    STRUCTURAL
+    MUST ( objectclass )
+    MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxConfApplication $ oxRevision )
+    X-ORIGIN 'Gluu created objectclass' )
+
 dn: cn=schema
 objectClass: top
 objectClass: ldapSubentry
