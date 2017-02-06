@@ -9,7 +9,7 @@ import json
 class SchemaGenerator(object):
     def __init__(self, jsontext, header=None):
         self.data = json.loads(jsontext)
-        self.outString = header if header else u''
+        self.header = header
 
     def __compare_defs(self, m1, m2):
         n1 = int(m1[1].split(':')[1])
@@ -25,6 +25,8 @@ class SchemaGenerator(object):
 
     def generate_schema(self):
         """Function that generates the schema and returns it as a string"""
+        self.outString = u''
+        self.outString += self.header if self.header else u""
         if len(self.outString):
             self.outString += u"\n"
         if len(self.data['oidMacros']) > 0:
@@ -101,6 +103,10 @@ class SchemaGenerator(object):
 
     def generate_ldif(self):
         """Function which generates the OpenDJ LDIF format schema string."""
+        self.outString = u''
+        self.outString += self.header if self.header else u""
+        if len(self.outString):
+            self.outString += u"\n"
         self.outString += u"dn: cn=schema\nobjectClass: top\nobjectClass: " \
             + u"ldapSubentry\nobjectClass: subschema\ncn: schema\n"
 
