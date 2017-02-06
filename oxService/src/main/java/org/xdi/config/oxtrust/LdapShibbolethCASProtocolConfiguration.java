@@ -5,10 +5,12 @@
  */
 package org.xdi.config.oxtrust;
 
+import java.io.Serializable;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.ldap.model.Entry;
 
 /**
  * Shibboleth IDP CAS-related settings configuration entry. 
@@ -17,9 +19,12 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxShibbolethCASProtocolConfiguration"})
-public class LdapShibbolethCASProtocolConfiguration {
+public class LdapShibbolethCASProtocolConfiguration extends Entry implements Serializable {
 
     private static final long serialVersionUID = -11887457695212971L;
+
+    @LdapAttribute(ignoreDuringUpdate = true)
+    private String inum;
     
     @LdapJsonObject
     @LdapAttribute(name = "oxConfApplication")
@@ -29,6 +34,14 @@ public class LdapShibbolethCASProtocolConfiguration {
     private long revision;
     
     public LdapShibbolethCASProtocolConfiguration() {}
+
+    public String getInum() {
+        return inum;
+    }
+
+    public void setInum(String inum) {
+        this.inum = inum;
+    }
 
     /**
      * @return the casProtocolConfiguration
