@@ -164,8 +164,10 @@ public class ResourceSetRegistrationWS {
 
             final ResourceSetWithId response = new ResourceSetWithId();
 
-            BeanUtils.copyProperties(response, ldapResourceSet);
             response.setId(ldapResourceSet.getId());
+            response.setName(ldapResourceSet.getName());
+            response.setUri(ldapResourceSet.getUrl());
+            response.setIconUri(ldapResourceSet.getIconUri());
             response.setScopes(umaScopeService.getScopeUrlsByDns(ldapResourceSet.getScopes()));
 
             final ResponseBuilder builder = Response.ok();
@@ -316,6 +318,9 @@ public class ResourceSetRegistrationWS {
         final org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = new org.xdi.oxauth.model.uma.persistence.ResourceSet();
         BeanUtils.copyProperties(ldapResourceSet, resourceSet);
 
+        ldapResourceSet.setName(resourceSet.getName());
+        ldapResourceSet.setUrl(resourceSet.getUri());
+        ldapResourceSet.setIconUri(resourceSet.getIconUri());
         ldapResourceSet.setId(rsid);
         ldapResourceSet.setRev("1");
         ldapResourceSet.setCreator(userDn);
@@ -350,8 +355,9 @@ public class ResourceSetRegistrationWS {
 
         ldapResourceSet = ldapResourceSets.get(0);
 
-        BeanUtils.copyProperties(ldapResourceSet, resourceSet);
-
+        ldapResourceSet.setName(resourceSet.getName());
+        ldapResourceSet.setUrl(resourceSet.getUri());
+        ldapResourceSet.setIconUri(resourceSet.getIconUri());
         ldapResourceSet.setScopes(umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resourceSet.getScopes()));
         ldapResourceSet.setRev(String.valueOf(incrementRev(ldapResourceSet.getRev())));
 
