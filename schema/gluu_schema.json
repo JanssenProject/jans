@@ -5271,25 +5271,25 @@
             "x_origin": "Gluu created objectclass"
         },
         {
-            "kind": "STRUCTURAL", 
+            "kind": "STRUCTURAL",
             "may": [
-                "ou", 
-                "friendlyName", 
-                "uniqueIdentifier", 
-                "inum", 
-                "oxConfApplication", 
+                "ou",
+                "friendlyName",
+                "uniqueIdentifier",
+                "inum",
+                "oxConfApplication",
                 "oxRevision"
-            ], 
+            ],
             "must": [
                 "objectclass"
-            ], 
+            ],
             "names": [
                 "oxShibbolethCASProtocolConfiguration"
-            ], 
-            "oid": "oxObjectClass:49", 
+            ],
+            "oid": "oxObjectClass:49",
             "sup": [
                 "top"
-            ], 
+            ],
             "x_origin": "Gluu created objectclass"
         }
     ],
