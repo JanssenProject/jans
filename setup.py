@@ -337,6 +337,7 @@ class Setup(object):
         self.ldif_scim = '%s/scim.ldif' % self.outputFolder
         self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
+        self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.cas_properties = '%s/cas.properties' % self.outputFolder
@@ -416,7 +417,8 @@ class Setup(object):
                            self.ldif_scim,
                            self.ldif_asimba,
                            self.ldif_passport,
-                           self.ldif_passport_config
+                           self.ldif_passport_config,
+                           self.ldif_idp
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
@@ -449,6 +451,7 @@ class Setup(object):
                      self.ldif_asimba: False,
                      self.ldif_passport: False,
                      self.ldif_passport_config: False,
+                     self.ldif_idp: False,
                      self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
