@@ -2817,3 +2817,10 @@ objectclass ( oxObjectClass:48 NAME 'oxPassportConfiguration'
 	MUST ( objectclass )
 	MAY ( ou $ gluuPassportConfiguration $ gluuStatus )
 	X-ORIGIN 'Gluu created objectclass' )
+	
+objectclass ( oxObjectClass:49 NAME 'oxShibbolethCASProtocolConfiguration'
+    SUP ( top )
+    STRUCTURAL
+    MUST ( objectclass )
+    MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxConfApplication $ oxRevision )
+    X-ORIGIN 'Gluu created objectclass' )
