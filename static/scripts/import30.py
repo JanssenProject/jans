@@ -87,6 +87,8 @@ class Migration(object):
         self.keytool = "/opt/jre/bin/keytool"
         self.key_store = "/opt/jre/jre/lib/security/cacerts"
         self.etc_hostname = "/etc/hostname"
+        self.ldif_import = "/opt/opendj/bin/import-ldif"
+        self.ldif_export = "/opt/opendj/bin/export-ldif"
 
         self.ldapDataFile = "/opt/gluu/data/data.mdb"
 
@@ -96,6 +98,7 @@ class Migration(object):
         self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
         self.attrs = 1000
         self.objclasses = 1000
+        self.ldap_type = 'openldap'
 
     def readFile(self, inFilePath):
         inFilePathText = None
@@ -267,8 +270,12 @@ class Migration(object):
 
     def exportInstallData(self):
         logging.info("Exporting LDAP data.")
-        output = self.getOutput([self.slapcat, '-f', self.slapdConf,
-                                 '-l', self.currentData])
+        if self.ldap_type == 'openldap':
+            output = self.getOutput([self.slapcat, '-f', self.slapdConf,
+                                     '-l', self.currentData])
+        elif self.ldap_type == 'opendj':
+            output = self.getOutput(
+                [self.ldif_export, '-n', 'userRoot', '-l', self.currentData])
         logging.debug(output)
 
     def convertSchema(self, f):
@@ -282,7 +289,7 @@ class Migration(object):
             # empty lines and the comments are copied as such
             if re.match('^#', line) or re.match('^\s*$', line):
                 pass
-            elif re.match('^\s\s', line):  # change the space indendation to tabs
+            elif re.match('^\s\s', line):  # change the space indent to tabs
                 line = re.sub('^\s\s', '\t', line)
             elif re.match('^\s', line):
                 line = re.sub('^\s', '\t', line)
@@ -319,10 +326,20 @@ class Migration(object):
 
     def copyCustomSchema(self):
         logging.info("Converting Schema files of custom attributes.")
-        sloc = os.path.join(self.backupDir, 'opt', 'opendj', 'config', 'schema')
-        schema_99 = os.path.join(sloc, '99-user.ldif')
-        schema_100 = os.path.join(sloc, '100-user.ldif')
+        loc = os.path.join(self.backupDir, 'opt', 'opendj', 'config', 'schema')
+        schema_99 = os.path.join(loc, '99-user.ldif')
+        schema_100 = os.path.join(loc, '100-user.ldif')
 
+        if self.ldap_type == 'opendj':
+            if os.path.isfile(schema_99):
+                shutil.copyfile(
+                    schema_99, '/opt/opendj/config/schema/99-user.ldif')
+            if os.path.isfile(schema_100):
+                shutil.copyfile(
+                    schema_100, '/opt/opendj/config/schema/100-user.ldif')
+            return
+
+        # Process for openldap and then copy
         new_user = os.path.join(self.workingDir, 'new_99.ldif')
         user_file = os.path.join(self.workingDir, 'user.schema')
         outfile = open(user_file, 'w')
@@ -452,8 +469,7 @@ class Migration(object):
                     line.replace("cn=directory manager", "cn=directory manager,o=gluu")
                     outfile.write(line)
 
-    def importProcessedData(self):
-        logging.info("Importing Processed LDAP data.")
+    def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/'))
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
         logging.debug("Moving %s to %s.", self.ldapDataFile, backupfile)
@@ -466,20 +482,99 @@ class Migration(object):
                                 self.slapdConf, '-l', self.o_site])
         logging.debug(output)
 
+    def importDataIntoOpenDJ(self):
+        command = [self.ldif_import, '-n', 'userRoot',
+                   '-l', self.o_gluu, '-R', self.o_gluu+'.rejects']
+        output = self.getOutput(command)
+        logging.debug(output)
+        command = [self.ldif_import, '-n', 'userRoot',
+                   '-l', self.o_site, '-R', self.o_site+'.rejects']
+        logging.debug(output)
+
+    def importProcessedData(self):
+        logging.info("Importing Processed LDAP data.")
+        if self.ldap_type == 'openldap':
+            self.importDataIntoOpenldap()
+        else:
+            self.importDataIntoOpenDJ()
+
+    def getLDAPServerType(self):
+        choice = 1
+        print("~~~~~~~ Gluu Server Community Edition Migartion Tool ~~~~~~~")
+        try:
+            choice = int(raw_input(
+                "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
+        except ValueError:
+            logging.error("You entered non-interger value. Cannot decide LDAP"
+                          "server type. Quitting.")
+            sys.exit(1)
+
+        if choice == 1:
+            self.ldap_type = 'openldap'
+        elif choice == 2:
+            self.ldap_type = 'opendj'
+        else:
+            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+            sys.exit(1)
+
+    def stopOpenDJ(self):
+        logging.info('Stopping OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'stop', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        else:
+            output = self.getOutput([self.service, 'opendj', 'stop'])
+
+        if output.find("Directory Server is now stopped") > 0 or \
+                output.strip() == "failed":
+            logging.info("Directory Server is now stopped")
+        else:
+            logging.error(
+                "OpenDJ did not stop properly. Import cannot run without "
+                "stopping the directory server. Exiting from import. Check"
+                " /opt/opendj/logs/errors")
+            sys.exit(1)
+
+    def startOpenDJ(self):
+        logging.info('Starting OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'start', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        output = self.getOutput([self.service, 'opendj', 'start'])
+        if output.find("Directory Server has started successfully") > 0 or \
+                output.strip() == "active":
+            logging.info("Directory Server has started successfully")
+        else:
+            logging.error("OpenDJ did not start properly. Check "
+                          "/opt/opendj/logs/errors. Restart it manually.")
+
+    def stopLDAPServer(self):
+        if self.ldap_type == 'openldap':
+            self.stopSolserver()
+        else:
+            self.stopOpenDJ()
+
+    def startLDAPServer(self):
+        if self.ldap_type == 'openldap':
+            self.startSolserver()
+        else:
+            self.startOpenDJ()
+
     def migrate(self):
         """Main function for the migration of backup data
         """
+        self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
         self.stopWebapps()
-        self.stopSolserver()
+        self.stopLDAPServer()
         self.copyCertificates()
         self.copyCustomFiles()
         self.copyCustomSchema()
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
-        self.startSolserver()
+        self.startLDAPServer()
         self.startWebapps()
 
 
