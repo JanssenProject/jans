@@ -5,7 +5,6 @@ dn: ou=oxidp,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: organizationalUnit
 ou: oxidp
-oxRevision: 1
 
 
 dn: ou=cas,ou=oxidp,o=%(inumOrg)s,o=gluu
