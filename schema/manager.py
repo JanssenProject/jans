@@ -107,11 +107,40 @@ def make_json(filename):
     print json.dumps(schema_dict, indent=4, sort_keys=True)
 
 
+def make_schema_docs():
+    schema = 'gluu_schema.json'
+    f = open(schema)
+    json_string = f.read()
+    f.close()
+    data = json.loads(json_string)
+    objClasses = data['objectClasses']
+    attTypes = data['attributeTypes']
+    docs = ''
+
+    for obj_class in objClasses:
+        docs += "\n\n## {}".format(" (or) ".join(obj_class['names']))
+        if 'desc' in obj_class:
+            docs += "\n_{}_".format(obj_class['desc'].encode('utf-8'))
+
+        for obj_attr in obj_class['may']:
+            attr_docs_added = False
+            for attr_type in attTypes:
+                if obj_attr in attr_type['names']:
+                    docs += "\n* __{}__".format(" (or) ".join(attr_type['names']))
+                    if 'desc' in attr_type:
+                        docs += ":  {}".format(attr_type['desc'].encode('utf-8'))
+                    attr_docs_added = True
+                    break
+            if not attr_docs_added:
+                docs += "\n* __{}__".format(obj_attr)
+    print docs
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "action", help="the action you want to perform.",
-        choices=["autogenerate", "generate", "makejson", "test"])
+        choices=["autogenerate", "generate", "makejson", "makedocs", "test"])
     parser.add_argument(
         "--type", help="the schema type you want to generate",
         choices=["openldap", "opendj"])
@@ -133,3 +162,5 @@ if __name__ == '__main__':
             print "No Schema Input. Specify schema file with --filename"
     elif args.action == 'autogenerate':
         autogenerate()
+    elif args.action == 'makedocs':
+        make_schema_docs()
