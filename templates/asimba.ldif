@@ -5,7 +5,6 @@ dn: ou=oxasimba,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: organizationalUnit
 ou: oxasimba
-oxRevision: 1
 
 dn: ou=idps,ou=oxasimba,o=%(inumOrg)s,o=gluu
 objectClass: top
