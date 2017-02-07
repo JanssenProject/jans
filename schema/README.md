@@ -31,6 +31,12 @@ python manage.py generate --type opendj --filename <json filename>
 python manage.py makejson --filename <path to schema file>
 ```
 
+### Generate Markdown Docs for the Schema
+
+```
+python manage.py makedocs
+```
+
 ### Getting Help
 
 ```
