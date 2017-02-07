@@ -1097,10 +1097,10 @@ description: gluuPermission
 description: User permission or role
 displayName: User permisison
 gluuAttributeEditType: admin
-gluuAttributeName: gluuPermission
+gluuAttributeName: role
 gluuAttributeOrigin: gluuPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: active
 inum: %(inumOrg)s!0005!6049
-urn: urn:gluu:dir:attribute-gluuPermission
+urn: urn:gluu:dir:attribute-def:role
