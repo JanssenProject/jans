@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.service;
 
+import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Factory;
 import org.jboss.seam.annotations.In;
@@ -23,7 +24,7 @@ import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 /**
- * Holds factoryt methods to create services
+ * Holds factory methods to create services
  *
  * @author Yuriy Movchan Date: 05/22/2015
  */
@@ -50,7 +51,11 @@ public class ApplicationFactory {
 
 	@Factory(value = "memcachedConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
 	public MemcachedConfiguration createMemcachedConfiguration() {
-		return applianceService.getAppliance().getMemcachedConfiguration();
+		MemcachedConfiguration memcachedConfiguration = applianceService.getAppliance().getMemcachedConfiguration();
+		if (memcachedConfiguration == null || StringUtils.isBlank(memcachedConfiguration.getServers())) {
+			throw new RuntimeException("Failed to load memcached configuration from ldap. Please check appliance ldap entry.");
+		}
+		return memcachedConfiguration;
 	}
 
 	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
