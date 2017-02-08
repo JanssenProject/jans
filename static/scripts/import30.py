@@ -19,6 +19,7 @@ import shutil
 import json
 import re
 
+from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter
 from jsonmerge import merge
 
@@ -560,6 +561,16 @@ class Migration(object):
         else:
             self.startOpenDJ()
 
+    def copyIDPFiles(self):
+        if os.path.isdir(os.path.join(self.backupDir, 'opt', 'idp')):
+            logging.info('Copying Shibboleth IDP files...')
+            copy_tree(
+                os.path.join(self.backupDir, 'opt', 'idp', 'metadata'),
+                '/opt/shibboleth-idp/metadata')
+            copy_tree(
+                os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
+                '/opt/shibboleth-idp/ssl')
+
     def migrate(self):
         """Main function for the migration of backup data
         """
@@ -570,6 +581,7 @@ class Migration(object):
         self.stopLDAPServer()
         self.copyCertificates()
         self.copyCustomFiles()
+        self.copyIDPFiles()
         self.copyCustomSchema()
         self.exportInstallData()
         self.processBackupData()
