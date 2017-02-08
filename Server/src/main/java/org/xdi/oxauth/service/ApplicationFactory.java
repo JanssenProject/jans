@@ -18,6 +18,7 @@ import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
+import org.xdi.service.cache.MemcachedConfiguration;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
@@ -46,6 +47,11 @@ public class ApplicationFactory {
     public SHA256withECDSASignatureVerification createBouncyCastleSignatureVerification() {
         return new SHA256withECDSASignatureVerification();
     }
+
+	@Factory(value = "memcachedConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+	public MemcachedConfiguration createMemcachedConfiguration() {
+		return applianceService.getAppliance().getMemcachedConfiguration();
+	}
 
 	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
 	public SmtpConfiguration createSmtpConfiguration() {
