@@ -54,6 +54,8 @@ public class ApplicationFactory {
 		MemcachedConfiguration memcachedConfiguration = applianceService.getAppliance().getMemcachedConfiguration();
 		if (memcachedConfiguration == null || StringUtils.isBlank(memcachedConfiguration.getServers())) {
 			throw new RuntimeException("Failed to load memcached configuration from ldap. Please check appliance ldap entry.");
+		} else {
+			log.trace("Memcached configuration: " + memcachedConfiguration);
 		}
 		return memcachedConfiguration;
 	}
