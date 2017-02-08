@@ -6,20 +6,15 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
-import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -37,6 +32,7 @@ import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
 import javax.faces.context.ExternalContext;
@@ -67,9 +63,6 @@ public class SessionStateService {
     private Log log;
 
     @In
-    private LdapEntryManager ldapEntryManager;
-
-    @In
     private AuthenticationService authenticationService;
     
     @In
@@ -92,6 +85,9 @@ public class SessionStateService {
 
     @In(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
+
+    @In
+    private CacheService cacheService;
 
     public static SessionStateService instance() {
         return (SessionStateService) Component.getInstance(SessionStateService.class);
@@ -431,7 +427,7 @@ public class SessionStateService {
 
                 sessionState.setPersisted(true);
                 log.trace("sessionStateAttributes: " + sessionState.getPermissionGrantedMap());
-                ldapEntryManager.persist(sessionState);
+                putInCache(sessionState);
                 return true;
             }
         } catch (Exception e) {
@@ -492,11 +488,23 @@ public class SessionStateService {
         return true;
     }
 
+    private void putInCache(SessionState sessionState) {
+        int expirationInSeconds = sessionState.getState() == SessionIdState.UNAUTHENTICATED ?
+                appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() :
+                appConfiguration.getSessionIdUnusedLifetime();
+        cacheService.put(Integer.toString(expirationInSeconds), sessionState.getId(), sessionState); // first parameter is expiration instead of region for memcached
+    }
+
+    private SessionState getFromCache(String sessionId) {
+        return (SessionState) cacheService.get(null, sessionId);
+    }
+
 	private SessionState mergeWithRetry(final SessionState sessionState, int maxAttempts) {
 		EntryPersistenceException lastException = null;
 		for (int i = 1; i <= maxAttempts; i++) {
 			try {
-				return ldapEntryManager.merge(sessionState);
+                putInCache(sessionState);
+				return sessionState;
 			} catch (EntryPersistenceException ex) {
 				lastException = ex;
 				if (ex.getCause() instanceof LDAPException) {
@@ -512,8 +520,8 @@ public class SessionStateService {
 				throw ex;
 			}
 		}
-		
-		log.error("Session entry update attempt was unsuccessfull after '{0}' attempts", maxAttempts);
+
+        log.error("Session entry update attempt was unsuccessfull after '{0}' attempts", maxAttempts);
 		throw lastException;
 	}
 
@@ -538,13 +546,8 @@ public class SessionStateService {
         return sb.toString();
     }
 
-    public SessionState getSessionByDN(String p_dn) {
-        try {
-            return ldapEntryManager.find(SessionState.class, p_dn);
-        } catch (Exception e) {
-            log.trace(e.getMessage(), e);
-        }
-        return null;
+    public SessionState getSessionById(String sessionId) {
+        return getFromCache(sessionId);
     }
 
     public SessionState getSessionState(String sessionState) {
@@ -552,14 +555,8 @@ public class SessionStateService {
             return null;
         }
 
-        String dn = dn(sessionState);
-        boolean contains = containsSessionState(dn);
-        if (!contains) {
-            return null;
-        }
-
         try {
-            final SessionState entity = getSessionByDN(dn);
+            final SessionState entity = getSessionById(sessionState);
             log.trace("Try to get session by id: {0} ...", sessionState);
             if (entity != null) {
                 log.trace("Session dn: {0}", entity.getDn());
@@ -576,23 +573,13 @@ public class SessionStateService {
         return null;
     }
 
-    public boolean containsSessionState(String dn) {
-        try {
-            return ldapEntryManager.contains(SessionState.class, dn);
-        } catch (Exception e) {
-            log.trace(e.getMessage(), e);
-        }
-
-        return false;
-    }
-
     private String getBaseDn() {
         return staticConfiguration.getBaseDn().getSessionId();
     }
 
-    public boolean remove(SessionState p_sessionState) {
+    public boolean remove(SessionState sessionState) {
         try {
-            ldapEntryManager.remove(p_sessionState);
+            cacheService.remove(null, sessionState.getId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
@@ -609,84 +596,6 @@ public class SessionStateService {
                 log.error("Failed to remove entry", e);
             }
         }
-    }
-
-    public void cleanUpSessions() {
-        final int interval = appConfiguration.getSessionIdUnusedLifetime();
-        final int unauthenticatedInterval = appConfiguration.getSessionIdUnauthenticatedUnusedLifetime();
-
-        BatchOperation<SessionState> unauthenticatedIdsBatchService = new BatchOperation<SessionState>(ldapEntryManager) {
-            @Override
-            protected List<SessionState> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-            }
-
-            @Override
-            protected void performAction(List<SessionState> entries) {
-                remove(entries);
-            }
-
-            private Filter getFilter() {
-                try {
-                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(unauthenticatedInterval);
-                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
-                    return Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
-                }catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxLastAccessTime");
-                }
-            }
-        };
-        unauthenticatedIdsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
-
-        BatchOperation<SessionState> idsBatchService = new BatchOperation<SessionState>(ldapEntryManager) {
-            @Override
-            protected List<SessionState> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-            }
-
-            @Override
-            protected void performAction(List<SessionState> entries) {
-                remove(entries);
-            }
-
-            private Filter getFilter() {
-                try {
-                    final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(interval);
-                    String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
-                    return Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
-                }catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxLastAccessTime");
-                }
-            }
-        };
-        idsBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
-    }
-
-    public List<SessionState> getUnauthenticatedIdsOlderThan(int p_intervalInSeconds) {
-        try {
-            final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(p_intervalInSeconds);
-            String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
-            final Filter filter = Filter.create(String.format("&(oxLastAccessTime<=%s)(oxState=unauthenticated)", dateInPastString, dateInPastString));
-            return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return Collections.emptyList();
-    }
-
-
-    public List<SessionState> getIdsOlderThan(int p_intervalInSeconds) {
-        try {
-            final long dateInPast = new Date().getTime() - TimeUnit.SECONDS.toMillis(p_intervalInSeconds);
-            String dateInPastString = StaticUtils.encodeGeneralizedTime(new Date(dateInPast));
-            final Filter filter = Filter.create(String.format("(oxLastAccessTime<=%s)", dateInPastString, dateInPastString));
-            return ldapEntryManager.findEntries(getBaseDn(), SessionState.class, filter);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return Collections.emptyList();
     }
 
     public boolean isSessionValid(SessionState sessionState) {

@@ -107,7 +107,6 @@ public class CleanerTimer {
         try {
             processAuthorizationGrantList();
             processRegisteredClients();
-            sessionStateService.cleanUpSessions(); // remove unused session ids
 
             Date now = new Date();
             this.rptManager.cleanupRPTs(now);
