@@ -11,19 +11,12 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.RDN;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
@@ -31,6 +24,7 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.service.CacheService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +56,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @In
 	private AppConfiguration appConfiguration;
 
+    @In
+    private CacheService cacheService;
+
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
         if (authorizationGrants != null && !authorizationGrants.isEmpty()) {
@@ -79,7 +76,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationCodeGrant createAuthorizationCodeGrant(User user, Client client, Date authenticationTime) {
         final AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
-        grant.persist(grant.getAuthorizationCode());
+        cacheService.put(Integer.toString(grant.getAuthorizationCode().getExpiresIn()), grant.cacheKey(), grant);
         return grant;
     }
 
@@ -100,7 +97,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode) {
-        return (AuthorizationCodeGrant) load(clientId, authorizationCode);
+        return (AuthorizationCodeGrant) cacheService.get(null, AuthorizationCodeGrant.cacheKey(clientId, authorizationCode));
     }
 
     @Override

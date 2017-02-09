@@ -6,11 +6,10 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.util.Date;
-
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -74,5 +73,13 @@ public class AuthorizationCodeGrant extends AuthorizationGrant {
         if (getAuthorizationCode() != null) {
             getAuthorizationCode().checkExpired();
         }
+    }
+
+    public String cacheKey() {
+        return cacheKey(getClientId(), getAuthorizationCode().getCode());
+    }
+
+    public static String cacheKey(String clientId, String code) {
+        return clientId + "_" + code;
     }
 }
