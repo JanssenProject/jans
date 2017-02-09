@@ -12,6 +12,7 @@ import org.xdi.oxauth.model.token.HandleTokenFactory;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -33,7 +34,7 @@ import java.util.Date;
  * @author Javier Rojas Blum
  * @version July 31, 2016
  */
-public abstract class AbstractToken {
+public abstract class AbstractToken implements Serializable {
 
     @LdapAttribute(name = "oxAuthTokenCode")
     private String code;
