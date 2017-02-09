@@ -19,6 +19,7 @@ import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.util.LdapUtils;
 import org.xdi.util.security.StringEncrypter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.List;
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
-public class Client {
+public class Client implements Serializable {
 
     @LdapDN
     private String dn;
