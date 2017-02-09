@@ -65,8 +65,14 @@ public class UmaValidationService {
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
 
+        String hostUri;
         try {
-            new URI(host);
+        	int index = host.indexOf("://");
+        	if (index != -1) {
+        		hostUri = (new URI(host)).getHost();
+        	} else {
+        		hostUri = (new URI("https://" + host)).getHost();
+        	}
         } catch (URISyntaxException ex) {
             log.error("Failed to parse AM host: '{0}'", ex, host);
             throw new WebApplicationException(Response.status(BAD_REQUEST)
@@ -75,18 +81,18 @@ public class UmaValidationService {
 
         try {
             URI umaBaseEndpoint = new URI(appConfiguration.getBaseEndpoint());
-            if (!StringHelper.equalsIgnoreCase(host, umaBaseEndpoint.getHost())) {
-                log.error("Get request for another AM: '{0}'", host);
+            if (!StringHelper.equalsIgnoreCase(hostUri, umaBaseEndpoint.getHost())) {
+                log.error("Get request for another AM: '{0}'. Expected: '{1}'", hostUri, umaBaseEndpoint.getHost());
                 throw new WebApplicationException(Response.status(BAD_REQUEST)
                         .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
             }
         } catch (URISyntaxException ex) {
-            log.error("Failed to parse AM host: '{0}'", ex, host);
+            log.error("Failed to parse AM host: '{0}'", ex, hostUri);
             throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
 
-        return StringHelper.toLowerCase(host).trim();
+        return StringHelper.toLowerCase(hostUri).trim();
     }
 
 //    public String validateHost(String host) {
@@ -96,15 +102,21 @@ public class UmaValidationService {
 //   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
 //   		}
 //
+//        String hostUri;
 //   		try {
-//   			new URI(host);
+//        	int index = host.indexOf("://");
+//        	if (index != -1) {
+//        		hostUri = (new URI(host)).getHost();
+//        	} else {
+//        		hostUri = (new URI("https://" + host)).getHost();
+//        	}
 //   		} catch (URISyntaxException ex) {
 //   			log.error("Failed to parse host: '{0}'", ex, host);
 //   			throw new WebApplicationException(Response.status(BAD_REQUEST)
 //   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
 //   		}
 //
-//   		return StringHelper.toLowerCase(host).trim();
+//   		return StringHelper.toLowerCase(hostUri).trim();
 //   	}
 
 
