@@ -10,6 +10,32 @@ class SchemaGenerator(object):
     def __init__(self, jsontext, header=None):
         self.data = json.loads(jsontext)
         self.header = header
+        self.macroMap = {}
+        if self.data['oidMacros']:
+            self.__mapMacros()
+
+    def __mapMacros(self):
+        if not self.data['oidMacros']:
+            return
+
+        macros = self.data['oidMacros']
+        # Find the root
+        for mac in macros:
+            if '.' in macros[mac]:
+                self.macroMap[mac] = macros[mac]
+                break
+
+        if not self.macroMap:
+            return
+
+        while len(macros) != len(self.macroMap):
+            for mac in macros:
+                if ':' not in macros[mac]:
+                    continue
+                oid = macros[mac]
+                parent, index = oid.split(':')
+                if parent in self.macroMap:
+                    self.macroMap[mac] = self.macroMap[parent] + '.' + index
 
     def __compare_defs(self, m1, m2):
         n1 = int(m1[1].split(':')[1])
@@ -101,6 +127,15 @@ class SchemaGenerator(object):
 
         return self.outString.strip()
 
+    def _getOID(self, model):
+        oid = model['oid']
+        if ':' not in oid or not self.macroMap:
+            return oid
+
+        macro, index = oid.split(':')
+        oid = self.macroMap[macro] + '.' + index
+        return oid
+
     def generate_ldif(self):
         """Function which generates the OpenDJ LDIF format schema string."""
         self.outString = u''
@@ -111,7 +146,7 @@ class SchemaGenerator(object):
             + u"ldapSubentry\nobjectClass: subschema\ncn: schema\n"
 
         for attr in self.data['attributeTypes']:
-            attr_str = u"attributeTypes: ( {} NAME ".format(attr['oid'])
+            attr_str = u"attributeTypes: ( {} NAME ".format(self._getOID(attr))
             if len(attr['names']) > 1:
                 namestring = u''
                 for name in attr['names']:
@@ -138,7 +173,7 @@ class SchemaGenerator(object):
             self.outString += attr_str
 
         for obc in self.data['objectClasses']:
-            obc_str = u"objectClasses: ( {} NAME ".format(obc['oid'])
+            obc_str = u"objectClasses: ( {} NAME ".format(self._getOID(obc))
             if len(obc['names']) > 1:
                 namestring = ''
                 for name in obc['names']:
