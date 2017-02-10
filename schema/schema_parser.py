@@ -83,7 +83,7 @@ class LDAPSchemaParser(object):
                     macro, index = obj.oid.split(':')
                     try:
                         obj.oid = oid_macros[macro] + '.' + index
-                    except KeyError, e:
+                    except KeyError as e:
                         logging.warning(error_msg, macro)
                         logging.debug(e, exc_info=True)
 
@@ -92,7 +92,7 @@ class LDAPSchemaParser(object):
                     macro, index = att.oid.split(':')
                     try:
                         att.oid = oid_macros[macro] + '.' + index
-                    except KeyError, e:
+                    except KeyError as e:
                         logging.warning(error_msg, macro)
                         logging.debug(e, exc_info=True)
 
