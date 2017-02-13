@@ -24,6 +24,10 @@
     "objectClasses": [
         {
             "kind": "AUXILIARY", 
+            "may": [
+                "telephoneNumber", 
+                "mobile"
+            ], 
             "names": [
                 "gluuCustomPerson"
             ], 
