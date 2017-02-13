@@ -1,2 +1,0 @@
-1. Add telephoneNumber to MAY attributes of gluuCustomPerson objectClass
-2. Add mobile to MAY attributes of gluuCustomPerson objectClass
