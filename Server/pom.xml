@@ -91,7 +91,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
-				<!-- check it : for some reason jar and war are not attached to project 
+				<!-- check it : for some reason jar and war are not attached to project
 					automatically, as temp solution install them manually -->
 				<executions>
 					<execution>
@@ -736,8 +736,46 @@
 			<properties>
 			</properties>
 			<build>
-				<plugins>
-				</plugins>
+              <plugins>
+                <plugin>
+                  <groupId>com.github.kongchen</groupId>
+                  <artifactId>swagger-maven-plugin</artifactId>
+                  <version>2.0</version>
+                  <configuration>
+                    <apiSources>
+                      <apiSource>
+                        <locations>org.xdi.oxauth.model.uma;
+                        </locations>
+                        <apiVersion>v1</apiVersion>
+                        <basePath>http://gluu.org</basePath>
+                        <outputTemplate>${basedir}/src/main/docs/mustache/markdown.mustache</outputTemplate>
+                        <outputPath>${basedir}/generated/swagger.markdown</outputPath>
+                        <swaggerDirectory>${basedir}/generated/apidocs</swaggerDirectory>
+                        <!--swaggerUIDocBasePath>http://www.example.com/restapi/doc</swaggerUIDocBasePath-->
+                        <!--useOutputFlatStructure>false</useOutputFlatStructure-->
+                        <mustacheFileRoot>${basedir}/src/main/docs/mustache</mustacheFileRoot>
+                        <!--overridingModels>/swagger-overriding-models.json</overridingModels-->
+                      </apiSource>
+                    </apiSources>
+                  </configuration>
+                  <executions>
+                    <execution>
+                      <phase>compile</phase>
+                      <goals>
+                        <goal>generate</goal>
+                      </goals>
+                    </execution>
+                  </executions>
+                  <dependencies>
+                    <dependency>
+                      <groupId>javax.servlet</groupId>
+                      <artifactId>servlet-api</artifactId>
+                      <version>2.3</version>
+                      <scope>runtime</scope>
+                    </dependency>
+                  </dependencies>
+                </plugin>
+              </plugins>
 			</build>
 			<dependencies>
 				<dependency>
