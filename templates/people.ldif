@@ -1,6 +1,7 @@
 dn: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: gluuPerson
+objectClass: gluuCustomPerson
 inum: %(inumOrg)s!0000!A8F2.DE1E.D7FB
 uid: admin
 givenName: Admin

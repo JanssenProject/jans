@@ -103,6 +103,13 @@ changetype: modify
 replace: defaultScope
 defaultScope: true
 
+dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
+changetype: modify
+add: oxAuthClaim
+oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
+oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
+
 ######################################
 # Scopes
 ######################################
@@ -114,6 +121,7 @@ inum: %(inumOrg)s!0009!7D01
 description: Dynamic scope org_name
 defaultScope: true
 oxScopeType: dynamic
+oxScriptDn: inum=%(inumOrg)s!0011!031C.5621,ou=scripts,o=%(inumOrg)s,o=gluu
 
 dn: inum=%(inumOrg)s!0009!7D02,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: top
@@ -123,13 +131,7 @@ inum: %(inumOrg)s!0009!7D02
 description: Dynamic scope work_phone
 defaultScope: true
 oxScopeType: dynamic
-
-dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
-changetype: modify
-add: oxAuthClaim
-oxAuthClaim: inum=%(inumOrg)s!0005!18CD,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CE,ou=attributes,o=%(inumOrg)s,o=gluu
-oxAuthClaim: inum=%(inumOrg)s!0005!18CF,ou=attributes,o=%(inumOrg)s,o=gluu
+oxScriptDn: inum=%(inumOrg)s!0011!031C.5622,ou=scripts,o=%(inumOrg)s,o=gluu
 
 ######################################
 # Groups
@@ -155,12 +157,12 @@ displayName: Gluu Test Group 2
 ######################################
 dn: inum=%(inumOrg)s!0000!B1F3.AEAE.B798,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
-objectClass: inetOrgPerson
 objectClass: gluuPerson
+objectClass: gluuCustomPerson
 cn: Test User
 sn: User
 o: Test
-birthdate: 1983-1-6
+birthdate: 19830106010101.253Z
 displayName: oxAuth Test User
 emailVerified: true
 gender: Male
@@ -184,7 +186,7 @@ l: Austin
 telephoneNumber: (512) 516-2413
 mobile: (512) 516-2413
 uid: test_user
-updatedAt: 1428004163
+updatedAt: 20170213135512.220Z
 userPassword: test_user_password
 website: http://www.gluu.org
 zoneinfo: America/Chicago
@@ -341,6 +343,11 @@ oxAuthRedirectURI: https://example.com/bad_sector_identifier
 # Scripts - Dynamic scope
 ######################################
 dn: inum=%(inumOrg)s!0011!031C.5621,ou=scripts,o=%(inumOrg)s,o=gluu
+changetype: modify
+replace: gluuStatus
+gluuStatus: true
+
+dn: inum=%(inumOrg)s!0011!031C.5622,ou=scripts,o=%(inumOrg)s,o=gluu
 changetype: modify
 replace: gluuStatus
 gluuStatus: true
