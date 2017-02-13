@@ -201,4 +201,6 @@ class SchemaGenerator(object):
 
             self.outString += obc_str
 
-        return self.outString.strip()
+        # Remove excess spaces and a new line at the end of the file
+        self.outString = self.outString.strip() + '\n\n'
+        return self.outString
