@@ -42,6 +42,7 @@ import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalDynamicClientRegistrationService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -592,7 +593,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             Arrays.asList(p_requestObject.getString(attr));
                     if (parameterValues != null && !parameterValues.isEmpty()) {
                         try {
-                            p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
+                        	boolean processed = processApplicationAttributes(p_client, attr, parameterValues);
+                        	if (!processed) {
+                        		p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
+                        	}
                         } catch (Exception e) {
                             staticLog.debug(e.getMessage(), e);
                         }
@@ -601,6 +605,17 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             }
         }
     }
+
+	private boolean processApplicationAttributes(Client p_client, String attr, final List<String> parameterValues) {
+		if (StringHelper.equalsIgnoreCase("oxAuthTrustedClient", attr)) {
+			boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
+			p_client.setTrustedClient(trustedClient);
+			
+			return true;
+		}
+		
+		return false;
+	}
 
     private String clientScopesToString(Client client){
         String[] scopeDns = client.getScopes();
