@@ -24,6 +24,7 @@ import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
+import org.xdi.service.CacheService;
 
 import java.util.*;
 
@@ -43,9 +44,12 @@ public class GrantService {
     private LdapEntryManager ldapEntryManager;
     @In
     private ApplicationAuditLogger applicationAuditLogger;
-    
+
     @In
     private ClientService clientService;
+
+    @In
+    private CacheService cacheService;
 
     @In
     private StaticConf staticConfiguration;
@@ -347,5 +351,9 @@ public class GrantService {
             oAuth2AuditLog.setUsername(tokenLdap.getUserId());
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
         }
+    }
+
+    public CacheService getCacheService() {
+        return cacheService;
     }
 }
