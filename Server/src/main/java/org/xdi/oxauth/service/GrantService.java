@@ -9,6 +9,7 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.ScopeType;
@@ -19,6 +20,7 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.MemcachedGrant;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
@@ -101,9 +103,13 @@ public class GrantService {
         log.trace("Removed token, code: " + p_token.getTokenCode());
     }
 
-    public void removeSilently(TokenLdap p_token) {
+    public void removeSilently(TokenLdap token) {
         try {
-            remove(p_token);
+            remove(token);
+
+            if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
+                cacheService.remove(null, MemcachedGrant.cacheKey(token.getClientId(), p_tokengetAuthorizationCode()));
+            }
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -228,6 +234,7 @@ public class GrantService {
         if (t != null) {
             removeSilently(t);
         }
+        cacheService.remove(null, MemcachedGrant.cacheKey(p_code, p_clientId));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
