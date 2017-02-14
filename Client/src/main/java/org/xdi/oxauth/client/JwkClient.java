@@ -8,6 +8,7 @@ package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
+import org.jboss.resteasy.client.ClientExecutor;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
@@ -91,9 +92,14 @@ public class JwkClient extends BaseClient<JwkRequest, JwkResponse> {
     }
 
     public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId) {
+        return getRSAPublicKey(jwkSetUri, keyId, null);
+    }
+
+    public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId, ClientExecutor clientExecutor) {
         RSAPublicKey publicKey = null;
 
         JwkClient jwkClient = new JwkClient(jwkSetUri);
+        jwkClient.setExecutor(clientExecutor);
         JwkResponse jwkResponse = jwkClient.exec();
         if (jwkResponse != null && jwkResponse.getStatus() == 200) {
             PublicKey pk = jwkResponse.getPublicKey(keyId);
