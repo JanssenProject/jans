@@ -234,7 +234,7 @@ public class GrantService {
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(null, MemcachedGrant.cacheKey(p_code, p_clientId));
+        cacheService.remove(null, MemcachedGrant.cacheKey(p_clientId, p_code));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
