@@ -12,6 +12,7 @@ import java.util.Set;
  */
 public class MemcachedGrant implements Serializable {
 
+    private String authorizationCodeString;  // duplicate due to AbstractToken code change on deserialization
     private AuthorizationCode authorizationCode;
     private User user;
     private Client client;
@@ -30,6 +31,7 @@ public class MemcachedGrant implements Serializable {
 
     public MemcachedGrant(AuthorizationGrant codeGrant) {
         authorizationCode = codeGrant.getAuthorizationCode();
+        authorizationCodeString = codeGrant.getAuthorizationCode().getCode(); // duplicate due to AbstractToken code change on deserialization
         user = codeGrant.getUser();
         client = codeGrant.getClient();
         authenticationTime = codeGrant.getAuthenticationTime();
@@ -90,8 +92,57 @@ public class MemcachedGrant implements Serializable {
         this.authenticationTime = authenticationTime;
     }
 
+    public String getAuthorizationCodeString() {
+        return authorizationCodeString;
+    }
+
+    public void setAuthorizationCodeString(String authorizationCodeString) {
+        this.authorizationCodeString = authorizationCodeString;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    public String getAcrValues() {
+        return acrValues;
+    }
+
+    public void setAcrValues(String acrValues) {
+        this.acrValues = acrValues;
+    }
+
+    public String getSessionDn() {
+        return sessionDn;
+    }
+
+    public void setSessionDn(String sessionDn) {
+        this.sessionDn = sessionDn;
+    }
+
     public AuthorizationCodeGrant asCodeGrant(AppConfiguration appConfiguration) {
         AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
+        grant.setAuthorizationCode(authorizationCode);
         grant.setScopes(scopes);
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
@@ -99,6 +150,10 @@ public class MemcachedGrant implements Serializable {
         grant.setCodeChallengeMethod(codeChallengeMethod);
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
+
+        if (authorizationCode != null) {
+            authorizationCode.setCode(authorizationCodeString);
+        }
         return grant;
     }
 
