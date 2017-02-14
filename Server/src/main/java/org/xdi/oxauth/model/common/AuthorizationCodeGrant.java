@@ -9,7 +9,6 @@ package org.xdi.oxauth.model.common;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -37,7 +36,7 @@ import java.util.Date;
  *
  * @author Javier Rojas Blum Date: 09.29.2011
  */
-public class AuthorizationCodeGrant extends AuthorizationGrant implements Serializable {
+public class AuthorizationCodeGrant extends AuthorizationGrant {
 
     /**
      * Constructs and authorization code grant.
@@ -51,6 +50,7 @@ public class AuthorizationCodeGrant extends AuthorizationGrant implements Serial
     public AuthorizationCodeGrant(User user, Client client, Date authenticationTime, AppConfiguration appConfiguration) {
         super(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, authenticationTime, appConfiguration);
         setAuthorizationCode(new AuthorizationCode(appConfiguration.getAuthorizationCodeLifetime()));
+        setIsCachedWithNoPersistence(true);
     }
 
     /**
@@ -74,13 +74,5 @@ public class AuthorizationCodeGrant extends AuthorizationGrant implements Serial
         if (getAuthorizationCode() != null) {
             getAuthorizationCode().checkExpired();
         }
-    }
-
-    public String cacheKey() {
-        return cacheKey(getClientId(), getAuthorizationCode().getCode());
-    }
-
-    public static String cacheKey(String clientId, String code) {
-        return clientId + "_" + code;
     }
 }

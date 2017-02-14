@@ -9,7 +9,6 @@ package org.xdi.oxauth.model.common;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
@@ -435,5 +434,22 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         }
 
         return accessTokens.get(hashedTokenCode);
+    }
+
+    @Override
+    public String toString() {
+        return "AbstractAuthorizationGrant{" +
+                "user=" + user +
+                ", client=" + client +
+                ", grantId='" + grantId + '\'' +
+                ", nonce='" + nonce + '\'' +
+                ", acrValues='" + acrValues + '\'' +
+                ", sessionDn='" + sessionDn + '\'' +
+                ", codeChallenge='" + codeChallenge + '\'' +
+                ", codeChallengeMethod='" + codeChallengeMethod + '\'' +
+                ", authenticationTime=" + authenticationTime +
+                ", scopes=" + scopes +
+                ", authorizationGrantType=" + authorizationGrantType +
+                '}';
     }
 }
