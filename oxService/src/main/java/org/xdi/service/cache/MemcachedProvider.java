@@ -57,12 +57,21 @@ public class MemcachedProvider extends CacheProvider<MemcachedClient> {
 
     @Override
     public Object get(String region, String key) {
-        return client.get(key);
+        try {
+            return client.get(key);
+        } catch (Exception e) {
+            log.error("Failed to fetch object by key: " + key, e);
+            return null;
+        }
     }
 
     @Override // it is so weird but we use as workaround "region" field to pass "expiration" for put operation
     public void put(String expirationInSeconds, String key, Object object) {
-        client.set(key, putExpiration(expirationInSeconds), object);
+        try {
+            client.set(key, putExpiration(expirationInSeconds), object);
+        } catch (Exception e) {
+            log.error("Failed to put object in cache, key: " + key, e);
+        }
     }
 
     private int putExpiration(String expirationInSeconds) {
@@ -75,7 +84,11 @@ public class MemcachedProvider extends CacheProvider<MemcachedClient> {
 
     @Override
     public void remove(String region, String key) {
-        client.delete(key);
+        try {
+            client.delete(key);
+        } catch (Exception e) {
+            log.error("Failed to remove object from cache, key: " + key, e);
+        }
     }
 
     @Override
