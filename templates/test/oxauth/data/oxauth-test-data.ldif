@@ -247,6 +247,7 @@ oxAuthResponseType: code
 oxAuthResponseType: id_token
 oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
+oxAuthTrustedClient: true
 
 dn: inum=%(inumOrg)s!0008!0068.3E20,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: top
@@ -261,6 +262,7 @@ oxAuthResponseType: code
 oxAuthResponseType: id_token
 oxAuthScope: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthTokenEndpointAuthMethod: client_secret_basic
+oxAuthTrustedClient: true
 
 ######################################
 # UMA
