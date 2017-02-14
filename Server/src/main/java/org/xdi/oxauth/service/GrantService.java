@@ -108,7 +108,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(null, MemcachedGrant.cacheKey(token.getClientId(), p_tokengetAuthorizationCode()));
+                cacheService.remove(null, MemcachedGrant.cacheKey(token.getClientId(), token.getAuthorizationCode()));
             }
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
