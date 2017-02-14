@@ -22,7 +22,7 @@ import java.util.Set;
  * @version December 29, 2016
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfiguration {
+public class AppConfiguration  {
 
     private String issuer;
     private String loginPage;

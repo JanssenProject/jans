@@ -6,11 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -26,6 +21,11 @@ import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Base class for all the types of authorization grant.
  *
@@ -36,17 +36,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private static final Logger LOGGER = Logger.getLogger(AuthorizationGrant.class);
 
-    //private static final int THREADS_COUNT = 200;
-
-//    private final ExecutorService executorService = Executors.newFixedThreadPool(THREADS_COUNT, new ThreadFactory() {
-//        public Thread newThread(Runnable p_r) {
-//            Thread thread = new Thread(p_r);
-//            thread.setDaemon(true);
-//            return thread;
-//        }
-//    });
-
     private final GrantService grantService = GrantService.instance();
+    private boolean isCachedWithNoPersistence = false;
 
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
                               Date authenticationTime, AppConfiguration appConfiguration) {
@@ -72,13 +63,16 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public void save() {
-// http://ox.gluu.org/jira/browse/OXAUTH-322?focusedCommentId=11620#comment-11620
-//        executorService.execute(new Runnable() {
-//            @Override
-//            public void run() {
-        saveImpl();
-//            }
-//        });
+        if (isCachedWithNoPersistence) {
+            if (getAuthorizationGrantType() == AuthorizationGrantType.AUTHORIZATION_CODE) {
+                MemcachedGrant memcachedGrant = new MemcachedGrant(this);
+                grantService.getCacheService().put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+            } else {
+                throw new UnsupportedOperationException("Grant caching is not supported for : " + getAuthorizationGrantType());
+            }
+        } else {
+            saveImpl();
+        }
     }
 
     private void saveImpl() {
@@ -280,5 +274,13 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public void checkExpiredTokens() {
         // do nothing, clean up is made via grant service: org.xdi.oxauth.service.GrantService.cleanUp()
+    }
+
+    public boolean isCachedWithNoPersistence() {
+        return isCachedWithNoPersistence;
+    }
+
+    public void setIsCachedWithNoPersistence(boolean isCachedWithNoPersistence) {
+        this.isCachedWithNoPersistence = isCachedWithNoPersistence;
     }
 }
