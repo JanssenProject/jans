@@ -80,11 +80,7 @@
     <!-- Cors -->
     <filter>
         <filter-name>CorsFilter</filter-name>
-        <filter-class>org.gluu.oxserver.filters.CorsFilter</filter-class>
-        <init-param>
-            <param-name>cors.allowed.origins</param-name>
-            <param-value>*</param-value>
-        </init-param>
+        <filter-class>org.xdi.oxauth.filter.CorsFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
@@ -92,11 +88,11 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
-        <url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
+        <url-pattern>/seam/resource/restv1/oxauth/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
         <filter-name>CorsFilter</filter-name>
-        <url-pattern>/seam/resource/restv1/oxauth/clientinfo</url-pattern>
+        <url-pattern>/opiframe</url-pattern>
     </filter-mapping>
 
     <!-- JSF -->
