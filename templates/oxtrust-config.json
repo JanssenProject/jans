@@ -119,7 +119,7 @@
     "cssLocation":"",
     "jsLocation":"",
 
-    "rptConnectionPoolUseConnectionPooling":false,
+    "rptConnectionPoolUseConnectionPooling":true,
     "rptConnectionPoolMaxTotal":200,
     "rptConnectionPoolDefaultMaxPerRoute":20,
     "rptConnectionPoolValidateAfterInactivity":10,
