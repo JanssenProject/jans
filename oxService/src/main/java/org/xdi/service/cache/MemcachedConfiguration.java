@@ -20,7 +20,7 @@ public class MemcachedConfiguration implements Serializable {
     private int bufferSize = 32768;
 
     @XmlElement(name = "putExpiration")
-    private int putExpiration = 86400; // one day
+    private int putExpiration = 60; // in seconds
 
     public int getPutExpiration() {
         return putExpiration;
