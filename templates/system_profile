@@ -7,6 +7,12 @@ else
 	echo "Gluu server is not started, please start it from root machine by service gluu-server start"
 	exit
 fi
+
+export JAVA_HOME=%(jre_home)s
+export NODE_HOME=%(node_home)s
+export OPENDJ_JAVA_HOME=%(jre_home)s
+
+export PATH=$PATH:$JAVA_HOME/bin:$NODE_HOME/bin:%(ldapBaseFolder)s/bin
 #####################################################################################################
 # End Gluu Block                                                                                    #
 #####################################################################################################
