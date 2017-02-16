@@ -1700,13 +1700,13 @@ class Setup(object):
         idpWar = 'idp.war'
         distIdpPath = '%s/idp.war' % self.distGluuFolder
 
-        tmpIdpDir = '%s/tmp_idp' % self.distFolder
+        tmpIdpDir = '%s/tmp/tmp_idp' % self.distFolder
 
         self.logIt("Unpacking %s..." % idpWar)
         self.removeDirs(tmpIdpDir)
         self.createDirs(tmpIdpDir)
 
-        self.run([self.jarCommand,
+        self.run([self.cmd_jar,
                   'xf',
                   distIdpPath], tmpIdpDir)
 
