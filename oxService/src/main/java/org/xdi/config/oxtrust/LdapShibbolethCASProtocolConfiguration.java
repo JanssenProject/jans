@@ -40,6 +40,9 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     }
 
     public void setInum(String inum) {
+        if (casProtocolConfiguration != null)
+            casProtocolConfiguration.setOrgInum(inum);
+        
         this.inum = inum;
     }
 

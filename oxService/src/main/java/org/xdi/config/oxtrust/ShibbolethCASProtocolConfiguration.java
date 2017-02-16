@@ -21,7 +21,7 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     
     private static final long serialVersionUID = 1107303245739658346L;
     
-    private String orgInum;
+    private String inum;
     
     private boolean enabled = true;
     
@@ -36,17 +36,17 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     private String sessionStorageType;
 
     /**
-     * @return the orgInum
+     * @return the inum
      */
-    public String getOrgInum() {
-        return orgInum;
+    public String getInum() {
+        return inum;
     }
 
     /**
-     * @param orgInum the orgInum to set
+     * @param inum the inum to set
      */
-    public void setOrgInum(String orgInum) {
-        this.orgInum = orgInum;
+    public void setInum(String inum) {
+        this.inum = inum;
     }
 
     /**
