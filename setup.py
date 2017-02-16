@@ -519,10 +519,6 @@ class Setup(object):
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
 
-            realIdp3BinFolder = "%s/bin" % realIdp3Folder;
-            if os.path.exists(realIdp3BinFolder):
-                self.run(['find', realIdp3BinFolder, '-name', '"*.sh"', '-exec', 'chmod', "755", '{}',  ';'])
-
     def set_permissions(self):
         self.logIt("Changing permissions")
 
@@ -534,10 +530,16 @@ class Setup(object):
         self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
         self.run(['find', "%s" % self.gluuBaseFolder, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
 
-	self.run(['find', "%s" % self.osDefault, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
+        self.run(['find', "%s" % self.osDefault, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
         self.run(['find', "%s" % self.osDefault, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
 
         self.run(['/bin/chmod', '-R', '644', self.etc_hosts, self.etc_hostname])
+
+        if self.installSaml:
+            realIdp3Folder = os.path.realpath(self.idp3Folder)
+            realIdp3BinFolder = "%s/bin" % realIdp3Folder;
+            if os.path.exists(realIdp3BinFolder):
+                self.run(['find', realIdp3BinFolder, '-name', '"*.sh"', '-exec', 'chmod', "755", '{}',  ';'])
 
     def get_ip(self):
         testIP = None
