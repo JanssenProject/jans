@@ -518,7 +518,10 @@ class Setup(object):
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
-            self.run([self.cmd_chmod, 'a+x', "%s/bin/*.sh" % realIdp3Folder])
+
+            realIdp3BinFolder = "%s/bin" % realIdp3Folder;
+            if os.path.exists(realIdp3BinFolder):
+                self.run(['find', realIdp3BinFolder, '-name', '"*.sh"', '-exec', 'chmod', "755", '{}',  ';'])
 
     def set_permissions(self):
         self.logIt("Changing permissions")
