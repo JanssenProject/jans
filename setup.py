@@ -539,7 +539,7 @@ class Setup(object):
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             realIdp3BinFolder = "%s/bin" % realIdp3Folder;
             if os.path.exists(realIdp3BinFolder):
-                self.run(['find', realIdp3BinFolder, '-name', '"*.sh"', '-exec', 'chmod', "755", '{}',  ';'])
+                self.run(['find', realIdp3BinFolder, '-name', '*.sh', '-exec', 'chmod', "755", '{}',  ';'])
 
     def get_ip(self):
         testIP = None
