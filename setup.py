@@ -212,13 +212,14 @@ class Setup(object):
         }
 
         self.idp3Folder = "/opt/shibboleth-idp"
-        self.idp3MetadataFolder = "/opt/shibboleth-idp/metadata"
-        self.idp3LogsFolder = "/opt/shibboleth-idp/logs"
-        self.idp3LibFolder = "/opt/shibboleth-idp/lib"
-        self.idp3ConfFolder = "/opt/shibboleth-idp/conf"
-        self.idp3ConfAuthnFolder = "/opt/shibboleth-idp/conf/authn"
-        self.idp3CredentialsFolder = "/opt/shibboleth-idp/credentials"
-        # self.idp3WarFolder = "/opt/shibboleth-idp/war"
+        self.idp3MetadataFolder = "%s/metadata" % self.idp3Folder
+        self.idp3LogsFolder = "%s/logs" % self.idp3Folder
+        self.idp3LibFolder = "%s/lib" % self.idp3Folder
+        self.idp3ConfFolder = "%s/conf" % self.idp3Folder
+        self.idp3ConfAuthnFolder = "%s/conf/authn" % self.idp3Folder
+        self.idp3CredentialsFolder = "%s/credentials" % self.idp3Folder
+        self.idp3WebappFolder = "%s/webapp" % self.idp3Folder
+        # self.idp3WarFolder = "%s/war"
 
         self.hostname = None
         self.ip = None
@@ -517,6 +518,7 @@ class Setup(object):
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
             self.run([self.cmd_chown, '-R', 'jetty:jetty', realIdp3Folder])
+            self.run([self.cmd_chmod, 'a+x', "%s/bin" % realIdp3Folder, '*.sh'])
 
     def set_permissions(self):
         self.logIt("Changing permissions")
@@ -1685,10 +1687,35 @@ class Setup(object):
 
             self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName])
             self.copyFile('%s/idp.war' % self.distGluuFolder, jettyIdpServiceWebapps)
+            
+            # Prepare libraries needed to for command line IDP3 utilities
+            self.install_saml_libraries()
 
             # chown -R jetty:jetty /opt/shibboleth-idp
             # self.run([self.cmd_chown,'-R', 'jetty:jetty', self.idp3Folder], '/opt')
             self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyIdpServiceWebapps], '/opt')
+
+    def install_saml_libraries(self):
+        # Unpack oxauth.war to get bcprov-jdk16.jar
+        idpWar = 'idp.war'
+        distIdpPath = '%s/idp.war' % self.distGluuFolder
+
+        tmpIdpDir = '%s/tmp_idp' % self.distFolder
+
+        self.logIt("Unpacking %s..." % idpWar)
+        self.removeDirs(tmpIdpDir)
+        self.createDirs(tmpIdpDir)
+
+        self.run([self.jarCommand,
+                  'xf',
+                  distIdpPath], tmpIdpDir)
+
+        # Copy libraries into webapp
+        idp3WebappLibFolder = "%/WEB-INF/lib" % self.idp3WebappFolder
+        self.createDirs(idp3WebappLibFolder)
+        self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, idp3WebappLibFolder)
+
+        self.removeDirs(tmpIdpDir)
 
     def install_asimba(self):
         asimbaWar = 'asimba.war'
@@ -1911,6 +1938,7 @@ class Setup(object):
                 self.run([self.cmd_mkdir, '-p', self.idp3ConfFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3ConfAuthnFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3CredentialsFolder])
+                self.run([self.cmd_mkdir, '-p', self.idp3WebappFolder])
                 # self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
                 self.run([self.cmd_chown, '-R', 'jetty:jetty', self.idp3Folder])
 
