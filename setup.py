@@ -1711,7 +1711,7 @@ class Setup(object):
                   distIdpPath], tmpIdpDir)
 
         # Copy libraries into webapp
-        idp3WebappLibFolder = "%/WEB-INF/lib" % self.idp3WebappFolder
+        idp3WebappLibFolder = "%s/WEB-INF/lib" % self.idp3WebappFolder
         self.createDirs(idp3WebappLibFolder)
         self.copyTree('%s/WEB-INF/lib' % tmpIdpDir, idp3WebappLibFolder)
 
