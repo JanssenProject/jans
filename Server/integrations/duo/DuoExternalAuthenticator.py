@@ -4,6 +4,7 @@
 # Author: Yuriy Movchan
 #
 
+from org.jboss.seam import Component
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
@@ -97,13 +98,13 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                userService = Component.getInstance(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
-            authenticationService = AuthenticationService.instance()
+            authenticationService = Component.getInstance(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (self.use_duo_group):
                 print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
@@ -138,7 +139,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not StringHelper.equals(user_name, authenticated_username)):
                 return False
 
-            authenticationService = AuthenticationService.instance()
+            authenticationService = Component.getInstance(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             self.processAuditGroup(user)
 
@@ -209,7 +210,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 # Send e-mail to administrator
                 user_id = user.getUserId()
-                mailService = MailService.instance()
+                mailService = Component.getInstance(MailService)
                 subject = "User log in: " + user_id
                 body = "User log in: " + user_id
                 mailService.sendMail(self.audit_email, subject, body)
