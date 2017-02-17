@@ -4,6 +4,7 @@
 # Author: Yuriy Movchan
 #
 
+from org.jboss.seam import Component
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
@@ -90,8 +91,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
-        userService = UserService.instance()
+        authenticationService = Component.getInstance(AuthenticationService)
+        userService = Component.getInstance(UserService)
 
         mapUserDeployment = False
         enrollUserDeployment = False
@@ -126,7 +127,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
                 loggedIn = False
                 if (StringHelper.isNotEmptyString(userName) and StringHelper.isNotEmptyString(userPassword)):
-                    userService = UserService.instance()
+                    userService = Component.getInstance(UserService)
                     loggedIn = userService.authenticate(userName, userPassword)
         
                 if (not loggedIn):
@@ -330,7 +331,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
+        authenticationService = Component.getInstance(AuthenticationService)
 
         if (step == 1):
             print "Google+ Prepare for step 1"
@@ -415,7 +416,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Google+ GetClientConfiguration. client_id is empty"
                 return None
 
-            clientService = ClientService.instance()
+            clientService = Component.getInstance(ClientService)
             client = clientService.getClient(clientId)
             if (client == None):
                 print "Google+ GetClientConfiguration. Failed to find client", clientId, " in local LDAP"

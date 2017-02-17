@@ -6,6 +6,7 @@
 
 import sys
 
+from org.jboss.seam import Component
 from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
 from javax.faces.context import FacesContext
@@ -49,7 +50,7 @@ class PersonAuthentication(PersonAuthenticationType):
         cas_validation_pattern = configurationAttributes.get("cas_validation_pattern").getValue2()
         cas_validation_timeout = int(configurationAttributes.get("cas_validation_timeout").getValue2()) * 1000
 
-        httpService = HttpService.instance();
+        httpService = Component.getInstance(HttpService);
 
         http_client = httpService.getHttpsClient();
         http_client_params = http_client.getParams();
@@ -86,9 +87,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
-        userService = UserService.instance()
-        httpService = HttpService.instance();
+        authenticationService = Component.getInstance(AuthenticationService)
+        userService = Component.getInstance(UserService)
+        httpService = Component.getInstance(HttpService);
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_map_user = StringHelper.toBoolean(configurationAttributes.get("cas_map_user").getValue2(), False)
@@ -243,8 +244,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
-        httpService = HttpService.instance();
+        authenticationService = Component.getInstance(AuthenticationService)
+        httpService = Component.getInstance(HttpService);
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)

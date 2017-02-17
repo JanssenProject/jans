@@ -4,6 +4,7 @@
 # Author: Yuriy Movchan
 #
 
+from org.jboss.seam import Component
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -59,7 +60,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                userService = Component.getInstance(UserService)
                 try:
                     logged_in = userService.authenticate(user_name, user_password)
                 except AuthenticationException:
@@ -107,7 +108,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if StringHelper.isEmpty(user_name):
             return None
 
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         find_user_by_uid = userService.getUser(user_name, attribute_name)
         if find_user_by_uid == None:
@@ -127,7 +128,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if StringHelper.isEmpty(user_name):
             return None
 
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         find_user_by_uid = userService.getUser(user_name)
         if find_user_by_uid == None:
@@ -144,7 +145,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if StringHelper.isEmpty(user_name):
             return None
 
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         find_user_by_uid = userService.getUser(user_name)
         if (find_user_by_uid == None):
