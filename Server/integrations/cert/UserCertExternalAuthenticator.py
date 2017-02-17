@@ -9,6 +9,7 @@ import sys
 import base64
 import urllib
 
+from org.jboss.seam import Component
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Contexts
 from javax.faces.context import FacesContext
@@ -106,7 +107,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         if step == 1:
             print "Cert. Authenticate for step 1"
@@ -179,7 +180,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 2. foundUserName: " + foundUserName
 
             logged_in = False
-            userService = UserService.instance()
+            userService = Component.getInstance(UserService)
             logged_in = userService.authenticate(foundUserName)
         
             print "Cert. Authenticate for step 2. Setting count steps to 2"
@@ -274,7 +275,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
@@ -406,7 +407,7 @@ class PersonAuthentication(PersonAuthenticationType):
             remoteip = request.getRemoteAddr()
         print "Cert. Validate recaptcha response. remoteip: '%s'" % remoteip
 
-        httpService = HttpService.instance();
+        httpService = Component.getInstance(HttpService);
 
         http_client = httpService.getHttpsClient();
         http_client_params = http_client.getParams();

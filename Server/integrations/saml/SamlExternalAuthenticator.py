@@ -133,8 +133,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
-        userService = UserService.instance()
+        authenticationService = Component.getInstance(AuthenticationService)
+        userService = Component.getInstance(UserService)
 
         saml_map_user = False
         saml_enroll_user = False
@@ -177,7 +177,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                userService = Component.getInstance(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -436,12 +436,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
+        authenticationService = Component.getInstance(AuthenticationService)
 
         if (step == 1):
             print "Saml. Prepare for step 1"
             
-            httpService = HttpService.instance()
+            httpService = Component.getInstance(HttpService)
             request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
             assertionConsumerServiceUrl = httpService.constructServerUrl(request) + "/postlogin"
             print "Saml. Prepare for step 1. Prepared assertionConsumerServiceUrl: '%s'" % assertionConsumerServiceUrl
@@ -541,7 +541,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Saml. GetClientConfiguration. client_id is empty"
                 return None
 
-            clientService = ClientService.instance()
+            clientService = Component.getInstance(ClientService)
             client = clientService.getClient(client_id)
             if (client == None):
                 print "Saml. GetClientConfiguration. Failed to find client '%s' in local LDAP" % client_id
@@ -654,7 +654,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if (self.userEnforceAttributesUniqueness == None):
             return True
 
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         # Prepare user object to search by pattern
         userBaseDn = userService.getDnForUser(None) 
@@ -717,7 +717,7 @@ class PersonAuthentication(PersonAuthenticationType):
             user.setCustomObjectClasses(self.userObjectClasses)
 
         # Prepare map to do quick mapping 
-        attributeService = AttributeService.instance()
+        attributeService = Component.getInstance(AttributeService)
         ldapAttributes = attributeService.getAllAttributes()
         samlUriToAttributesMap = HashMap()
         for ldapAttribute in ldapAttributes:
