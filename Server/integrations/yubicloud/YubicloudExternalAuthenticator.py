@@ -4,6 +4,7 @@
 # Author: Yuriy Movchan, Arunmozhi
 #
 
+from org.jboss.seam import Component
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -55,7 +56,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Yubicloud. Invalid OTP length"
                 return False
 
-            user_service = UserService.instance()
+            user_service = Component.getInstance(UserService)
             user = user_service.getUser(username)
 
             public_key = user.getAttribute('yubikeyId')

@@ -84,7 +84,7 @@ class PersonAuthentication(PersonAuthenticationType):
             userPassword = credentials.getPassword()
 
             if (StringHelper.isNotEmptyString(keyValue) and StringHelper.isNotEmptyString(userPassword)):
-                authenticationService = AuthenticationService.instance()
+                authenticationService = Component.getInstance(AuthenticationService)
 
                 for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
                     ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
