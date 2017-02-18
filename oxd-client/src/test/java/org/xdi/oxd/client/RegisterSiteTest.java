@@ -136,7 +136,7 @@ public class RegisterSiteTest {
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
         params.setClientLogoutUri(Lists.newArrayList(logoutUri));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization"));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization", "profile"));
         params.setTrustedClient(true);
 
         final Command command = new Command(CommandType.REGISTER_SITE);
