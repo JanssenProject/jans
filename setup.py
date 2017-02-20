@@ -505,8 +505,8 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'root:gluu', self.oxBaseDataFolder])
 
         # Set right permissions
-        self.run([self.cmd_chmod, '-R', '550', realCertFolder])
-        self.run([self.cmd_chmod, 'u+X', realCertFolder])
+        self.run([self.cmd_chmod, '-R', '440', realCertFolder])
+        self.run([self.cmd_chmod, 'a+X', realCertFolder])
         
         # Set write permission for Asimba's keystore (oxTrust can change it)
         self.run([self.cmd_chmod, 'u+w', realAsimbaJks])
