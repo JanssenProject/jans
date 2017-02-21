@@ -11,7 +11,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.model.SmtpConfiguration;
-import org.xdi.service.cache.MemcachedConfiguration;
+import org.xdi.service.cache.CacheConfiguration;
 
 import java.io.Serializable;
 import java.util.List;
@@ -34,9 +34,9 @@ public class GluuAppliance extends InumEntry implements Serializable {
 	@LdapJsonObject
 	private SmtpConfiguration smtpConfiguration;
 
-	@LdapAttribute(name = "oxMemcachedConfiguration")
+	@LdapAttribute(name = "oxCacheConfiguration")
 	@LdapJsonObject
-	private MemcachedConfiguration memcachedConfiguration;
+	private CacheConfiguration cacheConfiguration;
 	
 	@LdapAttribute(name = "oxIDPAuthentication")
 	private List<String> oxIDPAuthentication;
@@ -56,12 +56,12 @@ public class GluuAppliance extends InumEntry implements Serializable {
 		return smtpConfiguration;
 	}
 
-	public MemcachedConfiguration getMemcachedConfiguration() {
-		return memcachedConfiguration;
+	public CacheConfiguration getCacheConfiguration() {
+		return cacheConfiguration;
 	}
 
-	public void setMemcachedConfiguration(MemcachedConfiguration memcachedConfiguration) {
-		this.memcachedConfiguration = memcachedConfiguration;
+	public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
+		this.cacheConfiguration = cacheConfiguration;
 	}
 
 	public void setSmtpConfiguration(SmtpConfiguration smtpConfiguration) {
