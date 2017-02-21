@@ -236,7 +236,7 @@ class PersonAuthentication(PersonAuthenticationType):
             request = externalContext.getRequest()
 
             # Try to get certificate from header X-ClientCert
-            clientCertificate = externalContext.getRequestHeaderMap().get("x-clientcert")
+            clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
             if clientCertificate != None:
                 x509Certificate = self.certFromPemString(clientCertificate)
                 context.set("cert_x509",  self.certToString(x509Certificate))
@@ -246,7 +246,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Try to get certificate from attribute javax.servlet.request.X509Certificate
             x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
             if (x509Certificates != None) and (len(x509Certificates) > 0):
-                context.set("cert_x509", self.certToString(x509Certificates))
+                context.set("cert_x509", self.certToString(x509Certificates[0]))
                 print "Cert. Prepare for step 2. Storing user certificate obtained from 'javax.servlet.request.X509Certificate' attribute"
                 return True
 
@@ -348,16 +348,16 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return True
 
-    def certToString(self, x509Certificates):
-        return base64.b64encode(x509Certificates[0].getEncoded())
+    def certToString(self, x509Certificate):
+        return base64.b64encode(x509Certificate.getEncoded())
 
     def certFromString(self, x509CertificateEncoded):
         x509CertificateDecoded = base64.b64decode(x509CertificateEncoded)
-
         return CertUtil.x509CertificateFromBytes(x509CertificateDecoded)
 
     def certFromPemString(self, pemCertificate):
-        return CertUtil.parsePem(pemCertificate)
+        x509CertificateEncoded = pemCertificate.replace("-----BEGIN CERTIFICATE-----", "").replace("-----END CERTIFICATE-----", "").strip()
+        return self.certFromString(x509CertificateEncoded)
 
     def initRecaptcha(self, configurationAttributes):
         print "Cert. Initialize recaptcha"
