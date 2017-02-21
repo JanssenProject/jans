@@ -83,6 +83,12 @@
             </dependency>
 
             <dependency>
+                <groupId>net.jodah</groupId>
+                <artifactId>expiringmap</artifactId>
+                <version>0.5.7</version>
+            </dependency>
+
+            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.2</version>

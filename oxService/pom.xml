@@ -76,6 +76,12 @@
     </build>
 
     <dependencies>
+
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>expiringmap</artifactId>
+        </dependency>
+
 		<dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>

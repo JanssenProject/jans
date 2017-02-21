@@ -30,7 +30,7 @@ import org.jboss.seam.log.Log;
 @AutoCreate
 public class CacheService {
 
-	@In(value = "memcachedProvider")
+	@In(value = "cachedProviderAdapter")
 	private CacheProvider<?> cacheProvider;
 
     @Logger

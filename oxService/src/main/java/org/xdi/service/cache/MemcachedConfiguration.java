@@ -19,15 +19,18 @@ public class MemcachedConfiguration implements Serializable {
     @XmlElement(name = "bufferSize")
     private int bufferSize = 32768;
 
-    @XmlElement(name = "putExpiration")
-    private int putExpiration = 60; // in seconds
+    @XmlElement(name = "defaultPutExpiration")
+    private int defaultPutExpiration = 60; // in seconds
 
-    public int getPutExpiration() {
-        return putExpiration;
+    @XmlElement(name="connectionFactoryType")
+    MemcachedConnectionFactoryType connectionFactoryType = MemcachedConnectionFactoryType.DEFAULT;
+
+    public int getDefaultPutExpiration() {
+        return defaultPutExpiration;
     }
 
-    public void setPutExpiration(int putExpiration) {
-        this.putExpiration = putExpiration;
+    public void setDefaultPutExpiration(int defaultPutExpiration) {
+        this.defaultPutExpiration = defaultPutExpiration;
     }
 
     public int getBufferSize() {
@@ -54,12 +57,22 @@ public class MemcachedConfiguration implements Serializable {
         this.maxOperationQueueLength = maxOperationQueueLength;
     }
 
+    public MemcachedConnectionFactoryType getConnectionFactoryType() {
+        return connectionFactoryType;
+    }
+
+    public void setConnectionFactoryType(MemcachedConnectionFactoryType connectionFactoryType) {
+        this.connectionFactoryType = connectionFactoryType;
+    }
+
     @Override
     public String toString() {
         return "MemcachedConfiguration{" +
                 "servers='" + servers + '\'' +
                 ", maxOperationQueueLength=" + maxOperationQueueLength +
                 ", bufferSize=" + bufferSize +
+                ", defaultPutExpiration=" + defaultPutExpiration +
+                ", connectionFactoryType=" + connectionFactoryType +
                 '}';
     }
 }

@@ -1,45 +1,41 @@
 package org.xdi.service.cache;
 
-import net.spy.memcached.AddrUtil;
-import net.spy.memcached.DefaultConnectionFactory;
-import net.spy.memcached.MemcachedClient;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.cache.CacheProvider;
-import org.jboss.seam.log.Log;
-
-import static org.jboss.seam.ScopeType.APPLICATION;
+import net.spy.memcached.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author yuriyz on 02/02/2017.
  */
-@Name("memcachedProvider")
-@Scope(APPLICATION)
-@AutoCreate
-@Startup
-public class MemcachedProvider extends CacheProvider<MemcachedClient> {
+public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
-    @Logger
-    private Log log;
+    private static final Logger log = LoggerFactory.getLogger(MemcachedProvider.class);
 
-    @In(required = true)
     private MemcachedConfiguration memcachedConfiguration;
+
+    public MemcachedProvider(MemcachedConfiguration memcachedConfiguration) {
+        this.memcachedConfiguration = memcachedConfiguration;
+    }
 
     private MemcachedClient client;
 
-    @Create
     public void create() {
-        log.debug("Starting MemcachedProvider...");
+        log.debug("Starting MemcachedProvider ...");
         try {
-            client = new MemcachedClient(
-                    new DefaultConnectionFactory(memcachedConfiguration.getMaxOperationQueueLength(), memcachedConfiguration.getBufferSize()),
-                    AddrUtil.getAddresses(memcachedConfiguration.getServers()));
-            log.debug("MemcachedProvider started");
+            final ConnectionFactory connectionFactory;
+            if (memcachedConfiguration.getConnectionFactoryType() == MemcachedConnectionFactoryType.BINARY) {
+                connectionFactory = new BinaryConnectionFactory(memcachedConfiguration.getMaxOperationQueueLength(), memcachedConfiguration.getBufferSize());
+            } else {
+                connectionFactory = new DefaultConnectionFactory(memcachedConfiguration.getMaxOperationQueueLength(), memcachedConfiguration.getBufferSize());
+            }
+
+            client = new MemcachedClient(connectionFactory, AddrUtil.getAddresses(memcachedConfiguration.getServers()));
+            log.debug("MemcachedProvider started.");
         } catch (Exception e) {
             throw new IllegalStateException("Error starting MemcachedProvider", e);
         }
     }
 
-    @Destroy
     public void destroy() {
         log.debug("Destroying MemcachedProvider");
 
@@ -78,7 +74,7 @@ public class MemcachedProvider extends CacheProvider<MemcachedClient> {
         try {
             return Integer.parseInt(expirationInSeconds);
         } catch (Exception e) {
-            return memcachedConfiguration.getPutExpiration();
+            return memcachedConfiguration.getDefaultPutExpiration();
         }
     }
 
