@@ -232,11 +232,23 @@ class PersonAuthentication(PersonAuthenticationType):
                 context.set("recaptcha_site_key", self.recaptcha_creds['site_key'])
         elif step == 2:
             # Store certificate in session
-            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+            externalContext = FacesContext.getCurrentInstance().getExternalContext()
+            request = externalContext.getRequest()
+
+            # Try to get certificate from header X-ClientCert
+            clientCertificate = externalContext.getRequestHeaderMap().get("x-clientcert")
+            if clientCertificate != None:
+                x509Certificate = self.certFromPemString(clientCertificate)
+                context.set("cert_x509",  self.certToString(x509Certificate))
+                print "Cert. Prepare for step 2. Storing user certificate obtained from 'X-ClientCert' header"
+                return True
+
+            # Try to get certificate from attribute javax.servlet.request.X509Certificate
             x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
             if (x509Certificates != None) and (len(x509Certificates) > 0):
                 context.set("cert_x509", self.certToString(x509Certificates))
-                print "Cert. Prepare for step 2. Storing user certificate"
+                print "Cert. Prepare for step 2. Storing user certificate obtained from 'javax.servlet.request.X509Certificate' attribute"
+                return True
 
         if step < 4:
             return True
@@ -343,6 +355,9 @@ class PersonAuthentication(PersonAuthenticationType):
         x509CertificateDecoded = base64.b64decode(x509CertificateEncoded)
 
         return CertUtil.x509CertificateFromBytes(x509CertificateDecoded)
+
+    def certFromPemString(self, pemCertificate):
+        return CertUtil.parsePem(pemCertificate)
 
     def initRecaptcha(self, configurationAttributes):
         print "Cert. Initialize recaptcha"
