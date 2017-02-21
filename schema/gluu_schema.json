@@ -3922,10 +3922,10 @@
             "x_origin": "Gluu created attribute"
         },
         {
-            "desc": "Memcached configuration",
+            "desc": "Cache configuration",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxMemcachedConfiguration"
+                "oxCacheConfiguration"
             ],
             "oid": "oxAttribute:362",
             "substr": "caseIgnoreSubstringsMatch",
@@ -4210,7 +4210,7 @@
                 "oxIDPAuthentication",
                 "oxLogViewerConfig",
                 "oxSmtpConfiguration",
-                "oxMemcachedConfiguration",
+                "oxCacheConfiguration",
                 "oxTrustStoreCert",
                 "oxTrustStoreConf",
                 "passwordResetAllowed",
