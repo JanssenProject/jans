@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
+import org.xdi.oxauth.crypto.cert.CertificateParser;
 import org.xdi.util.StringHelper;
 
 import java.io.ByteArrayInputStream;
@@ -69,6 +70,16 @@ public class CertUtil {
 			return (X509Certificate) certFactory.generateCertificate(bais);
 		} catch (CertificateException ex) {
 			log.error("Failed to parse X.509 certificates from bytes", ex);
+		}
+		
+		return null;
+	}
+
+	public static X509Certificate parsePem(String pem) {
+		try {
+			return CertificateParser.parsePem(pem);
+		} catch (CertificateException ex) {
+			log.error("Failed to parse PEM certificate", ex);
 		}
 		
 		return null;
