@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class CacheConfiguration implements Serializable {
 
     @XmlElement(name = "cacheProviderType", required = true)
-    private CacheProviderType cacheProviderType;
+    private CacheProviderType cacheProviderType = CacheProviderType.IN_MEMORY;
 
     @XmlElement(name = "memcachedConfiguration")
     private MemcachedConfiguration memcachedConfiguration;
