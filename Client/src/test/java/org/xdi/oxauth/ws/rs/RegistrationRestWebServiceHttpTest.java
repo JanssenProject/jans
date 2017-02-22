@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version November 2, 2016
+ * @version February 22, 2017
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -333,6 +333,32 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth native test app with custom schema in URI",
                 redirectUriList);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+    }
+
+    @Parameters({"redirectUris", "sectorIdentifierUri"})
+    @Test
+    public void registerWithApplicationTypeNativeAndSubjectTypePairwise(
+            final String redirectUris, final String sectorIdentifierUri) throws Exception {
+        showTitle("registerWithApplicationTypeNativeAndSubjectTypePairwise");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth native test app",
+                redirectUriList);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setExecutor(clientExecutor(true));
