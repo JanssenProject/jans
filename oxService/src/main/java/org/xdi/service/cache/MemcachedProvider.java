@@ -49,6 +49,7 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
         try {
             client.shutdown();
+            log.debug("Destroyed MemcachedProvider");
         } catch (RuntimeException e) {
             throw new IllegalStateException("Error destroying MemcachedProvider", e);
         }
