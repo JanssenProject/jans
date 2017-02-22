@@ -30,9 +30,17 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
             }
 
             client = new MemcachedClient(connectionFactory, AddrUtil.getAddresses(memcachedConfiguration.getServers()));
+            testConnection();
             log.debug("MemcachedProvider started.");
         } catch (Exception e) {
             throw new IllegalStateException("Error starting MemcachedProvider", e);
+        }
+    }
+
+    private void testConnection() {
+        put("2", "connectionTest", "connectionTestValue");
+        if (!"connectionTestValue".equals(get("connectionTest"))) {
+            throw new IllegalStateException("Error starting MemcachedProvider. Please check memcached configuration: " + memcachedConfiguration);
         }
     }
 
