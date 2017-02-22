@@ -28,6 +28,12 @@ public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider> {
         log.debug("Started to create cache provider");
 
         CacheProviderType cacheProviderType = cacheConfiguration.getCacheProviderType();
+
+        if (cacheProviderType == null) {
+            log.error("Failed to initialize cacheProvider, cacheProviderType is null. Fallback to IN_MEMORY type.");
+            cacheProviderType = CacheProviderType.IN_MEMORY;
+        }
+
         switch (cacheProviderType) {
             case IN_MEMORY:
                 cacheProvider = new InMemoryCacheProvider(cacheConfiguration.getInMemoryConfiguration());

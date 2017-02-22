@@ -26,7 +26,10 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
     public void create() {
         log.debug("Starting InMemoryCacheProvider ...");
         try {
-            map = ExpiringMap.builder().build();
+            map = ExpiringMap.builder()
+                    .expirationPolicy(ExpirationPolicy.CREATED)
+                    .variableExpiration()
+                    .build();
 
             log.debug("InMemoryCacheProvider started.");
         } catch (Exception e) {
