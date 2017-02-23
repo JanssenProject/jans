@@ -30,11 +30,23 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
         log.debug("Starting RedisProvider ...");
 
         try {
-            pool = new JedisPool(new JedisPoolConfig(), configuration.getHost(), configuration.getPort());
+            JedisPoolConfig poolConfig = new JedisPoolConfig();
+            poolConfig.setMaxTotal(1000);
+            poolConfig.setMinIdle(2);
 
+            pool = new JedisPool(poolConfig, configuration.getHost(), configuration.getPort());
+
+            testConnection();
             log.debug("RedisProvider started.");
         } catch (Exception e) {
             throw new IllegalStateException("Error starting RedisProvider", e);
+        }
+    }
+
+    private void testConnection() {
+        put("testKey", "testValue");
+        if (!"testValue".equals(get("testKey"))) {
+            throw new RuntimeException("Failed to connect to redis server. Configuration: " + configuration);
         }
     }
 

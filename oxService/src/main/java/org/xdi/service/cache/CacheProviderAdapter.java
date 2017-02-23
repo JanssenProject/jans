@@ -41,6 +41,9 @@ public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider> {
             case MEMCACHED:
                 cacheProvider = new MemcachedProvider(cacheConfiguration.getMemcachedConfiguration());
                 break;
+            case REDIS:
+                cacheProvider = new RedisProvider(cacheConfiguration.getRedisConfiguration());
+                break;
         }
 
         if (cacheProvider == null) {
