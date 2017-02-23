@@ -109,5 +109,28 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
         }
     }
 
-
+//    public static void main(String[] args) throws InterruptedException {
+//        RedisConfiguration config = new RedisConfiguration();
+//
+//        RedisProvider cache = null;
+//        try {
+//            cache = new RedisProvider(config);
+//            cache.create();
+//
+//            cache.put(Integer.toString(3), "myKey", CacheProviderType.IN_MEMORY);
+//
+//            System.out.println(cache.get("myKey"));
+//
+//            Thread.sleep(1000);
+//
+//            System.out.println(cache.get("myKey"));
+//
+//            Thread.sleep(3000);
+//
+//            System.out.println(cache.get("myKey"));
+//
+//        } finally {
+//            cache.destroy();
+//        }
+//    }
 }
