@@ -19,6 +19,17 @@ public class CacheConfiguration implements Serializable {
     @XmlElement(name = "inMemoryConfiguration")
     private InMemoryConfiguration inMemoryConfiguration = new InMemoryConfiguration();
 
+    @XmlElement(name = "redisConfiguration")
+    private RedisConfiguration redisConfiguration;
+
+    public RedisConfiguration getRedisConfiguration() {
+        return redisConfiguration;
+    }
+
+    public void setRedisConfiguration(RedisConfiguration redisConfiguration) {
+        this.redisConfiguration = redisConfiguration;
+    }
+
     public CacheProviderType getCacheProviderType() {
         return cacheProviderType;
     }
@@ -48,6 +59,7 @@ public class CacheConfiguration implements Serializable {
         return "CacheConfiguration{" +
                 "cacheProviderType=" + cacheProviderType +
                 ", memcachedConfiguration=" + memcachedConfiguration +
+                ", redisConfiguration=" + redisConfiguration +
                 ", inMemoryConfiguration=" + inMemoryConfiguration +
                 '}';
     }
