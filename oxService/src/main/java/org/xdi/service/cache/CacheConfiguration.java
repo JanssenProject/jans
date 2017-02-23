@@ -17,7 +17,7 @@ public class CacheConfiguration implements Serializable {
     private MemcachedConfiguration memcachedConfiguration;
 
     @XmlElement(name = "inMemoryConfiguration")
-    private InMemoryConfiguration inMemoryConfiguration;
+    private InMemoryConfiguration inMemoryConfiguration = new InMemoryConfiguration();
 
     public CacheProviderType getCacheProviderType() {
         return cacheProviderType;
