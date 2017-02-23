@@ -65,7 +65,9 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     @Override
     public Object get(String region, String key) {
         try {
-            return client.get(key);
+            Object o = client.get(key);
+            log.trace("get - key: " + key + ", value:" + o);
+            return o;
         } catch (Exception e) {
             log.error("Failed to fetch object by key: " + key, e);
             return null;
@@ -105,5 +107,6 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     @Override
     public void clear() {
         client.flush();
+        log.trace("cleared");
     }
 }
