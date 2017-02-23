@@ -15,7 +15,7 @@ For demo purpouses we can generate CA, Intermediate1 and User certs using steps 
 | Create folder for end user certs | mkdir enduser-certs |  |
 | Generate the end user's private key and CSR | openssl genrsa -out enduser-certs/user-gluu.org.key 2048 <br/> openssl req -new -sha256 -key enduser-certs/user-gluu.org.key -out enduser-certs/user-gluu.org.csr | Country Name (2 letter code) [AU]:US <br/> State or Province Name (full name) [Some-State]:TX <br/> Locality Name (eg, city) []:Austin <br/> Organization Name (eg, company) [Internet Widgits Pty Ltd]:Gluu, Inc. <br/> Organizational Unit Name (eg, section) []:IT <br/> Common Name (e.g. server FQDN or YOUR name) []:Full User Name <br/> Email Address []: |
 | Sign the user CSR with the Intermediate1 key | openssl x509 -req -in enduser-certs/user-gluu.org.csr -extfile intermediate1-v3.ext -CA intermediate1.crt -CAkey intermediate1.key -set_serial 100 -days 365 -out enduser-certs/user-gluu.org.crt |  |
-| Bundle the user’s certificate and key into a p12 pack | openssl pkcs12 -export -out enduser-certs/user-gluu.org.p12 -inkey enduser-certs/user-gluu.org.key -in enduser-certs/user-gluu.org.crt -certfile ca-chain.cert.pem |  |
+| Bundle the user’s certificate and key into a p12 pack | openssl pkcs12 -export -out enduser-certs/user-gluu.org.p12 -inkey enduser-certs/user-gluu.org.key -in enduser-certs/user-gluu.org.crt -certfile chain-cert.pem |  |
 
 # Certification script configuration
 
