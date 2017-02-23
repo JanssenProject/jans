@@ -17,7 +17,7 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
     private ExpiringMap<String, Object> map = ExpiringMap.builder().build();
 
-    private InMemoryConfiguration configuration;
+    private InMemoryConfiguration configuration = new InMemoryConfiguration();
 
     public InMemoryCacheProvider(InMemoryConfiguration configuration) {
         this.configuration = configuration;

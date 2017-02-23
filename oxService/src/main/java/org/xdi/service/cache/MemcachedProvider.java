@@ -96,6 +96,7 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     public void remove(String region, String key) {
         try {
             client.delete(key);
+            log.trace("delete - key:" + key);
         } catch (Exception e) {
             log.error("Failed to remove object from cache, key: " + key, e);
         }
