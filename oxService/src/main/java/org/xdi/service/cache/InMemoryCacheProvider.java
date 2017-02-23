@@ -2,8 +2,8 @@ package org.xdi.service.cache;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.seam.log.Log;
+import org.jboss.seam.log.Logging;
 
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
-    private static final Logger log = LoggerFactory.getLogger(MemcachedProvider.class);
+    private static final Log log = Logging.getLog(InMemoryCacheProvider.class);
 
     private ExpiringMap<String, Object> map = ExpiringMap.builder().build();
 
