@@ -2113,6 +2113,12 @@ class Setup(object):
 
         return file_paths
 
+    def fomatWithDict(self, text, dictionary):
+        text = re.sub(r"%([^\(])", r"%%\1", text)
+        text = re.sub(r"%$", r"%%", text)  # There was a % at the end?
+
+        return text % dictionary
+
     def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
         self.logIt("Rendering template %s" % filePath)
         fn = os.path.split(filePath)[-1]
@@ -2120,7 +2126,9 @@ class Setup(object):
         template_text = f.read()
         f.close()
         newFn = open(os.path.join(outputFolder, fn), 'w+')
-        newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict))
+        self.logIt("Rendering template text %s" % template_text)
+        self.logIt("Rendering template dict %s" % self.merge_dicts(self.__dict__, self.templateRenderingDict))
+        newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
         newFn.close()
 
     def renderTemplate(self, filePath):
