@@ -2126,8 +2126,6 @@ class Setup(object):
         template_text = f.read()
         f.close()
         newFn = open(os.path.join(outputFolder, fn), 'w+')
-        self.logIt("Rendering template text %s" % template_text)
-        self.logIt("Rendering template dict %s" % self.merge_dicts(self.__dict__, self.templateRenderingDict))
         newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
         newFn.close()
 
