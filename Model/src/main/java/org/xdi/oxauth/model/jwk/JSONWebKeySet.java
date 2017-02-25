@@ -21,7 +21,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 /**
  * @author Javier Rojas Blum
- * @version June 25, 2016
+ * @version February 25, 2017
  */
 public class JSONWebKeySet {
 
@@ -91,7 +91,7 @@ public class JSONWebKeySet {
     public String toString() {
         try {
             JSONObject jwks = toJSONObject();
-            return jwks.toString(4);
+            return jwks.toString(4).replace("\\/", "/");
         } catch (JSONException e) {
             LOG.error(e.getMessage(), e);
             return null;
