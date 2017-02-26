@@ -191,6 +191,12 @@
         </classes>
     </test>
 
+    <test name="Web Keys Test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.WebKeysTest"/>
+        </classes>
+    </test>
+
     <!-- Dev tests-->
     <test name="Custom token issuing test via session" enabled="false">
         <classes>

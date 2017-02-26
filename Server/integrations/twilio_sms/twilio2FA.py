@@ -4,6 +4,7 @@
 # Author: Michael Schwartz
 #
 
+from org.jboss.seam import Component
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
@@ -77,7 +78,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
         session_attributes = context.get("sessionAttributes")
 
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")

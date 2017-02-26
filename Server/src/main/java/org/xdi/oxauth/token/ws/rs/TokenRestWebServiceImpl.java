@@ -123,9 +123,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT));
                     }
 
-                    log.debug("Attempting to find authorizationCodeGrant in LDAP by clinetId: '{0}', code: '{1}'", client.getClientId(), code);
+                    log.debug("Attempting to find authorizationCodeGrant by clinetId: '{0}', code: '{1}'", client.getClientId(), code);
                     AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
-                    log.trace("AuthorizationCodeGrant from LDAP: '{0}'", authorizationCodeGrant);
+                    log.trace("AuthorizationCodeGrant : '{0}'", authorizationCodeGrant);
 
                     if (authorizationCodeGrant != null) {
                         validatePKCE(authorizationCodeGrant, codeVerifier);
@@ -162,7 +162,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
                     } else {
-                    	log.debug("AuthorizationCodeGrant from LDAP is empty");
+                        log.debug("AuthorizationCodeGrant is empty by clinetId: '{0}', code: '{1}'", client.getClientId(), code);
                         // if authorization code is not found then code was already used = remove all grants with this auth code
                         grantService.removeAllByAuthorizationCode(code);
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT);

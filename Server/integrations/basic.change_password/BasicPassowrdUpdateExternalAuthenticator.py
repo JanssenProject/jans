@@ -4,6 +4,7 @@
 # Author: Yuriy Movchan
 #
 
+from org.jboss.seam import Component
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -46,7 +47,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                userService = Component.getInstance(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -56,7 +57,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Basic (with password update). Authenticate for step 2"
 
-            userService = UserService.instance()
+            userService = Component.getInstance(UserService)
 
             update_button = requestParameters.get("loginForm:updateButton")
             if ArrayHelper.isEmpty(update_button):

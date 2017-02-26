@@ -78,6 +78,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         final AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
         MemcachedGrant memcachedGrant = new MemcachedGrant(grant);
         cacheService.put(Integer.toString(grant.getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+        LOGGER.trace("Put authorization grant in cache, code: " + grant.getAuthorizationCode().getCode() + ", clientId: " + grant.getClientId());
         return grant;
     }
 
@@ -98,8 +99,13 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode) {
-        Object memcachedGrant = cacheService.get(null, MemcachedGrant.cacheKey(clientId, authorizationCode));
-        return memcachedGrant instanceof MemcachedGrant ? ((MemcachedGrant) memcachedGrant).asCodeGrant(appConfiguration) : null;
+        Object cachedGrant = cacheService.get(null, MemcachedGrant.cacheKey(clientId, authorizationCode));
+        if (cachedGrant == null) {
+            // retry one time : sometimes during high load cache client may be not fast enough
+            cachedGrant = cacheService.get(null, MemcachedGrant.cacheKey(clientId, authorizationCode));
+            LOGGER.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode + ", clientId: " + clientId);
+        }
+        return cachedGrant instanceof MemcachedGrant ? ((MemcachedGrant) cachedGrant).asCodeGrant(appConfiguration) : null;
     }
 
     @Override
