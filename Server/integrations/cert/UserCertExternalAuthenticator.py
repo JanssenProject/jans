@@ -9,6 +9,7 @@ import sys
 import base64
 import urllib
 
+from org.jboss.seam import Component
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Contexts
 from javax.faces.context import FacesContext
@@ -106,7 +107,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         if step == 1:
             print "Cert. Authenticate for step 1"
@@ -179,7 +180,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 2. foundUserName: " + foundUserName
 
             logged_in = False
-            userService = UserService.instance()
+            userService = Component.getInstance(UserService)
             logged_in = userService.authenticate(foundUserName)
         
             print "Cert. Authenticate for step 2. Setting count steps to 2"
@@ -231,11 +232,23 @@ class PersonAuthentication(PersonAuthenticationType):
                 context.set("recaptcha_site_key", self.recaptcha_creds['site_key'])
         elif step == 2:
             # Store certificate in session
-            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+            externalContext = FacesContext.getCurrentInstance().getExternalContext()
+            request = externalContext.getRequest()
+
+            # Try to get certificate from header X-ClientCert
+            clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
+            if clientCertificate != None:
+                x509Certificate = self.certFromPemString(clientCertificate)
+                context.set("cert_x509",  self.certToString(x509Certificate))
+                print "Cert. Prepare for step 2. Storing user certificate obtained from 'X-ClientCert' header"
+                return True
+
+            # Try to get certificate from attribute javax.servlet.request.X509Certificate
             x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
             if (x509Certificates != None) and (len(x509Certificates) > 0):
-                context.set("cert_x509", self.certToString(x509Certificates))
-                print "Cert. Prepare for step 2. Storing user certificate"
+                context.set("cert_x509", self.certToString(x509Certificates[0]))
+                print "Cert. Prepare for step 2. Storing user certificate obtained from 'javax.servlet.request.X509Certificate' attribute"
+                return True
 
         if step < 4:
             return True
@@ -274,7 +287,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
@@ -335,13 +348,16 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return True
 
-    def certToString(self, x509Certificates):
-        return base64.b64encode(x509Certificates[0].getEncoded())
+    def certToString(self, x509Certificate):
+        return base64.b64encode(x509Certificate.getEncoded())
 
     def certFromString(self, x509CertificateEncoded):
         x509CertificateDecoded = base64.b64decode(x509CertificateEncoded)
-
         return CertUtil.x509CertificateFromBytes(x509CertificateDecoded)
+
+    def certFromPemString(self, pemCertificate):
+        x509CertificateEncoded = pemCertificate.replace("-----BEGIN CERTIFICATE-----", "").replace("-----END CERTIFICATE-----", "").strip()
+        return self.certFromString(x509CertificateEncoded)
 
     def initRecaptcha(self, configurationAttributes):
         print "Cert. Initialize recaptcha"
@@ -406,7 +422,7 @@ class PersonAuthentication(PersonAuthenticationType):
             remoteip = request.getRemoteAddr()
         print "Cert. Validate recaptcha response. remoteip: '%s'" % remoteip
 
-        httpService = HttpService.instance();
+        httpService = Component.getInstance(HttpService);
 
         http_client = httpService.getHttpsClient();
         http_client_params = http_client.getParams();

@@ -4,6 +4,7 @@
 # Author: Arvind Tomar
 #
 
+from org.jboss.seam import Component
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.faces import FacesMessages
 from javax.faces.context import FacesContext
@@ -108,7 +109,7 @@ class PersonAuthentication(PersonAuthenticationType):
             logged_in = False
 
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                userService = Component.getInstance(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -117,8 +118,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         else:
             try:
-                userService = UserService.instance()
-                authenticationService = AuthenticationService.instance()
+                userService = Component.getInstance(UserService)
+                authenticationService = Component.getInstance(AuthenticationService)
                 foundUser = userService.getUserByAttribute("oxExternalUid", self.getUserValueFromAuth("provider",
                                                                                                       requestParameters) + ":" + self.getUserValueFromAuth(
                     self.getUidRemoteAttr(), requestParameters))

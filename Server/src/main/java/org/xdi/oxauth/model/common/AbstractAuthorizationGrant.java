@@ -440,6 +440,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     public String toString() {
         return "AbstractAuthorizationGrant{" +
                 "user=" + user +
+                ", authorizationCode=" + authorizationCode +
                 ", client=" + client +
                 ", grantId='" + grantId + '\'' +
                 ", nonce='" + nonce + '\'' +

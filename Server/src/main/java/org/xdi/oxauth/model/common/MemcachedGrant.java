@@ -12,7 +12,10 @@ import java.util.Set;
  */
 public class MemcachedGrant implements Serializable {
 
-    private AuthorizationCode authorizationCode;
+    private String authorizationCodeString;
+    private Date authorizationCodeCreationDate;
+    private Date authorizationCodeExpirationDate;
+
     private User user;
     private Client client;
     private Date authenticationTime;
@@ -29,7 +32,9 @@ public class MemcachedGrant implements Serializable {
     }
 
     public MemcachedGrant(AuthorizationGrant codeGrant) {
-        authorizationCode = codeGrant.getAuthorizationCode();
+        authorizationCodeString = codeGrant.getAuthorizationCode().getCode();
+        authorizationCodeCreationDate = codeGrant.getAuthorizationCode().getCreationDate();
+        authorizationCodeExpirationDate = codeGrant.getAuthorizationCode().getExpirationDate();
         user = codeGrant.getUser();
         client = codeGrant.getClient();
         authenticationTime = codeGrant.getAuthenticationTime();
@@ -40,14 +45,6 @@ public class MemcachedGrant implements Serializable {
         codeChallenge = codeGrant.getCodeChallenge();
         codeChallengeMethod = codeGrant.getCodeChallengeMethod();
         sessionDn = codeGrant.getSessionDn();
-    }
-
-    public AuthorizationCode getAuthorizationCode() {
-        return authorizationCode;
-    }
-
-    public void setAuthorizationCode(AuthorizationCode authorizationCode) {
-        this.authorizationCode = authorizationCode;
     }
 
     public User getUser() {
@@ -90,8 +87,58 @@ public class MemcachedGrant implements Serializable {
         this.authenticationTime = authenticationTime;
     }
 
+    public String getAuthorizationCodeString() {
+        return authorizationCodeString;
+    }
+
+    public void setAuthorizationCodeString(String authorizationCodeString) {
+        this.authorizationCodeString = authorizationCodeString;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getCodeChallenge() {
+        return codeChallenge;
+    }
+
+    public void setCodeChallenge(String codeChallenge) {
+        this.codeChallenge = codeChallenge;
+    }
+
+    public String getCodeChallengeMethod() {
+        return codeChallengeMethod;
+    }
+
+    public void setCodeChallengeMethod(String codeChallengeMethod) {
+        this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    public String getAcrValues() {
+        return acrValues;
+    }
+
+    public void setAcrValues(String acrValues) {
+        this.acrValues = acrValues;
+    }
+
+    public String getSessionDn() {
+        return sessionDn;
+    }
+
+    public void setSessionDn(String sessionDn) {
+        this.sessionDn = sessionDn;
+    }
+
     public AuthorizationCodeGrant asCodeGrant(AppConfiguration appConfiguration) {
+
         AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
+        grant.setAuthorizationCode(new AuthorizationCode(authorizationCodeString, authorizationCodeCreationDate, authorizationCodeExpirationDate));
         grant.setScopes(scopes);
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
@@ -99,11 +146,12 @@ public class MemcachedGrant implements Serializable {
         grant.setCodeChallengeMethod(codeChallengeMethod);
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
+
         return grant;
     }
 
     public String cacheKey() {
-        return cacheKey(client.getClientId(), getAuthorizationCode().getCode());
+        return cacheKey(client.getClientId(), authorizationCodeString);
     }
 
     public static String cacheKey(String clientId, String code) {
@@ -113,7 +161,7 @@ public class MemcachedGrant implements Serializable {
     @Override
     public String toString() {
         return "MemcachedGrant{" +
-                "authorizationCode=" + authorizationCode +
+                "authorizationCode=" + authorizationCodeString +
                 ", user=" + user +
                 ", client=" + client +
                 ", authenticationTime=" + authenticationTime +
