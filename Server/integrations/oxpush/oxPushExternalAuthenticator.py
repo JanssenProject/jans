@@ -8,7 +8,6 @@ from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.jboss.seam import Component
 from javax.faces.context import FacesContext
-from org.jboss.seam import Component
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
@@ -53,7 +52,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         oxpush_user_timeout = int(configurationAttributes.get("oxpush_user_timeout").getValue2())
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
@@ -67,14 +66,14 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                userService = Component.getInstance(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
             # Find user by uid
-            userService = UserService.instance()
+            userService = Component.getInstance(UserService)
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
                 print "oxPush. Authenticate for step 1. Failed to find user"

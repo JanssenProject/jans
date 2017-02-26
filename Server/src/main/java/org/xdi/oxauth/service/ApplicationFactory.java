@@ -6,20 +6,15 @@
 
 package org.xdi.oxauth.service;
 
-import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+import org.jboss.seam.annotations.*;
 import org.jboss.seam.log.Log;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
-import org.xdi.service.cache.MemcachedConfiguration;
+import org.xdi.service.cache.CacheConfiguration;
+import org.xdi.service.cache.InMemoryConfiguration;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
@@ -49,15 +44,21 @@ public class ApplicationFactory {
         return new SHA256withECDSASignatureVerification();
     }
 
-	@Factory(value = "memcachedConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-	public MemcachedConfiguration createMemcachedConfiguration() {
-		MemcachedConfiguration memcachedConfiguration = applianceService.getAppliance().getMemcachedConfiguration();
-		if (memcachedConfiguration == null || StringUtils.isBlank(memcachedConfiguration.getServers())) {
-			throw new RuntimeException("Failed to load memcached configuration from ldap. Please check appliance ldap entry.");
-		} else {
-			log.trace("Memcached configuration: " + memcachedConfiguration);
+	@Factory(value = "cacheConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+	public CacheConfiguration createCacheConfiguration() {
+		CacheConfiguration cacheConfiguration = applianceService.getAppliance().getCacheConfiguration();
+		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
+			log.error("Failed to read cache configuration from LDAP. Please check appliance oxCacheConfiguration attribute " +
+					"that must contain cache configuration JSON represented by CacheConfiguration.class. Applieance DN: " + applianceService.getAppliance().getDn());
+			log.info("Creating fallback IN-MEMORY cache configuration ... ");
+
+			cacheConfiguration = new CacheConfiguration();
+			cacheConfiguration.setInMemoryConfiguration(new InMemoryConfiguration());
+
+			log.info("IN-MEMORY cache configuration is created.");
 		}
-		return memcachedConfiguration;
+		log.info("Cache configuration: " + cacheConfiguration);
+		return cacheConfiguration;
 	}
 
 	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)

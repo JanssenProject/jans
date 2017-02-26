@@ -9,6 +9,7 @@ import datetime
 import urllib
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.jboss.seam import Component
 from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
@@ -97,8 +98,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.setEventContextParameters(context)
 
-        userService = UserService.instance()
-        deviceRegistrationService = DeviceRegistrationService.instance()
+        userService = Component.getInstance(UserService)
+        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
         if step == 1:
             print "Super-Gluu. Authenticate for step 1"
             if self.oneStep:
@@ -223,12 +224,12 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
             if self.oneStep:
-                session_state = SessionStateService.instance().getSessionStateFromCookie()
+                session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
                 if StringHelper.isEmpty(session_state):
                     print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
                     return False
             
-                issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
+                issuer = Component.getInstance(ConfigurationFactory).getConfiguration().getIssuer()
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
                                    'state': session_state,
@@ -249,7 +250,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.oneStep:
                 return True
 
-            authenticationService = AuthenticationService.instance()
+            authenticationService = Component.getInstance(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if user == None:
                 print "Super-Gluu. Prepare for step 2. Failed to determine user name"
@@ -259,7 +260,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Super-Gluu. Prepare for step 2. Request was generated already"
                 return True
             
-            session_state = SessionStateService.instance().getSessionStateFromCookie()
+            session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
                 print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
                 return False
@@ -271,7 +272,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Super-Gluu. Prepare for step 2. auth_method: '%s'" % auth_method
             
-            issuer = ConfigurationFactory.instance().getConfiguration().getIssuer()
+            issuer = Component.getInstance(ConfigurationFactory).getConfiguration().getIssuer()
             super_gluu_request_dictionary = {'username': user.getUserId(),
                                'app': client_redirect_uri,
                                'issuer': issuer,
@@ -327,7 +328,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = UserService.instance()
+        userService = Component.getInstance(UserService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
@@ -347,8 +348,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return find_user_by_uid
 
     def validateSessionDeviceStatus(self, client_redirect_uri, session_device_status, user_name = None):
-        userService = UserService.instance()
-        deviceRegistrationService = DeviceRegistrationService.instance()
+        userService = Component.getInstance(UserService)
+        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
 
         u2f_device_id = session_device_status['device_id']
 
@@ -483,8 +484,8 @@ class PersonAuthentication(PersonAuthenticationType):
         send_notification = False
         send_notification_result = True
 
-        userService = UserService.instance()
-        deviceRegistrationService = DeviceRegistrationService.instance()
+        userService = Component.getInstance(UserService)
+        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
 
         user_inum = userService.getUserInum(user_name)
 
@@ -574,7 +575,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def determineGeolocationData(self, remote_ip):
         print "Super-Gluu. Determine remote location. remote_ip: '%s'" % remote_ip
-        httpService = HttpService.instance()
+        httpService = Component.getInstance(HttpService)
 
         http_client = httpService.getHttpsClient()
         http_client_params = http_client.getParams()
