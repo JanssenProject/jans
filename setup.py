@@ -916,10 +916,6 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '700', self.gluuOptBinFolder])
 
     def copy_static(self):
-        if self.installSaml:
-            self.copyTree("%s/static/idp3/conf/" % self.install_dir, self.idp3ConfFolder)
-            self.copyFile("%s/static/idp3/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
-
         if self.installOxAuth:
             self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/libs" % self.gluuOptPythonFolder)
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
