@@ -8,7 +8,6 @@ from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
 from org.jboss.seam import Component
 from javax.faces.context import FacesContext
-from org.jboss.seam import Component
 from org.apache.http.entity import ContentType 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -52,9 +51,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
-        userService = UserService.instance()
-        httpService = HttpService.instance()
+        authenticationService = Component.getInstance(AuthenticationService)
+        userService = Component.getInstance(UserService)
+        httpService = Component.getInstance(HttpService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
@@ -184,7 +183,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = AuthenticationService.instance()
+        authenticationService = Component.getInstance(AuthenticationService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()

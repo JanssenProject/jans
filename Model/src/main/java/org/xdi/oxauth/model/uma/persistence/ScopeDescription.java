@@ -40,7 +40,7 @@ public class ScopeDescription {
 
     @NotNull
     @Size(min = 4, max = 30, message = "Length of scope name should be between 4 and 30")
-    @Pattern(regexp = "^[a-zA-Z\\d_]{4,30}$", message = "Invalid scope name")
+    @Pattern(regexp = "^[a-zA-Z\\d_]{4,30}$", message = "Invalid Scope Id .Only alphanumeric and underscore are allowed.")
     @LdapAttribute(name = "oxId")
     private String id;
     @LdapAttribute(name = "oxPolicyRule")

@@ -7,6 +7,7 @@
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.security import Identity
+from org.jboss.seam import Component
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
@@ -33,7 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
         u2f_server_uri = configurationAttributes.get("u2f_server_uri").getValue2()
         u2f_server_metadata_uri = u2f_server_uri + "/.well-known/fido-u2f-configuration"
 
-        metaDataConfigurationService = FidoU2fClientFactory.instance().createMetaDataConfigurationService(u2f_server_metadata_uri)
+        metaDataConfigurationService = Component.getInstance(FidoU2fClientFactory).createMetaDataConfigurationService(u2f_server_metadata_uri)
 
         max_attempts = 5
         for attempt in range(1, max_attempts):
@@ -82,7 +83,7 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = UserService.instance()
+                userService = Component.getInstance(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -102,7 +103,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "U2F. Authenticate for step 2. authMethod is empty"
                 return False
 
-            authenticationService = AuthenticationService.instance()
+            authenticationService = Component.getInstance(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
                 print "U2F. Prepare for step 2. Failed to determine user name"
@@ -110,7 +111,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if (auth_method == 'authenticate'):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to finish authentication workflow"
-                authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
+                authenticationRequestService = Component.getInstance(FidoU2fClientFactory).createAuthenticationRequestService(self.metaDataConfiguration)
                 authenticationStatus = authenticationRequestService.finishAuthentication(user.getUserId(), token_response)
 
                 if (authenticationStatus.getStatus() != Constants.RESULT_SUCCESS):
@@ -120,7 +121,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
             elif (auth_method == 'enroll'):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to finish registration workflow"
-                registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
+                registrationRequestService = Component.getInstance(FidoU2fClientFactory).createRegistrationRequestService(self.metaDataConfiguration)
                 registrationStatus = registrationRequestService.finishRegistration(user.getUserId(), token_response)
 
                 if (registrationStatus.getStatus() != Constants.RESULT_SUCCESS):
@@ -144,12 +145,12 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "U2F. Prepare for step 2"
 
-            session_state = SessionStateService.instance().getSessionStateFromCookie()
+            session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
                 print "U2F. Prepare for step 2. Failed to determine session_state"
                 return False
 
-            authenticationService = AuthenticationService.instance()
+            authenticationService = Component.getInstance(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
                 print "U2F. Prepare for step 2. Failed to determine user name"
@@ -158,7 +159,7 @@ class PersonAuthentication(PersonAuthenticationType):
             u2f_application_id = configurationAttributes.get("u2f_application_id").getValue2()
 
             # Check if user have registered devices
-            deviceRegistrationService = DeviceRegistrationService.instance()
+            deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
 
             userInum = user.getAttribute("inum")
 
@@ -170,7 +171,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start authentication workflow"
 
                 try:
-                    authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
+                    authenticationRequestService = Component.getInstance(FidoU2fClientFactory).createAuthenticationRequestService(self.metaDataConfiguration)
                     authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_state)
                 except ClientResponseFailure, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
@@ -178,7 +179,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         return False
             else:
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start registration workflow"
-                registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
+                registrationRequestService = Component.getInstance(FidoU2fClientFactory).createRegistrationRequestService(self.metaDataConfiguration)
                 registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_state)
 
             context.set("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))
