@@ -354,12 +354,12 @@ class Setup(object):
 
         self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
         self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
-        self.idp3_configuration_properties = '/idp.properties'
-        self.idp3_configuration_ldap_properties = '/ldap.properties'
-        self.idp3_configuration_saml_nameid = '/saml-nameid.properties'
-        self.idp3_configuration_services = '/services.properties'
-        self.idp3_configuration_password_authn = '/authn/password-authn-config.xml'
-        self.idp3_metadata = '/idp-metadata.xml'
+        self.idp3_configuration_properties = 'idp.properties'
+        self.idp3_configuration_ldap_properties = 'ldap.properties'
+        self.idp3_configuration_saml_nameid = 'saml-nameid.properties'
+        self.idp3_configuration_services = 'services.properties'
+        self.idp3_configuration_password_authn = 'authn/password-authn-config.xml'
+        self.idp3_metadata = 'idp-metadata.xml'
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = "%s/static/system/ubuntu/rsyslog" % self.install_dir
@@ -1660,26 +1660,18 @@ class Setup(object):
             self.run([self.cmd_jar, 'xf', self.distGluuFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
 
-            # copy templates
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_properties, self.idp3ConfFolder + self.idp3_configuration_properties)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_ldap_properties, self.idp3ConfFolder + self.idp3_configuration_ldap_properties)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_saml_nameid, self.idp3ConfFolder + self.idp3_configuration_saml_nameid)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_services, self.idp3ConfFolder + self.idp3_configuration_services)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_password_authn, self.idp3ConfFolder + self.idp3_configuration_password_authn)
-            self.copyFile(self.staticIDP3FolderMetadata + self.idp3_metadata, self.idp3MetadataFolder + self.idp3_metadata)
-
             # Process templates
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_properties, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_ldap_properties, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_saml_nameid, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_services, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_password_authn, self.idp3ConfFolder + '/authn', self.idp3ConfFolder + '/authn')
+            self.renderTemplateInOut(self.idp3_configuration_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_ldap_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_saml_nameid, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_services, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_password_authn, self.staticIDP3FolderConf + '/authn', self.idp3ConfFolder + '/authn')
 
             # load certificates to update metadata
             self.templateRenderingDict['idp3EncryptionCertificateText'] = self.load_certificate_text(self.certFolder + '/idp-encryption.crt')
             self.templateRenderingDict['idp3SigningCertificateText'] = self.load_certificate_text(self.certFolder + '/idp-signing.crt')
             # update IDP3 metadata
-            self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder)
+            self.renderTemplateInOut(self.idp3_metadata, self.staticIDP3FolderMetadata, self.idp3MetadataFolder)
 
             self.idpWarFullPath = '%s/idp.war' % self.distGluuFolder
 
