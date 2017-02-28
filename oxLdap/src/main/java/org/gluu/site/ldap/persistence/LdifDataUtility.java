@@ -276,13 +276,22 @@ public final class LdifDataUtility {
 		}
 	}
 	
-	public ResultCode validateLDIF(LDIFReader ldifReader){
+	public ResultCode validateLDIF(LDIFReader ldifReader,String dn){
 		ResultCode resultCode = ResultCode.SUCCESS;
 		while (true) {
 			// Read the next change to process
 			LDIFChangeRecord ldifRecord = null;
 			try {
 				ldifRecord = ldifReader.readChangeRecord(true);
+				if (ldifRecord != null) {
+					if (dn != null && !dn.isEmpty()) {
+						if (!ldifRecord.getDN().equals(dn)) {
+							resultCode = ResultCode.NOT_SUPPORTED;
+							break;
+						}
+					}
+				}
+				
 			} catch (LDIFException le) {
 				log.info("Malformed ldif record " + ldifRecord);
 				log.error("Malformed ldif record", le);
