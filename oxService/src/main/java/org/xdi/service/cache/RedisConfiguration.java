@@ -1,22 +1,21 @@
 package org.xdi.service.cache;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author yuriyz on 02/23/2017.
  */
-@XmlRootElement
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RedisConfiguration implements Serializable {
 
-    @XmlElement(name = "host")
-    private String host = "localhost";
+	private static final long serialVersionUID = 5513197227832695470L;
 
-    @XmlElement(name = "port")
+	private String host = "localhost";
+
     private int port = 6379;
 
-    @XmlElement(name = "defaultPutExpiration")
     private int defaultPutExpiration = 60; // in seconds
 
     public String getHost() {

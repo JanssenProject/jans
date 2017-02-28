@@ -1,29 +1,26 @@
 package org.xdi.service.cache;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author yuriyz on 02/02/2017.
  */
-@XmlRootElement
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MemcachedConfiguration implements Serializable {
 
-    @XmlElement(name = "servers")
-    private String servers; // server1:11211 server2:11211
+	private static final long serialVersionUID = 3380170170265842427L;
 
-    @XmlElement(name = "maxOperationQueueLength")
+	private String servers; // server1:11211 server2:11211
+
     private int maxOperationQueueLength = 99999999;
 
-    @XmlElement(name = "bufferSize")
     private int bufferSize = 32768;
 
-    @XmlElement(name = "defaultPutExpiration")
     private int defaultPutExpiration = 60; // in seconds
 
-    @XmlElement(name="connectionFactoryType")
-    MemcachedConnectionFactoryType connectionFactoryType = MemcachedConnectionFactoryType.DEFAULT;
+    private MemcachedConnectionFactoryType connectionFactoryType = MemcachedConnectionFactoryType.DEFAULT;
 
     public int getDefaultPutExpiration() {
         return defaultPutExpiration;

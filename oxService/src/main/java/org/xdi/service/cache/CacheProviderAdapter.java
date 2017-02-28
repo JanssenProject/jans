@@ -21,7 +21,7 @@ public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider> {
     @In(required = true)
     private CacheConfiguration cacheConfiguration;
 
-    AbstractCacheProvider cacheProvider = null;
+    private AbstractCacheProvider cacheProvider = null;
 
     @Create
     public void create() {

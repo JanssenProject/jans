@@ -2,15 +2,20 @@ package org.xdi.service.cache;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.io.Serializable;
 
 /**
  * @author yuriyz on 02/21/2017.
  */
-@XmlRootElement
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InMemoryConfiguration implements Serializable {
 
-    @XmlElement(name = "defaultPutExpiration")
+	private static final long serialVersionUID = 7544731515017051209L;
+
+	@XmlElement(name = "defaultPutExpiration")
     private int defaultPutExpiration = 60; // in seconds
 
     public int getDefaultPutExpiration() {

@@ -1,25 +1,23 @@
 package org.xdi.service.cache;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author yuriyz on 02/21/2017.
  */
-@XmlRootElement
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CacheConfiguration implements Serializable {
 
-    @XmlElement(name = "cacheProviderType", required = true)
-    private CacheProviderType cacheProviderType = CacheProviderType.IN_MEMORY;
+	private static final long serialVersionUID = 5047285980342633402L;
 
-    @XmlElement(name = "memcachedConfiguration")
+	private CacheProviderType cacheProviderType = CacheProviderType.IN_MEMORY;
+
     private MemcachedConfiguration memcachedConfiguration;
 
-    @XmlElement(name = "inMemoryConfiguration")
     private InMemoryConfiguration inMemoryConfiguration = new InMemoryConfiguration();
 
-    @XmlElement(name = "redisConfiguration")
     private RedisConfiguration redisConfiguration;
 
     public RedisConfiguration getRedisConfiguration() {
