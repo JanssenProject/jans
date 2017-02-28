@@ -107,7 +107,7 @@ public final class LdifDataUtility {
 	 *            LDIF reader
 	 * @return The result code for the processing that was performed
 	 */
-	protected ResultCode importLdifFile(LDAPConnection connection, LDIFReader ldifReader) {
+	public ResultCode importLdifFile(LDAPConnection connection, LDIFReader ldifReader) {
 		// Attempt to process and apply the changes to the server
 		ResultCode resultCode = ResultCode.SUCCESS;
 		while (true) {
@@ -274,6 +274,34 @@ public final class LdifDataUtility {
 			} catch (IOException ex) {
 			}
 		}
+	}
+	
+	public ResultCode validateLDIF(LDIFReader ldifReader){
+		ResultCode resultCode = ResultCode.SUCCESS;
+		while (true) {
+			// Read the next change to process
+			LDIFChangeRecord ldifRecord = null;
+			try {
+				ldifRecord = ldifReader.readChangeRecord(true);
+			} catch (LDIFException le) {
+				log.info("Malformed ldif record " + ldifRecord);
+				log.error("Malformed ldif record", le);
+				resultCode = ResultCode.DECODING_ERROR;
+				break;
+			} catch (IOException ioe) {
+				log.error("I/O error encountered while reading a change record", ioe);
+				resultCode = ResultCode.LOCAL_ERROR;
+				break;
+			}
+
+			// If the change record was null, then it means there are no more
+			// changes to be processed.
+			if (ldifRecord == null) {
+				break;
+			}
+		}
+
+		return resultCode;
 	}
 
 }
