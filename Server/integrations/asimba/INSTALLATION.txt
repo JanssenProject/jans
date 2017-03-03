@@ -1,4 +1,4 @@
-This list of steps needed to do to enable SAML person authentication module.
+This list of steps needed to do to enable Asimba/SAML person authentication module.
 
 1. This module depends on python libraries. In order to use it we need to install Jython. Please use next articles to proper Jython installation:
     - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
@@ -15,7 +15,7 @@ This list of steps needed to do to enable SAML person authentication module.
     - Enter level = 0-100 (priority of this method).
     - Select usage type "Interactive".
     - Add custom required and optional properties which specified in README.txt.
-    - Copy/paste script from SamlPersonAuthentication.py.
+    - Copy/paste script from AsimbaPersonAuthentication.py.
     - Activate it via "Enabled" checkbox.
     - Click "Update" button at the bottom of this page.
 
