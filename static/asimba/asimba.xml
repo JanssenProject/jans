@@ -82,17 +82,23 @@
 	     an in-memory session store.
 	 -->
 	<sessionfactory class="com.alfaariss.oa.engine.session.memory.MemorySessionFactory">
-		<expire>900</expire>
-	    <interval>60</interval>
-	    <max>100</max>
+        <!-- Expiration interval in seconds. -->
+        <expire>900</expire>
+        <!-- Storage cleaner interval in seconds. 0 = cleaning is disabled. -->
+        <interval>60</interval>
+        <!-- Maximum count of unexpired Session objects in memory, 0=infinity.  -->
+        <max>10000</max>
 	</sessionfactory>
 
 	<!-- Configure the TicketGrantingTicket-factory implemententation and behavior. The baseline
 	     server configures an in-memory TGT store  -->
 	<tgtfactory class="com.alfaariss.oa.engine.tgt.memory.MemoryTGTFactory">
-		<expire>3600</expire>
-	    <interval>60</interval>
-	    <max>100</max>
+        <!-- Expiration interval in seconds -->
+        <expire>3600</expire>
+        <!-- Storage cleaner interval in seconds. 0 = cleaning is disabled. -->
+        <interval>60</interval>
+        <!-- Maximum count of unexpired TGT objects in memory, 0=infinity  -->
+        <max>10000</max>
 	</tgtfactory>  
 	
 	<!-- Configure User Provisioning
