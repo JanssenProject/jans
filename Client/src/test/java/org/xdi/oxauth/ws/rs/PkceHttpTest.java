@@ -14,6 +14,12 @@ import org.xdi.oxauth.model.authorize.CodeVerifier;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+import org.xdi.oxauth.model.jws.RSASigner;
+import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
@@ -27,7 +33,7 @@ import static org.xdi.oxauth.client.Asserter.assertOk;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version March 3, 2017
  */
 
 public class PkceHttpTest extends BaseTest {
@@ -40,10 +46,13 @@ public class PkceHttpTest extends BaseTest {
         showTitle("tokenWithPkceCheck");
 
         // 1. Register client
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setResponseTypes(responseTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -54,15 +63,15 @@ public class PkceHttpTest extends BaseTest {
         assertNotNull(registerResponse.getRegistrationAccessToken());
 
         // 3. Request authorization
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<String> scopes = Arrays.asList(
                 "openid",
                 "profile",
                 "address",
                 "email");
         String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
         CodeVerifier verifier = authorizationRequest.generateAndSetCodeChallengeWithMethod();
 
@@ -71,13 +80,33 @@ public class PkceHttpTest extends BaseTest {
 
         assertNotNull(authorizationResponse.getLocation(), "The location is null");
         assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The ID Token is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
-        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
 
         String authorizationCode = authorizationResponse.getCode();
+        String idToken = authorizationResponse.getIdToken();
 
-        // 4. Get Access Token
+        // 4. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
+        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+
+        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
+                jwksUri,
+                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
+        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
+
+        assertTrue(rsaSigner.validate(jwt));
+
+        // 5. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
         tokenRequest.setRedirectUri(redirectUri);
