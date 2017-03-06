@@ -13,7 +13,7 @@ import static org.jboss.seam.ScopeType.APPLICATION;
 @Scope(APPLICATION)
 @AutoCreate
 @Startup
-public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider> {
+public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider<?>> {
 
     @Logger
     private Log log;
@@ -21,7 +21,7 @@ public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider> {
     @In(required = true)
     private CacheConfiguration cacheConfiguration;
 
-    private AbstractCacheProvider cacheProvider = null;
+    private AbstractCacheProvider<?> cacheProvider = null;
 
     @Create
     public void create() {
@@ -59,7 +59,7 @@ public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider> {
     }
 
     @Override
-    public CacheProvider getDelegate() {
+    public CacheProvider<?> getDelegate() {
         return cacheProvider;
     }
 

@@ -20,6 +20,7 @@ import com.unboundid.ldif.LDIFException;
 import com.unboundid.ldif.LDIFReader;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.xdi.util.StringHelper;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -276,7 +277,8 @@ public final class LdifDataUtility {
 		}
 	}
 	
-	public ResultCode validateLDIF(LDIFReader ldifReader,String dn){
+	public ResultCode validateLDIF(LDIFReader ldifReader, String dn) {
+		String baseDn = dn.toLowerCase();
 		ResultCode resultCode = ResultCode.SUCCESS;
 		while (true) {
 			// Read the next change to process
@@ -284,14 +286,14 @@ public final class LdifDataUtility {
 			try {
 				ldifRecord = ldifReader.readChangeRecord(true);
 				if (ldifRecord != null) {
-					if (dn != null && !dn.isEmpty()) {
-						if (!ldifRecord.getDN().equals(dn)) {
+					if (StringHelper.isNotEmpty(baseDn)) {
+						if (!ldifRecord.getDN().toLowerCase().endsWith(baseDn)) {
 							resultCode = ResultCode.NOT_SUPPORTED;
 							break;
 						}
 					}
 				}
-				
+
 			} catch (LDIFException le) {
 				log.info("Malformed ldif record " + ldifRecord);
 				log.error("Malformed ldif record", le);
