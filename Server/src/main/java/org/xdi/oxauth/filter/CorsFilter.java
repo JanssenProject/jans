@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.filter;
 
+import org.apache.log4j.Logger;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.contexts.Lifecycle;
-import org.jboss.seam.log.Log;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import javax.servlet.*;
@@ -24,16 +24,16 @@ import java.lang.reflect.Constructor;
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version February 15, 2017
+ * @version March 9, 2017
  */
 @AutoCreate
 @Name("corsFilter")
 public class CorsFilter implements Filter {
 
-    @org.jboss.seam.annotations.Logger
-    private Log log;
+    private static final Logger log = Logger.getLogger(CorsFilter.class);
 
-    private static final String CORS_FILTERS[] = {"org.apache.catalina.filters.CorsFilter",
+    private static final String CORS_FILTERS[] = {
+            "org.apache.catalina.filters.CorsFilter",
             "org.eclipse.jetty.servlets.CrossOriginFilter"};
 
     private AppConfiguration appConfiguration;
@@ -91,7 +91,7 @@ public class CorsFilter implements Filter {
         if (resultFilter == null) {
             log.error("Failed to prepare CORS filter");
         } else {
-            //log.debug("Prepared CORS filter: " + resultFilter);
+            log.debug("Prepared CORS filter: " + resultFilter);
         }
 
         return resultFilter;
