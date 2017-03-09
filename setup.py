@@ -354,12 +354,12 @@ class Setup(object):
 
         self.staticIDP3FolderConf = '%s/static/idp3/conf' % self.install_dir
         self.staticIDP3FolderMetadata = '%s/static/idp3/metadata' % self.install_dir
-        self.idp3_configuration_properties = '/idp.properties'
-        self.idp3_configuration_ldap_properties = '/ldap.properties'
-        self.idp3_configuration_saml_nameid = '/saml-nameid.properties'
-        self.idp3_configuration_services = '/services.properties'
-        self.idp3_configuration_password_authn = '/authn/password-authn-config.xml'
-        self.idp3_metadata = '/idp-metadata.xml'
+        self.idp3_configuration_properties = 'idp.properties'
+        self.idp3_configuration_ldap_properties = 'ldap.properties'
+        self.idp3_configuration_saml_nameid = 'saml-nameid.properties'
+        self.idp3_configuration_services = 'services.properties'
+        self.idp3_configuration_password_authn = 'authn/password-authn-config.xml'
+        self.idp3_metadata = 'idp-metadata.xml'
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = "%s/static/system/ubuntu/rsyslog" % self.install_dir
@@ -505,8 +505,8 @@ class Setup(object):
         self.run([self.cmd_chown, '-R', 'root:gluu', self.oxBaseDataFolder])
 
         # Set right permissions
-        self.run([self.cmd_chmod, '-R', '550', realCertFolder])
-        self.run([self.cmd_chmod, 'u+X', realCertFolder])
+        self.run([self.cmd_chmod, '-R', '440', realCertFolder])
+        self.run([self.cmd_chmod, 'a+X', realCertFolder])
         
         # Set write permission for Asimba's keystore (oxTrust can change it)
         self.run([self.cmd_chmod, 'u+w', realAsimbaJks])
@@ -916,10 +916,6 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '700', self.gluuOptBinFolder])
 
     def copy_static(self):
-        if self.installSaml:
-            self.copyTree("%s/static/idp3/conf/" % self.install_dir, self.idp3ConfFolder)
-            self.copyFile("%s/static/idp3/metadata/idp-metadata.xml" % self.install_dir, "%s/" % self.idp3MetadataFolder)
-
         if self.installOxAuth:
             self.copyFile("%s/static/auth/lib/duo_web.py" % self.install_dir, "%s/libs" % self.gluuOptPythonFolder)
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
@@ -1660,26 +1656,18 @@ class Setup(object):
             self.run([self.cmd_jar, 'xf', self.distGluuFolder + '/shibboleth-idp.jar'], '/opt')
             self.removeDirs('/opt/META-INF')
 
-            # copy templates
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_properties, self.idp3ConfFolder + self.idp3_configuration_properties)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_ldap_properties, self.idp3ConfFolder + self.idp3_configuration_ldap_properties)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_saml_nameid, self.idp3ConfFolder + self.idp3_configuration_saml_nameid)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_services, self.idp3ConfFolder + self.idp3_configuration_services)
-            self.copyFile(self.staticIDP3FolderConf + self.idp3_configuration_password_authn, self.idp3ConfFolder + self.idp3_configuration_password_authn)
-            self.copyFile(self.staticIDP3FolderMetadata + self.idp3_metadata, self.idp3MetadataFolder + self.idp3_metadata)
-
             # Process templates
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_properties, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_ldap_properties, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_saml_nameid, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_services, self.idp3ConfFolder, self.idp3ConfFolder)
-            self.renderTemplateInOut(self.idp3ConfFolder + self.idp3_configuration_password_authn, self.idp3ConfFolder + '/authn', self.idp3ConfFolder + '/authn')
+            self.renderTemplateInOut(self.idp3_configuration_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_ldap_properties, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_saml_nameid, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_services, self.staticIDP3FolderConf, self.idp3ConfFolder)
+            self.renderTemplateInOut(self.idp3_configuration_password_authn, self.staticIDP3FolderConf + '/authn', self.idp3ConfFolder + '/authn')
 
             # load certificates to update metadata
             self.templateRenderingDict['idp3EncryptionCertificateText'] = self.load_certificate_text(self.certFolder + '/idp-encryption.crt')
             self.templateRenderingDict['idp3SigningCertificateText'] = self.load_certificate_text(self.certFolder + '/idp-signing.crt')
             # update IDP3 metadata
-            self.renderTemplateInOut(self.idp3MetadataFolder + self.idp3_metadata, self.idp3MetadataFolder, self.idp3MetadataFolder)
+            self.renderTemplateInOut(self.idp3_metadata, self.staticIDP3FolderMetadata, self.idp3MetadataFolder)
 
             self.idpWarFullPath = '%s/idp.war' % self.distGluuFolder
 
@@ -2113,6 +2101,12 @@ class Setup(object):
 
         return file_paths
 
+    def fomatWithDict(self, text, dictionary):
+        text = re.sub(r"%([^\(])", r"%%\1", text)
+        text = re.sub(r"%$", r"%%", text)  # There was a % at the end?
+
+        return text % dictionary
+
     def renderTemplateInOut(self, filePath, templateFolder, outputFolder):
         self.logIt("Rendering template %s" % filePath)
         fn = os.path.split(filePath)[-1]
@@ -2120,7 +2114,7 @@ class Setup(object):
         template_text = f.read()
         f.close()
         newFn = open(os.path.join(outputFolder, fn), 'w+')
-        newFn.write(template_text % self.merge_dicts(self.__dict__, self.templateRenderingDict))
+        newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
         newFn.close()
 
     def renderTemplate(self, filePath):

@@ -91,7 +91,7 @@ class Migration(object):
         self.ldif_import = "/opt/opendj/bin/import-ldif"
         self.ldif_export = "/opt/opendj/bin/export-ldif"
 
-        self.ldapDataFile = "/opt/gluu/data/data.mdb"
+        self.ldapDataFile = "/opt/gluu/data/main_db/data.mdb"
 
         self.currentData = os.path.join(self.workingDir, 'current.ldif')
         self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
