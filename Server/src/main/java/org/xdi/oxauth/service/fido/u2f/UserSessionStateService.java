@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
@@ -23,15 +23,15 @@ import java.util.Map;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("userSessionStateService")
+@Stateless
+@Named("userSessionStateService")
 @AutoCreate
 public class UserSessionStateService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
 	public void updateUserSessionStateOnFinishRequest(String sessionState, String userInum, DeviceRegistrationResult deviceRegistrationResult, boolean enroll, boolean oneStep) {

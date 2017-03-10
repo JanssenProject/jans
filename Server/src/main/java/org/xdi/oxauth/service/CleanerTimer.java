@@ -8,13 +8,13 @@ package org.xdi.oxauth.service;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -36,9 +36,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@Name("cleanerTimer")
+@Named("cleanerTimer")
 @AutoCreate
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
 @Startup
 public class CleanerTimer {
 
@@ -46,38 +46,38 @@ public class CleanerTimer {
     private final static String EVENT_TYPE = "CleanerTimerEvent";
     private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+    @Inject
     private ClientService clientService;
-    @In
+    @Inject
     private GrantService grantService;
-    @In
+    @Inject
     private RPTManager rptManager;
-    @In
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private RequestService u2fRequestService;
 
-    @In
+    @Inject
     private MetricService metricService;
 
-    @In
+    @Inject
     private DeviceRegistrationService deviceRegistrationService;
 
-    @In
+    @Inject
     private ConfigurationFactory configurationFactory;
 
     private AtomicBoolean isActive;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @Observer("org.jboss.seam.postInitialization")

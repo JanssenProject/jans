@@ -9,9 +9,9 @@ package org.xdi.oxauth.service.fido.u2f;
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
@@ -25,18 +25,18 @@ import java.util.List;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("u2fRequestService")
+@Stateless
+@Named("u2fRequestService")
 @AutoCreate
 public class RequestService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-	@In
+	@Inject
 	private StaticConf staticConfiguration;
 
 	public List<RequestMessageLdap> getExpiredRequestMessages(BatchOperation<RequestMessageLdap> batchOperation, Date expirationDate) {

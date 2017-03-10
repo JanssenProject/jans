@@ -10,9 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -25,19 +25,19 @@ import java.util.Map;
  *
  * @author Yuriy Movchan Date: 07.20.2012
  */
-@Scope(ScopeType.APPLICATION)
-@Name("authenticationFilterService")
+@ApplicationScoped
+@Named("authenticationFilterService")
 @AutoCreate
 @Startup
 public class AuthenticationFilterService extends BaseAuthFilterService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @Create

@@ -11,9 +11,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.xdi.model.SimpleCustomProperty;
@@ -28,8 +28,8 @@ import org.xdi.service.custom.script.ExternalScriptService;
  *
  * @author Yuriy Movchan Date: 01/20/2015
  */
-@Scope(ScopeType.APPLICATION)
-@Name("externalApplicationSessionService")
+@ApplicationScoped
+@Named("externalApplicationSessionService")
 @AutoCreate
 @Startup
 public class ExternalApplicationSessionService extends ExternalScriptService {

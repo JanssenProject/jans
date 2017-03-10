@@ -7,7 +7,7 @@
 package org.xdi.oxauth.comp;
 
 import org.apache.commons.io.IOUtils;
-import org.jboss.seam.annotations.In;
+import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;

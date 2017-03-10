@@ -15,13 +15,13 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -37,16 +37,16 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @version 0.9 April 27, 2015
  */
-@Name("redirectionUriService")
-@Scope(ScopeType.STATELESS)
+@Named("redirectionUriService")
+@Stateless
 @AutoCreate
 public class RedirectionUriService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ClientService clientService;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     public String validateRedirectionUri(String clientIdentifier, String redirectionUri) {

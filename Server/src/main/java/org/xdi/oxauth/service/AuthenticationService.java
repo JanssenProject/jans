@@ -9,12 +9,12 @@ package org.xdi.oxauth.service;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesManager;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 import org.xdi.ldap.model.CustomAttribute;
@@ -43,6 +43,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
 
 import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
 
@@ -53,8 +55,8 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STAT
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("authenticationService")
+@Stateless
+@Named("authenticationService")
 @AutoCreate
 public class AuthenticationService {
 
@@ -82,43 +84,43 @@ public class AuthenticationService {
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS));
     private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private Identity identity;
 
-    @In(value = "#{facesContext.externalContext}", required = false)
+    @Inject(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
 
-    @In(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In(value = AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    @Inject(value = AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
     private List<LdapEntryManager> ldapAuthEntryManagers;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private MetricService metricService;
 
-    @In("org.jboss.seam.core.manager")
+    @Inject("org.jboss.seam.core.manager")
     private FacesManager facesManager;
 
     public static AuthenticationService instance() {

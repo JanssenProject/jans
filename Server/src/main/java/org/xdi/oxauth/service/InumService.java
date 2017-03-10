@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.service;
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -24,17 +24,17 @@ import org.xdi.oxauth.util.ServerUtil;
  *
  * @author Javier Rojas Date: 01.12.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("inumService")
+@Stateless
+@Named("inumService")
 @AutoCreate
 public class InumService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private IdGenService idGenService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     public String generateClientInum() {

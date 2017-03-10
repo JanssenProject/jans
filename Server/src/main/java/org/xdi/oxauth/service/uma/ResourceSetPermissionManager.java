@@ -11,12 +11,12 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
@@ -34,19 +34,19 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 11/02/2013
  */
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
 @AutoCreate
-@Name("resourceSetPermissionManager")
+@Named("resourceSetPermissionManager")
 public class ResourceSetPermissionManager extends AbstractResourceSetPermissionManager {
 
     private static final String ORGUNIT_OF_RESOURCE_SET_PERMISSION = "uma_resource_set_permission";
 
     private static final Log LOG = Logging.getLog(ResourceSetPermissionManager.class);
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     public static String getDn(String clientDn, String ticket) {
@@ -64,7 +64,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
             resourceSetPermission.setDn(getDn(clientDn, resourceSetPermission.getTicket()));
             ldapEntryManager.persist(resourceSetPermission);
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
     }
 
@@ -78,7 +78,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 return entries.get(0);
             }
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }
@@ -100,7 +100,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 return entries.get(0);
             }
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }
@@ -113,7 +113,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 ldapEntryManager.remove(permission);
             }
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
     }
 
@@ -131,7 +131,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                     try {
                         ldapEntryManager.remove(p);
                     } catch (Exception e) {
-                        LOG.error("Failed to remove entry", e);
+                        log.error("Failed to remove entry", e);
                     }
                 }
             }
@@ -140,7 +140,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 try {
                     return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
                 }catch (LDAPException e) {
-                    LOG.trace(e.getMessage(), e);
+                    log.trace(e.getMessage(), e);
                     return Filter.createPresenceFilter("oxAuthExpiration");
                 }
             }

@@ -9,13 +9,13 @@ package org.xdi.oxauth.service;
 import java.util.List;
 
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
@@ -25,20 +25,20 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("attributeService")
+@Stateless
+@Named("attributeService")
 @AutoCreate
 public class AttributeService extends org.xdi.service.AttributeService {
 
     private static final String CACHE_ATTRIBUTE = "AttributeCache";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
     /**
      * Get AttributeService instance

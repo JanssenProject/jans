@@ -1,7 +1,7 @@
 package org.xdi.oxauth.comp;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.annotations.In;
+import javax.inject.Inject;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTestAdapter;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -22,7 +22,7 @@ import static org.testng.Assert.*;
  */
 public class CryptoProviderTest extends BaseComponentTestAdapter {
 
-	@In
+	@Inject
 	private ConfigurationFactory configurationFactory;
 
     private final String SIGNING_INPUT = "Signing Input";

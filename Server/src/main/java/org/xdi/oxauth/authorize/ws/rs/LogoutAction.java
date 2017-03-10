@@ -12,15 +12,15 @@ import java.util.Map;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.international.StatusMessage.Severity;
-import org.jboss.seam.log.Log;
+
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -38,32 +38,32 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum Date: 03.13.2012
  * @author Yuriy Movchan Date: 09/01/2016
  */
-@Name("logoutAction")
-@Scope(ScopeType.EVENT)
+@Named("logoutAction")
+@RequestScoped
 public class LogoutAction {
 
 	private static final String EXTERNAL_LOGOUT = "external_logout";
 	private static final String EXTERNAL_LOGOUT_DATA = "external_logout_data";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private FacesMessages facesMessages;
 
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
     
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private JsonService jsonService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     private String idTokenHint;

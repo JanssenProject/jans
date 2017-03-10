@@ -30,15 +30,6 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>OpenIdConfiguration</servlet-name>
-        <servlet-class>org.xdi.oxauth.servlet.OpenIdConfiguration</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>OpenIdConfiguration</servlet-name>
-        <url-pattern>/.well-known/openid-configuration</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
         <servlet-name>WebFinger</servlet-name>
         <servlet-class>org.xdi.oxauth.servlet.WebFinger</servlet-class>
     </servlet>

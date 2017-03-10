@@ -9,9 +9,9 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.oxauth.model.common.User;
@@ -31,26 +31,26 @@ import java.util.List;
  *
  * @author Javier Rojas Blum Date: 11.30.2011
  */
-@Scope(ScopeType.STATELESS)
-@Name("userService")
+@Stateless
+@Named("userService")
 @AutoCreate
 public class UserService {
 
 	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AuthenticationService authenticationService;
 
-    @In
+    @Inject
     private InumService inumService;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     /**

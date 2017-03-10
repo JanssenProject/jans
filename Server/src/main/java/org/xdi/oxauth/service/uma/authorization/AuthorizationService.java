@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.service.uma.authorization;
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
@@ -35,18 +35,18 @@ import java.util.Set;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/02/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("umaAuthorizationService")
+@Stateless
+@Named("umaAuthorizationService")
 @AutoCreate
 public class AuthorizationService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ScopeService umaScopeService;
 
-    @In
+    @Inject
     private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {

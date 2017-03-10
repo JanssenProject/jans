@@ -9,7 +9,7 @@ package org.xdi.oxauth.model.common;
 import com.google.common.collect.Maps;
 import org.gluu.site.ldap.persistence.annotation.*;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Named;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Transient;
@@ -22,7 +22,7 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@Name("sessionUser")
+@Named("sessionUser")
 @AutoCreate
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthSessionId"})
