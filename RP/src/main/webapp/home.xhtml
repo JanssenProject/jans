@@ -720,9 +720,9 @@
 									<h:outputLabel for="grantType">Grant Type</h:outputLabel>
 									<h:selectOneMenu id="grantType"
 										value="#{tokenAction.grantType}">
-										<s:selectItems value="#{grantTypes}" var="grantType"
-											label="#{grantType}" noSelectionLabel="- Please select one -" />
-										<s:convertEnum />
+										<f:selectItem itemLabel="- Please select one -" itemValue="" />
+										<f:selectItems value="#{grantTypes}" var="grantType"
+											itemLabel="#{grantType}" itemValue="#{grantType}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
