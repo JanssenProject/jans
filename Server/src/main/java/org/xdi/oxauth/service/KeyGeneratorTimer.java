@@ -11,12 +11,12 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
@@ -34,24 +34,24 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Name("keyGeneratorTimer")
+@Named("keyGeneratorTimer")
 @AutoCreate
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
 public class KeyGeneratorTimer {
 
     private final static String EVENT_TYPE = "KeyGeneratorTimerEvent";
     private final static int DEFAULT_INTERVAL = 48; // 48 hours
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ConfigurationFactory configurationFactory;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     private AtomicBoolean isActive;

@@ -19,7 +19,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version December 29, 2016
+ * @version February 15, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration  {
@@ -102,6 +102,7 @@ public class AppConfiguration  {
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
+    private List<CorsConfigurationFilter> corsConfigurationFilters;
 
     private String applianceInum;
     private int sessionIdUnusedLifetime;
@@ -140,21 +141,21 @@ public class AppConfiguration  {
     private List<String> clientBlackList;
     private Boolean legacyIdTokenClaims;
     private Boolean customHeadersWithAuthorizationResponse;
-    private Boolean frontChannelLogoutSessionSupported; 
+    private Boolean frontChannelLogoutSessionSupported;
     private String loggingLevel;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
-		return frontChannelLogoutSessionSupported;
-	}
+        return frontChannelLogoutSessionSupported;
+    }
 
-	public void setFrontChannelLogoutSessionSupported(
-			Boolean frontChannelLogoutSessionSupported) {
-		this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
-	}
+    public void setFrontChannelLogoutSessionSupported(
+            Boolean frontChannelLogoutSessionSupported) {
+        this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+    }
 
-	public Boolean getUmaRptAsJwt() {
+    public Boolean getUmaRptAsJwt() {
         return umaRptAsJwt;
     }
 
@@ -866,6 +867,15 @@ public class AppConfiguration  {
         return clientAuthenticationFilters;
     }
 
+
+    public List<CorsConfigurationFilter> getCorsConfigurationFilters() {
+        if (corsConfigurationFilters == null) {
+            corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+        }
+
+        return corsConfigurationFilters;
+    }
+
     public String getApplianceInum() {
         return applianceInum;
     }
@@ -1146,12 +1156,12 @@ public class AppConfiguration  {
         this.updateClientAccessTime = updateClientAccessTime;
     }
 
-	public String getLoggingLevel() {
-		return loggingLevel;
-	}
+    public String getLoggingLevel() {
+        return loggingLevel;
+    }
 
-	public void setLoggingLevel(String loggingLevel) {
-		this.loggingLevel = loggingLevel;
-	}
+    public void setLoggingLevel(String loggingLevel) {
+        this.loggingLevel = loggingLevel;
+    }
 
 }

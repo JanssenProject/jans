@@ -13,13 +13,13 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.ldap.UserGroup;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -31,15 +31,15 @@ import com.unboundid.ldap.sdk.Filter;
  * @version 0.9, 27/07/2012
  * @author Yuriy Movchan Date: 04/11/2014
  */
-@Scope(ScopeType.APPLICATION)
-@Name("userGroupService")
+@ApplicationScoped
+@Named("userGroupService")
 @AutoCreate
 public class UserGroupService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
     public UserGroup loadGroup(String p_groupDN) {

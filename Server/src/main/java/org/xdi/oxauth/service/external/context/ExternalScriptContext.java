@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.net.util.SubnetUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.oxauth.model.util.Util;

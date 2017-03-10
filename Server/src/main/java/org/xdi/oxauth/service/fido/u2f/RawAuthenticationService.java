@@ -9,9 +9,9 @@ package org.xdi.oxauth.service.fido.u2f;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import org.apache.commons.io.IOUtils;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
@@ -27,8 +27,8 @@ import java.io.IOException;
  *
  * @author Yuriy Movchan Date: 05/20/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("rawAuthenticationService")
+@Stateless
+@Named("rawAuthenticationService")
 @AutoCreate
 public class RawAuthenticationService {
 
@@ -36,10 +36,10 @@ public class RawAuthenticationService {
 	public static final String AUTHENTICATE_CANCEL_TYPE = "navigator.id.cancelAssertion";
 	public static final String[] SUPPORTED_AUTHENTICATE_TYPES = new String[] { AUTHENTICATE_GET_TYPE, AUTHENTICATE_CANCEL_TYPE };
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In(value = "sha256withECDSASignatureVerification")
+	@Inject(value = "sha256withECDSASignatureVerification")
 	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawAuthenticateResponse parseRawAuthenticateResponse(String rawDataBase64) {

@@ -12,10 +12,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -48,28 +48,28 @@ import java.util.List;
  */
 @Path("/requester")
 @Api(value = "/requester/rpt", description = "The endpoint at which the requester asks the AM to issue an RPT")
-@Name("rptRestWebService")
+@Named("rptRestWebService")
 public class CreateRptWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private RPTManager rptManager;
-    @In
+    @Inject
     private UmaValidationService umaValidationService;
-    @In
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private AuthorizationService umaAuthorizationService;
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private JSONWebKeySet webKeysConfiguration;
 
     @Path("rpt")

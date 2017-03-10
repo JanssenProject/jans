@@ -9,9 +9,9 @@ package org.xdi.oxauth.service.fido.u2f;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import org.apache.commons.io.IOUtils;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.crypto.cert.CertificateParser;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
@@ -30,8 +30,8 @@ import java.security.cert.CertificateException;
  *
  * @author Yuriy Movchan Date: 05/20/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("rawRegistrationService")
+@Stateless
+@Named("rawRegistrationService")
 @AutoCreate
 public class RawRegistrationService {
 
@@ -43,10 +43,10 @@ public class RawRegistrationService {
 	public static final String REGISTER_CANCEL_TYPE = "navigator.id.cancelEnrollment";
 	public static final String[] SUPPORTED_REGISTER_TYPES = new String[] { REGISTER_FINISH_TYPE, REGISTER_CANCEL_TYPE };
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In(value = "sha256withECDSASignatureVerification")
+	@Inject(value = "sha256withECDSASignatureVerification")
 	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawRegisterResponse parseRawRegisterResponse(String rawDataBase64) throws BadInputException {

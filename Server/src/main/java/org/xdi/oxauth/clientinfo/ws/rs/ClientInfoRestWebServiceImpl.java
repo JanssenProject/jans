@@ -8,10 +8,12 @@ package org.xdi.oxauth.clientinfo.ws.rs;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoParamsValidator;
@@ -34,18 +36,18 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
-@Name("requestClientInfoRestWebService")
+@Named("requestClientInfoRestWebService")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+    @Inject
     private ScopeService scopeService;
-    @In
+    @Inject
     private AttributeService attributeService;
 
     @Override
@@ -63,7 +65,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
             accessToken = authorization.substring(7);
         }
         log.debug("Attempting to request Client Info, Access token = {0}, Is Secure = {1}",
-                accessToken, securityContext.isSecure());
+                new Object[] { accessToken, securityContext.isSecure() });
         Response.ResponseBuilder builder = Response.ok();
 
         if (!ClientInfoParamsValidator.validateParams(accessToken)) {

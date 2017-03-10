@@ -8,11 +8,11 @@ package org.xdi.oxauth.auth;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.intercept.BypassInterceptors;
 import org.jboss.seam.annotations.web.Filter;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.NotLoggedInException;
 import org.jboss.seam.servlet.ContextualHttpServletRequest;
@@ -54,26 +54,26 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @version March 4, 2016
  */
-@Scope(ScopeType.APPLICATION)
-@Name("org.jboss.seam.web.authenticationFilter")
-@Install(value = false, precedence = Install.BUILT_IN)
+@ApplicationScoped
+@Named("org.jboss.seam.web.authenticationFilter")
+@Intstall(value = false, precedence = Install.BUILT_IN)
 @BypassInterceptors
 @Filter(within = "org.jboss.seam.web.exceptionFilter")
 public class AuthenticationFilter extends AbstractFilter {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private ClientFilterService clientFilterService;
 
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
 	private AppConfiguration appConfiguration;

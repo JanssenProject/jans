@@ -12,9 +12,9 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -51,42 +51,42 @@ import java.util.concurrent.TimeUnit;
  * @version December 29, 2016
  */
 
-@Scope(ScopeType.STATELESS)
-@Name("sessionStateService")
+@Stateless
+@Named("sessionStateService")
 @AutoCreate
 public class SessionStateService {
 
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private AuthenticationService authenticationService;
     
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
-    @In
+    @Inject
     private JSONWebKeySet webKeysConfiguration;
 
-    @In(required = false)
+    @Inject(required = false)
     private FacesContext facesContext;
 
-    @In(value = "#{facesContext.externalContext}", required = false)
+    @Inject(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
     public static SessionStateService instance() {

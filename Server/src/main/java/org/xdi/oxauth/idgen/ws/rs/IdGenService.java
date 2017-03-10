@@ -7,13 +7,13 @@
 package org.xdi.oxauth.idgen.ws.rs;
 
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.service.external.ExternalIdGeneratorService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -24,20 +24,20 @@ import org.xdi.util.StringHelper;
  * @version 0.9, 24/06/2013
  */
 
-@Scope(ScopeType.STATELESS)
-@Name("idGenService")
+@Stateless
+@Named("idGenService")
 @AutoCreate
 public class IdGenService implements IdGenerator {
 
     public static final String PYTHON_CLASS_NAME = "PythonExternalIdGenerator";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private InumGenerator inumGenerator;
     
-    @In
+    @Inject
     private ExternalIdGeneratorService externalIdGeneratorService;
 
     public String generateId(IdType p_idType, String p_idPrefix) {

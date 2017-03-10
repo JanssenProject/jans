@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.action;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import java.io.Serializable;
+
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.log4j.Logger;
 import org.xdi.oxauth.client.TokenClient;
 import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.client.TokenResponse;
@@ -22,13 +22,14 @@ import org.xdi.oxauth.model.common.GrantType;
 /**
  * @author Javier Rojas Blum Date: 02.21.2012
  */
-@Name("tokenAction")
-@Scope(ScopeType.SESSION)
-@AutoCreate
-public class TokenAction {
+@Named("tokenAction")
+@SessionScoped
+public class TokenAction implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = -1049039555549738261L;
+
+	@Inject
+    private transient Logger log;
 
     private String tokenEndpoint;
     private GrantType grantType;
@@ -48,7 +49,7 @@ public class TokenAction {
 
     private AuthenticationMethod authenticationMethod;
 
-    @In
+    @Inject
     private UserInfoAction userInfoAction;
 
     public void exec() {
@@ -80,7 +81,7 @@ public class TokenAction {
             requestString = client.getRequestAsString();
             responseString = client.getResponseAsString();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         }
     }
 

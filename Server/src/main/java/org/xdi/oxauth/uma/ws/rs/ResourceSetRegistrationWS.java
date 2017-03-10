@@ -10,10 +10,10 @@ import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -50,29 +50,29 @@ import java.util.List;
  * @author Yuriy Movchan
  *         Date: 02/12/2015
  */
-@Name("resourceSetRegistrationRestWebService")
+@Named("resourceSetRegistrationRestWebService")
 @Path("/host/rsrc/resource_set")
 @Api(value = "/host/rsrc/resource_set", description = "The resource server uses the RESTful API at the authorization server's resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
 public class ResourceSetRegistrationWS {
 
     private static final int NOT_ALLOWED_STATUS = 405;
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private UmaValidationService umaValidationService;
-    @In
+    @Inject
     private ResourceSetService resourceSetService;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+    @Inject
     private ScopeService umaScopeService;
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @POST

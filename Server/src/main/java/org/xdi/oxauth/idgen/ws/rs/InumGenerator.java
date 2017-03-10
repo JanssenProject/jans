@@ -10,13 +10,13 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
@@ -34,8 +34,8 @@ import com.unboundid.ldap.sdk.RDN;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 26/06/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("inumGenerator")
+@Stateless
+@Named("inumGenerator")
 @AutoCreate
 public class InumGenerator implements IdGenerator {
 
@@ -43,12 +43,12 @@ public class InumGenerator implements IdGenerator {
 
     private static final int MAX = 100;
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     @Override

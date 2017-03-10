@@ -6,9 +6,11 @@
 
 package org.xdi.oxauth.action;
 
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.Name;
+import java.io.Serializable;
+
+import javax.enterprise.inject.Produces;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.GrantType;
@@ -23,56 +25,67 @@ import org.xdi.oxauth.model.register.ApplicationType;
 /**
  * @author Javier Rojas Blum Date: 09.13.2013
  */
-@Name("enumValuesFactory")
-@AutoCreate
-public class EnumValuesFactory {
+@Named("enumValuesFactory")
+public class EnumValuesFactory implements Serializable {
 
-    @Factory("responseTypes")
+	private static final long serialVersionUID = 8423949448460924545L;
+
+	@Produces
+	@Named("responseTypes")
     public ResponseType[] responseTypes() {
         return ResponseType.values();
     }
 
-    @Factory("grantTypes")
+    @Produces
+	@Named("grantTypes")
     public GrantType[] grantTypes() {
         return new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT};
     }
 
-    @Factory("applicationTypes")
+    @Produces
+	@Named("applicationTypes")
     public ApplicationType[] applicationTypes() {
         return ApplicationType.values();
     }
 
-    @Factory("authenticationMethods")
+    @Produces
+	@Named("authenticationMethods")
     public AuthenticationMethod[] authenticationMethods() {
         return AuthenticationMethod.values();
     }
 
-    @Factory("subjectTypes")
+    @Produces
+	@Named("subjectTypes")
     public SubjectType[] subjectTypes() {
         return SubjectType.values();
     }
 
-    @Factory("displays")
+    @Produces
+	@Named("displays")
     public Display[] displays() {
         return Display.values();
     }
 
-    @Factory("prompts")
+    @Produces
+	@Named("prompts")
     public Prompt[] prompts() {
         return Prompt.values();
     }
 
-    @Factory("signatureAlgorithms")
+    @Produces
+	@Named("signatureAlgorithms")
     public SignatureAlgorithm[] signatureAlgorithms() {
         return SignatureAlgorithm.values();
     }
 
-    @Factory("keyEncryptionAlgorithms")
+    @Produces
+	@Named("keyEncryptionAlgorithms")
     public KeyEncryptionAlgorithm[] keyEncryptionAlgorithms() {
         return KeyEncryptionAlgorithm.values();
     }
 
-    @Factory("blockEncryptionAlgorithms")
+    @Produces
+	@Named("blockEncryptionAlgorithms")
     public BlockEncryptionAlgorithm[] blockEncryptionAlgorithms() {
         return BlockEncryptionAlgorithm.values();
     }

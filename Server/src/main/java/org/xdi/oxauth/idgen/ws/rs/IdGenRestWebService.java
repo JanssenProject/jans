@@ -19,10 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
@@ -46,23 +48,23 @@ import com.wordnik.swagger.annotations.ApiParam;
  * @version 0.9, 24/06/2013
  */
 
-@Name("idGenWS")
+@Named("idGenWS")
 @Path("/id")
 @Api(value = "/id", description = "ID Generation")
 public class IdGenRestWebService {
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private IdGenService idGenService;
-    @In
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private PermissionService umaRsPermissionService;
-    @In
+    @Inject
     private RPTManager rptManager;
 
     @GET

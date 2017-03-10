@@ -6,23 +6,25 @@
 
 package org.xdi.oxauth.action;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import java.io.Serializable;
+
+import javax.faces.bean.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.log4j.Logger;
 
 /**
  * @author Javier Rojas Blum Date: 02.22.2012
  */
-@Name("checkSessionAction")
-@Scope(ScopeType.SESSION)
-@AutoCreate
-public class CheckSessionAction {
+@Named("checkSessionAction")
+@SessionScoped
+public class CheckSessionAction implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = 6513115606594205672L;
+
+	@Inject
+    private transient Logger log;
 
     private String checkSessionEndpoint;
 

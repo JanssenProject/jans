@@ -8,7 +8,7 @@ package org.xdi.oxauth.util;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.crypto.cert.CertificateParser;
 import org.xdi.util.StringHelper;

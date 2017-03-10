@@ -11,14 +11,14 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.international.LocaleSelector;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.security.Identity;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -53,56 +53,56 @@ import java.util.*;
  * @author Yuriy Movchan
  * @version January 20, 2017
  */
-@Name("authorizeAction")
-@Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
+@Named("authorizeAction")
+@RequestScoped // Do not change scope, we try to keep server without http sessions
 public class AuthorizeAction {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private RedirectionUriService redirectionUriService;
 
-    @In
+    @Inject
     private AuthenticationService authenticationService;
 
-    @In
+    @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In(value = AppInitializer.DEFAULT_ACR_VALUES, required = false)
+    @Inject(value = AppInitializer.DEFAULT_ACR_VALUES, required = false)
     private String defaultAuthenticationMethod;
 
-    @In("org.jboss.seam.international.localeSelector")
+    @Inject("org.jboss.seam.international.localeSelector")
     private LocaleSelector localeSelector;
 
-    @In
+    @Inject
     private NetworkService networkService;
 
-    @In
+    @Inject
     private Identity identity;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In(required = false)
+    @Inject(required = false)
     private FacesContext facesContext;
 
-    @In(value = "#{facesContext.externalContext}", required = false)
+    @Inject(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
 
     // OAuth 2.0 request parameters

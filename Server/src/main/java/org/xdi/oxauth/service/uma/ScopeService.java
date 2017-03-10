@@ -10,13 +10,13 @@ import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -41,23 +41,23 @@ import java.util.List;
  * @version 0.9, 22/04/2013
  */
 @AutoCreate
-@Scope(ScopeType.STATELESS)
-@Name("umaScopeService")
+@Stateless
+@Named("umaScopeService")
 public class ScopeService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+    @Inject
     private InumService inumService;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     public static ScopeService instance() {

@@ -8,10 +8,10 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.*;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
@@ -43,18 +43,18 @@ import java.util.List;
 @Api(value = "/rpt/status", description = "The endpoint at which the host requests the status of an RPT presented to it by a requester." +
         " The endpoint is RPT introspection profile implementation defined by UMA specification")
 
-@Name("rptStatusRestWebService")
+@Named("rptStatusRestWebService")
 public class RptStatusWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private RPTManager rptManager;
-    @In
+    @Inject
     private UmaValidationService umaValidationService;
-    @In
+    @Inject
     private ScopeService umaScopeService;
 
     @POST

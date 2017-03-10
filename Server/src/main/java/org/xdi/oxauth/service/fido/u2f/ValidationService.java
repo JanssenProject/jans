@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -26,18 +26,18 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 05/11/2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("u2fValidationService")
+@Stateless
+@Named("u2fValidationService")
 @AutoCreate
 public class ValidationService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
-	@In
+	@Inject
 	private UserService userService;
 
 	public boolean isValidSessionState(String userName, String sessionState) {

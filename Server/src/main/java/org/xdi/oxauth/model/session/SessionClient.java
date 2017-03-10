@@ -10,13 +10,13 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Named;
 import org.xdi.oxauth.model.registration.Client;
 
 /**
  * @author Javier Rojas Blum Date: 03.20.2012
  */
-@Name("sessionClient")
+@Named("sessionClient")
 @AutoCreate
 public class SessionClient {
 

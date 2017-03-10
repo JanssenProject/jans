@@ -7,10 +7,10 @@
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
 import com.wordnik.swagger.annotations.Api;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
@@ -43,28 +43,28 @@ import javax.ws.rs.core.Response;
  */
 @Path("/fido/u2f/authentication")
 @Api(value = "/fido/u2f/registration", description = "The endpoint at which the application U2F device start registration process.")
-@Name("u2fAuthenticationRestWebService")
+@Named("u2fAuthenticationRestWebService")
 public class U2fAuthenticationWS {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private ErrorResponseFactory errorResponseFactory;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@In
+	@Inject
 	private AuthenticationService u2fAuthenticationService;
 
-	@In
+	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
 
-	@In
+	@Inject
 	private UserSessionStateService userSessionStateService;
 
-	@In
+	@Inject
 	private ValidationService u2fValidationService;
 
 	@GET

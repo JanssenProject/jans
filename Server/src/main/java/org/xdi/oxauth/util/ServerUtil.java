@@ -15,7 +15,7 @@ import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -55,7 +55,7 @@ public class ServerUtil {
         try {
             return asJson(p_object);
         } catch (IOException e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
             return "";
         }
     }
@@ -140,7 +140,7 @@ public class ServerUtil {
             try {
                 return URLDecoder.decode(p_str, Util.UTF8);
             } catch (UnsupportedEncodingException e) {
-                LOG.trace(e.getMessage(), e);
+                log.trace(e.getMessage(), e);
             }
         }
         return p_str;

@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.uma;
 
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
@@ -36,7 +36,7 @@ public abstract class AbstractRPTManager implements IRPTManager {
             }
             return new UmaRPT(code, new Date(), accessToken.getExpirationDate(), grant.getUserId(), grant.getClientId(), amHost);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             throw new RuntimeException("Failed to generate RPT, aat: " + aat, e);
         }
     }

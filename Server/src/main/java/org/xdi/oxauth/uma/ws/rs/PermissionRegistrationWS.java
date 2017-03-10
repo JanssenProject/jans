@@ -16,10 +16,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.PermissionTicket;
@@ -51,7 +51,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author Yuriy Zabrovarnyy
  */
-@Name("resourceSetPermissionRegistrationRestWebService")
+@Named("resourceSetPermissionRegistrationRestWebService")
 @Path("/host/rsrc_pr")
 @Api(value = "/host/rsrc_pr", description = "The resource server uses the protection API's permission registration endpoint to register a requested permission with the authorization server that would suffice for the client's access attempt. The authorization server returns a permission ticket for the resource server to give to the client in its response. The PAT provided in the API request implicitly identifies the resource owner (\"subject\") to which the permission applies.\n" +
         "\n" +
@@ -60,21 +60,21 @@ import com.wordnik.swagger.annotations.ApiResponses;
         "The resource server uses the POST method at the endpoint. The body of the HTTP request message contains a JSON object providing the requested permission, using a format derived from the scope description format specified in [OAuth-resource-reg], as follows. The object has the following properties:")
 public class PermissionRegistrationWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private UmaValidationService umaValidationService;
     
-    @In
+    @Inject
     private PermissionService umaRsPermissionService;
 
-    @In
+    @Inject
 	private AppConfiguration appConfiguration;
 
     @POST

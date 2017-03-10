@@ -3,9 +3,9 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.PairwiseIdType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -20,20 +20,20 @@ import java.util.List;
  * @author Javier Rojas Blum
  * @version July 31, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("pairwiseIdentifierService")
+@Stateless
+@Named("pairwiseIdentifierService")
 @AutoCreate
 public class PairwiseIdentifierService {
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private AppConfiguration appConfiguration;
 
     public void addBranch(final String userInum) {

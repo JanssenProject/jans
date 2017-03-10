@@ -8,9 +8,9 @@ package org.xdi.oxauth.service;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -23,21 +23,21 @@ import java.util.List;
  *
  * @author Reda Zerrad Date: 08.10.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("applianceService")
+@Stateless
+@Named("applianceService")
 @AutoCreate
 public class ApplianceService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-	@In
+	@Inject
 	private StaticConf staticConfiguration;
 	/**
 	 * Add new appliance

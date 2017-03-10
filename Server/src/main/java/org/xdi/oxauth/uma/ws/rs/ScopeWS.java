@@ -14,10 +14,10 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -32,15 +32,15 @@ import com.wordnik.swagger.annotations.Api;
  * @version 0.9, 22/04/2013
  */
 @Path("/uma/scopes")
-@Name("umaScopeRestWebService")
+@Named("umaScopeRestWebService")
 @Api(value="/uma/scopes", description = "UMA Scope Endpoint provides scope description (json document) by scope id.")
 public class ScopeWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private ScopeService umaScopeService;
 
     @GET

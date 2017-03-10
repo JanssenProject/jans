@@ -10,13 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.model.ProgrammingLanguage;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
@@ -32,24 +32,24 @@ import org.xdi.util.INumGenerator;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@Scope(ScopeType.APPLICATION)
-@Name("customScriptManagerMigrator")
+@ApplicationScoped
+@Named("customScriptManagerMigrator")
 @AutoCreate
 // Remove this class after CE 1.7 release
 public class CustomScriptManagerMigrator {
 	
-	@In
+	@Inject
 	private CustomScriptManager customScriptManager;
 	
-	@In
+	@Inject
 	private CustomScriptService customScriptService;
 
-	@Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
 	private static final long serialVersionUID = -3225890597520443390L;
 
-	@In
+	@Inject
 	private AppConfiguration appConfiguration;
 
     public void migrateOldConfigurations() {
