@@ -12,7 +12,7 @@ import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
-import org.jboss.seam.annotations.In;
+import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.model.ProgrammingLanguage;
@@ -32,7 +32,7 @@ import org.xdi.util.INumGenerator;
 
 public class IdGenServiceTest extends BaseComponentTest {
 
-	@In
+	@Inject
 	private ConfigurationFactory configurationFactory;
 
 	private String idCustomScriptDn;

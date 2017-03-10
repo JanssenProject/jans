@@ -15,10 +15,10 @@ import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.seam.Component;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.jboss.seam.security.Identity;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.auth.Authenticator;
@@ -65,40 +65,40 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-@Name("requestAuthorizationRestWebService")
+@Named("requestAuthorizationRestWebService")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private RedirectionUriService redirectionUriService;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+    @Inject
     private ClientService clientService;
-    @In
+    @Inject
     private UserService userService;
-    @In
+    @Inject
     private Identity identity;
-    @In
+    @Inject
     private AuthenticationFilterService authenticationFilterService;
-    @In
+    @Inject
     private SessionStateService sessionStateService;
-    @In
+    @Inject
     private ScopeChecker scopeChecker;
-    @In
+    @Inject
     private SessionState sessionUser;
-    @In
+    @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
-    @In
+    @Inject
     private AuthenticationService authenticationService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @Override

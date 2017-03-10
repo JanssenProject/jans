@@ -15,10 +15,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.jboss.seam.security.Identity;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -51,34 +51,34 @@ import com.google.common.collect.Sets;
  * @author Yuriy Zabrovarnyy
  * @version December 15, 2015
  */
-@Name("endSessionRestWebService")
+@Named("endSessionRestWebService")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private RedirectionUriService redirectionUriService;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+    @Inject
     private ExternalApplicationSessionService externalApplicationSessionService;
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private GrantService grantService;
 
-    @In(required = false)
+    @Inject(required = false)
     private Identity identity;
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @Override

@@ -11,10 +11,10 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.RDN;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -36,27 +36,27 @@ import java.util.List;
  *
  * @author Javier Rojas Blum Date: 09.29.2011
  */
-@Name("authorizationGrantList")
+@Named("authorizationGrantList")
 @AutoCreate
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
 @Startup
 public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     private static final Log LOGGER = Logging.getLog(AuthorizationGrantList.class);
 
-    @In
+    @Inject
     private GrantService grantService;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
 	private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
     @Override

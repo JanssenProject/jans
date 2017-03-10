@@ -10,10 +10,10 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.U2fConfiguration;
@@ -32,18 +32,18 @@ import javax.ws.rs.core.Response;
  *
  * @author Yuriy Movchan Date: 05/13/2015
  */
-@Name("u2fMetaDataConfigurationRestWebService")
+@Named("u2fMetaDataConfigurationRestWebService")
 @Path("/oxauth/fido-u2f-configuration")
 @Api(value = "/.well-known/fido-u2f-configuration", description = "The FIDO server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/fido-u2f-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the FIDO U2f server.")
 public class U2fConfigurationWS {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private AppConfiguration appConfiguration;
 
-	@In
+	@Inject
 	private ErrorResponseFactory errorResponseFactory;
 
 	@GET

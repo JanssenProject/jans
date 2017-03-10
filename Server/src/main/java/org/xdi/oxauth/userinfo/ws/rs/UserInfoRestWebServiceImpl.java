@@ -10,10 +10,10 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -68,40 +68,40 @@ import java.util.*;
  * @author Javier Rojas Blum
  * @version August 17, 2016
  */
-@Name("requestUserInfoRestWebService")
+@Named("requestUserInfoRestWebService")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
 
-    @In
+    @Inject
     private ScopeService scopeService;
 
-    @In
+    @Inject
     private AttributeService attributeService;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
 
-    @In
+    @Inject
     private PairwiseIdentifierService pairwiseIdentifierService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private JSONWebKeySet webKeysConfiguration;
 
     @Override

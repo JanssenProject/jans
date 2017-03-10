@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
 import org.xdi.model.SimpleCustomProperty;
@@ -31,15 +31,15 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 01/14/2015
  */
-@Scope(ScopeType.APPLICATION)
-@Name("externalUmaAuthorizationPolicyService")
+@ApplicationScoped
+@Named("externalUmaAuthorizationPolicyService")
 @AutoCreate
 @Startup
 public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService {
 
 	private static final long serialVersionUID = -8609727759114795432L;
 	
-	@In
+	@Inject
 	private LookupService lookupService;
 
 	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsInumMap;

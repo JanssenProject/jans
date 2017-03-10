@@ -15,10 +15,10 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.model.GluuImage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -35,17 +35,17 @@ import com.wordnik.swagger.annotations.Api;
  */
 
 @Path("/uma/scopes/icons")
-@Name("umaScopeIconRestWebService")
+@Named("umaScopeIconRestWebService")
 @Api(value= "/uma/scopes/icons", description = "UMA Scope Icon endpoint provides scope icon by scope id.")
 public class ScopeIconWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private ScopeService umaScopeService;
-    @In
+    @Inject
     private XmlService xmlService;
 
     @GET

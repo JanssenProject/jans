@@ -7,9 +7,9 @@
 package org.xdi.oxauth.service;
 
 import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.In;
+import javax.inject.Inject;
 import org.jboss.seam.annotations.Install;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Named;
 import org.jboss.seam.ui.ClientUidSelector;
 import org.jboss.seam.util.RandomStringUtils;
 
@@ -20,15 +20,15 @@ import javax.faces.context.ExternalContext;
  * 
  * @author Yuriy Movchan Date: 07/10/2013
  */
-@Name("org.jboss.seam.ui.clientUidSelector")
-@Install(precedence = Install.DEPLOYMENT)
+@Named("org.jboss.seam.ui.clientUidSelector")
+@Injectstall(precedence = Install.DEPLOYMENT)
 public class FixedClientUidSelector extends ClientUidSelector {
 
 	private static final long serialVersionUID = -7004476980453250712L;
 
 	private String clientUid;
 
-	@In(value = "#{facesContext.externalContext}", required = false)
+	@Inject(value = "#{facesContext.externalContext}", required = false)
 	private ExternalContext externalContext;
 
 	@Create

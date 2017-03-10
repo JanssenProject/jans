@@ -23,13 +23,13 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -46,15 +46,15 @@ import org.xdi.oxauth.util.ServerUtil;
  * @author Javier Rojas Blum
  * @version September 21, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("registerParamsValidator")
+@Stateless
+@Named("registerParamsValidator")
 @AutoCreate
 public class RegisterParamsValidator {
 
-	@Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
-	@In
+	@Inject
     private AppConfiguration appConfiguration;
 
     //private static final String HTTP = "http";

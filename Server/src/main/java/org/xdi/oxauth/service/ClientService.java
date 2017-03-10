@@ -11,10 +11,10 @@ import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.log.Log;
+
 import org.python.jline.internal.Preconditions;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
@@ -35,8 +35,8 @@ import java.util.*;
  * @author Yuriy Movchan Date: 04/15/2014
  * @version October 22, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("clientService")
+@Stateless
+@Named("clientService")
 @AutoCreate
 public class ClientService {
 
@@ -46,22 +46,22 @@ public class ClientService {
     private static final String CACHE_CLIENT_NAME = "ClientCache";
     private static final String CACHE_CLIENT_FILTER_NAME = "ClientFilterCache";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
-    @In
+    @Inject
     private ClientFilterService clientFilterService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     private static String getClientIdCacheKey(String clientId) {

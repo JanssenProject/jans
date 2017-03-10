@@ -11,13 +11,13 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ScopeService;
 
@@ -28,15 +28,14 @@ import org.xdi.oxauth.service.ScopeService;
  * @author Yuriy Movchan
  * @version June 3, 2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("scopeChecker")
-@AutoCreate
+@Stateless
+@Named("scopeChecker")
 public class ScopeChecker {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ScopeService scopeService;
 
     public Set<String> checkScopesPolicy(Client client, String scope) {

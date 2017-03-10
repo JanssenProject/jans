@@ -12,9 +12,9 @@ import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
@@ -35,25 +35,25 @@ import java.util.*;
  * @author Javier Rojas Blum
  * @version November 11, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("grantService")
+@Stateless
+@Named("grantService")
 @AutoCreate
 public class GrantService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     public static String generateGrantId() {

@@ -29,9 +29,9 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.jboss.resteasy.util.HttpResponseCodes;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.net.SslDefaultHttpClient;
 import org.xdi.oxauth.model.net.HttpServiceResponse;
 import org.xdi.util.StringHelper;
@@ -52,15 +52,15 @@ import java.util.Map.Entry;
  *
  * @author Yuriy Movchan Date: 02/05/2013
  */
-@Scope(ScopeType.APPLICATION)
-@Name("httpService")
+@ApplicationScoped
+@Named("httpService")
 @AutoCreate
 public class HttpService implements Serializable {
 
 	private static final long serialVersionUID = -2398422090669045605L;
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
 	private Base64 base64;
 	

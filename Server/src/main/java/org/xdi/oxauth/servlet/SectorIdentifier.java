@@ -2,7 +2,7 @@ package org.xdi.oxauth.servlet;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.xdi.oxauth.service.SectorIdentifierService;
@@ -46,9 +46,9 @@ public class SectorIdentifier extends HttpServlet {
 
                     out.println(jsonArray.toString(4).replace("\\/", "/"));
                 } catch (JSONException e) {
-                    LOG.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 } finally {
                     out.close();
                 }

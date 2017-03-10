@@ -6,26 +6,28 @@
 
 package org.xdi.oxauth.action;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.faces.FacesManager;
-import org.jboss.seam.log.Log;
+import java.io.Serializable;
+
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.log4j.Logger;
 import org.xdi.oxauth.client.EndSessionRequest;
 
 /**
  * @author Javier Rojas Blum
  * @version February 23, 2016
  */
-@Name("endSessionAction")
-@Scope(ScopeType.SESSION)
-@AutoCreate
-public class EndSessionAction {
+@Named("endSessionAction")
+@SessionScoped
+public class EndSessionAction implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = 6785573643861198737L;
+
+	@Inject
+    private transient Logger log;
 
     private String endSessionEndpoint;
     private String idTokenHint;
@@ -41,9 +43,9 @@ public class EndSessionAction {
             EndSessionRequest req = new EndSessionRequest(idTokenHint, postLogoutRedirectUri, state);
 
             String authorizationRequest = endSessionEndpoint + "?" + req.getQueryString();
-            FacesManager.instance().redirectToExternalURL(authorizationRequest);
+            FacesContext.getCurrentInstance().getExternalContext().redirect(authorizationRequest);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         }
     }
 

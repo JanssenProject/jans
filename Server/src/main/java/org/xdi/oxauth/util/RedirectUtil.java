@@ -9,7 +9,7 @@ package org.xdi.oxauth.util;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.common.ResponseMode;
 
@@ -52,10 +52,10 @@ public class RedirectUtil {
 
             } catch (MalformedURLException e) {
                 builder = Response.serverError();
-                LOG.debug(e.getMessage(), e);
+                log.debug(e.getMessage(), e);
             } catch (JSONException e) {
                 builder = Response.serverError();
-                LOG.debug(e.getMessage(), e);
+                log.debug(e.getMessage(), e);
             }
         } else if (redirectUriResponse.getResponseMode() != ResponseMode.FORM_POST) {
             URI redirectURI = URI.create(redirectUriResponse.toString());

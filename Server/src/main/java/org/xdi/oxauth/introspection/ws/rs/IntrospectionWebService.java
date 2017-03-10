@@ -8,10 +8,10 @@ package org.xdi.oxauth.introspection.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.common.AbstractToken;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/09/2013
  */
-@Name("introspectionWS")
+@Named("introspectionWS")
 @Path("/introspection")
 @Api(value= "/introspection", description = "The Introspection Endpoint is an OAuth 2 Endpoint that responds to " +
         "   HTTP GET and HTTP POST requests from token holders.  The endpoint " +
@@ -44,13 +44,13 @@ import javax.ws.rs.core.Response;
         "   further authentication) and returns a JSON document representing the meta information surrounding the token.")
 public class IntrospectionWebService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
 
     @GET

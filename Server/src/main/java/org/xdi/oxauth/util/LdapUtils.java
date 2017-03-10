@@ -9,7 +9,7 @@ package org.xdi.oxauth.util;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 
 import com.unboundid.ldap.sdk.DN;
@@ -79,11 +79,11 @@ public class LdapUtils {
                 }
                 sb.append(")");
                 final String filterAsString = sb.toString();
-                LOG.trace("dnList: " + p_dnList + ", ldapFilter: " + filterAsString);
+                log.trace("dnList: " + p_dnList + ", ldapFilter: " + filterAsString);
                 return Filter.create(filterAsString);
             }
         } catch (LDAPException e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }

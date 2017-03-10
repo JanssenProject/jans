@@ -8,10 +8,10 @@ package org.xdi.oxauth.auth;
 
 import org.apache.commons.lang.StringUtils;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
@@ -19,7 +19,7 @@ import org.jboss.seam.core.Events;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.faces.FacesMessages;
 import org.jboss.seam.international.StatusMessage.Severity;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.SimplePrincipal;
@@ -52,38 +52,38 @@ import java.util.Map;
  * @author Yuriy Movchan
  * @version December 15, 2015
  */
-@Name("authenticator")
-@Scope(ScopeType.EVENT)
+@Named("authenticator")
+@RequestScoped
 // Do not change scope, we try to keep server without http sessions
 public class Authenticator implements Serializable {
 
     private static final long serialVersionUID = 669395320060928092L;
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private Identity identity;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private AuthenticationService authenticationService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private FacesMessages facesMessages;
 
-    @In(value = "#{facesContext.externalContext}", required = false)
+    @Inject(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
 
     private String authAcr;

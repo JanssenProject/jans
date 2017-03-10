@@ -11,13 +11,13 @@ import java.util.List;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
@@ -28,23 +28,23 @@ import com.unboundid.ldap.sdk.Filter;
  * @author Javier Rojas Blum Date: 07.05.2012
  * @author Yuriy Movchan Date: 2016/04/26
  */
-@Scope(ScopeType.STATELESS)
-@Name("scopeService")
+@Stateless
+@Named("scopeService")
 @AutoCreate
 public class ScopeService {
 
     private static final String CACHE_SCOPE_NAME = "ScopeCache";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-	@In
+	@Inject
 	private CacheService cacheService;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     /**

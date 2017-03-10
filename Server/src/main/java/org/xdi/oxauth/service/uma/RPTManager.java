@@ -11,9 +11,9 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
@@ -38,8 +38,8 @@ import java.util.UUID;
  * @author Yuriy Zabrovarnyy Date: 10/16/2012
  */
 @AutoCreate
-@Scope(ScopeType.APPLICATION)
-@Name("rptManager")
+@ApplicationScoped
+@Named("rptManager")
 @Startup
 public class RPTManager extends AbstractRPTManager {
 
@@ -47,15 +47,15 @@ public class RPTManager extends AbstractRPTManager {
 
     private static final Log LOG = Logging.getLog(RPTManager.class);
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     public RPTManager() {
@@ -79,7 +79,7 @@ public class RPTManager extends AbstractRPTManager {
             p_rpt.setDn(getDn(p_clientDn, id));
             ldapEntryManager.persist(p_rpt);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -93,7 +93,7 @@ public class RPTManager extends AbstractRPTManager {
                 return entries.get(0);
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }
@@ -106,7 +106,7 @@ public class RPTManager extends AbstractRPTManager {
                 ldapEntryManager.remove(t);
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -124,7 +124,7 @@ public class RPTManager extends AbstractRPTManager {
                     try {
                         ldapEntryManager.remove(p);
                     } catch (Exception e) {
-                        LOG.error("Failed to remove entry", e);
+                        log.error("Failed to remove entry", e);
                     }
                 }
             }
@@ -133,7 +133,7 @@ public class RPTManager extends AbstractRPTManager {
                 try {
                     return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
                 }catch (LDAPException e) {
-                    LOG.trace(e.getMessage(), e);
+                    log.trace(e.getMessage(), e);
                     return Filter.createPresenceFilter("oxAuthExpiration");
                 }
             }
@@ -153,7 +153,7 @@ public class RPTManager extends AbstractRPTManager {
         try {
             ldapEntryManager.merge(p_rpt);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -171,7 +171,7 @@ public class RPTManager extends AbstractRPTManager {
                 }
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return result;
     }
@@ -200,7 +200,7 @@ public class RPTManager extends AbstractRPTManager {
                 }
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
         return null;
     }

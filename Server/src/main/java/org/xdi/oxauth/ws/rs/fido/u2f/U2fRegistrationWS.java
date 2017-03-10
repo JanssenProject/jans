@@ -7,10 +7,10 @@
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
 import com.wordnik.swagger.annotations.Api;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
@@ -43,31 +43,31 @@ import java.util.List;
  */
 @Path("/fido/u2f/registration")
 @Api(value = "/fido/u2f/registration", description = "The endpoint at which the U2F device start registration process.")
-@Name("u2fRegistrationRestWebService")
+@Named("u2fRegistrationRestWebService")
 public class U2fRegistrationWS {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@In
+	@Inject
 	private ErrorResponseFactory errorResponseFactory;
 
-	@In
+	@Inject
 	private RegistrationService u2fRegistrationService;
 
-	@In
+	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
-	@In
+	@Inject
 	private UserSessionStateService userSessionStateService;
 
-	@In
+	@Inject
 	private ValidationService u2fValidationService;
 
 	@GET
