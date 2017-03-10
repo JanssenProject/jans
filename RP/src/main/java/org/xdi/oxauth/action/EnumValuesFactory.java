@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth.action;
 
-import java.io.Serializable;
-
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
@@ -25,10 +23,7 @@ import org.xdi.oxauth.model.register.ApplicationType;
 /**
  * @author Javier Rojas Blum Date: 09.13.2013
  */
-@Named("enumValuesFactory")
-public class EnumValuesFactory implements Serializable {
-
-	private static final long serialVersionUID = 8423949448460924545L;
+public class EnumValuesFactory {
 
 	@Produces
 	@Named("responseTypes")
@@ -37,8 +32,8 @@ public class EnumValuesFactory implements Serializable {
     }
 
     @Produces
-	@Named("grantTypes")
-    public GrantType[] grantTypes() {
+	@Named
+    public GrantType[] getGrantTypes() {
         return new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT};
     }
 
