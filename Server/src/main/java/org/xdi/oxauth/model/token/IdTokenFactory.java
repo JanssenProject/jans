@@ -11,10 +11,10 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.GluuAttribute;
@@ -66,33 +66,33 @@ import java.util.*;
  * @author Yuriy Movchan
  * @version December 20, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("idTokenFactory")
+@Stateless
+@Named("idTokenFactory")
 @AutoCreate
 public class IdTokenFactory {
 
-    @In
+    @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private ScopeService scopeService;
 
-    @In
+    @Inject
     private AttributeService attributeService;
 
-    @In
+    @Inject
     private ConfigurationFactory configurationFactory;
 
-    @In
+    @Inject
     private PairwiseIdentifierService pairwiseIdentifierService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private JSONWebKeySet webKeysConfiguration;
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,

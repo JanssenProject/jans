@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.jwk.ws.rs;
 
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 
@@ -22,13 +22,13 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Name("requestJwkRestWebService")
+@Named("requestJwkRestWebService")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ConfigurationFactory configurationFactory;
 
     @Override

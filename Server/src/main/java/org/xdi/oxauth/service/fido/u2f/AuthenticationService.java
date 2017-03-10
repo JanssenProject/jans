@@ -8,9 +8,9 @@ package org.xdi.oxauth.service.fido.u2f;
 
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
@@ -36,36 +36,36 @@ import java.util.*;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("u2fAuthenticationService")
+@Stateless
+@Named("u2fAuthenticationService")
 @AutoCreate
 public class AuthenticationService extends RequestService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-	@In
+	@Inject
 	private ApplicationService applicationService;
 
-	@In
+	@Inject
 	private RawAuthenticationService rawAuthenticationService;
 
-	@In
+	@Inject
 	private ClientDataValidationService clientDataValidationService;
 
-	@In
+	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@In(value = "randomChallengeGenerator")
+	@Inject(value = "randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	@In
+	@Inject
 	private StaticConf staticConfiguration;
 
 	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userInum) throws BadInputException, NoEligableDevicesException {

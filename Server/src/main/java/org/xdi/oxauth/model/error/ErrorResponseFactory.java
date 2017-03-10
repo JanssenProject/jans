@@ -8,12 +8,14 @@ package org.xdi.oxauth.model.error;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import org.apache.log4j.Logger;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
@@ -38,13 +40,13 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  */
-@Name("errorResponseFactory")
+@Named("errorResponseFactory")
 @AutoCreate
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
 public class ErrorResponseFactory {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
     private volatile ErrorMessages messages;
 

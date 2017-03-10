@@ -7,9 +7,9 @@
 package org.xdi.oxauth.service.uma;
 
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
@@ -38,24 +38,24 @@ import static org.xdi.oxauth.model.uma.UmaErrorResponseType.*;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 04/02/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("umaValidationService")
+@Stateless
+@Named("umaValidationService")
 @AutoCreate
 public class UmaValidationService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+    @Inject
    	private ResourceSetService resourceSetService;
-    @In
+    @Inject
     private ScopeService umaScopeService;
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     public String validateAmHost(String host) {

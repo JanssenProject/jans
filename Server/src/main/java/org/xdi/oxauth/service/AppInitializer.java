@@ -14,29 +14,29 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.contexts.Context;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+import org.jsoup.nodes.Document;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.context.Initialized.Literal;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.servlet.ServletContext;
+
 import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.custom.script.CustomScriptType;
@@ -65,9 +65,8 @@ import com.unboundid.ldap.sdk.ResultCode;
  * @author Yuriy Zabrovarnyy
  * @version 0.1, 24/10/2011
  */
-@Scope(ScopeType.APPLICATION)
-@Name("appInitializer")
-@Startup
+@ApplicationScoped
+@Named("appInitializer")
 public class AppInitializer {
 
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
@@ -80,10 +79,10 @@ public class AppInitializer {
     public static final String LDAP_ENTRY_MANAGER_NAME = "ldapEntryManager";
     public static final String LDAP_AUTH_ENTRY_MANAGER_NAME = "ldapAuthEntryManager";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
     
-    @In
+    @Inject
     private ApplianceService applianceService;
     
 	private FileConfiguration ldapConfig;
@@ -98,10 +97,10 @@ public class AppInitializer {
     private AtomicBoolean isActive;
 	private long lastFinishedTime;
 
-	@In
+	@Inject
 	private ConfigurationFactory configurationFactory;
 
-	@Create
+	@PostConstruct
     public void createApplicationComponents() {
     	SecurityProviderUtility.installBCProvider();
 
@@ -147,17 +146,17 @@ public class AppInitializer {
 		}
 	}
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void initReloadTimer() {
+    public void init(@Initialized(ApplicationScoped.class) ServletContext init) {
 		this.isActive = new AtomicBoolean(false);
 		this.lastFinishedTime = System.currentTimeMillis();
 
 		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
     }
+    
+    @Inject @Any Event<Document> documentEvent;
 
-	@Observer(EVENT_TYPE)
-	@Asynchronous
-	public void reloadConfigurationTimerEvent() {
+    public void reloadConfigurationTimerEvent(@Observes @AppReloadTimer @Event<String> reloadEvent) {
+    	documentEvent.fireAsync(event, options)
 		if (this.isActive.get()) {
 			return;
 		}
@@ -219,14 +218,17 @@ public class AppInitializer {
 		return ldapAuthEntryManager;
 	}
 
-    @Factory(value = LDAP_ENTRY_MANAGER_NAME, scope = ScopeType.APPLICATION, autoCreate = true)
+    @Produces @ApplicationScoped
+    @Named(LDAP_ENTRY_MANAGER_NAME)
     public LdapEntryManager createLdapEntryManager() {
         LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(this.connectionProvider, this.bindConnectionProvider));
-        log.debug("Created {0}: {1}", LDAP_ENTRY_MANAGER_NAME, ldapEntryManager);
+        log.debug("Created {0}: {1}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager });
+
         return ldapEntryManager;
     }
 
-	@Factory(value = LDAP_AUTH_ENTRY_MANAGER_NAME, scope = ScopeType.APPLICATION, autoCreate = true)
+    @Produces @ApplicationScoped
+    @Named(LDAP_AUTH_ENTRY_MANAGER_NAME)
 	public List<LdapEntryManager> createLdapAuthEntryManager() {
 		List<LdapEntryManager> ldapAuthEntryManagers = new ArrayList<LdapEntryManager>();
 		if (this.ldapAuthConfigs.size() == 0) {
@@ -235,7 +237,7 @@ public class AppInitializer {
 
 		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
 			LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(this.authConnectionProviders.get(i), this.authBindConnectionProviders.get(i)));
-	        log.debug("Created {0}#{1}: {2}", LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager);
+	        log.debug("Created {0}#{1}: {2}", new Object[] { LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager });
 	        
 	        ldapAuthEntryManagers.add(ldapAuthEntryManager);
 		}

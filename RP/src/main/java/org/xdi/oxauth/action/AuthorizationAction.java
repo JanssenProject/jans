@@ -6,14 +6,16 @@
 
 package org.xdi.oxauth.action;
 
+import java.io.Serializable;
+import java.util.List;
+
+import javax.enterprise.context.SessionScoped;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.faces.FacesManager;
-import org.jboss.seam.log.Log;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
@@ -29,19 +31,18 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import java.util.List;
-
 /**
  * @author Javier Rojas Blum
  * @version August 24, 2016
  */
-@Name("authorizationAction")
-@Scope(ScopeType.SESSION)
-@AutoCreate
-public class AuthorizationAction {
+@Named("authorizationAction")
+@SessionScoped
+public class AuthorizationAction implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = -4131456982254169325L;
+
+	@Inject
+    private transient Logger log;
 
     private String authorizationEndpoint;
     private String jwksUri;
@@ -130,7 +131,7 @@ public class AuthorizationAction {
             }
 
             String authorizationRequest = authorizationEndpoint + "?" + req.getQueryString();
-            FacesManager.instance().redirectToExternalURL(authorizationRequest);
+            FacesContext.getCurrentInstance().getExternalContext().redirect(authorizationRequest);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -438,7 +439,7 @@ public class AuthorizationAction {
                 openIdRequestObject = jwtAuthorizationRequest.getDecodedJwt();
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         }
 
         return openIdRequestObject;

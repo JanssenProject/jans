@@ -6,9 +6,9 @@
 
 package org.xdi.oxauth.service;
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
@@ -23,28 +23,28 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  *
  * @author Yuriy Movchan Date: 05/22/2015
  */
-@Scope(ScopeType.APPLICATION)
-@Name("applicationFactory")
+@ApplicationScoped
+@Named("applicationFactory")
 @Startup
 public class ApplicationFactory {
     
-    @In
+    @Inject
     private ApplianceService applianceService;
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @Factory(value = "randomChallengeGenerator", scope = ScopeType.APPLICATION, autoCreate = true)
+    @Producer(value = "randomChallengeGenerator", scope = ScopeType.APPLICATION, autoCreate = true)
     public RandomChallengeGenerator createRandomChallengeGenerator() {
         return new RandomChallengeGenerator();
     }
 
-    @Factory(value = "sha256withECDSASignatureVerification", scope = ScopeType.APPLICATION, autoCreate = true)
+    @Producer(value = "sha256withECDSASignatureVerification", scope = ScopeType.APPLICATION, autoCreate = true)
     public SHA256withECDSASignatureVerification createBouncyCastleSignatureVerification() {
         return new SHA256withECDSASignatureVerification();
     }
 
-	@Factory(value = "cacheConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+	@Producer(value = "cacheConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
 	public CacheConfiguration createCacheConfiguration() {
 		CacheConfiguration cacheConfiguration = applianceService.getAppliance().getCacheConfiguration();
 		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
@@ -61,7 +61,7 @@ public class ApplicationFactory {
 		return cacheConfiguration;
 	}
 
-	@Factory(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+	@Producer(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
 	public SmtpConfiguration createSmtpConfiguration() {
 		GluuAppliance appliance = applianceService.getAppliance();
 		SmtpConfiguration smtpConfiguration = appliance.getSmtpConfiguration();

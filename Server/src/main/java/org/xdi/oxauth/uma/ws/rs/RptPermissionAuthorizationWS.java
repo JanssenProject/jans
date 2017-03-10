@@ -8,10 +8,10 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -38,24 +38,24 @@ import javax.ws.rs.core.Response;
  */
 @Path("/requester/perm")
 @Api(value = "/requester/perm", description = "RPT authorization endpoint. RPT is authorized with new permission(s).")
-@Name("rptPermissionAuthorizationRestWebService")
+@Named("rptPermissionAuthorizationRestWebService")
 public class RptPermissionAuthorizationWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private RPTManager rptManager;
-    @In
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+    @Inject
     private UmaValidationService umaValidationService;
-    @In
+    @Inject
     private AuthorizationService umaAuthorizationService;
-    @In
+    @Inject
     private ClientService clientService;
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
     @POST

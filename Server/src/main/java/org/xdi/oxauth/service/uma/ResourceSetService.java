@@ -11,9 +11,9 @@ import com.unboundid.ldap.sdk.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -30,20 +30,20 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  *         Date: 10.05.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("resourceSetService")
+@Stateless
+@Named("resourceSetService")
 @AutoCreate
 public class ResourceSetService {
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     public void addBranch() {

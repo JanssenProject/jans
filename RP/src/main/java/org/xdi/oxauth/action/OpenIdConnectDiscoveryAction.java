@@ -6,31 +6,39 @@
 
 package org.xdi.oxauth.action;
 
-import org.apache.http.client.HttpClient;
-import org.jboss.resteasy.client.ClientExecutor;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
-import org.xdi.net.SslDefaultHttpClient;
-import org.xdi.net.TrustAllTrustManager;
-import org.xdi.oxauth.client.*;
+import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
 
+import java.io.Serializable;
 import java.net.URISyntaxException;
 
-import static org.xdi.oxauth.model.discovery.WebFingerParam.REL_VALUE;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.http.client.HttpClient;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
+import org.xdi.net.SslDefaultHttpClient;
+import org.xdi.net.TrustAllTrustManager;
+import org.xdi.oxauth.client.OpenIdConfigurationClient;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryClient;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryRequest;
+import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
 
 /**
  * @author Javier Rojas Blum
  * @version August 24, 2016
  */
-@Name("openIdConnectDiscoveryAction")
-@Scope(ScopeType.SESSION)
-@AutoCreate
-public class OpenIdConnectDiscoveryAction {
+@Named("openIdConnectDiscoveryAction")
+@SessionScoped
+public class OpenIdConnectDiscoveryAction implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = -7821250358671474997L;
+
+	@Inject
+    private transient Logger log;
 
     private String resource;
     private String host;
@@ -43,17 +51,17 @@ public class OpenIdConnectDiscoveryAction {
     private String requestString2;
     private String responseString2;
 
-    @In
+    @Inject
     private RegistrationAction registrationAction;
-    @In
+    @Inject
     private AuthorizationAction authorizationAction;
-    @In
+    @Inject
     private TokenAction tokenAction;
-    @In
+    @Inject
     private UserInfoAction userInfoAction;
-    @In
+    @Inject
     private CheckSessionAction checkSessionAction;
-    @In
+    @Inject
     private EndSessionAction endSessionAction;
 
     public void exec() {
@@ -103,11 +111,11 @@ public class OpenIdConnectDiscoveryAction {
                 endSessionAction.setEndSessionEndpoint(openIdConfigurationResponse.getEndSessionEndpoint());
             }
         } catch (IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         } catch (URISyntaxException e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         }
     }
 

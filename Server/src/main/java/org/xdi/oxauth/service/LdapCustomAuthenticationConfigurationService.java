@@ -11,13 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
@@ -31,8 +31,8 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 08.27.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("ldapCustomAuthenticationConfigurationService")
+@Stateless
+@Named("ldapCustomAuthenticationConfigurationService")
 @AutoCreate
 public class LdapCustomAuthenticationConfigurationService implements Serializable {
 
@@ -42,10 +42,10 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 	private static final String CUSTOM_AUTHENTICATION_PROPERTY_PREFIX = "property.";
 	private static final String CUSTOM_AUTHENTICATION_SCRIPT_USAGE_TYPE = "usage.";
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private ApplianceService applianceService;
 
 	public List<CustomAuthenticationConfiguration> getCustomAuthenticationConfigurations() {

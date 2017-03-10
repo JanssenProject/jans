@@ -1,7 +1,7 @@
 package org.xdi.oxauth.service.uma.authorization;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -34,7 +34,7 @@ public class NeedInfoResponseBuilder {
                 errorDetails.put("requesting_party_claims", new JSONObject(ServerUtil.asJson(requestingPartyClaims)));
             }
         } catch (Exception ex) {
-            LOG.error("Failed to generate 'need_info' json response", ex);
+            log.error("Failed to generate 'need_info' json response", ex);
             return null;
         }
 

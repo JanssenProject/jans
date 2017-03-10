@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.action;
 
-import com.google.common.collect.Lists;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import java.io.Serializable;
+import java.util.List;
+
+import javax.faces.bean.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.log4j.Logger;
 import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
@@ -27,19 +27,20 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author Javier Rojas Blum
  * @version February 5, 2016
  */
-@Name("registrationAction")
-@Scope(ScopeType.SESSION)
-@AutoCreate
-public class RegistrationAction {
+@Named("registrationAction")
+@SessionScoped
+public class RegistrationAction implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = -5920839612180688968L;
+
+	@Inject
+    private transient Logger log;
 
     private String registrationEndpoint;
     private String redirectUris;
@@ -87,9 +88,9 @@ public class RegistrationAction {
     private String clientReadRequestString;
     private String clientReadResponseString;
 
-    @In
+    @Inject
     private AuthorizationAction authorizationAction;
-    @In
+    @Inject
     private TokenAction tokenAction;
 
     public void exec() {
@@ -145,7 +146,7 @@ public class RegistrationAction {
             requestString = client.getRequestAsString();
             responseString = client.getResponseAsString();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         }
     }
 
@@ -161,7 +162,7 @@ public class RegistrationAction {
             clientReadRequestString = client.getRequestAsString();
             clientReadResponseString = client.getResponseAsString();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         }
     }
 

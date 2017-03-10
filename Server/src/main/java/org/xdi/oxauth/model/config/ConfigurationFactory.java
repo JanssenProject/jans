@@ -17,12 +17,12 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
@@ -30,7 +30,7 @@ import org.jboss.seam.annotations.async.Asynchronous;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -48,8 +48,8 @@ import org.xdi.util.properties.FileConfiguration;
  * @author Yuriy Movchan
  * @version June 15, 2016
  */
-@Scope(ScopeType.APPLICATION)
-@Name("configurationFactory")
+@ApplicationScoped
+@Named("configurationFactory")
 @AutoCreate
 @Startup
 public class ConfigurationFactory {
@@ -82,8 +82,8 @@ public class ConfigurationFactory {
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
     public static final String LDAP_DEFAULT_FILE_PATH = DIR + "ox-ldap.properties";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
     private final String CONFIG_FILE_NAME = "oxauth-config.json";
     private final String ERRORS_FILE_NAME = "oxauth-errors.json";
@@ -127,10 +127,10 @@ public class ConfigurationFactory {
 
     public void create() {
         if (!createFromLdap(true)) {
-            LOG.error("Failed to load configuration from LDAP. Please fix it!!!.");
+            log.error("Failed to load configuration from LDAP. Please fix it!!!.");
             throw new ConfigurationException("Failed to load configuration from LDAP.");
         } else {
-            LOG.info("Configuration loaded successfully.");
+            log.info("Configuration loaded successfully.");
         }
     }
 
@@ -201,12 +201,12 @@ public class ConfigurationFactory {
         return ldapConfiguration;
     }
 
-    @Factory(value = "appConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+    @Producer(value = "appConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
     public AppConfiguration getConfiguration() {
         return conf;
     }
 
-    @Factory(value = "staticConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+    @Producer(value = "staticConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
     public StaticConf getStaticConfiguration() {
         return staticConf;
     }
@@ -215,7 +215,7 @@ public class ConfigurationFactory {
         return getStaticConfiguration().getBaseDn();
     }
     
-    @Factory(value = "webKeysConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
+    @Producer(value = "webKeysConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
     public JSONWebKeySet getWebKeys() {
         return jwks;
     }
@@ -238,11 +238,11 @@ public class ConfigurationFactory {
     private boolean reloadWebkeyFromFile() {
         final JSONWebKeySet webKeysFromFile = loadWebKeysFromFile();
         if (webKeysFromFile != null) {
-            LOG.info("Reloaded web keys from file: " + webKeysFilePath);
+            log.info("Reloaded web keys from file: " + webKeysFilePath);
             jwks = webKeysFromFile;
             return true;
         } else {
-            LOG.error("Failed to load web keys configuration from file: " + webKeysFilePath);
+            log.error("Failed to load web keys configuration from file: " + webKeysFilePath);
         }
 
         return false;
@@ -251,11 +251,11 @@ public class ConfigurationFactory {
     private boolean reloadStaticConfFromFile() {
         final StaticConf staticConfFromFile = loadStaticConfFromFile();
         if (staticConfFromFile != null) {
-            LOG.info("Reloaded static conf from file: " + staticConfFilePath);
+            log.info("Reloaded static conf from file: " + staticConfFilePath);
             staticConf = staticConfFromFile;
             return true;
         } else {
-            LOG.error("Failed to load static configuration from file: " + staticConfFilePath);
+            log.error("Failed to load static configuration from file: " + staticConfFilePath);
         }
 
         return false;
@@ -264,12 +264,12 @@ public class ConfigurationFactory {
     private boolean reloadErrorsFromFile() {
         final ErrorMessages errorsFromFile = loadErrorsFromFile();
         if (errorsFromFile != null) {
-            LOG.info("Reloaded errors from file: " + errorsFilePath);
+            log.info("Reloaded errors from file: " + errorsFilePath);
             final ErrorResponseFactory f = ServerUtil.instance(ErrorResponseFactory.class);
             f.setMessages(errorsFromFile);
             return true;
         } else {
-            LOG.error("Failed to load errors from file: " + errorsFilePath);
+            log.error("Failed to load errors from file: " + errorsFilePath);
         }
 
         return false;
@@ -278,18 +278,18 @@ public class ConfigurationFactory {
     private boolean reloadConfFromFile() {
         final AppConfiguration configFromFile = loadConfFromFile();
         if (configFromFile != null) {
-            LOG.info("Reloaded configuration from file: " + configFilePath);
+            log.info("Reloaded configuration from file: " + configFilePath);
             conf = configFromFile;
             return true;
         } else {
-            LOG.error("Failed to load configuration from file: " + configFilePath);
+            log.error("Failed to load configuration from file: " + configFilePath);
         }
 
         return false;
     }
 
     private boolean createFromLdap(boolean recoverFromFiles) {
-        LOG.info("Loading configuration from LDAP...");
+        log.info("Loading configuration from LDAP...");
         try {
             final Conf c = loadConfigurationFromLdap();
             if (c != null) {
@@ -305,11 +305,11 @@ public class ConfigurationFactory {
                 return true;
             }
         } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
 
         if (recoverFromFiles) {
-            LOG.info("Unable to find configuration in LDAP, try to load configuration from file system... ");
+            log.info("Unable to find configuration in LDAP, try to load configuration from file system... ");
             if (createFromFile()) {
                 this.loadedFromLdap = false;
                 return true;
@@ -327,7 +327,7 @@ public class ConfigurationFactory {
 
             return conf;
         } catch (LdapMappingException ex) {
-            LOG.error(ex.getMessage());
+            log.error(ex.getMessage());
         }
 
         return null;
@@ -390,7 +390,7 @@ public class ConfigurationFactory {
                 staticConf = c;
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -401,7 +401,7 @@ public class ConfigurationFactory {
                 conf = c;
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -413,7 +413,7 @@ public class ConfigurationFactory {
                 f.setMessages(errorMessages);
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -428,7 +428,7 @@ public class ConfigurationFactory {
 
             return ldapFileName;
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             ldapConfiguration = null;
         }
 
@@ -486,7 +486,7 @@ public class ConfigurationFactory {
 
             this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
         } catch (Exception ex) {
-            LOG.error("Failed to load configuration from {0}", ex, saltFilePath);
+            log.error("Failed to load configuration from {0}", ex, saltFilePath);
             throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
         }
     }
@@ -498,7 +498,7 @@ public class ConfigurationFactory {
             return fileConfiguration;
         } catch (Exception ex) {
             if (isMandatory) {
-                LOG.error("Failed to load configuration from {0}", ex, fileName);
+                log.error("Failed to load configuration from {0}", ex, fileName);
                 throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
             }
         }

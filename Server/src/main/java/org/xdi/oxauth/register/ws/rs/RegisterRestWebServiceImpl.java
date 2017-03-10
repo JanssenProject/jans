@@ -10,10 +10,10 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.jboss.seam.log.Logging;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
@@ -67,37 +67,37 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Yuriy Movchan
  * @version October 31, 2016
  */
-@Name("registerRestWebService")
+@Named("registerRestWebService")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private ScopeService scopeService;
-    @In
+    @Inject
     private InumService inumService;
-    @In
+    @Inject
     private ClientService clientService;
-    @In
+    @Inject
     private TokenService tokenService;
 
-    @In
+    @Inject
     private MetricService metricService;
 
-    @In
+    @Inject
     private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
     
-    @In
+    @Inject
     private RegisterParamsValidator registerParamsValidator;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     @Override
@@ -598,7 +598,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         		p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
                         	}
                         } catch (Exception e) {
-                            staticLog.debug(e.getMessage(), e);
+                            staticlog.debug(e.getMessage(), e);
                         }
                     }
                 }

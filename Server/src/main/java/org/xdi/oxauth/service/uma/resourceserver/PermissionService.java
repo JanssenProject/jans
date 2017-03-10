@@ -7,9 +7,9 @@
 package org.xdi.oxauth.service.uma.resourceserver;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
@@ -32,25 +32,25 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 01/07/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("umaRsPermissionService")
+@Stateless
+@Named("umaRsPermissionService")
 @AutoCreate
 public class PermissionService {
 
     public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private RsResourceService umaRsResourceService;
-    @In
+    @Inject
     private TokenService tokenService;
-    @In
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
     
-    @In
+    @Inject
     private ClientService clientService;
 
     public static PermissionService instance() {
@@ -79,7 +79,7 @@ public class PermissionService {
             // and the permission ticket it just received from the AM in the body in a JSON-encoded "ticket" property.
             result.setFirst(false);
             final String ticket = registerPermission(p_rpt, resource, p_scopes);
-            //                    LOG.debug("Register permissions on AM, permission ticket: " + ticket);
+            //                    log.debug("Register permissions on AM, permission ticket: " + ticket);
 
             final String entity = ServerUtil.asJsonSilently(new PermissionTicket(ticket));
 

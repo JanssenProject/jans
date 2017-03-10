@@ -9,10 +9,10 @@ package org.xdi.oxauth.token.ws.rs;
 import com.google.common.base.Strings;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -48,37 +48,37 @@ import java.security.SignatureException;
  * @author Javier Rojas Blum
  * @version October 7, 2016
  */
-@Name("requestTokenRestWebService")
+@Named("requestTokenRestWebService")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
 
-    @In
+    @Inject
     private SessionClient sessionClient;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private GrantService grantService;
 
-    @In
+    @Inject
     private AuthenticationFilterService authenticationFilterService;
 
-    @In
+    @Inject
     private AuthenticationService authenticationService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @Override

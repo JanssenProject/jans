@@ -12,13 +12,13 @@ import java.util.List;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConf;
@@ -37,21 +37,21 @@ import com.unboundid.ldap.sdk.Filter;
  *
  * @author Yuriy Movchan Date: 05/14/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("deviceRegistrationService")
+@Stateless
+@Named("deviceRegistrationService")
 @AutoCreate
 public class DeviceRegistrationService {
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private StaticConf staticConfiguration;
 
 	public void addBranch(final String userInum) {

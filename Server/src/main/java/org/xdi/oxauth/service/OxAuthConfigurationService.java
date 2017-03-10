@@ -9,10 +9,10 @@ package org.xdi.oxauth.service;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.web.ServletContexts;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -23,12 +23,12 @@ import org.xdi.util.StringHelper;
  *
  * @author Oleksiy Tataryn Date: 08.07.2014
  */
-@Scope(ScopeType.STATELESS)
-@Name("oxAuthConfigurationService")
+@Stateless
+@Named("oxAuthConfigurationService")
 @AutoCreate
 public class OxAuthConfigurationService {
 
-	@In
+	@Inject
 	private AppConfiguration appConfiguration;
 
 	public String getCssLocation() {

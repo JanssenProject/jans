@@ -9,9 +9,9 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.util.StringHelper;
@@ -22,18 +22,18 @@ import java.util.*;
  * @author Javier Rojas Blum
  * @version November 30, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("clientAuthorizationsService")
+@Stateless
+@Named("clientAuthorizationsService")
 @AutoCreate
 public class ClientAuthorizationsService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private UserService userService;
 
     public void addBranch(final String userInum) {

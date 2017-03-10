@@ -17,18 +17,17 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.Destroy;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.apache.log4j.Logger;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
@@ -37,8 +36,8 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import com.google.common.base.Objects;
 
-@Name("applicationAuditLogger")
-@Scope(ScopeType.APPLICATION)
+@Named("applicationAuditLogger")
+@ApplicationScoped
 @AutoCreate
 @Startup(depends = "appInitializer")
 public class ApplicationAuditLogger {
@@ -57,10 +56,10 @@ public class ApplicationAuditLogger {
 	private String jmsUserName;
 	private String jmsPassword;
 
-	@Logger
-	private Log logger;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private AppConfiguration appConfiguration;
 
 	private final ReentrantLock lock = new ReentrantLock();

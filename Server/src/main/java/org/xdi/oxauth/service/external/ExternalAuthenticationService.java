@@ -14,10 +14,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
@@ -44,15 +44,15 @@ import com.google.common.collect.Sets;
  *
  * @author Yuriy Movchan Date: 21/08/2012
  */
-@Scope(ScopeType.APPLICATION)
-@Name("externalAuthenticationService")
+@ApplicationScoped
+@Named("externalAuthenticationService")
 @AutoCreate
 @Startup
 public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public final static String MODIFIED_INTERNAL_TYPES_EVENT_TYPE = "CustomScriptModifiedInternlTypesEvent";
 
-    @In(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
 	private static final long serialVersionUID = 7339887464253044927L;

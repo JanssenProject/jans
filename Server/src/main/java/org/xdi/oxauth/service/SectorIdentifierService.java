@@ -2,9 +2,9 @@ package org.xdi.oxauth.service;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.ldap.SectorIdentifier;
 import org.xdi.util.StringHelper;
@@ -13,17 +13,17 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version January 15, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("sectorIdentifierService")
+@Stateless
+@Named("sectorIdentifierService")
 @AutoCreate
 public class SectorIdentifierService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private StaticConf staticConfiguration;
 
     public static SectorIdentifierService instance() {

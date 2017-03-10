@@ -20,10 +20,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
+
 import org.jboss.seam.security.Identity;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.service.SessionStateService;
@@ -41,16 +41,16 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @Path("/oxauth")
 @Api(value = "/oxauth", description = "Check Session Status Endpoint")
-@Name("checkSessionStatusRestWebService")
+@Named("checkSessionStatusRestWebService")
 public class CheckSessionStatusRestWebServiceImpl {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
-	@In(required = false)
+	@Inject(required = false)
 	private Identity identity;
 
     @GET

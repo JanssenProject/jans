@@ -7,15 +7,15 @@
 package org.xdi.oxauth.service;
 
 import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Inject;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Observer;
 import org.jboss.seam.annotations.Scope;
 import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -25,8 +25,8 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
  *
  * @author Yuriy Movchan Date: 07/30/2015
  */
-@Scope(ScopeType.APPLICATION)
-@Name(MetricService.METRIC_SERVICE_COMPONENT_NAME)
+@ApplicationScoped
+@Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
 @AutoCreate
 @Startup
 public class MetricService extends org.xdi.service.metric.MetricService {
@@ -35,19 +35,19 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 
 	private static final long serialVersionUID = 7875838160379126796L;
 
-	@Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
-	@In
+	@Inject
     private ApplianceService applianceService;
 
-	@In
+	@Inject
 	private ConfigurationFactory configurationFactory;
 
-	@In
+	@Inject
 	private AppConfiguration appConfiguration;
 
-	@In
+	@Inject
     private StaticConf staticConfiguration;
 
     @Observer("org.jboss.seam.postInitialization")

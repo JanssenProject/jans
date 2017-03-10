@@ -12,12 +12,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
+import org.apache.log4j.Logger;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 
@@ -31,13 +31,13 @@ import java.util.Set;
  *
  * @author Yuriy Movchan Date: 05/20/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("clientDataValidationService")
+@Stateless
+@Named("clientDataValidationService")
 @AutoCreate
 public class ClientDataValidationService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
 	public void checkContent(ClientData clientData, String[] types, String challenge, Set<String> facets) throws BadInputException {
 		if (!ArrayUtils.contains(types, clientData.getTyp())) {

@@ -9,9 +9,9 @@ package org.xdi.oxauth.service.fido.u2f;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.jboss.seam.ScopeType;
+import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
+import javax.inject.Named;
 import org.jboss.seam.annotations.Scope;
 import org.xdi.net.InetAddressUtility;
 import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
@@ -21,9 +21,9 @@ import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-// @Scope(ScopeType.STATELESS)
-@Scope(ScopeType.APPLICATION)
-@Name("applicationService")
+// @Stateless
+@ApplicationScoped
+@Named("applicationService")
 @AutoCreate
 public class ApplicationService {
 
