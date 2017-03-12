@@ -8,6 +8,7 @@ package org.gluu.site.ldap.persistence;
 
 import com.unboundid.ldap.sdk.ChangeType;
 import com.unboundid.ldap.sdk.Entry;
+import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.LDAPSearchException;
@@ -18,6 +19,7 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldif.LDIFChangeRecord;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.ldif.LDIFReader;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.xdi.util.StringHelper;
@@ -26,7 +28,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 /**
@@ -313,6 +317,27 @@ public final class LdifDataUtility {
 		}
 
 		return resultCode;
+	}
+	
+	public List<SearchResultEntry> getAttributeResultEntryLDIF(LDAPConnection connection, List<String> patterns, String baseDN) {
+		List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
+		try {
+			for (String pattern : patterns) {
+				String[] targetArray = new String[] { pattern };
+				Filter inumFilter = Filter.createSubstringFilter("inum", null,targetArray, null);
+				Filter searchFilter = Filter.createORFilter(inumFilter);
+				SearchResultEntry sr = connection.searchForEntry(baseDN,SearchScope.SUB, searchFilter, null);
+				searchResultEntryList.add(sr);
+			}
+
+			return searchResultEntryList;
+		} catch (LDAPException le) {
+			if (le.getResultCode() != ResultCode.NO_SUCH_OBJECT) {
+				log.error("Failed to search ldif record", le);
+				return null;
+			}
+		}
+		return null;
 	}
 
 }
