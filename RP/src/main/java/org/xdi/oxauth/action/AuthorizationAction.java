@@ -35,7 +35,7 @@ import org.xdi.oxauth.model.util.StringUtils;
  * @author Javier Rojas Blum
  * @version August 24, 2016
  */
-@Named("authorizationAction")
+@Named
 @SessionScoped
 public class AuthorizationAction implements Serializable {
 
