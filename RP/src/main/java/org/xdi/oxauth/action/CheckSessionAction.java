@@ -8,7 +8,7 @@ package org.xdi.oxauth.action;
 
 import java.io.Serializable;
 
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 /**
  * @author Javier Rojas Blum Date: 02.22.2012
  */
-@Named("checkSessionAction")
+@Named
 @SessionScoped
 public class CheckSessionAction implements Serializable {
 

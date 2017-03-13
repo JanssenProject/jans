@@ -9,7 +9,7 @@ package org.xdi.oxauth.action;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -33,7 +33,7 @@ import com.google.common.collect.Lists;
  * @author Javier Rojas Blum
  * @version February 5, 2016
  */
-@Named("registrationAction")
+@Named
 @SessionScoped
 public class RegistrationAction implements Serializable {
 
@@ -41,6 +41,12 @@ public class RegistrationAction implements Serializable {
 
 	@Inject
     private transient Logger log;
+
+    @Inject
+    private AuthorizationAction authorizationAction;
+
+    @Inject
+    private TokenAction tokenAction;
 
     private String registrationEndpoint;
     private String redirectUris;
@@ -87,11 +93,6 @@ public class RegistrationAction implements Serializable {
     private boolean showClientReadResults;
     private String clientReadRequestString;
     private String clientReadResponseString;
-
-    @Inject
-    private AuthorizationAction authorizationAction;
-    @Inject
-    private TokenAction tokenAction;
 
     public void exec() {
         try {

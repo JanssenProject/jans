@@ -21,7 +21,7 @@ import org.xdi.oxauth.model.common.AuthorizationMethod;
 /**
  * @author Javier Rojas Blum Date: 02.22.2012
  */
-@Named("userInfoAction")
+@Named
 @SessionScoped
 public class UserInfoAction implements Serializable {
 
