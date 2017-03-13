@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.action;
+package org.xdi.oxauth.util;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
@@ -26,8 +26,8 @@ import org.xdi.oxauth.model.register.ApplicationType;
 public class EnumValuesFactory {
 
 	@Produces
-	@Named("responseTypes")
-    public ResponseType[] responseTypes() {
+	@Named
+    public ResponseType[] getResponseTypes() {
         return ResponseType.values();
     }
 
@@ -38,50 +38,50 @@ public class EnumValuesFactory {
     }
 
     @Produces
-	@Named("applicationTypes")
-    public ApplicationType[] applicationTypes() {
+	@Named
+    public ApplicationType[] getApplicationTypes() {
         return ApplicationType.values();
     }
 
     @Produces
-	@Named("authenticationMethods")
-    public AuthenticationMethod[] authenticationMethods() {
+	@Named
+    public AuthenticationMethod[] getAuthenticationMethods() {
         return AuthenticationMethod.values();
     }
 
     @Produces
-	@Named("subjectTypes")
-    public SubjectType[] subjectTypes() {
+	@Named
+    public SubjectType[] getSubjectTypes() {
         return SubjectType.values();
     }
 
     @Produces
-	@Named("displays")
-    public Display[] displays() {
+	@Named
+    public Display[] getDisplays() {
         return Display.values();
     }
 
     @Produces
-	@Named("prompts")
-    public Prompt[] prompts() {
+	@Named
+    public Prompt[] getPrompts() {
         return Prompt.values();
     }
 
     @Produces
-	@Named("signatureAlgorithms")
-    public SignatureAlgorithm[] signatureAlgorithms() {
+	@Named
+    public SignatureAlgorithm[] getSignatureAlgorithms() {
         return SignatureAlgorithm.values();
     }
 
     @Produces
-	@Named("keyEncryptionAlgorithms")
-    public KeyEncryptionAlgorithm[] keyEncryptionAlgorithms() {
+	@Named
+    public KeyEncryptionAlgorithm[] getKeyEncryptionAlgorithms() {
         return KeyEncryptionAlgorithm.values();
     }
 
     @Produces
-	@Named("blockEncryptionAlgorithms")
-    public BlockEncryptionAlgorithm[] blockEncryptionAlgorithms() {
+	@Named
+    public BlockEncryptionAlgorithm[] getBlockEncryptionAlgorithms() {
         return BlockEncryptionAlgorithm.values();
     }
 }

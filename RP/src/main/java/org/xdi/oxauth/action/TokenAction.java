@@ -22,7 +22,7 @@ import org.xdi.oxauth.model.common.GrantType;
 /**
  * @author Javier Rojas Blum Date: 02.21.2012
  */
-@Named("tokenAction")
+@Named
 @SessionScoped
 public class TokenAction implements Serializable {
 
@@ -30,6 +30,9 @@ public class TokenAction implements Serializable {
 
 	@Inject
     private transient Logger log;
+
+    @Inject
+    private UserInfoAction userInfoAction;
 
     private String tokenEndpoint;
     private GrantType grantType;
@@ -48,9 +51,6 @@ public class TokenAction implements Serializable {
     private String responseString;
 
     private AuthenticationMethod authenticationMethod;
-
-    @Inject
-    private UserInfoAction userInfoAction;
 
     public void exec() {
         try {

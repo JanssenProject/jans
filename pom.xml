@@ -11,7 +11,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.min-version>3.0.3</maven.min-version>
+		<maven.min-version>3.3.9</maven.min-version>
 
 		<oxcore.version>3.1.0-SNAPSHOT</oxcore.version>
 		<oxeleven.version>3.1.0-SNAPSHOT</oxeleven.version>
@@ -25,11 +25,11 @@
 		<weld.version>3.0.0.CR2</weld.version>
 		<drools.version>5.3.3.Final</drools.version>
 		<richfaces.version>4.5.17.Final</richfaces.version>
-        <uel.version>2.2</uel.version>
+		<uel.version>2.2</uel.version>
 		<hibernate.version>4.1.8.Final</hibernate.version>
 		<swagger.version>1.3.7</swagger.version>
 
-		<jetty.version>9.3.10.v20160621</jetty.version>
+		<jetty.version>9.4.2.v20170220</jetty.version>
 
 		<version.arquillian_core>1.1.11.Final</version.arquillian_core>
 		<version.arquillian.seam2>1.0.0.Beta1</version.arquillian.seam2>
@@ -623,6 +623,11 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
