@@ -20,7 +20,7 @@ import org.xdi.oxauth.client.EndSessionRequest;
  * @author Javier Rojas Blum
  * @version February 23, 2016
  */
-@Named("endSessionAction")
+@Named
 @SessionScoped
 public class EndSessionAction implements Serializable {
 

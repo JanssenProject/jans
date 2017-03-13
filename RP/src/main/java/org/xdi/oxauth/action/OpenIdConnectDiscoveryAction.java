@@ -31,7 +31,7 @@ import org.xdi.oxauth.client.OpenIdConnectDiscoveryResponse;
  * @author Javier Rojas Blum
  * @version August 24, 2016
  */
-@Named("openIdConnectDiscoveryAction")
+@Named
 @SessionScoped
 public class OpenIdConnectDiscoveryAction implements Serializable {
 
@@ -39,17 +39,6 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 
 	@Inject
     private transient Logger log;
-
-    private String resource;
-    private String host;
-    private String rel;
-
-    private boolean showResults;
-    private boolean acceptUntrustedCertificate;
-    private String requestString1;
-    private String responseString1;
-    private String requestString2;
-    private String responseString2;
 
     @Inject
     private RegistrationAction registrationAction;
@@ -63,6 +52,17 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
     private CheckSessionAction checkSessionAction;
     @Inject
     private EndSessionAction endSessionAction;
+
+    private String resource;
+    private String host;
+    private String rel;
+
+    private boolean showResults;
+    private boolean acceptUntrustedCertificate;
+    private String requestString1;
+    private String responseString1;
+    private String requestString2;
+    private String responseString2;
 
     public void exec() {
         try {
