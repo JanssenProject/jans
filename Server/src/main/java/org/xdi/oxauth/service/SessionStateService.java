@@ -6,15 +6,28 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -35,14 +48,8 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,8 +59,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @Stateless
-@Named("sessionStateService")
-@AutoCreate
+@Named
 public class SessionStateService {
 
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
@@ -88,10 +94,6 @@ public class SessionStateService {
 
     @Inject
     private CacheService cacheService;
-
-    public static SessionStateService instance() {
-        return (SessionStateService) Component.getInstance(SessionStateService.class);
-    }
 
     public String getAcr(SessionState session) {
         if (session == null || session.getSessionAttributes() == null) {

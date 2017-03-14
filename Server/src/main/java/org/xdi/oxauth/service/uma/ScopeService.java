@@ -6,18 +6,19 @@
 
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -29,28 +30,27 @@ import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
  * @version 0.9, 22/04/2013
  */
-@AutoCreate
 @Stateless
 @Named("umaScopeService")
 public class ScopeService {
 
     @Inject
     private Logger log;
+
     @Inject
     private LdapEntryManager ldapEntryManager;
+
     @Inject
     private InumService inumService;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 

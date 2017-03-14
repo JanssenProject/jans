@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.http.client.HttpClient;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.xdi.net.SslDefaultHttpClient;

@@ -6,19 +6,19 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.Map;
+
+import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
-
-import java.util.Map;
 
 /**
  * Provides operations with authentication filters
@@ -26,13 +26,9 @@ import java.util.Map;
  * @author Yuriy Movchan Date: 07.20.2012
  */
 @ApplicationScoped
-@Named("authenticationFilterService")
-@AutoCreate
+@Named
 @Startup
 public class AuthenticationFilterService extends BaseAuthFilterService {
-
-    @Inject
-    private Logger log;
 
     @Inject
     private LdapEntryManager ldapEntryManager;

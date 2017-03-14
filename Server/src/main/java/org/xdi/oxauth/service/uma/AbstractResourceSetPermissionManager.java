@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.service.uma;
 
+import java.util.Date;
+import java.util.UUID;
+
 import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.util.INumGenerator;
-
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -27,4 +27,5 @@ public abstract class AbstractResourceSetPermissionManager implements IResourceS
         return new ResourceSetPermission(p_request.getResourceSetId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(p_request.getScopes()),
                 amHost, "", ticket, configurationCode, expirationDate);
     }
+
 }

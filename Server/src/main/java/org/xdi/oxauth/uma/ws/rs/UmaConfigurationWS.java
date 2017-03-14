@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -24,11 +24,10 @@ import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata configuration.
@@ -36,7 +35,6 @@ import javax.ws.rs.core.Response;
  * @author Yuriy Movchan Date: 10/25/2012
  * @author Yuriy Zabrovarnyy Date: 03/12/2015
  */
-@Named("umaMetaDataConfigurationRestWebService")
 @Path("/oxauth/uma-configuration")
 @Api(value = "/.well-known/uma-configuration", description = "The authorization server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/uma-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the authorization server. ")
 public class UmaConfigurationWS {
@@ -45,6 +43,7 @@ public class UmaConfigurationWS {
 
     @Inject
     private Logger log;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 

@@ -6,15 +6,17 @@
 
 package org.xdi.oxauth.model.common;
 
-import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.RDN;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.Scope;
-
 import org.jboss.seam.log.Logging;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -26,18 +28,16 @@ import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.service.CacheService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import com.unboundid.ldap.sdk.DN;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.RDN;
 
 /**
  * Component to hold in memory authorization grant objects.
  *
  * @author Javier Rojas Blum Date: 09.29.2011
  */
-@Named("authorizationGrantList")
-@AutoCreate
+@Named
 @ApplicationScoped
 @Startup
 public class AuthorizationGrantList implements IAuthorizationGrantList {

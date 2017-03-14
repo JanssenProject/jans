@@ -6,15 +6,18 @@
 
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
-
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -27,38 +30,37 @@ import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.util.StaticUtils;
 
 /**
  * RPT manager component
  *
  * @author Yuriy Zabrovarnyy Date: 10/16/2012
  */
-@AutoCreate
-@ApplicationScoped
-@Named("rptManager")
-@Startup
-public class RPTManager extends AbstractRPTManager {
+@Stateless
+@Named
+public class RptManager extends AbstractRPTManager {
 
     private static final String ORGUNIT_OF_RPT = "uma_requester_permission_token";
 
-    private static final Log LOG = Logging.getLog(RPTManager.class);
+    @Inject
+    private Logger log;
 
     @Inject
     private LdapEntryManager ldapEntryManager;
 
     @Inject
     private TokenService tokenService;
+
     @Inject
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
     private StaticConf staticConfiguration;
 
-    public RPTManager() {
+    public RptManager() {
         ldapEntryManager = ServerUtil.getLdapManager();
     }
 

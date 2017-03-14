@@ -13,7 +13,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;

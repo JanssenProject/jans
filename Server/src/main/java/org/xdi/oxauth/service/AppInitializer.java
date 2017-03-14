@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
@@ -22,17 +24,22 @@ import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.jsoup.nodes.Document;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Destroyed;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.context.Initialized.Literal;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
-import java.util.logging.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.servlet.ServletContext;
@@ -66,7 +73,7 @@ import com.unboundid.ldap.sdk.ResultCode;
  * @version 0.1, 24/10/2011
  */
 @ApplicationScoped
-@Named("appInitializer")
+@Named
 public class AppInitializer {
 
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
@@ -100,6 +107,9 @@ public class AppInitializer {
 	@Inject
 	private ConfigurationFactory configurationFactory;
 
+	@Inject
+	private BeanManager beanManager;
+
 	@PostConstruct
     public void createApplicationComponents() {
     	SecurityProviderUtility.installBCProvider();
@@ -120,13 +130,10 @@ public class AppInitializer {
     }
 
 
-	@Observer("org.jboss.seam.postInitialization")
-	@Asynchronous
-    public void postInitialization() {
+    public void postInitialization(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
 				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
 		CustomScriptManager.instance().init(supportedCustomScriptTypes);
-        CustomScriptManagerMigrator.instance().migrateOldConfigurations();
 	}
 
 	private void createStringEncrypter() {
@@ -151,6 +158,12 @@ public class AppInitializer {
 		this.lastFinishedTime = System.currentTimeMillis();
 
 		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
+    }
+
+    public void destoy(@BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
+    	// TODO:
+    	// Close connection here
+    	// Clean up caches, etc...
     }
     
     @Inject @Any Event<Document> documentEvent;
@@ -517,6 +530,14 @@ public class AppInitializer {
 			}
 		}
 	}
+	
+	public <T> T getInstance(Class<T> clazz) {
+		Bean<?> bean = beanManager.getBeans(clazz).iterator().next();
+		CreationalContext<?> ctx = beanManager.createCreationalContext(bean);
+		Object obj = beanManager.getReference(bean, bean.getClass(), ctx);
+
+		return (T) obj;
+    }
 	
 	private class LdapConnectionProviders {
 		private LdapConnectionService connectionProvider;

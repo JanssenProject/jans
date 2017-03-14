@@ -138,29 +138,23 @@
 
 									<h:outputLabel for="registrationResponseType">Response Types</h:outputLabel>
 									<h:selectManyListbox id="registrationResponseType"
-										value="#{registrationAction.responseTypes}">
-										<f:selectItems value="#{responseTypes}" var="responseType"
-											itemLabel="#{responseType.name()}" itemValue="#{responseType}" />
-										<f:converter converterId="enumConverter"/>
+										value="#{registrationAction.responseTypes}" converter="omnifaces.GenericEnumConverter">
+										<f:selectItems value="#{responseTypes}" />
 									</h:selectManyListbox>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="registrationGrantType">Grant Types</h:outputLabel>
 									<h:selectManyListbox id="registrationGrantType"
-										value="#{registrationAction.grantTypes}">
-										<f:selectItems value="#{grantTypes}" var="grantType"
-											itemLabel="#{grantType.name()}" itemValue="#{grantType}" />
-										<f:converter converterId="enumConverter"/>
+										value="#{registrationAction.grantTypes}" converter="omnifaces.GenericEnumConverter">
+										<f:selectItems value="#{grantTypes}" />
 									</h:selectManyListbox>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="applicationType">Application Type</h:outputLabel>
 									<h:selectOneMenu id="applicationType"
-										value="#{registrationAction.applicationType}">
+										value="#{registrationAction.applicationType}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{applicationTypes}" var="applicationType"
-											itemLabel="#{applicationType.name()}" itemValue="#{applicationType}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{applicationTypes}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
@@ -206,121 +200,97 @@
 
 									<h:outputLabel for="subjectType">Subject Type</h:outputLabel>
 									<h:selectOneMenu id="subjectType"
-										value="#{registrationAction.subjectType}">
+										value="#{registrationAction.subjectType}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{subjectTypes}" var="subjectType"
-											itemLabel="#{subjectType.name()}" itemValue="#{subjectType}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{subjectTypes}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="idTokenSignedResponseAlg">ID Token Signed Response Alg</h:outputLabel>
 									<h:selectOneMenu id="idTokenSignedResponseAlg"
-										value="#{registrationAction.idTokenSignedResponseAlg}">
+										value="#{registrationAction.idTokenSignedResponseAlg}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-											itemLabel="#{signatureAlgorithm.name()}" itemValue="#{signatureAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="idTokenEncryptedResponseAlg">ID Token Encrypted Response Alg</h:outputLabel>
 									<h:selectOneMenu id="idTokenEncryptedResponseAlg"
-										value="#{registrationAction.idTokenEncryptedResponseAlg}">
+										value="#{registrationAction.idTokenEncryptedResponseAlg}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-											itemLabel="#{keyEncryptionAlgorithm.name()}" itemValue="#{keyEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="idTokenEncryptedResponseEnc">ID Token Encrypted Response Enc</h:outputLabel>
 									<h:selectOneMenu id="idTokenEncryptedResponseEnc"
-										value="#{registrationAction.idTokenEncryptedResponseEnc}">
+										value="#{registrationAction.idTokenEncryptedResponseEnc}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-											itemLabel="#{blockEncryptionAlgorithm.name()}" itemValue="#{blockEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="userInfoSignedResponseAlg">User Info Signed Response Alg</h:outputLabel>
 									<h:selectOneMenu id="userInfoSignedResponseAlg"
-										value="#{registrationAction.userInfoSignedResponseAlg}">
+										value="#{registrationAction.userInfoSignedResponseAlg}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-											itemLabel="#{signatureAlgorithm.name()}" itemValue="#{signatureAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="userInfoEncryptedResponseAlg">User Info Encrypted Response Alg</h:outputLabel>
 									<h:selectOneMenu id="userInfoEncryptedResponseAlg"
-										value="#{registrationAction.userInfoEncryptedResponseAlg}">
+										value="#{registrationAction.userInfoEncryptedResponseAlg}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-											itemLabel="#{keyEncryptionAlgorithm.name()}" itemValue="#{keyEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="userInfoEncryptedResponseEnc">User Info Encrypted Response Enc</h:outputLabel>
 									<h:selectOneMenu id="userInfoEncryptedResponseEnc"
-										value="#{registrationAction.userInfoEncryptedResponseEnc}">
+										value="#{registrationAction.userInfoEncryptedResponseEnc}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-											itemLabel="#{blockEncryptionAlgorithm.name()}" itemValue="#{blockEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="requestObjectSigningAlg">Request Object Signing Alg</h:outputLabel>
 									<h:selectOneMenu id="requestObjectSigningAlg"
-										value="#{registrationAction.requestObjectSigningAlg}">
+										value="#{registrationAction.requestObjectSigningAlg}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-											itemLabel="#{signatureAlgorithm.name()}" itemValue="#{signatureAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="requestObjectEncryptionAlg">Request Object Encryption Alg</h:outputLabel>
 									<h:selectOneMenu id="requestObjectEncryptionAlg"
-										value="#{registrationAction.requestObjectEncryptionAlg}">
+										value="#{registrationAction.requestObjectEncryptionAlg}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-											itemLabel="#{keyEncryptionAlgorithm.name()}" itemValue="#{keyEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="requestObjectEncryptionEnc">Request Object Encryption Enc</h:outputLabel>
 									<h:selectOneMenu id="requestObjectEncryptionEnc"
-										value="#{registrationAction.requestObjectEncryptionEnc}">
+										value="#{registrationAction.requestObjectEncryptionEnc}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-											itemLabel="#{blockEncryptionAlgorithm.name()}" itemValue="#{blockEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="tokenEndpointAuthMethod">Token Endpoint Auth Method</h:outputLabel>
 									<h:selectOneMenu id="tokenEndpointAuthMethod"
-										value="#{registrationAction.tokenEndpointAuthMethod}">
+										value="#{registrationAction.tokenEndpointAuthMethod}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{authenticationMethods}" var="authenticationMethod"
-											itemLabel="#{authenticationMethod.name()}" itemValue="#{authenticationMethod}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{authenticationMethods}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
 									<h:outputLabel for="tokenEndpointAuthSigningAlg">Token Endpoint Auth Signing Alg</h:outputLabel>
 									<h:selectOneMenu id="tokenEndpointAuthSigningAlg"
-										value="#{registrationAction.tokenEndpointAuthSigningAlg}">
+										value="#{registrationAction.tokenEndpointAuthSigningAlg}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-											itemLabel="#{signatureAlgorithm.name()}" itemValue="#{signatureAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{signatureAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
@@ -469,10 +439,8 @@
 
 								<h:outputLabel for="responseType">Response Type</h:outputLabel>
 								<h:selectManyListbox id="responseType"
-									value="#{authorizationAction.responseTypes}">
-									<f:selectItems value="#{responseTypes}" var="responseType"
-										itemLabel="#{responseType.name()}" itemValue="#{responseType}" />
-									<f:converter converterId="enumConverter"/>
+									value="#{authorizationAction.responseTypes}" converter="omnifaces.GenericEnumConverter">
+									<f:selectItems value="#{responseTypes}" />
 								</h:selectManyListbox>
 								<h:outputText></h:outputText>
 
@@ -515,19 +483,15 @@
 
 								<h:outputLabel for="display">Display</h:outputLabel>
 								<h:selectOneMenu id="display"
-									value="#{authorizationAction.display}">
-									<f:selectItems value="#{displays}" var="display"
-										itemLabel="#{display.name()}" itemValue="#{display}" />
-									<f:converter converterId="enumConverter"/>
+									value="#{authorizationAction.display}" converter="omnifaces.GenericEnumConverter">
+									<f:selectItems value="#{displays}" />
 								</h:selectOneMenu>
 								<h:outputText></h:outputText>
 
 								<h:outputLabel for="prompt">Prompt</h:outputLabel>
 								<h:selectManyListbox id="prompt"
-									value="#{authorizationAction.prompt}">
-									<f:selectItems value="#{prompts}" var="prompt"
-										itemLabel="#{prompt.name()}" itemValue="#{prompt}" />
-									<f:converter converterId="enumConverter"/>
+									value="#{authorizationAction.prompt}" converter="omnifaces.GenericEnumConverter">
+									<f:selectItems value="#{prompts}" />
 								</h:selectManyListbox>
 								<h:outputText></h:outputText>
 
@@ -609,10 +573,8 @@
 										rendered="#{authorizationAction.JWSSelected}">Request Object Signing Alg</h:outputLabel>
 									<h:selectOneMenu id="authorizationRequestObjectSigningAlg"
 										value="#{authorizationAction.requestObjectSigningAlg}"
-										rendered="#{authorizationAction.JWSSelected}">
-										<f:selectItems value="#{signatureAlgorithms}" var="signatureAlgorithm"
-											itemLabel="#{signatureAlgorithm.name()}" itemValue="#{signatureAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										rendered="#{authorizationAction.JWSSelected}" converter="omnifaces.GenericEnumConverter">
+										<f:selectItems value="#{signatureAlgorithms}" />
 
 										<a4j:ajax event="change" render="authorizationEndpointDiv"
 											execute="@this" />
@@ -623,10 +585,8 @@
 										rendered="#{authorizationAction.JWESelected}">Request Object Encryption Alg</h:outputLabel>
 									<h:selectOneMenu id="authorizationRequestObjectEncryptionAlg"
 										value="#{authorizationAction.requestObjectEncryptionAlg}"
-										rendered="#{authorizationAction.JWESelected}">
-										<f:selectItems value="#{keyEncryptionAlgorithms}" var="keyEncryptionAlgorithm"
-											itemLabel="#{keyEncryptionAlgorithm.name()}" itemValue="#{keyEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										rendered="#{authorizationAction.JWESelected}" converter="omnifaces.GenericEnumConverter">
+										<f:selectItems value="#{keyEncryptionAlgorithms}" />
 
 										<a4j:ajax event="change" render="authorizationEndpointDiv"
 											execute="@this" />
@@ -637,10 +597,8 @@
 										rendered="#{authorizationAction.JWESelected}">Request Object Encryption Enc</h:outputLabel>
 									<h:selectOneMenu id="authorizationRequestObjectEncryptionEnc"
 										value="#{authorizationAction.requestObjectEncryptionEnc}"
-										rendered="#{authorizationAction.JWESelected}">
-										<f:selectItems value="#{blockEncryptionAlgorithms}" var="blockEncryptionAlgorithm"
-											itemLabel="#{blockEncryptionAlgorithm.name()}" itemValue="#{blockEncryptionAlgorithm}" />
-										<f:converter converterId="enumConverter"/>
+										rendered="#{authorizationAction.JWESelected}" converter="omnifaces.GenericEnumConverter">
+										<f:selectItems value="#{blockEncryptionAlgorithms}" />
 									</h:selectOneMenu>
 									<h:outputText rendered="#{authorizationAction.JWESelected}"></h:outputText>
 
@@ -714,11 +672,9 @@
 
 									<h:outputLabel for="grantType">Grant Type</h:outputLabel>
 									<h:selectOneMenu id="grantType"
-										value="#{tokenAction.grantType}">
+										value="#{tokenAction.grantType}" converter="omnifaces.GenericEnumConverter">
 										<f:selectItem itemLabel="- Please select one -" />
-										<f:selectItems value="#{grantTypes}" var="grantType"
-											itemLabel="#{grantType.name()}" itemValue="#{grantType}" />
-										<f:converter converterId="enumConverter"/>
+										<f:selectItems value="#{grantTypes}" />
 									</h:selectOneMenu>
 									<h:outputText></h:outputText>
 
@@ -778,10 +734,8 @@
 							<div>
 								<h:panelGrid columns="2">
 									<h:selectOneMenu id="tokenAuthenticationMethod"
-										value="#{tokenAction.authenticationMethod}">
-										<f:selectItems value="#{authenticationMethods}" var="authenticationMethod"
-											itemLabel="#{authenticationMethod.name()}" itemValue="#{authenticationMethod}" />
-										<f:converter converterId="enumConverter"/>
+										value="#{tokenAction.authenticationMethod}" converter="omnifaces.GenericEnumConverter">
+										<f:selectItems value="#{authenticationMethods}" />
 									</h:selectOneMenu>
 								</h:panelGrid>
 							</div>
@@ -879,10 +833,8 @@
 							<div>
 								<h:panelGrid columns="2">
 									<h:selectOneMenu id="userInfoAuthorizationMethod"
-										value="#{userInfoAction.authorizationMethod}">
-										<f:selectItems value="#{authorizationMethods}" var="authorizationMethod"
-											itemLabel="#{authorizationMethod.name()}" itemValue="#{authorizationMethod}" />
-										<f:converter converterId="enumConverter"/>
+										value="#{userInfoAction.authorizationMethod}" converter="omnifaces.GenericEnumConverter">
+										<f:selectItems value="#{authorizationMethods}" />
 									</h:selectOneMenu>
 								</h:panelGrid>
 							</div>

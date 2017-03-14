@@ -6,16 +6,25 @@
 
 package org.xdi.oxauth.service;
 
-import com.google.common.collect.Sets;
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Observer;
+import java.util.Set;
+import java.util.TimeZone;
+
+import javax.ejb.Stateless;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import javax.enterprise.context.ApplicationScoped;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.Observer;
-
 import org.python.jline.internal.Preconditions;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.SearchScope;
@@ -26,7 +35,8 @@ import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
-import java.util.*;
+import com.google.common.collect.Sets;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with clients.
@@ -36,8 +46,7 @@ import java.util.*;
  * @version October 22, 2016
  */
 @Stateless
-@Named("clientService")
-@AutoCreate
+@Named
 public class ClientService {
 
 	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "oxAuthClient" };
@@ -286,7 +295,7 @@ public class ClientService {
     /**
      * Remove all clients from caches after receiving event
      */
-    @Observer(EVENT_CLEAR_CLIENT_CACHE)
+    @Observes @Event<Cli>> (EVENT_CLEAR_CLIENT_CACHE)
     public void clearClientCache() {
         log.debug("Clearing up clients cache");
 

@@ -6,12 +6,8 @@
 
 package org.xdi.oxauth.util;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
-
-import org.jboss.seam.log.Logging;
-import org.xdi.oxauth.model.common.ResponseMode;
+import java.net.MalformedURLException;
+import java.net.URI;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
@@ -19,15 +15,20 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import java.net.MalformedURLException;
-import java.net.URI;
+
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.jboss.resteasy.specimpl.ResponseBuilderImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.model.common.ResponseMode;
 
 /**
  * @version October 1, 2015
  */
 public class RedirectUtil {
 
-    private final static Log LOG = Logging.getLog(RedirectUtil.class);
+	private final static Logger log = LoggerFactory.getLogger(RedirectUtil.class);
 
     static String JSON_REDIRECT_PROPNAME = "redirect";
 

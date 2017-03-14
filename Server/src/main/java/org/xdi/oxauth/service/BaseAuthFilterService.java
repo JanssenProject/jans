@@ -6,19 +6,27 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.jboss.seam.log.Logging;
+import javax.inject.Inject;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.configuration.BaseFilter;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author Yuriy Movchan
@@ -28,6 +36,16 @@ import java.util.regex.Pattern;
  */
 
 public abstract class BaseAuthFilterService {
+	
+	@Inject
+	protected Logger log;
+
+    public static final Pattern PARAM_VALUE_PATTERN = Pattern.compile("([\\w]+)[\\s]*\\=[\\*\\s]*(\\{[\\s]*[\\d]+[\\s]*\\})[\\*\\s]*");
+
+    private boolean enabled;
+    private boolean filterAttributes = true;
+
+    private List<AuthenticationFilterWithParameters> filterWithParameters;
 
     public static class AuthenticationFilterWithParameters {
 
@@ -102,15 +120,6 @@ public abstract class BaseAuthFilterService {
             return String.format("IndexedParameter [paramName=%s, paramIndex=%s]", paramName, paramIndex);
         }
     }
-
-    public static final Pattern PARAM_VALUE_PATTERN = Pattern.compile("([\\w]+)[\\s]*\\=[\\*\\s]*(\\{[\\s]*[\\d]+[\\s]*\\})[\\*\\s]*");
-
-    private static final Log LOG = Logging.getLog(BaseAuthFilterService.class);
-
-    private boolean enabled;
-    private boolean filterAttributes = true;
-
-    private List<AuthenticationFilterWithParameters> filterWithParameters;
 
     public void init(List<? extends BaseFilter> p_filterList, boolean p_enabled, boolean p_filterAttributes) {
         this.enabled = p_enabled;
@@ -206,7 +215,7 @@ public abstract class BaseAuthFilterService {
         return filter;
     }
 
-    public static String loadEntryDN(LdapEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
+    public String loadEntryDN(LdapEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
         Filter ldapFilter;

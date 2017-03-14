@@ -8,12 +8,10 @@ package org.xdi.oxauth.service.external;
 
 import java.util.Map;
 
-import org.jboss.seam.Component;
+import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -26,8 +24,7 @@ import org.xdi.service.custom.script.ExternalScriptService;
  * @author Yuriy Movchan Date: 01/16/2015
  */
 @ApplicationScoped
-@Named("externalIdGeneratorService")
-@AutoCreate
+@Named
 @Startup
 public class ExternalIdGeneratorService extends ExternalScriptService {
 

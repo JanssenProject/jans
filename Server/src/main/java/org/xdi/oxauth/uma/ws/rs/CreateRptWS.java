@@ -6,16 +6,21 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.google.common.collect.Lists;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -29,17 +34,16 @@ import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.RPTManager;
+import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.collect.Lists;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata configuration.
@@ -48,21 +52,26 @@ import java.util.List;
  */
 @Path("/requester")
 @Api(value = "/requester/rpt", description = "The endpoint at which the requester asks the AM to issue an RPT")
-@Named("rptRestWebService")
 public class CreateRptWS {
 
     @Inject
     private Logger log;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
-    private RPTManager rptManager;
+    private RptManager rptManager;
+
     @Inject
     private UmaValidationService umaValidationService;
+
     @Inject
     private TokenService tokenService;
+
     @Inject
     private AuthorizationService umaAuthorizationService;
+
     @Inject
     private LdapEntryManager ldapEntryManager;
 

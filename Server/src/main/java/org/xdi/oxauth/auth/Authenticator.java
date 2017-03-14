@@ -6,23 +6,23 @@
 
 package org.xdi.oxauth.auth;
 
-import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
+import java.io.Serializable;
+import java.security.Identity;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import javax.faces.context.ExternalContext;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.contexts.Context;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.plugins.server.embedded.SimplePrincipal;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Events;
 import org.jboss.seam.faces.FacesManager;
 import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.international.StatusMessage.Severity;
-
-import org.jboss.seam.security.Credentials;
-import org.jboss.seam.security.Identity;
-import org.jboss.seam.security.SimplePrincipal;
+import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionIdState;
@@ -38,12 +38,6 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
-
-import javax.faces.context.ExternalContext;
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Authenticator component
