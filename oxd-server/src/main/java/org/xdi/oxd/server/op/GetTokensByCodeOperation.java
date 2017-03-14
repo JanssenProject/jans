@@ -11,9 +11,7 @@ import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -77,43 +75,13 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
                 throw new ErrorResponseException(ErrorResponseCode.NO_ACCESS_TOKEN_RETURNED);
             }
 
-
-            final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
-            opResponse.setAccessToken(response.getAccessToken());
-            opResponse.setIdToken(response.getIdToken());
-            opResponse.setRefreshToken(response.getRefreshToken());
-            opResponse.setExpiresIn(response.getExpiresIn());
-
             final Jwt idToken = Jwt.parse(response.getIdToken());
-            final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
-            if (!getStateService().isNonceValid(nonceFromToken)) {
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
-            }
 
-            RSASigner rsaSigner = Validator.createRSASigner(idToken, discoveryResponse);
-
-            // id_token validation
-            if (!Validator.isIdTokenValid(idToken, discoveryResponse, nonceFromToken, site.getClientId(), rsaSigner)) {
-                LOG.error("ID Token is not valid, token: " + response.getIdToken());
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN);
-            }
-
-            // access_token validation
-            if (!Strings.isNullOrEmpty(response.getAccessToken())) {
-                if (!rsaSigner.validateAccessToken(response.getAccessToken(), idToken)) {
-                    throw new ErrorResponseException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
-                }
-            }
-
-            // code validation
-            if (!Strings.isNullOrEmpty(params.getCode())) {
-                if (!rsaSigner.validateAuthorizationCode(params.getCode(), idToken)) {
-                    throw new ErrorResponseException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
-                }
-            }
-
-            final Map<String, List<String>> claims = idToken.getClaims() != null ? idToken.getClaims().toMap() : new HashMap<String, List<String>>();
-            opResponse.setIdTokenClaims(claims);
+            final Validator validator = new Validator(idToken, discoveryResponse);
+            validator.validateNonce(getStateService());
+            validator.validateIdToken(site.getClientId());
+            validator.validateAccessToken(response.getAccessToken());
+            validator.validateAuthorizationCode(params.getCode());
 
             // persist tokens
             site.setIdToken(response.getIdToken());
@@ -121,6 +89,14 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             getSiteService().update(site);
             getStateService().invalidateState(params.getState());
 
+            final Map<String, List<String>> claims = idToken.getClaims() != null ? idToken.getClaims().toMap() : new HashMap<String, List<String>>();
+
+            final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();
+            opResponse.setAccessToken(response.getAccessToken());
+            opResponse.setIdToken(response.getIdToken());
+            opResponse.setRefreshToken(response.getRefreshToken());
+            opResponse.setExpiresIn(response.getExpiresIn());
+            opResponse.setIdTokenClaims(claims);
             return okResponse(opResponse);
         } else {
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
