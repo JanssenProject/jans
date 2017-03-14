@@ -14,7 +14,7 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.model.authorize.Claim;

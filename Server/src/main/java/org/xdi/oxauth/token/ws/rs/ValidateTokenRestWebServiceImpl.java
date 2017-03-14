@@ -6,13 +6,17 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -24,19 +28,12 @@ import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 import org.xdi.oxauth.model.token.ValidateTokenParamsValidator;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-
 /**
  * Provides interface for validate token REST web services
  *
  * @author Javier Rojas Blum
  * @version January 27, 2016
  */
-@Named("requestValidateTokenRestWebService")
 public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebService {
 
     @Inject

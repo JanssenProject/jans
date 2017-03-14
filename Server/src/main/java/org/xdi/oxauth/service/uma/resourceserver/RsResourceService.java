@@ -10,13 +10,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.uma.ResourceSetService;
@@ -29,13 +27,14 @@ import org.xdi.oxauth.util.ServerUtil;
  */
 @Stateless
 @Named("umaRsResourceService")
-@AutoCreate
 public class RsResourceService {
 
     @Inject
     private Logger log;
+
     @Inject
     private ResourceSetService resourceSetService;
+
     @Inject
     private ScopeService umaScopeService;
 

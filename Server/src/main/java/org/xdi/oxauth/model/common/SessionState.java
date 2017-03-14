@@ -6,16 +6,21 @@
 
 package org.xdi.oxauth.model.common;
 
-import com.google.common.collect.Maps;
-import org.gluu.site.ldap.persistence.annotation.*;
-import org.jboss.seam.annotations.AutoCreate;
-import javax.inject.Named;
-
-import javax.annotation.Nonnull;
-import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
+import javax.inject.Named;
+import javax.persistence.Transient;
+
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+
+import com.google.common.collect.Maps;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,7 +28,6 @@ import java.util.Map;
  * @version December 15, 2015
  */
 @Named("sessionUser")
-@AutoCreate
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthSessionId"})
 public class SessionState implements Serializable {

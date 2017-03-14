@@ -6,9 +6,13 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import java.util.Map;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
@@ -16,16 +20,13 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.ws.rs.fido.u2f.U2fAuthenticationWS;
 import org.xdi.util.StringHelper;
 
-import java.util.Map;
-
 /**
  * Configure user session to confirm user {@link U2fAuthenticationWS} authentication
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
 @Stateless
-@Named("userSessionStateService")
-@AutoCreate
+@Named
 public class UserSessionStateService {
 
 	@Inject

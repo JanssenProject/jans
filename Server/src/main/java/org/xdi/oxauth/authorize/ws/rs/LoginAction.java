@@ -1,9 +1,8 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
+
+import org.slf4j.Logger;
 
 
 /**
@@ -11,7 +10,7 @@ import org.jboss.seam.annotations.Scope;
  * @version May 24, 2016
  */
 @Named("loginAction")
-@RequestScoped // Do not change scope, we try to keep server without http sessions
+@RequestScoped
 public class LoginAction {
 
     @Inject

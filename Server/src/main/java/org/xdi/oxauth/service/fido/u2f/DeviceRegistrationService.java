@@ -10,15 +10,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConf;
@@ -38,18 +36,17 @@ import com.unboundid.ldap.sdk.Filter;
  * @author Yuriy Movchan Date: 05/14/2015
  */
 @Stateless
-@Named("deviceRegistrationService")
-@AutoCreate
+@Named
 public class DeviceRegistrationService {
+
+	@Inject
+	private Logger log;
 
 	@Inject
 	private LdapEntryManager ldapEntryManager;
 
 	@Inject
 	private UserService userService;
-
-	@Inject
-	private Logger log;
 
 	@Inject
 	private StaticConf staticConfiguration;

@@ -6,19 +6,22 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
-
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.service.CleanerTimer;
 
-import java.util.Date;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides generic operations with U2F requests
@@ -27,7 +30,6 @@ import java.util.List;
  */
 @Stateless
 @Named("u2fRequestService")
-@AutoCreate
 public class RequestService {
 
 	@Inject

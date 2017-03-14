@@ -7,14 +7,12 @@
 package org.xdi.oxauth.jwk.ws.rs;
 
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 
 /**
  * Provides interface for JWK REST web services
@@ -22,7 +20,6 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Named("requestJwkRestWebService")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
 
     @Inject

@@ -9,28 +9,24 @@ package org.xdi.oxauth.service.status.ldap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.ejb.Asynchronous;
+import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
 
 /**
  * @author Yuriy Movchan
  * @version 0.1, 11/18/2012
  */
-@Named("ldapStatusTimer")
-@AutoCreate
 @ApplicationScoped
+@Named
+@Startup
 public class LdapStatusTimer {
 
     private final static String EVENT_TYPE = "LdapStatusTimerEvent";
@@ -38,7 +34,6 @@ public class LdapStatusTimer {
 
     @Inject
     private Logger log;
-
 
     private AtomicBoolean isActive;
 

@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
@@ -16,10 +17,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.PermissionTicket;
@@ -51,7 +49,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author Yuriy Zabrovarnyy
  */
-@Named("resourceSetPermissionRegistrationRestWebService")
 @Path("/host/rsrc_pr")
 @Api(value = "/host/rsrc_pr", description = "The resource server uses the protection API's permission registration endpoint to register a requested permission with the authorization server that would suffice for the client's access attempt. The authorization server returns a permission ticket for the resource server to give to the client in its response. The PAT provided in the API request implicitly identifies the resource owner (\"subject\") to which the permission applies.\n" +
         "\n" +
@@ -62,12 +59,16 @@ public class PermissionRegistrationWS {
 
     @Inject
     private Logger log;
+
     @Inject
     private TokenService tokenService;
+
     @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
     private UmaValidationService umaValidationService;
     

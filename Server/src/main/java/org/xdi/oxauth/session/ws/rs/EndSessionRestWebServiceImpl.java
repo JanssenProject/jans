@@ -6,8 +6,10 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
+import java.security.Identity;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
@@ -15,11 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.lang.StringUtils;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
-import org.jboss.seam.security.Identity;
+import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -51,19 +49,23 @@ import com.google.common.collect.Sets;
  * @author Yuriy Zabrovarnyy
  * @version December 15, 2015
  */
-@Named("endSessionRestWebService")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject
     private Logger log;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
     private RedirectionUriService redirectionUriService;
+
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
     @Inject
     private ExternalApplicationSessionService externalApplicationSessionService;
+
     @Inject
     private SessionStateService sessionStateService;
 
@@ -75,6 +77,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject(required = false)
     private Identity identity;
+
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 

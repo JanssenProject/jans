@@ -6,18 +6,26 @@
 
 package org.xdi.oxauth.auth;
 
-import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.intercept.BypassInterceptors;
-import org.jboss.seam.annotations.web.Filter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.security.Identity;
+import java.util.List;
 
-import org.jboss.seam.security.Identity;
+import javax.enterprise.context.ApplicationScoped;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.core.filter.AbstractFilter;
+import org.jboss.seam.annotations.*;
+import org.jboss.seam.annotations.web.Filter;
 import org.jboss.seam.security.NotLoggedInException;
 import org.jboss.seam.servlet.ContextualHttpServletRequest;
-import org.jboss.seam.util.Base64;
-import org.jboss.seam.web.AbstractFilter;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.Prompt;
@@ -39,25 +47,11 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
 /**
  * @author Javier Rojas Blum
  * @version March 4, 2016
  */
 @ApplicationScoped
-@Named("org.jboss.seam.web.authenticationFilter")
-@Intstall(value = false, precedence = Install.BUILT_IN)
-@BypassInterceptors
 @Filter(within = "org.jboss.seam.web.exceptionFilter")
 public class AuthenticationFilter extends AbstractFilter {
 

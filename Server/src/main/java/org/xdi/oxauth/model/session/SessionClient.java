@@ -9,15 +9,14 @@ package org.xdi.oxauth.model.session;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import org.jboss.seam.annotations.AutoCreate;
 import javax.inject.Named;
+
 import org.xdi.oxauth.model.registration.Client;
 
 /**
  * @author Javier Rojas Blum Date: 03.20.2012
  */
-@Named("sessionClient")
-@AutoCreate
+@Named
 public class SessionClient {
 
     private Client client;

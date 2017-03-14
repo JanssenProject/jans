@@ -9,15 +9,12 @@ package org.xdi.oxauth.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
@@ -29,8 +26,7 @@ import com.unboundid.ldap.sdk.Filter;
  * @author Yuriy Movchan Date: 2016/04/26
  */
 @Stateless
-@Named("scopeService")
-@AutoCreate
+@Named
 public class ScopeService {
 
     private static final String CACHE_SCOPE_NAME = "ScopeCache";
@@ -46,15 +42,6 @@ public class ScopeService {
 
     @Inject
     private StaticConf staticConfiguration;
-
-    /**
-     * Get ScopeService instance
-     *
-     * @return ScopeService instance
-     */
-    public static ScopeService instance() {
-        return (ScopeService) Component.getInstance(ScopeService.class);
-    }
 
     /**
      * returns a list of all scopes
