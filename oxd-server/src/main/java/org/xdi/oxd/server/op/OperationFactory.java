@@ -38,6 +38,8 @@ public class OperationFactory {
                     return new GetTokensByCodeOperation(command, injector);
                 case GET_USER_INFO:
                     return new GetUserInfoOperation(command, injector);
+                case VALIDATE:
+                    return new ValidateOperation(command, injector);
                 case IMPLICIT_FLOW:
                     return new ImplicitFlowOperation(command, injector);
                 case REGISTER_SITE:

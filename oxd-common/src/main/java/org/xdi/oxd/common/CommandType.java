@@ -25,6 +25,7 @@ public enum CommandType {
     GET_USER_INFO("get_user_info"),
     GET_LOGOUT_URI("get_logout_uri"),
 
+    VALIDATE("validate"),
     CHECK_ID_TOKEN("id_token_status"),
     CHECK_ACCESS_TOKEN("access_token_status"),
     LICENSE_STATUS("license_status"),
