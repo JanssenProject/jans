@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -19,16 +20,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import javax.inject.Inject;
-
-import java.util.logging.Level;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
@@ -48,7 +43,6 @@ import com.wordnik.swagger.annotations.ApiParam;
  * @version 0.9, 24/06/2013
  */
 
-@Named("idGenWS")
 @Path("/id")
 @Api(value = "/id", description = "ID Generation")
 public class IdGenRestWebService {

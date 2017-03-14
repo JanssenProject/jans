@@ -6,14 +6,11 @@
 
 package org.xdi.oxauth.service;
 
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-
 import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
+
 import org.jboss.seam.web.ServletContexts;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
@@ -23,9 +20,8 @@ import org.xdi.util.StringHelper;
  *
  * @author Oleksiy Tataryn Date: 08.07.2014
  */
-@Stateless
-@Named("oxAuthConfigurationService")
-@AutoCreate
+@ApplicationScoped
+@Named
 public class OxAuthConfigurationService {
 
 	@Inject

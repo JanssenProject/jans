@@ -6,14 +6,16 @@
 
 package org.xdi.oxauth.clientinfo.ws.rs;
 
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import javax.inject.Inject;
-
-import java.util.logging.Level;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoParamsValidator;
@@ -25,30 +27,28 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ScopeService;
 
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Set;
-
 /**
  * Provides interface for Client Info REST web services
  *
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
-@Named("requestClientInfoRestWebService")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
-    @Inject
-    private Logger log;
-    @Inject
-    private ErrorResponseFactory errorResponseFactory;
-    @Inject
-    private AuthorizationGrantList authorizationGrantList;
-    @Inject
-    private ScopeService scopeService;
-    @Inject
-    private AttributeService attributeService;
+	@Inject
+	private Logger log;
+
+	@Inject
+	private ErrorResponseFactory errorResponseFactory;
+
+	@Inject
+	private AuthorizationGrantList authorizationGrantList;
+
+	@Inject
+	private ScopeService scopeService;
+
+	@Inject
+	private AttributeService attributeService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
@@ -97,7 +97,6 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(Client client, Set<String> scopes) {
-//        FileConfiguration ldapConfiguration = ConfigurationFactory.getLdapConfiguration();
         JSONObject jsonObj = new JSONObject();
 
         try {

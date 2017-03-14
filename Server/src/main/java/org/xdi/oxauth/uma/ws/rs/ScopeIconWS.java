@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,10 +16,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
+import org.slf4j.Logger;
 import org.xdi.model.GluuImage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -35,16 +33,18 @@ import com.wordnik.swagger.annotations.Api;
  */
 
 @Path("/uma/scopes/icons")
-@Named("umaScopeIconRestWebService")
 @Api(value= "/uma/scopes/icons", description = "UMA Scope Icon endpoint provides scope icon by scope id.")
 public class ScopeIconWS {
 
     @Inject
     private Logger log;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
     private ScopeService umaScopeService;
+
     @Inject
     private XmlService xmlService;
 

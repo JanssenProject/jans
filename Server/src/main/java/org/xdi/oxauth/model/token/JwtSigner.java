@@ -7,7 +7,6 @@
 package org.xdi.oxauth.model.token;
 
 import org.python.jline.internal.Preconditions;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;

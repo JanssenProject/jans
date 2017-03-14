@@ -6,46 +6,44 @@
 
 package org.xdi.oxauth.service;
 
-import org.xdi.oxauth.model.util.Util;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
+import org.xdi.oxauth.model.util.Util;
 
-import javax.ws.rs.HttpMethod;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 
 /**
  * @author Javier Rojas Blum
  * @version 0.9 April 27, 2015
  */
-@Named("redirectionUriService")
 @Stateless
-@AutoCreate
+@Named
 public class RedirectionUriService {
 
     @Inject
     private Logger log;
+
     @Inject
     private ClientService clientService;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 

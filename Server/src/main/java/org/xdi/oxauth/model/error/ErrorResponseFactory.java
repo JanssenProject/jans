@@ -6,16 +6,18 @@
 
 package org.xdi.oxauth.model.error;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
@@ -29,19 +31,13 @@ import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.List;
-
 /**
  * Provides an easy way to get Error responses based in an error response type
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  */
-@Named("errorResponseFactory")
-@AutoCreate
+@Named
 @ApplicationScoped
 public class ErrorResponseFactory {
 

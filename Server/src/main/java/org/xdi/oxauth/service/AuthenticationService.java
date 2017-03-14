@@ -6,17 +6,33 @@
 
 package org.xdi.oxauth.service;
 
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.Identity;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.contexts.Context;
 import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.faces.FacesManager;
-
-import org.jboss.seam.security.Credentials;
-import org.jboss.seam.security.Identity;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
@@ -29,24 +45,12 @@ import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.exception.InvalidStateException;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
-
-import javax.annotation.Nonnull;
-import javax.faces.context.ExternalContext;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.logging.Level;
-import org.apache.log4j.Logger;
-
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
 
 /**
  * Authentication service methods
@@ -56,8 +60,7 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STAT
  * @version December 26, 2016
  */
 @Stateless
-@Named("authenticationService")
-@AutoCreate
+@Named
 public class AuthenticationService {
 
     // use only "acr" instead of "acr_values" #334

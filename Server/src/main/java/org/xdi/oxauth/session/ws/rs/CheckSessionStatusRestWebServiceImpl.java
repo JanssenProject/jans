@@ -7,8 +7,10 @@
 package org.xdi.oxauth.session.ws.rs;
 
 import java.io.IOException;
+import java.security.Identity;
 import java.util.Date;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -20,11 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
-import org.jboss.seam.security.Identity;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -41,7 +39,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @Path("/oxauth")
 @Api(value = "/oxauth", description = "Check Session Status Endpoint")
-@Named("checkSessionStatusRestWebService")
 public class CheckSessionStatusRestWebServiceImpl {
 
 	@Inject

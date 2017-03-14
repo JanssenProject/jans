@@ -1,9 +1,8 @@
 package org.xdi.oxauth.service.external.internal;
 
+import java.security.Identity;
 import java.util.Map;
 
-import org.jboss.seam.security.Credentials;
-import org.jboss.seam.security.Identity;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import org.xdi.oxauth.service.UserService;

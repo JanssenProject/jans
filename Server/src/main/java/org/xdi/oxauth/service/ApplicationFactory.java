@@ -6,9 +6,11 @@
 
 package org.xdi.oxauth.service;
 
+import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import javax.inject.Named;
 
+import org.jboss.seam.annotations.*;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
@@ -24,7 +26,7 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  * @author Yuriy Movchan Date: 05/22/2015
  */
 @ApplicationScoped
-@Named("applicationFactory")
+@Named
 @Startup
 public class ApplicationFactory {
     

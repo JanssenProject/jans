@@ -14,6 +14,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -23,15 +26,8 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -47,8 +43,7 @@ import org.xdi.oxauth.util.ServerUtil;
  * @version September 21, 2016
  */
 @Stateless
-@Named("registerParamsValidator")
-@AutoCreate
+@Named
 public class RegisterParamsValidator {
 
 	@Inject

@@ -6,10 +6,25 @@
 
 package org.xdi.oxauth.service.uma;
 
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
@@ -23,38 +38,32 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.util.StringHelper;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
-
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.*;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 04/02/2013
  */
+@Named
 @Stateless
-@Named("umaValidationService")
-@AutoCreate
 public class UmaValidationService {
 
     @Inject
     private Logger log;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
     private TokenService tokenService;
+
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
     @Inject
    	private ResourceSetService resourceSetService;
+
     @Inject
     private ScopeService umaScopeService;
+
     @Inject
     private AppConfiguration appConfiguration;
 

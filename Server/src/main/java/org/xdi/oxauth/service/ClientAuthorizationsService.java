@@ -6,25 +6,28 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
+import javax.ejb.Stateless;
+import javax.inject.Named;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * @author Javier Rojas Blum
  * @version November 30, 2016
  */
 @Stateless
-@Named("clientAuthorizationsService")
-@AutoCreate
+@Named
 public class ClientAuthorizationsService {
 
     @Inject

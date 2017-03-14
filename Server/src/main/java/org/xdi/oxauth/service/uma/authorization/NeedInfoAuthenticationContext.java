@@ -1,9 +1,9 @@
 package org.xdi.oxauth.service.uma.authorization;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import java.io.Serializable;
 import java.util.List;
+
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy

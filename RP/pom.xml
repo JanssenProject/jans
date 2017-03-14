@@ -270,11 +270,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
+			<artifactId>slf4j-simple</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.unboundid</groupId>
@@ -299,6 +299,12 @@
 			<artifactId>richfaces-a4j</artifactId>
 		</dependency>
 
+		<!-- OmniFaces -->
+		<dependency>
+		    <groupId>org.omnifaces</groupId>
+		    <artifactId>omnifaces</artifactId>
+		</dependency>
+ 
 		<!-- JBoss -->
 		<dependency>
 			<groupId>jboss</groupId>

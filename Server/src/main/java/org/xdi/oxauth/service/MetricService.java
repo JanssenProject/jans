@@ -6,16 +6,13 @@
 
 package org.xdi.oxauth.service;
 
-import org.jboss.seam.Component;
+import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
 
+import org.jboss.seam.annotations.Observer;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -27,7 +24,6 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
  */
 @ApplicationScoped
 @Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
-@AutoCreate
 @Startup
 public class MetricService extends org.xdi.service.metric.MetricService {
 	

@@ -9,17 +9,14 @@ package org.xdi.oxauth.service;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.ldap.UserGroup;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -31,9 +28,8 @@ import com.unboundid.ldap.sdk.Filter;
  * @version 0.9, 27/07/2012
  * @author Yuriy Movchan Date: 04/11/2014
  */
-@ApplicationScoped
-@Named("userGroupService")
-@AutoCreate
+@Stateless
+@Named
 public class UserGroupService {
 
     @Inject
@@ -95,12 +91,4 @@ public class UserGroupService {
         return false;
     }
 
-	/**
-	 * Get UserGroupService instance
-	 * 
-	 * @return UserGroupService instance
-	 */
-	public static UserGroupService instance() {
-		return (UserGroupService) Component.getInstance(UserGroupService.class);
-	}
 }

@@ -6,6 +6,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.ejb.Asynchronous;
+import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.QueueConnection;
@@ -17,17 +22,10 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.Destroy;
-import javax.inject.Inject;
-import javax.inject.Named;
-import org.apache.log4j.Logger;
 import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConf;
@@ -36,9 +34,8 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import com.google.common.base.Objects;
 
-@Named("applicationAuditLogger")
+@Named
 @ApplicationScoped
-@AutoCreate
 @Startup(depends = "appInitializer")
 public class ApplicationAuditLogger {
 
