@@ -5,11 +5,13 @@ import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.ClientUtils;
+import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.TokenClient;
 import org.xdi.oxauth.client.TokenRequest;
 import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxd.common.Command;
@@ -47,6 +49,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         validate(params);
 
         final SiteConfiguration site = getSite();
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(params.getCode());
@@ -55,7 +58,8 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         tokenRequest.setAuthPassword(site.getClientSecret());
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
 
-        final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getTokenEndpoint());
+
+        final TokenClient tokenClient = new TokenClient(discoveryResponse.getTokenEndpoint());
         tokenClient.setExecutor(getHttpService().getClientExecutor());
         tokenClient.setRequest(tokenRequest);
         final TokenResponse response = tokenClient.exec();
@@ -80,26 +84,44 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             opResponse.setRefreshToken(response.getRefreshToken());
             opResponse.setExpiresIn(response.getExpiresIn());
 
-            final Jwt jwt = Jwt.parse(response.getIdToken());
-            final String nonceFromToken = jwt.getClaims().getClaimAsString(JwtClaimName.NONCE);
+            final Jwt idToken = Jwt.parse(response.getIdToken());
+            final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
             if (!getStateService().isNonceValid(nonceFromToken)) {
                 throw new ErrorResponseException(ErrorResponseCode.INVALID_NONCE);
             }
 
-            if (CheckIdTokenOperation.isValid(jwt, getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()), nonceFromToken, site.getClientId())) {
-                final Map<String, List<String>> claims = jwt.getClaims() != null ? jwt.getClaims().toMap() : new HashMap<String, List<String>>();
-                opResponse.setIdTokenClaims(claims);
+            RSASigner rsaSigner = Validator.createRSASigner(idToken, discoveryResponse);
 
-                // persist tokens
-                site.setIdToken(response.getIdToken());
-                site.setAccessToken(response.getAccessToken());
-                getSiteService().update(site);
-                getStateService().invalidateState(params.getState());
-
-                return okResponse(opResponse);
-            } else {
+            // id_token validation
+            if (!Validator.isIdTokenValid(idToken, discoveryResponse, nonceFromToken, site.getClientId(), rsaSigner)) {
                 LOG.error("ID Token is not valid, token: " + response.getIdToken());
+                throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN);
             }
+
+            // access_token validation
+            if (!Strings.isNullOrEmpty(response.getAccessToken())) {
+                if (!rsaSigner.validateAccessToken(response.getAccessToken(), idToken)) {
+                    throw new ErrorResponseException(ErrorResponseCode.INVALID_ACCESS_TOKEN_BAD_HASH);
+                }
+            }
+
+            // code validation
+            if (!Strings.isNullOrEmpty(params.getCode())) {
+                if (!rsaSigner.validateAuthorizationCode(params.getCode(), idToken)) {
+                    throw new ErrorResponseException(ErrorResponseCode.INVALID_AUTHORIZATION_CODE_BAD_HASH);
+                }
+            }
+
+            final Map<String, List<String>> claims = idToken.getClaims() != null ? idToken.getClaims().toMap() : new HashMap<String, List<String>>();
+            opResponse.setIdTokenClaims(claims);
+
+            // persist tokens
+            site.setIdToken(response.getIdToken());
+            site.setAccessToken(response.getAccessToken());
+            getSiteService().update(site);
+            getStateService().invalidateState(params.getState());
+
+            return okResponse(opResponse);
         } else {
             LOG.error("Failed to get tokens because response code is: " + response.getScope());
         }
