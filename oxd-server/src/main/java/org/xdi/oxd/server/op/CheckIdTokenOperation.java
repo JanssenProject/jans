@@ -38,12 +38,13 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         final SiteConfiguration site = getSite();
         final String idToken = params.getIdToken();
         final Jwt jwt = Jwt.parse(idToken);
+        final Validator validator = new Validator(jwt, discoveryResponse);
 
         final Date issuedAt = jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT);
         final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
 
         final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
-        opResponse.setActive(Validator.isIdTokenValid(jwt, discoveryResponse, params.getNonce(), site.getClientId()));
+        opResponse.setActive(validator.isIdTokenValid(site.getClientId()));
         opResponse.setIssuedAt(issuedAt != null ? issuedAt.getTime() / 1000 : 0);
         opResponse.setExpiresAt(expiresAt != null ? expiresAt.getTime() / 1000 : 0);
         opResponse.setClaims(jwt.getClaims().toMap());
