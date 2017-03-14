@@ -11,20 +11,14 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.ArrayUtils;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import org.apache.log4j.Logger;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Client data validation service
@@ -32,8 +26,7 @@ import java.util.Set;
  * @author Yuriy Movchan Date: 05/20/2015
  */
 @Stateless
-@Named("clientDataValidationService")
-@AutoCreate
+@Named
 public class ClientDataValidationService {
 
 	@Inject

@@ -10,14 +10,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
@@ -32,8 +30,7 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan Date: 08.27.2012
  */
 @Stateless
-@Named("ldapCustomAuthenticationConfigurationService")
-@AutoCreate
+@Named
 public class LdapCustomAuthenticationConfigurationService implements Serializable {
 
 	private static final long serialVersionUID = -2225890597520443390L;

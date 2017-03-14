@@ -8,14 +8,11 @@ package org.xdi.oxauth.service;
 
 import java.util.List;
 
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.CacheService;
@@ -26,8 +23,7 @@ import org.xdi.util.StringHelper;
  * @version 0.9 March 27, 2015
  */
 @Stateless
-@Named("attributeService")
-@AutoCreate
+@Named
 public class AttributeService extends org.xdi.service.AttributeService {
 
     private static final String CACHE_ATTRIBUTE = "AttributeCache";

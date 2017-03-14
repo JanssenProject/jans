@@ -6,37 +6,37 @@
 
 package org.xdi.oxauth.service;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-
-import org.xdi.oxauth.model.config.Conf;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
 
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+import javax.ejb.Asynchronous;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.seam.annotations.*;
+import org.jboss.seam.async.TimerSchedule;
+import org.jboss.seam.core.Events;
+import org.xdi.oxauth.model.config.Conf;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 
 /**
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Named("keyGeneratorTimer")
-@AutoCreate
 @ApplicationScoped
+@Named
 public class KeyGeneratorTimer {
 
     private final static String EVENT_TYPE = "KeyGeneratorTimerEvent";

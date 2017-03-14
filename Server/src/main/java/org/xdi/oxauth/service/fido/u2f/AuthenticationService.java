@@ -6,11 +6,20 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.unboundid.ldap.sdk.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
@@ -29,7 +38,7 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with U2F authentication request
@@ -38,7 +47,6 @@ import java.util.*;
  */
 @Stateless
 @Named("u2fAuthenticationService")
-@AutoCreate
 public class AuthenticationService extends RequestService {
 
 	@Inject
@@ -62,7 +70,8 @@ public class AuthenticationService extends RequestService {
 	@Inject
 	private UserService userService;
 
-	@Inject(value = "randomChallengeGenerator")
+	@Inject
+	@Named("randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
 	@Inject

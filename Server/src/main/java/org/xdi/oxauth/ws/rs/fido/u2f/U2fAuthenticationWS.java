@@ -6,11 +6,17 @@
 
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
-import com.wordnik.swagger.annotations.Api;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
@@ -33,8 +39,7 @@ import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * The endpoint allows to start and finish U2F authentication process
@@ -43,7 +48,6 @@ import javax.ws.rs.core.Response;
  */
 @Path("/fido/u2f/authentication")
 @Api(value = "/fido/u2f/registration", description = "The endpoint at which the application U2F device start registration process.")
-@Named("u2fAuthenticationRestWebService")
 public class U2fAuthenticationWS {
 
 	@Inject

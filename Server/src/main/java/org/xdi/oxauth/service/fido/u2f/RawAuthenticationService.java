@@ -6,12 +6,14 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-import org.apache.commons.io.IOUtils;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import java.io.IOException;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
@@ -20,7 +22,8 @@ import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.util.io.ByteDataInputStream;
 
-import java.io.IOException;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 
 /**
  * Provides operations with U2F RAW authentication response
@@ -28,8 +31,7 @@ import java.io.IOException;
  * @author Yuriy Movchan Date: 05/20/2015
  */
 @Stateless
-@Named("rawAuthenticationService")
-@AutoCreate
+@Named
 public class RawAuthenticationService {
 
 	public static final String AUTHENTICATE_GET_TYPE = "navigator.id.getAssertion";
@@ -39,7 +41,8 @@ public class RawAuthenticationService {
 	@Inject
 	private Logger log;
 
-	@Inject(value = "sha256withECDSASignatureVerification")
+	@Inject
+	c(value = "sha256withECDSASignatureVerification")
 	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawAuthenticateResponse parseRawAuthenticateResponse(String rawDataBase64) {

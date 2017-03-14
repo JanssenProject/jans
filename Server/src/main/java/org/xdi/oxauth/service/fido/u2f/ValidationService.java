@@ -6,13 +6,11 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -28,7 +26,6 @@ import org.xdi.util.StringHelper;
  */
 @Stateless
 @Named("u2fValidationService")
-@AutoCreate
 public class ValidationService {
 
 	@Inject

@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.service;
 
-import org.jboss.seam.annotations.Create;
-import javax.inject.Inject;
-import org.jboss.seam.annotations.Install;
-import javax.inject.Named;
-import org.jboss.seam.ui.ClientUidSelector;
-import org.jboss.seam.util.RandomStringUtils;
-
 import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.Install;
+import org.jboss.seam.ui.ClientUidSelector;
 
 /**
  * Fix cookie value in Seam component

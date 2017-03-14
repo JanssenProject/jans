@@ -6,8 +6,13 @@
 
 package org.xdi.oxauth.model.common;
 
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.exception.InvalidJweException;
@@ -20,11 +25,6 @@ import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.util.security.StringEncrypter;
-
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Base class for all the types of authorization grant.

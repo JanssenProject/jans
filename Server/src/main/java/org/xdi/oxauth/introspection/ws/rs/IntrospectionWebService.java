@@ -6,22 +6,7 @@
 
 package org.xdi.oxauth.introspection.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import org.apache.commons.lang.StringUtils;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
-import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.common.AbstractToken;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.IntrospectionResponse;
-import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaScopeType;
-import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.util.ServerUtil;
-
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -32,11 +17,24 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
+import org.xdi.oxauth.model.common.AbstractToken;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.IntrospectionResponse;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.UmaScopeType;
+import org.xdi.oxauth.service.token.TokenService;
+import org.xdi.oxauth.util.ServerUtil;
+
+import com.wordnik.swagger.annotations.Api;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/09/2013
  */
-@Named("introspectionWS")
 @Path("/introspection")
 @Api(value= "/introspection", description = "The Introspection Endpoint is an OAuth 2 Endpoint that responds to " +
         "   HTTP GET and HTTP POST requests from token holders.  The endpoint " +

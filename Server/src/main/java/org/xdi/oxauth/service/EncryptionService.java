@@ -8,13 +8,11 @@ package org.xdi.oxauth.service;
 
 import java.util.Properties;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import org.apache.log4j.Logger;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
+import org.slf4j.Logger;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.PropertiesDecrypter;
@@ -27,8 +25,7 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  * @author Yuriy Movchan Date: 09/23/2014
  */
 @Stateless
-@Named("encryptionService")
-@AutoCreate
+@Named
 public class EncryptionService {
 
     @Inject

@@ -1,8 +1,8 @@
 package org.xdi.oxauth.service.uma.authorization;
 
 import org.codehaus.jettison.json.JSONObject;
-
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**
@@ -12,7 +12,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 public class NeedInfoResponseBuilder {
 
-    private final static Log LOG = Logging.getLog(NeedInfoResponseBuilder.class);
+    private final static Logger log = LoggerFactory.getLogger(NeedInfoResponseBuilder.class);
 
     private NeedInfoResponseBuilder() {
     }

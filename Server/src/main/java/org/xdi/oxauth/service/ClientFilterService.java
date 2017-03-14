@@ -8,21 +8,14 @@ package org.xdi.oxauth.service;
 
 import java.util.Map;
 
+import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
 import org.jboss.seam.annotations.Create;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
@@ -31,13 +24,9 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
  * @version March 4, 2016
  */
 @ApplicationScoped
-@Named("clientFilterService")
-@AutoCreate
+@Named
 @Startup
 public class ClientFilterService extends BaseAuthFilterService {
-
-    @Inject
-    private Logger log;
 
     @Inject
     private LdapEntryManager ldapEntryManager;

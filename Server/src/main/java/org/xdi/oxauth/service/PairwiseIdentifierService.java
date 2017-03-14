@@ -1,11 +1,14 @@
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import java.net.URI;
+import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.PairwiseIdType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -13,17 +16,18 @@ import org.xdi.oxauth.model.ldap.PairwiseIdentifier;
 import org.xdi.oxauth.model.util.SubjectIdentifierGenerator;
 import org.xdi.util.StringHelper;
 
-import java.net.URI;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * @author Javier Rojas Blum
  * @version July 31, 2016
  */
 @Stateless
-@Named("pairwiseIdentifierService")
-@AutoCreate
+@Named
 public class PairwiseIdentifierService {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private LdapEntryManager ldapEntryManager;
@@ -31,8 +35,6 @@ public class PairwiseIdentifierService {
     @Inject
     private UserService userService;
 
-    @Inject
-    private Logger log;
     @Inject
     private AppConfiguration appConfiguration;
 
@@ -71,7 +73,7 @@ public class PairwiseIdentifierService {
                 if (entries.size() > 1) {
                     log.error("Found more then one pairwise identifier by sector identifier: {0}" + sectorIdentifier);
                     for (PairwiseIdentifier pairwiseIdentifier : entries) {
-                        log.error(pairwiseIdentifier);
+                        log.error("PairwiseIdentifier: {}", pairwiseIdentifier);
                     }
                 }
                 return entries.get(0);
@@ -112,7 +114,4 @@ public class PairwiseIdentifierService {
         return String.format("ou=pairwiseIdentifiers,%s", userBaseDn);
     }
 
-    public static PairwiseIdentifierService instance() {
-        return (PairwiseIdentifierService) Component.getInstance(PairwiseIdentifierService.class);
-    }
 }

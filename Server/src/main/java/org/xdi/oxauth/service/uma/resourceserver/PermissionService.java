@@ -6,10 +6,17 @@
 
 package org.xdi.oxauth.service.uma.resourceserver;
 
-import org.apache.commons.lang.StringUtils;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
@@ -23,30 +30,28 @@ import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 
-import javax.ws.rs.core.Response;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 01/07/2013
  */
 @Stateless
 @Named("umaRsPermissionService")
-@AutoCreate
 public class PermissionService {
 
     public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
 
     @Inject
     private Logger log;
+
     @Inject
     private RsResourceService umaRsResourceService;
+
     @Inject
     private TokenService tokenService;
+
     @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
+
     @Inject
     private AppConfiguration appConfiguration;
     

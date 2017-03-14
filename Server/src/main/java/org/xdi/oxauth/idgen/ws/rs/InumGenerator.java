@@ -8,15 +8,13 @@ package org.xdi.oxauth.idgen.ws.rs;
 
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-
+import org.slf4j.Logger;
 import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
@@ -36,7 +34,6 @@ import com.unboundid.ldap.sdk.RDN;
  */
 @Stateless
 @Named("inumGenerator")
-@AutoCreate
 public class InumGenerator implements IdGenerator {
 
     public static final String SEPARATOR = "!";

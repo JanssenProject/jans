@@ -6,11 +6,10 @@
 
 package org.xdi.oxauth.service.custom;
 
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
+
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.service.custom.script.AbstractCustomScriptService;
 
@@ -20,8 +19,7 @@ import org.xdi.service.custom.script.AbstractCustomScriptService;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @Stateless
-@Named("customScriptService")
-@AutoCreate
+@Named
 public class CustomScriptService extends AbstractCustomScriptService{
 	
 	@Inject

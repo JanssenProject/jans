@@ -6,13 +6,14 @@
 
 package org.xdi.oxauth.service.external;
 
-import com.google.common.collect.Sets;
-import org.jboss.seam.Component;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -20,9 +21,7 @@ import org.xdi.model.custom.script.type.scope.DynamicScopeType;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.service.custom.script.ExternalScriptService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Sets;
 
 /**
  * Provides factory methods needed to create dynamic scope extension
@@ -30,8 +29,7 @@ import java.util.Set;
  * @author Yuriy Movchan Date: 01/08/2015
  */
 @ApplicationScoped
-@Named("externalDynamicScopeService")
-@AutoCreate
+@Named
 @Startup
 public class ExternalDynamicScopeService extends ExternalScriptService {
 

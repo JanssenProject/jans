@@ -6,26 +6,25 @@
 
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import javax.enterprise.context.ApplicationScoped;
-import org.jboss.seam.annotations.AutoCreate;
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.jboss.seam.annotations.Scope;
 
-import org.jboss.seam.log.Logging;
+import org.gluu.site.ldap.persistence.BatchOperation;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 
-import java.util.Date;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.util.StaticUtils;
 
 /**
  * Holds resource set permission tokens and permissions
@@ -34,14 +33,14 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 11/02/2013
  */
-@ApplicationScoped
-@AutoCreate
-@Named("resourceSetPermissionManager")
+@Stateless
+@Named
 public class ResourceSetPermissionManager extends AbstractResourceSetPermissionManager {
 
     private static final String ORGUNIT_OF_RESOURCE_SET_PERMISSION = "uma_resource_set_permission";
 
-    private static final Log LOG = Logging.getLog(ResourceSetPermissionManager.class);
+    @Inject
+    private Logger log;
 
     @Inject
     private LdapEntryManager ldapEntryManager;

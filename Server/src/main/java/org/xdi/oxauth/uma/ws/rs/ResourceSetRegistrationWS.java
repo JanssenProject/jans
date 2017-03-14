@@ -6,14 +6,32 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.google.common.collect.Lists;
-import com.wordnik.swagger.annotations.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import javax.inject.Named;
-
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -28,14 +46,12 @@ import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.google.common.collect.Lists;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * This AM's endpoint is part of resource set registration API.
@@ -50,7 +66,6 @@ import java.util.List;
  * @author Yuriy Movchan
  *         Date: 02/12/2015
  */
-@Named("resourceSetRegistrationRestWebService")
 @Path("/host/rsrc/resource_set")
 @Api(value = "/host/rsrc/resource_set", description = "The resource server uses the RESTful API at the authorization server's resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
 public class ResourceSetRegistrationWS {
@@ -62,16 +77,22 @@ public class ResourceSetRegistrationWS {
 
     @Inject
     private TokenService tokenService;
+
     @Inject
     private UmaValidationService umaValidationService;
+
     @Inject
     private ResourceSetService resourceSetService;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+   
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
     @Inject
     private ScopeService umaScopeService;
+
     @Inject
     private AppConfiguration appConfiguration;
 
