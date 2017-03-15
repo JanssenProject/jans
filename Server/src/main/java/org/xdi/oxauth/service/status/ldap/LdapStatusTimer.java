@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.ejb.Asynchronous;
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,8 +25,8 @@ import org.xdi.oxauth.service.AppInitializer;
  * @version 0.1, 11/18/2012
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 @Named
-@Startup
 public class LdapStatusTimer {
 
     private final static String EVENT_TYPE = "LdapStatusTimerEvent";
@@ -37,15 +37,17 @@ public class LdapStatusTimer {
 
     private AtomicBoolean isActive;
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.info("Initializing LdapStatusTimer");
-        this.isActive = new AtomicBoolean(false);
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
+//    public void init() {
+//        log.info("Initializing LdapStatusTimer");
+//        this.isActive = new AtomicBoolean(false);
+//
+//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL));
+//    }
 
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL));
-    }
-
-    @Observer(EVENT_TYPE)
+    // TODO: CDI: Fix
+//    @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
         if (this.isActive.get()) {

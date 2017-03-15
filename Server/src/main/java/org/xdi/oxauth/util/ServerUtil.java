@@ -17,8 +17,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
 
@@ -43,6 +47,7 @@ import org.xdi.util.Util;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9, 26/12/2012
  */
 
@@ -106,16 +111,52 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
-    public static <T> T instance(Class p_clazz) {
-        return (T) Component.getInstance(p_clazz);
-    }
+    public static <T> Instance<T> instance(Class<T> p_clazz) {
+		return CDI.current().select(p_clazz);
+    }    	
 
-    public static <T> T instance(String p_name) {
-        return (T) Component.getInstance(p_name);
-    }
+    public static <T> T bean(Class<T> p_clazz) {
+		return instance(p_clazz).get();
+    }    	
+
+    public static <T> void destroy(Class<T> p_clazz) {
+		Instance<T> instance = instance(p_clazz);
+		if (instance.isResolvable()) {
+			instance.destroy(instance.get());
+		}
+    }    	
+
+    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
+    	class NamedAnnotation extends AnnotationLiteral<Named> implements Named {
+			private static final long serialVersionUID = 5873127661481517380L;
+
+			private final String value;
+
+    	     public NamedAnnotation(final String value) {
+    	         this.value = value;
+    	     }
+
+    	     public String value() {
+    	        return value;
+    	    }
+    	}
+
+		return CDI.current().select(p_clazz, new NamedAnnotation(name));
+    }    	
+
+    public static <T> T bean(Class<T> p_clazz, String name) {
+		return instance(p_clazz, name).get();
+    }    	
+
+    public static <T> void destroy(Class<T> p_clazz, String name) {
+		Instance<T> instance = instance(p_clazz, name);
+		if (instance.isResolvable()) {
+			instance.destroy(instance.get());
+		}
+    }    	
 
     public static LdapEntryManager getLdapManager() {
-        return instance(AppInitializer.LDAP_ENTRY_MANAGER_NAME);
+        return bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }
 
     public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {

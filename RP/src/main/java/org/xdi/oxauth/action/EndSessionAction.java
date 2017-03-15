@@ -27,7 +27,7 @@ public class EndSessionAction implements Serializable {
 	private static final long serialVersionUID = 6785573643861198737L;
 
 	@Inject
-    private transient Logger log;
+    private Logger log;
 
     private String endSessionEndpoint;
     private String idTokenHint;

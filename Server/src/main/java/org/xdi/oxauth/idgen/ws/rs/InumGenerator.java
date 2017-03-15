@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.util.INumGenerator;
 
 import com.unboundid.ldap.sdk.DN;
@@ -46,7 +46,7 @@ public class InumGenerator implements IdGenerator {
     private LdapEntryManager ldapEntryManager;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     @Override
     public String generateId(String p_idType, String p_idPrefix) {

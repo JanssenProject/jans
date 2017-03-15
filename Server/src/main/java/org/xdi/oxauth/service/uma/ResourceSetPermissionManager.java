@@ -18,7 +18,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 
@@ -46,7 +46,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     private LdapEntryManager ldapEntryManager;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     public static String getDn(String clientDn, String ticket) {
         return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
@@ -52,7 +52,7 @@ public class UserService {
     private InumService inumService;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     /**
      * Authenticate user

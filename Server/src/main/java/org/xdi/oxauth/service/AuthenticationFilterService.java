@@ -8,7 +8,7 @@ package org.xdi.oxauth.service;
 
 import java.util.Map;
 
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,8 +26,8 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan Date: 07.20.2012
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 @Named
-@Startup
 public class AuthenticationFilterService extends BaseAuthFilterService {
 
     @Inject
