@@ -11,11 +11,10 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
 
-import org.jboss.seam.Component;
 import org.xdi.model.GluuAttribute;
 import org.xdi.service.AttributeService;
 
-@FacesConverter("AttributeNameConverter")
+@FacesConverter("attributeNameConverter")
 public class AttributeNameConverter implements Converter {
 
 	@Override

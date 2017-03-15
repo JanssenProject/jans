@@ -92,13 +92,4 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
     public abstract String baseDn();
 
-	/**
-     * Get CustomScriptService instance
-     *
-     * @return CustomScriptService instance
-     */
-    public static AbstractCustomScriptService instance() {
-        return (AbstractCustomScriptService) Component.getInstance(AbstractCustomScriptService.class);
-    }
-
 }

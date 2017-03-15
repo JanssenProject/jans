@@ -165,13 +165,7 @@ public class LdapEntryReporter extends ScheduledReporter {
                        SortedMap<String, Histogram> histograms,
                        SortedMap<String, Meter> meters,
                        SortedMap<String, Timer> timers) {
-        Lifecycle.beginCall();
-        try {
-            reportImpl(counters, timers);
-        } finally {
-			Lifecycle.endCall();
-		}
-
+        reportImpl(counters, timers);
     }
 
 	private void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
