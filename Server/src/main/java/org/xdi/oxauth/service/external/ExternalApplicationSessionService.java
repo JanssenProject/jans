@@ -8,12 +8,13 @@ package org.xdi.oxauth.service.external;
 
 import java.util.Map;
 
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -27,12 +28,9 @@ import org.xdi.service.custom.script.ExternalScriptService;
  * @author Yuriy Movchan Date: 01/20/2015
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 @Named
-@Startup
 public class ExternalApplicationSessionService extends ExternalScriptService {
-
-	@Inject
-    private Logger log;
 
 	private static final long serialVersionUID = 2316361273036208685L;
 

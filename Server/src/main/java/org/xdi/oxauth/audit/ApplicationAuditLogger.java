@@ -6,9 +6,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.annotation.PreDestroy;
 import javax.ejb.Asynchronous;
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.jms.JMSException;
@@ -22,13 +25,9 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Destroy;
-import org.jboss.seam.annotations.Observer;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -36,7 +35,7 @@ import com.google.common.base.Objects;
 
 @Named
 @ApplicationScoped
-@Startup(depends = "appInitializer")
+@DependsOn("appInitializer")
 public class ApplicationAuditLogger {
 
 	private static final String APPLICATION_AUDIT_LOGGER_REFRESH_TIMER = "applicationAuditLoggerRefreshTimer";
@@ -64,13 +63,13 @@ public class ApplicationAuditLogger {
 	private boolean updateState;
 	private Boolean enabledOAuthAuditnLogging;
 
-	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
+    // TODO: CDI: Fix
+//	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	public void updateConfiguration(AppConfiguration appConfiguration, StaticConfiguration staticConfiguration) {
 		this.updateState = true;
 	}
 
-	@Create
-	public void init() {
+	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging())) {
 			return;
 		}
@@ -94,7 +93,7 @@ public class ApplicationAuditLogger {
 		}
 	}
 
-	@Destroy
+	@PreDestroy
 	public void destroy() {
 		if (this.pooledConnectionFactory == null)
 			return;
@@ -164,27 +163,27 @@ public class ApplicationAuditLogger {
 			txtMessage.setText(ServerUtil.asPrettyJson(oAuth2AuditLog));
 			producer.send(txtMessage);
 		} catch (JMSException e) {
-			logger.error("Can't send message", e);
+			log.error("Can't send message", e);
 		} catch (IOException e) {
-			logger.error("Can't serialize the audit log", e);
+			log.error("Can't serialize the audit log", e);
 		} catch (Exception e) {
-			logger.error("Can't send message, please check your activeMQ configuration.", e);
+			log.error("Can't send message, please check your activeMQ configuration.", e);
 		} finally {
 			if (connection == null)
 				return;
 			try {
 				connection.close();
 			} catch (JMSException e) {
-				logger.error("Can't close connection.");
+				log.error("Can't close connection.");
 			}
 		}
 	}
 
 	private void loggingThroughFile(OAuth2AuditLog oAuth2AuditLog) {
 		try {
-			logger.info(ServerUtil.asPrettyJson(oAuth2AuditLog));
+			log.info(ServerUtil.asPrettyJson(oAuth2AuditLog));
 		} catch (IOException e) {
-			logger.error("Can't serialize the audit log", e);
+			log.error("Can't serialize the audit log", e);
 		}
 	}
 

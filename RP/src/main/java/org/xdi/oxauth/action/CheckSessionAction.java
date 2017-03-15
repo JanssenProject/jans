@@ -24,7 +24,7 @@ public class CheckSessionAction implements Serializable {
 	private static final long serialVersionUID = 6513115606594205672L;
 
 	@Inject
-    private transient Logger log;
+    private Logger log;
 
     private String checkSessionEndpoint;
 

@@ -21,7 +21,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @XmlRootElement(name = "static")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StaticConf {
+public class StaticConfiguration {
 
     @XmlElement(name = "base-dn")
     private BaseDnConfiguration baseDn;

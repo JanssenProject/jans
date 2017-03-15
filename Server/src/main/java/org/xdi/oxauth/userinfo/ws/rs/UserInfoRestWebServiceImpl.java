@@ -40,6 +40,7 @@ import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
@@ -111,7 +112,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private JSONWebKeySet webKeysConfiguration;
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {

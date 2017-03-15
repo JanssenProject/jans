@@ -19,7 +19,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
@@ -49,7 +49,7 @@ public class DeviceRegistrationService {
 	private UserService userService;
 
 	@Inject
-	private StaticConf staticConfiguration;
+	private StaticConfiguration staticConfiguration;
 
 	public void addBranch(final String userInum) {
 		SimpleBranch branch = new SimpleBranch();

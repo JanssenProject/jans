@@ -9,15 +9,13 @@ package org.xdi.oxauth.model.error;
 import java.io.IOException;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
@@ -36,17 +34,19 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  */
-@Named
-@ApplicationScoped
 public class ErrorResponseFactory {
 
-    @Inject
-    private Logger log;
+    private Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
 
-    private volatile ErrorMessages messages;
+    private ErrorMessages messages;
 
-    public ErrorMessages getMessages() {
+    public ErrorResponseFactory(ErrorMessages messages) {
+    	this.messages = messages;
+	}
+
+	public ErrorMessages getMessages() {
         return messages;
     }
 

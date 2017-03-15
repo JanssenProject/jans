@@ -22,7 +22,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
@@ -81,7 +81,7 @@ public class RegistrationService extends RequestService {
 	private ChallengeGenerator challengeGenerator;
 
 	@Inject
-	private StaticConf staticConfiguration;
+	private StaticConfiguration staticConfiguration;
 
 	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userInum) {
 		if (applicationService.isValidateApplication()) {

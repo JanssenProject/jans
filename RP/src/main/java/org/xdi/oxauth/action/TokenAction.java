@@ -29,7 +29,7 @@ public class TokenAction implements Serializable {
 	private static final long serialVersionUID = -1049039555549738261L;
 
 	@Inject
-    private transient Logger log;
+    private Logger log;
 
     @Inject
     private UserInfoAction userInfoAction;
