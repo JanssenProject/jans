@@ -34,7 +34,8 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
@@ -81,10 +82,10 @@ public class SessionStateService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     @Inject
-    private JSONWebKeySet webKeysConfiguration;
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Inject(required = false)
     private FacesContext facesContext;
@@ -151,7 +152,7 @@ public class SessionStateService {
             sessionAttributes.putAll(currentSessionAttributes);
 
             // Reinit login
-            sessionAttributes.put("auth_step", "1");
+            sessionAttributes.put("c", "1");
 
             for (Iterator<Entry<String, String>> it = currentSessionAttributes.entrySet().iterator(); it.hasNext(); ) {
                 Entry<String, String> currentSessionAttributesEntry = it.next();

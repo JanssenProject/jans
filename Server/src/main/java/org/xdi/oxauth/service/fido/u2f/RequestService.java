@@ -17,7 +17,7 @@ import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.service.CleanerTimer;
 
@@ -39,7 +39,7 @@ public class RequestService {
 	private LdapEntryManager ldapEntryManager;
 
 	@Inject
-	private StaticConf staticConfiguration;
+	private StaticConfiguration staticConfiguration;
 
 	public List<RequestMessageLdap> getExpiredRequestMessages(BatchOperation<RequestMessageLdap> batchOperation, Date expirationDate) {
 		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=u2f,o=@!1111,o=gluu

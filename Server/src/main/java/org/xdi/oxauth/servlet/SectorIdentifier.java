@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
-import org.jboss.seam.log.Logging;
-import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.slf4j.Logger;
 import org.xdi.oxauth.service.SectorIdentifierService;
 

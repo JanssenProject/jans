@@ -27,7 +27,7 @@ import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.RPTManager;
+import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.resourceserver.PermissionService;
 import org.xdi.oxauth.service.uma.resourceserver.RsResourceType;
 import org.xdi.oxauth.service.uma.resourceserver.RsScopeType;
@@ -52,14 +52,18 @@ public class IdGenRestWebService {
 
     @Inject
     private Logger log;
+
     @Inject
     private IdGenService idGenService;
+
     @Inject
     private TokenService tokenService;
+
     @Inject
     private PermissionService umaRsPermissionService;
+
     @Inject
-    private RPTManager rptManager;
+    private RptManager rptManager;
 
     @GET
     @Path("/{prefix}/{type}/")

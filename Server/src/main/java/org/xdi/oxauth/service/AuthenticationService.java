@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.ejb.Stateless;
 import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
@@ -87,6 +88,7 @@ public class AuthenticationService {
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS));
     private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
+
     @Inject
     private Logger log;
 

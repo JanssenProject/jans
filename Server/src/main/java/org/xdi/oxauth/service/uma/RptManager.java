@@ -23,7 +23,7 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.CleanerTimer;
@@ -58,7 +58,7 @@ public class RptManager extends AbstractRPTManager {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     public RptManager() {
         ldapEntryManager = ServerUtil.getLdapManager();

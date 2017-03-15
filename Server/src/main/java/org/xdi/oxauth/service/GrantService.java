@@ -27,7 +27,7 @@ import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.MemcachedGrant;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.util.ServerUtil;
@@ -63,7 +63,7 @@ public class GrantService {
     private CacheService cacheService;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();

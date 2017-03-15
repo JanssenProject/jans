@@ -6,11 +6,12 @@
 
 package org.xdi.oxauth.service;
 
-import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.jboss.seam.annotations.*;
+import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.random.RandomChallengeGenerator;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
@@ -25,9 +26,6 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  *
  * @author Yuriy Movchan Date: 05/22/2015
  */
-@ApplicationScoped
-@Named
-@Startup
 public class ApplicationFactory {
     
     @Inject
@@ -36,18 +34,18 @@ public class ApplicationFactory {
     @Inject
     private Logger log;
 
-    @Producer(value = "randomChallengeGenerator", scope = ScopeType.APPLICATION, autoCreate = true)
-    public RandomChallengeGenerator createRandomChallengeGenerator() {
+    @Produces @ApplicationScoped
+    public RandomChallengeGenerator getRandomChallengeGenerator() {
         return new RandomChallengeGenerator();
     }
 
-    @Producer(value = "sha256withECDSASignatureVerification", scope = ScopeType.APPLICATION, autoCreate = true)
-    public SHA256withECDSASignatureVerification createBouncyCastleSignatureVerification() {
+    @Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
+    public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
         return new SHA256withECDSASignatureVerification();
     }
 
-	@Producer(value = "cacheConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-	public CacheConfiguration createCacheConfiguration() {
+	@Produces @ApplicationScoped
+	public CacheConfiguration getCacheConfiguration() {
 		CacheConfiguration cacheConfiguration = applianceService.getAppliance().getCacheConfiguration();
 		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
 			log.error("Failed to read cache configuration from LDAP. Please check appliance oxCacheConfiguration attribute " +
@@ -63,8 +61,8 @@ public class ApplicationFactory {
 		return cacheConfiguration;
 	}
 
-	@Producer(value = "smtpConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-	public SmtpConfiguration createSmtpConfiguration() {
+	@Produces @ApplicationScoped
+	public SmtpConfiguration getSmtpConfiguration() {
 		GluuAppliance appliance = applianceService.getAppliance();
 		SmtpConfiguration smtpConfiguration = appliance.getSmtpConfiguration();
 		

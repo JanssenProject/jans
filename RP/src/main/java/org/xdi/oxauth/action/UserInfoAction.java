@@ -8,6 +8,7 @@ package org.xdi.oxauth.action;
 
 import java.io.Serializable;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -28,7 +29,7 @@ public class UserInfoAction implements Serializable {
 	private static final long serialVersionUID = 8127882852081260414L;
 
 	@Inject
-    private transient Logger log;
+    private Logger log;
 
     private String userInfoEndpoint;
     private String accessToken;
@@ -38,6 +39,11 @@ public class UserInfoAction implements Serializable {
     private String responseString;
 
     private AuthorizationMethod authorizationMethod;
+    
+    @PostConstruct
+    public void test() {
+    	System.out.println("Created");
+    }
 
     public void exec() {
         try {

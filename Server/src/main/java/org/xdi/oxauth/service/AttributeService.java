@@ -14,7 +14,7 @@ import javax.inject.Named;
 
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
@@ -35,15 +35,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
     private CacheService cacheService;
 
     @Inject
-    private StaticConf staticConfiguration;
-    /**
-     * Get AttributeService instance
-     *
-     * @return AttributeService instance
-     */
-    public static AttributeService instance() {
-        return (AttributeService) Component.getInstance(AttributeService.class);
-    }
+    private StaticConfiguration staticConfiguration;
 
     /**
      * returns GluuAttribute by Dn

@@ -10,7 +10,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.custom.script.AbstractCustomScriptService;
 
 /**
@@ -23,7 +23,7 @@ import org.xdi.service.custom.script.AbstractCustomScriptService;
 public class CustomScriptService extends AbstractCustomScriptService{
 	
 	@Inject
-	private StaticConf staticConfiguration;
+	private StaticConfiguration staticConfiguration;
 
 	private static final long serialVersionUID = -5283102477313448031L;
 

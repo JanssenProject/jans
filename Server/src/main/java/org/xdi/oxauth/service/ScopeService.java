@@ -15,7 +15,7 @@ import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
@@ -41,7 +41,7 @@ public class ScopeService {
     private LdapEntryManager ldapEntryManager;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     /**
      * returns a list of all scopes

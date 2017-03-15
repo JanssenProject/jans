@@ -14,8 +14,8 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.slf4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
+import org.slf4j.Logger;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
@@ -42,7 +42,7 @@ public class AuthorizationAction implements Serializable {
 	private static final long serialVersionUID = -4131456982254169325L;
 
 	@Inject
-    private transient Logger log;
+    private Logger log;
 
     private String authorizationEndpoint;
     private String jwksUri;
