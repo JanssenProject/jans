@@ -17,7 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.util.StringHelper;
@@ -46,7 +46,7 @@ public class ResourceSetService {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();

@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service;
 
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -14,7 +14,7 @@ import javax.inject.Named;
 import org.jboss.seam.annotations.Observer;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
@@ -23,8 +23,8 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
  * @author Yuriy Movchan Date: 07/30/2015
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 @Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
-@Startup
 public class MetricService extends org.xdi.service.metric.MetricService {
 	
 	public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
@@ -44,9 +44,10 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	private AppConfiguration appConfiguration;
 
 	@Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
-    @Observer("org.jboss.seam.postInitialization")
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
     public void create() {
     	init(this.appConfiguration.getMetricReporterInterval());
     }

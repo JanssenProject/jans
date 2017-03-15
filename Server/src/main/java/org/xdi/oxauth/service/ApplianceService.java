@@ -13,7 +13,7 @@ import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
@@ -36,7 +36,7 @@ public class ApplianceService {
     private AppConfiguration appConfiguration;
 
 	@Inject
-	private StaticConf staticConfiguration;
+	private StaticConfiguration staticConfiguration;
 	/**
 	 * Add new appliance
 	 * @param appliance Appliance

@@ -15,8 +15,9 @@ import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.ejb.Asynchronous;
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
@@ -42,8 +43,8 @@ import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
  * @version December 15, 2015
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 @Named
-@Startup
 public class CleanerTimer {
 
     public final static int BATCH_SIZE = 100;
@@ -84,7 +85,8 @@ public class CleanerTimer {
     @Inject
     private AppConfiguration appConfiguration;
 
-    @Observer("org.jboss.seam.postInitialization")
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
     public void init() {
         log.debug("Initializing CleanerTimer");
         this.isActive = new AtomicBoolean(false);
@@ -97,7 +99,8 @@ public class CleanerTimer {
         Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
     }
 
-    @Observer(EVENT_TYPE)
+    // TODO: CDI: Fix
+//    @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
         if (this.isActive.get()) {

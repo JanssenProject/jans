@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,8 +30,8 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan Date: 01/14/2015
  */
 @ApplicationScoped
+@DependsOn("appInitializer")
 @Named
-@Startup
 public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService {
 
 	private static final long serialVersionUID = -8609727759114795432L;

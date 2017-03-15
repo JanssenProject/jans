@@ -9,7 +9,7 @@ package org.xdi.oxauth.dev;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorMessage;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
@@ -96,7 +96,7 @@ public class ConfSerialization {
         baseDn.setAttributes("ou=attributes,o=@!1111,o=gluu");
         baseDn.setSessionId("ou=session,o=@!1111,o=gluu");
 
-        final StaticConf c = new StaticConf();
+        final StaticConfiguration c = new StaticConfiguration();
         c.setBaseDn(baseDn);
 
         final String jsonStr = ServerUtil.createJsonMapper().writeValueAsString(c);

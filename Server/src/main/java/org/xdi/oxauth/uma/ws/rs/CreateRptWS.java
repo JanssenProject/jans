@@ -23,6 +23,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
@@ -79,7 +80,7 @@ public class CreateRptWS {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private JSONWebKeySet webKeysConfiguration;
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Path("rpt")
     @POST

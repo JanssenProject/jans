@@ -41,8 +41,7 @@ public class RawAuthenticationService {
 	@Inject
 	private Logger log;
 
-	@Inject
-	c(value = "sha256withECDSASignatureVerification")
+	@Inject @Named(value = "sha256withECDSASignatureVerification")
 	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawAuthenticateResponse parseRawAuthenticateResponse(String rawDataBase64) {

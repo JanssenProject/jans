@@ -6,7 +6,7 @@ import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.ldap.SectorIdentifier;
 import org.xdi.util.StringHelper;
 
@@ -25,7 +25,7 @@ public class SectorIdentifierService {
     private LdapEntryManager ldapEntryManager;
 
     @Inject
-    private StaticConf staticConfiguration;
+    private StaticConfiguration staticConfiguration;
 
     /**
      * Get sector identifier by inum

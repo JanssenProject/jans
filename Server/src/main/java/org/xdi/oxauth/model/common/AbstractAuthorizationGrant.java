@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -32,7 +33,7 @@ import org.xdi.oxauth.util.TokenHashUtil;
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
 
-    private static final Logger LOGGER = Logger.getLogger(AbstractAuthorizationGrant.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractAuthorizationGrant.class);
 
     private final User user;
     private final AuthorizationGrantType authorizationGrantType;
@@ -403,8 +404,8 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
      */
     @Override
     public RefreshToken getRefreshToken(String refreshTokenCode) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Looking for the refresh token: " + refreshTokenCode
+        if (log.isTraceEnabled()) {
+        	log.trace("Looking for the refresh token: " + refreshTokenCode
                     + " for an authorization grant of type: " + getAuthorizationGrantType());
         }
 

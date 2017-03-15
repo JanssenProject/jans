@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.ejb.Asynchronous;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -25,6 +26,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.annotations.*;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.core.Events;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -56,7 +58,8 @@ public class KeyGeneratorTimer {
 
     private AtomicBoolean isActive;
 
-    @Observer("org.jboss.seam.postInitialization")
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
     public void init() {
         log.debug("Initializing KeyGeneratorTimer");
 
@@ -71,7 +74,8 @@ public class KeyGeneratorTimer {
         Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
     }
 
-    @Observer(EVENT_TYPE)
+    // TODO: CDI: Fix
+//    @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
         if (!appConfiguration.getKeyRegenerationEnabled()) {

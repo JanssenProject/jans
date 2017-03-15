@@ -25,6 +25,7 @@
 		<weld.version>3.0.0.CR2</weld.version>
 		<drools.version>5.3.3.Final</drools.version>
 		<richfaces.version>4.5.17.Final</richfaces.version>
+        <jsf.version>2.1</jsf.version>
 		<omnifaces.version>2.6.1</omnifaces.version>
 		<uel.version>2.2</uel.version>
 		<hibernate.version>4.1.8.Final</hibernate.version>
@@ -100,6 +101,12 @@
 				<artifactId>el-impl</artifactId>
 				<version>${uel.version}</version>
 			</dependency>
+
+            <dependency>
+                <groupId>javax.faces</groupId>
+                <artifactId>jsf-api</artifactId>
+                <version>${jsf.version}</version>
+            </dependency>
 
 			<!-- Gluu -->
 			<dependency>
@@ -481,6 +488,11 @@
 				<artifactId>ejb-api</artifactId>
 				<version>3.0</version>
 				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.2.3</version>
 			</dependency>
 
 			<!-- Test -->

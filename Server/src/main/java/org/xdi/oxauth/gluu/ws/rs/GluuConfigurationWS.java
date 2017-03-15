@@ -43,12 +43,18 @@ import com.wordnik.swagger.annotations.ApiResponses;
 /**
  * Created by eugeniuparvan on 8/5/16.
  */
-@Path("/oxauth/gluu-configuration")
+@Path("/.well-known/gluu-configuration")
 @Api(value = "/.well-known/gluu-configuration", description = "Endpoint for non-standard OpenID Connect discovery configuration data in a JSON [RFC4627] document that resides in at /.well-known/gluu-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the Gluu server.")
 public class GluuConfigurationWS {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private ScopeService scopeService;    
+
+    @Inject
+    private AttributeService attributeService;    
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -108,8 +114,6 @@ public class GluuConfigurationWS {
     private Map<String, Set<String>> createScopeToClaimsMapping() {
         Map<String, Set<String>> result = new HashMap<String, Set<String>>();
         try {
-            final AttributeService attributeService = AttributeService.instance();
-            final ScopeService scopeService = ScopeService.instance();
             for (Scope scope : scopeService.getAllScopesList()) {
                 final Set<String> claimsList = new HashSet<String>();
                 result.put(scope.getDisplayName(), claimsList);

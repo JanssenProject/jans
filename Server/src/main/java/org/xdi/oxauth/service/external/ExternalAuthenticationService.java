@@ -13,11 +13,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.ejb.Startup;
+import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
@@ -41,13 +42,13 @@ import com.google.common.collect.Sets;
  * @author Yuriy Movchan Date: 21/08/2012
  */
 @ApplicationScoped
-@Startup
+@DependsOn("appInitializer")
 @Named
 public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public final static String MODIFIED_INTERNAL_TYPES_EVENT_TYPE = "CustomScriptModifiedInternlTypesEvent";
 
-    @Inject(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
 	private static final long serialVersionUID = 7339887464253044927L;
@@ -59,7 +60,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		super(CustomScriptType.PERSON_AUTHENTICATION);
 	}
 
-	@Observer(MODIFIED_INTERNAL_TYPES_EVENT_TYPE)
+    // TODO: CDI: Fix
+//	@Observer(MODIFIED_INTERNAL_TYPES_EVENT_TYPE)
 	public void reload() {
 		super.reload();
 	}
@@ -418,10 +420,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 		return false;
 	}
-
-    public static ExternalAuthenticationService instance() {
-        return (ExternalAuthenticationService) Component.getInstance(ExternalAuthenticationService.class);
-    }
 
 	public Map<Integer, Set<String>> levelToAcrMapping() {
 		Map<Integer, Set<String>> map = Maps.newHashMap();

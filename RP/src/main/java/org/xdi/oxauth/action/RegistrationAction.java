@@ -40,7 +40,7 @@ public class RegistrationAction implements Serializable {
 	private static final long serialVersionUID = -5920839612180688968L;
 
 	@Inject
-    private transient Logger log;
+    private Logger log;
 
     @Inject
     private AuthorizationAction authorizationAction;

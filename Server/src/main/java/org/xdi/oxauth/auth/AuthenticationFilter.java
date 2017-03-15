@@ -12,27 +12,27 @@ import java.io.UnsupportedEncodingException;
 import java.security.Identity;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.core.filter.AbstractFilter;
 import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.web.Filter;
 import org.jboss.seam.security.NotLoggedInException;
-import org.jboss.seam.servlet.ContextualHttpServletRequest;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -51,8 +51,7 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version March 4, 2016
  */
-@ApplicationScoped
-@Filter(within = "org.jboss.seam.web.exceptionFilter")
+@WebFilter(asyncSupported = true)
 public class AuthenticationFilter extends AbstractFilter {
 
     @Inject
@@ -72,8 +71,9 @@ public class AuthenticationFilter extends AbstractFilter {
 
 	private AppConfiguration appConfiguration;
 
-	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
+    // TODO: CDI: Fix
+//	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
+	public void updateConfiguration(AppConfiguration appConfiguration, StaticConfiguration staticConfiguration) {
 		this.appConfiguration = appConfiguration;
 	}
 
@@ -101,71 +101,65 @@ public class AuthenticationFilter extends AbstractFilter {
         final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         final HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
-        new ContextualHttpServletRequest(httpRequest) {
+        final Identity identity = Identity.instance();
+        init();
 
-            @Override
-            public void process() {
-                final Identity identity = Identity.instance();
-                init();
+        // Workaround for tomcat
+        if (appConfiguration == null) {
+        	appConfiguration = (AppConfiguration) Component.getInstance("appConfiguration", true);
+        }
 
-                // Workaround for tomcat
-                if (appConfiguration == null) {
-                	appConfiguration = (AppConfiguration) Component.getInstance("appConfiguration", true);
+        try {
+            final String requestUrl = httpRequest.getRequestURL().toString();
+			log.trace("Get request to: '{0}'", requestUrl);
+            if (requestUrl.endsWith("/token") && ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) {
+            	log.debug("Starting token endpoint authentication");
+                if (httpRequest.getParameter("client_assertion") != null
+                        && httpRequest.getParameter("client_assertion_type") != null) {
+					log.debug("Starting JWT token endpoint authentication");
+                    processJwtAuth(errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                } else if (httpRequest.getHeader("Authorization") != null && httpRequest.getHeader("Authorization").startsWith("Basic ")) {
+					log.debug("Starting Basic Auth token endpoint authentication");
+                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                } else {
+					log.debug("Starting POST Auth token endpoint authentication");
+                    processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                }
+            } else if (httpRequest.getHeader("Authorization") != null) {
+                String header = httpRequest.getHeader("Authorization");
+                if (header.startsWith("Bearer ")) {
+                    processBearerAuth(httpRequest, httpResponse, filterChain);
+                } else if (header.startsWith("Basic ")) {
+                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                } else {
+                    httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+
+                    httpResponse.sendError(401, "Not authorized");
+                }
+            } else {
+                String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
+                List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
+
+                if (StringUtils.isBlank(sessionState)) {
+                    // OXAUTH-297 : check whether session_state is present in cookie
+                    sessionState = sessionStateService.getSessionStateFromCookie(httpRequest);
                 }
 
-                try {
-                    final String requestUrl = httpRequest.getRequestURL().toString();
-					log.trace("Get request to: '{0}'", requestUrl);
-                    if (requestUrl.endsWith("/token") && ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) {
-                    	log.debug("Starting token endpoint authentication");
-                        if (httpRequest.getParameter("client_assertion") != null
-                                && httpRequest.getParameter("client_assertion_type") != null) {
-							log.debug("Starting JWT token endpoint authentication");
-                            processJwtAuth(errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        } else if (httpRequest.getHeader("Authorization") != null && httpRequest.getHeader("Authorization").startsWith("Basic ")) {
-							log.debug("Starting Basic Auth token endpoint authentication");
-                            processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        } else {
-							log.debug("Starting POST Auth token endpoint authentication");
-                            processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        }
-                    } else if (httpRequest.getHeader("Authorization") != null) {
-                        String header = httpRequest.getHeader("Authorization");
-                        if (header.startsWith("Bearer ")) {
-                            processBearerAuth(httpRequest, httpResponse, filterChain);
-                        } else if (header.startsWith("Basic ")) {
-                            processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        } else {
-                            httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
-
-                            httpResponse.sendError(401, "Not authorized");
-                        }
-                    } else {
-                        String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
-                        List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
-
-                        if (StringUtils.isBlank(sessionState)) {
-                            // OXAUTH-297 : check whether session_state is present in cookie
-                            sessionState = sessionStateService.getSessionStateFromCookie(httpRequest);
-                        }
-
-                        SessionState sessionStateObject = null;
-                        if (StringUtils.isNotBlank(sessionState)) {
-                            sessionStateObject = sessionStateService.getSessionState(sessionState);
-                        }
-                        if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState() && !prompts.contains(Prompt.LOGIN)) {
-                            processSessionAuth(errorResponseFactory, sessionState, httpRequest, httpResponse, filterChain);
-                        } else {
-                            filterChain.doFilter(httpRequest, httpResponse);
-                        }
-                    }
-                } catch (IOException ex) {
-                    log.error(ex.getMessage(), ex);
-                } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
+                SessionState sessionStateObject = null;
+                if (StringUtils.isNotBlank(sessionState)) {
+                    sessionStateObject = sessionStateService.getSessionState(sessionState);
+                }
+                if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState() && !prompts.contains(Prompt.LOGIN)) {
+                    processSessionAuth(errorResponseFactory, sessionState, httpRequest, httpResponse, filterChain);
+                } else {
+                    filterChain.doFilter(httpRequest, httpResponse);
                 }
             }
-        }.run();
+        } catch (IOException ex) {
+            log.error(ex.getMessage(), ex);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+        }
     }
 
     private void processSessionAuth(ErrorResponseFactory errorResponseFactory, String p_sessionState, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
