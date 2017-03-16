@@ -75,6 +75,12 @@ public class AppInitializer {
     @Inject
     private ApplianceService applianceService;
 
+    @Inject
+    private PythonService pythonService;
+
+    @Inject
+    private CustomScriptManager customScriptManager;
+
 	@Inject
 	private ConfigurationFactory configurationFactory;
 
@@ -111,9 +117,8 @@ public class AppInitializer {
 
         setDefaultAuthenticationMethod(localLdapEntryManager);
 
-        PythonService.instance().initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
-
-        CustomScriptManager.instance().init(supportedCustomScriptTypes);
+        pythonService.initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
+        customScriptManager.init(supportedCustomScriptTypes);
 	}
 
     @Produces @ApplicationScoped @Named("stringEncrypter")
