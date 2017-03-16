@@ -1,4 +1,4 @@
-package org.xdi.oxauth.service;
+package org.xdi.oxauth.model.exception;
 
 /**
  * @author Yuriy Zabrovarnyy

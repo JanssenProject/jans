@@ -30,6 +30,9 @@ public class ApplicationFactory {
     
     @Inject
     private ApplianceService applianceService;
+    
+    @Inject
+    private EncryptionService encryptionService;
 
     @Inject
     private Logger log;
@@ -73,8 +76,7 @@ public class ApplicationFactory {
 		String password = smtpConfiguration.getPassword();
 		if (StringHelper.isNotEmpty(password)) {
 			try {
-				EncryptionService securityService = EncryptionService.instance();
-				smtpConfiguration.setPasswordDecrypted(securityService.decrypt(password));
+				smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
 			} catch (EncryptionException ex) {
 				log.error("Failed to decript SMTP user password", ex);
 			}

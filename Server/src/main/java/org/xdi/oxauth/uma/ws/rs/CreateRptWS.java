@@ -26,7 +26,6 @@ import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.token.JwtSigner;
