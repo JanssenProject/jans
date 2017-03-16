@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.xdi</groupId>
 		<artifactId>oxauth</artifactId>
-		<version>3.1.0-SNAPSHOT</version>
+		<version>3.1.0.weld-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -292,10 +292,6 @@
 			<artifactId>oxauth-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.xdi</groupId>
-			<artifactId>oxLdap</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxeleven-client</artifactId>
 		</dependency>
@@ -310,57 +306,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxLdap-annotations</artifactId>
+			<artifactId>oxcore-ldap-annotations</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxService</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jboss.seam</groupId>
-					<artifactId>jboss-seam-ui</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jboss.seam</groupId>
-					<artifactId>jboss-seam</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>oxcore-ldap</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxServer</artifactId>
+			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxUtil</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>jsf-api</artifactId>
-					<groupId>javax.faces</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsf-facelets</artifactId>
-					<groupId>com.sun.facelets</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>servlet-api</artifactId>
-					<groupId>javax.servlet</groupId>
-				</exclusion>
-			</exclusions>
+			<artifactId>oxcore-server</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxTomcat</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>tomcat-catalina</artifactId>
-					<groupId>org.apache.tomcat</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>tomcat-coyote</artifactId>
-					<groupId>org.apache.tomcat</groupId>
-				</exclusion>
-			</exclusions>
+			<artifactId>oxcore-util</artifactId>
 		</dependency>
 
 		<!-- Weld -->
@@ -856,7 +818,7 @@
 			<dependencies>
 				<dependency>
 					<groupId>org.xdi</groupId>
-					<artifactId>oxSaml</artifactId>
+					<artifactId>oxcore-saml</artifactId>
 				</dependency>
 			</dependencies>
 		</profile>

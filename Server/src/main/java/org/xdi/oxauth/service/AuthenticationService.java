@@ -31,8 +31,6 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.faces.FacesManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
@@ -46,6 +44,7 @@ import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.login.Credentials;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.util.Util;
@@ -101,13 +100,13 @@ public class AuthenticationService {
     @Inject(value = "#{facesContext.externalContext}", required = false)
     private ExternalContext externalContext;
 
-    @Inject(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @Inject(value = AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    @Inject @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
     private List<LdapEntryManager> ldapAuthEntryManagers;
 
     @Inject
@@ -128,10 +127,6 @@ public class AuthenticationService {
     @Inject("org.jboss.seam.core.manager")
     private FacesManager facesManager;
 
-    public static AuthenticationService instance() {
-        return ServerUtil.instance(AuthenticationService.class);
-    }
-
     /**
      * Authenticate user.
      *
@@ -140,7 +135,7 @@ public class AuthenticationService {
      * @return <code>true</code> if success, otherwise <code>false</code>.
      */
     public boolean authenticate(String userName, String password) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+        Credentials credentials = ServerUtil.bean(Credentials.class);
         log.debug("Authenticating user with LDAP: username: '{0}', credentials: '{1}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
@@ -228,7 +223,7 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+        Credentials credentials = ServerUtil.bean(Credentials.class);
 
         if (this.ldapAuthConfigs == null) {
             return authenticate(credentials, null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
@@ -267,7 +262,7 @@ public class AuthenticationService {
      * Utility method which can be used in custom scripts
      */
     public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+        Credentials credentials = ServerUtil.bean(Credentials.class);
         return authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
     }
 
@@ -322,7 +317,7 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String userName) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+        Credentials credentials = ServerUtil.bean(Credentials.class);
         log.debug("Authenticating user with LDAP: username: '{0}', credentials: '{1}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
@@ -416,7 +411,7 @@ public class AuthenticationService {
     }
 
     public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+        Credentials credentials = ServerUtil.bean(Credentials.class);
 
         log.trace("configureSessionUser: credentials: '{0}', sessionState: '{1}', credentials.userName: '{2}', authenticatedUser.userId: '{3}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
 
@@ -439,7 +434,7 @@ public class AuthenticationService {
     }
 
     public SessionState configureEventUser() {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+        Credentials credentials = ServerUtil.bean(Credentials.class);
 
         User user = getAuthenticatedUser();
         if (user == null) {
@@ -502,7 +497,7 @@ public class AuthenticationService {
     }
 
     public void configureSessionClient(Context context) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+        Credentials credentials = ServerUtil.bean(Credentials.class);
         String clientInum = credentials.getUsername();
         log.debug("ConfigureSessionClient: username: '{0}', credentials: '{1}'", clientInum, System.identityHashCode(credentials));
 

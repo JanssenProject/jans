@@ -99,7 +99,6 @@ public class AppInitializer {
     	SecurityProviderUtility.installBCProvider();
     }
 
-
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
 				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
@@ -333,7 +332,7 @@ public class AppInitializer {
 	}
 
 	private LdapConnectionService createConnectionProvider(Properties connectionProperties) {
-		EncryptionService securityService = EncryptionService.instance();
+		EncryptionService securityService = ServerUtil.bean(EncryptionService.class);
 		LdapConnectionService connectionProvider = new LdapConnectionService(securityService.decryptProperties(connectionProperties));
 
 		return connectionProvider;
@@ -416,7 +415,7 @@ public class AppInitializer {
 
 	private GluuAppliance loadAppliance(LdapEntryManager localLdapEntryManager, String ... ldapReturnAttributes) {
 		String baseDn = configurationFactory.getBaseDn().getAppliance();
-		String applianceInum = configurationFactory.getConfiguration().getApplianceInum();
+		String applianceInum = configurationFactory.getAppConfiguration().getApplianceInum();
 		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
 			return null;
 		}

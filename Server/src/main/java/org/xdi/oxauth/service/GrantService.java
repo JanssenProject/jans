@@ -30,7 +30,6 @@ import org.xdi.oxauth.model.common.MemcachedGrant;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
 
@@ -67,10 +66,6 @@ public class GrantService {
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
-    }
-
-    public static GrantService instance() {
-        return ServerUtil.instance(GrantService.class);
     }
 
     public String buildDn(String p_uniqueIdentifier, String p_grantId, String p_clientId) {

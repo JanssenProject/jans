@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.slf4j.Logger;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.PropertiesDecrypter;
 import org.xdi.util.security.StringEncrypter;
@@ -53,9 +52,5 @@ public class EncryptionService {
 	public Properties decryptProperties(Properties connectionProperties) {
 		return PropertiesDecrypter.decryptProperties(stringEncrypter, connectionProperties);
 	}
-
-    public static EncryptionService instance() {
-        return ServerUtil.instance(EncryptionService.class);
-    }
 
 }

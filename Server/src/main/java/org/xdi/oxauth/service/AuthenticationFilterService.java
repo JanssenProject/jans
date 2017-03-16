@@ -8,6 +8,7 @@ package org.xdi.oxauth.service;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -16,7 +17,6 @@ import javax.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
-import org.jboss.seam.annotations.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
@@ -36,7 +36,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
     @Inject
     private AppConfiguration appConfiguration;
 
-    @Create
+    @PostConstruct
     public void init() {
         super.init(appConfiguration.getAuthenticationFilters(), Boolean.TRUE.equals(appConfiguration.getAuthenticationFiltersEnabled()), true);
     }
@@ -75,7 +75,4 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
         return null;
     }
 
-    public static AuthenticationFilterService instance() {
-        return (AuthenticationFilterService) Component.getInstance(AuthenticationFilterService.class);
-    }
 }
