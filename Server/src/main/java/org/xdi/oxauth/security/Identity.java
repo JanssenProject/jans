@@ -1,0 +1,147 @@
+package org.xdi.oxauth.security;
+
+import java.io.Serializable;
+import java.security.Principal;
+
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.security.auth.login.LoginException;
+
+import org.slf4j.Logger;
+
+@RequestScoped
+@Named
+public class Identity implements Serializable {
+
+	private static final long serialVersionUID = 3751659008033189259L;
+
+	@Inject
+	private Logger log;
+
+	@Inject
+	private Credentials credentials;
+
+	private Principal principal;
+
+	/**
+	 * Simple check that returns true if the user is logged in, without
+	 * attempting to authenticate
+	 * 
+	 * @return true if the user is logged in
+	 */
+	public boolean isLoggedIn() {
+		// If there is a principal set, then the user is logged in.
+		return getPrincipal() != null;
+	}
+
+	/**
+	 * Will attempt to authenticate quietly if the user's credentials are set
+	 * and they haven't authenticated already. A quiet authentication doesn't
+	 * throw any exceptions if authentication fails.
+	 * 
+	 * @return true if the user is logged in, false otherwise
+	 */
+	public boolean tryLogin() {
+		if ((getPrincipal() == null) && credentials.isSet()) {
+			quietLogin();
+		}
+
+		return isLoggedIn();
+	}
+
+	/**
+	 * Attempts to authenticate the user.
+	 * 
+	 * @return String returns "loggedIn" if user is authenticated, or null if not.
+	 */
+	public String login() {
+		try {
+			if (isLoggedIn()) {
+				return "loggedIn";
+			}
+
+			authenticate();
+
+			if (!isLoggedIn()) {
+				throw new LoginException();
+			}
+
+			if (log.isDebugEnabled()) {
+				log.debug("Login successful for: " + credentials.getUsername());
+			}
+
+			return "loggedIn";
+		} catch (LoginException ex) {
+			credentials.invalidate();
+
+			if (log.isDebugEnabled()) {
+				log.debug("Login failed for: " + credentials.getUsername(), ex);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Attempts a quiet login, suppressing any login exceptions and not creating
+	 * any faces messages. This method is intended to be used primarily as an
+	 * internal API call, however has been made public for convenience.
+	 */
+	public void quietLogin() {
+		try {
+			if (!isLoggedIn()) {
+				if (credentials.isSet()) {
+					authenticate();
+				}
+			}
+		} catch (LoginException ex) {
+			credentials.invalidate();
+		}
+	}
+
+	public synchronized void authenticate() throws LoginException {
+		// If we're already authenticated, then don't authenticate again
+		if (!isLoggedIn() && !credentials.isInvalid()) {
+			principal = new UserPrincipal(credentials.getUsername());
+			credentials.setPassword(null);
+		}
+	}
+
+	public Principal getPrincipal() {
+		return principal;
+	}
+
+	public Credentials getCredentials() {
+		return credentials;
+	}
+
+	/**
+	 * Resets all security state and credentials
+	 */
+	public void unAuthenticate() {
+		principal = null;
+		credentials.clear();
+	}
+
+	public void logout() {
+		if (isLoggedIn()) {
+			unAuthenticate();
+		}
+	}
+	
+	class UserPrincipal implements Principal {
+
+		private String name;
+
+		public UserPrincipal(final String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+	}
+
+}
