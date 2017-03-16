@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import java.security.Identity;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -32,6 +31,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionParamsValidator;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.RedirectionUriService;
