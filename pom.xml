@@ -36,7 +36,6 @@
 		<jetty.version>9.4.2.v20170220</jetty.version>
 
 		<version.arquillian_core>1.1.11.Final</version.arquillian_core>
-		<version.arquillian.seam2>1.0.0.Beta1</version.arquillian.seam2>
 		<fest.assert.version>1.4</fest.assert.version>
 	</properties>
 
@@ -370,13 +369,6 @@
 				<version>2.2.0.GA</version>
 			</dependency>
 
-			<!-- Debug -->
-			<dependency>
-				<groupId>org.jboss.seam</groupId>
-				<artifactId>jboss-seam-debug</artifactId>
-				<version>${seam.version}</version>
-			</dependency>
-
 			<!-- Jython -->
 			<dependency>
 				<groupId>org.python</groupId>
@@ -503,12 +495,6 @@
 				<groupId>org.jboss.arquillian.junit</groupId>
 				<artifactId>arquillian-junit-container</artifactId>
 				<version>${version.arquillian_core}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.arquillian.extension</groupId>
-				<artifactId>arquillian-seam2</artifactId>
-				<version>${version.arquillian.seam2}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
