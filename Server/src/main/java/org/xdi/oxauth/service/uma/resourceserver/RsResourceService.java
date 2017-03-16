@@ -19,7 +19,6 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.uma.ResourceSetService;
 import org.xdi.oxauth.service.uma.ScopeService;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,10 +36,6 @@ public class RsResourceService {
 
     @Inject
     private ScopeService umaScopeService;
-
-    public static RsResourceService instance() {
-        return ServerUtil.instance(RsResourceService.class);
-    }
 
     public ResourceSet getResource(RsResourceType p_type) {
         final ResourceSet criteria = new ResourceSet();

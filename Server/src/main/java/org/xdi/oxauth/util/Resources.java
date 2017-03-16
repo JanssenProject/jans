@@ -1,7 +1,10 @@
 package org.xdi.oxauth.util;
 
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +16,28 @@ import org.slf4j.LoggerFactory;
  */
 public class Resources {
 
-    @Produces
-    public Logger getLogger(InjectionPoint ip) {
-        Class<?> clazz = ip.getMember().getDeclaringClass();
-        
-        return LoggerFactory.getLogger(clazz);
-    }
+	@Produces
+	public Logger getLogger(InjectionPoint ip) {
+		Class<?> clazz = ip.getMember().getDeclaringClass();
+
+		return LoggerFactory.getLogger(clazz);
+	}
+
+	@Produces
+	@RequestScoped
+	public FacesContext getFacesContext() {
+		return FacesContext.getCurrentInstance();
+	}
+
+	@Produces
+	@RequestScoped
+	public ExternalContext getExternalContext() {
+		FacesContext facesContext = getFacesContext();
+		if (facesContext != null) {
+			return facesContext.getExternalContext();
+		}
+		
+		return null;
+	}
 
 }

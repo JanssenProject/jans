@@ -87,8 +87,4 @@ public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService
 		return false;
 	}
 
-    public static ExternalUmaAuthorizationPolicyService instance() {
-        return (ExternalUmaAuthorizationPolicyService) Component.getInstance(ExternalUmaAuthorizationPolicyService.class);
-    }
-
 }

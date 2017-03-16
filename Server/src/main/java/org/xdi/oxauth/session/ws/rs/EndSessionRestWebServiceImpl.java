@@ -75,7 +75,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @Inject
     private GrantService grantService;
 
-    @Inject(required = false)
+    @Inject
     private Identity identity;
 
     @Inject

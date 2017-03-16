@@ -1,5 +1,7 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.slf4j.Logger;
@@ -9,8 +11,8 @@ import org.slf4j.Logger;
  * @author Javier Rojas Blum
  * @version May 24, 2016
  */
-@Named("loginAction")
 @RequestScoped
+@Named
 public class LoginAction {
 
     @Inject
@@ -25,4 +27,5 @@ public class LoginAction {
     public void setLoginHint(String loginHint) {
         this.loginHint = loginHint;
     }
+
 }

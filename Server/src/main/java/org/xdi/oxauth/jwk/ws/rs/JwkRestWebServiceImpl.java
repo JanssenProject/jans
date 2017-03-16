@@ -11,8 +11,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 
 /**
  * Provides interface for JWK REST web services
@@ -26,7 +25,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
     private Logger log;
 
     @Inject
-    private ConfigurationFactory configurationFactory;
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Override
     public Response requestJwk(SecurityContext sec) {
@@ -34,8 +33,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            JSONWebKeySet jwks = configurationFactory.getWebKeys();
-            builder.entity(jwks.toString());
+            builder.entity(webKeysConfiguration.toString());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500

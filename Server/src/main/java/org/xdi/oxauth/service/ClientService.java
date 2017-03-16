@@ -17,6 +17,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.codehaus.jettison.json.JSONArray;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
@@ -25,8 +26,10 @@ import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.SearchScope;
+import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
@@ -60,6 +63,9 @@ public class ClientService {
 
     @Inject
     private CacheService cacheService;
+
+    @Inject
+    private ScopeService scopeService;
 
     @Inject
     private ClientFilterService clientFilterService;
@@ -334,6 +340,59 @@ public class ClientService {
         }
 
         removeFromCache(client);
+    }
+
+    public Object getAttribute(Client client, String clientAttribute) throws InvalidClaimException {
+        Object attribute = null;
+
+        if (clientAttribute != null) {
+            if (clientAttribute.equals("displayName")) {
+                attribute = client.getClientName();
+            } else if (clientAttribute.equals("inum")) {
+                attribute = client.getClientId();
+            } else if (clientAttribute.equals("oxAuthAppType")) {
+                attribute = client.getApplicationType();
+            } else if (clientAttribute.equals("oxAuthIdTokenSignedResponseAlg")) {
+                attribute = client.getIdTokenSignedResponseAlg();
+            } else if (clientAttribute.equals("oxAuthRedirectURI") && client.getRedirectUris() != null) {
+                JSONArray array = new JSONArray();
+                for (String redirectUri : client.getRedirectUris()) {
+                    array.put(redirectUri);
+                }
+                attribute = array;
+            } else if (clientAttribute.equals("oxAuthScope") && client.getScopes() != null) {
+                JSONArray array = new JSONArray();
+                for (String scopeDN : client.getScopes()) {
+                    Scope s = scopeService.getScopeByDn(scopeDN);
+                    if (s != null) {
+                        String scopeName = s.getDisplayName();
+                        array.put(scopeName);
+                    }
+                }
+                attribute = array;
+            } else {
+                for (CustomAttribute customAttribute : client.getCustomAttributes()) {
+                    if (customAttribute.getName().equals(clientAttribute)) {
+                        List<String> values = customAttribute.getValues();
+                        if (values != null) {
+                            if (values.size() == 1) {
+                                attribute = values.get(0);
+                            } else {
+                                JSONArray array = new JSONArray();
+                                for (String v : values) {
+                                    array.put(v);
+                                }
+                                attribute = array;
+                            }
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return attribute;
     }
 
 }

@@ -78,6 +78,9 @@ public class U2fRegistrationWS {
 
 	@Inject
 	private ValidationService u2fValidationService;
+	
+	@Inject
+	private ExternalAuthenticationService service;
 
 	@GET
 	@Produces({ "application/json" })
@@ -224,7 +227,6 @@ public class U2fRegistrationWS {
 		if (acrValuesStr == null)
 			return false;
 
-		ExternalAuthenticationService service = ExternalAuthenticationService.instance();
 		CustomScriptConfiguration u2fScriptConfiguration = service.getCustomScriptConfigurationByName("u2f");
 		if (u2fScriptConfiguration == null)
 			return false;

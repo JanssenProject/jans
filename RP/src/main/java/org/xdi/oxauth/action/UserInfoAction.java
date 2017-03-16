@@ -39,11 +39,6 @@ public class UserInfoAction implements Serializable {
     private String responseString;
 
     private AuthorizationMethod authorizationMethod;
-    
-    @PostConstruct
-    public void test() {
-    	System.out.println("Created");
-    }
 
     public void exec() {
         try {

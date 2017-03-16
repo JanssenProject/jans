@@ -9,6 +9,7 @@ package org.xdi.oxauth.authorize.ws.rs;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -35,8 +36,8 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum Date: 03.13.2012
  * @author Yuriy Movchan Date: 09/01/2016
  */
-@Named("logoutAction")
 @RequestScoped
+@Named
 public class LogoutAction {
 
 	private static final String EXTERNAL_LOGOUT = "external_logout";

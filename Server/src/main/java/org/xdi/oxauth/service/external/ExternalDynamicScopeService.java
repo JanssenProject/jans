@@ -82,8 +82,4 @@ public class ExternalDynamicScopeService extends ExternalScriptService {
 		return result;
 	}
 
-    public static ExternalDynamicScopeService instance() {
-        return (ExternalDynamicScopeService) Component.getInstance(ExternalDynamicScopeService.class);
-    }
-
 }

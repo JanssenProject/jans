@@ -27,7 +27,6 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.uma.ScopeService;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -125,7 +124,4 @@ public class AuthorizationService {
                 .entity(entity).build());
     }
 
-    public static AuthorizationService instance() {
-        return ServerUtil.instance(AuthorizationService.class);
-    }
 }
