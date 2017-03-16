@@ -72,7 +72,7 @@ public class ClientAuthorizationsService {
             if (entries.size() > 1) {
                 log.error("Found more then one client authorization entry by client Id: {0}" + clientId);
                 for (ClientAuthorizations entry : entries) {
-                    log.error(entry);
+                    log.error(entry.toString());
                 }
             }
             return entries.get(0);

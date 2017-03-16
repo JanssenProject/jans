@@ -61,9 +61,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     // TODO: CDI: Fix
 //	@Observer(MODIFIED_INTERNAL_TYPES_EVENT_TYPE)
-	public void reload() {
-		super.reload();
-	}
+//	public void reload() {
+//		super.reload();
+//	}
 
 	@Override
 	protected void reloadExternal() {
