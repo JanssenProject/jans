@@ -25,7 +25,6 @@ import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.UserService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -205,10 +204,6 @@ public class DeviceRegistrationService {
 		}
 
 		return hash;
-    }
-
-    public static DeviceRegistrationService instance() {
-        return ServerUtil.instance(DeviceRegistrationService.class);
     }
 
 }

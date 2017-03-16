@@ -7,7 +7,6 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
 import java.io.UnsupportedEncodingException;
-import java.security.Identity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -47,6 +46,7 @@ import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientAuthorizationsService;
@@ -112,10 +112,10 @@ public class AuthorizeAction {
     @Inject
     private AppConfiguration appConfiguration;
 
-    @Inject(required = false)
+    @Inject
     private FacesContext facesContext;
 
-    @Inject(value = "#{facesContext.externalContext}", required = false)
+    @Inject
     private ExternalContext externalContext;
 
     // OAuth 2.0 request parameters
@@ -670,7 +670,7 @@ public class AuthorizeAction {
             sessionStateService.updateSessionState(session);
 
             // OXAUTH-297 - set session_state cookie
-            SessionStateService.instance().createSessionStateCookie(sessionState);
+            sessionStateService.createSessionStateCookie(sessionState);
 
             Map<String, String> sessionAttribute = authenticationService.getAllowedParameters(session.getSessionAttributes());
 

@@ -51,8 +51,4 @@ public class ExternalIdGeneratorService extends ExternalScriptService {
 		return executeExternalGenerateIdMethod(this.defaultExternalCustomScript, appId, idType, idPrefix);
 	}
 
-	public static ExternalIdGeneratorService instance() {
-		return (ExternalIdGeneratorService) Component.getInstance(ExternalIdGeneratorService.class);
-	}
-
 }

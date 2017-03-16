@@ -69,7 +69,6 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.log.Logging;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
@@ -625,7 +624,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         // custom attributes (custom attributes must be in custom object class)
         final List<String> attrList = appConfiguration.getDynamicRegistrationCustomAttributes();
         if (attrList != null && !attrList.isEmpty()) {
-            final Log staticLog = Logging.getLog(RegisterRestWebServiceImpl.class);
             for (String attr : attrList) {
                 if (p_requestObject.has(attr)) {
                     final JSONArray parameterValuesJsonArray = p_requestObject.optJSONArray(attr);
@@ -639,7 +637,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         		p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
                         	}
                         } catch (Exception e) {
-                            staticlog.debug(e.getMessage(), e);
+                            log.debug(e.getMessage(), e);
                         }
                     }
                 }

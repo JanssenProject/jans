@@ -87,10 +87,10 @@ public class SessionStateService {
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
 
-    @Inject(required = false)
+    @Inject
     private FacesContext facesContext;
 
-    @Inject(value = "#{facesContext.externalContext}", required = false)
+    @Inject
     private ExternalContext externalContext;
 
     @Inject

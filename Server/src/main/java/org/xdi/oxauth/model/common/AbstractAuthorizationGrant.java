@@ -23,6 +23,7 @@ import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
 
 /**
@@ -230,7 +231,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     public String checkScopesPolicy(String requestedScopes) {
         this.scopes.clear();
 
-        Set<String> grantedScopes = ScopeChecker.instance().checkScopesPolicy(client, requestedScopes);
+        Set<String> grantedScopes = ServerUtil.bean(ScopeChecker.class).checkScopesPolicy(client, requestedScopes);
         this.scopes.addAll(grantedScopes);
 
         final StringBuilder grantedScopesSb = new StringBuilder();

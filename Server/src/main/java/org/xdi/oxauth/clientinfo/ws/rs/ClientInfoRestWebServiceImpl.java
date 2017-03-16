@@ -25,6 +25,7 @@ import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.ScopeService;
 
 /**
@@ -46,6 +47,9 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
 	@Inject
 	private ScopeService scopeService;
+
+	@Inject
+	private ClientService clientService;
 
 	@Inject
 	private AttributeService attributeService;
@@ -108,7 +112,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
                         GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
 
                         String attributeName = attribute.getName();
-                        Object attributeValue = client.getAttribute(attribute.getName());
+                        Object attributeValue = clientService.getAttribute(client, attribute.getName());
 
                         jsonObj.put(attributeName, attributeValue);
                     }
