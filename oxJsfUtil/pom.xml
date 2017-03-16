@@ -19,6 +19,10 @@
 			<artifactId>oxcore-service</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>javax.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>

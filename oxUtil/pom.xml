@@ -71,7 +71,6 @@
 		<dependency>
 			<groupId>javax.faces</groupId>
 			<artifactId>jsf-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
