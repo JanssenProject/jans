@@ -1,6 +1,5 @@
 package org.xdi.oxauth.service.job;
 
-import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 

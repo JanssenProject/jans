@@ -23,9 +23,6 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -60,19 +57,19 @@ public class KeyGeneratorTimer {
 
     // TODO: CDI: Fix
 //    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.debug("Initializing KeyGeneratorTimer");
-
-        this.isActive = new AtomicBoolean(false);
-
-        long interval = appConfiguration.getKeyRegenerationInterval();
-        if (interval <= 0) {
-            interval = DEFAULT_INTERVAL;
-        }
-
-        interval = interval * 3600L * 1000L;
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
-    }
+//    public void init() {
+//        log.debug("Initializing KeyGeneratorTimer");
+//
+//        this.isActive = new AtomicBoolean(false);
+//
+//        long interval = appConfiguration.getKeyRegenerationInterval();
+//        if (interval <= 0) {
+//            interval = DEFAULT_INTERVAL;
+//        }
+//
+//        interval = interval * 3600L * 1000L;
+//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
+//    }
 
     // TODO: CDI: Fix
 //    @Observer(EVENT_TYPE)
@@ -150,15 +147,6 @@ public class KeyGeneratorTimer {
         }
 
         return jsonObject;
-    }
-
-    /**
-     * Get KeyGeneratorTimer instance
-     *
-     * @return KeyGeneratorTimer instance
-     */
-    public static KeyGeneratorTimer instance() {
-        return (KeyGeneratorTimer) Component.getInstance(KeyGeneratorTimer.class);
     }
 
 }

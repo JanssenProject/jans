@@ -9,9 +9,11 @@ package org.xdi.oxauth.service;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -121,14 +123,6 @@ public class ApplianceService {
 
 	public String getApplianceInum() {
 		return appConfiguration.getApplianceInum();
-	}
-
-	/**
-	 * Get applianceService instance
-	 * @return ApplianceService instance
-	 */
-	public static ApplianceService instance() {
-		return (ApplianceService) Component.getInstance(ApplianceService.class);
 	}
 
 }
