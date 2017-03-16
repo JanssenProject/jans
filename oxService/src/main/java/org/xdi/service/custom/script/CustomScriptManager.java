@@ -20,20 +20,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.ejb.Asynchronous;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.ObservesAsync;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-
-import org.slf4j.Logger;
-
 import org.python.core.PyLong;
 import org.python.core.PyObject;
+import org.slf4j.Logger;
 import org.xdi.exception.PythonException;
 import org.xdi.model.ScriptLocationType;
 import org.xdi.model.SimpleCustomProperty;
@@ -115,8 +114,7 @@ public class CustomScriptManager implements Serializable {
 		}
 	}
 
-//	@Destroy
-	public void destroy() {
+	public void destroy(@BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
 		log.debug("Destroying custom scripts configurations");
 		if (this.customScriptConfigurations == null) {
 			return;
