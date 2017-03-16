@@ -29,7 +29,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.discovery.OpenIdConnectDiscoveryParamsValidator;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Javier Rojas Blum Date: 01.28.2013
@@ -41,6 +40,9 @@ public class WebFinger extends HttpServlet {
 
 	@Inject
     private Logger log;
+	
+	@Inject
+	private AppConfiguration appConfiguration;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -64,7 +66,6 @@ public class WebFinger extends HttpServlet {
         log.debug("Attempting to request OpenID Connect Discovery: " + resource + ", " + rel + ", Is Secure = " + httpRequest.isSecure());
 
         try {
-        	AppConfiguration appConfiguration = ServerUtil.instance("appConfiguration");
             if (OpenIdConnectDiscoveryParamsValidator.validateParams(resource, rel)) {
                 if (rel == null || rel.equals(REL_VALUE)) {
                     JSONObject jsonObj = new JSONObject();

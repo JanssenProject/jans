@@ -9,10 +9,10 @@ package org.xdi.oxauth.comp;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.Component;
-import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.model.ProgrammingLanguage;
@@ -35,13 +35,13 @@ public class IdGenServiceTest extends BaseComponentTest {
 	@Inject
 	private ConfigurationFactory configurationFactory;
 
+	@Inject
+	private CustomScriptService customScriptService;
+
 	private String idCustomScriptDn;
 
 	private CustomScript buildIdCustomScriptEntry(String idScript) {
-		final CustomScriptService customScriptService = (CustomScriptService) Component.getInstance(CustomScriptService.class);
-    	ConfigurationFactory configurationFactory = ServerUtil.instance(ConfigurationFactory.class);
-
-		String basedInum = configurationFactory.getConfiguration().getOrganizationInum();
+		String basedInum = configurationFactory.getAppConfiguration().getOrganizationInum();
 		String customScriptId = basedInum + "!" + INumGenerator.generate(2);
 		String dn = customScriptService.buildDn(customScriptId);
 

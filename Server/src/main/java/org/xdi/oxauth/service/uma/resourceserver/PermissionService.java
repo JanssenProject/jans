@@ -58,10 +58,6 @@ public class PermissionService {
     @Inject
     private ClientService clientService;
 
-    public static PermissionService instance() {
-        return ServerUtil.instance(PermissionService.class);
-    }
-
     public Pair<Boolean, Response> hasEnoughPermissionsWithTicketRegistration(UmaRPT p_rpt, List<ResourceSetPermission> p_rptPermissions, RsResourceType p_resourceType, List<RsScopeType> p_scopes) {
         final Pair<Boolean, Response> result = new Pair<Boolean, Response>(false, null);
         final ResourceSet resource = umaRsResourceService.getResource(p_resourceType);

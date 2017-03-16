@@ -10,7 +10,6 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STAT
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.Identity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,6 +47,7 @@ import org.xdi.oxauth.model.login.Credentials;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
@@ -97,7 +97,7 @@ public class AuthenticationService {
     @Inject
     private Identity identity;
 
-    @Inject(value = "#{facesContext.externalContext}", required = false)
+    @Inject
     private ExternalContext externalContext;
 
     @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)

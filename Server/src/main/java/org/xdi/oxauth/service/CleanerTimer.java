@@ -23,6 +23,7 @@ import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.jboss.seam.async.TimerSchedule;
 import org.jboss.seam.core.Events;
+import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -35,6 +36,7 @@ import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
+import org.xdi.oxauth.service.uma.RptManager;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -61,7 +63,7 @@ public class CleanerTimer {
     @Inject
     private GrantService grantService;
     @Inject
-    private RPTManager rptManager;
+    private RptManager rptManager;
     @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
     @Inject

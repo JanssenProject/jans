@@ -47,7 +47,7 @@ public class CheckSessionStatusRestWebServiceImpl {
 	@Inject
 	private SessionStateService sessionStateService;
 
-	@Inject(required = false)
+	@Inject
 	private Identity identity;
 
     @GET
