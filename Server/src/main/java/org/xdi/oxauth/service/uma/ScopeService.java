@@ -28,7 +28,6 @@ import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeType;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
-import org.xdi.oxauth.util.ServerUtil;
 
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
@@ -59,10 +58,6 @@ public class ScopeService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
-
-    public static ScopeService instance() {
-        return ServerUtil.instance(ScopeService.class);
-    }
 
     public List<ScopeDescription> getAllScopes() {
         try {

@@ -7,7 +7,6 @@
 package org.xdi.oxauth.auth;
 
 import java.io.Serializable;
-import java.security.Identity;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
@@ -74,7 +74,7 @@ public class Authenticator implements Serializable {
     @Inject
     private FacesMessages facesMessages;
 
-    @Inject(value = "#{facesContext.externalContext}", required = false)
+    @Inject
     private ExternalContext externalContext;
 
     private String authAcr;

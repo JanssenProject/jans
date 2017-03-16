@@ -9,11 +9,12 @@ package org.xdi.oxauth.auth;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.security.Identity;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -21,16 +22,14 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.core.filter.AbstractFilter;
-import org.jboss.seam.security.NotLoggedInException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -39,6 +38,7 @@ import org.xdi.oxauth.model.token.ClientAssertion;
 import org.xdi.oxauth.model.token.ClientAssertionType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientFilterService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
@@ -50,10 +50,13 @@ import org.xdi.util.StringHelper;
  * @version March 4, 2016
  */
 @WebFilter(asyncSupported = true)
-public class AuthenticationFilter extends AbstractFilter {
+public class AuthenticationFilter implements Filter {
 
     @Inject
     private Logger log;
+    
+    @Inject
+    private Authenticator authenticator;
 
     @Inject
     private SessionStateService sessionStateService;
@@ -67,45 +70,24 @@ public class AuthenticationFilter extends AbstractFilter {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-	private AppConfiguration appConfiguration;
-
-    // TODO: CDI: Fix
-//	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(AppConfiguration appConfiguration, StaticConfiguration staticConfiguration) {
-		this.appConfiguration = appConfiguration;
-	}
+    @Inject
+    private AppConfiguration appConfiguration;
+    
+    @Inject
+    private Identity identity;
 
     private String realm;
     public static final String REALM = "oxAuth";
 
-    private void init() {
-        if (sessionStateService == null) {
-            sessionStateService = SessionStateService.instance();
-        }
-        if (clientService == null) {
-            clientService = (ClientService) Component.getInstance(ClientService.class, true);
-        }
-        if (clientFilterService == null) {
-            clientFilterService = ClientFilterService.instance();
-        }
-        if (errorResponseFactory == null) {
-            errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
-        }
-    }
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+	}
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                          final FilterChain filterChain) throws IOException, ServletException {
         final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         final HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-
-        final Identity identity = Identity.instance();
-        init();
-
-        // Workaround for tomcat
-        if (appConfiguration == null) {
-        	appConfiguration = (AppConfiguration) Component.getInstance("appConfiguration", true);
-        }
 
         try {
             final String requestUrl = httpRequest.getRequestURL().toString();
@@ -115,20 +97,20 @@ public class AuthenticationFilter extends AbstractFilter {
                 if (httpRequest.getParameter("client_assertion") != null
                         && httpRequest.getParameter("client_assertion_type") != null) {
 					log.debug("Starting JWT token endpoint authentication");
-                    processJwtAuth(errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                    processJwtAuth(httpRequest, httpResponse, filterChain);
                 } else if (httpRequest.getHeader("Authorization") != null && httpRequest.getHeader("Authorization").startsWith("Basic ")) {
 					log.debug("Starting Basic Auth token endpoint authentication");
-                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
                 } else {
 					log.debug("Starting POST Auth token endpoint authentication");
-                    processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                    processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse, filterChain);
                 }
             } else if (httpRequest.getHeader("Authorization") != null) {
                 String header = httpRequest.getHeader("Authorization");
                 if (header.startsWith("Bearer ")) {
                     processBearerAuth(httpRequest, httpResponse, filterChain);
                 } else if (header.startsWith("Basic ")) {
-                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
+                    processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
                 } else {
                     httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
 
@@ -163,7 +145,7 @@ public class AuthenticationFilter extends AbstractFilter {
     private void processSessionAuth(ErrorResponseFactory errorResponseFactory, String p_sessionState, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
         boolean requireAuth;
 
-        requireAuth = !authenticator().authenticateBySessionState(p_sessionState);
+        requireAuth = !authenticator.authenticateBySessionState(p_sessionState);
         log.trace("Process Session Auth, sessionState = {0}, requireAuth = {1}", p_sessionState, requireAuth);
 
         if (!requireAuth) {
@@ -176,19 +158,19 @@ public class AuthenticationFilter extends AbstractFilter {
         }
 
         if (requireAuth) {
-            sendError(errorResponseFactory, p_httpResponse);
+            sendError(p_httpResponse);
         }
     }
 
     private void processBasicAuth(ClientService clientService, ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                                  FilterChain filterChain, Identity identity) {
+                                  FilterChain filterChain) {
         boolean requireAuth = true;
 
         try {
             String header = servletRequest.getHeader("Authorization");
             if (header != null && header.startsWith("Basic ")) {
                 String base64Token = header.substring(6);
-                String token = new String(Base64.decode(base64Token), Util.UTF8_STRING_ENCODING);
+                String token = new String(Base64.decodeBase64(base64Token), Util.UTF8_STRING_ENCODING);
 
                 String username = "";
                 String password = "";
@@ -214,19 +196,14 @@ public class AuthenticationFilter extends AbstractFilter {
                         identity.getCredentials().setUsername(username);
                         identity.getCredentials().setPassword(password);
 
-                        final Authenticator authenticator = authenticator();
                         requireAuth = !authenticator.authenticateWebService();
                     }
                 }
             }
 
-            try {
-                if (!requireAuth) {
-                    filterChain.doFilter(servletRequest, servletResponse);
-                    return;
-                }
-            } catch (NotLoggedInException ex) {
-                requireAuth = true;
+            if (!requireAuth) {
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
             }
         } catch (UnsupportedEncodingException ex) {
             log.info("Basic authentication failed", ex);
@@ -240,15 +217,11 @@ public class AuthenticationFilter extends AbstractFilter {
 
         try {
             if (requireAuth && !identity.isLoggedIn()) {
-                sendError(errorResponseFactory, servletResponse);
+                sendError(servletResponse);
             }
         } catch (IOException ex) {
             log.error(ex.getMessage(), ex);
         }
-    }
-
-    private Authenticator authenticator() {
-        return (Authenticator) Component.getInstance(Authenticator.class, true);
     }
 
     private void processBearerAuth(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
@@ -270,7 +243,7 @@ public class AuthenticationFilter extends AbstractFilter {
     }
 
     private void processPostAuth(ClientService clientService, ClientFilterService clientFilterService, ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                                 FilterChain filterChain, Identity identity) {
+                                 FilterChain filterChain) {
         try {
             String clientId = "";
             String clientSecret = "";
@@ -286,7 +259,6 @@ public class AuthenticationFilter extends AbstractFilter {
         	log.debug("requireAuth: '{0}'", requireAuth);
 
             if (requireAuth) {
-                Authenticator authenticator = authenticator();
                 if (isExistUserPassword) {
                     Client client = clientService.getClient(clientId);
                     if (client != null && AuthenticationMethod.CLIENT_SECRET_POST == client.getAuthenticationMethod()) {
@@ -317,17 +289,13 @@ public class AuthenticationFilter extends AbstractFilter {
                 }
             }
 
-            try {
-                if (!requireAuth) {
-                    filterChain.doFilter(servletRequest, servletResponse);
-                    return;
-                }
-            } catch (NotLoggedInException ex) {
-                requireAuth = true;
+            if (!requireAuth) {
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
             }
 
             if (requireAuth && !identity.isLoggedIn()) {
-                sendError(errorResponseFactory, servletResponse);
+                sendError(servletResponse);
             }
         } catch (ServletException ex) {
             log.error("Post authentication failed: {0}", ex, ex.getMessage());
@@ -338,8 +306,8 @@ public class AuthenticationFilter extends AbstractFilter {
         }
     }
 
-    private void processJwtAuth(ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                                FilterChain filterChain, Identity identity) {
+    private void processJwtAuth(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+                                FilterChain filterChain) {
         boolean authorized = false;
 
         try {
@@ -361,7 +329,6 @@ public class AuthenticationFilter extends AbstractFilter {
                         identity.getCredentials().setUsername(username);
                         identity.getCredentials().setPassword(password);
 
-                        final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
                         authenticator.authenticateWebService(true);
                         authorized = true;
                     }
@@ -369,8 +336,6 @@ public class AuthenticationFilter extends AbstractFilter {
             }
 
             filterChain.doFilter(servletRequest, servletResponse);
-        } catch (NotLoggedInException ex) {
-            log.info("JWT authentication failed: {0}", ex, ex.getMessage());
         } catch (ServletException ex) {
             log.info("JWT authentication failed: {0}", ex, ex.getMessage());
         } catch (IOException ex) {
@@ -381,13 +346,13 @@ public class AuthenticationFilter extends AbstractFilter {
 
         try {
             if (!authorized) {
-                sendError(errorResponseFactory, servletResponse);
+                sendError(servletResponse);
             }
         } catch (IOException ex) {
         }
     }
 
-    private void sendError(ErrorResponseFactory errorResponseFactory, HttpServletResponse servletResponse) throws IOException {
+    private void sendError(HttpServletResponse servletResponse) throws IOException {
         PrintWriter out = null;
         try {
             out = servletResponse.getWriter();
@@ -416,5 +381,9 @@ public class AuthenticationFilter extends AbstractFilter {
     public void setRealm(String realm) {
         this.realm = realm;
     }
+
+	@Override
+	public void destroy() {
+	}
 
 }

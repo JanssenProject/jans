@@ -61,13 +61,4 @@ public class ScopeChecker {
         return grantedScopes;
     }
 
-    /**
-     * Get ScopeChecker instance
-     *
-     * @return ScopeChecker instance
-     */
-    public static ScopeChecker instance() {
-        return (ScopeChecker) Component.getInstance(ScopeChecker.class);
-    }
-
 }

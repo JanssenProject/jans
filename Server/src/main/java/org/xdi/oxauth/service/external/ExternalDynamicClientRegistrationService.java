@@ -61,8 +61,4 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 		return result;
 	}
 
-    public static ExternalDynamicClientRegistrationService instance() {
-        return (ExternalDynamicClientRegistrationService) Component.getInstance(ExternalDynamicClientRegistrationService.class);
-    }
-
 }

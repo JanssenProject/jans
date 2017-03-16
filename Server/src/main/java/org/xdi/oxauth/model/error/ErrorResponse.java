@@ -11,7 +11,8 @@ import java.net.URLEncoder;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for error responses.
@@ -21,7 +22,7 @@ import org.jboss.seam.log.Logging;
  */
 public abstract class ErrorResponse {
 
-    private final static Log LOG = Logging.getLog(ErrorResponse.class);
+    private final static Logger log = LoggerFactory.getLogger(ErrorResponse.class);
 
 	private String errorDescription;
 	private String errorUri;

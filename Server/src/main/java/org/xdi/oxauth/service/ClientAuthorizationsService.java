@@ -13,9 +13,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.util.StringHelper;

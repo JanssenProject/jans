@@ -12,9 +12,6 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 
 import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -42,9 +39,6 @@ public class OpenIdConnectDiscoveryAction implements Serializable {
 
 	@Inject
 	private Logger log;
-
-	@Inject
-	private Instance<?> instance;
 
 	@Inject
 	private RegistrationAction registrationAction;

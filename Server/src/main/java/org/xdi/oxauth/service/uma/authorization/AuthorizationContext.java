@@ -22,6 +22,7 @@ import org.xdi.oxauth.model.uma.ClaimToken;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -82,7 +83,7 @@ public class AuthorizationContext extends ExternalScriptContext {
     }
 
     public String getUserClaim(String p_claimName) {
-        GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(p_claimName);
+        GluuAttribute gluuAttribute = ServerUtil.bean(AttributeService.class).getByClaimName(p_claimName);
 
         if (gluuAttribute != null) {
             String ldapClaimName = gluuAttribute.getName();
