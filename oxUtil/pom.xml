@@ -68,7 +68,6 @@
 			<artifactId>httpclient</artifactId>
 		</dependency>
 
-		<!-- JSF -->
 		<dependency>
 			<groupId>javax.faces</groupId>
 			<artifactId>jsf-api</artifactId>
