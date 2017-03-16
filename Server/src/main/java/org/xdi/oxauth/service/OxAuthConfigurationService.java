@@ -10,8 +10,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 
-import org.jboss.seam.web.ServletContexts;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 
@@ -22,10 +22,14 @@ import org.xdi.util.StringHelper;
  */
 @ApplicationScoped
 @Named
+@Deprecated //TODO: We don't need this class
 public class OxAuthConfigurationService {
 
 	@Inject
 	private AppConfiguration appConfiguration;
+	
+	@Inject
+	private ServletContext context;
 
 	public String getCssLocation() {
 		if (StringHelper.isEmpty(appConfiguration.getCssLocation())) {
@@ -42,7 +46,7 @@ public class OxAuthConfigurationService {
 
 	public String getJsLocation() {
 		if (StringHelper.isEmpty(appConfiguration.getJsLocation())) {
-			String contextPath = ServletContexts.instance().getRequest().getContextPath();
+			String contextPath = context.getContextPath();
 			return contextPath + "/js";
 		} else {
 			return appConfiguration.getJsLocation();
@@ -51,7 +55,7 @@ public class OxAuthConfigurationService {
 
 	public String getImgLocation() {
 		if (StringHelper.isEmpty(appConfiguration.getImgLocation())) {
-			String contextPath = ServletContexts.instance().getRequest().getContextPath();
+			String contextPath = context.getContextPath();
 			return contextPath + "/img";
 		} else {
 			return appConfiguration.getImgLocation();

@@ -6,10 +6,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.jboss.weld.context.bound.BoundRequestContext;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jboss.weld.context.bound.BoundRequestContext;
 
 /**
  * Weld implementation. Associated storage is put in

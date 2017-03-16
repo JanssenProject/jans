@@ -19,6 +19,7 @@ import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Movchan
@@ -66,8 +67,8 @@ public class LdapStatusTimer {
     }
 
     private void processInt() {
-    	LdapEntryManager ldapEntryManager = (LdapEntryManager) Component.getInstance(AppInitializer.LDAP_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
-    	List<LdapEntryManager> ldapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
+    	LdapEntryManager ldapEntryManager = ServerUtil.bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME); 
+    	List<LdapEntryManager> ldapAuthEntryManagers = ServerUtil.bean(List.class, AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME); 
 
     	logConnectionProviderStatistic(ldapEntryManager, "connectionProvider", "bindConnectionProvider");
 

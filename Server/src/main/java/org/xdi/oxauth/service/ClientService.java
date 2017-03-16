@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import javax.ejb.Stateless;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -293,7 +292,9 @@ public class ClientService {
     /**
      * Remove all clients from caches after receiving event
      */
-    @Observes
+    
+    // TODO: CDI
+//    @Observes
     //@Event<Cli>> (EVENT_CLEAR_CLIENT_CACHE)
     public void clearClientCache() {
         log.debug("Clearing up clients cache");

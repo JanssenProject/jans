@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.xdi</groupId>
 		<artifactId>oxauth</artifactId>
-		<version>3.1.0-SNAPSHOT</version>
+		<version>3.1.0.weld-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -29,46 +29,10 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<skipTests>true</skipTests>  <!-- set it to false when test sources appear -->
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
@@ -92,15 +56,15 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxLdap-annotations</artifactId>
+			<artifactId>oxcore-ldap-annotations</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxUtil</artifactId>
+			<artifactId>oxcore-util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxModel</artifactId>
+			<artifactId>oxcore-model</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
