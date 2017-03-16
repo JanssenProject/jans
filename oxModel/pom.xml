@@ -2,49 +2,26 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxModel</artifactId>
+	<artifactId>oxcore-model</artifactId>
 	<packaging>jar</packaging>
 	<name>oxModel</name>
 
 	<parent>
 		<groupId>org.xdi</groupId>
-		<artifactId>oxCore</artifactId>
+		<artifactId>oxcore</artifactId>
 		<version>3.1.0.weld-SNAPSHOT</version>
 	</parent>
 
-	<prerequisites>
-		<maven>${maven.min-version}</maven>
-	</prerequisites>
-
 	<dependencies>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>oxUtil</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxLdap-annotations</artifactId>
+			<artifactId>oxcore-ldap-annotations</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-		</dependency>
-
-		<!-- Logging -->
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
 	</dependencies>
 

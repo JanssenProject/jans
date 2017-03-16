@@ -8,13 +8,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.contexts.Lifecycle;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.model.CustomScript;
 
@@ -29,10 +26,10 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
 	private static final long serialVersionUID = -6187179012715072064L;
 
-	@Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
     public void add(CustomScript customScript) {

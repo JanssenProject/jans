@@ -6,7 +6,6 @@
 
 package org.xdi.service.metric;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,13 +16,9 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import javax.inject.Inject;
+import javax.inject.Named;
 
-import org.jboss.seam.Component;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.contexts.Lifecycle;
-import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.counter.CounterMetricData;
@@ -49,13 +44,16 @@ import com.codahale.metrics.Timer;
  * @author Yuriy Movchan Date: 08/03/2015
  */
 public class LdapEntryReporter extends ScheduledReporter {
+	
+	@Inject @Named
+	private MetricService metricService;
     /**
      * Returns a new {@link Builder} for {@link LdapEntryReporter}.
      *
      * @param registry the registry to report
      * @return a {@link Builder} instance for a {@link LdapEntryReporter}
      */
-    public static Builder forRegistry(MetricRegistry registry, String metricServiceComponentName) {
+    public static Builder forRegistry(MetricRegistry registry, /* TODO: CDI review */ String metricServiceComponentName) {
         return new Builder(registry, metricServiceComponentName);
     }
 
@@ -170,7 +168,6 @@ public class LdapEntryReporter extends ScheduledReporter {
 
 	private void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
         final Date currentRunTime = new Date(clock.getTime());
-		final MetricService metricService = (MetricService) Component.getInstance(metricServiceComponentName);
 
         List<MetricEntry> metricEntries = new ArrayList<MetricEntry>();
         if (counters != null && !counters.isEmpty()) {

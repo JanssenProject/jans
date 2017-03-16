@@ -3,9 +3,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.xdi</groupId>
-	<artifactId>oxCore</artifactId>
+	<artifactId>oxcore</artifactId>
 	<packaging>pom</packaging>
 	<version>3.1.0.weld-SNAPSHOT</version>
+
 	<name>oxCore</name>
 	<url>http://ox.gluu.org</url>
 
@@ -25,6 +26,9 @@
 		<resteasy.version>2.3.4.Final</resteasy.version>
 		<gxt.version>3.0.1</gxt.version>
 		<gwt.version>2.5.0</gwt.version>
+
+		<log4j.version>2.7</log4j.version>
+		<slf4j.version>1.7.24</slf4j.version>
 	</properties>
 
 	<repositories>
@@ -90,6 +94,12 @@
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>3.0.1</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>javax.persistence</groupId>
+				<artifactId>persistence-api</artifactId>
+				<version>1.0.2</version>
 			</dependency>
 
 			<!-- Commons libs -->
@@ -103,46 +113,60 @@
 				<artifactId>commons-codec</artifactId>
 				<version>1.5</version>
 			</dependency>
-	        <dependency>
-	            <groupId>commons-codec</groupId>
-	            <artifactId>commons-codec</artifactId>
-	            <version>1.5</version>
+			<dependency>
+				<groupId>commons-configuration</groupId>
+				<artifactId>commons-configuration</artifactId>
+				<version>1.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-exec</artifactId>
+				<version>1.1</version>
 			</dependency>
 
 			<!-- Logging -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-api</artifactId>
-				<version>2.7</version>
+				<version>${log4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-1.2-api</artifactId>
-				<version>2.7</version>
+				<version>${log4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
-				<version>2.7</version>
+				<version>${log4j.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
-				<version>1.7.2</version>
+				<version>${slf4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.7.2</version>
+				<version>${slf4j.version}</version>
 				<scope>test</scope>
 			</dependency>
 
 			<!-- Cache -->
 			<dependency>
-				<groupId>net.sf.ehcache</groupId>
-				<artifactId>ehcache-core</artifactId>
-				<version>2.4.3</version>
+				<groupId>net.jodah</groupId>
+				<artifactId>expiringmap</artifactId>
+				<version>0.5.7</version>
+			</dependency>
+			<dependency>
+				<groupId>net.spy</groupId>
+				<artifactId>spymemcached</artifactId>
+				<version>2.12.2</version>
+			</dependency>
+			<dependency>
+				<groupId>redis.clients</groupId>
+				<artifactId>jedis</artifactId>
+				<version>2.9.0</version>
 			</dependency>
 
 			<!-- Jackson -->
@@ -204,6 +228,39 @@
 				<groupId>io.dropwizard.metrics</groupId>
 				<artifactId>metrics-core</artifactId>
 				<version>3.1.2</version>
+			</dependency>
+
+			<!-- Jython -->
+			<dependency>
+				<groupId>org.python</groupId>
+				<artifactId>jython</artifactId>
+				<version>2.5.3</version>
+			</dependency>
+
+			<!-- Tomcat -->
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-catalina</artifactId>
+				<version>7.0.67</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-coyote</artifactId>
+				<version>7.0.67</version>
+			</dependency>
+
+			<!-- LDAP -->
+			<dependency>
+				<groupId>com.unboundid</groupId>
+				<artifactId>unboundid-ldapsdk</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+
+			<!-- Other -->
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>1.4.7</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

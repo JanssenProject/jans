@@ -1,31 +1,30 @@
 package org.xdi.service.cache;
 
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.cache.CacheProvider;
-import org.jboss.seam.log.Log;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
 
-import static org.jboss.seam.ScopeType.APPLICATION;
+import org.slf4j.Logger;
 
 /**
  * @author yuriyz on 02/21/2017.
  */
-@Name("cachedProviderAdapter")
-@Scope(APPLICATION)
-@AutoCreate
-@Startup
-public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider<?>> {
+@ApplicationScoped
+@Named
+public class CacheProviderFactory {
 
-    @Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
-    @In(required = true)
+    @Inject
     private CacheConfiguration cacheConfiguration;
 
-    private AbstractCacheProvider<?> cacheProvider = null;
-
-    @Create
-    public void create() {
+    @Produces @ApplicationScoped
+    public CacheProvider getCacheProvider() {
         log.debug("Started to create cache provider");
+
+        AbstractCacheProvider<?> cacheProvider = null;
 
         CacheProviderType cacheProviderType = cacheConfiguration.getCacheProviderType();
 
@@ -51,35 +50,8 @@ public class CacheProviderAdapter extends AbstractCacheProvider<CacheProvider<?>
         }
 
         cacheProvider.create();
-    }
-
-    @Destroy
-    public void destroy() {
-        cacheProvider.destroy();
-    }
-
-    @Override
-    public CacheProvider<?> getDelegate() {
+        
         return cacheProvider;
     }
 
-    @Override
-    public Object get(String region, String key) {
-        return cacheProvider.get(region, key);
-    }
-
-    @Override
-    public void put(String region, String key, Object object) {
-        cacheProvider.put(region, key, object);
-    }
-
-    @Override
-    public void remove(String region, String key) {
-        cacheProvider.remove(region, key);
-    }
-
-    @Override
-    public void clear() {
-        cacheProvider.clear();
-    }
 }

@@ -3,37 +3,21 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>oxSaml</artifactId>
+	<artifactId>oxcore-saml</artifactId>
 	<name>oxSaml</name>
 	<packaging>jar</packaging>
 
 	<parent>
 		<groupId>org.xdi</groupId>
-		<artifactId>oxCore</artifactId>
+		<artifactId>oxcore</artifactId>
 		<version>3.1.0.weld-SNAPSHOT</version>
 	</parent>
-
-	<prerequisites>
-		<maven>${maven.min-version}</maven>
-	</prerequisites>
-
-	<build>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources</directory>
-			</testResource>
-		</testResources>
-	</build>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxUtil</artifactId>
+			<artifactId>oxcore-util</artifactId>
 			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
 		</dependency>
 	</dependencies>
 </project>

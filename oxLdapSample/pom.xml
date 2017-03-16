@@ -3,13 +3,13 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.gluu</groupId>
-	<artifactId>oxLdapSample</artifactId>
+	<artifactId>oxcore-ldap-sample</artifactId>
 	<name>oxLdapSample</name>
 	<description>Sample project to show oxLdap functionality</description>
 
 	<parent>
 		<groupId>org.xdi</groupId>
-		<artifactId>oxCore</artifactId>
+		<artifactId>oxcore</artifactId>
 		<version>3.1.0.weld-SNAPSHOT</version>
 	</parent>
 
@@ -20,12 +20,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxLdap</artifactId>
+			<artifactId>oxcore-ldap</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
-			<artifactId>oxLdap-annotations</artifactId>
+			<artifactId>oxcore-ldap-annotations</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

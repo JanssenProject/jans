@@ -1,20 +1,24 @@
 package org.xdi.service.cache;
 
+import java.io.Serializable;
+
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.apache.commons.lang.SerializationUtils;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-
-import java.io.Serializable;
 
 /**
  * @author yuriyz on 02/23/2017.
  */
 public class RedisProvider extends AbstractCacheProvider<JedisPool> {
 
-    private static final Log log = Logging.getLog(InMemoryCacheProvider.class);
+	@Inject
+    private Logger log;
 
     private JedisPool pool;
 
@@ -50,6 +54,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
         }
     }
 
+    @PreDestroy
     public void destroy() {
         log.debug("Destroying RedisProvider");
 

@@ -15,29 +15,26 @@ import java.io.Serializable;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.SerializationUtils;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 
 /**
  * Service class to serialize/deserialize object to file
  *
  * @author Yuriy Movchan Date: 01/27/2014
  */
-@Name("objectSerializationService")
-@Scope(ScopeType.APPLICATION)
-@AutoCreate
+@Stateless
+@Named
 public class ObjectSerializationService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
 	public boolean saveObject(String path, Serializable obj, boolean append) {
 		File file = new File(path);
@@ -106,14 +103,5 @@ public class ObjectSerializationService {
 		File file = new File(path);
 		FileUtils.deleteQuietly(file);
 	}
-
-    /**
-     * Get objectSerializationService instance
-     *
-     * @return ObjectSerializationService instance
-     */
-    public static ObjectSerializationService instance() {
-        return (ObjectSerializationService) Component.getInstance(ObjectSerializationService.class);
-    }
 
 }

@@ -11,12 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.log.Log;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.service.custom.inject.UpdateScript;
 import org.xdi.util.StringHelper;
 
 /**
@@ -34,18 +35,17 @@ public class ExternalScriptService implements Serializable {
 	protected List<CustomScriptConfiguration> customScriptConfigurations;
 	protected CustomScriptConfiguration defaultExternalCustomScript;
 
-	@Logger
-	protected Log log;
+	@Inject
+	protected Logger log;
 	
-	@In
+	@Inject
 	protected CustomScriptManager customScriptManager;
 	
 	public ExternalScriptService(CustomScriptType customScriptType) {
 		this.customScriptType = customScriptType;
 	}
 
-	@Observer(CustomScriptManager.MODIFIED_EVENT_TYPE)
-	public void reload() {
+	public void reload(@Observes @UpdateScript String event) {
 		// Get actual list of external configurations
 		List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(customScriptType);
 		addExternalConfigurations(newCustomScriptConfigurations);

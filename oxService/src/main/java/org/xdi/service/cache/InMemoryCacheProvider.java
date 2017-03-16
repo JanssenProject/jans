@@ -2,10 +2,12 @@ package org.xdi.service.cache;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 /**
  * @author yuriyz on 02/21/2017.
@@ -13,7 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
-    private static final Log log = Logging.getLog(InMemoryCacheProvider.class);
+	@Inject
+    private Logger log;
 
     private ExpiringMap<String, Object> map = ExpiringMap.builder().build();
 
@@ -37,6 +40,7 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
         }
     }
 
+    @PreDestroy
     public void destroy() {
         log.debug("Destroying InMemoryCacheProvider");
 

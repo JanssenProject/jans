@@ -2,18 +2,16 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- *//**
- * 
  */
 package org.xdi.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.SchemaEntry;
 import org.xdi.util.OxConstants;
@@ -29,16 +27,16 @@ import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
  */
 public abstract class AttributeService {
 
-	@Logger
-	protected Log log;
+	@Inject
+	protected Logger log;
 
-	@In
+	@Inject
     protected LdapEntryManager ldapEntryManager;
 	
-	@In
+	@Inject
 	protected SchemaService schemaService;
 
-	@In
+	@Inject
 	protected CacheService cacheService;
 	
     public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {

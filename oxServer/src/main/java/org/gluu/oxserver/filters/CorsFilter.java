@@ -10,7 +10,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CORS wrapper to support both Tomcat and Jetty
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class CorsFilter implements Filter {
 
-	private static final Logger LOG = Logger.getLogger(CorsFilter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CorsFilter.class);
 
 	private static final String CORS_FILTERS[] = { "org.apache.catalina.filters.CorsFilter",
 			"org.eclipse.jetty.servlets.CrossOriginFilter" };

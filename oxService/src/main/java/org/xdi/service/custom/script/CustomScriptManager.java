@@ -20,20 +20,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.ejb.Asynchronous;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.ObservesAsync;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+
+import org.slf4j.Logger;
+
 import org.python.core.PyLong;
 import org.python.core.PyObject;
 import org.xdi.exception.PythonException;
@@ -44,6 +42,8 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.PythonService;
+import org.xdi.service.custom.inject.ReloadScript;
+import org.xdi.service.custom.inject.UpdateScript;
 import org.xdi.util.StringHelper;
 
 /**
@@ -51,9 +51,8 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@Scope(ScopeType.APPLICATION)
-@Name("customScriptManager")
-@AutoCreate
+@ApplicationScoped
+@Named
 public class CustomScriptManager implements Serializable {
 
 	private static final long serialVersionUID = -4225890597520443390L;
@@ -64,14 +63,17 @@ public class CustomScriptManager implements Serializable {
     
     public final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "oxModuleProperty", "gluuStatus" };
 
-	@Logger
-	protected Log log;
+	@Inject
+	protected Logger log;
 
-	@In
+	@Inject
 	private PythonService pythonService;
 	
-	@In(value = "customScriptService")
+	@Inject @Named("customScriptService")
 	protected AbstractCustomScriptService customScriptService;
+
+	@Inject @UpdateScript
+	private Event<String> event;
 
 	protected List<CustomScriptType> supportedCustomScriptTypes;
 	private Map<String, CustomScriptConfiguration> customScriptConfigurations;
@@ -89,12 +91,11 @@ public class CustomScriptManager implements Serializable {
 
 		reload();
 
-		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
+// TODO: CDI
+//		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
     }
 
-	@Observer(EVENT_TYPE)
-	@Asynchronous
-	public void reloadTimerEvent() {
+	public void reloadTimerEvent(@ObservesAsync @ReloadScript String event) {
 		if (this.isActive.get()) {
 			return;
 		}
@@ -131,7 +132,7 @@ public class CustomScriptManager implements Serializable {
 		boolean modified = reloadImpl();
 		
 		if (modified) {
-			Events.instance().raiseEvent(MODIFIED_EVENT_TYPE);
+			event.fireAsync(MODIFIED_EVENT_TYPE);
 		}
 	}
 
@@ -399,9 +400,5 @@ public class CustomScriptManager implements Serializable {
     public List<CustomScriptType> getSupportedCustomScriptTypes() {
 		return supportedCustomScriptTypes;
 	}
-
-	public static CustomScriptManager instance() {
-        return (CustomScriptManager) Component.getInstance(CustomScriptManager.class);
-    }
 
 }
