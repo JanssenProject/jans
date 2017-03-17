@@ -44,10 +44,10 @@ import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.login.Credentials;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Credentials;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -98,6 +98,9 @@ public class AuthenticationService {
 
     @Inject
     private Identity identity;
+    
+    @Inject
+    private Credentials credentials;
 
     @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
@@ -137,7 +140,6 @@ public class AuthenticationService {
      * @return <code>true</code> if success, otherwise <code>false</code>.
      */
     public boolean authenticate(String userName, String password) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
         log.debug("Authenticating user with LDAP: username: '{0}', credentials: '{1}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
@@ -145,9 +147,9 @@ public class AuthenticationService {
         com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
         try {
             if ((this.ldapAuthConfigs == null) || (this.ldapAuthConfigs.size() == 0)) {
-                authenticated = localAuthenticate(credentials, userName, password);
+                authenticated = localAuthenticate(userName, password);
             } else {
-                authenticated = externalAuthenticate(credentials, userName, password);
+                authenticated = externalAuthenticate(userName, password);
             }
         } finally {
             timerContext.stop();
@@ -178,7 +180,7 @@ public class AuthenticationService {
         }
     }
 
-    private boolean localAuthenticate(Credentials credentials, String userName, String password) {
+    private boolean localAuthenticate(String userName, String password) {
         User user = userService.getUser(userName);
         if (user != null) {
             if (!checkUserStatus(user)) {
@@ -200,7 +202,7 @@ public class AuthenticationService {
         return false;
     }
 
-    private boolean externalAuthenticate(Credentials credentials, String keyValue, String password) {
+    private boolean externalAuthenticate(String keyValue, String password) {
         for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
             GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
             LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
@@ -215,7 +217,7 @@ public class AuthenticationService {
                 localPrimaryKey = ldapAuthConfig.getLocalPrimaryKey();
             }
 
-            boolean authenticated = authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+            boolean authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
             if (authenticated) {
                 return authenticated;
             }
@@ -225,10 +227,8 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-
         if (this.ldapAuthConfigs == null) {
-            return authenticate(credentials, null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+            return authenticate(null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
         }
 
         boolean authenticated = false;
@@ -239,7 +239,7 @@ public class AuthenticationService {
                 GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
                 LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
 
-                authenticated = authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+                authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
                 if (authenticated) {
                     break;
                 }
@@ -264,11 +264,6 @@ public class AuthenticationService {
      * Utility method which can be used in custom scripts
      */
     public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-        return authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
-    }
-
-    public boolean authenticate(Credentials credentials, GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}', credentials: '{2}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
         List<?> baseDNs;
@@ -537,7 +532,7 @@ public class AuthenticationService {
         }
     }
 
-    public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
+    public static Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
         final Map<String, String> result = new HashMap<String, String>();
         if (!requestParameterMap.isEmpty()) {
             final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();

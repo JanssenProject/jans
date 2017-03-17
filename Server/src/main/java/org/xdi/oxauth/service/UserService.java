@@ -46,48 +46,10 @@ public class UserService {
     private LdapEntryManager ldapEntryManager;
 
     @Inject
-    private AuthenticationService authenticationService;
-
-    @Inject
     private InumService inumService;
 
     @Inject
     private StaticConfiguration staticConfiguration;
-
-    /**
-     * Authenticate user
-     *
-     * @param userName The username
-     * @return <code>true</code> if success, otherwise <code>false</code>
-     */
-    public boolean authenticate(String userName) {
-        return authenticationService.authenticate(userName);
-    }
-
-    /**
-     * Authenticate user
-     *
-     * @param userName The username
-     * @param password The user's pasword
-     * @return <code>true</code> if success, otherwise <code>false</code>
-     */
-    public boolean authenticate(String userName, String password) {
-        return authenticationService.authenticate(userName, password);
-    }
-
-    /**
-     * Authenticate user
-     *
-     * @param keyValue The value of authentication key
-     * @param password The user's password
-     * @param primaryKey Authentication key attribute name
-     * @param localPrimaryKey Local authentication key attribute name
-     * @return <code>true</code> if success, otherwise <code>false</code>
-     */
-    @Deprecated
-    public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        return authenticationService.authenticate(keyValue, password, primaryKey, localPrimaryKey);
-    }
 
     /**
      * returns User by Dn
