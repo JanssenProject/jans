@@ -71,32 +71,26 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.mortbay.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <connectors>
-                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                            <port>${jetty.http.port}</port>
-                            <maxIdleTime>3600000</maxIdleTime>
-                        </connector>
-                    </connectors>
-                    <scanIntervalSeconds>10</scanIntervalSeconds>
-                    <webApp>
-                        <contextPath>/${project.build.finalName}</contextPath>
-<!--
-                        <jettyEnvXml>src/main/webapp-jetty/WEB-INF/jetty-env.xml</jettyEnvXml>
--->
-                    </webApp>
-<!--
-                    <contextXml>src/main/webapp-jetty/WEB-INF/jetty-context.xml</contextXml>
- -->
-                    <!-- if you don't want to use war:inplace, use this path instead -->
-                    <!--
-                       <webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory>
-                    -->
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<configuration>
+					<connectors>
+						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+							<port>${jetty.http.port}</port>
+							<maxIdleTime>3600000</maxIdleTime>
+						</connector>
+					</connectors>
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<webApp>
+						<contextPath>/${project.build.finalName}</contextPath>
+						<!-- <jettyEnvXml>src/main/webapp-jetty/WEB-INF/jetty-env.xml</jettyEnvXml> -->
+					</webApp>
+					<!-- <contextXml>src/main/webapp-jetty/WEB-INF/jetty-context.xml</contextXml> -->
+					<!-- if you don't want to use war:inplace, use this path instead -->
+					<!-- <webAppSourceDirectory>${project.build.directory}/${project.build.finalName}</webAppSourceDirectory> -->
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -127,6 +121,34 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-util</artifactId>
 		</dependency>
+
+		<!-- Weld -->
+		<dependency>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.spec.javax.annotation</groupId>
+			<artifactId>jboss-annotations-api_1.2_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
@@ -214,20 +236,12 @@
 			<artifactId>mvel2</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
+			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.unboundid</groupId>
-			<artifactId>unboundid-ldapsdk</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
@@ -250,10 +264,10 @@
 
 		<!-- OmniFaces -->
 		<dependency>
-		    <groupId>org.omnifaces</groupId>
-		    <artifactId>omnifaces</artifactId>
+			<groupId>org.omnifaces</groupId>
+			<artifactId>omnifaces</artifactId>
 		</dependency>
- 
+
 		<!-- JBoss -->
 		<dependency>
 			<groupId>jboss</groupId>
@@ -278,45 +292,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Weld -->
-        <dependency>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.2_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.spec.javax.faces</groupId>
-            <artifactId>jboss-jsf-api_2.2_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-
-
-		<dependency>
-			<groupId>org.glassfish.web</groupId>
-			<artifactId>el-impl</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Hibernate -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -325,11 +300,6 @@
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -341,63 +311,49 @@
 					<name>!jetty.disable</name>
 				</property>
 			</activation>
-	
+
 			<dependencies>
 				<dependency>
 					<groupId>javax.enterprise</groupId>
 					<artifactId>cdi-api</artifactId>
 				</dependency>
-		
 				<dependency>
 					<groupId>javax.inject</groupId>
 					<artifactId>javax.inject</artifactId>
 				</dependency>
-		
 				<dependency>
-					<groupId>org.jboss.spec.javax.annotation</groupId>
-					<artifactId>jboss-annotations-api_1.2_spec</artifactId>
-					<scope>compile</scope>
+					<groupId>com.sun.faces</groupId>
+					<artifactId>jsf-impl</artifactId>
 				</dependency>
-		
-				<dependency>
-					<groupId>org.jboss.weld.servlet</groupId>
-					<artifactId>weld-servlet-core</artifactId>
-					<scope>runtime</scope>
-				</dependency>
-		
 				<dependency>
 					<groupId>org.jboss.spec.javax.faces</groupId>
 					<artifactId>jboss-jsf-api_2.2_spec</artifactId>
 				</dependency>
-		
 				<dependency>
-					<groupId>com.sun.faces</groupId>
-					<artifactId>jsf-impl</artifactId>
-					<scope>runtime</scope>
+					<groupId>org.jboss.weld.servlet</groupId>
+					<artifactId>weld-servlet-core</artifactId>
 				</dependency>
-		
 				<dependency>
 					<groupId>org.jboss.weld</groupId>
 					<artifactId>weld-core-impl</artifactId>
-					<scope>runtime</scope>
 				</dependency>
-		
 				<dependency>
 					<groupId>org.jboss.weld.module</groupId>
 					<artifactId>weld-jsf</artifactId>
-					<scope>runtime</scope>
 				</dependency>
-		
 				<dependency>
 					<groupId>org.glassfish.web</groupId>
 					<artifactId>el-impl</artifactId>
-					<scope>runtime</scope>
 					<exclusions>
 						<exclusion>
 							<groupId>javax.el</groupId>
 							<artifactId>el-api</artifactId>
 						</exclusion>
 					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.spec.javax.annotation</groupId>
+					<artifactId>jboss-annotations-api_1.2_spec</artifactId>
 				</dependency>
 			</dependencies>
 
@@ -415,7 +371,7 @@
 									<Implementation-Build>${buildNumber}</Implementation-Build>
 								</manifestEntries>
 							</archive>
-		
+
 							<webResources>
 								<resource>
 									<directory>src/main/webapp</directory>
@@ -453,4 +409,5 @@
 			</build>
 		</profile>
 	</profiles>
+
 </project>

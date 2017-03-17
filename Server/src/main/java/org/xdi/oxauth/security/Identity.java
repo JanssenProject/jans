@@ -20,7 +20,6 @@ import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.session.SessionClient;
 
 @RequestScoped
-@Default
 @Named
 public class Identity implements Serializable {
 

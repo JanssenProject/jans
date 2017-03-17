@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>oxauth-server</artifactId>
 	<name>oxAuth Server</name>
@@ -91,8 +91,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
-				<!-- check it : for some reason jar and war are not attached to project
-					automatically, as temp solution install them manually -->
+				<!-- check it : for some reason jar and war are not attached to project automatically, as temp solution install them manually -->
 				<executions>
 					<execution>
 						<id>install-jar</id>
@@ -330,67 +329,41 @@
 		</dependency>
 
 		<!-- Weld -->
-        <dependency>
-            <groupId>org.jboss.spec.javax.servlet</groupId>
-            <artifactId>jboss-servlet-api_3.1_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.faces</groupId>
-            <artifactId>jsf-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.2_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.spec.javax.ejb</groupId>
-            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.spec.javax.faces</groupId>
-            <artifactId>jboss-jsf-api_2.2_spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-<!--
 		<dependency>
-			<groupId>javassist</groupId>
-			<artifactId>javassist</artifactId>
+			<groupId>javax.enterprise</groupId>
+			<artifactId>cdi-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.transaction</groupId>
-			<artifactId>jta</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
 		</dependency>
--->
+		<dependency>
+			<groupId>javax.faces</groupId>
+			<artifactId>jsf-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.spec.javax.annotation</groupId>
+			<artifactId>jboss-annotations-api_1.2_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.spec.javax.ejb</groupId>
+			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Commons libs -->
 		<dependency>
@@ -447,6 +420,10 @@
 		</dependency>
 
 		<!-- Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
@@ -641,8 +618,8 @@
 
 		<!-- Other -->
 		<dependency>
-		    <groupId>com.googlecode.json-simple</groupId>
-		    <artifactId>json-simple</artifactId>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.mvel</groupId>
@@ -693,15 +670,120 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-catalina</artifactId>
-            <version>7.0.55</version>
-            <scope>provided</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-catalina</artifactId>
+			<version>7.0.55</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<profiles>
+		<profile>
+			<id>jetty</id>
+			<activation>
+				<property>
+					<name>!jetty.disable</name>
+				</property>
+			</activation>
+
+			<dependencies>
+				<dependency>
+					<groupId>javax.enterprise</groupId>
+					<artifactId>cdi-api</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>javax.inject</groupId>
+					<artifactId>javax.inject</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>com.sun.faces</groupId>
+					<artifactId>jsf-impl</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.spec.javax.faces</groupId>
+					<artifactId>jboss-jsf-api_2.2_spec</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.weld.servlet</groupId>
+					<artifactId>weld-servlet-core</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.weld</groupId>
+					<artifactId>weld-core-impl</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.weld.module</groupId>
+					<artifactId>weld-jsf</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>org.glassfish.web</groupId>
+					<artifactId>el-impl</artifactId>
+					<exclusions>
+						<exclusion>
+							<groupId>javax.el</groupId>
+							<artifactId>el-api</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.spec.javax.annotation</groupId>
+					<artifactId>jboss-annotations-api_1.2_spec</artifactId>
+				</dependency>
+			</dependencies>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<archive>
+								<manifest>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+								</manifest>
+								<manifestEntries>
+									<Implementation-Build>${buildNumber}</Implementation-Build>
+								</manifestEntries>
+							</archive>
+
+							<webResources>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+										<include>**/*.properties</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>**/*.xhtml</include>
+										<include>**/*.jsp</include>
+										<include>**/*.html</include>
+										<include>**/*.pdf</include>
+										<include>**/*.js</include>
+										<include>**/*.css</include>
+										<include>**/*.xcss</include>
+										<include>**/*.png</include>
+										<include>**/*.jpg</include>
+										<include>**/*.gif</include>
+										<include>**/*.ico</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/webapp-jetty</directory>
+									<filtering>true</filtering>
+								</resource>
+							</webResources>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
 		<profile>
 			<id>swagger</id>
 			<activation>
@@ -712,57 +794,57 @@
 			<properties>
 			</properties>
 			<build>
-              <plugins>
-                <plugin>
-                  <groupId>com.github.kongchen</groupId>
-                  <artifactId>swagger-maven-plugin</artifactId>
-                  <version>2.0</version>
-                  <configuration>
-                    <apiSources>
-                      <apiSource>
-                        <locations>org.xdi.oxauth.model.uma;
-                        </locations>
-                        <apiVersion>v1</apiVersion>
-                        <basePath>http://gluu.org</basePath>
-                        <outputTemplate>${basedir}/src/main/docs/mustache/markdown.mustache</outputTemplate>
-                        <outputPath>${basedir}/generated/swagger.markdown</outputPath>
-                        <swaggerDirectory>${basedir}/generated/apidocs</swaggerDirectory>
-                        <!--swaggerUIDocBasePath>http://www.example.com/restapi/doc</swaggerUIDocBasePath-->
-                        <!--useOutputFlatStructure>false</useOutputFlatStructure-->
-                        <mustacheFileRoot>${basedir}/src/main/docs/mustache</mustacheFileRoot>
-                        <!--overridingModels>/swagger-overriding-models.json</overridingModels-->
-                      </apiSource>
-                    </apiSources>
-                  </configuration>
-                  <executions>
-                    <execution>
-                      <phase>compile</phase>
-                      <goals>
-                        <goal>generate</goal>
-                      </goals>
-                    </execution>
-                  </executions>
-                  <dependencies>
-                    <dependency>
-                      <groupId>javax.servlet</groupId>
-                      <artifactId>servlet-api</artifactId>
-                      <version>2.3</version>
-                      <scope>runtime</scope>
-                    </dependency>
-                  </dependencies>
-                </plugin>
-              </plugins>
+				<plugins>
+					<plugin>
+						<groupId>com.github.kongchen</groupId>
+						<artifactId>swagger-maven-plugin</artifactId>
+						<version>2.0</version>
+						<configuration>
+							<apiSources>
+								<apiSource>
+									<locations>org.xdi.oxauth.model.uma;
+									</locations>
+									<apiVersion>v1</apiVersion>
+									<basePath>http://gluu.org</basePath>
+									<outputTemplate>${basedir}/src/main/docs/mustache/markdown.mustache</outputTemplate>
+									<outputPath>${basedir}/generated/swagger.markdown</outputPath>
+									<swaggerDirectory>${basedir}/generated/apidocs</swaggerDirectory>
+									<!--swaggerUIDocBasePath>http://www.example.com/restapi/doc</swaggerUIDocBasePath -->
+									<!--useOutputFlatStructure>false</useOutputFlatStructure -->
+									<mustacheFileRoot>${basedir}/src/main/docs/mustache</mustacheFileRoot>
+									<!--overridingModels>/swagger-overriding-models.json</overridingModels -->
+								</apiSource>
+							</apiSources>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>compile</phase>
+								<goals>
+									<goal>generate</goal>
+								</goals>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>javax.servlet</groupId>
+								<artifactId>servlet-api</artifactId>
+								<version>2.3</version>
+								<scope>runtime</scope>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
 			</build>
 			<dependencies>
 				<dependency>
 					<groupId>com.wordnik</groupId>
 					<artifactId>swagger-jaxrs_2.10</artifactId>
-				    <version>1.3.13</version>
+					<version>1.3.13</version>
 				</dependency>
 				<dependency>
 					<groupId>com.wordnik</groupId>
 					<artifactId>swagger-servlet_2.9.1</artifactId>
-				    <version>1.3.1</version>
+					<version>1.3.1</version>
 				</dependency>
 			</dependencies>
 		</profile>
