@@ -9,6 +9,8 @@ package org.xdi.oxauth.model.error;
 import java.io.IOException;
 import java.util.List;
 
+import javax.enterprise.inject.Vetoed;
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -36,13 +38,17 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
  */
+@Vetoed
 public class ErrorResponseFactory {
 
-    private Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
+    @Inject
+    private Logger log;
 
     private ErrorMessages messages;
 
-    public ErrorResponseFactory(ErrorMessages messages) {
+    public ErrorResponseFactory() {}
+
+	public ErrorResponseFactory(ErrorMessages messages) {
     	this.messages = messages;
 	}
 

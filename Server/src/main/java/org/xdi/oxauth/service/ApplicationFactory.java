@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,11 +37,6 @@ public class ApplicationFactory {
 
     @Inject
     private Logger log;
-
-    @Produces @ApplicationScoped
-    public RandomChallengeGenerator getRandomChallengeGenerator() {
-        return new RandomChallengeGenerator();
-    }
 
     @Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {

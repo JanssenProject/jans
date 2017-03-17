@@ -8,7 +8,6 @@ import javax.inject.Named;
 
 @RequestScoped
 @Named
-@Default
 public class Credentials implements Serializable {
 
 	private static final long serialVersionUID = 4757835767552243714L;
