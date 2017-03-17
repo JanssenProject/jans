@@ -81,7 +81,6 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             validator.validateNonce(getStateService());
             validator.validateIdToken(site.getClientId());
             validator.validateAccessToken(response.getAccessToken());
-            validator.validateAuthorizationCode(params.getCode());
 
             // persist tokens
             site.setIdToken(response.getIdToken());
