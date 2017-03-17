@@ -29,7 +29,11 @@ public class FacesService {
 	@Inject
 	private ExternalContext externalContext;
 
-	public void redirect(String viewId, Map<String, Object> parameters, boolean includeConversationId) {
+	public void redirect(String viewId) {
+		redirect(viewId, null);
+	}
+
+	public void redirect(String viewId, Map<String, Object> parameters) {
 		if (viewId == null) {
 			throw new RedirectException("cannot redirect to a null viewId");
 		}
@@ -41,10 +45,6 @@ public class FacesService {
 			url = encodeParameters(url, parameters);
 		}
 
-		redirect(url);
-	}
-
-	private void redirect(String url) {
 		try {
 			externalContext.redirect(externalContext.encodeActionURL(url));
 		} catch (IOException ioe) {
