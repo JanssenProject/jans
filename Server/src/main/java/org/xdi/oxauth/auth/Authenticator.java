@@ -11,13 +11,17 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import javax.ejb.Stateless;
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.plugins.server.embedded.SimplePrincipal;
+import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -28,7 +32,9 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.security.Credentials;
 import org.xdi.oxauth.security.Identity;
+import org.xdi.oxauth.security.SimplePrincipal;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
@@ -43,9 +49,8 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan
  * @version December 15, 2015
  */
-@Named("authenticator")
-@RequestScoped
-// Do not change scope, we try to keep server without http sessions
+@Stateless
+@Named
 public class Authenticator implements Serializable {
 
     private static final long serialVersionUID = 669395320060928092L;
@@ -55,6 +60,9 @@ public class Authenticator implements Serializable {
 
     @Inject
     private Identity identity;
+
+    @Inject
+    private Credentials credentials;
 
     @Inject
     private ClientService clientService;
@@ -72,10 +80,13 @@ public class Authenticator implements Serializable {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private FacesMessages facesMessages;
+    private FacesContext facesContext;
 
     @Inject
     private ExternalContext externalContext;
+
+    @Inject
+    private FacesService facesService;
 
     private String authAcr;
 
@@ -90,7 +101,7 @@ public class Authenticator implements Serializable {
      * @return Returns <code>true</code> if the authentication succeed
      */
     public boolean authenticate() {
-        if (!authenticateImpl(Contexts.getEventContext(), true, false)) {
+        if (!authenticateImpl(true, false)) {
             return authenticationFailed();
         } else {
             return true;
@@ -98,7 +109,7 @@ public class Authenticator implements Serializable {
     }
 
     public String authenticateWithOutcome() {
-        boolean result = authenticateImpl(Contexts.getEventContext(), true, false);
+        boolean result = authenticateImpl(true, false);
         if (result) {
             return Constants.RESULT_SUCCESS;
         } else {
@@ -108,30 +119,25 @@ public class Authenticator implements Serializable {
     }
 
     public boolean authenticateWebService(boolean skipPassword) {
-        return authenticateImpl(getWebServiceContext(), false, skipPassword);
+        return authenticateImpl(false, skipPassword);
     }
 
     public boolean authenticateWebService() {
-        return authenticateImpl(getWebServiceContext(), false, false);
+        return authenticateImpl(false, false);
     }
 
-    public Context getWebServiceContext() {
-        return Contexts.getEventContext();
-    }
-
-    public boolean authenticateImpl(Context context, boolean interactive, boolean skipPassword) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+    public boolean authenticateImpl(boolean interactive, boolean skipPassword) {
         boolean authenticated = false;
         try {
             log.trace("Authenticating ... (interactive: " + interactive + ", skipPassword: " + skipPassword + ", credentials.username: " + credentials.getUsername() + ")");
             if (StringHelper.isNotEmpty(credentials.getUsername()) && (skipPassword || StringHelper.isNotEmpty(credentials.getPassword()))
                     && credentials.getUsername().startsWith("@!")) {
-                authenticated = clientAuthentication(credentials, context, interactive, skipPassword);
+                authenticated = clientAuthentication(credentials, interactive, skipPassword);
             } else {
                 if (interactive) {
-                    authenticated = userAuthenticationInteractive(credentials);
+                    authenticated = userAuthenticationInteractive();
                 } else {
-                    authenticated = userAuthenticationService(credentials);
+                    authenticated = userAuthenticationService();
                 }
             }
         } catch (Exception ex) {
@@ -147,7 +153,7 @@ public class Authenticator implements Serializable {
         return false;
     }
 
-    private boolean clientAuthentication(Credentials credentials, Context context, boolean interactive, boolean skipPassword) {
+    private boolean clientAuthentication(Credentials credentials, boolean interactive, boolean skipPassword) {
         boolean isServiceUsesExternalAuthenticator = !interactive && externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE);
         if (isServiceUsesExternalAuthenticator) {
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
@@ -162,7 +168,7 @@ public class Authenticator implements Serializable {
                 log.info("Authentication result for user '{0}', result: '{1}'", credentials.getUsername(), result);
 
                 if (result) {
-                    authenticationService.configureSessionClient(context);
+                    authenticationService.configureSessionClient();
 
                     log.info("Authentication success for client: '{0}'", credentials.getUsername());
                     return true;
@@ -175,7 +181,7 @@ public class Authenticator implements Serializable {
             loggedIn = clientService.authenticate(credentials.getUsername(), credentials.getPassword());
         }
         if (loggedIn) {
-            authenticationService.configureSessionClient(context);
+            authenticationService.configureSessionClient();
 
             log.info("Authentication success for Client: '{0}'", credentials.getUsername());
             return true;
@@ -184,7 +190,7 @@ public class Authenticator implements Serializable {
         return false;
     }
 
-    private boolean userAuthenticationInteractive(Credentials credentials) {
+    private boolean userAuthenticationInteractive() {
         SessionState sessionState = sessionStateService.getSessionState();
         Map<String, String> sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
         if (sessionIdAttributes == null) {
@@ -192,10 +198,6 @@ public class Authenticator implements Serializable {
             authenticationFailedSessionInvalid();
             return false;
         }
-
-        // Set in event context sessionAttributes to allow access them from external authenticator
-        Context eventContext = Contexts.getEventContext();
-        eventContext.set("sessionAttributes", sessionIdAttributes);
 
         initCustomAuthenticatorVariables(sessionIdAttributes);
         boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
@@ -293,7 +295,7 @@ public class Authenticator implements Serializable {
                 }
 
                 log.trace("Redirect to page: '{0}'", redirectTo);
-                FacesManager.instance().redirect(redirectTo, null, false);
+                facesService.redirect(redirectTo);
                 return true;
             }
 
@@ -305,11 +307,9 @@ public class Authenticator implements Serializable {
                 identity.quietLogin();
 
                 // Redirect to authorization workflow
-                if (Events.exists()) {
-                    log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
-                    authenticationService.onSuccessfulLogin(eventSessionState);
+                log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
+                authenticationService.onSuccessfulLogin(eventSessionState);
 //                    Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
-                }
 
                 log.info("Authentication success for User: '{0}'", credentials.getUsername());
                 return true;
@@ -321,15 +321,14 @@ public class Authenticator implements Serializable {
                 	SessionState eventSessionState = authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
 
                     // Redirect to authorization workflow
-                    if (Events.exists()) {
                         log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
                         authenticationService.onSuccessfulLogin(eventSessionState);
+// TODO: CDI Review                       
 //                        Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
                     }
 
                     log.info("Authentication success for User: '{0}'", credentials.getUsername());
                     return true;
-                }
             }
         }
 
@@ -347,7 +346,7 @@ public class Authenticator implements Serializable {
 		return true;
 	}
 
-    private boolean userAuthenticationService(Credentials credentials) {
+    private boolean userAuthenticationService() {
         if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE)) {
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService
                     .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authAcr);
@@ -362,7 +361,6 @@ public class Authenticator implements Serializable {
                 log.info("Authentication result for '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
 
                 if (result) {
-                    authenticateExternallyWebService(credentials.getUsername());
                     authenticationService.configureEventUser();
 
                     log.info("Authentication success for User: '{0}'", credentials.getUsername());
@@ -375,7 +373,6 @@ public class Authenticator implements Serializable {
         if (StringHelper.isNotEmpty(credentials.getUsername())) {
             boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
             if (authenticated) {
-                authenticateExternallyWebService(credentials.getUsername());
                 authenticationService.configureEventUser();
 
                 log.info("Authentication success for User: '{0}'", credentials.getUsername());
@@ -406,10 +403,6 @@ public class Authenticator implements Serializable {
             log.error("Failed to get attributes from session");
             return Constants.RESULT_EXPIRED;
         }
-
-        // Set in event context sessionAttributs to allow access them from external authenticator
-        Context eventContext = Contexts.getEventContext();
-        eventContext.set("sessionAttributes", sessionIdAttributes);
 
         if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
             return Constants.RESULT_SUCCESS;
@@ -470,7 +463,7 @@ public class Authenticator implements Serializable {
                     }
                 }
 
-                FacesManager.instance().redirect(redirectTo, null, false);
+                facesService.redirect(redirectTo);
 
                 return Constants.RESULT_SUCCESS;
             }
@@ -501,15 +494,6 @@ public class Authenticator implements Serializable {
         }
     }
 
-    public void authenticateExternallyWebService(String userName) {
-        org.jboss.seam.resteasy.Application application = (org.jboss.seam.resteasy.Application) Component.getInstance(org.jboss.seam.resteasy.Application.class);
-        if ((application != null) && !application.isDestroySessionAfterRequest()) {
-            Principal principal = new SimplePrincipal(userName);
-            identity.acceptExternallyAuthenticatedPrincipal(principal);
-            identity.quietLogin();
-        }
-    }
-
     public boolean authenticateBySessionState(String p_sessionState) {
         if (StringUtils.isNotBlank(p_sessionState) && appConfiguration.getSessionIdEnabled()) {
             try {
@@ -535,7 +519,6 @@ public class Authenticator implements Serializable {
             final User user = authenticationService.getUserOrRemoveSession(sessionState);
             if (user != null) {
                 try {
-                    authenticateExternallyWebService(user.getUserId());
                     authenticationService.configureEventUser(sessionState);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
@@ -560,15 +543,15 @@ public class Authenticator implements Serializable {
 
     private boolean authenticationFailed() {
         if (!this.addedErrorMessage) {
-            facesMessages.addFromResourceBundle(Severity.ERROR, "login.errorMessage");
+            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage", "login.errorMessage"));
         }
         return false;
     }
 
     private void authenticationFailedSessionInvalid() {
         this.addedErrorMessage = true;
-        facesMessages.addFromResourceBundle(Severity.ERROR, "login.errorSessionInvalidMessage");
-        FacesManager.instance().redirect("/error.xhtml");
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage", "login.errorSessionInvalidMessage"));
+        facesService.redirect("/error.xhtml");
     }
 
     private void markAuthStepAsPassed(Map<String, String> sessionIdAttributes, Integer authStep) {
@@ -597,7 +580,7 @@ public class Authenticator implements Serializable {
     }
 
     public void configureSessionClient(Client client) {
-        authenticationService.configureSessionClient(getWebServiceContext(), client);
+        authenticationService.configureSessionClient(client);
     }
 
 }

@@ -2,15 +2,25 @@ package org.xdi.oxauth.security;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.security.auth.login.LoginException;
 
+import org.python.modules.synchronize;
 import org.slf4j.Logger;
+import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.session.SessionClient;
 
 @RequestScoped
+@Default
 @Named
 public class Identity implements Serializable {
 
@@ -23,6 +33,14 @@ public class Identity implements Serializable {
 	private Credentials credentials;
 
 	private Principal principal;
+
+	private SessionState sessionState;
+
+	// TODO: CDI review, use more CDI way
+	private User user;
+	private SessionClient setSessionClient;
+	
+	private HashMap<String, Object> workingParameters;
 
 	/**
 	 * Simple check that returns true if the user is logged in, without
@@ -103,10 +121,14 @@ public class Identity implements Serializable {
 	public synchronized void authenticate() throws LoginException {
 		// If we're already authenticated, then don't authenticate again
 		if (!isLoggedIn() && !credentials.isInvalid()) {
-			principal = new UserPrincipal(credentials.getUsername());
+			principal = new SimplePrincipal(credentials.getUsername());
 			credentials.setPassword(null);
 		}
 	}
+
+    public void acceptExternallyAuthenticatedPrincipal(Principal principal) {
+        this.principal = principal;
+    }
 
 	public Principal getPrincipal() {
 		return principal;
@@ -129,19 +151,56 @@ public class Identity implements Serializable {
 			unAuthenticate();
 		}
 	}
-	
-	class UserPrincipal implements Principal {
 
-		private String name;
+	public SessionState getSessionState() {
+		return sessionState;
+	}
 
-		public UserPrincipal(final String name) {
-			this.name = name;
+	public void setSessionState(SessionState sessionState) {
+		this.sessionState = sessionState;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public void setSessionClient(SessionClient sessionClient) {
+		this.setSessionClient = sessionClient;
+	}
+
+	public SessionClient getSetSessionClient() {
+		return setSessionClient;
+	}
+
+	public void setSetSessionClient(SessionClient setSessionClient) {
+		this.setSessionClient = setSessionClient;
+	}
+
+	private synchronized void initWorkingParamaters() {
+		if (this.workingParameters == null) {
+			this.workingParameters = new HashMap<String, Object>();
 		}
+	}
 
-		@Override
-		public String getName() {
-			return name;
-		}
+	public HashMap<String, Object> getWorkingParameters() {
+		initWorkingParamaters();
+		return workingParameters;
+	}
+
+	public boolean gisSetWorkingParameter(String name) {
+		return this.workingParameters.containsKey(name);
+	}
+
+	public Object getWorkingParameter(String name) {
+		return this.workingParameters.get(name);
+	}
+
+	public void setWorkingParameter(String name, Object value) {
+		this.workingParameters.put(name, value);
 	}
 
 }

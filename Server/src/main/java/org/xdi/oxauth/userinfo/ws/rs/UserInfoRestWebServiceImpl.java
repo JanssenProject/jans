@@ -65,6 +65,7 @@ import org.xdi.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
@@ -92,6 +93,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private ClientService clientService;
 
     @Inject
     private ScopeService scopeService;
@@ -321,7 +325,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Signature
-        String sharedSecret = authorizationGrant.getClient().getClientSecret();
+        String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
         String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
         jwt.setEncodedSignature(signature);
 
@@ -447,7 +451,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
             try {
-                byte[] sharedSymmetricKey = authorizationGrant.getClient().getClientSecret().getBytes(Util.UTF8_STRING_ENCODING);
+                byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING);
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
                 jwe = jweEncrypter.encrypt(jwe);
             } catch (UnsupportedEncodingException e) {

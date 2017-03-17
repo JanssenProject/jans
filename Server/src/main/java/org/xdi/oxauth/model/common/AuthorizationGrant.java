@@ -45,6 +45,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
 	private GrantService grantService;
 
+	private IdTokenFactory idTokenFactory;
+
     private boolean isCachedWithNoPersistence = false;
 
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
@@ -53,14 +55,17 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
     
     @Inject
-    public void init(GrantService grantService) {
+    public void init(GrantService grantService, IdTokenFactory idTokenFactory) {
+    	
+    	// TODO: CDI review
     	this.grantService = grantService;
+    	this.idTokenFactory = idTokenFactory;
     }
 
     public IdToken createIdToken(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
-        JsonWebResponse jwr = IdTokenFactory.createJwr(
+        JsonWebResponse jwr = idTokenFactory.createJwr(
                 grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         return new IdToken(jwr.toString(),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),

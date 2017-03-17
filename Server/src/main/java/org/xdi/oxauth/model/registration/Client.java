@@ -267,8 +267,8 @@ public class Client implements Serializable {
      *
      * @return The client secret.
      */
-    public String getClientSecret() throws StringEncrypter.EncryptionException {
-        return EncryptionService.instance().decrypt(encodedClientSecret);
+    public String getClientSecret() {
+        return encodedClientSecret;
     }
 
     /**
@@ -276,8 +276,8 @@ public class Client implements Serializable {
      *
      * @param clientSecret The client secret.
      */
-    public void setClientSecret(String clientSecret) throws StringEncrypter.EncryptionException {
-        encodedClientSecret = EncryptionService.instance().encrypt(clientSecret);
+    public void setClientSecret(String clientSecret) {
+        encodedClientSecret = clientSecret;
     }
 
     /**

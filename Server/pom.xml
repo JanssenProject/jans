@@ -322,6 +322,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-jsf-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-util</artifactId>
 		</dependency>
 

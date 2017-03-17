@@ -10,14 +10,15 @@ import java.io.IOException;
 import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.jboss.seam.faces.FacesManager;
-import org.jboss.seam.faces.FacesMessages;
+import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -47,9 +48,6 @@ public class LogoutAction {
     private Logger log;
 
     @Inject
-    private FacesMessages facesMessages;
-
-    @Inject
     private AuthorizationGrantList authorizationGrantList;
     
     @Inject
@@ -63,6 +61,12 @@ public class LogoutAction {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private FacesService facesService;
+
+    @Inject
+    private FacesContext facesContext;
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
@@ -127,7 +131,7 @@ public class LogoutAction {
             sb.append("&"+EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI+"=").append(postLogoutRedirectUri);
         }
         
-        FacesManager.instance().redirectToExternalURL("seam/resource/restv1/oxauth/end_session?" + sb.toString());
+        facesService.redirectToExternalURL("seam/resource/restv1/oxauth/end_session?" + sb.toString());
     }
 
 	private boolean validateParameters() {
@@ -195,7 +199,7 @@ public class LogoutAction {
 				}
 				
 				// Redirect to external URL
-				FacesManager.instance().redirectToExternalURL(logoutExternalUrl);
+				facesService.redirectToExternalURL(logoutExternalUrl);
 				return ExternalLogoutResult.REDIRECT;
 			}
 		} else {
@@ -242,15 +246,14 @@ public class LogoutAction {
 	}
 
 	public void missingLogoutParameters() {
-		facesMessages.addFromResourceBundle(Severity.ERROR, "logout.missingParameters");
-		FacesManager.instance().redirect("/error.xhtml");
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "logout.missingParameters", "logout.missingParameters"));
+		facesService.redirect("/error.xhtml");
 	}
 
 	public void logoutFailed() {
-		facesMessages.add(Severity.ERROR, "Failed to process logout");
-		FacesManager.instance().redirect("/error.xhtml");
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failed to process logout", "Failed to process logout"));
+		facesService.redirect("/error.xhtml");
 	}
-	
 	
 	public static class LogoutParameters {
 		private String idTokenHint;
