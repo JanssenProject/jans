@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.model.config;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 
@@ -14,5 +16,6 @@ import org.xdi.oxauth.model.jwk.JSONWebKeySet;
  * @version 03/15/2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Vetoed
 public class WebKeysConfiguration extends JSONWebKeySet {
 }

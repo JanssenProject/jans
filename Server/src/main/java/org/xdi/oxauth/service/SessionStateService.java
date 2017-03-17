@@ -68,9 +68,6 @@ public class SessionStateService {
 
     @Inject
     private Logger log;
-
-    @Inject
-    private AuthenticationService authenticationService;
     
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
@@ -199,7 +196,7 @@ public class SessionStateService {
             final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
 
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> newRequestParameterMap = AuthenticationService.getAllowedParameters(parameterMap);
             for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
                 String name = newRequestParameterMapEntry.getKey();
                 if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {

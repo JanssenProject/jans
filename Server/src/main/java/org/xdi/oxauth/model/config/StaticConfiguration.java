@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.config;
 
+import javax.enterprise.inject.Vetoed;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -21,6 +22,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @XmlRootElement(name = "static")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Vetoed
 public class StaticConfiguration {
 
     @XmlElement(name = "base-dn")

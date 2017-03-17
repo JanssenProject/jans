@@ -9,7 +9,7 @@ import javax.inject.Named;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import org.xdi.oxauth.security.Credentials;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 
 /**
@@ -22,13 +22,13 @@ import org.xdi.oxauth.util.ServerUtil;
 public class InternalDefaultPersonAuthenticationType extends DummyPersonAuthenticationType {
 
 	@Inject
-	private UserService userService;
+	private AuthenticationService authenticationService;
 
 	@Inject
 	private Credentials credentials;
 
 	public InternalDefaultPersonAuthenticationType() {
-		this.userService = ServerUtil.bean(UserService.class);
+		this.authenticationService = ServerUtil.bean(AuthenticationService.class);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class InternalDefaultPersonAuthenticationType extends DummyPersonAuthenti
 			return false;
 		}
 
-		return userService.authenticate(credentials.getUsername(), credentials.getPassword());
+		return authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
 	}
 
 	@Override

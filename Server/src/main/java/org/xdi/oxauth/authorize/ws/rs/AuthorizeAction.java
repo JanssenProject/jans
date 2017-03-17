@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.auth.Authenticator;
+import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
@@ -106,7 +107,7 @@ public class AuthorizeAction {
     private ExternalAuthenticationService externalAuthenticationService;
 
     @Inject @Named(AppInitializer.DEFAULT_ACR_VALUES)
-    private String defaultAuthenticationMethod;
+    private AuthenticationMode defaultAuthenticationMode;
 
 // TODO: CDI review
 //    @Inject("org.jboss.seam.international.localeSelector")
@@ -223,8 +224,8 @@ public class AuthorizeAction {
             if (useExternalAuthenticator) {
                 List<String> acrValuesList = acrValuesList();
                 if (acrValuesList.isEmpty()) {
-                    if (StringHelper.isNotEmpty(defaultAuthenticationMethod)) {
-                        acrValuesList = Arrays.asList(defaultAuthenticationMethod);
+                    if (StringHelper.isNotEmpty(defaultAuthenticationMode.getName())) {
+                        acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
                     } else {
                         CustomScriptConfiguration defaultExternalAuthenticator = externalAuthenticationService.getDefaultExternalAuthenticator(AuthenticationScriptUsageType.INTERACTIVE);
                         if (defaultExternalAuthenticator != null) {

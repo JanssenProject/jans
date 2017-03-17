@@ -16,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ import org.xdi.model.SimpleProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
+import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
@@ -62,7 +64,7 @@ public class AppInitializer {
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
-    public static final String DEFAULT_ACR_VALUES = "defaultAuthModeName";
+    public static final String DEFAULT_ACR_VALUES = "defaultAuthMode";
 
     public static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
 
@@ -98,7 +100,7 @@ public class AppInitializer {
 
     private AtomicBoolean isActive;
 	private long lastFinishedTime;
-	private String authenticationMode;
+	private AuthenticationMode authenticationMode;
 
 	@PostConstruct
     public void createApplicationComponents() {
@@ -121,8 +123,8 @@ public class AppInitializer {
         customScriptManager.init(supportedCustomScriptTypes);
 	}
 
-    @Produces @ApplicationScoped @Named("stringEncrypter")
-	public StringEncrypter createStringEncrypter() {
+    @Produces @ApplicationScoped
+	public StringEncrypter getStringEncrypter() {
 		String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
     	
     	if (StringHelper.isEmpty(encodeSalt)) {
@@ -198,7 +200,7 @@ public class AppInitializer {
 	}
 
     @Produces @ApplicationScoped @Named(LDAP_ENTRY_MANAGER_NAME)
-    public LdapEntryManager createLdapEntryManager() {
+    public LdapEntryManager getLdapEntryManager() {
         LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(this.connectionProvider, this.bindConnectionProvider));
         log.debug("Created {0}: {1}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager });
 
@@ -406,7 +408,7 @@ public class AppInitializer {
 
 		authenticationMode = null;
 		if (appliance != null) {
-			this.authenticationMode = appliance.getAuthenticationMode();
+			this.authenticationMode = new AuthenticationMode(appliance.getAuthenticationMode());
 		}
 
 	    // TODO: CDI: Fix
@@ -414,7 +416,7 @@ public class AppInitializer {
 	}
 	
 	@Produces @ApplicationScoped @Named(DEFAULT_ACR_VALUES)
-	public String getDefaultAuthenticationMode() {
+	public AuthenticationMode getDefaultAuthenticationMode() {
 		return authenticationMode;
 	}
 
