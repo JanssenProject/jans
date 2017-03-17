@@ -1,29 +1,39 @@
 package org.xdi.oxauth.service.external.internal;
 
-import java.security.Identity;
 import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.type.auth.DummyPersonAuthenticationType;
+import org.xdi.oxauth.security.Credentials;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * Wrapper to call internal authentication method
  *
  * @author Yuriy Movchan Date: 06/04/2015
  */
+@Stateless
+@Named
 public class InternalDefaultPersonAuthenticationType extends DummyPersonAuthenticationType {
 
+	@Inject
 	private UserService userService;
 
+	@Inject
+	private Credentials credentials;
+
 	public InternalDefaultPersonAuthenticationType() {
-		this.userService = UserService.instance();
+		this.userService = ServerUtil.bean(UserService.class);
 	}
 
 	@Override
 	public boolean authenticate(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step) {
-		Credentials credentials = Identity.instance().getCredentials();
-		if (credentials == null) {
+		if (!credentials.isSet()) {
 			return false;
 		}
 
