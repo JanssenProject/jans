@@ -28,18 +28,18 @@ import org.xdi.util.StringHelper;
 public class ExternalScriptService implements Serializable {
 
 	private static final long serialVersionUID = -1070021905117441202L;
-	
-	protected CustomScriptType customScriptType;
-
-	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
-	protected List<CustomScriptConfiguration> customScriptConfigurations;
-	protected CustomScriptConfiguration defaultExternalCustomScript;
 
 	@Inject
 	protected Logger log;
 	
 	@Inject
 	protected CustomScriptManager customScriptManager;
+	
+	protected CustomScriptType customScriptType;
+
+	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
+	protected List<CustomScriptConfiguration> customScriptConfigurations;
+	protected CustomScriptConfiguration defaultExternalCustomScript;
 	
 	public ExternalScriptService(CustomScriptType customScriptType) {
 		this.customScriptType = customScriptType;
