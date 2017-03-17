@@ -34,6 +34,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
+import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.Filter;
@@ -69,6 +70,9 @@ public class ClientService {
 
     @Inject
     private ClientFilterService clientFilterService;
+    
+    @Inject
+    private EncryptionService encryptionService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -106,8 +110,9 @@ public class ClientService {
 
         try {
             Client client = getClient(clientId);
-            authenticated = client != null && client.getClientSecret() != null
-                    && client.getClientSecret().equals(password);
+            String decryptedClientSecret = decryptSecret(client.getClientSecret());
+            authenticated = client != null && decryptedClientSecret != null
+                    && decryptedClientSecret.equals(password);
         } catch (StringEncrypter.EncryptionException e) {
             log.error(e.getMessage(), e);
         }
@@ -394,5 +399,13 @@ public class ClientService {
 
         return attribute;
     }
+
+	public String decryptSecret(String encryptedClientSecret) throws EncryptionException {
+		return encryptionService.decrypt(encryptedClientSecret);
+	}
+
+	public String encryptSecret(String clientSecret) throws EncryptionException {
+		return encryptionService.encrypt(clientSecret);
+	}
 
 }

@@ -21,8 +21,6 @@ import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -34,7 +32,6 @@ import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.RptManager;
 
@@ -88,17 +85,17 @@ public class CleanerTimer {
 
     // TODO: CDI: Fix
 //    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.debug("Initializing CleanerTimer");
-        this.isActive = new AtomicBoolean(false);
-
-        long interval = appConfiguration.getCleanServiceInterval();
-        if (interval <= 0) {
-            interval = DEFAULT_INTERVAL;
-        }
-        interval = interval * 1000L;
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
-    }
+//    public void init() {
+//        log.debug("Initializing CleanerTimer");
+//        this.isActive = new AtomicBoolean(false);
+//
+//        long interval = appConfiguration.getCleanServiceInterval();
+//        if (interval <= 0) {
+//            interval = DEFAULT_INTERVAL;
+//        }
+//        interval = interval * 1000L;
+//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
+//    }
 
     // TODO: CDI: Fix
 //    @Observer(EVENT_TYPE)

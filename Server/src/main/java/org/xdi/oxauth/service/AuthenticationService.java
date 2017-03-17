@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
@@ -59,6 +60,7 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
+// TODO: Review CDI injection Identity into stateless
 @Stateless
 @Named
 public class AuthenticationService {
@@ -97,9 +99,6 @@ public class AuthenticationService {
     @Inject
     private Identity identity;
 
-    @Inject
-    private ExternalContext externalContext;
-
     @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
@@ -124,8 +123,11 @@ public class AuthenticationService {
     @Inject
     private MetricService metricService;
 
-    @Inject("org.jboss.seam.core.manager")
-    private FacesManager facesManager;
+    @Inject
+    private ExternalContext externalContext;
+
+    @Inject
+    private FacesService facesService;
 
     /**
      * Authenticate user.
@@ -457,19 +459,16 @@ public class AuthenticationService {
     }
 
     private void configureEventUserContext(SessionState sessionState) {
-        identity.addRole("user");
-
-        Contexts.getEventContext().set("sessionUser", sessionState);
+        identity.setSessionState(sessionState);
     }
 
     private void configureAuthenticatedUser(User user) {
-        Contexts.getEventContext().set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
+        identity.setUser(user);
     }
 
     public User getAuthenticatedUser() {
-        Context eventContext = Contexts.getEventContext();
-        if (eventContext.isSet(EVENT_CONTEXT_AUTHENTICATED_USER)) {
-            return (User) eventContext.get(EVENT_CONTEXT_AUTHENTICATED_USER);
+        if (identity.getUser() != null) {
+            return identity.getUser();
         } else {
             SessionState sessionState = sessionStateService.getSessionState();
             if (sessionState != null) {
@@ -477,7 +476,7 @@ public class AuthenticationService {
                 String userId = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
                 if (StringHelper.isNotEmpty(userId)) {
                     User user = userService.getUser(userId);
-                    eventContext.set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
+                    identity.setUser(user);
 
                     return user;
                 }
@@ -496,22 +495,20 @@ public class AuthenticationService {
         return null;
     }
 
-    public void configureSessionClient(Context context) {
+    public void configureSessionClient() {
         Credentials credentials = ServerUtil.bean(Credentials.class);
         String clientInum = credentials.getUsername();
         log.debug("ConfigureSessionClient: username: '{0}', credentials: '{1}'", clientInum, System.identityHashCode(credentials));
 
         Client client = clientService.getClient(clientInum);
-        configureSessionClient(context, client);
+        configureSessionClient(client);
     }
 
-    public void configureSessionClient(Context context, Client client) {
-        identity.addRole("client");
-
+    public void configureSessionClient(Client client) {
         SessionClient sessionClient = new SessionClient();
         sessionClient.setClient(client);
 
-        context.set("sessionClient", sessionClient);
+        identity.setSessionClient(sessionClient);
 
         clientService.updatAccessTime(client, true);
     }
@@ -536,7 +533,7 @@ public class AuthenticationService {
             result.put(SESSION_STATE, sessionUser.getId());
 
             log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, allowedParameters);
-            facesManager.redirect("/authorize.xhtml", (Map) allowedParameters, false);
+            facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
         }
     }
 
@@ -636,7 +633,7 @@ public class AuthenticationService {
     }
 
     public String getParameterValue(String p_name) {
-        final Object o = Contexts.getEventContext().get(p_name);
+        final Object o = identity.getWorkingParameter(p_name);
         if (o instanceof String) {
             final String s = (String) o;
             return s;
@@ -652,7 +649,7 @@ public class AuthenticationService {
     }
 
     public boolean isParameterExists(String p_name) {
-        return Contexts.getEventContext().isSet(p_name);
+        return identity.gisSetWorkingParameter(p_name);
     }
 
 }

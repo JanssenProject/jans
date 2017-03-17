@@ -7,6 +7,7 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -25,6 +26,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
+import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
@@ -66,15 +68,21 @@ import com.google.common.collect.Sets;
  * @author Yuriy Movchan
  * @version January 20, 2017
  */
-@Named("authorizeAction")
 @RequestScoped
+@Named
 public class AuthorizeAction {
 
     @Inject
     private Logger log;
 
     @Inject
+    private Authenticator authenticator;
+
+    @Inject
     private ClientService clientService;
+
+    @Inject
+    private ScopeService scopeService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -97,11 +105,12 @@ public class AuthorizeAction {
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @Inject(value = AppInitializer.DEFAULT_ACR_VALUES, required = false)
+    @Inject @Named(AppInitializer.DEFAULT_ACR_VALUES)
     private String defaultAuthenticationMethod;
 
-    @Inject("org.jboss.seam.international.localeSelector")
-    private LocaleSelector localeSelector;
+// TODO: CDI review
+//    @Inject("org.jboss.seam.international.localeSelector")
+//    private LocaleSelector localeSelector;
 
     @Inject
     private NetworkService networkService;
@@ -111,6 +120,9 @@ public class AuthorizeAction {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private FacesService facesService;
 
     @Inject
     private FacesContext facesContext;
@@ -156,7 +168,8 @@ public class AuthorizeAction {
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
             if (matchingLocale != null) {
-                localeSelector.setLocale(matchingLocale);
+// TODO : CDI review
+//                localeSelector.setLocale(matchingLocale);
             }
         }
     }
@@ -263,7 +276,7 @@ public class AuthorizeAction {
                         requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
             }
 
-            FacesManager.instance().redirect(redirectTo, loginParameters, false);
+            facesService.redirect(redirectTo, loginParameters);
             return;
         }
 
@@ -344,7 +357,6 @@ public class AuthorizeAction {
         }
 
         if (!identity.isLoggedIn()) {
-            final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
             authenticator.authenticateBySessionState(sessionState);
         }
 
@@ -358,7 +370,6 @@ public class AuthorizeAction {
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
         List<org.xdi.oxauth.model.common.Scope> scopes = new ArrayList<org.xdi.oxauth.model.common.Scope>();
-        ScopeService scopeService = ScopeService.instance();
 
         if (scope != null && !scope.isEmpty()) {
             String[] scopesName = scope.split(" ");
@@ -683,7 +694,8 @@ public class AuthorizeAction {
             final String parametersAsString = authenticationService.parametersAsString(sessionAttribute);
             final String uri = "seam/resource/restv1/oxauth/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {0}", uri);
-            FacesManager.instance().redirectToExternalURL(uri);
+
+            facesService.redirectToExternalURL(uri);
         } catch (UnsupportedEncodingException e) {
             log.trace(e.getMessage(), e);
         }
@@ -710,7 +722,7 @@ public class AuthorizeAction {
         sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED,
                 getState()));
 
-        FacesManager.instance().redirectToExternalURL(sb.toString());
+        facesService.redirectToExternalURL(sb.toString());
     }
 
     public void invalidRequest() {
@@ -726,7 +738,7 @@ public class AuthorizeAction {
         sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.INVALID_REQUEST,
                 getState()));
 
-        FacesManager.instance().redirectToExternalURL(sb.toString());
+        facesService.redirectToExternalURL(sb.toString());
     }
 
     public void consentRequired() {
@@ -740,7 +752,7 @@ public class AuthorizeAction {
         }
         sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.CONSENT_REQUIRED, getState()));
 
-        FacesManager.instance().redirectToExternalURL(sb.toString());
+        facesService.redirectToExternalURL(sb.toString());
     }
 
     public String getCodeChallenge() {
@@ -758,4 +770,66 @@ public class AuthorizeAction {
     public void setCodeChallengeMethod(String codeChallengeMethod) {
         this.codeChallengeMethod = codeChallengeMethod;
     }
+
+    public String encodeParameters(String url, Map<String, Object> parameters)
+    {
+       if ( parameters.isEmpty() ) return url;
+       
+       StringBuilder builder = new StringBuilder(url);
+       for ( Map.Entry<String, Object> param: parameters.entrySet() )
+       {
+          String parameterName = param.getKey();
+          if ( !containsParameter(url, parameterName) )
+          {
+             Object parameterValue = param.getValue();
+             if (parameterValue instanceof Iterable)
+             {
+                for ( Object value: (Iterable) parameterValue )
+                {
+                   builder.append('&')
+                         .append(parameterName)
+                         .append('=');
+                   if (value!=null)
+                   {
+                      builder.append(encode(value));
+                   }
+                }
+             }
+             else
+             {
+                builder.append('&')
+                      .append(parameterName)
+                      .append('=');
+                if (parameterValue!=null)
+                {
+                   builder.append(encode(parameterValue));
+                }
+             }
+          }
+       }
+       if ( url.indexOf('?')<0 ) 
+       {
+          builder.setCharAt( url.length() ,'?' );
+       }
+       return builder.toString();
+    }
+
+    private boolean containsParameter(String url, String parameterName)
+    {
+       return url.indexOf('?' + parameterName + '=')>0 || 
+             url.indexOf( '&' + parameterName + '=')>0;
+    }
+
+    private String encode(Object value)
+    {
+       try
+       {
+          return URLEncoder.encode(String.valueOf(value), "UTF-8");
+       }
+       catch (UnsupportedEncodingException iee)
+       {
+          throw new RuntimeException(iee);
+       }
+    }
+
 }

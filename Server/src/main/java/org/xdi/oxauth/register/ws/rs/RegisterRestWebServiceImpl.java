@@ -193,7 +193,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             final Client client = new Client();
                             client.setDn("inum=" + inum + "," + clientsBaseDN);
                             client.setClientId(inum);
-                            client.setClientSecret(generatedClientSecret);
+                            client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
                             client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
 
                             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -548,7 +548,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         JSONObject responseJsonObject = new JSONObject();
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), client.getClientSecret());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
         		appConfiguration.getRegistrationEndpoint() + "?" +
