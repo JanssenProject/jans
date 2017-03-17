@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebInitParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +21,16 @@ import org.slf4j.LoggerFactory;
  * @author Yuriy Movchan
  * @version September 07, 2016
  */
-@WebFilter
+@WebFilter(initParams = { @WebInitParam(name = "cors.allowed.origins", value = "*") }, urlPatterns = { "/.well-known/*",
+		"/seam/resource/restv1/oxauth/userinfo", "/seam/resource/restv1/oxauth/clientinfo" })
 public class CorsFilter implements Filter {
 
-	private static final Logger LOG = LoggerFactory.getLogger(CorsFilter.class);
+	private static final Logger log = LoggerFactory.getLogger(CorsFilter.class);
 
 	private static final String CORS_FILTERS[] = { "org.apache.catalina.filters.CorsFilter",
 			"org.eclipse.jetty.servlets.CrossOriginFilter" };
 	
-	Filter filter;
+	private Filter filter;
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -69,9 +71,9 @@ public class CorsFilter implements Filter {
 		}
 		
 		if (resultFilter == null) {
-			LOG.error("Failed to prepare CORS filter");
+			log.error("Failed to prepare CORS filter");
 		} else {
-			LOG.debug("Prepared CORS filter: " + resultFilter);
+			log.debug("Prepared CORS filter: " + resultFilter);
 		}
 
 		return resultFilter;

@@ -42,8 +42,6 @@ public class SchemaService {
     @Inject
 	private LdapEntryManager ldapEntryManager;
 
-
-
 	/**
 	 * Load schema from DS
 	 * 

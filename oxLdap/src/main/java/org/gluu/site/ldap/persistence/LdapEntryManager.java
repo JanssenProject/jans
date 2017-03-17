@@ -55,6 +55,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	private transient OperationsFacade ldapOperationService;
 	private transient List<DeleteNotifier> subscribers;
 
+	public LdapEntryManager() {}
+
 	public LdapEntryManager(OperationsFacade ldapOperationService) {
 		this.ldapOperationService = ldapOperationService;
 		subscribers = new LinkedList<DeleteNotifier>();

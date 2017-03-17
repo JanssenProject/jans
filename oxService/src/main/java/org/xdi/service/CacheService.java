@@ -26,7 +26,7 @@ import com.kenai.jaffl.annotations.In;
 public class CacheService {
 
 	@Inject
-	private CacheProvider<?> cacheProvider;
+	private CacheProvider cacheProvider;
 
 	@Inject
     private Logger log;
