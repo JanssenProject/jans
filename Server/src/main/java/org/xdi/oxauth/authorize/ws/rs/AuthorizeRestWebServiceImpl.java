@@ -12,7 +12,6 @@ import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.security.Identity;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +72,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.AuthenticationFilterService;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientAuthorizationsService;
@@ -102,30 +102,46 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private Logger log;
+
     @Inject
     private ApplicationAuditLogger applicationAuditLogger;
+
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
     @Inject
     private RedirectionUriService redirectionUriService;
+
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
     @Inject
     private ClientService clientService;
+
     @Inject
     private UserService userService;
+
     @Inject
     private Identity identity;
+
     @Inject
     private AuthenticationFilterService authenticationFilterService;
+
     @Inject
     private SessionStateService sessionStateService;
+
     @Inject
     private ScopeChecker scopeChecker;
+
     @Inject
     private SessionState sessionUser;
+
     @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
+    
+    @Inject
+    private Authenticator authenticator;
+
     @Inject
     private AuthenticationService authenticationService;
 
@@ -407,10 +423,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 sessionStateService.createSessionStateCookie(sessionUser.getId(), httpResponse);
                                                 sessionStateService.updateSessionState(sessionUser);
                                                 user = userService.getUserByDn(sessionUser.getUserDn());
-
-                                                Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
-                                                authenticator.authenticateExternallyWebService(user.getUserId());
-                                                identity.addRole("user");
                                             } else {
                                                 redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
                                                         AuthorizeErrorResponseType.LOGIN_REQUIRED, state));

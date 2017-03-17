@@ -50,6 +50,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
+    @Inject
+    private InternalDefaultPersonAuthenticationType internalDefaultPersonAuthenticationType;
+
 	private static final long serialVersionUID = 7339887464253044927L;
 
 	private Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> customScriptConfigurationsMapByUsageType;
@@ -452,7 +455,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 	
 	private CustomScriptConfiguration getInternalCustomScriptConfiguration() {
-		PersonAuthenticationType personAuthenticationType = new InternalDefaultPersonAuthenticationType();
 		CustomScript customScript = new AuthenticationCustomScript() {
 			@Override
 			public AuthenticationScriptUsageType getUsageType() {
@@ -463,7 +465,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		customScript.setName(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 		customScript.setLevel(-1);
 
-		return new CustomScriptConfiguration(customScript, personAuthenticationType,
+		return new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType,
 				new HashMap<String, SimpleCustomProperty>(0));
 	}
 

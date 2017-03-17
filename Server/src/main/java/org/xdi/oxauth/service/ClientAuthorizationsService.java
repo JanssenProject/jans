@@ -116,7 +116,4 @@ public class ClientAuthorizationsService {
         return String.format("ou=clientAuthorizations,%s", userBaseDn); // "ou=clientAuthorizations,inum=1234,ou=people,o=@!1111,o=gluu"
     }
 
-    public static ClientAuthorizationsService instance() {
-        return (ClientAuthorizationsService) Component.getInstance(ClientAuthorizationsService.class);
-    }
 }

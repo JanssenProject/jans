@@ -24,6 +24,7 @@ import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
 
 import com.google.common.base.Strings;
@@ -86,7 +87,7 @@ public class ClientAssertion {
 
                         // Validate expiration
                         if (expirationTime.after(new Date())) {
-                            ClientService clientService = (ClientService) Component.getInstance(ClientService.class);
+                            ClientService clientService = ServerUtil.bean(ClientService.class);
                             Client client = clientService.getClient(subject);
 
                             // Validate client
@@ -102,14 +103,14 @@ public class ClientAssertion {
                                 if (jwtType != null && signatureAlgorithm != null && signatureAlgorithm.getFamily() != null &&
                                         ((authenticationMethod == AuthenticationMethod.CLIENT_SECRET_JWT && signatureAlgorithm.getFamily().equals("HMAC"))
                                                 || (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT && (signatureAlgorithm.getFamily().equals("RSA") || signatureAlgorithm.getFamily().equals("EC"))))) {
-                                    clientSecret = client.getClientSecret();
+                                    clientSecret = clientService.decryptSecret(client.getClientSecret());
 
                                     // Validate the crypto segment
                                     String keyId = jwt.getHeader().getKeyId();
                                     JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                                             JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                                             new JSONObject(client.getJwks());
-                                    String sharedSecret = client.getClientSecret();
+                                    String sharedSecret = clientService.decryptSecret(client.getClientSecret());
                                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
                                     		appConfiguration);
                                     boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),

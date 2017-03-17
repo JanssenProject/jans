@@ -157,6 +157,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-jsf-util</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
 				<artifactId>oxcore-saml</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
