@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.service;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -45,8 +46,7 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@Inject
     private StaticConfiguration staticConfiguration;
 
-    // TODO: CDI: Fix
-//    @Observer("org.jboss.seam.postInitialization")
+    @PostConstruct
     public void create() {
     	init(this.appConfiguration.getMetricReporterInterval());
     }

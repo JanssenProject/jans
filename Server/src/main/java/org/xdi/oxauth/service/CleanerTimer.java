@@ -51,22 +51,29 @@ public class CleanerTimer {
 
     @Inject
     private Logger log;
+
     @Inject
     private LdapEntryManager ldapEntryManager;
+
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
     @Inject
     private ClientService clientService;
+
     @Inject
     private GrantService grantService;
+
     @Inject
     private RptManager rptManager;
+
     @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
+
     @Inject
     private SessionStateService sessionStateService;
 
-    @Inject
+    @Inject @Named("u2fRequestService")
     private RequestService u2fRequestService;
 
     @Inject
