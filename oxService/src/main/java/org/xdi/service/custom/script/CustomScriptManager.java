@@ -43,6 +43,7 @@ import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.inject.ReloadScript;
 import org.xdi.service.custom.inject.UpdateScript;
+import org.xdi.service.custom.model.UpdateScriptEvent;
 import org.xdi.util.StringHelper;
 
 /**
@@ -71,7 +72,7 @@ public class CustomScriptManager implements Serializable {
 	@Inject @Named("customScriptService")
 	protected AbstractCustomScriptService customScriptService;
 
-	@Inject @UpdateScript
+	@Inject
 	private Event<String> event;
 
 	protected List<CustomScriptType> supportedCustomScriptTypes;
@@ -94,7 +95,7 @@ public class CustomScriptManager implements Serializable {
 //		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
     }
 
-	public void reloadTimerEvent(@ObservesAsync @ReloadScript String event) {
+	public void reloadTimerEvent(@ObservesAsync @UpdateScript String event) {
 		if (this.isActive.get()) {
 			return;
 		}
@@ -130,7 +131,7 @@ public class CustomScriptManager implements Serializable {
 		boolean modified = reloadImpl();
 		
 		if (modified) {
-			event.fireAsync(MODIFIED_EVENT_TYPE);
+			event.select(ReloadScript.Literal.INSTANCE).fire(MODIFIED_EVENT_TYPE);
 		}
 	}
 

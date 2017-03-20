@@ -2,6 +2,7 @@ package org.xdi.service.cache;
 
 import java.io.Serializable;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
@@ -20,14 +21,17 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
 	@Inject
     private Logger log;
 
+    @Inject
+    private CacheConfiguration cacheConfiguration;
+
     private JedisPool pool;
+    private RedisConfiguration redisConfiguration;
 
-    private RedisConfiguration configuration = new RedisConfiguration();
+    public RedisProvider() {}
 
-    public RedisProvider(RedisConfiguration configuration) {
-        if (configuration != null) {
-            this.configuration = configuration;
-        }
+    @PostConstruct
+    public void init() {
+    	this.redisConfiguration = cacheConfiguration.getRedisConfiguration();
     }
 
     public void create() {
@@ -38,7 +42,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
             poolConfig.setMaxTotal(1000);
             poolConfig.setMinIdle(2);
 
-            pool = new JedisPool(poolConfig, configuration.getHost(), configuration.getPort());
+            pool = new JedisPool(poolConfig, redisConfiguration.getHost(), redisConfiguration.getPort());
 
             testConnection();
             log.debug("RedisProvider started.");
@@ -50,7 +54,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
     private void testConnection() {
         put("testKey", "testValue");
         if (!"testValue".equals(get("testKey"))) {
-            throw new RuntimeException("Failed to connect to redis server. Configuration: " + configuration);
+            throw new RuntimeException("Failed to connect to redis server. Configuration: " + redisConfiguration);
         }
     }
 
@@ -100,7 +104,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
         try {
             return Integer.parseInt(expirationInSeconds);
         } catch (Exception e) {
-            return configuration.getDefaultPutExpiration();
+            return redisConfiguration.getDefaultPutExpiration();
         }
     }
 

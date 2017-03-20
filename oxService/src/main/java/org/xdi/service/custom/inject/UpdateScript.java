@@ -13,6 +13,10 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
+/**
+ * @author Yuriy Movchan
+ * Date: 03/17/2017
+ */
 @Qualifier
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD, FIELD, PARAMETER })

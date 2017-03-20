@@ -1,7 +1,13 @@
 package org.xdi.service.cache;
 
+import java.util.Set;
+
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -20,6 +26,9 @@ public class CacheProviderFactory {
     @Inject
     private CacheConfiguration cacheConfiguration;
 
+    @Inject @ApplicationScoped
+    private Instance<CacheProvider> instance;
+
     @Produces @ApplicationScoped
     public CacheProvider getCacheProvider() {
         log.debug("Started to create cache provider");
@@ -33,15 +42,16 @@ public class CacheProviderFactory {
             cacheProviderType = CacheProviderType.IN_MEMORY;
         }
 
+        // Create proxied bean
         switch (cacheProviderType) {
             case IN_MEMORY:
-                cacheProvider = new InMemoryCacheProvider(cacheConfiguration.getInMemoryConfiguration());
+            	cacheProvider = instance.select(InMemoryCacheProvider.class).get();
                 break;
             case MEMCACHED:
-                cacheProvider = new MemcachedProvider(cacheConfiguration.getMemcachedConfiguration());
+            	cacheProvider = instance.select(MemcachedProvider.class).get();
                 break;
             case REDIS:
-                cacheProvider = new RedisProvider(cacheConfiguration.getRedisConfiguration());
+            	cacheProvider = instance.select(RedisProvider.class).get();
                 break;
         }
 

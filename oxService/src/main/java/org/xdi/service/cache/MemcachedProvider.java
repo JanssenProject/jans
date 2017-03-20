@@ -1,5 +1,6 @@
 package org.xdi.service.cache;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
@@ -21,10 +22,16 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 	@Inject
     private Logger log;
 
-    private MemcachedConfiguration memcachedConfiguration;
+    @Inject
+    private CacheConfiguration cacheConfiguration;
 
-    public MemcachedProvider(MemcachedConfiguration memcachedConfiguration) {
-        this.memcachedConfiguration = memcachedConfiguration;
+	private MemcachedConfiguration memcachedConfiguration;
+
+    public MemcachedProvider() {}
+
+    @PostConstruct
+    public void init() {
+    	this.memcachedConfiguration = cacheConfiguration.getMemcachedConfiguration();
     }
 
     private MemcachedClient client;
