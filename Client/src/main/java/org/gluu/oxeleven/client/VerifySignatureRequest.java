@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2016
+ * @version March 20, 2017
  */
 public class VerifySignatureRequest extends BaseRequest {
 
@@ -33,5 +33,21 @@ public class VerifySignatureRequest extends BaseRequest {
 
     public void setVerifySignatureRequestParam(VerifySignatureRequestParam verifySignatureRequestParam) {
         this.verifySignatureRequestParam = verifySignatureRequestParam;
+    }
+
+    @Override
+    public String getQueryString() {
+        StringBuilder queryStringBuilder = new StringBuilder();
+
+        /*try {
+            if (verifySignatureRequestParam != null) {
+                queryStringBuilder.append(VerifySignatureRequestParam.)
+                        .append("=").append(URLEncoder.encode(verifySignatureRequestParam, StringUtils.UTF8_STRING_ENCODING));
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }*/
+
+        return queryStringBuilder.toString();
     }
 }

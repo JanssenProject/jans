@@ -11,13 +11,14 @@ import java.util.Map;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version March 20, 2017
  */
 public class Configuration {
 
     private Map<String, String> pkcs11Config;
     private String pkcs11Pin;
     private String dnName;
+    private String testModeToken;
 
     public Map<String, String> getPkcs11Config() {
         if (pkcs11Config == null) {
@@ -45,5 +46,13 @@ public class Configuration {
 
     public void setDnName(String dnName) {
         this.dnName = dnName;
+    }
+
+    public String getTestModeToken() {
+        return testModeToken;
+    }
+
+    public void setTestModeToken(String testModeToken) {
+        this.testModeToken = testModeToken;
     }
 }

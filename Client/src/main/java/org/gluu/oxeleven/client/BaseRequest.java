@@ -8,13 +8,14 @@ package org.gluu.oxeleven.client;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version March 20, 2017
  */
 public abstract class BaseRequest {
 
     private String contentType;
     private String mediaType;
     private String httpMethod;
+    private String accessToken;
 
     public String getContentType() {
         return contentType;
@@ -39,4 +40,14 @@ public abstract class BaseRequest {
     public void setHttpMethod(String httpMethod) {
         this.httpMethod = httpMethod;
     }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public abstract String getQueryString();
 }

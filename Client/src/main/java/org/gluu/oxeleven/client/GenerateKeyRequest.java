@@ -6,12 +6,18 @@
 
 package org.gluu.oxeleven.client;
 
+import com.google.common.base.Strings;
+import org.gluu.oxeleven.model.GenerateKeyRequestParam;
+import org.gluu.oxeleven.util.StringUtils;
+
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version March 20, 2017
  */
 public class GenerateKeyRequest extends BaseRequest {
 
@@ -38,5 +44,25 @@ public class GenerateKeyRequest extends BaseRequest {
 
     public void setExpirationTime(Long expirationTime) {
         this.expirationTime = expirationTime;
+    }
+
+    @Override
+    public String getQueryString() {
+        StringBuilder queryStringBuilder = new StringBuilder();
+
+        try {
+            if (!Strings.isNullOrEmpty(signatureAlgorithm)) {
+                queryStringBuilder.append(GenerateKeyRequestParam.SIGNATURE_ALGORITHM)
+                        .append("=").append(URLEncoder.encode(signatureAlgorithm, StringUtils.UTF8_STRING_ENCODING));
+            }
+            if (expirationTime != null) {
+                queryStringBuilder.append("&").append(GenerateKeyRequestParam.EXPIRATION_TIME)
+                        .append("=").append(expirationTime);
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return queryStringBuilder.toString();
     }
 }

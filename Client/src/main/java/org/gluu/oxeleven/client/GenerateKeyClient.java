@@ -16,12 +16,17 @@ import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITH
 
 /**
  * @author Javier Rojas Blum
- * @version April 27, 2016
+ * @version March 20, 2017
  */
 public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKeyResponse> {
 
     public GenerateKeyClient(String url) {
         super(url);
+    }
+
+    @Override
+    public String getHttpMethod() {
+        return HttpMethod.POST;
     }
 
     @Override
@@ -57,6 +62,9 @@ public class GenerateKeyClient extends BaseClient<GenerateKeyRequest, GenerateKe
         clientRequest = new ClientRequest(url);
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
+        if (!Strings.isNullOrEmpty(getRequest().getAccessToken())) {
+            clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
+        }
 
         if (!Strings.isNullOrEmpty(getRequest().getSignatureAlgorithm())) {
             addRequestParam(SIGNATURE_ALGORITHM, getRequest().getSignatureAlgorithm());
