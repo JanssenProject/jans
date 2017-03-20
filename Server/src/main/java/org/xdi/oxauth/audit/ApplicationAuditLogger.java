@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Asynchronous;
 import javax.ejb.DependsOn;
@@ -40,6 +41,9 @@ public class ApplicationAuditLogger {
 
 	private static final String APPLICATION_AUDIT_LOGGER_REFRESH_TIMER = "applicationAuditLoggerRefreshTimer";
 
+	@Inject
+	private Logger log;
+
 	private final String BROKER_URL_PREFIX = "failover:(";
 	private final String BROKER_URL_SUFFIX = ")?timeout=5000&jms.useAsyncSend=true";
 	private final int ACK_MODE = Session.AUTO_ACKNOWLEDGE;
@@ -51,9 +55,6 @@ public class ApplicationAuditLogger {
 	private Set<String> jmsBrokerURISet;
 	private String jmsUserName;
 	private String jmsPassword;
-
-	@Inject
-	private Logger log;
 
 	@Inject
 	private AppConfiguration appConfiguration;
@@ -69,7 +70,8 @@ public class ApplicationAuditLogger {
 		this.updateState = true;
 	}
 
-	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    @PostConstruct
+	public void init() {
 		if (BooleanUtils.isNotTrue(isEnabledOAuthAuditnLogging())) {
 			return;
 		}

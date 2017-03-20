@@ -97,9 +97,6 @@ public class IdTokenFactory {
 
     @Inject
     private PairwiseIdentifierService pairwiseIdentifierService;
-    
-    @Inject
-    private IdTokenFactory idTokenFactory;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -477,10 +474,10 @@ public class IdTokenFactory {
         final Client grantClient = grant.getClient();
         if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
                 && grantClient.getIdTokenEncryptedResponseEnc() != null) {
-            return idTokenFactory.generateEncryptedIdToken(
+            return generateEncryptedIdToken(
                     grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         } else {
-            return idTokenFactory.generateSignedIdToken(
+            return generateSignedIdToken(
                     grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         }
     }
