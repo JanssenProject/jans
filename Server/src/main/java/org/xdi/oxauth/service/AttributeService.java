@@ -49,7 +49,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
             gluuAttribute = ldapEntryManager.find(GluuAttribute.class, dn);
             cacheService.put(CACHE_ATTRIBUTE, dn, gluuAttribute);
         } else {
-            log.trace("Get attribute from cache by Dn '{0}'", dn);
+            log.trace("Get attribute from cache by Dn '{}'", dn);
         }
 
         return gluuAttribute;
