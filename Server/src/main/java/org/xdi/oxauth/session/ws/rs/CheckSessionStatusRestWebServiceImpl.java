@@ -7,7 +7,6 @@
 package org.xdi.oxauth.session.ws.rs;
 
 import java.io.IOException;
-import java.security.Identity;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -24,6 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
