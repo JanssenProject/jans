@@ -20,7 +20,7 @@
 		<maven.min-version>3.0.3</maven.min-version>
 
 		<weld.version>3.0.0.CR2</weld.version>
-		<jsf.version>2.1</jsf.version>
+		<jsf.version>2.2.14</jsf.version>
 
 		<jackson.version>1.9.13</jackson.version>
 		<resteasy.version>2.3.4.Final</resteasy.version>
@@ -86,7 +86,7 @@
 				<version>1.0.0.Final</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.faces</groupId>
+				<groupId>com.sun.faces</groupId>
 				<artifactId>jsf-api</artifactId>
 				<version>${jsf.version}</version>
 				<scope>provided</scope>

@@ -43,7 +43,6 @@ import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.inject.ReloadScript;
 import org.xdi.service.custom.inject.UpdateScript;
-import org.xdi.service.custom.model.UpdateScriptEvent;
 import org.xdi.util.StringHelper;
 
 /**
