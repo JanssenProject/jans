@@ -11,10 +11,8 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -39,7 +37,6 @@ import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 /**
@@ -49,7 +46,7 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan
  * @version December 15, 2015
  */
-@Stateless
+@RequestScoped
 @Named
 public class Authenticator implements Serializable {
 

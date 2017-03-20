@@ -176,7 +176,6 @@ public class AuthorizeAction {
     }
 
     public void checkPermissionGranted() {
-
         if ((clientId == null) || clientId.isEmpty()) {
             log.error("Permission denied. client_id should be not empty.");
             permissionDenied();

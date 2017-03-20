@@ -105,7 +105,7 @@ public class ClientService {
      * @return <code>true</code> if success, otherwise <code>false</code>.
      */
     public boolean authenticate(String clientId, String password) {
-        log.debug("Authenticating Client with LDAP: clientId = {0}", clientId);
+        log.debug("Authenticating Client with LDAP: clientId = {}", clientId);
         boolean authenticated = false;
 
         try {
@@ -142,7 +142,7 @@ public class ClientService {
     public Client getClient(String clientId) {
         if (clientId != null && !clientId.isEmpty()) {
             Client result = getClientByDn(buildClientDn(clientId));
-            log.debug("Found {0} entries for client id = {1}", result != null ? 1 : 0, clientId);
+            log.debug("Found {} entries for client id = {}", result != null ? 1 : 0, clientId);
 
             return result;
         }
@@ -200,7 +200,7 @@ public class ClientService {
                 log.debug(ex.getMessage());
             }
         } else {
-            log.trace("Get client from cache by Dn '{0}'", dn);
+            log.trace("Get client from cache by Dn '{}'", dn);
         }
 
         return client;
@@ -341,7 +341,7 @@ public class ClientService {
         try {
             ldapEntryManager.merge(customEntry);
         } catch (EntryPersistenceException epe) {
-            log.error("Failed to update oxLastAccessTime and oxLastLoginTime of client '{0}'", clientDn);
+            log.error("Failed to update oxLastAccessTime and oxLastLoginTime of client '{}'", clientDn);
         }
 
         removeFromCache(client);
