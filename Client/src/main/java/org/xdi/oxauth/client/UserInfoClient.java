@@ -113,7 +113,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
             if (StringUtils.isNotBlank(entity)) {
-                List<String> contentType = clientResponse.getHeaders().get("Content-Type");
+                List<Object> contentType = clientResponse.getHeaders().get("Content-Type");
                 if (contentType != null && contentType.contains("application/jwt")) {
                     String[] jwtParts = entity.split("\\.");
                     if (jwtParts.length == 5) {

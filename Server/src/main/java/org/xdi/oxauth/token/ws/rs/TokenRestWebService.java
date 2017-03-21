@@ -27,7 +27,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author Javier Rojas Blum Date: 09.21.2011
  */
-@Path("/oxauth")
 @Api(value = "/oxauth", description = "Token Endpoint is used to obtain an Access Token, an ID Token, and optionally a Refresh Token. The RP (Client) sends a Token Request to the Token Endpoint to obtain a Token Response")
 public interface TokenRestWebService {
 

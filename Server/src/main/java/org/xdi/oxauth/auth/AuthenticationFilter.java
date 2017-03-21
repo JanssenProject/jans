@@ -49,7 +49,10 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version March 4, 2016
  */
-@WebFilter(asyncSupported = true)
+@WebFilter(asyncSupported = true,
+urlPatterns = {"/seam/resource/restv1/oxauth/authorize",
+		"/seam/resource/restv1/oxauth/(authorize|token|check_session|userinfo)",}
+)
 public class AuthenticationFilter implements Filter {
 
     @Inject

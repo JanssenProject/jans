@@ -10,7 +10,7 @@
 		<param-name>org.jboss.weld.development</param-name>
 		<param-value>true</param-value>
 	</context-param>
-
+	
 	<!-- JSF -->
 	<context-param>
 		<param-name>javax.faces.PROJECT_STAGE</param-name>

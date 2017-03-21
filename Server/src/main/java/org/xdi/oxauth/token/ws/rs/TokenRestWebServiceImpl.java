@@ -10,6 +10,7 @@ import java.security.SignatureException;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -58,6 +59,7 @@ import com.google.common.base.Strings;
  * @author Javier Rojas Blum
  * @version October 7, 2016
  */
+@Path("/oxauth")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject

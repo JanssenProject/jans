@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.auth;
 
-import java.io.Serializable;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +47,7 @@ import org.xdi.util.StringHelper;
  */
 @RequestScoped
 @Named
-public class Authenticator implements Serializable {
-
-    private static final long serialVersionUID = 669395320060928092L;
+public class Authenticator {
 
     @Inject
     private Logger log;

@@ -7,6 +7,7 @@
 package org.xdi.oxauth.jwk.ws.rs;
 
 import javax.inject.Inject;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -19,6 +20,7 @@ import org.xdi.oxauth.model.config.WebKeysConfiguration;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
+@Path("/oxauth")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
 
     @Inject

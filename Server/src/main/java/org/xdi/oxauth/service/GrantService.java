@@ -364,7 +364,4 @@ public class GrantService {
         }
     }
 
-    public CacheService getCacheService() {
-        return cacheService;
-    }
 }

@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -80,6 +81,7 @@ import org.xdi.util.security.StringEncrypter;
  * @author Javier Rojas Blum
  * @version August 17, 2016
  */
+@Path("/oxauth")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject

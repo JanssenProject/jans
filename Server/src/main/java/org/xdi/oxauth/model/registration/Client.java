@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.codehaus.jettison.json.JSONArray;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
 import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
@@ -22,12 +21,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
-import org.xdi.oxauth.service.EncryptionService;
-import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.util.LdapUtils;
-import org.xdi.util.security.StringEncrypter;
 
 /**
  * @author Javier Rojas Blum
