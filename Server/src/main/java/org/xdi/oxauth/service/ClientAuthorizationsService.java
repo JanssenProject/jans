@@ -32,7 +32,7 @@ import com.unboundid.ldap.sdk.Filter;
 @Named
 public class ClientAuthorizationsService {
 
-    @Inject
+	@Inject
     private Logger log;
 
     @Inject

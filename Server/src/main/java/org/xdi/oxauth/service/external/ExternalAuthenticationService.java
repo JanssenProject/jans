@@ -13,12 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
-import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -32,7 +28,6 @@ import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
-import org.xdi.service.custom.inject.ReloadScript;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.OxConstants;
 import org.xdi.util.StringHelper;

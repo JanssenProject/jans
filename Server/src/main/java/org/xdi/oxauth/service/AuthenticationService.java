@@ -65,7 +65,7 @@ import org.xdi.util.StringHelper;
 @Named
 public class AuthenticationService {
 
-    // use only "acr" instead of "acr_values" #334
+	// use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
             AuthorizeRequestParam.RESPONSE_TYPE,

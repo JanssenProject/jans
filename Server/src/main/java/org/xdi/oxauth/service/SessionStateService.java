@@ -61,9 +61,9 @@ import com.unboundid.ldap.sdk.ResultCode;
 
 @Stateless
 @Named
-public class SessionStateService {
+public class SessionStateService  {
 
-    public static final String SESSION_STATE_COOKIE_NAME = "session_state";
+	public static final String SESSION_STATE_COOKIE_NAME = "session_state";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
     @Inject

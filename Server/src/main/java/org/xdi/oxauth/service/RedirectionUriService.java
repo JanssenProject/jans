@@ -13,12 +13,11 @@ import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.model.common.SessionState;
@@ -38,7 +37,7 @@ import com.google.common.collect.Sets;
 @Named
 public class RedirectionUriService {
 
-    @Inject
+	@Inject
     private Logger log;
 
     @Inject
@@ -56,21 +55,17 @@ public class RedirectionUriService {
                 String[] redirectUris = client.getRedirectUris();
 
                 if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-                    ClientRequest clientRequest = new ClientRequest(sectorIdentifierUri);
-                    clientRequest.setHttpMethod(HttpMethod.GET);
 
-                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                    int status = clientResponse.getStatus();
+                    // TODO: Replace with service to reuse connection pool 
+                    javax.ws.rs.client.Client restClient = ClientBuilder.newClient();
+                    Invocation.Builder invocationBuilder = restClient.target(sectorIdentifierUri).request();
+                    String entity = invocationBuilder.get(String.class);
 
-                    if (status == 200) {
-                        String entity = clientResponse.getEntity(String.class);
-                        JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
-                        redirectUris = new String[sectorIdentifierJsonArray.length()];
-                        for (int i = 0; i < sectorIdentifierJsonArray.length(); i++) {
-                            redirectUris[i] = sectorIdentifierJsonArray.getString(i);
-                        }
-                    } else {
-                        return null;
+                    // TODO: Replace with service to reuse connection pool 
+                    JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
+                    redirectUris = new String[sectorIdentifierJsonArray.length()];
+                    for (int i = 0; i < sectorIdentifierJsonArray.length(); i++) {
+                        redirectUris[i] = sectorIdentifierJsonArray.getString(i);
                     }
                 }
 
@@ -81,7 +76,7 @@ public class RedirectionUriService {
                     final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
 
                     for (String uri : redirectUris) {
-                        log.debug("Comparing {0} == {1}", uri, redirectionUri);
+                        log.debug("Comparing {} == {}", uri, redirectionUri);
                         if (uri.equals(redirectionUri)) { // compare complete uri
                             return redirectionUri;
                         }

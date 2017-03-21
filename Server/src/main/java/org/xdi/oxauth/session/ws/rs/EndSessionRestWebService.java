@@ -29,7 +29,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@Path("/oxauth")
 @Api(value = "/oxauth", description = "End Session Endpoint - URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP")
 public interface EndSessionRestWebService {
 

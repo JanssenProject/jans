@@ -59,6 +59,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
@@ -108,6 +109,7 @@ import org.xdi.util.security.StringEncrypter;
  * @author Yuriy Movchan
  * @version October 31, 2016
  */
+@Path("/oxauth")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @Inject

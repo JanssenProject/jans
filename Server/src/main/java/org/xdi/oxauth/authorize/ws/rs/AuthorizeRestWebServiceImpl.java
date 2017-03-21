@@ -8,10 +8,8 @@ package org.xdi.oxauth.authorize.ws.rs;
 
 import static org.xdi.oxauth.model.util.StringUtils.implode;
 
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,10 +23,14 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
@@ -37,8 +39,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.auth.Authenticator;
@@ -96,7 +96,7 @@ import com.wordnik.swagger.annotations.Api;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-@Named("requestAuthorizationRestWebService")
+@Path("/oxauth")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
@@ -132,9 +132,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ScopeChecker scopeChecker;
-
-    @Inject
-    private SessionState sessionUser;
 
     @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
@@ -215,6 +212,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
+        SessionState sessionUser = identity.getSessionState();
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
                 userService.getUserByDn(sessionUser.getUserDn()) : null;
 
@@ -284,21 +282,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     String reqUriHash = reqUri.getFragment();
                                     String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-                                    ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
-                                    clientRequest.setHttpMethod(HttpMethod.GET);
+                                    // TODO: Replace with service to reuse connection pool 
+                                    javax.ws.rs.client.Client restClient = ClientBuilder.newClient();
+                                    Invocation.Builder invocationBuilder = restClient.target(reqUriWithoutFragment).request("application/json");
+                                    request = invocationBuilder.get(String.class);
 
-                                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
-                                    int status = clientResponse.getStatus();
-
-                                    if (status == 200) {
-                                        request = clientResponse.getEntity(String.class);
-
-                                        if (StringUtils.isBlank(reqUriHash)) {
-                                            validRequestUri = true;
-                                        } else {
-                                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
-                                            validRequestUri = StringUtils.equals(reqUriHash, hash);
-                                        }
+                                    if (StringUtils.isBlank(reqUriHash)) {
+                                        validRequestUri = true;
+                                    } else {
+                                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
+                                        validRequestUri = StringUtils.equals(reqUriHash, hash);
                                     }
 
                                     if (validRequestUri) {
@@ -314,9 +307,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     }
                                 } catch (URISyntaxException e) {
                                     log.error(e.getMessage(), e);
-                                } catch (UnknownHostException e) {
+                                } catch (WebApplicationException e) {
                                     log.error(e.getMessage(), e);
-                                } catch (ConnectException e) {
+                                } catch (ProcessingException e) {
                                     log.error(e.getMessage(), e);
                                 } catch (Exception e) {
                                     log.error(e.getMessage(), e);
@@ -676,6 +669,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
      * @param prompts     prompts
      */
     private void overrideUnauthenticatedSessionParameters(HttpServletRequest httpRequest, List<Prompt> prompts) {
+        SessionState sessionUser = identity.getSessionState();
         if (sessionUser != null && sessionUser.getState() != SessionIdState.AUTHENTICATED) {
             Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
 
@@ -794,6 +788,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void endSession(String sessionState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        SessionState sessionUser = identity.getSessionState();
+
         identity.logout();
         sessionUser.setUserDn(null);
        	sessionUser.setAuthenticationTime(null);

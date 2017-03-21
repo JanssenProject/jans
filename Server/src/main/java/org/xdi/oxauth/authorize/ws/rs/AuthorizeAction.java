@@ -73,7 +73,7 @@ import com.google.common.collect.Sets;
 @Named
 public class AuthorizeAction {
 
-    @Inject
+	@Inject
     private Logger log;
 
     @Inject

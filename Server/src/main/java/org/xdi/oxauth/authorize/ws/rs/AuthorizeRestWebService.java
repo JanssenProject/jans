@@ -40,7 +40,6 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-@Path("/oxauth")
 @Api(value = "/oxauth", description = "The Authorization Endpoint performs Authentication of the End-User. This is done by sending the User Agent to the Authorization Server's Authorization Endpoint for Authentication and Authorization, using request parameters defined by OAuth 2.0 and additional parameters and parameter values defined by OpenID Connect.")
 public interface AuthorizeRestWebService {
 

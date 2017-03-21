@@ -11,6 +11,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -49,6 +50,7 @@ import com.google.common.collect.Sets;
  * @author Yuriy Zabrovarnyy
  * @version December 15, 2015
  */
+@Path("/oxauth")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject

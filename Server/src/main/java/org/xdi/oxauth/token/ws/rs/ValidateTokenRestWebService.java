@@ -27,7 +27,6 @@ import com.wordnik.swagger.annotations.ApiParam;
  * @author Javier Rojas Blum
  * @version January 27, 2016
  */
-@Path("/oxauth")
 @Api(value = "/oxauth", description = "Validation Endpoint is used to validate an Access Token.")
 public interface ValidateTokenRestWebService {
 
