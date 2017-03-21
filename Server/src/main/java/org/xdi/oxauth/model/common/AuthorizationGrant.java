@@ -28,7 +28,9 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.IdTokenFactory;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.GrantService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
+import org.xdi.service.CacheService;
 import org.xdi.util.security.StringEncrypter;
 
 /**
@@ -42,6 +44,9 @@ import org.xdi.util.security.StringEncrypter;
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorizationGrant.class);
+
+    @Inject
+    private CacheService cacheService;
 
 	private GrantService grantService;
 
@@ -65,6 +70,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public IdToken createIdToken(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
+    	idTokenFactory = ServerUtil.bean(IdTokenFactory.class);
         JsonWebResponse jwr = idTokenFactory.createJwr(
                 grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         return new IdToken(jwr.toString(),
@@ -84,7 +90,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         if (isCachedWithNoPersistence) {
             if (getAuthorizationGrantType() == AuthorizationGrantType.AUTHORIZATION_CODE) {
                 MemcachedGrant memcachedGrant = new MemcachedGrant(this);
-                grantService.getCacheService().put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+                cacheService = ServerUtil.bean(CacheService.class);
+                cacheService.put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
             } else {
                 throw new UnsupportedOperationException("Grant caching is not supported for : " + getAuthorizationGrantType());
             }
@@ -96,6 +103,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private void saveImpl() {
         String grantId = getGrantId();
         if (grantId != null && StringUtils.isNotBlank(grantId)) {
+        	grantService = ServerUtil.bean(GrantService.class);
             final List<TokenLdap> grants = grantService.getGrantsByGrantId(grantId);
             if (grants != null && !grants.isEmpty()) {
                 final String nonce = getNonce();

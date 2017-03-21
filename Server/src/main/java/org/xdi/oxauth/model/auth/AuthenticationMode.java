@@ -1,10 +1,14 @@
 package org.xdi.oxauth.model.auth;
 
+import java.io.Serializable;
+
 /**
  * @author Yuriy Movchan
  * Date: 03/17/2017
  */
-public class AuthenticationMode {
+public class AuthenticationMode implements Serializable {
+
+	private static final long serialVersionUID = -3187893527945584013L;
 
 	private String name;
 

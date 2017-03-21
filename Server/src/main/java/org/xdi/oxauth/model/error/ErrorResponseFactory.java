@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.enterprise.inject.Vetoed;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -41,8 +42,7 @@ import org.xdi.util.StringHelper;
 @Vetoed
 public class ErrorResponseFactory {
 
-    @Inject
-    private Logger log;
+    private static Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
 
     private ErrorMessages messages;
 

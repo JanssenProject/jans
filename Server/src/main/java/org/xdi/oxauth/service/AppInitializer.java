@@ -14,13 +14,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.ServletContext;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -148,12 +149,12 @@ public class AppInitializer {
 //		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
 //    }
 //
-//    public void destoy(@BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
-//    	// TODO:
-//    	// Close connection here
-//    	// Clean up caches, etc...
-//    }
-//    
+    public void destoy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
+    	// TODO:
+    	// Close connection here
+    	// Clean up caches, etc...
+    }
+    
 //    public void reloadConfigurationTimerEvent(@Observes @AppReloadTimer @Event<String> reloadEvent) {
 //    	documentEvent.fireAsync(event, options)
 //		if (this.isActive.get()) {
