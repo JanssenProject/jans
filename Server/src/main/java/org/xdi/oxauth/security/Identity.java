@@ -3,17 +3,12 @@ package org.xdi.oxauth.security;
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.security.auth.login.LoginException;
 
-import org.python.modules.synchronize;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;

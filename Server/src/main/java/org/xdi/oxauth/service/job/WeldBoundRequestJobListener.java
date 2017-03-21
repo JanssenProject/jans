@@ -1,11 +1,5 @@
 package org.xdi.oxauth.service.job;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.inject.Inject;
-
 //import org.jboss.weld.context.bound.BoundRequestContext;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;

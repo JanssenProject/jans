@@ -9,6 +9,7 @@ package org.xdi.oxauth.clientinfo.ws.rs;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -34,6 +35,7 @@ import org.xdi.oxauth.service.ScopeService;
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
+@Path("/oxauth")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
 	@Inject

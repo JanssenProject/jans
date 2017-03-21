@@ -29,7 +29,7 @@ import com.unboundid.ldap.sdk.Filter;
 @Named
 public class ScopeService {
 
-    private static final String CACHE_SCOPE_NAME = "ScopeCache";
+	private static final String CACHE_SCOPE_NAME = "ScopeCache";
 
     @Inject
     private Logger log;
