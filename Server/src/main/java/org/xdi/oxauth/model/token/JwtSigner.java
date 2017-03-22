@@ -7,7 +7,6 @@
 package org.xdi.oxauth.model.token;
 
 import org.python.jline.internal.Preconditions;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
@@ -16,6 +15,8 @@ import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -56,7 +57,9 @@ public class JwtSigner {
         if (client.getIdTokenSignedResponseAlg() != null) {
             signatureAlgorithm = SignatureAlgorithm.fromString(client.getIdTokenSignedResponseAlg());
         }
-        return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), client.getClientSecret());
+        
+        ClientService clientService = ServerUtil.bean(ClientService.class); 
+        return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
     }
 
     public Jwt newJwt() throws Exception {

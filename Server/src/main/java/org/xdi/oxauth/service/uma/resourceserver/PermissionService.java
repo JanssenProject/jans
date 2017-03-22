@@ -6,10 +6,17 @@
 
 package org.xdi.oxauth.service.uma.resourceserver;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
@@ -23,39 +30,33 @@ import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 
-import javax.ws.rs.core.Response;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 01/07/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("umaRsPermissionService")
-@AutoCreate
+@Stateless
+@Named("umaRsPermissionService")
 public class PermissionService {
 
     public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private RsResourceService umaRsResourceService;
-    @In
+
+    @Inject
     private TokenService tokenService;
-    @In
+
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+
+    @Inject
     private AppConfiguration appConfiguration;
     
-    @In
+    @Inject
     private ClientService clientService;
-
-    public static PermissionService instance() {
-        return ServerUtil.instance(PermissionService.class);
-    }
 
     public Pair<Boolean, Response> hasEnoughPermissionsWithTicketRegistration(UmaRPT p_rpt, List<ResourceSetPermission> p_rptPermissions, RsResourceType p_resourceType, List<RsScopeType> p_scopes) {
         final Pair<Boolean, Response> result = new Pair<Boolean, Response>(false, null);
@@ -79,7 +80,7 @@ public class PermissionService {
             // and the permission ticket it just received from the AM in the body in a JSON-encoded "ticket" property.
             result.setFirst(false);
             final String ticket = registerPermission(p_rpt, resource, p_scopes);
-            //                    LOG.debug("Register permissions on AM, permission ticket: " + ticket);
+            //                    log.debug("Register permissions on AM, permission ticket: " + ticket);
 
             final String entity = ServerUtil.asJsonSilently(new PermissionTicket(ticket));
 

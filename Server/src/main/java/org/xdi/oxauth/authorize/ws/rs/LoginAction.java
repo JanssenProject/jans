@@ -1,21 +1,22 @@
 package org.xdi.oxauth.authorize.ws.rs;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
+
 
 /**
  * @author Javier Rojas Blum
  * @version May 24, 2016
  */
-@Name("loginAction")
-@Scope(ScopeType.EVENT) // Do not change scope, we try to keep server without http sessions
+@RequestScoped
+@Named
 public class LoginAction {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
     private String loginHint;
 
@@ -26,4 +27,5 @@ public class LoginAction {
     public void setLoginHint(String loginHint) {
         this.loginHint = loginHint;
     }
+
 }

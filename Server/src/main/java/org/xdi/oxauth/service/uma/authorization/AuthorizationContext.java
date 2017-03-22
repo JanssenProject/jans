@@ -6,6 +6,14 @@
 
 package org.xdi.oxauth.service.uma.authorization;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
@@ -14,13 +22,7 @@ import org.xdi.oxauth.model.uma.ClaimToken;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -81,7 +83,7 @@ public class AuthorizationContext extends ExternalScriptContext {
     }
 
     public String getUserClaim(String p_claimName) {
-        GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(p_claimName);
+        GluuAttribute gluuAttribute = ServerUtil.bean(AttributeService.class).getByClaimName(p_claimName);
 
         if (gluuAttribute != null) {
             String ldapClaimName = gluuAttribute.getName();

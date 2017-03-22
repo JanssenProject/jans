@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.model.authorize;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.registration.Client;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Validates the parameters received for the authorize web service.

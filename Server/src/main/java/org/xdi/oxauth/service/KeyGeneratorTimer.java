@@ -6,72 +6,73 @@
 
 package org.xdi.oxauth.service;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.Conf;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
+import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
+import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
+import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
 
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+import javax.ejb.Asynchronous;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.config.Conf;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 
 /**
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Name("keyGeneratorTimer")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
+@Named
 public class KeyGeneratorTimer {
 
     private final static String EVENT_TYPE = "KeyGeneratorTimerEvent";
     private final static int DEFAULT_INTERVAL = 48; // 48 hours
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ConfigurationFactory configurationFactory;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     private AtomicBoolean isActive;
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.debug("Initializing KeyGeneratorTimer");
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
+//    public void init() {
+//        log.debug("Initializing KeyGeneratorTimer");
+//
+//        this.isActive = new AtomicBoolean(false);
+//
+//        long interval = appConfiguration.getKeyRegenerationInterval();
+//        if (interval <= 0) {
+//            interval = DEFAULT_INTERVAL;
+//        }
+//
+//        interval = interval * 3600L * 1000L;
+//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
+//    }
 
-        this.isActive = new AtomicBoolean(false);
-
-        long interval = appConfiguration.getKeyRegenerationInterval();
-        if (interval <= 0) {
-            interval = DEFAULT_INTERVAL;
-        }
-
-        interval = interval * 3600L * 1000L;
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
-    }
-
-    @Observer(EVENT_TYPE)
+    // TODO: CDI: Fix
+//    @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
         if (!appConfiguration.getKeyRegenerationEnabled()) {
@@ -126,7 +127,7 @@ public class KeyGeneratorTimer {
 
                 if (expirationDate.before(now)) {
                     // The expired key is not added to the array of keys
-                    log.debug("Removing JWK: {0}, Expiration date: {1}",
+                    log.debug("Removing JWK: {}, Expiration date: {}",
                             key.getString(KEY_ID),
                             key.getString(EXPIRATION_TIME));
                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
@@ -146,15 +147,6 @@ public class KeyGeneratorTimer {
         }
 
         return jsonObject;
-    }
-
-    /**
-     * Get KeyGeneratorTimer instance
-     *
-     * @return KeyGeneratorTimer instance
-     */
-    public static KeyGeneratorTimer instance() {
-        return (KeyGeneratorTimer) Component.getInstance(KeyGeneratorTimer.class);
     }
 
 }
