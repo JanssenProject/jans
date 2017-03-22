@@ -30,11 +30,11 @@
 						value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
 
 					<h:panelGroup layout="block"
-						rendered='#{!empty client.getLogoUri()}'>
-						<h:graphicImage url='#{client.getLogoUri()}' />
+						rendered='#{!empty client.LogoUri}'>
+						<h:graphicImage url='#{client.LogoUri}' />
 					</h:panelGroup>
 					<h:panelGroup layout="block"
-						rendered='#{empty client.getLogoUri()}'>
+						rendered='#{empty client.LogoUri}'>
 						<a href="http://www.gluu.org/"> <h:graphicImage
 								url="img/logo.png" />
 						</a>
@@ -121,20 +121,20 @@
 									</li>
 									-->
 									<h:panelGroup layout="block"
-										rendered='#{!empty client.getPolicyUri()}'>
+										rendered='#{!empty client.policyUri}'>
 										<p>
 											<h:outputText value="#{msgs['common.agreePolicy']}" />
-											<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
+											<a target="_blank" href='#{client.policyUri}'> <h:outputText
 													value="#{msgs['common.privacyPolicy']}" />
 											</a>
 										</p>
 									</h:panelGroup>
 
 									<h:panelGroup layout="block"
-										rendered='#{!empty client.getTosUri()}'>
+										rendered='#{!empty client.tosUri}'>
 										<p>
 											<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
-											<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
+											<a target="_blank" href='#{client.tosUri}'> <h:outputText
 													value="#{msgs['common.termsOfService']}" />
 											</a>
 										</p>
