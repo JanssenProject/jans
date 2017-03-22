@@ -18,7 +18,7 @@
 	</ui:define>
 
 	<ui:define name="pageTitle">
-		<h:outputText value="#{messages['login.pageTitle']}" />
+		<h:outputText value="#{msgs['login.pageTitle']}" />
 	</ui:define>
 
 	<ui:define name="body">
@@ -68,7 +68,7 @@
 									<h:messages style="color:red;" />
 									<div class="row-fluid">
 										<span class="input-name span3"> <h:outputLabel
-												for="username" value="#{messages['login.username']}" />
+												for="username" value="#{msgs['login.username']}" />
 										</span>
 
 										<div class="span6">
@@ -80,7 +80,7 @@
 
 									<div class="row-fluid">
 										<span class="input-name span3"> <h:outputLabel
-												for="password" value="#{messages['login.password']}" />
+												for="password" value="#{msgs['login.password']}" />
 										</span>
 										<div class="span6">
 											<h:inputSecret id="password" value="#{credentials.password}"
@@ -93,7 +93,7 @@
 										<div class="gradient contact-button green span2 offset3">
 											<div id="submit_block" class="login_input">
 												<h:commandButton id="loginButton" style="padding-left: 35%;"
-													value="#{messages['login.login']}"
+													value="#{msgs['login.login']}"
 													action="#{authenticator.authenticate}" />
 											</div>
 											<span class="sprite-green_click_icon"></span>
@@ -105,7 +105,7 @@
 												<div id="submit_block" class="login_input">
 													<h:commandButton id="registerButton"
 														style="padding-left: 35%;"
-														value="#{messages['login.register']}"
+														value="#{msgs['login.register']}"
 														action="#{authenticator.authenticate}" />
 												</div>
 												<span class="sprite-green_click_icon"></span>
@@ -123,9 +123,9 @@
 									<h:panelGroup layout="block"
 										rendered='#{!empty client.getPolicyUri()}'>
 										<p>
-											<h:outputText value="#{messages['common.agreePolicy']}" />
+											<h:outputText value="#{msgs['common.agreePolicy']}" />
 											<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-													value="#{messages['common.privacyPolicy']}" />
+													value="#{msgs['common.privacyPolicy']}" />
 											</a>
 										</p>
 									</h:panelGroup>
@@ -133,9 +133,9 @@
 									<h:panelGroup layout="block"
 										rendered='#{!empty client.getTosUri()}'>
 										<p>
-											<h:outputText value="#{messages['common.pleaseReadTheTos']}" />
+											<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
 											<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-													value="#{messages['common.termsOfService']}" />
+													value="#{msgs['common.termsOfService']}" />
 											</a>
 										</p>
 									</h:panelGroup>
@@ -169,9 +169,9 @@
 			</div>
 			<div id="footer">
 				<p>
-					<h:outputText value="#{messages['common.gluuInc']}" />
+					<h:outputText value="#{msgs['common.gluuInc']}" />
 					, |
-					<h:outputText value="#{messages['common.caution']}" escape="false" />
+					<h:outputText value="#{msgs['common.caution']}" escape="false" />
 				</p>
 			</div>
 		</div>
