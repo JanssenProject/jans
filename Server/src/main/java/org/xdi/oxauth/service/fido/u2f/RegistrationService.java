@@ -6,64 +6,81 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
-import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.fido.u2f.*;
+import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
+import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
-import org.xdi.oxauth.model.fido.u2f.protocol.*;
+import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequest;
+import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
+import org.xdi.oxauth.model.fido.u2f.protocol.DeviceData;
+import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequest;
+import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
+import org.xdi.oxauth.model.fido.u2f.protocol.RegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with U2F registration requests
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("u2fRegistrationService")
-@AutoCreate
+@Stateless
+@Named("u2fRegistrationService")
 public class RegistrationService extends RequestService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-	@In
+	@Inject
 	private ApplicationService applicationService;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@In
+	@Inject
 	private AuthenticationService u2fAuthenticationService;
 
-	@In
+	@Inject
 	private RawRegistrationService rawRegistrationService;
 
-	@In
+	@Inject
 	private ClientDataValidationService clientDataValidationService;
 
-	@In
+	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
 
-	@In(value = "randomChallengeGenerator")
+	@Inject @Named("randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	@In
-	private StaticConf staticConfiguration;
+	@Inject
+	private StaticConfiguration staticConfiguration;
 
 	public RegisterRequestMessage builRegisterRequestMessage(String appId, String userInum) {
 		if (applicationService.isValidateApplication()) {
@@ -143,7 +160,7 @@ public class RegistrationService extends RequestService {
 
 		boolean approved = StringHelper.equals(RawRegistrationService.REGISTER_FINISH_TYPE, response.getClientData().getTyp());
 		if (!approved) {
-			log.debug("Registratio request with keyHandle '{0}' was canceled", rawRegisterResponse.getKeyHandle());
+			log.debug("Registratio request with keyHandle '{}' was canceled", rawRegisterResponse.getKeyHandle());
 			return new DeviceRegistrationResult(deviceRegistration, DeviceRegistrationResult.Status.CANCELED);
 		}
 

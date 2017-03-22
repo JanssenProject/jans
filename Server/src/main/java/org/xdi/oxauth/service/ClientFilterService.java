@@ -8,21 +8,14 @@ package org.xdi.oxauth.service;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
@@ -30,22 +23,18 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
  * @author Javier Rojas Blum
  * @version March 4, 2016
  */
-@Scope(ScopeType.APPLICATION)
-@Name("clientFilterService")
-@AutoCreate
-@Startup
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named
 public class ClientFilterService extends BaseAuthFilterService {
 
-    @Logger
-    private Log log;
-
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @Create
+    @PostConstruct
     public void init() {
         super.init(appConfiguration.getClientAuthenticationFilters(), Boolean.TRUE.equals(appConfiguration.getClientAuthenticationFiltersEnabled()), false);
     }
@@ -63,7 +52,4 @@ public class ClientFilterService extends BaseAuthFilterService {
         return resultDn;
     }
 
-    public static ClientFilterService instance() {
-        return (ClientFilterService) Component.getInstance(ClientFilterService.class);
-    }
 }

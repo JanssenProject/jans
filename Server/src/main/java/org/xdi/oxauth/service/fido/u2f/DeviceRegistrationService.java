@@ -10,24 +10,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.UserService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Filter;
@@ -37,22 +34,21 @@ import com.unboundid.ldap.sdk.Filter;
  *
  * @author Yuriy Movchan Date: 05/14/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("deviceRegistrationService")
-@AutoCreate
+@Stateless
+@Named
 public class DeviceRegistrationService {
 
-	@In
+	@Inject
+	private Logger log;
+
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@Logger
-	private Log log;
-
-	@In
-	private StaticConf staticConfiguration;
+	@Inject
+	private StaticConfiguration staticConfiguration;
 
 	public void addBranch(final String userInum) {
 		SimpleBranch branch = new SimpleBranch();
@@ -208,10 +204,6 @@ public class DeviceRegistrationService {
 		}
 
 		return hash;
-    }
-
-    public static DeviceRegistrationService instance() {
-        return ServerUtil.instance(DeviceRegistrationService.class);
     }
 
 }

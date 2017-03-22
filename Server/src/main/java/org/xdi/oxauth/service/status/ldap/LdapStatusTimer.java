@@ -9,48 +9,46 @@ package org.xdi.oxauth.service.status.ldap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.ejb.Asynchronous;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Movchan
  * @version 0.1, 11/18/2012
  */
-@Name("ldapStatusTimer")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named
 public class LdapStatusTimer {
 
     private final static String EVENT_TYPE = "LdapStatusTimerEvent";
     private final static long DEFAULT_INTERVAL = 60 * 1000; // 1 minute
 
-    @Logger
-    private Log log;
-
+    @Inject
+    private Logger log;
 
     private AtomicBoolean isActive;
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.info("Initializing LdapStatusTimer");
-        this.isActive = new AtomicBoolean(false);
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
+//    public void init() {
+//        log.info("Initializing LdapStatusTimer");
+//        this.isActive = new AtomicBoolean(false);
+//
+//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL));
+//    }
 
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL));
-    }
-
-    @Observer(EVENT_TYPE)
+    // TODO: CDI: Fix
+//    @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
         if (this.isActive.get()) {
@@ -69,8 +67,8 @@ public class LdapStatusTimer {
     }
 
     private void processInt() {
-    	LdapEntryManager ldapEntryManager = (LdapEntryManager) Component.getInstance(AppInitializer.LDAP_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
-    	List<LdapEntryManager> ldapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME, ScopeType.APPLICATION); 
+    	LdapEntryManager ldapEntryManager = ServerUtil.bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME); 
+    	List<LdapEntryManager> ldapAuthEntryManagers = ServerUtil.bean(List.class, AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME); 
 
     	logConnectionProviderStatistic(ldapEntryManager, "connectionProvider", "bindConnectionProvider");
 
@@ -85,22 +83,22 @@ public class LdapStatusTimer {
         LDAPConnectionProvider bindLdapConnectionProvider = ldapEntryManager.getLdapOperationService().getBindConnectionProvider();
         
         if (ldapConnectionProvider == null) {
-        	log.error("{0} is empty", connectionProviderName);
+        	log.error("{} is empty", connectionProviderName);
         } else {
             if (ldapConnectionProvider.getConnectionPool() == null) {
-            	log.error("{0} is empty", connectionProviderName);
+            	log.error("{} is empty", connectionProviderName);
             } else {
-            	log.info("{0} statistics: {1}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{} statistics: {}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 
         if (bindLdapConnectionProvider == null) {
-        	log.error("{0} is empty", bindConnectionProviderName);
+        	log.error("{} is empty", bindConnectionProviderName);
         } else {
             if (bindLdapConnectionProvider.getConnectionPool() == null) {
-            	log.error("{0} is empty", bindConnectionProviderName);
+            	log.error("{} is empty", bindConnectionProviderName);
             } else {
-            	log.info("{0} statistics: {1}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{} statistics: {}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 	}

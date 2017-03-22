@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.TokenType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -24,11 +24,10 @@ import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata configuration.
@@ -36,19 +35,19 @@ import javax.ws.rs.core.Response;
  * @author Yuriy Movchan Date: 10/25/2012
  * @author Yuriy Zabrovarnyy Date: 03/12/2015
  */
-@Name("umaMetaDataConfigurationRestWebService")
 @Path("/oxauth/uma-configuration")
 @Api(value = "/.well-known/uma-configuration", description = "The authorization server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/uma-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the authorization server. ")
 public class UmaConfigurationWS {
 
     public static final String UMA_SCOPES_SUFFIX = "/uma/scopes";
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @GET
@@ -96,7 +95,7 @@ public class UmaConfigurationWS {
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);
-            log.trace("Uma configuration: {0}", entity);
+            log.trace("Uma configuration: {}", entity);
 
             return Response.ok(entity).build();
         } catch (Throwable ex) {

@@ -1,11 +1,11 @@
 package org.xdi.oxauth.model.common;
 
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.registration.Client;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.registration.Client;
 
 /**
  * @author yuriyz on 02/14/2017.

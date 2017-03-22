@@ -6,14 +6,19 @@
 
 package org.xdi.oxauth.model.error;
 
+import java.io.IOException;
+import java.util.List;
+
+import javax.enterprise.inject.Vetoed;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
@@ -27,28 +32,27 @@ import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.util.List;
-
 /**
  * Provides an easy way to get Error responses based in an error response type
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  */
-@Name("errorResponseFactory")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
+@Vetoed
 public class ErrorResponseFactory {
 
-    @Logger
-    private Log log;
+    private static Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
 
-    private volatile ErrorMessages messages;
+    private ErrorMessages messages;
 
-    public ErrorMessages getMessages() {
+    public ErrorResponseFactory() {}
+
+	public ErrorResponseFactory(ErrorMessages messages) {
+    	this.messages = messages;
+	}
+
+	public ErrorMessages getMessages() {
         return messages;
     }
 
@@ -64,18 +68,18 @@ public class ErrorResponseFactory {
      * @return Error message or <code>null</code> if not found.
      */
     private ErrorMessage getError(List<ErrorMessage> p_list, IErrorType type) {
-        log.debug("Looking for the error with id: {0}", type);
+        log.debug("Looking for the error with id: {}", type);
 
         if (p_list != null) {
             for (ErrorMessage error : p_list) {
                 if (error.getId().equals(type.getParameter())) {
-                    log.debug("Found error, id: {0}", type);
+                    log.debug("Found error, id: {}", type);
                     return error;
                 }
             }
         }
 
-        log.debug("Error not found, id: {0}", type);
+        log.debug("Error not found, id: {}", type);
         return null;
     }
 

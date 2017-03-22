@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,10 +16,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.GluuImage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -35,24 +33,26 @@ import com.wordnik.swagger.annotations.Api;
  */
 
 @Path("/uma/scopes/icons")
-@Name("umaScopeIconRestWebService")
 @Api(value= "/uma/scopes/icons", description = "UMA Scope Icon endpoint provides scope icon by scope id.")
 public class ScopeIconWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+
+    @Inject
     private ScopeService umaScopeService;
-    @In
+
+    @Inject
     private XmlService xmlService;
 
     @GET
     @Path("{id}")
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response getScopeDescription(@PathParam("id") String id) {
-        log.trace("UMA - get scope's icon : id: {0}", id);
+        log.trace("UMA - get scope's icon : id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
                 final ScopeDescription scope = umaScopeService.getInternalScope(id);
