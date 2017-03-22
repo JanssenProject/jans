@@ -6,25 +6,39 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.model.exception.AcrChangedException;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
@@ -35,14 +49,8 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -51,47 +59,39 @@ import java.util.concurrent.TimeUnit;
  * @version December 29, 2016
  */
 
-@Scope(ScopeType.STATELESS)
-@Name("sessionStateService")
-@AutoCreate
-public class SessionStateService {
+@Stateless
+@Named
+public class SessionStateService  {
 
-    public static final String SESSION_STATE_COOKIE_NAME = "session_state";
+	public static final String SESSION_STATE_COOKIE_NAME = "session_state";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
-    @Logger
-    private Log log;
-
-    @In
-    private AuthenticationService authenticationService;
+    @Inject
+    private Logger log;
     
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
-    private StaticConf staticConfiguration;
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
-    @In
-    private JSONWebKeySet webKeysConfiguration;
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
 
-    @In(required = false)
+    @Inject
     private FacesContext facesContext;
 
-    @In(value = "#{facesContext.externalContext}", required = false)
+    @Inject
     private ExternalContext externalContext;
 
-    @In
+    @Inject
     private CacheService cacheService;
-
-    public static SessionStateService instance() {
-        return (SessionStateService) Component.getInstance(SessionStateService.class);
-    }
 
     public String getAcr(SessionState session) {
         if (session == null || session.getSessionAttributes() == null) {
@@ -149,7 +149,7 @@ public class SessionStateService {
             sessionAttributes.putAll(currentSessionAttributes);
 
             // Reinit login
-            sessionAttributes.put("auth_step", "1");
+            sessionAttributes.put("c", "1");
 
             for (Iterator<Entry<String, String>> it = currentSessionAttributes.entrySet().iterator(); it.hasNext(); ) {
                 Entry<String, String> currentSessionAttributesEntry = it.next();
@@ -163,7 +163,7 @@ public class SessionStateService {
 
             boolean updateResult = updateSessionState(session, true, true, true);
             if (!updateResult) {
-                log.debug("Failed to update session entry: '{0}'", session.getId());
+                log.debug("Failed to update session entry: '{}'", session.getId());
             }
         }
     }
@@ -185,7 +185,7 @@ public class SessionStateService {
 
         boolean updateResult = updateSessionState(session, true, true, true);
         if (!updateResult) {
-            log.debug("Failed to update session entry: '{0}'", session.getId());
+            log.debug("Failed to update session entry: '{}'", session.getId());
         }
     }
 
@@ -196,7 +196,7 @@ public class SessionStateService {
             final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
 
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> newRequestParameterMap = AuthenticationService.getAllowedParameters(parameterMap);
             for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
                 String name = newRequestParameterMapEntry.getKey();
                 if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
@@ -217,7 +217,7 @@ public class SessionStateService {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals(SESSION_STATE_COOKIE_NAME) /*&& cookie.getSecure()*/) {
-                        log.trace("Found session_state cookie: '{0}'", cookie.getValue());
+                        log.trace("Found session_state cookie: '{}'", cookie.getValue());
                         return cookie.getValue();
                     }
                 }
@@ -370,7 +370,7 @@ public class SessionStateService {
 
         auditLogging(sessionState);
 
-        log.trace("Generated new session, id = '{0}', state = '{1}', asJwt = '{2}', persisted = '{3}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
+        log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
         return sessionState;
     }
 
@@ -409,7 +409,7 @@ public class SessionStateService {
         boolean persisted = updateSessionState(sessionState, true, true, true);
 
         auditLogging(sessionState);
-        log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionState.getId(), sessionState.getState(), persisted);
+        log.trace("Authenticated session, id = '{}', state = '{}', persisted = '{}'", sessionState.getId(), sessionState.getState(), persisted);
         return sessionState;
     }
 
@@ -476,7 +476,7 @@ public class SessionStateService {
             		try {
 						mergeWithRetry(sessionState, 3);
 					} catch (EmptyEntryPersistenceException ex) {
-						log.warn("Faield to update session entry '{0}': '{1}'", sessionState.getId(), ex.getMessage());
+						log.warn("Faield to update session entry '{}': '{}'", sessionState.getId(), ex.getMessage());
 					}
             	}
             }
@@ -509,10 +509,10 @@ public class SessionStateService {
 				lastException = ex;
 				if (ex.getCause() instanceof LDAPException) {
 					LDAPException parentEx = ((LDAPException) ex.getCause());
-					log.debug("LDAP exception resultCode: '{0}'", parentEx.getResultCode().intValue());
+					log.debug("LDAP exception resultCode: '{}'", parentEx.getResultCode().intValue());
 					if ((parentEx.getResultCode().intValue() == ResultCode.NO_SUCH_ATTRIBUTE_INT_VALUE) ||
 						(parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE)) {
-						log.warn("Session entry update attempt '{0}' was unsuccessfull", i);
+						log.warn("Session entry update attempt '{}' was unsuccessfull", i);
 						continue;
 					}
 				}
@@ -521,7 +521,7 @@ public class SessionStateService {
 			}
 		}
 
-        log.error("Session entry update attempt was unsuccessfull after '{0}' attempts", maxAttempts);
+        log.error("Session entry update attempt was unsuccessfull after '{}' attempts", maxAttempts);
 		throw lastException;
 	}
 
@@ -557,9 +557,9 @@ public class SessionStateService {
 
         try {
             final SessionState entity = getSessionById(sessionState);
-            log.trace("Try to get session by id: {0} ...", sessionState);
+            log.trace("Try to get session by id: {} ...", sessionState);
             if (entity != null) {
-                log.trace("Session dn: {0}", entity.getDn());
+                log.trace("Session dn: {}", entity.getDn());
 
                 if (isSessionValid(entity)) {
                     return entity;
@@ -569,7 +569,7 @@ public class SessionStateService {
             log.trace(ex.getMessage(), ex);
         }
 
-        log.trace("Failed to get session by id: {0}", sessionState);
+        log.trace("Failed to get session by id: {}", sessionState);
         return null;
     }
 

@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.service.external.context;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.token.JsonWebResponse;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Holds object required in dynamic scope custom scripts 

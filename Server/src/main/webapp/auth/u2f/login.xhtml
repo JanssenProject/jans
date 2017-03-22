@@ -101,7 +101,7 @@
                             <h:panelGroup rendered="#{not identity.loggedIn}">
                                 <div class="login-panel">
                                     <div class="login-panel-header">
-                                        <h:outputText value="#{messages['login.login']}"/>
+                                        <h:outputText value="#{msgs['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
                                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
@@ -116,18 +116,18 @@
 
                                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
-                                                <h:outputText value="#{messages['common.agreePolicy']}"/>
+                                                <h:outputText value="#{msgs['common.agreePolicy']}"/>
                                                 <a target="_blank" href='#{client.getPolicyUri()}'>
-                                                    <h:outputText value="#{messages['common.privacyPolicy']}"/>
+                                                    <h:outputText value="#{msgs['common.privacyPolicy']}"/>
                                                 </a>
                                             </p>
                                         </s:div>
 
                                         <s:div rendered='#{!empty client.getTosUri()}'>
                                             <p>
-                                                <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
+                                                <h:outputText value="#{msgs['common.pleaseReadTheTos']}"/>
                                                 <a target="_blank" href='#{client.getTosUri()}'>
-                                                    <h:outputText value="#{messages['common.termsOfService']}"/>
+                                                    <h:outputText value="#{msgs['common.termsOfService']}"/>
                                                 </a>
                                             </p>
                                         </s:div>
