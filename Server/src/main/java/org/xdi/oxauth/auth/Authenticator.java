@@ -195,6 +195,9 @@ public class Authenticator {
             return false;
         }
 
+        // Set current state into identity to allow use in login form and authentication scripts
+        identity.setSessionState(sessionState);
+
         initCustomAuthenticatorVariables(sessionIdAttributes);
         boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
         if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr)) {
@@ -414,7 +417,7 @@ public class Authenticator {
             log.error("Failed to get attributes from session");
             return Constants.RESULT_EXPIRED;
         }
-        
+
         // Set current state into identity to allow use in login form and authentication scripts
         identity.setSessionState(sessionState);
 
