@@ -6,7 +6,7 @@
 	<groupId>org.xdi</groupId>
 	<artifactId>oxauth</artifactId>
 	<packaging>pom</packaging>
-	<version>3.1.0.weld-SNAPSHOT</version>
+	<version>3.1.0-SNAPSHOT</version>
 	<name>oxAuth</name>
 	<url>http://ox.gluu.org</url>
 
