@@ -283,7 +283,6 @@ public abstract class BaseTest {
 
         if (userSecret != null) {
             if (userId != null) {
-            	System.out.println("authenticateResourceOwnerAndGrantAccess: pageSource:" + driver.getPageSource());
                 WebElement usernameElement = driver.findElement(By.name(loginFormUsername));
                 usernameElement.sendKeys(userId);
             }
