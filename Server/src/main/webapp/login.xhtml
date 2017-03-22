@@ -7,9 +7,10 @@
 	template="/WEB-INF/incl/layout/login-template.xhtml">
 
 	<f:metadata>
-		<f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
 		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
 			if="#{sessionStateService.notSessionStateAuthenticated}" />
+
+		<f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
 	</f:metadata>
 
 	<ui:define name="head">

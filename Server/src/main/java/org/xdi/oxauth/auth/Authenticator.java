@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -107,6 +108,7 @@ public class Authenticator {
         if (result) {
             return Constants.RESULT_SUCCESS;
         } else {
+    		addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate", null);
             return Constants.RESULT_FAILURE;
         }
 
@@ -391,6 +393,21 @@ public class Authenticator {
 	}
 
     public String prepareAuthenticationForStep() {
+    	String result = prepareAuthenticationForStepImpl();
+    	
+    	if (Constants.RESULT_SUCCESS.equals(result)) {
+    	} else if (Constants.RESULT_FAILURE.equals(result)) {
+    		addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate", null);
+    	} else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
+    		addMessage(FacesMessage.SEVERITY_ERROR, "You don't have permissions", null);
+    	} else if (Constants.RESULT_EXPIRED.equals(result)) {
+    		addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate. Authentication session has expired", null);
+		}
+
+    	return result;
+    }
+
+    private String prepareAuthenticationForStepImpl() {
         SessionState sessionState = sessionStateService.getSessionState();
         Map<String, String> sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
         if (sessionIdAttributes == null) {
@@ -576,5 +593,10 @@ public class Authenticator {
     public void configureSessionClient(Client client) {
         authenticationService.configureSessionClient(client);
     }
+
+	public void addMessage(Severity severity, String summary, String detail) {
+		FacesMessage message = new FacesMessage(severity, summary, detail);
+		facesContext.addMessage(null, message);
+	}
 
 }
