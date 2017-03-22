@@ -150,7 +150,7 @@ public class IdGenRestWebService {
         // along with providing the authorization server's URI in an "as_uri" property
         // to facilitate authorization server configuration data discovery,
         // including discovery of the endpoint where the client can request an RPT (Section 3.4.1).
-        log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {0}",
+        log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {}",
         		appConfiguration.getUmaConfigurationEndpoint());
 
         return new Pair<Boolean, Response>(false, unauthorizedResponse());
@@ -188,7 +188,7 @@ public class IdGenRestWebService {
 
     private String generateId(String prefix, String type) {
         final String id = idGenService.generateId(type, prefix);
-        log.trace("Generated id: {0}, prefix: {1}, type: {2}", id, prefix, type);
+        log.trace("Generated id: {}, prefix: {}, type: {}", id, prefix, type);
         return id;
     }
 

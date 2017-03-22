@@ -165,7 +165,7 @@ public class AuthenticationService extends RequestService {
 		boolean approved = StringHelper.equals(RawAuthenticationService.AUTHENTICATE_GET_TYPE, clientData.getTyp());
 		if (!approved) {
 			status = DeviceRegistrationResult.Status.CANCELED;
-			log.debug("Authentication request with keyHandle '{0}' was canceled", response.getKeyHandle());
+			log.debug("Authentication request with keyHandle '{}' was canceled", response.getKeyHandle());
 		}
 
 		return new DeviceRegistrationResult(usedDeviceRegistration, status);

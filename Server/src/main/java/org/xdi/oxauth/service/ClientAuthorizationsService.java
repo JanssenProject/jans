@@ -70,7 +70,7 @@ public class ClientAuthorizationsService {
         if (entries != null && !entries.isEmpty()) {
             // if more then one entry then it's problem, non-deterministic behavior, id must be unique
             if (entries.size() > 1) {
-                log.error("Found more then one client authorization entry by client Id: {0}" + clientId);
+                log.error("Found more then one client authorization entry by client Id: {}" + clientId);
                 for (ClientAuthorizations entry : entries) {
                     log.error(entry.toString());
                 }

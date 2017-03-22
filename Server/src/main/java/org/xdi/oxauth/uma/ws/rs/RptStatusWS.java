@@ -205,7 +205,7 @@ public class RptStatusWS {
                             result.add(toAdd);
                         }
                     } else {
-                        log.debug("Ignore permission, skip it in response because permission is not valid. Permission dn: {0}, rpt dn: {1}",
+                        log.debug("Ignore permission, skip it in response because permission is not valid. Permission dn: {}, rpt dn: {}",
                                 permission.getDn(), p_rpt.getDn());
                     }
                 }

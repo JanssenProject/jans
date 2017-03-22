@@ -337,20 +337,20 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public CustomScriptConfiguration determineExternalAuthenticatorForWorkflow(AuthenticationScriptUsageType usageType, CustomScriptConfiguration customScriptConfiguration) {
     	String authMode = customScriptConfiguration.getName();
-    	log.debug("Validating acr_values: '{0}'", authMode);
+    	log.debug("Validating acr_values: '{}'", authMode);
 
     	boolean isValidAuthenticationMethod = executeExternalIsValidAuthenticationMethod(usageType, customScriptConfiguration);
         if (!isValidAuthenticationMethod) {
-        	log.warn("Current acr_values: '{0}' isn't valid", authMode);
+        	log.warn("Current acr_values: '{}' isn't valid", authMode);
 
         	String alternativeAuthenticationMethod = executeExternalGetAlternativeAuthenticationMethod(usageType, customScriptConfiguration);
             if (StringHelper.isEmpty(alternativeAuthenticationMethod)) {
-            	log.error("Failed to determine alternative authentication mode for acr_values: '{0}'", authMode);
+            	log.error("Failed to determine alternative authentication mode for acr_values: '{}'", authMode);
                 return null;
             } else {
             	CustomScriptConfiguration alternativeCustomScriptConfiguration = getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, alternativeAuthenticationMethod);
                 if (alternativeCustomScriptConfiguration == null) {
-                    log.error("Failed to get alternative CustomScriptConfiguration '{0}' for acr_values: '{1}'", alternativeAuthenticationMethod, authMode);
+                    log.error("Failed to get alternative CustomScriptConfiguration '{}' for acr_values: '{}'", alternativeAuthenticationMethod, authMode);
                     return null;
                 } else {
                     return alternativeCustomScriptConfiguration;

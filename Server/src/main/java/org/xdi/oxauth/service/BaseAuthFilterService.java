@@ -136,7 +136,7 @@ public abstract class BaseAuthFilterService {
 
         for (BaseFilter authenticationFilter : p_filterList) {
             if (Boolean.TRUE.equals(authenticationFilter.getBind()) && StringHelper.isEmpty(authenticationFilter.getBindPasswordAttribute())) {
-                log.error("Skipping authentication filter:\n '{0}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilter);
+                log.error("Skipping authentication filter:\n '{}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilter);
                 continue;
             }
 
@@ -155,7 +155,7 @@ public abstract class BaseAuthFilterService {
             AuthenticationFilterWithParameters tmpAutheticationFilterWithParameter = new AuthenticationFilterWithParameters(authenticationFilter, variableNames, indexedParameters);
             tmpAuthenticationFilterWithParameters.add(tmpAutheticationFilterWithParameter);
 
-            log.debug("Authentication filter with parameters: '{0}'. ", tmpAutheticationFilterWithParameter);
+            log.debug("Authentication filter with parameters: '{}'. ", tmpAutheticationFilterWithParameter);
         }
 
         return tmpAuthenticationFilterWithParameters;
@@ -222,14 +222,14 @@ public abstract class BaseAuthFilterService {
         try {
             ldapFilter = Filter.create(filter);
         } catch (LDAPException ex) {
-            log.error("Failed to create Ldap filter: '{0}'", ex, filter);
+            log.error("Failed to create Ldap filter: '{}'", ex, filter);
             return null;
         }
 
         List<LdapDummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), LdapDummyEntry.class, new String[0], ldapFilter);
 
         if (foundEntries.size() > 1) {
-            log.error("Found more than one entry by filter: '{0}'. Entries:\n", ldapFilter, foundEntries);
+            log.error("Found more than one entry by filter: '{}'. Entries:\n", ldapFilter, foundEntries);
             return null;
         }
 

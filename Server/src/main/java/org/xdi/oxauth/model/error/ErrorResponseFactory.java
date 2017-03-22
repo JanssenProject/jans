@@ -68,18 +68,18 @@ public class ErrorResponseFactory {
      * @return Error message or <code>null</code> if not found.
      */
     private ErrorMessage getError(List<ErrorMessage> p_list, IErrorType type) {
-        log.debug("Looking for the error with id: {0}", type);
+        log.debug("Looking for the error with id: {}", type);
 
         if (p_list != null) {
             for (ErrorMessage error : p_list) {
                 if (error.getId().equals(type.getParameter())) {
-                    log.debug("Found error, id: {0}", type);
+                    log.debug("Found error, id: {}", type);
                     return error;
                 }
             }
         }
 
-        log.debug("Error not found, id: {0}", type);
+        log.debug("Error not found, id: {}", type);
         return null;
     }
 

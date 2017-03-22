@@ -1,4 +1,4 @@
-package org.xdi.oxauth.util;
+package org.xdi.oxauth.service.util;
 
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -13,11 +13,11 @@ import org.slf4j.LoggerFactory;
  */
 public class Resources {
 
-	@Produces
-	public Logger getLogger(InjectionPoint ip) {
-		Class<?> clazz = ip.getMember().getDeclaringClass();
-
-		return LoggerFactory.getLogger(clazz);
-	}
+    @Produces
+    public Logger getLogger(InjectionPoint ip) {
+        Class<?> clazz = ip.getMember().getDeclaringClass();
+        
+        return LoggerFactory.getLogger(clazz);
+    }
 
 }

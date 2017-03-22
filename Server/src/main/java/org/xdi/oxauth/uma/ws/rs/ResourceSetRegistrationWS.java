@@ -111,7 +111,7 @@ public class ResourceSetRegistrationWS {
             ResourceSet resourceSet) {
         try {
             String id = generatedId();
-            log.trace("Try to create resource set, id: {0}", id);
+            log.trace("Try to create resource set, id: {}", id);
 
             umaValidationService.assertHasProtectionScope(authorization);
             return putResourceSetImpl(Response.Status.CREATED, authorization, id, resourceSet);
@@ -179,7 +179,7 @@ public class ResourceSetRegistrationWS {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
 
-            log.debug("Getting resource set description: '{0}'", rsid);
+            log.debug("Getting resource set description: '{}'", rsid);
 
             final org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = resourceSetService.getResourceSetById(rsid);
 
@@ -302,7 +302,7 @@ public class ResourceSetRegistrationWS {
 
     private Response putResourceSetImpl(Response.Status status, String authorization, String rsid,
                                         ResourceSet resourceSet) throws IllegalAccessException, InvocationTargetException, IOException {
-        log.trace("putResourceSetImpl, rsid: {0}, status:", rsid, status.name());
+        log.trace("putResourceSetImpl, rsid: {}, status:", rsid, status.name());
         String patToken = tokenService.getTokenFromAuthorizationParameter(authorization);
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(patToken);
 
@@ -331,7 +331,7 @@ public class ResourceSetRegistrationWS {
 
     private String addResourceSet(String rsid, ResourceSet resourceSet, String userDn,
                                   String clientDn) throws IllegalAccessException, InvocationTargetException {
-        log.debug("Adding new resource set description: '{0}'", rsid);
+        log.debug("Adding new resource set description: '{}'", rsid);
 
         final String resourceSetDn = resourceSetService.getDnForResourceSet(rsid);
         final List<String> scopeDNs = umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resourceSet.getScopes());
@@ -359,7 +359,7 @@ public class ResourceSetRegistrationWS {
     }
 
     private String updateResourceSet(String rsid, ResourceSet resourceSet) throws IllegalAccessException, InvocationTargetException {
-        log.debug("Updating resource set description: '{0}'.", rsid);
+        log.debug("Updating resource set description: '{}'.", rsid);
 
         org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = new org.xdi.oxauth.model.uma.persistence.ResourceSet();
         ldapResourceSet.setDn(resourceSetService.getBaseDnForResourceSet());

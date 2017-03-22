@@ -71,7 +71,7 @@ public class PairwiseIdentifierService {
             if (entries != null && !entries.isEmpty()) {
                 // if more then one entry then it's problem, non-deterministic behavior, id must be unique
                 if (entries.size() > 1) {
-                    log.error("Found more then one pairwise identifier by sector identifier: {0}" + sectorIdentifier);
+                    log.error("Found more then one pairwise identifier by sector identifier: {}" + sectorIdentifier);
                     for (PairwiseIdentifier pairwiseIdentifier : entries) {
                         log.error("PairwiseIdentifier: {}", pairwiseIdentifier);
                     }

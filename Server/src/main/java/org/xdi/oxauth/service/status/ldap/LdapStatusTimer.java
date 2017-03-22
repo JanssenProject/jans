@@ -83,22 +83,22 @@ public class LdapStatusTimer {
         LDAPConnectionProvider bindLdapConnectionProvider = ldapEntryManager.getLdapOperationService().getBindConnectionProvider();
         
         if (ldapConnectionProvider == null) {
-        	log.error("{0} is empty", connectionProviderName);
+        	log.error("{} is empty", connectionProviderName);
         } else {
             if (ldapConnectionProvider.getConnectionPool() == null) {
-            	log.error("{0} is empty", connectionProviderName);
+            	log.error("{} is empty", connectionProviderName);
             } else {
-            	log.info("{0} statistics: {1}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{} statistics: {}", connectionProviderName, ldapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 
         if (bindLdapConnectionProvider == null) {
-        	log.error("{0} is empty", bindConnectionProviderName);
+        	log.error("{} is empty", bindConnectionProviderName);
         } else {
             if (bindLdapConnectionProvider.getConnectionPool() == null) {
-            	log.error("{0} is empty", bindConnectionProviderName);
+            	log.error("{} is empty", bindConnectionProviderName);
             } else {
-            	log.info("{0} statistics: {1}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
+            	log.info("{} statistics: {}", bindConnectionProviderName, bindLdapConnectionProvider.getConnectionPool().getConnectionPoolStatistics());
             }
         }
 	}

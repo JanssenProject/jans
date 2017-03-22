@@ -70,7 +70,7 @@ public class RedirectionUriService {
                 }
 
                 if (StringUtils.isNotBlank(redirectionUri)) {
-                    log.debug("Validating redirection URI: clientIdentifier = {0}, redirectionUri = {1}, found = {2}",
+                    log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
                             clientIdentifier, redirectionUri, redirectUris.length);
 
                     final String redirectUriWithoutParams = uriWithoutParams(redirectionUri);
@@ -113,11 +113,11 @@ public class RedirectionUriService {
             String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
 
             if (postLogoutRedirectUris != null && StringUtils.isNotBlank(postLogoutRedirectUri)) {
-                log.debug("Validating post logout redirect URI: clientId = {0}, postLogoutRedirectUri = {1}",
+                log.debug("Validating post logout redirect URI: clientId = {}, postLogoutRedirectUri = {}",
                         clientId, postLogoutRedirectUri);
 
                 for (String uri : postLogoutRedirectUris) {
-                    log.debug("Comparing {0} == {1}", uri, postLogoutRedirectUri);
+                    log.debug("Comparing {} == {}", uri, postLogoutRedirectUri);
                     if (uri.equals(postLogoutRedirectUri)) {
                         return postLogoutRedirectUri;
                     }
@@ -147,7 +147,7 @@ public class RedirectionUriService {
 				? clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true)
 				: Sets.<Client>newHashSet();
 
-		log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {0}", postLogoutRedirectUri);
+		log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {}", postLogoutRedirectUri);
 
 		for (Client client : clientsByDns) {
 			String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
@@ -156,7 +156,7 @@ public class RedirectionUriService {
 			}
 
 			for (String uri : postLogoutRedirectUris) {
-				log.debug("Comparing {0} == {1}, clientId: {2}", uri, postLogoutRedirectUri, client.getClientId());
+				log.debug("Comparing {} == {}, clientId: {}", uri, postLogoutRedirectUri, client.getClientId());
 				if (uri.equals(postLogoutRedirectUri)) {
 					return postLogoutRedirectUri;
 				}

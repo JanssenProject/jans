@@ -76,7 +76,7 @@ public class U2fAuthenticationWS {
 	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
 		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
-			log.debug("Startig authentication with username '{0}', keyhandle '{1}' for appId '{2}' and session_state '{3}'", userName, keyHandle, appId, sessionState);
+			log.debug("Startig authentication with username '{}', keyhandle '{}' for appId '{}' and session_state '{}'", userName, keyHandle, appId, sessionState);
 
 			if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
 				throw new BadInputException(String.format("The request should contains either username or keyhandle"));
@@ -133,7 +133,7 @@ public class U2fAuthenticationWS {
 	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
 		String sessionState = null;
 		try {
-			log.debug("Finishing authentication for username '{0}' with response '{1}'", userName, authenticateResponseString);
+			log.debug("Finishing authentication for username '{}' with response '{}'", userName, authenticateResponseString);
 
 			AuthenticateResponse authenticateResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(authenticateResponseString, AuthenticateResponse.class);
 
@@ -192,7 +192,7 @@ public class U2fAuthenticationWS {
 				try {
 					deviceRegistrationService.disableUserDeviceRegistration(deviceRegistration);
 				} catch (Exception ex2) {
-					log.error("Failed to mark device '{0}' as compomised", ex2, deviceRegistration.getId());
+					log.error("Failed to mark device '{}' as compomised", ex2, deviceRegistration.getId());
 				}
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.DEVICE_COMPROMISED)).build());
