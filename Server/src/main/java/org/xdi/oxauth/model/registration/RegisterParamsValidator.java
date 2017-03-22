@@ -6,8 +6,10 @@
 
 package org.xdi.oxauth.model.registration;
 
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,15 +17,15 @@ import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.ProcessingException;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -161,20 +163,27 @@ public class RegisterParamsValidator {
                     valid = false;
                 }
 
-                // TODO: Replace with service to reuse connection pool 
-                javax.ws.rs.client.Client restClient = ClientBuilder.newClient();
-                Invocation.Builder invocationBuilder = restClient.target(sectorIdentifierUrl).request();
-                String entity = invocationBuilder.get(String.class);
+                ClientRequest clientRequest = new ClientRequest(sectorIdentifierUrl);
+                clientRequest.setHttpMethod(HttpMethod.GET);
 
-                JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
-                valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
+                ClientResponse<String> clientResponse = clientRequest.get(String.class);
+                int status = clientResponse.getStatus();
+
+                if (status == 200) {
+                    String entity = clientResponse.getEntity(String.class);
+
+                    JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
+                    valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
+                }
             } catch (URISyntaxException e) {
                 log.trace(e.getMessage(), e);
                 valid = false;
-            } catch (WebApplicationException e) {
-                log.error(e.getMessage(), e);
-            } catch (ProcessingException e) {
-                log.error(e.getMessage(), e);
+            } catch (UnknownHostException e) {
+                log.trace(e.getMessage(), e);
+                valid = false;
+            } catch (ConnectException e) {
+                log.trace(e.getMessage(), e);
+                valid = false;
             } catch (JSONException e) {
                 log.trace(e.getMessage(), e);
                 valid = false;

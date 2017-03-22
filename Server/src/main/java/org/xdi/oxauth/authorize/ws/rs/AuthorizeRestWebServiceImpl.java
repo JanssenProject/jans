@@ -8,8 +8,10 @@ package org.xdi.oxauth.authorize.ws.rs;
 
 import static org.xdi.oxauth.model.util.StringUtils.implode;
 
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +41,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.auth.Authenticator;
@@ -282,16 +286,21 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     String reqUriHash = reqUri.getFragment();
                                     String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-                                    // TODO: Replace with service to reuse connection pool 
-                                    javax.ws.rs.client.Client restClient = ClientBuilder.newClient();
-                                    Invocation.Builder invocationBuilder = restClient.target(reqUriWithoutFragment).request("application/json");
-                                    request = invocationBuilder.get(String.class);
+                                    ClientRequest clientRequest = new ClientRequest(reqUriWithoutFragment);
+                                    clientRequest.setHttpMethod(HttpMethod.GET);
 
-                                    if (StringUtils.isBlank(reqUriHash)) {
-                                        validRequestUri = true;
-                                    } else {
-                                        String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
-                                        validRequestUri = StringUtils.equals(reqUriHash, hash);
+                                    ClientResponse<String> clientResponse = clientRequest.get(String.class);
+                                    int status = clientResponse.getStatus();
+
+                                    if (status == 200) {
+                                        request = clientResponse.getEntity(String.class);
+
+                                        if (StringUtils.isBlank(reqUriHash)) {
+                                            validRequestUri = true;
+                                        } else {
+                                            String hash = Base64Util.base64urlencode(JwtUtil.getMessageDigestSHA256(request));
+                                            validRequestUri = StringUtils.equals(reqUriHash, hash);
+                                        }
                                     }
 
                                     if (validRequestUri) {
@@ -307,9 +316,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     }
                                 } catch (URISyntaxException e) {
                                     log.error(e.getMessage(), e);
-                                } catch (WebApplicationException e) {
+                                } catch (UnknownHostException e) {
                                     log.error(e.getMessage(), e);
-                                } catch (ProcessingException e) {
+                                } catch (ConnectException e) {
                                     log.error(e.getMessage(), e);
                                 } catch (Exception e) {
                                     log.error(e.getMessage(), e);
