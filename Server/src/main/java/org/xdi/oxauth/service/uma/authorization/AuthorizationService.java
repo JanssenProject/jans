@@ -46,7 +46,7 @@ public class AuthorizationService {
     private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
-        log.trace("Check policies for permission, id: '{0}'", permission.getDn());
+        log.trace("Check policies for permission, id: '{}'", permission.getDn());
         List<ScopeDescription> scopes = umaScopeService.getScopesByDns(permission.getScopeDns());
         return allowToAddPermission(grant, rpt, scopes, permission, httpRequest, claims);
     }
@@ -58,7 +58,7 @@ public class AuthorizationService {
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<ScopeDescription> scopes,
                                         ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
-        log.trace("Check policies for scopes: '{0}'", scopes);
+        log.trace("Check policies for scopes: '{}'", scopes);
 
         Set<String> authorizationPolicies = getAuthorizationPolicies(scopes);
 
@@ -71,7 +71,7 @@ public class AuthorizationService {
             for (String authorizationPolicy : authorizationPolicies) {
                 // if at least one policy returns false then whole result is false
                 if (!applyPolicy(authorizationPolicy, context)) {
-                    log.trace("Reject access. Policy dn: '{0}'", authorizationPolicy);
+                    log.trace("Reject access. Policy dn: '{}'", authorizationPolicy);
                     return false;
                 }
             }
@@ -95,12 +95,12 @@ public class AuthorizationService {
     }
 
     private boolean applyPolicy(String authorizationPolicyDn, AuthorizationContext authorizationContext) {
-        log.trace("Apply policy dn: '{0}' ...", authorizationPolicyDn);
+        log.trace("Apply policy dn: '{}' ...", authorizationPolicyDn);
 
         final CustomScriptConfiguration customScriptConfiguration = externalUmaAuthorizationPolicyService.getAuthorizationPolicyByDn(authorizationPolicyDn);
         if (customScriptConfiguration != null) {
             final boolean result = externalUmaAuthorizationPolicyService.executeExternalAuthorizeMethod(customScriptConfiguration, authorizationContext);
-            log.trace("Policy '{0}' result: {1}", authorizationPolicyDn, result);
+            log.trace("Policy '{}' result: {}", authorizationPolicyDn, result);
 
             // if false check whether "need_info" objects are set, if yes then throw WebApplicationException directly here
             if (!result) {
@@ -113,7 +113,7 @@ public class AuthorizationService {
             }
             return result;
         } else {
-            log.error("Unable to load custom script dn: '{0}'", authorizationPolicyDn);
+            log.error("Unable to load custom script dn: '{}'", authorizationPolicyDn);
         }
 
         return false;

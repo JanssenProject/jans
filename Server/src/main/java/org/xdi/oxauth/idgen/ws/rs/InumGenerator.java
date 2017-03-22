@@ -54,7 +54,7 @@ public class InumGenerator implements IdGenerator {
         if (idType != null) {
             return generateId(idType, p_idPrefix);
         } else {
-            log.error("Unable to identify id type: {0}", p_idType);
+            log.error("Unable to identify id type: {}", p_idType);
         }
         return "";
     }
@@ -79,7 +79,7 @@ public class InumGenerator implements IdGenerator {
 
                 inum = sb.toString();
                 if (StringUtils.isBlank(inum)) {
-                    log.error("Unable to generate inum: {0}", inum);
+                    log.error("Unable to generate inum: {}", inum);
                     break;
                 }
 
@@ -98,7 +98,7 @@ public class InumGenerator implements IdGenerator {
             log.error(e.getMessage(), e);
             inum = e.getMessage();
         }
-        log.trace("Generated inum: {0}", inum);
+        log.trace("Generated inum: {}", inum);
         return inum;
     }
 

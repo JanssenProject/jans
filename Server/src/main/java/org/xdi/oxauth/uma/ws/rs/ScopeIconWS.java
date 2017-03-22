@@ -52,7 +52,7 @@ public class ScopeIconWS {
     @Path("{id}")
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response getScopeDescription(@PathParam("id") String id) {
-        log.trace("UMA - get scope's icon : id: {0}", id);
+        log.trace("UMA - get scope's icon : id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
                 final ScopeDescription scope = umaScopeService.getInternalScope(id);

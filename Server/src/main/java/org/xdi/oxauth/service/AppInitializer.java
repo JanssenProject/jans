@@ -195,7 +195,7 @@ public class AppInitializer {
     	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
 
     	LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(ldapConnectionProviders.getConnectionProvider(), ldapConnectionProviders.getConnectionBindProvider()));
-	    log.debug("Created custom authentication LdapEntryManager: {0}", ldapAuthEntryManager);
+	    log.debug("Created custom authentication LdapEntryManager: {}", ldapAuthEntryManager);
 	        
 		return ldapAuthEntryManager;
 	}
@@ -203,7 +203,7 @@ public class AppInitializer {
     @Produces @ApplicationScoped @Named(LDAP_ENTRY_MANAGER_NAME)
     public LdapEntryManager getLdapEntryManager() {
         LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(this.connectionProvider, this.bindConnectionProvider));
-        log.debug("Created {0}: {1}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager });
+        log.debug("Created {}: {}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager });
 
         return ldapEntryManager;
     }
@@ -222,7 +222,7 @@ public class AppInitializer {
 
 		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
 			LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(this.authConnectionProviders.get(i), this.authBindConnectionProviders.get(i)));
-	        log.debug("Created {0}#{1}: {2}", new Object[] { LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager });
+	        log.debug("Created {}#{}: {}", new Object[] { LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager });
 	        
 	        ldapAuthEntryManagers.add(ldapAuthEntryManager);
 		}
@@ -243,7 +243,7 @@ public class AppInitializer {
 //    	Contexts.getApplicationContext().remove(LDAP_ENTRY_MANAGER_NAME);
 //    	oldLdapEntryManager.destroy();
 //
-//    	log.debug("Destroyed {0}: {1}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
+//    	log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
 //    }
 //
 //    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
@@ -258,14 +258,14 @@ public class AppInitializer {
 //
 //		for (LdapEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
 //			oldLdapAuthEntryManager.destroy();
-//	        log.debug("Destroyed {0}: {1}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+//	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
 //		}
 //    }
 
 	private void destroyLdapConnectionService(LdapConnectionService connectionProvider) {
 		if (connectionProvider != null) {
 			connectionProvider.closeConnectionPool();
-	        log.debug("Destoryed connectionProvider: {1}", connectionProvider);
+	        log.debug("Destoryed connectionProvider: {}", connectionProvider);
         }
 	}
 
@@ -397,7 +397,7 @@ public class AppInitializer {
 					configurations.add(configuration);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{0}'", ex, configurationJson);
+				log.error("Failed to create object by json: '{}'", ex, configurationJson);
 			}
 		}
 
@@ -451,7 +451,7 @@ public class AppInitializer {
 				return mapLdapConfig(configuration.getConfig());
 			}
 		} catch (Exception ex) {
-			log.error("Failed to create object by oxIDPAuthConf: '{0}'", ex, configuration);
+			log.error("Failed to create object by oxIDPAuthConf: '{}'", ex, configuration);
 		}
 
 		return null;
@@ -494,7 +494,7 @@ public class AppInitializer {
 			return;
 		}
 
-		log.info("Setting loggers level to: '{0}'", loggingLevel);
+		log.info("Setting loggers level to: '{}'", loggingLevel);
 		
 		LoggerContext loggerContext = LoggerContext.getContext(false);
 

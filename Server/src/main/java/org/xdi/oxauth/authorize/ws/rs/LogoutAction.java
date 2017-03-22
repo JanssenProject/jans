@@ -164,16 +164,16 @@ public class LogoutAction {
 
 		boolean isExternalAuthenticatorLogoutPresent = StringHelper.isNotEmpty(acrValues);
 		if (isExternalAuthenticatorLogoutPresent) {
-			log.debug("Attemptinmg to execute logout method of '{0}' external authenticator.", acrValues);
+			log.debug("Attemptinmg to execute logout method of '{}' external authenticator.", acrValues);
 
 			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfigurationByName(acrValues);
 			if (customScriptConfiguration == null) {
-				log.error("Failed to get ExternalAuthenticatorConfiguration. acr_values: {0}", acrValues);
+				log.error("Failed to get ExternalAuthenticatorConfiguration. acr_values: {}", acrValues);
 				return ExternalLogoutResult.FAILURE;
 			} else {
 				boolean scriptExternalLogoutResult = externalAuthenticationService.executeExternalLogout(customScriptConfiguration, null);
 				ExternalLogoutResult externalLogoutResult = scriptExternalLogoutResult ? ExternalLogoutResult.SUCCESS : ExternalLogoutResult.FAILURE;
-				log.debug("Logout result is '{0}' for session '{1}', userDn: '{2}'", externalLogoutResult, sessionState.getId(), sessionState.getUserDn());					
+				log.debug("Logout result is '{}' for session '{}', userDn: '{}'", externalLogoutResult, sessionState.getId(), sessionState.getUserDn());					
 
 				int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
 	            if (apiVersion < 3) {
@@ -183,7 +183,7 @@ public class LogoutAction {
 	            	
             	log.trace("According to API version script supports logout redirects");
             	String logoutExternalUrl = externalAuthenticationService.getLogoutExternalUrl(customScriptConfiguration, null);
-            	log.debug("External logout result is '{0}' for user '{1}'", logoutExternalUrl, sessionState.getUserDn());
+            	log.debug("External logout result is '{}' for user '{}'", logoutExternalUrl, sessionState.getUserDn());
 				
 				if (StringHelper.isEmpty(logoutExternalUrl)) {
 					return externalLogoutResult;

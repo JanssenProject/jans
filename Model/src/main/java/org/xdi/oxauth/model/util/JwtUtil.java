@@ -6,42 +6,29 @@
 
 package org.xdi.oxauth.model.util;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.ALGORITHM;
-import static org.xdi.oxauth.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
-import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
-import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
-import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
-import static org.xdi.oxauth.model.jwk.JWKParameter.PUBLIC_KEY;
-import static org.xdi.oxauth.model.jwk.JWKParameter.X;
-import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
-
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.util.Set;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
-
 import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.bouncycastle.openssl.PEMParser;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.xdi.oxauth.model.crypto.Certificate;
 import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.util.StringHelper;
+
+import javax.ws.rs.HttpMethod;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.*;
+import java.security.cert.X509Certificate;
+import java.util.Set;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
@@ -51,12 +38,6 @@ import org.xdi.util.StringHelper;
 public class JwtUtil {
 
     private static final Logger log = Logger.getLogger(JwtUtil.class);
-	private static Client client;
-
-	static {
-		// TODO: We can't store Resteasy client as static variable. We need to conveer this static class to Stateless bean
-    	client = ClientBuilder.newClient();
-    }
 
     public static void printAlgorithmsAndProviders() {
         Set<String> algorithms = Security.getAlgorithms("Signature");
@@ -183,9 +164,17 @@ public class JwtUtil {
         JSONObject jsonKey = null;
         try {
             if (StringHelper.isEmpty(jwks)) {
-            	Invocation.Builder builder = client.target(jwksUri).request("application/json");
-                jwks = builder.get(String.class);
-                log.debug(String.format("JWK: %s", jwks));
+                ClientRequest clientRequest = new ClientRequest(jwksUri);
+                clientRequest.setHttpMethod(HttpMethod.GET);
+                ClientResponse<String> clientResponse = clientRequest.get(String.class);
+
+                int status = clientResponse.getStatus();
+                log.debug(String.format("Status: %n%d", status));
+
+                if (status == 200) {
+                    jwks = clientResponse.getEntity(String.class);
+                    log.debug(String.format("JWK: %s", jwks));
+                }
             }
             if (StringHelper.isNotEmpty(jwks)) {
                 JSONObject jsonObject = new JSONObject(jwks);
@@ -217,11 +206,17 @@ public class JwtUtil {
         JSONObject jwks = null;
         try {
             if (!StringHelper.isEmpty(jwksUri)) {
-            	Invocation.Builder builder = client.target(jwksUri).request("application/json");
-                String jwksString = builder.get(String.class);
+                ClientRequest clientRequest = new ClientRequest(jwksUri);
+                clientRequest.setHttpMethod(HttpMethod.GET);
+                ClientResponse<String> clientResponse = clientRequest.get(String.class);
 
-                jwks = new JSONObject(jwksString);
-                log.debug(String.format("JWK: %s", jwks));
+                int status = clientResponse.getStatus();
+                log.debug(String.format("Status: %n%d", status));
+
+                if (status == 200) {
+                    jwks = new JSONObject(clientResponse.getEntity(String.class));
+                    log.debug(String.format("JWK: %s", jwks));
+                }
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);

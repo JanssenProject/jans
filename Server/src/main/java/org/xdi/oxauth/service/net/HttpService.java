@@ -171,7 +171,7 @@ public class HttpService implements Serializable {
 		try {
 			return new String(base64.encode((value).getBytes(Util.UTF8)), Util.UTF8);
 		} catch (UnsupportedEncodingException ex) {
-	    	log.error("Failed to convert '{0}' to base64", ex, value);
+	    	log.error("Failed to convert '{}' to base64", ex, value);
 		}
 
 		return null;
@@ -181,7 +181,7 @@ public class HttpService implements Serializable {
 		try {
 			return URLEncoder.encode(value, Util.UTF8);
 		} catch (UnsupportedEncodingException ex) {
-	    	log.error("Failed to encode url '{0}'", ex, value);
+	    	log.error("Failed to encode url '{}'", ex, value);
 		}
 
 		return null;

@@ -163,7 +163,7 @@ public class SessionStateService  {
 
             boolean updateResult = updateSessionState(session, true, true, true);
             if (!updateResult) {
-                log.debug("Failed to update session entry: '{0}'", session.getId());
+                log.debug("Failed to update session entry: '{}'", session.getId());
             }
         }
     }
@@ -185,7 +185,7 @@ public class SessionStateService  {
 
         boolean updateResult = updateSessionState(session, true, true, true);
         if (!updateResult) {
-            log.debug("Failed to update session entry: '{0}'", session.getId());
+            log.debug("Failed to update session entry: '{}'", session.getId());
         }
     }
 
@@ -217,7 +217,7 @@ public class SessionStateService  {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals(SESSION_STATE_COOKIE_NAME) /*&& cookie.getSecure()*/) {
-                        log.trace("Found session_state cookie: '{0}'", cookie.getValue());
+                        log.trace("Found session_state cookie: '{}'", cookie.getValue());
                         return cookie.getValue();
                     }
                 }
@@ -370,7 +370,7 @@ public class SessionStateService  {
 
         auditLogging(sessionState);
 
-        log.trace("Generated new session, id = '{0}', state = '{1}', asJwt = '{2}', persisted = '{3}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
+        log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
         return sessionState;
     }
 
@@ -409,7 +409,7 @@ public class SessionStateService  {
         boolean persisted = updateSessionState(sessionState, true, true, true);
 
         auditLogging(sessionState);
-        log.trace("Authenticated session, id = '{0}', state = '{1}', persisted = '{2}'", sessionState.getId(), sessionState.getState(), persisted);
+        log.trace("Authenticated session, id = '{}', state = '{}', persisted = '{}'", sessionState.getId(), sessionState.getState(), persisted);
         return sessionState;
     }
 
@@ -476,7 +476,7 @@ public class SessionStateService  {
             		try {
 						mergeWithRetry(sessionState, 3);
 					} catch (EmptyEntryPersistenceException ex) {
-						log.warn("Faield to update session entry '{0}': '{1}'", sessionState.getId(), ex.getMessage());
+						log.warn("Faield to update session entry '{}': '{}'", sessionState.getId(), ex.getMessage());
 					}
             	}
             }
@@ -509,10 +509,10 @@ public class SessionStateService  {
 				lastException = ex;
 				if (ex.getCause() instanceof LDAPException) {
 					LDAPException parentEx = ((LDAPException) ex.getCause());
-					log.debug("LDAP exception resultCode: '{0}'", parentEx.getResultCode().intValue());
+					log.debug("LDAP exception resultCode: '{}'", parentEx.getResultCode().intValue());
 					if ((parentEx.getResultCode().intValue() == ResultCode.NO_SUCH_ATTRIBUTE_INT_VALUE) ||
 						(parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE)) {
-						log.warn("Session entry update attempt '{0}' was unsuccessfull", i);
+						log.warn("Session entry update attempt '{}' was unsuccessfull", i);
 						continue;
 					}
 				}
@@ -521,7 +521,7 @@ public class SessionStateService  {
 			}
 		}
 
-        log.error("Session entry update attempt was unsuccessfull after '{0}' attempts", maxAttempts);
+        log.error("Session entry update attempt was unsuccessfull after '{}' attempts", maxAttempts);
 		throw lastException;
 	}
 
@@ -557,9 +557,9 @@ public class SessionStateService  {
 
         try {
             final SessionState entity = getSessionById(sessionState);
-            log.trace("Try to get session by id: {0} ...", sessionState);
+            log.trace("Try to get session by id: {} ...", sessionState);
             if (entity != null) {
-                log.trace("Session dn: {0}", entity.getDn());
+                log.trace("Session dn: {}", entity.getDn());
 
                 if (isSessionValid(entity)) {
                     return entity;
@@ -569,7 +569,7 @@ public class SessionStateService  {
             log.trace(ex.getMessage(), ex);
         }
 
-        log.trace("Failed to get session by id: {0}", sessionState);
+        log.trace("Failed to get session by id: {}", sessionState);
         return null;
     }
 

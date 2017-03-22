@@ -159,7 +159,7 @@ public class CleanerTimer {
                             List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
                             authorizationGrantList.removeAuthorizationGrants(toRemove);
 
-                            log.debug("Removing Client: {0}, Expiration date: {1}",
+                            log.debug("Removing Client: {}, Expiration date: {}",
                                     client.getClientId(),
                                     client.getClientSecretExpiresAt());
                             clientService.remove(client);
@@ -192,7 +192,7 @@ public class CleanerTimer {
             protected void performAction(List<RequestMessageLdap> entries) {
                 for (RequestMessageLdap requestMessageLdap : entries) {
                     try {
-                        log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
+                        log.debug("Removing RequestMessageLdap: {}, Creation date: {}",
                                 requestMessageLdap.getRequestId(),
                                 requestMessageLdap.getCreationDate());
                         u2fRequestService.removeRequestMessage(requestMessageLdap);
@@ -223,7 +223,7 @@ public class CleanerTimer {
             protected void performAction(List<DeviceRegistration> entries) {
                 for (DeviceRegistration deviceRegistration : entries) {
                     try {
-                        log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
+                        log.debug("Removing DeviceRegistration: {}, Creation date: {}",
                                 deviceRegistration.getId(),
                                 deviceRegistration.getCreationDate());
                         deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);

@@ -43,6 +43,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
 import org.xdi.oxauth.model.token.TokenParamsValidator;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.AuthenticationFilterService;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.GrantService;
@@ -66,6 +67,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private Logger log;
 
     @Inject
+    private Identity identity;
+
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
     @Inject
@@ -73,9 +77,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;
-
-    @Inject
-    private SessionClient sessionClient;
 
     @Inject
     private UserService userService;
@@ -99,8 +100,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                                        String clientId, String clientSecret, String codeVerifier,
                                        HttpServletRequest request, SecurityContext sec) {
         log.debug(
-                "Attempting to request access token: grantType = {0}, code = {1}, redirectUri = {2}, username = {3}, refreshToken = {4}, " +
-                        "clientId = {5}, ExtraParams = {6}, isSecure = {7}, codeVerifier = {8}",
+                "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
+                        "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}",
                 grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(),
                 sec.isSecure(), codeVerifier);
 
@@ -121,12 +122,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else {
             	log.trace("Request parameters are right");
                 GrantType gt = GrantType.fromString(grantType);
-            	log.debug("Grant type: '{0}'", gt);
+            	log.debug("Grant type: '{}'", gt);
 
+            	SessionClient sessionClient = identity.getSetSessionClient();
                 Client client = sessionClient.getClient();
-            	log.debug("Get sessionClient: '{0}'", sessionClient);
+            	log.debug("Get sessionClient: '{}'", sessionClient);
             	if (client != null) {
-            		log.debug("Get client from session: '{0}'", client.getClientId());
+            		log.debug("Get client from session: '{}'", client.getClientId());
             	}
 
                 if (gt == GrantType.AUTHORIZATION_CODE) {
@@ -134,9 +136,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT));
                     }
 
-                    log.debug("Attempting to find authorizationCodeGrant by clinetId: '{0}', code: '{1}'", client.getClientId(), code);
+                    log.debug("Attempting to find authorizationCodeGrant by clinetId: '{}', code: '{}'", client.getClientId(), code);
                     AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(client.getClientId(), code);
-                    log.trace("AuthorizationCodeGrant : '{0}'", authorizationCodeGrant);
+                    log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
 
                     if (authorizationCodeGrant != null) {
                         validatePKCE(authorizationCodeGrant, codeVerifier);
@@ -145,7 +147,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         authorizationCodeGrant.save();
 
                         AccessToken accToken = authorizationCodeGrant.createAccessToken();
-                        log.debug("Issuing access token: {0}", accToken.getCode());
+                        log.debug("Issuing access token: {}", accToken.getCode());
 
                         RefreshToken reToken = authorizationCodeGrant.createRefreshToken();
 
@@ -173,7 +175,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                         grantService.removeByCode(authorizationCodeGrant.getAuthorizationCode().getCode(), authorizationCodeGrant.getClientId());
                     } else {
-                        log.debug("AuthorizationCodeGrant is empty by clinetId: '{0}', code: '{1}'", client.getClientId(), code);
+                        log.debug("AuthorizationCodeGrant is empty by clinetId: '{}', code: '{}'", client.getClientId(), code);
                         // if authorization code is not found then code was already used = remove all grants with this auth code
                         grantService.removeAllByAuthorizationCode(code);
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT);
@@ -330,7 +332,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier) {
-        log.trace("PKCE validation, code_verifier: {0}, code_challenge: {1}, method: {2}",
+        log.trace("PKCE validation, code_verifier: {}, code_challenge: {}, method: {}",
                 codeVerifier, grant.getCodeChallenge(), grant.getCodeChallengeMethod());
 
         if (Strings.isNullOrEmpty(grant.getCodeChallenge()) && Strings.isNullOrEmpty(codeVerifier)) {

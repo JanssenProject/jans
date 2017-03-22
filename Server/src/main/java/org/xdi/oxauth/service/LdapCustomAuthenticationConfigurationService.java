@@ -64,7 +64,7 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 					customAuthenticationConfigurations.add(customAuthenticationConfiguration);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{0}'", ex, configurationJson);
+				log.error("Failed to create object by json: '{}'", ex, configurationJson);
 			}
 		}
 

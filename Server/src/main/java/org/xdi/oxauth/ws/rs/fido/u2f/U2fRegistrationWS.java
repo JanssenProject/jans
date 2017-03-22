@@ -87,7 +87,7 @@ public class U2fRegistrationWS {
 	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState, @QueryParam("enrollment_code") String enrollmentCode) {
 		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
-			log.debug("Startig registration with username '{0}' for appId '{1}'. session_state '{2}', enrollment_code '{3}'", userName, appId, sessionState, enrollmentCode);
+			log.debug("Startig registration with username '{}' for appId '{}'. session_state '{}', enrollment_code '{}'", userName, appId, sessionState, enrollmentCode);
 
 			String userInum = null;
 
@@ -159,7 +159,7 @@ public class U2fRegistrationWS {
 	public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
 		String sessionState = null;
 		try {
-			log.debug("Finishing registration for username '{0}' with response '{1}'", userName, registerResponseString);
+			log.debug("Finishing registration for username '{}' with response '{}'", userName, registerResponseString);
 
 			RegisterResponse registerResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(registerResponseString, RegisterResponse.class);
 

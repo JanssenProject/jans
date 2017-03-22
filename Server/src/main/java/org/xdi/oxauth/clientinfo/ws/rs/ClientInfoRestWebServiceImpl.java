@@ -70,7 +70,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
         if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
             accessToken = authorization.substring(7);
         }
-        log.debug("Attempting to request Client Info, Access token = {0}, Is Secure = {1}",
+        log.debug("Attempting to request Client Info, Access token = {}, Is Secure = {}",
                 new Object[] { accessToken, securityContext.isSecure() });
         Response.ResponseBuilder builder = Response.ok();
 
