@@ -12,7 +12,6 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
 
-import org.apache.log4j.Logger;
 import org.gluu.oxserver.filters.AbstractCorsFilter;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
@@ -26,9 +25,6 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 @WebFilter(initParams = { @WebInitParam(name = "cors.allowed.origins", value = "*") }, urlPatterns = { "/.well-known/*",
 		"/seam/resource/restv1/oxauth/userinfo", "/seam/resource/restv1/oxauth/clientinfo" })
 public class CorsFilter extends AbstractCorsFilter {
-
-	@Inject
-	private Logger log;
 
 	@Inject
 	private AppConfiguration appConfiguration;
