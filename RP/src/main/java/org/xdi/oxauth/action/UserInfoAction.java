@@ -6,13 +6,15 @@
 
 package org.xdi.oxauth.action;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import java.io.Serializable;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.client.UserInfoClient;
 import org.xdi.oxauth.client.UserInfoRequest;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
@@ -20,13 +22,14 @@ import org.xdi.oxauth.model.common.AuthorizationMethod;
 /**
  * @author Javier Rojas Blum Date: 02.22.2012
  */
-@Name("userInfoAction")
-@Scope(ScopeType.SESSION)
-@AutoCreate
-public class UserInfoAction {
+@Named
+@SessionScoped
+public class UserInfoAction implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = 8127882852081260414L;
+
+	@Inject
+    private Logger log;
 
     private String userInfoEndpoint;
     private String accessToken;
@@ -50,11 +53,12 @@ public class UserInfoAction {
             requestString = client.getRequestAsString();
             responseString = client.getResponseAsString();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+        	log.error(e.getMessage(), e);
         }
     }
 
-    @Factory(value = "authorizationMethods")
+    @Produces
+    @Named("authorizationMethods")
     public AuthorizationMethod[] authorizationMethods() {
         return AuthorizationMethod.values();
     }

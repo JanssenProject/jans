@@ -8,16 +8,13 @@ package org.xdi.oxauth.service;
 
 import java.util.List;
 
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
@@ -25,29 +22,20 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("attributeService")
-@AutoCreate
+@Stateless
+@Named
 public class AttributeService extends org.xdi.service.AttributeService {
 
     private static final String CACHE_ATTRIBUTE = "AttributeCache";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
-    @In
-    private StaticConf staticConfiguration;
-    /**
-     * Get AttributeService instance
-     *
-     * @return AttributeService instance
-     */
-    public static AttributeService instance() {
-        return (AttributeService) Component.getInstance(AttributeService.class);
-    }
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     /**
      * returns GluuAttribute by Dn
@@ -61,7 +49,7 @@ public class AttributeService extends org.xdi.service.AttributeService {
             gluuAttribute = ldapEntryManager.find(GluuAttribute.class, dn);
             cacheService.put(CACHE_ATTRIBUTE, dn, gluuAttribute);
         } else {
-            log.trace("Get attribute from cache by Dn '{0}'", dn);
+            log.trace("Get attribute from cache by Dn '{}'", dn);
         }
 
         return gluuAttribute;

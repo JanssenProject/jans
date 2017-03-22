@@ -52,7 +52,7 @@
     </ui:define>
 
     <ui:define name="pageTitle">
-        <h:outputText value="#{messages['login.pageTitle']}"/>
+        <h:outputText value="#{msgs['login.pageTitle']}"/>
     </ui:define>
 
     <ui:define name="body">
@@ -90,18 +90,18 @@
 	
 	            <s:div rendered='#{!empty client.getPolicyUri()}'>
 	                <p>
-	                    <h:outputText value="#{messages['common.agreePolicy']}"/>
+	                    <h:outputText value="#{msgs['common.agreePolicy']}"/>
 	                    <a target="_blank" href='#{client.getPolicyUri()}'>
-	                        <h:outputText value="#{messages['common.privacyPolicy']}"/>
+	                        <h:outputText value="#{msgs['common.privacyPolicy']}"/>
 	                    </a>
 	                </p>
 	            </s:div>
 	
 	            <s:div rendered='#{!empty client.getTosUri()}'>
 	                <p>
-	                    <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
+	                    <h:outputText value="#{msgs['common.pleaseReadTheTos']}"/>
 	                    <a target="_blank" href='#{client.getTosUri()}'>
-	                        <h:outputText value="#{messages['common.termsOfService']}"/>
+	                        <h:outputText value="#{msgs['common.termsOfService']}"/>
 	                    </a>
 	                </p>
 	            </s:div>

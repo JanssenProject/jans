@@ -6,22 +6,24 @@
 
 package org.xdi.oxauth.service.uma;
 
-import com.google.common.base.Preconditions;
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Collections;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.util.StringHelper;
 
-import java.util.Collections;
-import java.util.List;
+import com.google.common.base.Preconditions;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with resource set descriptions
@@ -30,21 +32,21 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  *         Date: 10.05.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("resourceSetService")
-@AutoCreate
+@Stateless
+@Named
 public class ResourceSetService {
 
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @Logger
-    private Log log;
-
-    @In
-    private StaticConf staticConfiguration;
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
@@ -204,15 +206,6 @@ public class ResourceSetService {
     public String getBaseDnForResourceSet() {
         final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
         return String.format("ou=resource_sets,%s", umaBaseDn);
-    }
-
-    /**
-     * Get ResourceSetService instance
-     *
-     * @return ResourceSetService instance
-     */
-    public static ResourceSetService instance() {
-        return (ResourceSetService) Component.getInstance(ResourceSetService.class);
     }
 
 }

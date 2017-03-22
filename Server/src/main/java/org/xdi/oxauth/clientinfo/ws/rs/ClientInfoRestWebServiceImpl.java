@@ -6,12 +6,17 @@
 
 package org.xdi.oxauth.clientinfo.ws.rs;
 
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoParamsValidator;
@@ -21,12 +26,8 @@ import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.ScopeService;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.Set;
 
 /**
  * Provides interface for Client Info REST web services
@@ -34,19 +35,26 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
-@Name("requestClientInfoRestWebService")
+@Path("/oxauth")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
-    @Logger
-    private Log log;
-    @In
-    private ErrorResponseFactory errorResponseFactory;
-    @In
-    private AuthorizationGrantList authorizationGrantList;
-    @In
-    private ScopeService scopeService;
-    @In
-    private AttributeService attributeService;
+	@Inject
+	private Logger log;
+
+	@Inject
+	private ErrorResponseFactory errorResponseFactory;
+
+	@Inject
+	private AuthorizationGrantList authorizationGrantList;
+
+	@Inject
+	private ScopeService scopeService;
+
+	@Inject
+	private ClientService clientService;
+
+	@Inject
+	private AttributeService attributeService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
@@ -62,8 +70,8 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
         if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
             accessToken = authorization.substring(7);
         }
-        log.debug("Attempting to request Client Info, Access token = {0}, Is Secure = {1}",
-                accessToken, securityContext.isSecure());
+        log.debug("Attempting to request Client Info, Access token = {}, Is Secure = {}",
+                new Object[] { accessToken, securityContext.isSecure() });
         Response.ResponseBuilder builder = Response.ok();
 
         if (!ClientInfoParamsValidator.validateParams(accessToken)) {
@@ -95,7 +103,6 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(Client client, Set<String> scopes) {
-//        FileConfiguration ldapConfiguration = ConfigurationFactory.getLdapConfiguration();
         JSONObject jsonObj = new JSONObject();
 
         try {
@@ -107,7 +114,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
                         GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
 
                         String attributeName = attribute.getName();
-                        Object attributeValue = client.getAttribute(attribute.getName());
+                        Object attributeValue = clientService.getAttribute(client, attribute.getName());
 
                         jsonObj.put(attributeName, attributeValue);
                     }

@@ -6,12 +6,11 @@
 
 package org.xdi.oxauth.service.custom;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.xdi.oxauth.model.config.StaticConf;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.custom.script.AbstractCustomScriptService;
 
 /**
@@ -19,13 +18,12 @@ import org.xdi.service.custom.script.AbstractCustomScriptService;
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
-@Scope(ScopeType.STATELESS)
-@Name("customScriptService")
-@AutoCreate
+@Stateless
+@Named
 public class CustomScriptService extends AbstractCustomScriptService{
 	
-	@In
-	private StaticConf staticConfiguration;
+	@Inject
+	private StaticConfiguration staticConfiguration;
 
 	private static final long serialVersionUID = -5283102477313448031L;
 

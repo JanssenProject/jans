@@ -6,13 +6,18 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -24,31 +29,25 @@ import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 import org.xdi.oxauth.model.token.ValidateTokenParamsValidator;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-
 /**
  * Provides interface for validate token REST web services
  *
  * @author Javier Rojas Blum
  * @version January 27, 2016
  */
-@Name("requestValidateTokenRestWebService")
+@Path("/oxauth")
 public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
 
     @Override
@@ -62,7 +61,7 @@ public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebServ
     }
 
     private Response validateAccessToken(String accessToken, HttpServletRequest httpRequest, SecurityContext sec) {
-        log.debug("Attempting to validate access token: {0}, Is Secure = {1}",
+        log.debug("Attempting to validate access token: {}, Is Secure = {}",
                 accessToken, sec.isSecure());
         ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.TOKEN_VALIDATE);

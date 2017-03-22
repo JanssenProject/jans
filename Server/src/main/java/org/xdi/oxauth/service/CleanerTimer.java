@@ -6,15 +6,22 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.ejb.Asynchronous;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -25,75 +32,80 @@ import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.xdi.oxauth.service.uma.RptManager;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@Name("cleanerTimer")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
-@Startup
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named
 public class CleanerTimer {
 
     public final static int BATCH_SIZE = 100;
     private final static String EVENT_TYPE = "CleanerTimerEvent";
     private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+
+    @Inject
     private ClientService clientService;
-    @In
+
+    @Inject
     private GrantService grantService;
-    @In
-    private RPTManager rptManager;
-    @In
+
+    @Inject
+    private RptManager rptManager;
+
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject @Named("u2fRequestService")
     private RequestService u2fRequestService;
 
-    @In
+    @Inject
     private MetricService metricService;
 
-    @In
+    @Inject
     private DeviceRegistrationService deviceRegistrationService;
 
-    @In
+    @Inject
     private ConfigurationFactory configurationFactory;
 
     private AtomicBoolean isActive;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.debug("Initializing CleanerTimer");
-        this.isActive = new AtomicBoolean(false);
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
+//    public void init() {
+//        log.debug("Initializing CleanerTimer");
+//        this.isActive = new AtomicBoolean(false);
+//
+//        long interval = appConfiguration.getCleanServiceInterval();
+//        if (interval <= 0) {
+//            interval = DEFAULT_INTERVAL;
+//        }
+//        interval = interval * 1000L;
+//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
+//    }
 
-        long interval = appConfiguration.getCleanServiceInterval();
-        if (interval <= 0) {
-            interval = DEFAULT_INTERVAL;
-        }
-        interval = interval * 1000L;
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
-    }
-
-    @Observer(EVENT_TYPE)
+    // TODO: CDI: Fix
+//    @Observer(EVENT_TYPE)
     @Asynchronous
     public void process() {
         if (this.isActive.get()) {
@@ -147,7 +159,7 @@ public class CleanerTimer {
                             List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
                             authorizationGrantList.removeAuthorizationGrants(toRemove);
 
-                            log.debug("Removing Client: {0}, Expiration date: {1}",
+                            log.debug("Removing Client: {}, Expiration date: {}",
                                     client.getClientId(),
                                     client.getClientSecretExpiresAt());
                             clientService.remove(client);
@@ -180,7 +192,7 @@ public class CleanerTimer {
             protected void performAction(List<RequestMessageLdap> entries) {
                 for (RequestMessageLdap requestMessageLdap : entries) {
                     try {
-                        log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
+                        log.debug("Removing RequestMessageLdap: {}, Creation date: {}",
                                 requestMessageLdap.getRequestId(),
                                 requestMessageLdap.getCreationDate());
                         u2fRequestService.removeRequestMessage(requestMessageLdap);
@@ -211,7 +223,7 @@ public class CleanerTimer {
             protected void performAction(List<DeviceRegistration> entries) {
                 for (DeviceRegistration deviceRegistration : entries) {
                     try {
-                        log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
+                        log.debug("Removing DeviceRegistration: {}, Creation date: {}",
                                 deviceRegistration.getId(),
                                 deviceRegistration.getCreationDate());
                         deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);

@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.model.common;
 
+import java.util.Date;
+
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
-
-import java.util.Date;
 
 /**
  * <p>
