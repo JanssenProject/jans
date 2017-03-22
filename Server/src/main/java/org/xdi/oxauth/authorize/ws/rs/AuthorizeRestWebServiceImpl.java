@@ -800,8 +800,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         SessionState sessionUser = identity.getSessionState();
 
         identity.logout();
-        sessionUser.setUserDn(null);
-       	sessionUser.setAuthenticationTime(null);
+        
+        if (sessionUser != null) {
+	        sessionUser.setUserDn(null);
+	       	sessionUser.setAuthenticationTime(null);
+        }
 
 
         String id = sessionState;
