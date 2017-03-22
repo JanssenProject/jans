@@ -125,8 +125,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             	log.debug("Grant type: '{}'", gt);
 
             	SessionClient sessionClient = identity.getSetSessionClient();
-                Client client = sessionClient.getClient();
-            	log.debug("Get sessionClient: '{}'", sessionClient);
+            	Client client = null;
+            	if (sessionClient != null) {
+            		client = sessionClient.getClient();
+                	log.debug("Get sessionClient: '{}'", sessionClient);
+                }
+
             	if (client != null) {
             		log.debug("Get client from session: '{}'", client.getClientId());
             	}
