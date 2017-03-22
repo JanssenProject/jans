@@ -414,6 +414,9 @@ public class Authenticator {
             log.error("Failed to get attributes from session");
             return Constants.RESULT_EXPIRED;
         }
+        
+        // Set current state into identity to allow use in login form and authentication scripts
+        identity.setSessionState(sessionState);
 
         if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
             return Constants.RESULT_SUCCESS;
