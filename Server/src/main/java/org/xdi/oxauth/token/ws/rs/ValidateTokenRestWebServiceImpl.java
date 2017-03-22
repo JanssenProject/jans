@@ -61,7 +61,7 @@ public class ValidateTokenRestWebServiceImpl implements ValidateTokenRestWebServ
     }
 
     private Response validateAccessToken(String accessToken, HttpServletRequest httpRequest, SecurityContext sec) {
-        log.debug("Attempting to validate access token: {0}, Is Secure = {1}",
+        log.debug("Attempting to validate access token: {}, Is Secure = {}",
                 accessToken, sec.isSecure());
         ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.TOKEN_VALIDATE);

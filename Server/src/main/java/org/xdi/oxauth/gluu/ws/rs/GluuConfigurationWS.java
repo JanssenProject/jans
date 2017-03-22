@@ -81,7 +81,7 @@ public class GluuConfigurationWS {
             // convert manually to avoid possible conflicts between resteasy
             // providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(conf);
-            log.trace("Gluu configuration: {0}", entity);
+            log.trace("Gluu configuration: {}", entity);
 
             return Response.ok(entity).build();
         } catch (Throwable ex) {

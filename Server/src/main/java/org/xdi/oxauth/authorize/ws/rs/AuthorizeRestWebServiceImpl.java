@@ -189,13 +189,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         // ATTENTION : please do not add more parameter in this debug method because it will not work with Seam 2.2.2.Final ,
         // there is limit of 10 parameters (hardcoded), see: org.jboss.seam.core.Interpolator#interpolate
         log.debug("Attempting to request authorization: "
-                        + "responseType = {0}, clientId = {1}, scope = {2}, redirectUri = {3}, nonce = {4}, "
-                        + "state = {5}, request = {6}, isSecure = {7}, requestSessionState = {8}, sessionState = {9}",
+                        + "responseType = {}, clientId = {}, scope = {}, redirectUri = {}, nonce = {}, "
+                        + "state = {}, request = {}, isSecure = {}, requestSessionState = {}, sessionState = {}",
                 responseType, clientId, scope, redirectUri, nonce,
                 state, request, securityContext.isSecure(), requestSessionState, sessionState);
 
         log.debug("Attempting to request authorization: "
-                        + "acrValues = {0}, amrValues = {1}, originHeaders = {2}, codeChallenge = {3}, codeChallengeMethod = {4}",
+                        + "acrValues = {}, amrValues = {}, originHeaders = {}, codeChallenge = {}, codeChallengeMethod = {}",
                 acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod);
 
         ResponseBuilder builder = Response.ok();
@@ -352,11 +352,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     }
                                 } catch (InvalidJwtException e) {
                                     invalidOpenidRequestObject = true;
-                                    log.debug("Invalid JWT authorization request. Exception = {0}, Message = {1}", e,
+                                    log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
                                             e.getClass().getName(), e.getMessage());
                                 } catch (Exception e) {
                                     invalidOpenidRequestObject = true;
-                                    log.debug("Invalid JWT authorization request. Exception = {0}, Message = {1}", e,
+                                    log.debug("Invalid JWT authorization request. Exception = {}, Message = {}", e,
                                             e.getClass().getName(), e.getMessage());
                                 }
                             }
@@ -590,7 +590,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     final SessionState newSessionUser = sessionStateService.generateAuthenticatedSessionState(sessionUser.getUserDn(), prompt);
                                     String newSessionState = newSessionUser.getId();
                                     sessionUser.setId(newSessionState);
-                                    log.trace("newSessionState = {0}", newSessionState);
+                                    log.trace("newSessionState = {}", newSessionState);
                                 }
                                 redirectUriResponse.addResponseParameter(AuthorizeResponseParam.SESSION_STATE, sessionUser.getId());
                                 redirectUriResponse.addResponseParameter(AuthorizeResponseParam.STATE, state);
@@ -681,10 +681,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             boolean persisted = sessionStateService.persistSessionState(sessionUser, !prompts.contains(Prompt.NONE));
             if (persisted) {
                 if (log.isTraceEnabled()) {
-                    log.trace("Session '{0}' persisted to LDAP", sessionUser.getId());
+                    log.trace("Session '{}' persisted to LDAP", sessionUser.getId());
                 }
             } else {
-                log.error("Failed to persisted session: {0}", sessionUser.getId());
+                log.error("Failed to persisted session: {}", sessionUser.getId());
             }
         }
     }
@@ -805,10 +805,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             if (ldapSessionState != null) {
                 boolean result = sessionStateService.remove(ldapSessionState);
                 if (!result) {
-                    log.error("Failed to remove session_state '{0}' from LDAP", id);
+                    log.error("Failed to remove session_state '{}' from LDAP", id);
                 }
             } else {
-                log.error("Failed to load session from LDAP by session_state: '{0}'", id);
+                log.error("Failed to load session from LDAP by session_state: '{}'", id);
             }
         }
 

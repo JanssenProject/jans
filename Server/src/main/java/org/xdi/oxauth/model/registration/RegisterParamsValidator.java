@@ -249,13 +249,13 @@ public class RegisterParamsValidator {
             URI uri = new URI(logoutUri);
 
             if (!redirectUriHosts.contains(uri.getHost())) {
-                log.error("logout uri host is not within redirect_uris, logout_uri: {0}, redirect_uris: {1}", logoutUri, redirectUris);
+                log.error("logout uri host is not within redirect_uris, logout_uri: {}, redirect_uris: {}", logoutUri, redirectUris);
                 throwInvalidLogoutUri(errorResponseFactory);
                 return;
             }
 
             if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
-                log.error("logout uri schema is not https, logout_uri: {0}", logoutUri);
+                log.error("logout uri schema is not https, logout_uri: {}", logoutUri);
                 throwInvalidLogoutUri(errorResponseFactory);
             }
         } catch (Exception e) {

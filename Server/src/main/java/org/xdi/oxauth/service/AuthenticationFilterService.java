@@ -57,7 +57,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
 
         String bindPasswordAttribute = authenticationFilterWithParameters.getAuthenticationFilter().getBindPasswordAttribute();
         if (StringHelper.isEmpty(bindPasswordAttribute)) {
-            log.error("Skipping authentication filter:\n '{0}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilterWithParameters.getAuthenticationFilter());
+            log.error("Skipping authentication filter:\n '{}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilterWithParameters.getAuthenticationFilter());
             return null;
         }
 

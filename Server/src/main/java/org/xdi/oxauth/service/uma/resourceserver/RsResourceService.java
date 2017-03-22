@@ -45,7 +45,7 @@ public class RsResourceService {
         final List<ResourceSet> ldapResourceSets = resourceSetService
                 .findResourceSets(criteria);
         if (ldapResourceSets == null || ldapResourceSets.isEmpty()) {
-            log.trace("No resource set for type: {0}", p_type);
+            log.trace("No resource set for type: {}", p_type);
             return createResourceSet(p_type);
         } else {
             final int size = ldapResourceSets.size();
@@ -80,7 +80,7 @@ public class RsResourceService {
     }
 
     private ResourceSet createResourceSet(RsResourceType p_type) {
-        log.trace("Creating new internal resource set, type: {0} ...", p_type);
+        log.trace("Creating new internal resource set, type: {} ...", p_type);
         // Create resource set description branch if needed
         if (!resourceSetService.containsBranch()) {
             resourceSetService.addBranch();
@@ -102,7 +102,7 @@ public class RsResourceService {
 //            }
 
         resourceSetService.addResourceSet(s);
-        log.trace("New internal resource set created, type: {0}.", p_type);
+        log.trace("New internal resource set created, type: {}.", p_type);
         return s;
     }
 }

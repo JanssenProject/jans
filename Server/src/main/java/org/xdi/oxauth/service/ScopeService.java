@@ -178,7 +178,7 @@ public class ScopeService {
             cacheService.put(CACHE_SCOPE_NAME, getScopeNameCacheKey(scope.getDisplayName()), scope);
             cacheService.put(CACHE_SCOPE_NAME, getScopeDnCacheKey(scope.getDn()), scope);
         } catch (Exception ex) {
-            log.error("Failed to put scope in cache, scope: '{0}'", scope, ex);
+            log.error("Failed to put scope in cache, scope: '{}'", scope, ex);
         }
     }
     private void putInCache(String claimDn, List<org.xdi.oxauth.model.common.Scope> scopes) {
@@ -190,7 +190,7 @@ public class ScopeService {
         	String key = getClaimDnCacheKey(claimDn);
             cacheService.put(CACHE_SCOPE_NAME, key, scopes);
         } catch (Exception ex) {
-            log.error("Failed to put scopes in cache, claimDn: '{0}'", claimDn, ex);
+            log.error("Failed to put scopes in cache, claimDn: '{}'", claimDn, ex);
         }
     }
 
@@ -199,7 +199,7 @@ public class ScopeService {
             String key = getScopeDnCacheKey(dn);
             return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
-            log.error("Failed to get scope from cache, scopeDn: '{0}'", dn, ex);
+            log.error("Failed to get scope from cache, scopeDn: '{}'", dn, ex);
             return null;
         }
     }
@@ -209,7 +209,7 @@ public class ScopeService {
             String key = getScopeNameCacheKey(name);
             return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
-            log.error("Failed to get scope from cache, name: '{0}'", name, ex);
+            log.error("Failed to get scope from cache, name: '{}'", name, ex);
             return null;
         }
     }
@@ -219,7 +219,7 @@ public class ScopeService {
         	String key = getClaimDnCacheKey(claimDn);
             return (List<org.xdi.oxauth.model.common.Scope>) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
-            log.error("Failed to get scopes from cache, claimDn: '{0}'", claimDn, ex);
+            log.error("Failed to get scopes from cache, claimDn: '{}'", claimDn, ex);
             return null;
         }
     }

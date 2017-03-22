@@ -139,11 +139,11 @@ public class Authenticator {
         }
 
         if (authenticated) {
-            log.trace("Authentication successfully for '{0}'", credentials.getUsername());
+            log.trace("Authentication successfully for '{}'", credentials.getUsername());
             return true;
         }
 
-        log.info("Authentication failed for '{0}'", credentials.getUsername());
+        log.info("Authentication failed for '{}'", credentials.getUsername());
         return false;
     }
 
@@ -154,17 +154,17 @@ public class Authenticator {
                     .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authAcr);
 
             if (customScriptConfiguration == null) {
-                log.error("Failed to get CustomScriptConfiguration. acr: '{0}'", this.authAcr);
+                log.error("Failed to get CustomScriptConfiguration. acr: '{}'", this.authAcr);
             } else {
                 this.authAcr = customScriptConfiguration.getCustomScript().getName();
 
                 boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, null, 1);
-                log.info("Authentication result for user '{0}', result: '{1}'", credentials.getUsername(), result);
+                log.info("Authentication result for user '{}', result: '{}'", credentials.getUsername(), result);
 
                 if (result) {
                     authenticationService.configureSessionClient();
 
-                    log.info("Authentication success for client: '{0}'", credentials.getUsername());
+                    log.info("Authentication success for client: '{}'", credentials.getUsername());
                     return true;
                 }
             }
@@ -177,7 +177,7 @@ public class Authenticator {
         if (loggedIn) {
             authenticationService.configureSessionClient();
 
-            log.info("Authentication success for Client: '{0}'", credentials.getUsername());
+            log.info("Authentication success for Client: '{}'", credentials.getUsername());
             return true;
         }
 
@@ -205,19 +205,19 @@ public class Authenticator {
 
             CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, this.authAcr);
             if (customScriptConfiguration == null) {
-                log.error("Failed to get CustomScriptConfiguration for acr: '{1}', auth_step: '{0}'", this.authAcr, this.authStep);
+                log.error("Failed to get CustomScriptConfiguration for acr: '{}', auth_step: '{}'", this.authAcr, this.authStep);
                 return false;
             }
 
             // Check if all previous steps had passed
             boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
             if (!passedPreviousSteps) {
-                log.error("There are authentication steps not marked as passed. acr: '{1}', auth_step: '{0}'", this.authAcr, this.authStep);
+                log.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}'", this.authAcr, this.authStep);
                 return false;
             }
 
             boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, externalContext.getRequestParameterValuesMap(), this.authStep);
-            log.debug("Authentication result for user '{0}'. auth_step: '{1}', result: '{2}', credentials: '{3}'", credentials.getUsername(), this.authStep, result, System.identityHashCode(credentials));
+            log.debug("Authentication result for user '{}'. auth_step: '{}', result: '{}', credentials: '{}'", credentials.getUsername(), this.authStep, result, System.identityHashCode(credentials));
 
             int overridenNextStep = -1;
 
@@ -225,7 +225,7 @@ public class Authenticator {
             if (apiVersion > 1) {
             	log.trace("According to API version script supports steps overriding");
             	overridenNextStep = externalAuthenticationService.getNextStep(customScriptConfiguration, externalContext.getRequestParameterValuesMap(), this.authStep);
-            	log.debug("Get next step from script: '{0}'", apiVersion);
+            	log.debug("Get next step from script: '{}'", apiVersion);
             }
 
             if (!result && (overridenNextStep == -1)) {
@@ -242,7 +242,7 @@ public class Authenticator {
             	sessionStateService.resetToStep(sessionState, overridenNextStep);
 
             	this.authStep = overridenNextStep;
-            	log.info("Authentication reset to step : '{0}'", this.authStep);
+            	log.info("Authentication reset to step : '{}'", this.authStep);
             }
 
 
@@ -288,7 +288,7 @@ public class Authenticator {
                 	}
                 }
 
-                log.trace("Redirect to page: '{0}'", redirectTo);
+                log.trace("Redirect to page: '{}'", redirectTo);
                 facesService.redirect(redirectTo);
                 return true;
             }
@@ -301,11 +301,11 @@ public class Authenticator {
                 identity.quietLogin();
 
                 // Redirect to authorization workflow
-                log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
+                log.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
                 authenticationService.onSuccessfulLogin(eventSessionState);
 //                    Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
 
-                log.info("Authentication success for User: '{0}'", credentials.getUsername());
+                log.info("Authentication success for User: '{}'", credentials.getUsername());
                 return true;
             }
         } else {
@@ -315,13 +315,13 @@ public class Authenticator {
                 	SessionState eventSessionState = authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
 
                     // Redirect to authorization workflow
-                        log.debug("Sending event to trigger user redirection: '{0}'", credentials.getUsername());
+                        log.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
                         authenticationService.onSuccessfulLogin(eventSessionState);
 // TODO: CDI Review                       
 //                        Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
                     }
 
-                    log.info("Authentication success for User: '{0}'", credentials.getUsername());
+                    log.info("Authentication success for User: '{}'", credentials.getUsername());
                     return true;
             }
         }
@@ -333,7 +333,7 @@ public class Authenticator {
 		sessionState.setSessionAttributes(sessionIdAttributes);
 		boolean updateResult = sessionStateService.updateSessionState(sessionState, true, true, true);
 		if (!updateResult) {
-		    log.debug("Failed to update session entry: '{0}'", sessionState.getId());
+		    log.debug("Failed to update session entry: '{}'", sessionState.getId());
 		    return false;
 		}
 
@@ -346,21 +346,21 @@ public class Authenticator {
                     .determineCustomScriptConfiguration(AuthenticationScriptUsageType.SERVICE, 1, this.authAcr);
 
             if (customScriptConfiguration == null) {
-                log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', acr: '{1}'",
+                log.error("Failed to get CustomScriptConfiguration. auth_step: '{}', acr: '{}'",
                         this.authStep, this.authAcr);
             } else {
                 this.authAcr = customScriptConfiguration.getName();
 
                 boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration, null, 1);
-                log.info("Authentication result for '{0}'. auth_step: '{1}', result: '{2}'", credentials.getUsername(), this.authStep, result);
+                log.info("Authentication result for '{}'. auth_step: '{}', result: '{}'", credentials.getUsername(), this.authStep, result);
 
                 if (result) {
                     authenticationService.configureEventUser();
 
-                    log.info("Authentication success for User: '{0}'", credentials.getUsername());
+                    log.info("Authentication success for User: '{}'", credentials.getUsername());
                     return true;
                 }
-                log.info("Authentication failed for User: '{0}'", credentials.getUsername());
+                log.info("Authentication failed for User: '{}'", credentials.getUsername());
             }
         }
 
@@ -369,10 +369,10 @@ public class Authenticator {
             if (authenticated) {
                 authenticationService.configureEventUser();
 
-                log.info("Authentication success for User: '{0}'", credentials.getUsername());
+                log.info("Authentication success for User: '{}'", credentials.getUsername());
                 return true;
             }
-            log.info("Authentication failed for User: '{0}'", credentials.getUsername());
+            log.info("Authentication failed for User: '{}'", credentials.getUsername());
         }
 
         return false;
@@ -414,7 +414,7 @@ public class Authenticator {
         CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(
                 AuthenticationScriptUsageType.INTERACTIVE, this.authAcr);
         if (customScriptConfiguration == null) {
-            log.error("Failed to get CustomScriptConfiguration. auth_step: '{0}', acr: '{1}'", this.authStep, this.authAcr);
+            log.error("Failed to get CustomScriptConfiguration. auth_step: '{}', acr: '{}'", this.authStep, this.authAcr);
             return Constants.RESULT_FAILURE;
         }
 
@@ -437,11 +437,11 @@ public class Authenticator {
                 CustomScriptConfiguration determinedCustomScriptConfiguration = externalAuthenticationService.getCustomScriptConfiguration(
                         AuthenticationScriptUsageType.INTERACTIVE, determinedauthAcr);
                 if (determinedCustomScriptConfiguration == null) {
-                    log.error("Failed to get determined CustomScriptConfiguration. auth_step: '{0}', acr: '{1}'", this.authStep, this.authAcr);
+                    log.error("Failed to get determined CustomScriptConfiguration. auth_step: '{}', acr: '{}'", this.authStep, this.authAcr);
                     return Constants.RESULT_FAILURE;
                 }
 
-                log.debug("Redirect to page: '{0}'. Force to use acr: '{1}'", redirectTo, determinedauthAcr);
+                log.debug("Redirect to page: '{}'. Force to use acr: '{}'", redirectTo, determinedauthAcr);
 
                 determinedauthAcr = determinedCustomScriptConfiguration.getName();
                 String determinedAuthLevel = Integer.toString(determinedCustomScriptConfiguration.getLevel());
@@ -466,7 +466,7 @@ public class Authenticator {
         // Check if all previous steps had passed
         boolean passedPreviousSteps = isPassedPreviousAuthSteps(sessionIdAttributes, this.authStep);
         if (!passedPreviousSteps) {
-            log.error("There are authentication steps not marked as passed. acr: '{1}', auth_step: '{0}'", this.authAcr, this.authStep);
+            log.error("There are authentication steps not marked as passed. acr: '{}', auth_step: '{}'", this.authAcr, this.authStep);
             return Constants.RESULT_FAILURE;
         }
 
@@ -507,7 +507,7 @@ public class Authenticator {
         }
         String p_sessionState = sessionState.getId();
 
-        log.trace("authenticateBySessionState, sessionState = '{0}', session = '{1}', state= '{2}'", p_sessionState, sessionState, sessionState.getState());
+        log.trace("authenticateBySessionState, sessionState = '{}', session = '{}', state= '{}'", p_sessionState, sessionState, sessionState.getState());
         // IMPORTANT : authenticate by session state only if state of session is authenticated!
         if (SessionIdState.AUTHENTICATED == sessionState.getState()) {
             final User user = authenticationService.getUserOrRemoveSession(sessionState);

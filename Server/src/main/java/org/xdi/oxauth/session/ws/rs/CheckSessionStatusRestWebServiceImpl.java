@@ -66,7 +66,7 @@ public class CheckSessionStatusRestWebServiceImpl {
 	public Response requestCheckSessionStatus(@Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse,
 			@Context SecurityContext securityContext) throws IOException {
 		String sessionStateCookie = sessionStateService.getSessionStateFromCookie(httpRequest);
-		log.debug("Found session '{0}' cookie: '{1}'", SessionStateService.SESSION_STATE_COOKIE_NAME, sessionStateCookie);
+		log.debug("Found session '{}' cookie: '{}'", SessionStateService.SESSION_STATE_COOKIE_NAME, sessionStateCookie);
 
 		CheckSessionResponse response = new CheckSessionResponse("unknown", "");
 
@@ -82,7 +82,7 @@ public class CheckSessionStatusRestWebServiceImpl {
 		}
 
 		String responseJson = ServerUtil.asJson(response);
-		log.debug("Check session status response: '{0}'", responseJson);
+		log.debug("Check session status response: '{}'", responseJson);
 
 		return Response.ok().type(MediaType.APPLICATION_JSON).entity(responseJson).build();
 	}

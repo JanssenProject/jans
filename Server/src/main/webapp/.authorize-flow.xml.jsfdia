@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PROCESS model-entity="JSFProcess">
+ <PROCESS-ITEM NAME="rules:#authorize" PATH="/authorize"
+  SHAPE="32,17,0,0" model-entity="JSFProcessGroup">
+  <PROCESS-ITEM ID="rules:#authorize:0" NAME="item" PATH="/authorize" model-entity="JSFProcessItem">
+   <PROCESS-ITEM-OUTPUT ID="::#authorize.xhtml" NAME="output"
+    PATH="/authorize.xhtml" TARGET="rules:#authorize.xhtml"
+    TITLE="[any]" model-entity="JSFProcessItemOutput"/>
+  </PROCESS-ITEM>
+ </PROCESS-ITEM>
+ <PROCESS-ITEM NAME="rules:#authorize.xhtml" PATH="/authorize.xhtml"
+  SHAPE="240,33,0,0" model-entity="JSFProcessGroup"/>
+</PROCESS>

@@ -31,7 +31,7 @@ public class JwkRestWebServiceImpl implements JwkRestWebService {
 
     @Override
     public Response requestJwk(SecurityContext sec) {
-        log.debug("Attempting to request JWK, Is Secure = {0}", sec.isSecure());
+        log.debug("Attempting to request JWK, Is Secure = {}", sec.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
         try {

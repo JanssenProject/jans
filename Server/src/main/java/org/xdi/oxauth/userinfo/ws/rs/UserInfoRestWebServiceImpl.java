@@ -134,7 +134,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
             accessToken = authorization.substring(7);
         }
-        log.debug("Attempting to request User Info, Access token = {0}, Is Secure = {1}",
+        log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}",
                 accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
@@ -168,7 +168,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     try {
                         currentUser = userService.getUserByDn(authorizationGrant.getUserDn());
                     } catch (EntryPersistenceException ex) {
-                        log.warn("Failed to reload user entry: '{0}'", authorizationGrant.getUserDn());
+                        log.warn("Failed to reload user entry: '{}'", authorizationGrant.getUserDn());
                     }
 
                     if (authorizationGrant.getClient() != null

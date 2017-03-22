@@ -238,6 +238,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public TokenLdap asTokenLdap(AbstractToken p_token) {
+    	grantService = ServerUtil.bean(GrantService.class);
 
         final String id = GrantService.generateGrantId();
 
