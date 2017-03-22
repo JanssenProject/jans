@@ -160,7 +160,7 @@ public class RegistrationService extends RequestService {
 
 		boolean approved = StringHelper.equals(RawRegistrationService.REGISTER_FINISH_TYPE, response.getClientData().getTyp());
 		if (!approved) {
-			log.debug("Registratio request with keyHandle '{0}' was canceled", rawRegisterResponse.getKeyHandle());
+			log.debug("Registratio request with keyHandle '{}' was canceled", rawRegisterResponse.getKeyHandle());
 			return new DeviceRegistrationResult(deviceRegistration, DeviceRegistrationResult.Status.CANCELED);
 		}
 

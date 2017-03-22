@@ -159,7 +159,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (appConfiguration.getDynamicRegistrationEnabled()) {
                 final RegisterRequest r = RegisterRequest.fromJson(requestParams);
 
-                log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",
+                log.debug("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, params = {}",
                         r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
 
                 if (r.getSubjectType() == null) {
@@ -437,7 +437,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_UPDATE);
         oAuth2AuditLog.setClientId(clientId);
         try {
-            log.debug("Attempting to UPDATE client, client_id: {0}, requestParams = {1}, isSecure = {3}",
+            log.debug("Attempting to UPDATE client, client_id: {}, requestParams = {}, isSecure = {}",
                     clientId, requestParams, securityContext.isSecure());
             final String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
 
@@ -494,7 +494,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     public Response requestClientRead(String clientId, String authorization, HttpServletRequest httpRequest,
                                       SecurityContext securityContext) {
         String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-        log.debug("Attempting to read client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
+        log.debug("Attempting to read client: clientId = {}, registrationAccessToken = {} isSecure = {}",
                 clientId, accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 

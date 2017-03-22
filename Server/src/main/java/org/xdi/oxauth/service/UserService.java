@@ -80,7 +80,7 @@ public class UserService {
 	}
 
 	public User getUser(String userId, String... returnAttributes) {
-		log.debug("Getting user information from LDAP: userId = {0}", userId);
+		log.debug("Getting user information from LDAP: userId = {}", userId);
 
 		if (StringHelper.isEmpty(userId)) {
 			return null;
@@ -89,7 +89,7 @@ public class UserService {
 		Filter userUidFilter = Filter.createEqualityFilter("uid", userId);
 
 		List<User> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
-		log.debug("Found {0} entries for user id = {1}", entries.size(), userId);
+		log.debug("Found {} entries for user id = {}", entries.size(), userId);
 
 		if (entries.size() > 0) {
 			return entries.get(0);
@@ -167,7 +167,7 @@ public class UserService {
 
 
     public User getUserByAttribute(String attributeName, String attributeValue) {
-        log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = new User();
         user.setDn(staticConfiguration.getBaseDn().getPeople());
@@ -178,7 +178,7 @@ public class UserService {
         user.setCustomAttributes(customAttributes);
 
         List<User> entries = ldapEntryManager.findEntries(user);
-        log.debug("Found '{0}' entries", entries.size());
+        log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
             return entries.get(0);
@@ -191,13 +191,13 @@ public class UserService {
         log.debug("Getting user by sample");
 
         List<User> entries = ldapEntryManager.findEntries(user, limit, limit);
-        log.debug("Found '{0}' entries", entries.size());
+        log.debug("Found '{}' entries", entries.size());
 
         return (User) entries;
     }
 
     public User addUserAttributeByUserInum(String userInum, String attributeName, String attributeValue) {
-    	log.debug("Add user attribute by user inum  to LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+    	log.debug("Add user attribute by user inum  to LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUserByInum(userInum);
         if (user == null) {
@@ -215,7 +215,7 @@ public class UserService {
     }
     
     public User addUserAttribute(String userId, String attributeName, String attributeValue) {
-        log.debug("Add user attribute to LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+        log.debug("Add user attribute to LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUser(userId);
         if (user == null) {
@@ -256,7 +256,7 @@ public class UserService {
 	}
 
     public User removeUserAttribute(String userId, String attributeName, String attributeValue) {
-        log.debug("Remove user attribute from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+        log.debug("Remove user attribute from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUser(userId);
         if (user == null) {
@@ -284,7 +284,7 @@ public class UserService {
     }
 
     public User replaceUserAttribute(String userId, String attributeName, String oldAttributeValue, String newAttributeValue) {
-        log.debug("Replace user attribute in LDAP: attributeName = '{0}', oldAttributeValue = '{1}', newAttributeValue = '{2}'", attributeName, oldAttributeValue, newAttributeValue);
+        log.debug("Replace user attribute in LDAP: attributeName = '{}', oldAttributeValue = '{}', newAttributeValue = '{}'", attributeName, oldAttributeValue, newAttributeValue);
 
         User user = getUser(userId);
         if (user == null) {
@@ -334,7 +334,7 @@ public class UserService {
 
     // this method must be called only if app mode = MEMORY, in ldap case it's anyway persisted in ldap.
     public boolean saveLongLivedToken(String userId, PersistentJwt longLivedToken) {
-        log.debug("Saving long-lived access token: userId = {0}", userId);
+        log.debug("Saving long-lived access token: userId = {}", userId);
         boolean succeed = false;
 
         User user = getUser(userId);

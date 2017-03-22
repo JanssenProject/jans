@@ -477,7 +477,7 @@ public class ConfigurationFactory {
 
             this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
         } catch (Exception ex) {
-            log.error("Failed to load configuration from {0}", ex, saltFilePath);
+            log.error("Failed to load configuration from {}", ex, saltFilePath);
             throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
         }
     }
@@ -489,7 +489,7 @@ public class ConfigurationFactory {
             return fileConfiguration;
         } catch (Exception ex) {
             if (isMandatory) {
-                log.error("Failed to load configuration from {0}", ex, fileName);
+                log.error("Failed to load configuration from {}", ex, fileName);
                 throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
             }
         }

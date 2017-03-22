@@ -186,13 +186,13 @@ public class AuthorizeAction {
         try {
             client = clientService.getClient(clientId);
         } catch (EntryPersistenceException ex) {
-            log.error("Permission denied. Failed to find client by inum '{0}' in LDAP.", clientId, ex);
+            log.error("Permission denied. Failed to find client by inum '{}' in LDAP.", clientId, ex);
             permissionDenied();
             return;
         }
 
         if (client == null) {
-            log.error("Permission denied. Failed to find client_id '{0}' in LDAP.", clientId);
+            log.error("Permission denied. Failed to find client_id '{}' in LDAP.", clientId);
             permissionDenied();
             return;
         }
@@ -203,7 +203,7 @@ public class AuthorizeAction {
         try {
             session = sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(session, acrValues);
         } catch (AcrChangedException e) {
-            log.debug("There is already existing session which has another acr then {0}, session: {1}", acrValues, session.getId());
+            log.debug("There is already existing session which has another acr then {}, session: {}", acrValues, session.getId());
             if (prompts.contains(Prompt.LOGIN)) {
                 session = handleAcrChange(session, prompts);
             } else {
@@ -237,7 +237,7 @@ public class AuthorizeAction {
                 CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
 
                 if (customScriptConfiguration == null) {
-                    log.error("Failed to get CustomScriptConfiguration. auth_step: {0}, acr_values: {1}", 1, this.acrValues);
+                    log.error("Failed to get CustomScriptConfiguration. auth_step: {}, acr_values: {}", 1, this.acrValues);
                     permissionDenied();
                     return;
                 }
@@ -249,7 +249,7 @@ public class AuthorizeAction {
 
                 String tmpRedirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, 1);
                 if (StringHelper.isNotEmpty(tmpRedirectTo)) {
-                    log.trace("Redirect to person authentication login page: {0}", tmpRedirectTo);
+                    log.trace("Redirect to person authentication login page: {}", tmpRedirectTo);
                     redirectTo = tmpRedirectTo;
                 }
             }
@@ -264,7 +264,7 @@ public class AuthorizeAction {
             unauthenticatedSession.addPermission(clientId, false);
             boolean persisted = sessionStateService.persistSessionState(unauthenticatedSession, !prompts.contains(Prompt.NONE)); // always persist is prompt is not none
             if (persisted && log.isTraceEnabled()) {
-                log.trace("Session '{0}' persisted to LDAP", unauthenticatedSession.getId());
+                log.trace("Session '{}' persisted to LDAP", unauthenticatedSession.getId());
             }
 
             this.sessionState = unauthenticatedSession.getId();
@@ -693,7 +693,7 @@ public class AuthorizeAction {
 
             final String parametersAsString = authenticationService.parametersAsString(sessionAttribute);
             final String uri = "seam/resource/restv1/oxauth/authorize?" + parametersAsString;
-            log.trace("permissionGranted, redirectTo: {0}", uri);
+            log.trace("permissionGranted, redirectTo: {}", uri);
 
             facesService.redirectToExternalURL(uri);
         } catch (UnsupportedEncodingException e) {

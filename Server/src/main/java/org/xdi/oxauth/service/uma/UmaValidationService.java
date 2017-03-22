@@ -83,7 +83,7 @@ public class UmaValidationService {
         		hostUri = (new URI("https://" + host)).getHost();
         	}
         } catch (URISyntaxException ex) {
-            log.error("Failed to parse AM host: '{0}'", ex, host);
+            log.error("Failed to parse AM host: '{}'", ex, host);
             throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
@@ -91,12 +91,12 @@ public class UmaValidationService {
         try {
             URI umaBaseEndpoint = new URI(appConfiguration.getBaseEndpoint());
             if (!StringHelper.equalsIgnoreCase(hostUri, umaBaseEndpoint.getHost())) {
-                log.error("Get request for another AM: '{0}'. Expected: '{1}'", hostUri, umaBaseEndpoint.getHost());
+                log.error("Get request for another AM: '{}'. Expected: '{}'", hostUri, umaBaseEndpoint.getHost());
                 throw new WebApplicationException(Response.status(BAD_REQUEST)
                         .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
             }
         } catch (URISyntaxException ex) {
-            log.error("Failed to parse AM host: '{0}'", ex, hostUri);
+            log.error("Failed to parse AM host: '{}'", ex, hostUri);
             throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
@@ -120,7 +120,7 @@ public class UmaValidationService {
 //        		hostUri = (new URI("https://" + host)).getHost();
 //        	}
 //   		} catch (URISyntaxException ex) {
-//   			log.error("Failed to parse host: '{0}'", ex, host);
+//   			log.error("Failed to parse host: '{}'", ex, host);
 //   			throw new WebApplicationException(Response.status(BAD_REQUEST)
 //   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
 //   		}
@@ -138,7 +138,7 @@ public class UmaValidationService {
     }
 
     private AuthorizationGrant validateAuthorization(String authorization, UmaScopeType umaScopeType) {
-        log.trace("Validate authorization: {0}", authorization);
+        log.trace("Validate authorization: {}", authorization);
         if (StringHelper.isEmpty(authorization)) {
             throw new WebApplicationException(Response.status(UNAUTHORIZED)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UNAUTHORIZED_CLIENT)).build());

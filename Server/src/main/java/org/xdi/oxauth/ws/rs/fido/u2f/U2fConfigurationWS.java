@@ -62,7 +62,7 @@ public class U2fConfigurationWS {
 			// convert manually to avoid possible conflicts between resteasy
 			// providers, e.g. jettison, jackson
 			final String entity = ServerUtil.asPrettyJson(conf);
-			log.trace("FIDO U2F configuration: {0}", entity);
+			log.trace("FIDO U2F configuration: {}", entity);
 
 			return Response.ok(entity).build();
 		} catch (Throwable ex) {

@@ -45,13 +45,13 @@ public class ValidationService {
 		
 		SessionState ldapSessionState = sessionStateService.getSessionState(sessionState);
 		if (ldapSessionState == null) {
-			log.error("Specified session_state '{0}' is invalid", sessionState);
+			log.error("Specified session_state '{}' is invalid", sessionState);
 			return false;
 		}
 		
 		String sessionStateUser = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
 		if (!StringHelper.equalsIgnoreCase(userName, sessionStateUser)) {
-			log.error("Username '{0}' and session_state '{1}' don't match", userName, sessionState);
+			log.error("Username '{}' and session_state '{}' don't match", userName, sessionState);
 			return false;
 		}
 
@@ -66,18 +66,18 @@ public class ValidationService {
 		
 		User user = userService.getUser(userName, U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
 		if (user == null) {
-			log.error("Specified user_name '{0}' is invalid", userName);
+			log.error("Specified user_name '{}' is invalid", userName);
 			return false;
 		}
 		
 		String userEnrollmentCode = user.getAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
 		if (userEnrollmentCode == null) {
-			log.error("Specified enrollment_code '{0}' is invalid", enrollmentCode);
+			log.error("Specified enrollment_code '{}' is invalid", enrollmentCode);
 			return false;
 		}
 
 		if (!StringHelper.equalsIgnoreCase(userEnrollmentCode, enrollmentCode)) {
-			log.error("Username '{0}' and enrollment_code '{1}' don't match", userName, enrollmentCode);
+			log.error("Username '{}' and enrollment_code '{}' don't match", userName, enrollmentCode);
 			return false;
 		}
 

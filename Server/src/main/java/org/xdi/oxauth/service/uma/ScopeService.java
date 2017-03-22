@@ -88,9 +88,9 @@ public class ScopeService {
 
                 // if more then one scope then it's problem, non-deterministic behavior, id must be unique
                 if (entries.size() > 1) {
-                    log.error("Found more then one internal uma scope by input id: {0}" + p_scopeId);
+                    log.error("Found more then one internal uma scope by input id: {}" + p_scopeId);
                     for (ScopeDescription s : entries) {
-                        log.error("Scope, Id: {0}, dn: {1}", s.getId(), s.getDn());
+                        log.error("Scope, Id: {}, dn: {}", s.getId(), s.getDn());
                     }
                 }
                 return entries.get(0);

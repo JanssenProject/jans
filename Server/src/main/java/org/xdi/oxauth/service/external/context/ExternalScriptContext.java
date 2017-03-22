@@ -73,7 +73,7 @@ public class ExternalScriptContext {
 		try {
 	    	return ldapEntryManager.find(CustomEntry.class, dn, ldapReturnAttributes);
 		} catch (EntryPersistenceException epe) {
-		    log.error("Failed to find entry '{0}'", dn);
+		    log.error("Failed to find entry '{}'", dn);
 		}
 
 		return null;

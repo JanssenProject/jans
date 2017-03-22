@@ -55,7 +55,7 @@ public class InumService {
         final StringBuilder dnSb = new StringBuilder("inum=");
         dnSb.append(inum).append(",").append(baseDn);
         final String dn = dnSb.toString();
-        log.trace("Generated dn: {0}", dn);
+        log.trace("Generated dn: {}", dn);
         return new Pair<String, String>(inum, dn);
     }
 

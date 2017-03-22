@@ -74,12 +74,12 @@ public class UserSessionStateService {
 
 		SessionState ldapSessionState = sessionStateService.getSessionState(sessionState);
 		if (ldapSessionState == null) {
-			log.warn("Failed to load session state '{0}'", sessionState);
+			log.warn("Failed to load session state '{}'", sessionState);
 			return null;
 		}
 		
 		if (SessionIdState.UNAUTHENTICATED != ldapSessionState.getState()) {
-			log.warn("Unexpected session '{0}' state: '{1}'", sessionState, ldapSessionState.getState());
+			log.warn("Unexpected session '{}' state: '{}'", sessionState, ldapSessionState.getState());
 			return null;
 		}
 

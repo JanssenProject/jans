@@ -127,7 +127,7 @@ public class KeyGeneratorTimer {
 
                 if (expirationDate.before(now)) {
                     // The expired key is not added to the array of keys
-                    log.debug("Removing JWK: {0}, Expiration date: {1}",
+                    log.debug("Removing JWK: {}, Expiration date: {}",
                             key.getString(KEY_ID),
                             key.getString(EXPIRATION_TIME));
                     AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
