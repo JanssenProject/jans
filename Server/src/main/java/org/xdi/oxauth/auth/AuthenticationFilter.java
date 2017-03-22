@@ -249,11 +249,11 @@ public class AuthenticationFilter implements Filter {
 				filterChain.doFilter(servletRequest, servletResponse);
 			}
 		} catch (ServletException ex) {
-			log.info("Bearer authorization failed: {}", ex, ex.getMessage());
+			log.info("Bearer authorization failed: {}", ex);
 		} catch (IOException ex) {
-			log.info("Bearer authorization failed: {}", ex, ex.getMessage());
+			log.info("Bearer authorization failed: {}", ex);
 		} catch (Exception ex) {
-			log.info("Bearer authorization failed: {}", ex, ex.getMessage());
+			log.info("Bearer authorization failed: {}", ex);
 		}
 	}
 
@@ -318,11 +318,11 @@ public class AuthenticationFilter implements Filter {
 				sendError(servletResponse);
 			}
 		} catch (ServletException ex) {
-			log.error("Post authentication failed: {}", ex, ex.getMessage());
+			log.error("Post authentication failed: {}", ex);
 		} catch (IOException ex) {
-			log.error("Post authentication failed: {}", ex, ex.getMessage());
+			log.error("Post authentication failed: {}", ex);
 		} catch (Exception ex) {
-			log.error("Post authentication failed: {}", ex, ex.getMessage());
+			log.error("Post authentication failed: {}", ex);
 		}
 	}
 
@@ -359,11 +359,11 @@ public class AuthenticationFilter implements Filter {
 
 			filterChain.doFilter(servletRequest, servletResponse);
 		} catch (ServletException ex) {
-			log.info("JWT authentication failed: {}", ex, ex.getMessage());
+			log.info("JWT authentication failed: {}", ex);
 		} catch (IOException ex) {
-			log.info("JWT authentication failed: {}", ex, ex.getMessage());
+			log.info("JWT authentication failed: {}", ex);
 		} catch (InvalidJwtException ex) {
-			log.info("JWT authentication failed: {}", ex, ex.getMessage());
+			log.info("JWT authentication failed: {}", ex);
 		}
 
 		try {
