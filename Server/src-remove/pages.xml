@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pages xmlns="http://jboss.org/schema/seam/pages"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://jboss.org/schema/seam/pages http://jboss.org/schema/seam/pages-2.3.xsd"
+       no-conversation-view-id="/authorize.xhtml"
+       login-view-id="/login.xhtml">
+
+    <exception class="javax.faces.application.ViewExpiredException">
+        <redirect view-id="/login.xhtml">
+            <message severity="warn">Your session has timed out, please try again</message>
+        </redirect>
+    </exception>
+
+    <exception class="org.jboss.seam.ui.UnauthorizedCommandException">
+        <redirect view-id="/login.xhtml">
+            <message severity="error">The request is invalid, please try again</message>
+        </redirect>
+    </exception>
+
+    <exception class="javax.faces.validator.ValidatorException">
+        <redirect view-id="/error.xhtml">
+            <message severity="error">
+                #{logout.missingParameters}
+            </message>
+        </redirect>
+    </exception>
+        <exception class="javax.faces.application.ViewExpiredException">
+            <redirect view-id="/error.xhtml">
+                <message severity="warn">Your session has timed out, please try again</message>
+            </redirect>
+        </exception>
+
+        <exception class="org.jboss.seam.ConcurrentRequestTimeoutException" log-level="trace">
+            <http-error error-code="503" />
+        </exception>
+
+        <exception class="java.lang.NullPointerException">
+            <redirect view-id="/error.xhtml">
+                <message severity="warn">Required data not found to complete this action. Please try again
+                or report your issue to a BT administrator.</message>
+            </redirect>
+        </exception>
+
+        <exception class="java.lang.RuntimeException">
+            <redirect view-id="/error.xhtml">
+                <message severity="warn">Unexpected Error</message>
+           </redirect>
+       </exception>
+
+        <exception>
+            <redirect view-id="/error.xhtml">
+                <message severity="error">Unexpected error, please try again</message>
+            </redirect>
+        </exception>
+</pages>
