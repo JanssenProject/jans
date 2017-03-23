@@ -105,7 +105,11 @@ public class ConfigurationFactory {
             this.configFilePath = confDir + CONFIG_FILE_NAME;
             this.errorsFilePath = confDir + ERRORS_FILE_NAME;
             this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
-            this.webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE_NAME;
+            String certsDir = getLdapConfiguration().getString("certsDir");
+            if (StringHelper.isEmpty(certsDir)) {
+            	certsDir = confDir;
+            }
+            this.webKeysFilePath = certsDir + File.separator + WEB_KEYS_FILE_NAME;
             this.saltFilePath = confDir + SALT_FILE_NAME;
             loadCryptoConfigurationSalt();
         } finally {
