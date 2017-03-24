@@ -11,7 +11,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version March 23, 2017
  */
 public class CryptoProviderFactory {
 
@@ -28,6 +28,7 @@ public class CryptoProviderFactory {
                 break;
             case PKCS11:
                 cryptoProvider = new OxElevenCryptoProvider(
+                        configuration.getOxElevenTestModeToken(),
                         configuration.getOxElevenGenerateKeyEndpoint(),
                         configuration.getOxElevenSignEndpoint(),
                         configuration.getOxElevenVerifySignatureEndpoint(),

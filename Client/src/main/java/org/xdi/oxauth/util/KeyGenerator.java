@@ -6,29 +6,10 @@
 
 package org.xdi.oxauth.util;
 
-import static org.xdi.oxauth.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
-import static org.xdi.oxauth.model.jwk.JWKParameter.EXPIRATION_TIME;
-import static org.xdi.oxauth.model.jwk.JWKParameter.EXPONENT;
-import static org.xdi.oxauth.model.jwk.JWKParameter.KEY_ID;
-import static org.xdi.oxauth.model.jwk.JWKParameter.MODULUS;
-import static org.xdi.oxauth.model.jwk.JWKParameter.X;
-import static org.xdi.oxauth.model.jwk.JWKParameter.Y;
-
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-//import org.apache.log4j.SimpleLayout;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
@@ -41,6 +22,12 @@ import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import static org.xdi.oxauth.model.jwk.JWKParameter.*;
+
 /**
  * Command example: java -cp
  * bcprov-jdk15on-1.54.jar:.jar:bcpkix-jdk15on-1.54.jar:commons-cli-1.2.jar:commons-codec-1.5.jar:commons-lang-2.6.jar:jettison-1.3.jar:log4j-1.2.14.jar:oxauth-model.jar:oxauth.jar
@@ -51,175 +38,180 @@ import org.xdi.oxauth.model.util.StringUtils;
  * Certificates" -expiration 365
  * <p/>
  * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -ox11
- * https://ce.gluu.info:8443/oxeleven/rest/oxeleven/generateKey -expiration 365
+ * https://ce.gluu.info:8443/oxeleven/rest/oxeleven/generateKey -expiration 365 -at xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version September 30, 2016
+ * @version March 23, 2017
  */
 public class KeyGenerator {
 
-	private static final String ALGORITHMS = "algorithms";
-	private static final String KEY_STORE_FILE = "keystore";
-	private static final String KEY_STORE_PASSWORD = "keypasswd";
-	private static final String DN_NAME = "dnname";
-	private static final String OXELEVEN_GENERATE_KEY_ENDPOINT = "ox11";
-	private static final String EXPIRATION = "expiration";
-	private static final String HELP = "h";
-	private static final Logger log;
+    private static final String ALGORITHMS = "algorithms";
+    private static final String KEY_STORE_FILE = "keystore";
+    private static final String KEY_STORE_PASSWORD = "keypasswd";
+    private static final String DN_NAME = "dnname";
+    private static final String OXELEVEN_ACCESS_TOKEN = "at";
+    private static final String OXELEVEN_GENERATE_KEY_ENDPOINT = "ox11";
+    private static final String EXPIRATION = "expiration";
+    private static final String HELP = "h";
+    private static final Logger log;
 
-	static {
-		StatusLogger.getLogger().setLevel(Level.OFF);
-		log = Logger.getLogger(KeyGenerator.class);
-	}
+    static {
+        StatusLogger.getLogger().setLevel(Level.OFF);
+        log = Logger.getLogger(KeyGenerator.class);
+    }
 
-	public static void main(String[] args) throws Exception {
-		new Cli(args).parse();
-	}
+    public static void main(String[] args) throws Exception {
+        new Cli(args).parse();
+    }
 
-	public static class Cli {
-		private String[] args = null;
-		private Options options = new Options();
+    public static class Cli {
+        private String[] args = null;
+        private Options options = new Options();
 
-		public Cli(String[] args) {
-			this.args = args;
+        public Cli(String[] args) {
+            this.args = args;
 
-			Option algorithmsOption = new Option(ALGORITHMS, true,
-					"Signature Algorithms (RS256 RS384 RS512 ES256 ES384 ES512).");
-			algorithmsOption.setArgs(Option.UNLIMITED_VALUES);
+            Option algorithmsOption = new Option(ALGORITHMS, true,
+                    "Signature Algorithms (RS256 RS384 RS512 ES256 ES384 ES512).");
+            algorithmsOption.setArgs(Option.UNLIMITED_VALUES);
 
-			options.addOption(algorithmsOption);
-			options.addOption(KEY_STORE_FILE, true, "Key Store file.");
-			options.addOption(KEY_STORE_PASSWORD, true, "Key Store password.");
-			options.addOption(DN_NAME, true, "DN of certificate issuer.");
-			options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
-			options.addOption(EXPIRATION, true, "Expiration in days.");
-			options.addOption(HELP, false, "Show help.");
-		}
+            options.addOption(algorithmsOption);
+            options.addOption(KEY_STORE_FILE, true, "Key Store file.");
+            options.addOption(KEY_STORE_PASSWORD, true, "Key Store password.");
+            options.addOption(DN_NAME, true, "DN of certificate issuer.");
+            options.addOption(OXELEVEN_ACCESS_TOKEN, true, "oxEleven Access Token");
+            options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
+            options.addOption(EXPIRATION, true, "Expiration in days.");
+            options.addOption(HELP, false, "Show help.");
+        }
 
-		public void parse() {
-			CommandLineParser parser = new BasicParser();
+        public void parse() {
+            CommandLineParser parser = new BasicParser();
 
-			CommandLine cmd = null;
-			try {
-				cmd = parser.parse(options, args);
+            CommandLine cmd = null;
+            try {
+                cmd = parser.parse(options, args);
 
-				if (cmd.hasOption(HELP))
-					help();
+                if (cmd.hasOption(HELP))
+                    help();
 
-				if (cmd.hasOption(ALGORITHMS) && cmd.hasOption(OXELEVEN_GENERATE_KEY_ENDPOINT)
-						&& cmd.hasOption(EXPIRATION)) {
-					String[] algorithms = cmd.getOptionValues(ALGORITHMS);
-					String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
-					int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
+                if (cmd.hasOption(ALGORITHMS) && cmd.hasOption(OXELEVEN_ACCESS_TOKEN)
+                        && cmd.hasOption(OXELEVEN_GENERATE_KEY_ENDPOINT)
+                        && cmd.hasOption(EXPIRATION)) {
+                    String[] algorithms = cmd.getOptionValues(ALGORITHMS);
+                    String accessToken = cmd.getOptionValue(OXELEVEN_ACCESS_TOKEN);
+                    String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
+                    int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
 
-					List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
-					if (signatureAlgorithms.isEmpty()) {
-						help();
-					} else {
-						try {
-							JSONWebKeySet jwks = new JSONWebKeySet();
-							OxElevenCryptoProvider cryptoProvider = new OxElevenCryptoProvider(generateKeyEndpoint,
-									null, null, null);
+                    List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
+                    if (signatureAlgorithms.isEmpty()) {
+                        help();
+                    } else {
+                        try {
+                            JSONWebKeySet jwks = new JSONWebKeySet();
+                            OxElevenCryptoProvider cryptoProvider = new OxElevenCryptoProvider(accessToken,
+                                    generateKeyEndpoint,
+                                    null, null, null);
 
-							Calendar calendar = new GregorianCalendar();
-							calendar.add(Calendar.DATE, expiration);
+                            Calendar calendar = new GregorianCalendar();
+                            calendar.add(Calendar.DATE, expiration);
 
-							for (SignatureAlgorithm signatureAlgorithm : signatureAlgorithms) {
-								JSONObject result = cryptoProvider.generateKey(signatureAlgorithm,
-										calendar.getTimeInMillis());
-								// System.out.println(result);
+                            for (SignatureAlgorithm signatureAlgorithm : signatureAlgorithms) {
+                                JSONObject result = cryptoProvider.generateKey(signatureAlgorithm,
+                                        calendar.getTimeInMillis());
+                                // System.out.println(result);
 
-								JSONWebKey key = new JSONWebKey();
-								key.setKid(result.getString(KEY_ID));
-								key.setUse(Use.SIGNATURE);
-								key.setAlg(signatureAlgorithm);
-								key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
-								key.setExp(result.optLong(EXPIRATION_TIME));
-								key.setCrv(signatureAlgorithm.getCurve());
-								key.setN(result.optString(MODULUS));
-								key.setE(result.optString(EXPONENT));
-								key.setX(result.optString(X));
-								key.setY(result.optString(Y));
+                                JSONWebKey key = new JSONWebKey();
+                                key.setKid(result.getString(KEY_ID));
+                                key.setUse(Use.SIGNATURE);
+                                key.setAlg(signatureAlgorithm);
+                                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
+                                key.setExp(result.optLong(EXPIRATION_TIME));
+                                key.setCrv(signatureAlgorithm.getCurve());
+                                key.setN(result.optString(MODULUS));
+                                key.setE(result.optString(EXPONENT));
+                                key.setX(result.optString(X));
+                                key.setY(result.optString(Y));
 
-								JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
-								key.setX5c(StringUtils.toList(x5c));
+                                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                                key.setX5c(StringUtils.toList(x5c));
 
-								jwks.getKeys().add(key);
-							}
+                                jwks.getKeys().add(key);
+                            }
 
-							System.out.println(jwks);
-						} catch (Exception e) {
-							log.error("Failed to generate keys", e);
-							help();
-						}
-					}
-				} else if (cmd.hasOption(ALGORITHMS) && cmd.hasOption(KEY_STORE_FILE)
-						&& cmd.hasOption(KEY_STORE_PASSWORD) && cmd.hasOption(DN_NAME) && cmd.hasOption(EXPIRATION)) {
-					String[] algorithms = cmd.getOptionValues(ALGORITHMS);
-					String keystore = cmd.getOptionValue(KEY_STORE_FILE);
-					String keypasswd = cmd.getOptionValue(KEY_STORE_PASSWORD);
-					String dnName = cmd.getOptionValue(DN_NAME);
-					int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
+                            System.out.println(jwks);
+                        } catch (Exception e) {
+                            log.error("Failed to generate keys", e);
+                            help();
+                        }
+                    }
+                } else if (cmd.hasOption(ALGORITHMS) && cmd.hasOption(KEY_STORE_FILE)
+                        && cmd.hasOption(KEY_STORE_PASSWORD) && cmd.hasOption(DN_NAME) && cmd.hasOption(EXPIRATION)) {
+                    String[] algorithms = cmd.getOptionValues(ALGORITHMS);
+                    String keystore = cmd.getOptionValue(KEY_STORE_FILE);
+                    String keypasswd = cmd.getOptionValue(KEY_STORE_PASSWORD);
+                    String dnName = cmd.getOptionValue(DN_NAME);
+                    int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
 
-					List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
-					if (signatureAlgorithms.isEmpty()) {
-						help();
-					} else {
-						try {
-							SecurityProviderUtility.installBCProvider(true);
+                    List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
+                    if (signatureAlgorithms.isEmpty()) {
+                        help();
+                    } else {
+                        try {
+                            SecurityProviderUtility.installBCProvider(true);
 
-							JSONWebKeySet jwks = new JSONWebKeySet();
-							OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keystore, keypasswd, dnName);
+                            JSONWebKeySet jwks = new JSONWebKeySet();
+                            OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keystore, keypasswd, dnName);
 
-							Calendar calendar = new GregorianCalendar();
-							calendar.add(Calendar.DATE, expiration);
+                            Calendar calendar = new GregorianCalendar();
+                            calendar.add(Calendar.DATE, expiration);
 
-							for (SignatureAlgorithm signatureAlgorithm : signatureAlgorithms) {
-								JSONObject result = cryptoProvider.generateKey(signatureAlgorithm,
-										calendar.getTimeInMillis());
-								// System.out.println(result);
+                            for (SignatureAlgorithm signatureAlgorithm : signatureAlgorithms) {
+                                JSONObject result = cryptoProvider.generateKey(signatureAlgorithm,
+                                        calendar.getTimeInMillis());
+                                // System.out.println(result);
 
-								JSONWebKey key = new JSONWebKey();
-								key.setKid(result.getString(KEY_ID));
-								key.setUse(Use.SIGNATURE);
-								key.setAlg(signatureAlgorithm);
-								key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
-								key.setExp(result.optLong(EXPIRATION_TIME));
-								key.setCrv(signatureAlgorithm.getCurve());
-								key.setN(result.optString(MODULUS));
-								key.setE(result.optString(EXPONENT));
-								key.setX(result.optString(X));
-								key.setY(result.optString(Y));
+                                JSONWebKey key = new JSONWebKey();
+                                key.setKid(result.getString(KEY_ID));
+                                key.setUse(Use.SIGNATURE);
+                                key.setAlg(signatureAlgorithm);
+                                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
+                                key.setExp(result.optLong(EXPIRATION_TIME));
+                                key.setCrv(signatureAlgorithm.getCurve());
+                                key.setN(result.optString(MODULUS));
+                                key.setE(result.optString(EXPONENT));
+                                key.setX(result.optString(X));
+                                key.setY(result.optString(Y));
 
-								JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
-								key.setX5c(StringUtils.toList(x5c));
+                                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                                key.setX5c(StringUtils.toList(x5c));
 
-								jwks.getKeys().add(key);
-							}
+                                jwks.getKeys().add(key);
+                            }
 
-							System.out.println(jwks);
-						} catch (Exception e) {
-							log.error("Failed to generate keys", e);
-							help();
-						}
-					}
-				} else {
-					help();
-				}
-			} catch (ParseException e) {
-				log.error("Failed to generate keys", e);
-				help();
-			}
-		}
+                            System.out.println(jwks);
+                        } catch (Exception e) {
+                            log.error("Failed to generate keys", e);
+                            help();
+                        }
+                    }
+                } else {
+                    help();
+                }
+            } catch (ParseException e) {
+                log.error("Failed to generate keys", e);
+                help();
+            }
+        }
 
-		private void help() {
-			HelpFormatter formatter = new HelpFormatter();
+        private void help() {
+            HelpFormatter formatter = new HelpFormatter();
 
-			formatter.printHelp(
-					"KeyGenerator -algorithms alg ... -expiration n_days [-ox11 url] [-keystore path -keypasswd secret -dnname dn_name]",
-					options);
-			System.exit(0);
-		}
-	}
+            formatter.printHelp(
+                    "KeyGenerator -algorithms alg ... -expiration n_days [-ox11 url] [-keystore path -keypasswd secret -dnname dn_name]",
+                    options);
+            System.exit(0);
+        }
+    }
 }
