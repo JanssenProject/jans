@@ -18,12 +18,12 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 8, 2016
+ * @version March 23, 2017
  */
 public class CryptoProviderTest extends BaseComponentTestAdapter {
 
-	@In
-	private ConfigurationFactory configurationFactory;
+    @In
+    private ConfigurationFactory configurationFactory;
 
     private final String SIGNING_INPUT = "Signing Input";
     private final String SHARED_SECRET = "secret";
@@ -47,7 +47,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
     private String es512Signature;
 
     @Test
-    public void configuration() {
+    public void appConfiguration() {
         try {
             AppConfiguration appConfiguration = configurationFactory.getConfiguration();
             assertNotNull(appConfiguration);
