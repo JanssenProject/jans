@@ -88,7 +88,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-
 			<!-- Gluu -->
 			<dependency>
 				<groupId>org.xdi</groupId>
@@ -164,11 +163,13 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
+
 			<dependency>
 				<groupId>org.glassfish.web</groupId>
 				<artifactId>el-impl</artifactId>
 				<version>${uel.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>com.sun.faces</groupId>
 				<artifactId>jsf-api</artifactId>
@@ -204,7 +205,7 @@
 				<version>${omnifaces.version}</version>
 			</dependency>
 
-			<!-- Pretty Faces -->
+			<!-- Prettyfaces -->
 			<dependency>
 			    <groupId>org.ocpsoft.rewrite</groupId>
 			    <artifactId>rewrite-servlet</artifactId>
@@ -376,14 +377,27 @@
 			</dependency>
 			<dependency>
 			    <groupId>org.jboss.resteasy</groupId>
-			    <artifactId>resteasy-bom</artifactId>
-                <type>pom</type>
-                <scope>import</scope>
+			    <artifactId>resteasy-cdi</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.jboss.resteasy</groupId>
-			    <artifactId>resteasy-cdi</artifactId>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-servlet-initializer</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxrs</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxb-provider</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jackson-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
 
@@ -486,12 +500,14 @@
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
 	        </dependency>
+	        
 	        <dependency>
 	            <groupId>org.eclipse.jetty</groupId>
 	            <artifactId>jetty-deploy</artifactId>
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
 	        </dependency>
+	
 	        <dependency>
 	            <!-- Jetty annotations needed for Servlet 3.1 support -->
 	            <groupId>org.eclipse.jetty</groupId>
@@ -499,6 +515,7 @@
 	            <version>${jetty.version}</version>
 	            <scope>provided</scope>
 	        </dependency>
+	
 	        <dependency>
 	            <!-- Jetty plus and naming required for testing resource injections -->
 	            <groupId>org.eclipse.jetty</groupId>
@@ -527,15 +544,8 @@
                 <artifactId>arquillian-bom</artifactId>
                 <version>${arquillian.version}</version>
                 <type>pom</type>
-                <scope>test</scope>
+                <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>org.jboss.arquillian</groupId>
-                <artifactId>arquillian-build</artifactId>
-                <version>${arquillian.version}</version>
-                <type>pom</type>
-                <scope>test</scope>
-			</dependency>
 
             <dependency>
                 <groupId>org.jboss.arquillian.graphene</groupId>
@@ -544,7 +554,6 @@
                 <type>pom</type>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.jboss.arquillian.extension</groupId>
                 <artifactId>arquillian-drone-bom</artifactId>
