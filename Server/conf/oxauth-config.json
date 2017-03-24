@@ -217,6 +217,7 @@
     "pairwiseCalculationKey":"${config.oxauth.pairwiseCalculationKey}",
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
     "webKeysStorage": "keystore",
+    "oxElevenTestModeToken": "${config.oxeleven.testModeToken}",
     "dnName": "CN=oxAuth CA Certificates",
     "keyStoreFile": "./conf/keystore.jks",
     "keyStoreSecret": "secret",
