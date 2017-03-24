@@ -19,7 +19,7 @@ public interface UpdateUserType extends BaseExternalType {
 
 	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
 	
-	public boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean newUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
 	
 	public boolean addUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
 	
