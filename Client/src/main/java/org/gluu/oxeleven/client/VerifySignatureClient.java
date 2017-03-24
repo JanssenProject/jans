@@ -11,16 +11,19 @@ import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
 
-import static org.gluu.oxeleven.model.VerifySignatureRequestParam.*;
-
 /**
  * @author Javier Rojas Blum
- * @version April 18, 2016
+ * @version March 20, 2017
  */
 public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, VerifySignatureResponse> {
 
     public VerifySignatureClient(String url) {
         super(url);
+    }
+
+    @Override
+    public String getHttpMethod() {
+        return HttpMethod.POST;
     }
 
     @Override
@@ -56,6 +59,9 @@ public class VerifySignatureClient extends BaseClient<VerifySignatureRequest, Ve
         clientRequest = new ClientRequest(url);
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
+        if (!Strings.isNullOrEmpty(getRequest().getAccessToken())) {
+            clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
+        }
 
         if (getRequest().getVerifySignatureRequestParam() != null) {
             clientRequest.body(getRequest().getMediaType(), getRequest().getVerifySignatureRequestParam());

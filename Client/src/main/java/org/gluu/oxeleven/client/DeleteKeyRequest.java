@@ -6,12 +6,18 @@
 
 package org.gluu.oxeleven.client;
 
+import com.google.common.base.Strings;
+import org.gluu.oxeleven.model.DeleteKeyRequestParam;
+import org.gluu.oxeleven.util.StringUtils;
+
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * @author Javier Rojas Blum
- * @version April 12, 2016
+ * @version March 20, 2017
  */
 public class DeleteKeyRequest extends BaseRequest {
 
@@ -29,5 +35,21 @@ public class DeleteKeyRequest extends BaseRequest {
 
     public void setAlias(String alias) {
         this.alias = alias;
+    }
+
+    @Override
+    public String getQueryString() {
+        StringBuilder queryStringBuilder = new StringBuilder();
+
+        try {
+            if (!Strings.isNullOrEmpty(alias)) {
+                queryStringBuilder.append(DeleteKeyRequestParam.KEY_ID)
+                        .append("=").append(URLEncoder.encode(alias, StringUtils.UTF8_STRING_ENCODING));
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return queryStringBuilder.toString();
     }
 }

@@ -16,6 +16,7 @@ import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.gluu.oxeleven.util.Base64Util;
+import org.gluu.oxeleven.util.StringUtils;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -34,7 +35,7 @@ import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version October 5, 2016
+ * @version March 20, 2017
  */
 @Name("generateKeyRestService")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
@@ -49,13 +50,22 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 
             if (signatureAlgorithm == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter.");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter."
+                ));
             } else if (expirationTime == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the expiration time parameter is mandatory.");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The request asked for an operation that cannot be supported because the expiration time parameter is mandatory."
+                ));
             } else if (signatureAlgorithm == SignatureAlgorithm.NONE || signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.HMAC)) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The provided signature algorithm parameter is not supported");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The provided signature algorithm parameter is not supported."
+                ));
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();

@@ -15,6 +15,7 @@ import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
+import org.gluu.oxeleven.util.StringUtils;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -30,7 +31,7 @@ import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
 
 /**
  * @author Javier Rojas Blum
- * @version May 20, 2016
+ * @version March 20, 2017
  */
 @Name("signRestService")
 public class SignRestServiceImpl implements SignRestService {
@@ -45,20 +46,32 @@ public class SignRestServiceImpl implements SignRestService {
 
             if (Strings.isNullOrEmpty(signRequestParam.getSigningInput())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the signingInput parameter is mandatory.");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The request asked for an operation that cannot be supported because the signingInput parameter is mandatory."
+                ));
             } else if (signatureAlgorithm == null) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter.");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The request asked for an operation that cannot be supported because the server does not support the provided signatureAlgorithm parameter."
+                ));
             } else if (signatureAlgorithm != SignatureAlgorithm.NONE
                     && SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())
                     && Strings.isNullOrEmpty(signRequestParam.getSharedSecret())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the shared secret parameter is mandatory.");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The request asked for an operation that cannot be supported because the shared secret parameter is mandatory."
+                ));
             } else if (signatureAlgorithm != SignatureAlgorithm.NONE
                     && !SignatureAlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()) // EC or RSA
                     && Strings.isNullOrEmpty(signRequestParam.getAlias())) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the alias parameter is mandatory.");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The request asked for an operation that cannot be supported because the alias parameter is mandatory."
+                ));
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();
@@ -75,7 +88,10 @@ public class SignRestServiceImpl implements SignRestService {
             }
         } catch (InvalidKeyException e) {
             builder = Response.status(Response.Status.BAD_REQUEST);
-            builder.entity("Invalid key, either the alias or signatureAlgorithm parameter is not valid.");
+            builder.entity(StringUtils.getErrorResponse(
+                    "invalid_request",
+                    "Invalid key, either the alias or signatureAlgorithm parameter is not valid."
+            ));
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             LOG.error(e.getMessage(), e);

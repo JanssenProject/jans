@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
 import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
+import org.gluu.oxeleven.util.StringUtils;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.log.Log;
 import org.jboss.seam.log.Logging;
@@ -29,7 +30,7 @@ import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
 
 /**
  * @author Javier Rojas Blum
- * @version May 20, 2016
+ * @version March 20, 2017
  */
 @Name("deleteKeyRestService")
 public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
@@ -42,7 +43,10 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
         try {
             if (Strings.isNullOrEmpty(alias)) {
                 builder = Response.status(Response.Status.BAD_REQUEST);
-                builder.entity("The request asked for an operation that cannot be supported because the alias parameter is mandatory.");
+                builder.entity(StringUtils.getErrorResponse(
+                        "invalid_request",
+                        "The request asked for an operation that cannot be supported because the alias parameter is mandatory."
+                ));
             } else {
                 Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();

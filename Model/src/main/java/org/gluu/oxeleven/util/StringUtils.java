@@ -1,15 +1,38 @@
+/*
+ * oxEleven is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2016, Gluu
+ */
+
 package org.gluu.oxeleven.util;
 
 import org.codehaus.jettison.json.JSONArray;
-
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version October 5, 2016
+ * @version March 20, 2017
  */
 public class StringUtils {
+
+    public static final String UTF8_STRING_ENCODING = "UTF-8";
+    public static final String ERROR = "error";
+    public static final String ERROR_DESCRIPTION = "error_description";
+
+    public static String getErrorResponse(String error, String errorDescription) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(ERROR, error);
+            jsonObject.put(ERROR_DESCRIPTION, errorDescription);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonObject.toString();
+    }
 
     public static List<String> toList(JSONArray jsonArray) {
         List<String> list = new ArrayList<String>();

@@ -6,6 +6,7 @@
 
 package org.gluu.oxeleven.client;
 
+import com.google.common.base.Strings;
 import org.jboss.resteasy.client.ClientRequest;
 
 import javax.ws.rs.HttpMethod;
@@ -14,12 +15,17 @@ import static org.gluu.oxeleven.model.DeleteKeyRequestParam.KEY_ID;
 
 /**
  * @author Javier Rojas Blum
- * @version April 26, 2016
+ * @version March 20, 2017
  */
 public class DeleteKeyClient extends BaseClient<DeleteKeyRequest, DeleteKeyResponse> {
 
     public DeleteKeyClient(String url) {
         super(url);
+    }
+
+    @Override
+    public String getHttpMethod() {
+        return HttpMethod.POST;
     }
 
     @Override
@@ -55,6 +61,9 @@ public class DeleteKeyClient extends BaseClient<DeleteKeyRequest, DeleteKeyRespo
         clientRequest = new ClientRequest(url);
         clientRequest.header("Content-Type", getRequest().getMediaType());
         clientRequest.setHttpMethod(getRequest().getHttpMethod());
+        if (!Strings.isNullOrEmpty(getRequest().getAccessToken())) {
+            clientRequest.header("Authorization", "Bearer " + getRequest().getAccessToken());
+        }
 
         addRequestParam(KEY_ID, getRequest().getAlias());
 
