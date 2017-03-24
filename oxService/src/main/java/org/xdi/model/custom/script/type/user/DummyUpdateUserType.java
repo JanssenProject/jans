@@ -38,7 +38,7 @@ public class DummyUpdateUserType implements UpdateUserType {
 	}
 
 	@Override
-	public boolean newUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
+	public boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
 
