@@ -63,7 +63,7 @@ public class AbstractCorsFilter implements Filter {
 		        resultFilter = (Filter) cons.newInstance();
 				break;
 			} catch (Exception ex) {
-                log.error(ex.getMessage(), ex);
+                log.trace(ex.getMessage(), ex);
 			}
 		}
 		
