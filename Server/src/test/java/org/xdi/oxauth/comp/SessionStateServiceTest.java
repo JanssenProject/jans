@@ -6,6 +6,17 @@
 
 package org.xdi.oxauth.comp;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -15,28 +26,24 @@ import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.UserService;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.testng.Assert.*;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version December 15, 2015
  */
 
 public class SessionStateServiceTest extends BaseComponentTest {
 
+	@Inject
     private SessionStateService m_service;
+
+	@Inject
     private UserService userService;
 
-    @Override
-    public void beforeClass() {
-        m_service = SessionStateService.instance();
-        userService = UserService.instance();
-    }
+	@Override
+	public void beforeClass() {
+	}
 
     @Override
     public void afterClass() {
@@ -104,4 +111,5 @@ public class SessionStateServiceTest extends BaseComponentTest {
         assertNotNull(fromLdap2.getAuthenticationTime());
         assertTrue(fromLdap2.isPermissionGrantedForClient(clientId));
     }
+
 }

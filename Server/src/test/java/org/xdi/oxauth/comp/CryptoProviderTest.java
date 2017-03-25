@@ -49,7 +49,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
     @Test
     public void configuration() {
         try {
-            AppConfiguration appConfiguration = configurationFactory.getConfiguration();
+            AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
             assertNotNull(appConfiguration);
 
             cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
@@ -63,7 +63,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyNone() {
         boolean algorithmNotSupported = false;
 
@@ -76,7 +76,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         assertTrue(algorithmNotSupported);
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyHS256() {
         boolean algorithmNotSupported = false;
 
@@ -89,7 +89,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         assertTrue(algorithmNotSupported);
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyHS384() {
         boolean algorithmNotSupported = false;
 
@@ -102,7 +102,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         assertTrue(algorithmNotSupported);
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyHS512() {
         boolean algorithmNotSupported = false;
 
@@ -115,7 +115,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         assertTrue(algorithmNotSupported);
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testSignHS256() {
         try {
             hs256Signature = cryptoProvider.sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS256);
@@ -136,7 +136,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testSignHS384() {
         try {
             hs384Signature = cryptoProvider.sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS384);
@@ -157,7 +157,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testSignHS512() {
         try {
             hs512Signature = cryptoProvider.sign(SIGNING_INPUT, null, SHARED_SECRET, SignatureAlgorithm.HS512);
@@ -178,7 +178,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyRS256() {
         try {
             JSONObject response = cryptoProvider.generateKey(SignatureAlgorithm.RS256, expirationTime);
@@ -218,7 +218,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyRS384() {
         try {
             JSONObject response = cryptoProvider.generateKey(SignatureAlgorithm.RS384, expirationTime);
@@ -258,7 +258,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyRS512() {
         try {
             JSONObject response = cryptoProvider.generateKey(SignatureAlgorithm.RS512, expirationTime);
@@ -298,7 +298,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyES256() {
         try {
             JSONObject response = cryptoProvider.generateKey(SignatureAlgorithm.ES256, expirationTime);
@@ -338,7 +338,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyES384() {
         try {
             JSONObject response = cryptoProvider.generateKey(SignatureAlgorithm.ES384, expirationTime);
@@ -378,7 +378,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
         }
     }
 
-    @Test(dependsOnMethods = {"appConfiguration"})
+    @Test(dependsOnMethods = {"configuration"})
     public void testGenerateKeyES512() {
         try {
             JSONObject response = cryptoProvider.generateKey(SignatureAlgorithm.ES512, expirationTime);
