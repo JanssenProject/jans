@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.model.ProgrammingLanguage;
@@ -37,8 +38,22 @@ public class IdGenServiceTest extends BaseComponentTest {
 
 	@Inject
 	private CustomScriptService customScriptService;
+	
+	@Inject
+	private IdGenService idGenService;
+	
+	@Inject
+	private LdapEntryManager ldapEntryManager;
 
 	private String idCustomScriptDn;
+
+	@Override
+	public void beforeClass() {
+	}
+
+	@Override
+	public void afterClass() {
+	}
 
 	private CustomScript buildIdCustomScriptEntry(String idScript) {
 		String basedInum = configurationFactory.getAppConfiguration().getOrganizationInum();
@@ -61,15 +76,15 @@ public class IdGenServiceTest extends BaseComponentTest {
 		return customScript;
 	}
 
-	@Override
-	public void beforeClass() {
-		final InputStream inputStream = InumGeneratorTest.class.getResourceAsStream("/id/gen/SampleIdGenerator.py");
+	@Test
+	public void loadCustomScript() {
+		final InputStream inputStream = IdGenServiceTest.class.getResourceAsStream("/id/gen/SampleIdGenerator.py");
 		try {
 			final String idScript = IOUtils.toString(inputStream);
 			CustomScript idCustomScript = buildIdCustomScriptEntry(idScript);
 			this.idCustomScriptDn = idCustomScript.getDn();
 
-			getLdapManager().persist(idCustomScript);
+			ldapEntryManager.persist(idCustomScript);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -77,25 +92,23 @@ public class IdGenServiceTest extends BaseComponentTest {
 		}
 	}
 
-	@Override
-	public void afterClass() {
-		CustomScript customScript = new CustomScript();
-		customScript.setDn(this.idCustomScriptDn);
-
-		getLdapManager().remove(customScript);
-	}
-
-	@Test
+	@Test(dependsOnMethods = "loadCustomScript")
 	public void testCustomIdGenerationByPythonScript() {
-		final IdGenService instance = ServerUtil.instance(IdGenService.class);
-
-		final String uuid = instance.generateId("test", "");
+		final String uuid = idGenService.generateId("test", "");
 		System.out.println("Generated Id: " + uuid);
 		Assert.assertFalse(StringUtils.isNotBlank(uuid));
 
-		final String invalidUuid = instance.generateId("", "");
+		final String invalidUuid = idGenService.generateId("", "");
 		System.out.println("Generated invalid Id: " + invalidUuid);
 		Assert.assertFalse(StringUtils.equalsIgnoreCase(invalidUuid, "invalid"));
+	}
+
+	@Test(dependsOnMethods = "testCustomIdGenerationByPythonScript")
+	public void removeCustomScript() {
+		CustomScript customScript = new CustomScript();
+		customScript.setDn(this.idCustomScriptDn);
+
+		ldapEntryManager.remove(customScript);
 	}
 
 }
