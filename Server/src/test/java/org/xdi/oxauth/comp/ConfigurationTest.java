@@ -7,6 +7,8 @@
 package org.xdi.oxauth.comp;
 
 import org.apache.commons.io.IOUtils;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+
 import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -28,6 +30,12 @@ import java.io.FileInputStream;
  */
 
 public class ConfigurationTest extends BaseComponentTestAdapter {
+	
+	@Inject
+	private ConfigurationFactory configurationFactory;
+	
+	@Inject
+	private LdapEntryManager ldapEntryManager;
 
     /*
     Configuration must be present, otherwise server will not start normally... There is fallback configuration from
@@ -35,10 +43,9 @@ public class ConfigurationTest extends BaseComponentTestAdapter {
      */
     @Test
     public void configurationPresence() {
-    	ConfigurationFactory configurationFactory = ServerUtil.instance(ConfigurationFactory.class);
         Assert.assertTrue((configurationFactory != null) && (configurationFactory.getLdapConfiguration() != null) &&
-        		(configurationFactory.getConfiguration() != null) && (configurationFactory.getErrorResponses() != null) &&
-        		(configurationFactory.getStaticConfiguration() != null) && (configurationFactory.getWebKeys() != null));
+        		(configurationFactory.getAppConfiguration() != null) && (configurationFactory.getErrorResponseFactory() != null) &&
+        		(configurationFactory.getStaticConfiguration() != null) && (configurationFactory.getWebKeysConfiguration() != null));
     }
 
     /*
@@ -64,7 +71,7 @@ public class ConfigurationTest extends BaseComponentTestAdapter {
         c.setErrors(errorsJson);
         c.setStatics(staticConfJson);
         c.setWebKeys(webKeysJson);
-        getLdapManager().persist(c);
+        ldapEntryManager.persist(c);
     }
 
     private static AppConfiguration loadConfFromFile(String p_filePath) throws JAXBException {

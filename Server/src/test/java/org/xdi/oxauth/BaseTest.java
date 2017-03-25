@@ -6,11 +6,16 @@
 
 package org.xdi.oxauth;
 
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
+import java.util.List;
+import java.util.Map.Entry;
+
+import javax.ws.rs.core.Response;
 import org.testng.Assert;
 
 /**
- * @author Javier Rojas Date: 10.10.2011
+ * @author Javier Rojas
+ * @author Yuriy Movchan
+ * Date: 10.10.2011
  */
 public abstract class BaseTest extends ConfigurableTest {
 
@@ -22,18 +27,22 @@ public abstract class BaseTest extends ConfigurableTest {
         System.out.println("#######################################################");
     }
 
-    public static void showResponse(String title,
-                                    EnhancedMockHttpServletResponse response) {
+    public static void showResponse(String title, Response response) {
         System.out.println(" ");
         System.out.println("RESPONSE FOR: " + title);
         System.out.println(response.getStatus());
-        for (Object headerName : response.getHeaderNames()) {
+        for (Entry<String, List<Object>> headers : response.getHeaders().entrySet()) {
+        	String headerName = headers.getKey();
             System.out.println(headerName + ": "
-                    + response.getHeader(headerName.toString()));
+                    + headers.getValue());
         }
-        System.out.println(response.getContentAsString().replace("\\n", "\n"));
+        
+        Object entity = response.getEntity();
+        if (entity != null) {
+        	System.out.println(entity.toString().replace("\\n", "\n"));
+        }
         System.out.println(" ");
-        System.out.println("Status message: " + response.getStatusMessage());
+        System.out.println("Status message: " + response.getStatus());
     }
 
     public static void fails(Throwable e) {
