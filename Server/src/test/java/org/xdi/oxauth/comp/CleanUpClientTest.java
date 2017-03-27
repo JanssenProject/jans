@@ -6,8 +6,12 @@
 
 package org.xdi.oxauth.comp;
 
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.Component;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -16,15 +20,15 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.util.StringHelper;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Yuriy Movchan
  * @version 0.1, 03/24/2014
  */
 
 public class CleanUpClientTest extends BaseComponentTest {
+	
+	@Inject
+	private ClientService clientService;
 
 	@Override
 	public void beforeClass() {
@@ -41,8 +45,6 @@ public class CleanUpClientTest extends BaseComponentTest {
 		List<String> usedClientsList = Arrays.asList(StringHelper.split(usedClients, ",", true, false));
 		output("Used clients: " + usedClientsList);
 
-		final ClientService clientService = (ClientService) Component.getInstance(ClientService.class);
-		
 		int clientsResultSetSize = 50;
 
 		int countResults = 0;
