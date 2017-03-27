@@ -3,157 +3,157 @@
 <suite name="oxAuthServer" parallel="false">
 
     <!-- Application Type Restriction (embedded) -->
-    <test name="Application Type Restriction (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.ApplicationTypeRestrictionEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     <test name="Application Type Restriction (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.ApplicationTypeRestrictionEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Authorization Code Flow test -->
-    <test name="Authorization Code Flow test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizationCodeFlowEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Authorization Code Flow test -->
+<!--     <test name="Authorization Code Flow test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.AuthorizationCodeFlowEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Authorize test -->
-    <test name="Authorize test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizeRestWebServiceEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Authorize test -->
+<!--     <test name="Authorize test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.AuthorizeRestWebServiceEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Authorize with Response Mode test -->
-    <test name="Authorize with Response Mode test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizeWithResponseModeEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Authorize with Response Mode test -->
+<!--     <test name="Authorize with Response Mode test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.AuthorizeWithResponseModeEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Client Authentication Filter test (embedded) -->
-    <test name="Client Authentication Filter test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientAuthenticationFilterEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Client Authentication Filter test (embedded) -->
+<!--     <test name="Client Authentication Filter test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.ClientAuthenticationFilterEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Client Info test -->
-    <test name="Client Info test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.ClientInfoRestWebServiceEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Client Info test -->
+<!--     <test name="Client Info test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.ClientInfoRestWebServiceEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- End Session test -->
-    <test name="End Session test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.EndSessionRestWebServiceEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     End Session test -->
+<!--     <test name="End Session test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.EndSessionRestWebServiceEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Grant Types Restriction -->
-    <test name="Grant Types Restriction (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Grant Types Restriction -->
+<!--     <test name="Grant Types Restriction (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- JWK test -->
-    <test name="JWK test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.JwkRestWebServiceEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     JWK test -->
+<!--     <test name="JWK test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.JwkRestWebServiceEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Key Generation test -->
-    <test name="Key Generation test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.KeyGenerationTest"/>
-        </classes>
-    </test>
+<!--     Key Generation test -->
+<!--     <test name="Key Generation test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.KeyGenerationTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- OpenID Request Object test -->
-    <test name="OpenID Request Object test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithHSAlgEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithRSAlgEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithESAlgEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     OpenID Request Object test -->
+<!--     <test name="OpenID Request Object test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithHSAlgEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithRSAlgEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithESAlgEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Register test -->
-    <test name="Register test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.RegistrationRestWebServiceEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Register test -->
+<!--     <test name="Register test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.RegistrationRestWebServiceEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Request Object Signing Alg Restriction test -->
-    <test name="Request Object Signing Alg Restriction test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.RequestObjectSigningAlgRestrictionEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Request Object Signing Alg Restriction test -->
+<!--     <test name="Request Object Signing Alg Restriction test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.RequestObjectSigningAlgRestrictionEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Response Types Restriction -->
-    <test name="Response Types Restriction (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.ResponseTypesRestrictionEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Response Types Restriction -->
+<!--     <test name="Response Types Restriction (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.ResponseTypesRestrictionEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Sector Identifier URL Verification test -->
-    <test name="Sector Identifier URL Verification (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.SectorIdentifierUrlVerificationEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Sector Identifier URL Verification test -->
+<!--     <test name="Sector Identifier URL Verification (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.SectorIdentifierUrlVerificationEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Token Endpoint Auth Method Restriction test -->
-    <test name="Token Endpoint Auth Method Restriction (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenEndpointAuthMethodRestrictionEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Token Endpoint Auth Method Restriction test -->
+<!--     <test name="Token Endpoint Auth Method Restriction (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenEndpointAuthMethodRestrictionEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Token test -->
-    <test name="Token test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithRSAlgEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithESAlgEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     Token test -->
+<!--     <test name="Token test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithRSAlgEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithESAlgEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- User Authentication Filter test (embedded) -->
-    <test name="User Authentication Filter test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.UserAuthenticationFilterEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     User Authentication Filter test (embedded) -->
+<!--     <test name="User Authentication Filter test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.UserAuthenticationFilterEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- User Info test -->
-    <test name="User Info test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.UserInfoRestWebServiceEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     User Info test -->
+<!--     <test name="User Info test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.UserInfoRestWebServiceEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Signature test -->
-    <test name="Signature test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.SignatureTest"/>
-        </classes>
-    </test>
+<!--     Signature test -->
+<!--     <test name="Signature test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.SignatureTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
-    <!-- Encryption test -->
-    <test name="Encryption test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.EncryptionTest"/>
-        </classes>
-    </test>
+<!--     Encryption test -->
+<!--     <test name="Encryption test (embedded)" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.EncryptionTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
 
     <test name="Utility methods test" enabled="true">
         <classes>
@@ -179,56 +179,62 @@
         </classes>
     </test>
 
-    <test name="UMA. Configuration test" enabled="true">
+    <test name="Crypto Provider test" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest"/>
+            <class name="org.xdi.oxauth.comp.CryptoProviderTest"/>
         </classes>
     </test>
-    <test name="UMA. Obtain AAT test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.ObtainAatWSTest"/>
-        </classes>
-    </test>
-    <test name="UMA. Obtain PAT test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.ObtainPatWSTest"/>
-        </classes>
-    </test>
-    <test name="UMA. Obtain RPT test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.ObtainRptWSTest"/>
-        </classes>
-    </test>
-    <test name="UMA. Register resource set test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.RegisterResourceSetWSTest"/>
-        </classes>
-    </test>
-    <test name="UMA. Register permission test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.RegisterPermissionWSTest"/>
-        </classes>
-    </test>
-    <test name="UMA. Workflow test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.AccessProtectedResourceFlowWSTest"/>
-        </classes>
-    </test>
-    <test name="UMA. Debug content test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.DebugContentEncodingTest"/>
-        </classes>
-    </test>
-    <test name="UMA. Scope test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest"/>
-        </classes>
-    </test>
-    <test name="ID Generation test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.IdGenRestWSEmbeddedTest"/>
-        </classes>
-    </test>
+
+<!--     <test name="UMA. Configuration test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Obtain AAT test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.ObtainAatWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Obtain PAT test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.ObtainPatWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Obtain RPT test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.ObtainRptWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Register resource set test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.RegisterResourceSetWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Register permission test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.RegisterPermissionWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Workflow test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.AccessProtectedResourceFlowWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Debug content test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.DebugContentEncodingTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="UMA. Scope test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
+<!--     <test name="ID Generation test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.IdGenRestWSEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
     <test name="Inum Generation test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.comp.InumGeneratorTest"/>
@@ -239,11 +245,11 @@
             <class name="org.xdi.oxauth.comp.IdGenServiceTest"/>
         </classes>
     </test>
-    <test name="Introspection endpoint test" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest"/>
-        </classes>
-    </test>
+<!--     <test name="Introspection endpoint test" enabled="true"> -->
+<!--         <classes> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest"/> -->
+<!--         </classes> -->
+<!--     </test> -->
     <test name="Remove unused clients test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.comp.CleanUpClientTest"/>
