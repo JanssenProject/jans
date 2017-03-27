@@ -6,16 +6,20 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 
 /**
  * Provides interface for validate token REST web services
@@ -23,7 +27,6 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum
  * @version January 27, 2016
  */
-@Path("/oxauth")
 @Api(value = "/oxauth", description = "Validation Endpoint is used to validate an Access Token.")
 public interface ValidateTokenRestWebService {
 

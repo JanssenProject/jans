@@ -61,7 +61,7 @@
 							<h:panelGroup rendered="#{not identity.loggedIn}">
 								<div class="login-panel">
 									<div class="login-panel-header">
-										<h:outputText value="#{messages['login.login']}" />
+										<h:outputText value="#{msgs['login.login']}" />
 									</div>
 									<div class="login-panel-body">
 										<ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
@@ -71,26 +71,26 @@
 										</s:div>
 
 										<p class="info">
-											<h:outputText value="#{messages['login.pleaseLoginHere']}" />
+											<h:outputText value="#{msgs['login.pleaseLoginHere']}" />
 										</p>
 
 										<div class="dialog">
 											<h:panelGrid columns="3" border="0" rowClasses="prop"
 												columnClasses="name,value,hint">
 												<h:outputLabel for="username"
-													value="#{messages['login.username']}" />
+													value="#{msgs['login.username']}" />
 												<h:inputText id="username" value="#{credentials.username}"
 													autocomplete="off" />
 												<h:outputText value="" />
 
 												<h:outputLabel for="password"
-													value="#{messages['login.password']}" />
+													value="#{msgs['login.password']}" />
 												<h:inputSecret id="password" value="#{credentials.password}"
 													autocomplete="off" />
 												<h:outputText value="" />
 
 												<h:outputLabel for="rememberMe"
-													value="#{messages['login.rememberMe']}" />
+													value="#{msgs['login.rememberMe']}" />
 												<h:selectBooleanCheckbox id="rememberMe"
 													value="#{rememberMe.enabled}" />
 												<h:outputText value="" />
@@ -99,25 +99,25 @@
 
 										<s:div rendered='#{!empty client.getPolicyUri()}'>
 											<p>
-												<h:outputText value="#{messages['common.agreePolicy']}" />
+												<h:outputText value="#{msgs['common.agreePolicy']}" />
 												<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-														value="#{messages['common.privacyPolicy']}" />
+														value="#{msgs['common.privacyPolicy']}" />
 												</a>
 											</p>
 										</s:div>
 
 										<s:div rendered='#{!empty client.getTosUri()}'>
 											<p>
-												<h:outputText value="#{messages['common.pleaseReadTheTos']}" />
+												<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
 												<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-														value="#{messages['common.termsOfService']}" />
+														value="#{msgs['common.termsOfService']}" />
 												</a>
 											</p>
 										</s:div>
 
 										<div class="actionButtons">
 											<h:commandButton id="loginButton"
-												value="#{messages['login.login']}"
+												value="#{msgs['login.login']}"
 												action="#{authenticator.authenticate}" />
 										</div>
 									</div>

@@ -10,34 +10,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.Asynchronous;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.properties.FileConfiguration;
@@ -48,13 +39,12 @@ import org.xdi.util.properties.FileConfiguration;
  * @author Yuriy Movchan
  * @version June 15, 2016
  */
-@Scope(ScopeType.APPLICATION)
-@Name("configurationFactory")
-@AutoCreate
-@Startup
+@ApplicationScoped
+@Named
 public class ConfigurationFactory {
 
-    private static final Log LOG = Logging.getLog(ConfigurationFactory.class);
+    @Inject
+    private Logger log;
 
     public final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "LDAP_CONFIGUARION_RELOAD";
     public final static String CONFIGURATION_UPDATE_EVENT = "configurationUpdateEvent";
@@ -82,9 +72,6 @@ public class ConfigurationFactory {
     private static final String LDAP_FILE_PATH = DIR + "oxauth-ldap.properties";
     public static final String LDAP_DEFAULT_FILE_PATH = DIR + "ox-ldap.properties";
 
-    @Logger
-    private Log log;
-
     private final String CONFIG_FILE_NAME = "oxauth-config.json";
     private final String ERRORS_FILE_NAME = "oxauth-errors.json";
     private final String STATIC_CONF_FILE_NAME = "oxauth-static-conf.json";
@@ -95,8 +82,9 @@ public class ConfigurationFactory {
 
     private FileConfiguration ldapConfiguration;
     private AppConfiguration conf;
-    private StaticConf staticConf;
-    private JSONWebKeySet jwks;
+    private StaticConfiguration staticConf;
+    private WebKeysConfiguration jwks;
+    private ErrorResponseFactory errorResponseFactory;
     private String cryptoConfigurationSalt;
 
     private AtomicBoolean isActive;
@@ -107,7 +95,7 @@ public class ConfigurationFactory {
     private long loadedRevision = -1;
     private boolean loadedFromLdap = true;
 
-    @Create
+    @PostConstruct
     public void init() {
         this.isActive = new AtomicBoolean(true);
         try {
@@ -117,7 +105,11 @@ public class ConfigurationFactory {
             this.configFilePath = confDir + CONFIG_FILE_NAME;
             this.errorsFilePath = confDir + ERRORS_FILE_NAME;
             this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
-            this.webKeysFilePath = getLdapConfiguration().getString("certsDir") + File.separator + WEB_KEYS_FILE_NAME;
+            String certsDir = getLdapConfiguration().getString("certsDir");
+            if (StringHelper.isEmpty(certsDir)) {
+            	certsDir = confDir;
+            }
+            this.webKeysFilePath = certsDir + File.separator + WEB_KEYS_FILE_NAME;
             this.saltFilePath = confDir + SALT_FILE_NAME;
             loadCryptoConfigurationSalt();
         } finally {
@@ -127,20 +119,22 @@ public class ConfigurationFactory {
 
     public void create() {
         if (!createFromLdap(true)) {
-            LOG.error("Failed to load configuration from LDAP. Please fix it!!!.");
+            log.error("Failed to load configuration from LDAP. Please fix it!!!.");
             throw new ConfigurationException("Failed to load configuration from LDAP.");
         } else {
-            LOG.info("Configuration loaded successfully.");
+            log.info("Configuration loaded successfully.");
         }
     }
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void initReloadTimer() {
-        final long delayBeforeFirstRun = 30 * 1000L;
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(delayBeforeFirstRun, DEFAULT_INTERVAL * 1000L));
-    }
+    // TODO: CDI: Fix
+//    @Observer("org.jboss.seam.postInitialization")
+//    public void initReloadTimer() {
+//        final long delayBeforeFirstRun = 30 * 1000L;
+//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(delayBeforeFirstRun, DEFAULT_INTERVAL * 1000L));
+//    }
 
-    @Observer(EVENT_TYPE)
+    // TODO: CDI: Fix
+//    @Observer(EVENT_TYPE)
     @Asynchronous
     public void reloadConfigurationTimerEvent() {
         if (this.isActive.get()) {
@@ -168,7 +162,8 @@ public class ConfigurationFactory {
             final long lastModified = ldapFile.lastModified();
             if (!StringHelper.equalsIgnoreCase(this.prevLdapFileName, ldapFileName) || (lastModified > ldapFileLastModifiedTime)) { // reload configuration only if it was modified
                 this.prevLdapFileName = loadLdapConfiguration(ldapFileName);
-                Events.instance().raiseAsynchronousEvent(LDAP_CONFIGUARION_RELOAD_EVENT_TYPE);
+                // TODO: CDI: Fix
+//                Events.instance().raiseAsynchronousEvent(LDAP_CONFIGUARION_RELOAD_EVENT_TYPE);
             }
         }
 
@@ -201,28 +196,28 @@ public class ConfigurationFactory {
         return ldapConfiguration;
     }
 
-    @Factory(value = "appConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-    public AppConfiguration getConfiguration() {
+    @Produces @ApplicationScoped
+    public AppConfiguration getAppConfiguration() {
         return conf;
     }
 
-    @Factory(value = "staticConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-    public StaticConf getStaticConfiguration() {
+    @Produces @ApplicationScoped
+    public StaticConfiguration getStaticConfiguration() {
         return staticConf;
+    }
+    
+    @Produces @ApplicationScoped
+    public WebKeysConfiguration getWebKeysConfiguration() {
+        return jwks;
+    }
+    
+    @Produces @ApplicationScoped
+    public ErrorResponseFactory getErrorResponseFactory() {
+        return errorResponseFactory;
     }
 
     public BaseDnConfiguration getBaseDn() {
         return getStaticConfiguration().getBaseDn();
-    }
-    
-    @Factory(value = "webKeysConfiguration", scope = ScopeType.APPLICATION, autoCreate = true)
-    public JSONWebKeySet getWebKeys() {
-        return jwks;
-    }
-
-    public ErrorMessages getErrorResponses() {
-        final ErrorResponseFactory f = ServerUtil.instance(ErrorResponseFactory.class);
-        return f.getMessages();
     }
 
     public String getCryptoConfigurationSalt() {
@@ -236,26 +231,26 @@ public class ConfigurationFactory {
     }
 
     private boolean reloadWebkeyFromFile() {
-        final JSONWebKeySet webKeysFromFile = loadWebKeysFromFile();
+        final WebKeysConfiguration webKeysFromFile = loadWebKeysFromFile();
         if (webKeysFromFile != null) {
-            LOG.info("Reloaded web keys from file: " + webKeysFilePath);
+            log.info("Reloaded web keys from file: " + webKeysFilePath);
             jwks = webKeysFromFile;
             return true;
         } else {
-            LOG.error("Failed to load web keys configuration from file: " + webKeysFilePath);
+            log.error("Failed to load web keys configuration from file: " + webKeysFilePath);
         }
 
         return false;
     }
 
     private boolean reloadStaticConfFromFile() {
-        final StaticConf staticConfFromFile = loadStaticConfFromFile();
+        final StaticConfiguration staticConfFromFile = loadStaticConfFromFile();
         if (staticConfFromFile != null) {
-            LOG.info("Reloaded static conf from file: " + staticConfFilePath);
+            log.info("Reloaded static conf from file: " + staticConfFilePath);
             staticConf = staticConfFromFile;
             return true;
         } else {
-            LOG.error("Failed to load static configuration from file: " + staticConfFilePath);
+            log.error("Failed to load static configuration from file: " + staticConfFilePath);
         }
 
         return false;
@@ -264,12 +259,11 @@ public class ConfigurationFactory {
     private boolean reloadErrorsFromFile() {
         final ErrorMessages errorsFromFile = loadErrorsFromFile();
         if (errorsFromFile != null) {
-            LOG.info("Reloaded errors from file: " + errorsFilePath);
-            final ErrorResponseFactory f = ServerUtil.instance(ErrorResponseFactory.class);
-            f.setMessages(errorsFromFile);
+            log.info("Reloaded errors from file: " + errorsFilePath);
+            errorResponseFactory = new ErrorResponseFactory(errorsFromFile);
             return true;
         } else {
-            LOG.error("Failed to load errors from file: " + errorsFilePath);
+            log.error("Failed to load errors from file: " + errorsFilePath);
         }
 
         return false;
@@ -278,38 +272,40 @@ public class ConfigurationFactory {
     private boolean reloadConfFromFile() {
         final AppConfiguration configFromFile = loadConfFromFile();
         if (configFromFile != null) {
-            LOG.info("Reloaded configuration from file: " + configFilePath);
+            log.info("Reloaded configuration from file: " + configFilePath);
             conf = configFromFile;
             return true;
         } else {
-            LOG.error("Failed to load configuration from file: " + configFilePath);
+            log.error("Failed to load configuration from file: " + configFilePath);
         }
 
         return false;
     }
 
     private boolean createFromLdap(boolean recoverFromFiles) {
-        LOG.info("Loading configuration from LDAP...");
+        log.info("Loading configuration from LDAP...");
         try {
             final Conf c = loadConfigurationFromLdap();
             if (c != null) {
                 init(c);
 
                 // Destroy old configuration
-            	Contexts.getApplicationContext().remove("appConfiguration");
-            	Contexts.getApplicationContext().remove("staticConfiguration");
-            	Contexts.getApplicationContext().remove("webKeysConfiguration");
+                ServerUtil.destroy(AppConfiguration.class);
+                ServerUtil.destroy(StaticConfiguration.class);
+                ServerUtil.destroy(WebKeysConfiguration.class);
+                ServerUtil.destroy(ErrorResponseFactory.class);
 
-                Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT, this.conf, this.staticConf);
+                // TODO: CDI: Fix
+//                Events.instance().raiseAsynchronousEvent(CONFIGURATION_UPDATE_EVENT, this.conf, this.staticConf);
                 
                 return true;
             }
         } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         }
 
         if (recoverFromFiles) {
-            LOG.info("Unable to find configuration in LDAP, try to load configuration from file system... ");
+            log.info("Unable to find configuration in LDAP, try to load configuration from file system... ");
             if (createFromFile()) {
                 this.loadedFromLdap = false;
                 return true;
@@ -327,7 +323,7 @@ public class ConfigurationFactory {
 
             return conf;
         } catch (LdapMappingException ex) {
-            LOG.error(ex.getMessage());
+            log.error(ex.getMessage());
         }
 
         return null;
@@ -336,8 +332,8 @@ public class ConfigurationFactory {
     private void init(Conf p_conf) {
         initConfigurationFromJson(p_conf.getDynamic());
         initStaticConfigurationFromJson(p_conf.getStatics());
-        initErrorsFromJson(p_conf.getErrors());
         initWebKeysFromJson(p_conf.getWebKeys());
+        initErrorsFromJson(p_conf.getErrors());
         this.loadedRevision = p_conf.getRevision();
     }
 
@@ -351,9 +347,9 @@ public class ConfigurationFactory {
             try {
                 // Generate new JWKS
                 JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
-                        getConfiguration().getKeyRegenerationInterval(),
-                        getConfiguration().getIdTokenLifetime(),
-                        getConfiguration());
+                        getAppConfiguration().getKeyRegenerationInterval(),
+                        getAppConfiguration().getIdTokenLifetime(),
+                        getAppConfiguration());
                 newWebKeys = jsonObject.toString();
 
                 // Attempt to load new JWKS
@@ -377,7 +373,7 @@ public class ConfigurationFactory {
     }
 
     public void initJwksFromString(String p_webKeys) throws IOException, JsonParseException, JsonMappingException {
-        final JSONWebKeySet k = ServerUtil.createJsonMapper().readValue(p_webKeys, JSONWebKeySet.class);
+        final WebKeysConfiguration k = ServerUtil.createJsonMapper().readValue(p_webKeys, WebKeysConfiguration.class);
         if (k != null) {
             jwks = k;
         }
@@ -385,12 +381,12 @@ public class ConfigurationFactory {
 
     private void initStaticConfigurationFromJson(String p_statics) {
         try {
-            final StaticConf c = ServerUtil.createJsonMapper().readValue(p_statics, StaticConf.class);
+            final StaticConfiguration c = ServerUtil.createJsonMapper().readValue(p_statics, StaticConfiguration.class);
             if (c != null) {
                 staticConf = c;
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -401,7 +397,7 @@ public class ConfigurationFactory {
                 conf = c;
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -409,11 +405,10 @@ public class ConfigurationFactory {
         try {
             final ErrorMessages errorMessages = ServerUtil.createJsonMapper().readValue(p_errosAsJson, ErrorMessages.class);
             if (errorMessages != null) {
-                final ErrorResponseFactory f = ServerUtil.instance(ErrorResponseFactory.class);
-                f.setMessages(errorMessages);
+                errorResponseFactory = new ErrorResponseFactory(errorMessages);
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -428,7 +423,7 @@ public class ConfigurationFactory {
 
             return ldapFileName;
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             ldapConfiguration = null;
         }
 
@@ -448,7 +443,7 @@ public class ConfigurationFactory {
         try {
             return ServerUtil.createJsonMapper().readValue(new File(configFilePath), AppConfiguration.class);
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            log.warn(e.getMessage(), e);
         }
         return null;
     }
@@ -457,25 +452,25 @@ public class ConfigurationFactory {
         try {
             return ServerUtil.createJsonMapper().readValue(new File(errorsFilePath), ErrorMessages.class);
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            log.warn(e.getMessage(), e);
         }
         return null;
     }
 
-    private StaticConf loadStaticConfFromFile() {
+    private StaticConfiguration loadStaticConfFromFile() {
         try {
-            return ServerUtil.createJsonMapper().readValue(new File(staticConfFilePath), StaticConf.class);
+            return ServerUtil.createJsonMapper().readValue(new File(staticConfFilePath), StaticConfiguration.class);
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            log.warn(e.getMessage(), e);
         }
         return null;
     }
 
-    private JSONWebKeySet loadWebKeysFromFile() {
+    private WebKeysConfiguration loadWebKeysFromFile() {
         try {
-            return ServerUtil.createJsonMapper().readValue(new File(webKeysFilePath), JSONWebKeySet.class);
+            return ServerUtil.createJsonMapper().readValue(new File(webKeysFilePath), WebKeysConfiguration.class);
         } catch (Exception e) {
-            LOG.warn(e.getMessage(), e);
+            log.warn(e.getMessage(), e);
         }
         return null;
     }
@@ -486,7 +481,7 @@ public class ConfigurationFactory {
 
             this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
         } catch (Exception ex) {
-            LOG.error("Failed to load configuration from {0}", ex, saltFilePath);
+            log.error("Failed to load configuration from {}", ex, saltFilePath);
             throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
         }
     }
@@ -498,7 +493,7 @@ public class ConfigurationFactory {
             return fileConfiguration;
         } catch (Exception ex) {
             if (isMandatory) {
-                LOG.error("Failed to load configuration from {0}", ex, fileName);
+                log.error("Failed to load configuration from {}", ex, fileName);
                 throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
             }
         }

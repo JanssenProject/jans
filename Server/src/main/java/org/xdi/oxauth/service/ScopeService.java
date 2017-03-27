@@ -9,16 +9,13 @@ package org.xdi.oxauth.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
@@ -28,33 +25,23 @@ import com.unboundid.ldap.sdk.Filter;
  * @author Javier Rojas Blum Date: 07.05.2012
  * @author Yuriy Movchan Date: 2016/04/26
  */
-@Scope(ScopeType.STATELESS)
-@Name("scopeService")
-@AutoCreate
+@Stateless
+@Named
 public class ScopeService {
 
-    private static final String CACHE_SCOPE_NAME = "ScopeCache";
+	private static final String CACHE_SCOPE_NAME = "ScopeCache";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-	@In
+	@Inject
 	private CacheService cacheService;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
-    private StaticConf staticConfiguration;
-
-    /**
-     * Get ScopeService instance
-     *
-     * @return ScopeService instance
-     */
-    public static ScopeService instance() {
-        return (ScopeService) Component.getInstance(ScopeService.class);
-    }
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     /**
      * returns a list of all scopes
@@ -191,7 +178,7 @@ public class ScopeService {
             cacheService.put(CACHE_SCOPE_NAME, getScopeNameCacheKey(scope.getDisplayName()), scope);
             cacheService.put(CACHE_SCOPE_NAME, getScopeDnCacheKey(scope.getDn()), scope);
         } catch (Exception ex) {
-            log.error("Failed to put scope in cache, scope: '{0}'", scope, ex);
+            log.error("Failed to put scope in cache, scope: '{}'", scope, ex);
         }
     }
     private void putInCache(String claimDn, List<org.xdi.oxauth.model.common.Scope> scopes) {
@@ -203,7 +190,7 @@ public class ScopeService {
         	String key = getClaimDnCacheKey(claimDn);
             cacheService.put(CACHE_SCOPE_NAME, key, scopes);
         } catch (Exception ex) {
-            log.error("Failed to put scopes in cache, claimDn: '{0}'", claimDn, ex);
+            log.error("Failed to put scopes in cache, claimDn: '{}'", claimDn, ex);
         }
     }
 
@@ -212,7 +199,7 @@ public class ScopeService {
             String key = getScopeDnCacheKey(dn);
             return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
-            log.error("Failed to get scope from cache, scopeDn: '{0}'", dn, ex);
+            log.error("Failed to get scope from cache, scopeDn: '{}'", dn, ex);
             return null;
         }
     }
@@ -222,7 +209,7 @@ public class ScopeService {
             String key = getScopeNameCacheKey(name);
             return (org.xdi.oxauth.model.common.Scope) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
-            log.error("Failed to get scope from cache, name: '{0}'", name, ex);
+            log.error("Failed to get scope from cache, name: '{}'", name, ex);
             return null;
         }
     }
@@ -232,7 +219,7 @@ public class ScopeService {
         	String key = getClaimDnCacheKey(claimDn);
             return (List<org.xdi.oxauth.model.common.Scope>) cacheService.get(CACHE_SCOPE_NAME, key);
         } catch (Exception ex) {
-            log.error("Failed to get scopes from cache, claimDn: '{0}'", claimDn, ex);
+            log.error("Failed to get scopes from cache, claimDn: '{}'", claimDn, ex);
             return null;
         }
     }
