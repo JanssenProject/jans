@@ -45,13 +45,13 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['oneidlogin.title']}</ui:define>
 
     <ui:define name="body">
         <h:form id="loginForm">
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">OneID Login</div>
+                    <div class="login-panel-header">#{msgs['oneidlogin.oneIDLogin']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
 
@@ -59,13 +59,13 @@
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </s:div>
 
-                        <p class="info">Please login here</p>
+                        <p class="info">#{msgs['oneidlogin.pleaseLoginHere']}</p>
 
                         <h:outputText value="#{oneid_login_button}" escape="false"/>
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['oneidlogin.termsPrivacy']}</a>
                             </p>
                         </s:div>
                     </div>
