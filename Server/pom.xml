@@ -49,45 +49,7 @@
 			</testResource>
 		</testResources>
 
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.17</version>
-					<configuration>
-						<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
-							-Dcatalina.base=${project.build.directory}
-							-Dgluu.base=${project.build.directory}
-						</argLine>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>2.2.2</version>
-					<configuration>
-						<tagBase>
-							file:///c:/sourcecontrol/gluu/openxdi_release/oxAuth/tags
-						</tagBase>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
@@ -127,6 +89,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -145,6 +108,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -173,21 +137,20 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>findbugs-maven-plugin</artifactId>
+  					<configuration>
+					<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
+						-Dcatalina.base=${project.build.directory}
+						-Dgluu.base=${project.build.directory}
+					</argLine>
+				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
 					<archive>
 						<manifest>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
@@ -227,11 +190,6 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-			</plugin>
-
 			<!-- Build number plugin -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -265,7 +223,7 @@
 					<scanIntervalSeconds>3</scanIntervalSeconds>
 				</configuration>
 			</plugin>
-			<plugin>
+      <plugin>
 				<artifactId>exec-maven-plugin</artifactId>
 				<groupId>org.codehaus.mojo</groupId>
 				<executions>
@@ -287,18 +245,6 @@
 		</plugins>
 	</build>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.jboss.arquillian</groupId>
-				<artifactId>arquillian-bom</artifactId>
-				<version>${version.arquillian_core}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<dependencies>
 		<!-- Gluu -->
 		<dependency>
@@ -310,18 +256,10 @@
 			<artifactId>oxauth-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxeleven-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxeleven-model</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-static</artifactId>
-			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-ldap-annotations</artifactId>
@@ -347,20 +285,19 @@
 			<artifactId>oxcore-util</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxeleven-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxeleven-model</artifactId>
+		</dependency>
+
 		<!-- Weld -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -369,21 +306,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.spec.javax.annotation</groupId>
-			<artifactId>jboss-annotations-api_1.2_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.spec.javax.ejb</groupId>
-			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
+		<!-- Pretty Faces -->
 		<dependency>
 		    <groupId>org.ocpsoft.rewrite</groupId>
 		    <artifactId>rewrite-servlet</artifactId>
@@ -397,12 +325,6 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>stringtemplate</artifactId>
-					<groupId>org.antlr</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -419,12 +341,6 @@
 		<dependency>
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-beanutils-core</artifactId>
-					<groupId>commons-beanutils</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-digester</groupId>
@@ -479,12 +395,6 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>activation</artifactId>
-					<groupId>javax.activation</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- LDAP -->
@@ -509,36 +419,6 @@
 			<artifactId>jsr305</artifactId>
 		</dependency>
 
-		<!-- Hibernate -->
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-		</dependency>
-
-		<!-- JBoss -->
-		<dependency>
-			<groupId>jboss</groupId>
-			<artifactId>jboss-common-core</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>apache-slide</groupId>
-					<artifactId>webdavlib</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>apache-httpclient</groupId>
-					<artifactId>commons-httpclient</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>apache-xerces</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jboss-common-logging-spi</artifactId>
-					<groupId>jboss</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<!-- Jython -->
 		<dependency>
 			<groupId>org.python</groupId>
@@ -558,7 +438,6 @@
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-pool</artifactId>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-pool2</artifactId>
@@ -576,54 +455,10 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxb-provider</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>activation</artifactId>
-					<groupId>javax.activation</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jaxb-api</artifactId>
-					<groupId>javax.xml.bind</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jaxb-impl</artifactId>
-					<groupId>com.sun.xml.bind</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>sjsxp</artifactId>
-					<groupId>com.sun.xml.stream</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>activation</artifactId>
-					<groupId>javax.activation</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jcip-annotations</artifactId>
-					<groupId>net.jcip</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jcl-over-slf4j</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>jsr250-api</artifactId>
-					<groupId>javax.annotation</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>scannotation</artifactId>
-					<groupId>org.scannotation</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>slf4j-simple</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -636,12 +471,6 @@
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
-		</dependency>
-
-		<!-- Documentation -->
-		<dependency>
-			<groupId>com.wordnik</groupId>
-			<artifactId>swagger-annotations</artifactId>
 		</dependency>
 
 		<!-- Other -->
@@ -668,36 +497,76 @@
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Test: Arquillian container and extensions -->
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+		  <groupId>org.jboss.arquillian.testng</groupId>
+		  <artifactId>arquillian-testng-container</artifactId>
+		  <scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.arquillian.junit</groupId>
-			<artifactId>arquillian-junit-container</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.easytesting</groupId>
-			<artifactId>fest-assert</artifactId>
-			<scope>test</scope>
+		  <groupId>org.jboss.arquillian.junit</groupId>
+		  <artifactId>arquillian-junit-container</artifactId>
+		  <scope>test</scope>
 		</dependency>
         <dependency>
-            <groupId>org.jboss.weld.se</groupId>
-            <artifactId>weld-se-core</artifactId>
-			<scope>test</scope>
-        </dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
+		  <groupId>org.jboss.arquillian.container</groupId>
+		  <artifactId>arquillian-jetty-embedded-9</artifactId>
+		  <scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina</artifactId>
-			<version>7.0.55</version>
-			<scope>provided</scope>
+			<groupId>org.jboss.arquillian.extension</groupId>
+			<artifactId>arquillian-rest-client-impl-3x</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Test: Embedded Jetty -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-deploy</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Jetty annotations needed for Servlet 3.1 support -->
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-annotations</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- Jetty plus and naming required for testing resource injections -->
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-plus</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+		<!-- Test: Shrinkwrap -->
+		<!-- Move to root xml -->
+        <dependency>
+            <groupId>org.jboss.shrinkwrap.resolver</groupId>
+            <artifactId>shrinkwrap-resolver-depchain</artifactId>
+            <scope>test</scope>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap.resolver</groupId>
+            <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap.descriptors</groupId>
+            <artifactId>shrinkwrap-descriptors-impl-javaee</artifactId>
+            <scope>test</scope>
+		</dependency>
+
+		<!-- Documentation -->
+		<dependency>
+			<groupId>com.wordnik</groupId>
+			<artifactId>swagger-annotations</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -716,10 +585,6 @@
 					<artifactId>cdi-api</artifactId>
 				</dependency>
 				<dependency>
-					<groupId>javax.inject</groupId>
-					<artifactId>javax.inject</artifactId>
-				</dependency>
-				<dependency>
 					<groupId>com.sun.faces</groupId>
 					<artifactId>jsf-api</artifactId>
 				</dependency>
@@ -727,12 +592,18 @@
 					<groupId>com.sun.faces</groupId>
 					<artifactId>jsf-impl</artifactId>
 				</dependency>
-<!--
+
 				<dependency>
-					<groupId>org.jboss.spec.javax.faces</groupId>
-					<artifactId>jboss-jsf-api_2.2_spec</artifactId>
+					<groupId>org.glassfish.web</groupId>
+					<artifactId>el-impl</artifactId>
+					<exclusions>
+						<exclusion>
+							<groupId>javax.el</groupId>
+							<artifactId>el-api</artifactId>
+						</exclusion>
+					</exclusions>
 				</dependency>
--->
+
 				<dependency>
 					<groupId>org.jboss.weld.servlet</groupId>
 					<artifactId>weld-servlet-core</artifactId>
@@ -744,20 +615,6 @@
 				<dependency>
 					<groupId>org.jboss.weld.module</groupId>
 					<artifactId>weld-jsf</artifactId>
-				</dependency>
-				<dependency>
-					<groupId>org.glassfish.web</groupId>
-					<artifactId>el-impl</artifactId>
-					<exclusions>
-						<exclusion>
-							<groupId>javax.el</groupId>
-							<artifactId>el-api</artifactId>
-						</exclusion>
-					</exclusions>
-				</dependency>
-				<dependency>
-					<groupId>org.jboss.spec.javax.annotation</groupId>
-					<artifactId>jboss-annotations-api_1.2_spec</artifactId>
 				</dependency>
 			</dependencies>
 
