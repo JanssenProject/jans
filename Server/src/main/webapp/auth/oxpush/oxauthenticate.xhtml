@@ -11,11 +11,11 @@
 
         <s:fragment rendered="#{param.oxpush_user_uid != null}">
             <script type="text/javascript">
-            //<![CDATA[
+                //<![CDATA[
                 jQuery(document).ready(function() {
                     $("#loginForm").submit();
                 });
-            //]]>
+                //]]>
             </script>
         </s:fragment>
 
@@ -52,13 +52,13 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth oxPush - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['oxpush.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">oxPush Login (Authentication request)</div>
+                    <div class="login-panel-header">#{msgs['oxpush.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
                         <s:div rendered='#{!empty client.getLogoUri()}'>
@@ -66,12 +66,12 @@
                         </s:div>
 
                         <s:div styleClass="dialog" rendered="#{param.oxpush_user_uid != null}">
-                            <p class="info">Sending authentication request...</p>
+                            <p class="info">#{msgs['oxpush.sendingAuthenticationRequest']}</p>
                         </s:div>
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['oxpush.termsPrivacy']}</a>
                             </p>
                         </s:div>
                     </div>

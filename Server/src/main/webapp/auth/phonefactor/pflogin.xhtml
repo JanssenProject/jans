@@ -10,11 +10,11 @@
         <script src="#{oxAuthConfigurationService.getJsLocation()}/jquery-ui-1.12.1.min.js"/>
 
         <script type="text/javascript">
-        //<![CDATA[
+            //<![CDATA[
             jQuery(document).ready(function() {
                 $("#loginForm").submit();
             });
-        //]]>
+            //]]>
         </script>
 
         <style type="text/css">
@@ -51,13 +51,13 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">PhoneFactor - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['phonefactor.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">PhoneFactor Login</div>
+                    <div class="login-panel-header">#{msgs['phonefactor.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
 
@@ -65,11 +65,11 @@
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </s:div>
 
-                        <p class="info">Authentication using PhoneFactor...</p>
+                        <p class="info">#{msgs['phonefactor.authenticationUsing']}</p>
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['phonefactor.termsPrivacy']}</a>
                             </p>
                         </s:div>
                     </div>

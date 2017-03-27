@@ -39,7 +39,7 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['oxpush.title']}</ui:define>
 
     <ui:define name="body">
         <table border="0" align="center">
@@ -51,7 +51,7 @@
 
                             <h:panelGroup rendered="#{not identity.loggedIn}">
                                 <div class="login-panel">
-                                    <div class="login-panel-header">Login</div>
+                                    <div class="login-panel-header">#{msgs['oxpush.loginLabel']}</div>
                                     <div class="login-panel-body">
                                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
@@ -59,22 +59,22 @@
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
                                         </s:div>
 
-                                        <p class="info">Please login here</p>
+                                        <p class="info">#{msgs['oxpush.pleaseLoginHere']}</p>
 
                                         <div class="dialog">
                                             <h:panelGrid columns="3" border="0" rowClasses="prop"
                                                          columnClasses="name,value,hint">
-                                                <h:outputLabel for="username">Username</h:outputLabel>
+                                                <h:outputLabel for="username">#{msgs['oxpush.username']}</h:outputLabel>
                                                 <h:inputText id="username"
                                                              value="#{credentials.username}" autocomplete="off"/>
                                                 <h:outputText value=""/>
 
-                                                <h:outputLabel for="password">Password</h:outputLabel>
+                                                <h:outputLabel for="password">#{msgs['oxpush.password']}</h:outputLabel>
                                                 <h:inputSecret id="password"
                                                                value="#{credentials.password}" autocomplete="off"/>
                                                 <h:outputText value=""/>
 
-                                                <h:outputLabel for="rememberMe">Remember me</h:outputLabel>
+                                                <h:outputLabel for="rememberMe">#{msgs['oxpush.rememberMe']}</h:outputLabel>
                                                 <h:selectBooleanCheckbox id="rememberMe"
                                                                          value="#{rememberMe.enabled}"/>
                                                 <h:outputText value=""/>
@@ -82,30 +82,30 @@
                                         </div>
 
                                         <s:div>
-                                        	<h:outputText value="Before log in make sure that you installed oxPush mobile application" style="color:blue"/>
+                                            <h:outputText value="#{msgs['oxpush.beforeLogIn']}" style="color:blue"/>
                                             <h:panelGrid columns="1" border="0">
-	                                            <h:outputLink value="#{oxpush_android_download_url}" title="Android" rendered="#{oxpush_android_download_url != null}">Android mobile application</h:outputLink>
-                                        	</h:panelGrid>
+                                                <h:outputLink value="#{oxpush_android_download_url}" title="Android" rendered="#{oxpush_android_download_url != null}">#{msgs['oxpush.androidMobileApplication']}</h:outputLink>
+                                            </h:panelGrid>
                                         </s:div>
 
                                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
-                                                By proceeding, you agree with the
+                                                #{msgs['oxpush.byProceeding']}
                                                 <strong>#{client.getClientName()}</strong>
-                                                <a target="_blank" href='#{client.getPolicyUri()}'>Privacy Policy</a>
+                                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['oxpush.privacyPolicy']}</a>
                                             </p>
                                         </s:div>
 
                                         <s:div rendered='#{!empty client.getTosUri()}'>
                                             <p>
-                                                Please read the
-                                                <a target="_blank" href='#{client.getTosUri()}'>Terms of Service</a>
+                                                #{msgs['oxpush.pleaseRead']}
+                                                <a target="_blank" href='#{client.getTosUri()}'>#{msgs['oxpush.termsOfService']}</a>
                                             </p>
                                         </s:div>
 
                                         <div class="actionButtons">
                                             <h:commandButton id="loginButton"
-                                                             value="Login"
+                                                             value="#{msgs['oxpush.loginLabel']}"
                                                              action="#{authenticator.authenticate}"/>
                                         </div>
                                     </div>
