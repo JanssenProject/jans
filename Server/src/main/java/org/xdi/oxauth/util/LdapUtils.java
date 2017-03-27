@@ -9,8 +9,8 @@ package org.xdi.oxauth.util;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.unboundid.ldap.sdk.DN;
 import com.unboundid.ldap.sdk.Filter;
@@ -26,7 +26,7 @@ import com.unboundid.ldap.sdk.RDN;
 
 public class LdapUtils {
 
-    private final static Log LOG = Logging.getLog(LdapUtils.class);
+    private final static Logger log = LoggerFactory.getLogger(LdapUtils.class);
 
     /**
      * Avoid initialization
@@ -79,11 +79,11 @@ public class LdapUtils {
                 }
                 sb.append(")");
                 final String filterAsString = sb.toString();
-                LOG.trace("dnList: " + p_dnList + ", ldapFilter: " + filterAsString);
+                log.trace("dnList: " + p_dnList + ", ldapFilter: " + filterAsString);
                 return Filter.create(filterAsString);
             }
         } catch (LDAPException e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }

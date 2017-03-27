@@ -9,10 +9,9 @@ package org.xdi.oxauth.service.fido.u2f;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
+import javax.ejb.Stateless;
+import javax.inject.Named;
+
 import org.xdi.net.InetAddressUtility;
 import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
 
@@ -21,10 +20,8 @@ import org.xdi.oxauth.exception.fido.u2f.BadConfigurationException;
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-// @Scope(ScopeType.STATELESS)
-@Scope(ScopeType.APPLICATION)
-@Name("applicationService")
-@AutoCreate
+@Stateless
+@Named
 public class ApplicationService {
 
 	private boolean validateApplication = true;

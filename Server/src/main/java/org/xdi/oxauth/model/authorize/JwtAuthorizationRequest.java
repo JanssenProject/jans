@@ -6,7 +6,12 @@
 
 package org.xdi.oxauth.model.authorize;
 
-import com.google.common.base.Strings;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -14,7 +19,6 @@ import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.Display;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
@@ -31,13 +35,11 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.security.PrivateKey;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum
@@ -100,7 +102,8 @@ public class JwtAuthorizationRequest {
                         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
                         jweDecrypter = new JweDecrypterImpl(privateKey);
                     } else {
-                        jweDecrypter = new JweDecrypterImpl(client.getClientSecret().getBytes(Util.UTF8_STRING_ENCODING));
+                        ClientService clientService = ServerUtil.bean(ClientService.class); 
+                        jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING));
                     }
                     jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
                     jweDecrypter.setBlockEncryptionAlgorithm(blockEncryptionAlgorithm);
@@ -318,7 +321,8 @@ public class JwtAuthorizationRequest {
     }
 
     private boolean validateSignature(SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
-        String sharedSecret = client.getClientSecret();
+        ClientService clientService = ServerUtil.bean(ClientService.class); 
+        String sharedSecret = clientService.decryptSecret(client.getClientSecret());
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :
                 new JSONObject(client.getJwks());

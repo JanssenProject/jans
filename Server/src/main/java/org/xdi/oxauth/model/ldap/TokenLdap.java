@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.ldap;
 
+import java.util.Date;
+
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-
-import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy

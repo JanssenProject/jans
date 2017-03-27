@@ -8,14 +8,11 @@ package org.xdi.oxauth.service;
 
 import java.util.Properties;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.util.ServerUtil;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.PropertiesDecrypter;
 import org.xdi.util.security.StringEncrypter;
@@ -26,15 +23,14 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  *
  * @author Yuriy Movchan Date: 09/23/2014
  */
-@Scope(ScopeType.STATELESS)
-@Name("encryptionService")
-@AutoCreate
+@Stateless
+@Named
 public class EncryptionService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private StringEncrypter stringEncrypter;
 
     public String decrypt(String encryptedString) throws EncryptionException {
@@ -56,9 +52,5 @@ public class EncryptionService {
 	public Properties decryptProperties(Properties connectionProperties) {
 		return PropertiesDecrypter.decryptProperties(stringEncrypter, connectionProperties);
 	}
-
-    public static EncryptionService instance() {
-        return ServerUtil.instance(EncryptionService.class);
-    }
 
 }

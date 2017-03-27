@@ -6,19 +6,27 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.inject.Inject;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.configuration.BaseFilter;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author Yuriy Movchan
@@ -28,6 +36,16 @@ import java.util.regex.Pattern;
  */
 
 public abstract class BaseAuthFilterService {
+	
+	@Inject
+	protected Logger log;
+
+    public static final Pattern PARAM_VALUE_PATTERN = Pattern.compile("([\\w]+)[\\s]*\\=[\\*\\s]*(\\{[\\s]*[\\d]+[\\s]*\\})[\\*\\s]*");
+
+    private boolean enabled;
+    private boolean filterAttributes = true;
+
+    private List<AuthenticationFilterWithParameters> filterWithParameters;
 
     public static class AuthenticationFilterWithParameters {
 
@@ -103,15 +121,6 @@ public abstract class BaseAuthFilterService {
         }
     }
 
-    public static final Pattern PARAM_VALUE_PATTERN = Pattern.compile("([\\w]+)[\\s]*\\=[\\*\\s]*(\\{[\\s]*[\\d]+[\\s]*\\})[\\*\\s]*");
-
-    private static final Log LOG = Logging.getLog(BaseAuthFilterService.class);
-
-    private boolean enabled;
-    private boolean filterAttributes = true;
-
-    private List<AuthenticationFilterWithParameters> filterWithParameters;
-
     public void init(List<? extends BaseFilter> p_filterList, boolean p_enabled, boolean p_filterAttributes) {
         this.enabled = p_enabled;
         this.filterWithParameters = prepareAuthenticationFilterWithParameters(p_filterList);
@@ -127,7 +136,7 @@ public abstract class BaseAuthFilterService {
 
         for (BaseFilter authenticationFilter : p_filterList) {
             if (Boolean.TRUE.equals(authenticationFilter.getBind()) && StringHelper.isEmpty(authenticationFilter.getBindPasswordAttribute())) {
-                LOG.error("Skipping authentication filter:\n '{0}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilter);
+                log.error("Skipping authentication filter:\n '{}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilter);
                 continue;
             }
 
@@ -146,7 +155,7 @@ public abstract class BaseAuthFilterService {
             AuthenticationFilterWithParameters tmpAutheticationFilterWithParameter = new AuthenticationFilterWithParameters(authenticationFilter, variableNames, indexedParameters);
             tmpAuthenticationFilterWithParameters.add(tmpAutheticationFilterWithParameter);
 
-            LOG.debug("Authentication filter with parameters: '{0}'. ", tmpAutheticationFilterWithParameter);
+            log.debug("Authentication filter with parameters: '{}'. ", tmpAutheticationFilterWithParameter);
         }
 
         return tmpAuthenticationFilterWithParameters;
@@ -206,21 +215,21 @@ public abstract class BaseAuthFilterService {
         return filter;
     }
 
-    public static String loadEntryDN(LdapEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
+    public String loadEntryDN(LdapEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
         Filter ldapFilter;
         try {
             ldapFilter = Filter.create(filter);
         } catch (LDAPException ex) {
-            LOG.error("Failed to create Ldap filter: '{0}'", ex, filter);
+            log.error("Failed to create Ldap filter: '{}'", ex, filter);
             return null;
         }
 
         List<LdapDummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), LdapDummyEntry.class, new String[0], ldapFilter);
 
         if (foundEntries.size() > 1) {
-            LOG.error("Found more than one entry by filter: '{0}'. Entries:\n", ldapFilter, foundEntries);
+            log.error("Found more than one entry by filter: '{}'. Entries:\n", ldapFilter, foundEntries);
             return null;
         }
 

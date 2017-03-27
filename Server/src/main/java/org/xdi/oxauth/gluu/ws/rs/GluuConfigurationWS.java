@@ -6,17 +6,21 @@
 
 package org.xdi.oxauth.gluu.ws.rs;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.Scope;
@@ -29,31 +33,36 @@ import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.*;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * Created by eugeniuparvan on 8/5/16.
  */
-@Name("gluuMetaDataConfigurationRestWebService")
-@Path("/oxauth/gluu-configuration")
+@Path("/.well-known/gluu-configuration")
 @Api(value = "/.well-known/gluu-configuration", description = "Endpoint for non-standard OpenID Connect discovery configuration data in a JSON [RFC4627] document that resides in at /.well-known/gluu-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the Gluu server.")
 public class GluuConfigurationWS {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
+    private ScopeService scopeService;    
+
+    @Inject
+    private AttributeService attributeService;    
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
     @GET
@@ -72,7 +81,7 @@ public class GluuConfigurationWS {
             // convert manually to avoid possible conflicts between resteasy
             // providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(conf);
-            log.trace("Gluu configuration: {0}", entity);
+            log.trace("Gluu configuration: {}", entity);
 
             return Response.ok(entity).build();
         } catch (Throwable ex) {
@@ -105,8 +114,6 @@ public class GluuConfigurationWS {
     private Map<String, Set<String>> createScopeToClaimsMapping() {
         Map<String, Set<String>> result = new HashMap<String, Set<String>>();
         try {
-            final AttributeService attributeService = AttributeService.instance();
-            final ScopeService scopeService = ScopeService.instance();
             for (Scope scope : scopeService.getAllScopesList()) {
                 final Set<String> claimsList = new HashSet<String>();
                 result.put(scope.getDisplayName(), claimsList);

@@ -6,26 +6,25 @@
 
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import java.util.Date;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 
-import java.util.Date;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.util.StaticUtils;
 
 /**
  * Holds resource set permission tokens and permissions
@@ -34,20 +33,20 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 11/02/2013
  */
-@Scope(ScopeType.APPLICATION)
-@AutoCreate
-@Name("resourceSetPermissionManager")
+@Stateless
+@Named
 public class ResourceSetPermissionManager extends AbstractResourceSetPermissionManager {
 
     private static final String ORGUNIT_OF_RESOURCE_SET_PERMISSION = "uma_resource_set_permission";
 
-    private static final Log LOG = Logging.getLog(ResourceSetPermissionManager.class);
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
-    private StaticConf staticConfiguration;
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     public static String getDn(String clientDn, String ticket) {
         return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));
@@ -64,7 +63,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
             resourceSetPermission.setDn(getDn(clientDn, resourceSetPermission.getTicket()));
             ldapEntryManager.persist(resourceSetPermission);
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
     }
 
@@ -78,7 +77,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 return entries.get(0);
             }
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }
@@ -100,7 +99,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 return entries.get(0);
             }
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return null;
     }
@@ -113,7 +112,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 ldapEntryManager.remove(permission);
             }
         } catch (Exception e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
     }
 
@@ -131,7 +130,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                     try {
                         ldapEntryManager.remove(p);
                     } catch (Exception e) {
-                        LOG.error("Failed to remove entry", e);
+                        log.error("Failed to remove entry", e);
                     }
                 }
             }
@@ -140,7 +139,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
                 try {
                     return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
                 }catch (LDAPException e) {
-                    LOG.trace(e.getMessage(), e);
+                    log.trace(e.getMessage(), e);
                     return Filter.createPresenceFilter("oxAuthExpiration");
                 }
             }

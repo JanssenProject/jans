@@ -10,14 +10,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.config.CustomAuthenticationConfiguration;
@@ -31,9 +29,8 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 08.27.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("ldapCustomAuthenticationConfigurationService")
-@AutoCreate
+@Stateless
+@Named
 public class LdapCustomAuthenticationConfigurationService implements Serializable {
 
 	private static final long serialVersionUID = -2225890597520443390L;
@@ -42,10 +39,10 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 	private static final String CUSTOM_AUTHENTICATION_PROPERTY_PREFIX = "property.";
 	private static final String CUSTOM_AUTHENTICATION_SCRIPT_USAGE_TYPE = "usage.";
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private ApplianceService applianceService;
 
 	public List<CustomAuthenticationConfiguration> getCustomAuthenticationConfigurations() {
@@ -67,7 +64,7 @@ public class LdapCustomAuthenticationConfigurationService implements Serializabl
 					customAuthenticationConfigurations.add(customAuthenticationConfiguration);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{0}'", ex, configurationJson);
+				log.error("Failed to create object by json: '{}'", ex, configurationJson);
 			}
 		}
 

@@ -6,62 +6,66 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.MemcachedGrant;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
 
-import java.util.*;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.util.StaticUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @version November 11, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("grantService")
-@AutoCreate
+@Stateless
+@Named
 public class GrantService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
-    @In
-    private StaticConf staticConfiguration;
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
-    }
-
-    public static GrantService instance() {
-        return ServerUtil.instance(GrantService.class);
     }
 
     public String buildDn(String p_uniqueIdentifier, String p_grantId, String p_clientId) {
@@ -360,7 +364,4 @@ public class GrantService {
         }
     }
 
-    public CacheService getCacheService() {
-        return cacheService;
-    }
 }

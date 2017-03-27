@@ -1,0 +1,45 @@
+<pretty-config xmlns="http://ocpsoft.org/schema/rewrite-config-prettyfaces" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://ocpsoft.org/schema/rewrite-config-prettyfaces
+                      http://ocpsoft.org/xml/ns/prettyfaces/rewrite-config-prettyfaces.xsd">
+
+	<url-mapping id="login">
+		<pattern value="/login" />
+		<view-id value="/login.htm" />
+	</url-mapping>
+
+	<url-mapping id="authorize">
+		<pattern value="/authorize" />
+		<view-id value="/authorize.htm" />
+	</url-mapping>
+
+	<url-mapping id="logout">
+		<pattern value="/logout" />
+		<view-id value="/logout.htm" />
+	</url-mapping>
+
+	<url-mapping id="postlogin">
+		<pattern value="/postlogin" />
+		<view-id value="/postlogin.htm" />
+	</url-mapping>
+
+	<url-mapping id="opiframe">
+		<pattern value="/opiframe" />
+		<view-id value="/opiframe.htm" />
+	</url-mapping>
+
+	<url-mapping id="error">
+		<pattern value="/error" />
+		<view-id value="/error.htm" />
+	</url-mapping>
+
+	<url-mapping id="error_service">
+		<pattern value="/error_service" />
+		<view-id value="/error_service.htm" />
+	</url-mapping>
+
+	<url-mapping id="cert-login">
+		<pattern value="/cert-login" />
+		<view-id value="/cert-login.htm" />
+	</url-mapping>
+
+</pretty-config>

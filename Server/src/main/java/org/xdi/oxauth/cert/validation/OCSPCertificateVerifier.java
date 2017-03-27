@@ -6,20 +6,6 @@
 
 package org.xdi.oxauth.cert.validation;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.x509.*;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cert.ocsp.*;
-import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.OperatorCreationException;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -32,6 +18,38 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.x509.AccessDescription;
+import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.ocsp.BasicOCSPResp;
+import org.bouncycastle.cert.ocsp.CertificateID;
+import org.bouncycastle.cert.ocsp.CertificateStatus;
+import org.bouncycastle.cert.ocsp.OCSPException;
+import org.bouncycastle.cert.ocsp.OCSPReq;
+import org.bouncycastle.cert.ocsp.OCSPReqBuilder;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.OCSPRespBuilder;
+import org.bouncycastle.cert.ocsp.RevokedStatus;
+import org.bouncycastle.cert.ocsp.SingleResp;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
+
 /**
  * Certificate verifier based on OCSP
  * 
@@ -40,7 +58,7 @@ import java.util.List;
  */
 public class OCSPCertificateVerifier implements CertificateVerifier {
 
-	private static final Logger log = Logger.getLogger(OCSPCertificateVerifier.class);
+	private static final Logger log = LoggerFactory.getLogger(OCSPCertificateVerifier.class);
 
 	public OCSPCertificateVerifier() {
 		SecurityProviderUtility.installBCProvider(true);

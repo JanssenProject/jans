@@ -6,20 +6,42 @@
 
 package org.xdi.oxauth.userinfo.ws.rs;
 
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.*;
+import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.DefaultScope;
+import org.xdi.oxauth.model.common.Scope;
+import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
@@ -44,6 +66,7 @@ import org.xdi.oxauth.model.userinfo.UserInfoParamsValidator;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.UserService;
@@ -52,57 +75,50 @@ import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.security.StringEncrypter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.util.*;
-
 /**
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
  * @version August 17, 2016
  */
-@Name("requestUserInfoRestWebService")
+@Path("/oxauth")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
 
-    @In
+    @Inject
+    private ClientService clientService;
+
+    @Inject
     private ScopeService scopeService;
 
-    @In
+    @Inject
     private AttributeService attributeService;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
 
-    @In
+    @Inject
     private PairwiseIdentifierService pairwiseIdentifierService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
-    private JSONWebKeySet webKeysConfiguration;
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
@@ -118,7 +134,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         if (authorization != null && !authorization.isEmpty() && authorization.startsWith("Bearer ")) {
             accessToken = authorization.substring(7);
         }
-        log.debug("Attempting to request User Info, Access token = {0}, Is Secure = {1}",
+        log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}",
                 accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
@@ -152,7 +168,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     try {
                         currentUser = userService.getUserByDn(authorizationGrant.getUserDn());
                     } catch (EntryPersistenceException ex) {
-                        log.warn("Failed to reload user entry: '{0}'", authorizationGrant.getUserDn());
+                        log.warn("Failed to reload user entry: '{}'", authorizationGrant.getUserDn());
                     }
 
                     if (authorizationGrant.getClient() != null
@@ -311,7 +327,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Signature
-        String sharedSecret = authorizationGrant.getClient().getClientSecret();
+        String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
         String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
         jwt.setEncodedSignature(signature);
 
@@ -437,7 +453,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
             try {
-                byte[] sharedSymmetricKey = authorizationGrant.getClient().getClientSecret().getBytes(Util.UTF8_STRING_ENCODING);
+                byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING);
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
                 jwe = jweEncrypter.encrypt(jwe);
             } catch (UnsupportedEncodingException e) {
