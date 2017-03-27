@@ -6,10 +6,10 @@
 
 package org.xdi.oxauth.service.uma;
 
+import java.util.Date;
+
 import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-
-import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy

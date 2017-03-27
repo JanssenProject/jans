@@ -25,7 +25,6 @@ import com.wordnik.swagger.annotations.Api;
  *
  * @author Javier Rojas Blum Date: 07.19.2012
  */
-@Path("/oxauth")
 @Api(value = "/oxauth", description = "The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.")
 public interface ClientInfoRestWebService {
 

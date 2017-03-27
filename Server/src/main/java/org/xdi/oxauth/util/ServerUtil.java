@@ -6,6 +6,26 @@
 
 package org.xdi.oxauth.util;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.spi.CDI;
+import javax.enterprise.util.AnnotationLiteral;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.CacheControl;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -14,9 +34,8 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
@@ -26,27 +45,15 @@ import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 import org.xdi.util.Util;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9, 26/12/2012
  */
 
 public class ServerUtil {
 
-    private final static Log LOG = Logging.getLog(ServerUtil.class);
+    private final static Logger log = LoggerFactory.getLogger(ServerUtil.class);
 
     private ServerUtil() {
     }
@@ -55,7 +62,7 @@ public class ServerUtil {
         try {
             return asJson(p_object);
         } catch (IOException e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
             return "";
         }
     }
@@ -104,16 +111,52 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
-    public static <T> T instance(Class p_clazz) {
-        return (T) Component.getInstance(p_clazz);
-    }
+    public static <T> Instance<T> instance(Class<T> p_clazz) {
+		return CDI.current().select(p_clazz);
+    }    	
 
-    public static <T> T instance(String p_name) {
-        return (T) Component.getInstance(p_name);
-    }
+    public static <T> T bean(Class<T> p_clazz) {
+		return instance(p_clazz).get();
+    }    	
+
+    public static <T> void destroy(Class<T> p_clazz) {
+		Instance<T> instance = instance(p_clazz);
+		if (instance.isResolvable()) {
+			instance.destroy(instance.get());
+		}
+    }    	
+
+    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
+    	class NamedAnnotation extends AnnotationLiteral<Named> implements Named {
+			private static final long serialVersionUID = 5873127661481517380L;
+
+			private final String value;
+
+    	     public NamedAnnotation(final String value) {
+    	         this.value = value;
+    	     }
+
+    	     public String value() {
+    	        return value;
+    	    }
+    	}
+
+		return CDI.current().select(p_clazz, new NamedAnnotation(name));
+    }    	
+
+    public static <T> T bean(Class<T> p_clazz, String name) {
+		return instance(p_clazz, name).get();
+    }    	
+
+    public static <T> void destroy(Class<T> p_clazz, String name) {
+		Instance<T> instance = instance(p_clazz, name);
+		if (instance.isResolvable()) {
+			instance.destroy(instance.get());
+		}
+    }    	
 
     public static LdapEntryManager getLdapManager() {
-        return instance(AppInitializer.LDAP_ENTRY_MANAGER_NAME);
+        return bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }
 
     public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {
@@ -140,7 +183,7 @@ public class ServerUtil {
             try {
                 return URLDecoder.decode(p_str, Util.UTF8);
             } catch (UnsupportedEncodingException e) {
-                LOG.trace(e.getMessage(), e);
+                log.trace(e.getMessage(), e);
             }
         }
         return p_str;

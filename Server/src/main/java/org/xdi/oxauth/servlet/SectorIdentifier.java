@@ -1,59 +1,62 @@
 package org.xdi.oxauth.servlet;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-import org.jboss.seam.servlet.ContextualHttpServletRequest;
-import org.xdi.oxauth.service.SectorIdentifierService;
+import java.io.IOException;
+import java.io.PrintWriter;
 
+import javax.inject.Inject;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
+
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.slf4j.Logger;
+import org.xdi.oxauth.service.SectorIdentifierService;
 
 /**
  * @author Javier Rojas Blum
  * @version January 15, 2016
  */
+@WebServlet(urlPatterns = "/sectoridentifier/*")
 public class SectorIdentifier extends HttpServlet {
 
-    private final static Log LOG = Logging.getLog(OpenIdConfiguration.class);
+	private static final long serialVersionUID = -1222077047492070618L;
+
+	@Inject
+    private Logger log;
+
+    @Inject
+    private SectorIdentifierService sectorIdentifierService;
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         final HttpServletRequest httpRequest = request;
         final HttpServletResponse httpResponse = response;
 
-        new ContextualHttpServletRequest(httpRequest) {
-            @Override
-            public void process() throws IOException {
-                httpResponse.setContentType("application/json");
-                PrintWriter out = httpResponse.getWriter();
-                try {
-                    String urlPath = httpRequest.getPathInfo();
-                    String inum = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
+        httpResponse.setContentType("application/json");
+        PrintWriter out = httpResponse.getWriter();
+        try {
+            String urlPath = httpRequest.getPathInfo();
+            String inum = urlPath.substring(urlPath.lastIndexOf("/") + 1, urlPath.length());
 
-                    org.xdi.oxauth.model.ldap.SectorIdentifier sectorIdentifier = SectorIdentifierService.instance().getSectorIdentifierByInum(inum);
+            org.xdi.oxauth.model.ldap.SectorIdentifier sectorIdentifier = sectorIdentifierService.getSectorIdentifierByInum(inum);
 
-                    JSONArray jsonArray = new JSONArray();
+            JSONArray jsonArray = new JSONArray();
 
-                    for (String redirectUri : sectorIdentifier.getRedirectUris()) {
-                        jsonArray.put(redirectUri);
-                    }
-
-                    out.println(jsonArray.toString(4).replace("\\/", "/"));
-                } catch (JSONException e) {
-                    LOG.error(e.getMessage(), e);
-                } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
-                } finally {
-                    out.close();
-                }
+            for (String redirectUri : sectorIdentifier.getRedirectUris()) {
+                jsonArray.put(redirectUri);
             }
-        }.run();
+
+            out.println(jsonArray.toString(4).replace("\\/", "/"));
+        } catch (JSONException e) {
+            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            out.close();
+        }
     }
 
     /**

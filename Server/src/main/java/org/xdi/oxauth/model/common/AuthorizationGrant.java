@@ -6,8 +6,18 @@
 
 package org.xdi.oxauth.model.common;
 
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.exception.InvalidJweException;
@@ -18,13 +28,10 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.token.IdTokenFactory;
 import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.service.GrantService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
+import org.xdi.service.CacheService;
 import org.xdi.util.security.StringEncrypter;
-
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Base class for all the types of authorization grant.
@@ -32,22 +39,39 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @version November 11, 2016
  */
+@Stateless
+@Named
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
-    private static final Logger LOGGER = Logger.getLogger(AuthorizationGrant.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthorizationGrant.class);
 
-    private final GrantService grantService = GrantService.instance();
+    @Inject
+    private CacheService cacheService;
+
+	private GrantService grantService;
+
+	private IdTokenFactory idTokenFactory;
+
     private boolean isCachedWithNoPersistence = false;
 
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
                               Date authenticationTime, AppConfiguration appConfiguration) {
         super(user, authorizationGrantType, client, authenticationTime, appConfiguration);
     }
+    
+    @Inject
+    public void init(GrantService grantService, IdTokenFactory idTokenFactory) {
+    	
+    	// TODO: CDI review
+    	this.grantService = grantService;
+    	this.idTokenFactory = idTokenFactory;
+    }
 
-    public static IdToken createIdToken(
+    public IdToken createIdToken(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes, boolean includeIdTokenClaims) throws Exception {
-        JsonWebResponse jwr = IdTokenFactory.createJwr(
+    	idTokenFactory = ServerUtil.bean(IdTokenFactory.class);
+        JsonWebResponse jwr = idTokenFactory.createJwr(
                 grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         return new IdToken(jwr.toString(),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
@@ -66,7 +90,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
         if (isCachedWithNoPersistence) {
             if (getAuthorizationGrantType() == AuthorizationGrantType.AUTHORIZATION_CODE) {
                 MemcachedGrant memcachedGrant = new MemcachedGrant(this);
-                grantService.getCacheService().put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+                cacheService = ServerUtil.bean(CacheService.class);
+                cacheService.put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
             } else {
                 throw new UnsupportedOperationException("Grant caching is not supported for : " + getAuthorizationGrantType());
             }
@@ -78,6 +103,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     private void saveImpl() {
         String grantId = getGrantId();
         if (grantId != null && StringUtils.isNotBlank(grantId)) {
+        	grantService = ServerUtil.bean(GrantService.class);
             final List<TokenLdap> grants = grantService.getGrantsByGrantId(grantId);
             if (grants != null && !grants.isEmpty()) {
                 final String nonce = getNonce();
@@ -95,7 +121,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
                         t.setJwtRequest(jwtRequest.getEncodedJwt());
                     }
-                    LOGGER.debug("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
+                    log.debug("Saving grant: " + grantId + ", code_challenge: " + getCodeChallenge());
                     grantService.mergeSilently(t);
                 }
             }
@@ -111,7 +137,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
             return accessToken;
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -125,7 +151,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
             return accessToken;
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -139,7 +165,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
             return refreshToken;
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -166,7 +192,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
             save(); // asynchronous save
             return idToken;
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -212,6 +238,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public TokenLdap asTokenLdap(AbstractToken p_token) {
+    	grantService = ServerUtil.bean(GrantService.class);
 
         final String id = GrantService.generateGrantId();
 

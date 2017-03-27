@@ -6,13 +6,18 @@
 
 package org.xdi.oxauth.service.uma.authorization;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
@@ -22,35 +27,26 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.uma.ScopeService;
-import org.xdi.oxauth.util.ServerUtil;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 22/02/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("umaAuthorizationService")
-@AutoCreate
+@Stateless
+@Named("umaAuthorizationService")
 public class AuthorizationService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private ScopeService umaScopeService;
 
-    @In
+    @Inject
     private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
-        log.trace("Check policies for permission, id: '{0}'", permission.getDn());
+        log.trace("Check policies for permission, id: '{}'", permission.getDn());
         List<ScopeDescription> scopes = umaScopeService.getScopesByDns(permission.getScopeDns());
         return allowToAddPermission(grant, rpt, scopes, permission, httpRequest, claims);
     }
@@ -62,7 +58,7 @@ public class AuthorizationService {
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<ScopeDescription> scopes,
                                         ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
-        log.trace("Check policies for scopes: '{0}'", scopes);
+        log.trace("Check policies for scopes: '{}'", scopes);
 
         Set<String> authorizationPolicies = getAuthorizationPolicies(scopes);
 
@@ -75,7 +71,7 @@ public class AuthorizationService {
             for (String authorizationPolicy : authorizationPolicies) {
                 // if at least one policy returns false then whole result is false
                 if (!applyPolicy(authorizationPolicy, context)) {
-                    log.trace("Reject access. Policy dn: '{0}'", authorizationPolicy);
+                    log.trace("Reject access. Policy dn: '{}'", authorizationPolicy);
                     return false;
                 }
             }
@@ -99,12 +95,12 @@ public class AuthorizationService {
     }
 
     private boolean applyPolicy(String authorizationPolicyDn, AuthorizationContext authorizationContext) {
-        log.trace("Apply policy dn: '{0}' ...", authorizationPolicyDn);
+        log.trace("Apply policy dn: '{}' ...", authorizationPolicyDn);
 
         final CustomScriptConfiguration customScriptConfiguration = externalUmaAuthorizationPolicyService.getAuthorizationPolicyByDn(authorizationPolicyDn);
         if (customScriptConfiguration != null) {
             final boolean result = externalUmaAuthorizationPolicyService.executeExternalAuthorizeMethod(customScriptConfiguration, authorizationContext);
-            log.trace("Policy '{0}' result: {1}", authorizationPolicyDn, result);
+            log.trace("Policy '{}' result: {}", authorizationPolicyDn, result);
 
             // if false check whether "need_info" objects are set, if yes then throw WebApplicationException directly here
             if (!result) {
@@ -117,7 +113,7 @@ public class AuthorizationService {
             }
             return result;
         } else {
-            log.error("Unable to load custom script dn: '{0}'", authorizationPolicyDn);
+            log.error("Unable to load custom script dn: '{}'", authorizationPolicyDn);
         }
 
         return false;
@@ -128,7 +124,4 @@ public class AuthorizationService {
                 .entity(entity).build());
     }
 
-    public static AuthorizationService instance() {
-        return ServerUtil.instance(AuthorizationService.class);
-    }
 }

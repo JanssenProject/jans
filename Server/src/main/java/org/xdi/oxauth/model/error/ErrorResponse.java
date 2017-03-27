@@ -11,8 +11,8 @@ import java.net.URLEncoder;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for error responses.
@@ -22,7 +22,7 @@ import org.jboss.seam.log.Logging;
  */
 public abstract class ErrorResponse {
 
-    private final static Log LOG = Logging.getLog(ErrorResponse.class);
+    private final static Logger log = LoggerFactory.getLogger(ErrorResponse.class);
 
 	private String errorDescription;
 	private String errorUri;
@@ -113,7 +113,7 @@ public abstract class ErrorResponse {
 				queryStringBuilder.append("&state=").append(getState());
 			}
 		} catch (UnsupportedEncodingException e) {
-			LOG.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return null;
 		}
 
@@ -144,7 +144,7 @@ public abstract class ErrorResponse {
 			}
 
 		} catch (JSONException e) {
-			LOG.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return null;
 		}
 

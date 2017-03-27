@@ -6,34 +6,39 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * @author Javier Rojas Blum
  * @version November 30, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("clientAuthorizationsService")
-@AutoCreate
+@Stateless
+@Named
 public class ClientAuthorizationsService {
 
-    @Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private UserService userService;
 
     public void addBranch(final String userInum) {
@@ -65,9 +70,9 @@ public class ClientAuthorizationsService {
         if (entries != null && !entries.isEmpty()) {
             // if more then one entry then it's problem, non-deterministic behavior, id must be unique
             if (entries.size() > 1) {
-                log.error("Found more then one client authorization entry by client Id: {0}" + clientId);
+                log.error("Found more then one client authorization entry by client Id: {}" + clientId);
                 for (ClientAuthorizations entry : entries) {
-                    log.error(entry);
+                    log.error(entry.toString());
                 }
             }
             return entries.get(0);
@@ -111,7 +116,4 @@ public class ClientAuthorizationsService {
         return String.format("ou=clientAuthorizations,%s", userBaseDn); // "ou=clientAuthorizations,inum=1234,ou=people,o=@!1111,o=gluu"
     }
 
-    public static ClientAuthorizationsService instance() {
-        return (ClientAuthorizationsService) Component.getInstance(ClientAuthorizationsService.class);
-    }
 }

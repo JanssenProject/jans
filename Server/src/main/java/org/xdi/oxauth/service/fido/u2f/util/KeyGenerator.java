@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.service.fido.u2f.util;
 
+import java.util.Date;
+import java.util.UUID;
+
 import org.codehaus.jettison.json.JSONObject;
 import org.python.icu.util.Calendar;
 import org.xdi.oxauth.model.crypto.Certificate;
@@ -16,9 +19,6 @@ import org.xdi.oxauth.model.crypto.signature.ECDSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
-
-import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author Yuriy Movchan

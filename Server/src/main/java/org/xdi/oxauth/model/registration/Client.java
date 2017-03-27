@@ -6,23 +6,22 @@
 
 package org.xdi.oxauth.model.registration;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.codehaus.jettison.json.JSONArray;
-import org.gluu.site.ldap.persistence.annotation.*;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.exception.InvalidClaimException;
-import org.xdi.oxauth.service.EncryptionService;
-import org.xdi.oxauth.service.ScopeService;
-import org.xdi.oxauth.util.LdapUtils;
-import org.xdi.util.security.StringEncrypter;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang.ArrayUtils;
+import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
+import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
+import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
+import org.gluu.site.ldap.persistence.annotation.LdapDN;
+import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.util.LdapUtils;
 
 /**
  * @author Javier Rojas Blum
@@ -262,8 +261,8 @@ public class Client implements Serializable {
      *
      * @return The client secret.
      */
-    public String getClientSecret() throws StringEncrypter.EncryptionException {
-        return EncryptionService.instance().decrypt(encodedClientSecret);
+    public String getClientSecret() {
+        return encodedClientSecret;
     }
 
     /**
@@ -271,8 +270,8 @@ public class Client implements Serializable {
      *
      * @param clientSecret The client secret.
      */
-    public void setClientSecret(String clientSecret) throws StringEncrypter.EncryptionException {
-        encodedClientSecret = EncryptionService.instance().encrypt(clientSecret);
+    public void setClientSecret(String clientSecret) {
+        encodedClientSecret = clientSecret;
     }
 
     /**
@@ -1042,58 +1041,4 @@ public class Client implements Serializable {
         return !ArrayUtils.isEmpty(userGroups);
     }
 
-    public Object getAttribute(String clientAttribute) throws InvalidClaimException {
-        Object attribute = null;
-
-        ScopeService scopeService = ScopeService.instance();
-
-        if (clientAttribute != null) {
-            if (clientAttribute.equals("displayName")) {
-                attribute = clientName;
-            } else if (clientAttribute.equals("inum")) {
-                attribute = clientId;
-            } else if (clientAttribute.equals("oxAuthAppType")) {
-                attribute = applicationType;
-            } else if (clientAttribute.equals("oxAuthIdTokenSignedResponseAlg")) {
-                attribute = idTokenSignedResponseAlg;
-            } else if (clientAttribute.equals("oxAuthRedirectURI") && redirectUris != null) {
-                JSONArray array = new JSONArray();
-                for (String redirectUri : redirectUris) {
-                    array.put(redirectUri);
-                }
-                attribute = array;
-            } else if (clientAttribute.equals("oxAuthScope") && scopes != null) {
-                JSONArray array = new JSONArray();
-                for (String scopeDN : scopes) {
-                    Scope s = scopeService.getScopeByDn(scopeDN);
-                    if (s != null) {
-                        String scopeName = s.getDisplayName();
-                        array.put(scopeName);
-                    }
-                }
-                attribute = array;
-            } else {
-                for (CustomAttribute customAttribute : customAttributes) {
-                    if (customAttribute.getName().equals(clientAttribute)) {
-                        List<String> values = customAttribute.getValues();
-                        if (values != null) {
-                            if (values.size() == 1) {
-                                attribute = values.get(0);
-                            } else {
-                                JSONArray array = new JSONArray();
-                                for (String v : values) {
-                                    array.put(v);
-                                }
-                                attribute = array;
-                            }
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        return attribute;
-    }
 }

@@ -6,23 +6,34 @@
 
 package org.xdi.oxauth.model.token;
 
-import com.google.common.collect.Lists;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.*;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
+import org.xdi.oxauth.model.common.AccessToken;
+import org.xdi.oxauth.model.common.AuthorizationCode;
+import org.xdi.oxauth.model.common.IAuthorizationGrant;
+import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
@@ -43,6 +54,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.PairwiseIdentifierService;
 import org.xdi.oxauth.service.ScopeService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
@@ -50,9 +62,7 @@ import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.util.*;
+import com.google.common.collect.Lists;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -66,34 +76,33 @@ import java.util.*;
  * @author Yuriy Movchan
  * @version December 20, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("idTokenFactory")
-@AutoCreate
+@Stateless
+@Named
 public class IdTokenFactory {
 
-    @In
+    @Inject
     private ExternalDynamicScopeService externalDynamicScopeService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
+    private ClientService clientService;
+
+    @Inject
     private ScopeService scopeService;
 
-    @In
+    @Inject
     private AttributeService attributeService;
 
-    @In
-    private ConfigurationFactory configurationFactory;
-
-    @In
+    @Inject
     private PairwiseIdentifierService pairwiseIdentifierService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
-    private JSONWebKeySet webKeysConfiguration;
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
 
     public Jwt generateSignedIdToken(IAuthorizationGrant authorizationGrant, String nonce,
                                      AuthorizationCode authorizationCode, AccessToken accessToken,
@@ -443,7 +452,7 @@ public class IdTokenFactory {
         } else if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A128KW
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.A256KW) {
             try {
-                byte[] sharedSymmetricKey = authorizationGrant.getClient().getClientSecret().getBytes(Util.UTF8_STRING_ENCODING);
+                byte[] sharedSymmetricKey = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING);
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyEncryptionAlgorithm, blockEncryptionAlgorithm, sharedSymmetricKey);
                 jwe = jweEncrypter.encrypt(jwe);
             } catch (UnsupportedEncodingException e) {
@@ -458,28 +467,17 @@ public class IdTokenFactory {
         return jwe;
     }
 
-    /**
-     * Get IdTokenFactory instance
-     *
-     * @return IdTokenFactory instance
-     */
-    public static IdTokenFactory instance() {
-        return (IdTokenFactory) Component.getInstance(IdTokenFactory.class);
-    }
-
-    public static JsonWebResponse createJwr(
+    public JsonWebResponse createJwr(
             IAuthorizationGrant grant, String nonce, AuthorizationCode authorizationCode, AccessToken accessToken,
             Set<String> scopes, boolean includeIdTokenClaims)
             throws Exception {
-        IdTokenFactory idTokenFactory = IdTokenFactory.instance();
-
         final Client grantClient = grant.getClient();
         if (grantClient != null && grantClient.getIdTokenEncryptedResponseAlg() != null
                 && grantClient.getIdTokenEncryptedResponseEnc() != null) {
-            return idTokenFactory.generateEncryptedIdToken(
+            return generateEncryptedIdToken(
                     grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         } else {
-            return idTokenFactory.generateSignedIdToken(
+            return generateSignedIdToken(
                     grant, nonce, authorizationCode, accessToken, scopes, includeIdTokenClaims);
         }
     }

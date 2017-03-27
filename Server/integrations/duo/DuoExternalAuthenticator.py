@@ -195,7 +195,7 @@ class PersonAuthentication(PersonAuthenticationType):
         member_of_list = user.getAttributeValues(attribute)
         if (member_of_list != None):
             for member_of in member_of_list:
-                if StringHelper.equalsIgnoreCase(group, member_of) or member_of.endsWith(group):
+                if StringHelper.equalsIgnoreCase(group, member_of) or member_of.endswith(group):
                     is_member = True
                     break
 
