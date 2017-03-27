@@ -888,57 +888,6 @@
 				</dependency>
 			</dependencies>
 		</profile>
-
-		<profile>
-			<id>arq-tomcat-7-embedded</id>
-			<activation>
-				<property>
-					<name>maven.test.skip</name>
-					<value>false</value>
-				</property>
-			</activation>
-
-			<build>
-				<testResources>
-					<testResource>
-						<directory>src/test/resources</directory>
-					</testResource>
-					<testResource>
-						<directory>src/test/resources-tomcat-7-embedded</directory>
-					</testResource>
-				</testResources>
-			</build>
-
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.arquillian.container</groupId>
-					<artifactId>arquillian-tomcat-embedded-7</artifactId>
-					<version>1.0.0.CR7</version>
-					<scope>test</scope>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-core</artifactId>
-					<version>7.0.69</version>
-					<scope>provided</scope>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-jasper</artifactId>
-					<version>7.0.69</version>
-					<scope>provided</scope>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-logging-juli</artifactId>
-					<version>7.0.69</version>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
 	</profiles>
 
 </project>
