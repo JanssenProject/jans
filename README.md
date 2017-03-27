@@ -10,6 +10,7 @@ Java web application providing REST API's for a PKCS #11 interface.
 - **Method:** POST
 - **Media Type:** application/x-www-form-urlencoded
 - **Data Params**
+    - accessToken [string]
     - signatureAlgorithm [string]
     - expirationTime [long]
 
@@ -17,6 +18,7 @@ Java web application providing REST API's for a PKCS #11 interface.
 
 ```java
 GenerateKeyRequest request = new GenerateKeyRequest();
+request.setAccessToken(accessToken);
 request.setSignatureAlgorithm(SignatureAlgorithm.RS256);
 request.setExpirationTime(expirationTime);
 
@@ -37,6 +39,7 @@ POST /oxeleven/rest/oxeleven/generateKey HTTP/1.1
 Host: ce.gluu.info:8443
 Cache-Control: no-cache
 Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 signatureAlgorithm=RS256&expirationTime=1462916947752
 ```
@@ -57,6 +60,7 @@ signatureAlgorithm=RS256&expirationTime=1462916947752
 
 ```java
 GenerateKeyRequest request = new GenerateKeyRequest();
+request.setAccessToken(accessToken);
 request.setSignatureAlgorithm(SignatureAlgorithm.ES256);
 request.setExpirationTime(expirationTime);
 
@@ -77,6 +81,7 @@ POST /oxeleven/rest/oxeleven/generateKey HTTP/1.1
 Host: ce.gluu.info:8443
 Cache-Control: no-cache
 Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 signatureAlgorithm=ES256&expirationTime=1462916947752
 ```
@@ -100,6 +105,7 @@ signatureAlgorithm=ES256&expirationTime=1462916947752
 - **Method:** POST
 - **Media Type:** application/json
 - **Data Params**
+    - accessToken [string]
 ```javascript
 {
     "signingInput": [string], 
@@ -113,6 +119,7 @@ signatureAlgorithm=ES256&expirationTime=1462916947752
 
 ```java
 SignRequest request = new SignRequest();
+request.setAccessToken(accessToken);
 request.getSignRequestParam().setSigningInput(signingInput);
 request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.HS256);
 request.getSignRequestParam().setSharedSecret(sharedSecret);
@@ -133,6 +140,7 @@ POST /oxeleven/rest/oxeleven/sign HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "Signing Input",
@@ -153,6 +161,7 @@ Cache-Control: no-cache
 
 ```java
 SignRequest request = new SignRequest();
+request.setAccessToken(accessToken);
 request.getSignRequestParam().setSigningInput(signingInput);
 request.getSignRequestParam().setAlias(rs256Alias);
 request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.RS256);
@@ -173,6 +182,7 @@ POST /oxeleven/rest/oxeleven/sign HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "Signing Input",
@@ -193,6 +203,7 @@ Cache-Control: no-cache
 
 ```java
 SignRequest request = new SignRequest();
+request.setAccessToken(accessToken);
 request.getSignRequestParam().setSigningInput(signingInput);
 request.getSignRequestParam().setAlias(es256Alias);
 request.getSignRequestParam().setSignatureAlgorithm(SignatureAlgorithm.ES256);
@@ -213,6 +224,7 @@ POST /oxeleven/rest/oxeleven/sign HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "Signing Input",
@@ -235,6 +247,7 @@ Cache-Control: no-cache
 - **Method:** POST
 - **Media Type:** application/json
 - **Data Params**
+    - accessToken [string]
 ```javascript
 {
     "signingInput": [string],
@@ -262,6 +275,7 @@ Cache-Control: no-cache
 
 ```java
 VerifySignatureRequest request = new VerifySignatureRequest();
+request.setAccessToken(accessToken);
 request.getVerifySignatureRequestParam().setSigningInput(signingInput);
 request.getVerifySignatureRequestParam().setSignature(noneSignature);
 request.getVerifySignatureRequestParam().setSignatureAlgorithm(SignatureAlgorithm.NONE);
@@ -281,6 +295,7 @@ POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "Signing Input",
@@ -301,6 +316,7 @@ Cache-Control: no-cache
 
 ```java
 VerifySignatureRequest request = new VerifySignatureRequest();
+request.setAccessToken(accessToken);
 request.getVerifySignatureRequestParam().setSigningInput(signingInput);
 request.getVerifySignatureRequestParam().setSignature(hs256Signature);
 request.getVerifySignatureRequestParam().setSharedSecret(sharedSecret);
@@ -321,6 +337,7 @@ POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "Signing Input",
@@ -349,6 +366,7 @@ keyRequestParam.setE("AQAB");
 jwksRequestParam.setKeyRequestParams(Arrays.asList(keyRequestParam));
         
 VerifySignatureRequest request = new VerifySignatureRequest();
+request.setAccessToken(accessToken);
 request.getVerifySignatureRequestParam().setSigningInput(signingInput);
 request.getVerifySignatureRequestParam().setSignature(signature);
 request.getVerifySignatureRequestParam().setAlias(alias);
@@ -370,6 +388,7 @@ POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6IlJTMjU2U0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCEzN0JBLkExRjEiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCEzN0JBLkExRjEiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6Ijc0NWY0N2RmLTY3ZDQtNDBlOC05MzhlLTVlMmI5OWQ5ZTQ3YSIsImV4cCI6MTQ2MTAzMDE5MSwiaWF0IjoxNDYxMDI5ODkxfQ",
@@ -401,6 +420,7 @@ Cache-Control: no-cache
 
 ```java
 VerifySignatureRequest request = new VerifySignatureRequest();
+request.setAccessToken(accessToken);
 request.getVerifySignatureRequestParam().setSigningInput(signingInput);
 request.getVerifySignatureRequestParam().setSignature(rs256Signature);
 request.getVerifySignatureRequestParam().setAlias(rs256Alias);
@@ -421,6 +441,7 @@ POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "Signing Input",
@@ -450,6 +471,7 @@ keyRequestParam.setY("AJ3IvktOcoICgdFPAvBM44glxcqoHzqyEmj60eATGf5e");
 jwksRequestParam.setKeyRequestParams(Arrays.asList(keyRequestParam));
 
 VerifySignatureRequest request = new VerifySignatureRequest();
+request.setAccessToken(accessToken);
 request.getVerifySignatureRequestParam().setSigningInput(signingInput);
 request.getVerifySignatureRequestParam().setSignature(signature);
 request.getVerifySignatureRequestParam().setAlias(alias);
@@ -471,6 +493,7 @@ POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiIsImtpZCI6IkVTMjU2U0lHIn0.eyJpc3MiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJzdWIiOiJAITkwQ0MuMkUzOC43NzRDLjYxMEIhMDAwMSFGRDNCLkIwQTAhMDAwOCE3OUIzLjY3MzYiLCJhdWQiOiJodHRwczovL2NlLmdsdXUuaW5mbzo4NDQzL3NlYW0vcmVzb3VyY2UvcmVzdHYxL294YXV0aC90b2tlbiIsImp0aSI6IjQ0ZjU0NmU0LWRmMmMtNDE5Ny1iNTNjLTIzNzhmY2YwYmRiZSIsImV4cCI6MTQ2MTAzMjgzMiwiaWF0IjoxNDYxMDMyNTMyfQ",
@@ -503,6 +526,7 @@ Cache-Control: no-cache
 
 ```java
 VerifySignatureRequest request = new VerifySignatureRequest();
+request.setAccessToken(accessToken);
 request.getVerifySignatureRequestParam().setSigningInput(signingInput);
 request.getVerifySignatureRequestParam().setSignature(es256Signature);
 request.getVerifySignatureRequestParam().setAlias(es256Alias);
@@ -523,6 +547,7 @@ POST /oxeleven/rest/oxeleven/verifySignature HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
 Cache-Control: no-cache
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 {
     "signingInput": "Signing Input",
@@ -546,12 +571,14 @@ Cache-Control: no-cache
 - **Method:** POST
 - **Media Type:** application/x-www-form-urlencoded
 - **Data Params**
+    - accessToken [string]
     - kid [string]
 
 #### Sample Code - RS256
 
 ```java
 DeleteKeyRequest request = new DeleteKeyRequest();
+request.setAccessToken(accessToken);
 request.setAlias(rs256Alias);
 
 DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
@@ -569,6 +596,7 @@ POST /oxeleven/rest/oxeleven/deleteKey HTTP/1.1
 Host: ce.gluu.info:8443
 Cache-Control: no-cache
 Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 kid=57a6c4fd-f65e-4baa-8a5d-f34812265383
 ```
@@ -585,6 +613,7 @@ kid=57a6c4fd-f65e-4baa-8a5d-f34812265383
 
 ```java
 DeleteKeyRequest request = new DeleteKeyRequest();
+request.setAccessToken(accessToken);
 request.setAlias(es256Alias);
 
 DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
@@ -602,6 +631,7 @@ POST /oxeleven/rest/oxeleven/deleteKey HTTP/1.1
 Host: ce.gluu.info:8443
 Cache-Control: no-cache
 Content-Type: application/x-www-form-urlencoded
+Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 kid=f6ade591-4230-4114-8147-316dde969395
 ```
@@ -645,29 +675,31 @@ kid=f6ade591-4230-4114-8147-316dde969395
       "showInfo": "true"
     },
     "pkcs11Pin": "1234",
-    "dnName": "CN=oxAuth CA Certificate"
+    "dnName": "CN=oxAuth CA Certificate",
+    "testModeToken": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
   }
   ```
   
-  Attribute    | Value                                 | Description
-  ------------ | -------------                         | -------------
-  name         | name suffix of this provider instance | This string is concatenated with the prefix SunPKCS11- to produce this provider instance's name (that is, the string returned by its Provider.getName() method). For example, if the name attribute is "SoftHSM", then the provider instance's name will be "SunPKCS11-SoftHSM".
-  library      | pathname of PKCS#11 implementation    | This is the full pathname (including extension) of the PKCS#11 implementation; the format of the pathname is platform dependent. For example, /opt/foo/lib/libpkcs11.so might be the pathname of a PKCS#11 implementation on Solaris and Linux while C:\foo\mypkcs11.dll might be one on Windows.
-  slot         | slot id                               | This is the id of the slot that this provider instance is to be associated with. For example, you would use 1 for the slot with the id 1 under PKCS#11. At most one of slot or slotListIndex may be specified. If neither is specified, the default is a slotListIndex of 0.
-  showinfo     | boolean                               | Whether to print debug info during startup
-  pkcs11Pin    | Personal Identification Number        | Certain PKCS#11 operations, such as accessing private keys, require a login using a Personal Identification Number, or PIN, before the operations can proceed. The most common type of operations that require login are those that deal with keys on the token.
-  dnName       | DN of certificate issuer              | DN of certificate issuer.
+  Attribute     | Value                                 | Description
+  ------------  | -------------                         | -------------
+  name          | Name suffix of this provider instance | This string is concatenated with the prefix SunPKCS11- to produce this provider instance's name (that is, the string returned by its Provider.getName() method). For example, if the name attribute is "SoftHSM", then the provider instance's name will be "SunPKCS11-SoftHSM".
+  library       | Pathname of PKCS#11 implementation    | This is the full pathname (including extension) of the PKCS#11 implementation; the format of the pathname is platform dependent. For example, /opt/foo/lib/libpkcs11.so might be the pathname of a PKCS#11 implementation on Solaris and Linux while C:\foo\mypkcs11.dll might be one on Windows.
+  slot          | Slot ID                               | This is the id of the slot that this provider instance is to be associated with. For example, you would use 1 for the slot with the id 1 under PKCS#11. At most one of slot or slotListIndex may be specified. If neither is specified, the default is a slotListIndex of 0.
+  showinfo      | boolean                               | Whether to print debug info during startup.
+  pkcs11Pin     | Personal Identification Number        | Certain PKCS#11 operations, such as accessing private keys, require a login using a Personal Identification Number, or PIN, before the operations can proceed. The most common type of operations that require login are those that deal with keys on the token.
+  dnName        | DN of certificate issuer              | DN of certificate issuer.
+  testModeToken | Access Token                          | Token used to consume the rest services.
 
   4. Deploy oxEleven.war in Tomcat
   
 ## Test
 
-  1. Ensure oxEleven is deployed an running
+  1. Ensure oxEleven is deployed an running.
   
-  2. Edit the file Client/src/test/Resources/testng.xml to point to your oxEleven deployment
+  2. Edit the file Client/src/test/Resources/testng.xml to point to your oxEleven deployment.
   
-  3. cd Client
+  3. cd Client.
   
-  4. mvn test
+  4. mvn test.
 
 To access Gluu support, please register and open a ticket on [Gluu Support](http://support.gluu.org)
