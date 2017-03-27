@@ -6,15 +6,13 @@
 
 package org.xdi.oxauth.jwk.ws.rs;
 
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.jwk.JSONWebKeySet;
-
+import javax.inject.Inject;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 
 /**
  * Provides interface for JWK REST web services
@@ -22,23 +20,22 @@ import javax.ws.rs.core.SecurityContext;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Name("requestJwkRestWebService")
+@Path("/oxauth")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
-    private ConfigurationFactory configurationFactory;
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
 
     @Override
     public Response requestJwk(SecurityContext sec) {
-        log.debug("Attempting to request JWK, Is Secure = {0}", sec.isSecure());
+        log.debug("Attempting to request JWK, Is Secure = {}", sec.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
         try {
-            JSONWebKeySet jwks = configurationFactory.getWebKeys();
-            builder.entity(jwks.toString());
+            builder.entity(webKeysConfiguration.toString());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); // 500

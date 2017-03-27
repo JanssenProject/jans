@@ -6,18 +6,15 @@
 
 package org.xdi.oxauth.service;
 
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.log.Log;
+import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
@@ -25,32 +22,31 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
  *
  * @author Yuriy Movchan Date: 07/30/2015
  */
-@Scope(ScopeType.APPLICATION)
-@Name(MetricService.METRIC_SERVICE_COMPONENT_NAME)
-@AutoCreate
-@Startup
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named(MetricService.METRIC_SERVICE_COMPONENT_NAME)
 public class MetricService extends org.xdi.service.metric.MetricService {
 	
 	public static final String METRIC_SERVICE_COMPONENT_NAME = "metricService";
 
 	private static final long serialVersionUID = 7875838160379126796L;
 
-	@Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
-	@In
+	@Inject
     private ApplianceService applianceService;
 
-	@In
+	@Inject
 	private ConfigurationFactory configurationFactory;
 
-	@In
+	@Inject
 	private AppConfiguration appConfiguration;
 
-	@In
-    private StaticConf staticConfiguration;
+	@Inject
+    private StaticConfiguration staticConfiguration;
 
-    @Observer("org.jboss.seam.postInitialization")
+    @PostConstruct
     public void create() {
     	init(this.appConfiguration.getMetricReporterInterval());
     }

@@ -1,8 +1,8 @@
 package org.xdi.oxauth.service.uma.authorization;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import java.io.Serializable;
+
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -13,12 +13,16 @@ public class RequiredClaim implements Serializable {
 
     @JsonProperty(value = "name")
     private String name;
+
     @JsonProperty(value = "friendly_name")
     private String friendlyName;
+
     @JsonProperty(value = "claim_type")
     private String claimType;
+
     @JsonProperty(value = "claim_token_format")
     private String[] claimTokenFormat;
+
     @JsonProperty(value = "issuer")
     private String[] issuer;
 

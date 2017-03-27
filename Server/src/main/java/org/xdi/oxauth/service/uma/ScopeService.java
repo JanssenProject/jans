@@ -6,19 +6,20 @@
 
 package org.xdi.oxauth.service.uma;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -27,42 +28,36 @@ import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeType;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
-import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
  * @version 0.9, 22/04/2013
  */
-@AutoCreate
-@Scope(ScopeType.STATELESS)
-@Name("umaScopeService")
+@Stateless
+@Named("umaScopeService")
 public class ScopeService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+
+    @Inject
     private InumService inumService;
-    @In
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
-    private StaticConf staticConfiguration;
-
-    public static ScopeService instance() {
-        return ServerUtil.instance(ScopeService.class);
-    }
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     public List<ScopeDescription> getAllScopes() {
         try {
@@ -93,9 +88,9 @@ public class ScopeService {
 
                 // if more then one scope then it's problem, non-deterministic behavior, id must be unique
                 if (entries.size() > 1) {
-                    log.error("Found more then one internal uma scope by input id: {0}" + p_scopeId);
+                    log.error("Found more then one internal uma scope by input id: {}" + p_scopeId);
                     for (ScopeDescription s : entries) {
-                        log.error("Scope, Id: {0}, dn: {1}", s.getId(), s.getDn());
+                        log.error("Scope, Id: {}, dn: {}", s.getId(), s.getDn());
                     }
                 }
                 return entries.get(0);

@@ -6,29 +6,25 @@
 
 package org.xdi.oxauth.service.token;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
-import org.xdi.util.StringHelper;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.util.StringHelper;
 
 /**
  * Token specific service methods
  *
  * @author Yuriy Movchan Date: 10/03/2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("tokenService")
-@AutoCreate
+@Stateless
+@Named
 public class TokenService {
 
-//	@Logger
-//    private Log log;
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
 
 	public String getTokenFromAuthorizationParameter(String authorizationParameter) {

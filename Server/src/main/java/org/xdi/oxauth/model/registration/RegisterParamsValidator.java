@@ -14,6 +14,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -23,15 +26,8 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -46,15 +42,14 @@ import org.xdi.oxauth.util.ServerUtil;
  * @author Javier Rojas Blum
  * @version September 21, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("registerParamsValidator")
-@AutoCreate
+@Stateless
+@Named
 public class RegisterParamsValidator {
 
-	@Logger
-    private Log log;
+	@Inject
+    private Logger log;
 
-	@In
+	@Inject
     private AppConfiguration appConfiguration;
 
     //private static final String HTTP = "http";
@@ -263,13 +258,13 @@ public class RegisterParamsValidator {
             URI uri = new URI(logoutUri);
 
             if (!redirectUriHosts.contains(uri.getHost())) {
-                log.error("logout uri host is not within redirect_uris, logout_uri: {0}, redirect_uris: {1}", logoutUri, redirectUris);
+                log.error("logout uri host is not within redirect_uris, logout_uri: {}, redirect_uris: {}", logoutUri, redirectUris);
                 throwInvalidLogoutUri(errorResponseFactory);
                 return;
             }
 
             if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
-                log.error("logout uri schema is not https, logout_uri: {0}", logoutUri);
+                log.error("logout uri schema is not https, logout_uri: {}", logoutUri);
                 throwInvalidLogoutUri(errorResponseFactory);
             }
         } catch (Exception e) {

@@ -6,87 +6,51 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.GluuStatus;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.StaticConf;
-import org.xdi.oxauth.model.token.PersistentJwt;
-import org.xdi.oxauth.model.util.Util;
-import org.xdi.util.StringHelper;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.ldap.model.GluuStatus;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.token.PersistentJwt;
+import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.StringHelper;
+
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with users.
  *
  * @author Javier Rojas Blum Date: 11.30.2011
  */
-@Scope(ScopeType.STATELESS)
-@Name("userService")
-@AutoCreate
+@Stateless
+@Named
 public class UserService {
+
 
 	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
-    private AuthenticationService authenticationService;
-
-    @In
+    @Inject
     private InumService inumService;
 
-    @In
-    private StaticConf staticConfiguration;
-
-    /**
-     * Authenticate user
-     *
-     * @param userName The username
-     * @return <code>true</code> if success, otherwise <code>false</code>
-     */
-    public boolean authenticate(String userName) {
-        return authenticationService.authenticate(userName);
-    }
-
-    /**
-     * Authenticate user
-     *
-     * @param userName The username
-     * @param password The user's pasword
-     * @return <code>true</code> if success, otherwise <code>false</code>
-     */
-    public boolean authenticate(String userName, String password) {
-        return authenticationService.authenticate(userName, password);
-    }
-
-    /**
-     * Authenticate user
-     *
-     * @param keyValue The value of authentication key
-     * @param password The user's password
-     * @param primaryKey Authentication key attribute name
-     * @param localPrimaryKey Local authentication key attribute name
-     * @return <code>true</code> if success, otherwise <code>false</code>
-     */
-    @Deprecated
-    public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        return authenticationService.authenticate(keyValue, password, primaryKey, localPrimaryKey);
-    }
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     /**
      * returns User by Dn
@@ -116,7 +80,7 @@ public class UserService {
 	}
 
 	public User getUser(String userId, String... returnAttributes) {
-		log.debug("Getting user information from LDAP: userId = {0}", userId);
+		log.debug("Getting user information from LDAP: userId = {}", userId);
 
 		if (StringHelper.isEmpty(userId)) {
 			return null;
@@ -125,7 +89,7 @@ public class UserService {
 		Filter userUidFilter = Filter.createEqualityFilter("uid", userId);
 
 		List<User> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
-		log.debug("Found {0} entries for user id = {1}", entries.size(), userId);
+		log.debug("Found {} entries for user id = {}", entries.size(), userId);
 
 		if (entries.size() > 0) {
 			return entries.get(0);
@@ -203,7 +167,7 @@ public class UserService {
 
 
     public User getUserByAttribute(String attributeName, String attributeValue) {
-        log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = new User();
         user.setDn(staticConfiguration.getBaseDn().getPeople());
@@ -214,7 +178,7 @@ public class UserService {
         user.setCustomAttributes(customAttributes);
 
         List<User> entries = ldapEntryManager.findEntries(user);
-        log.debug("Found '{0}' entries", entries.size());
+        log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
             return entries.get(0);
@@ -227,13 +191,13 @@ public class UserService {
         log.debug("Getting user by sample");
 
         List<User> entries = ldapEntryManager.findEntries(user, limit, limit);
-        log.debug("Found '{0}' entries", entries.size());
+        log.debug("Found '{}' entries", entries.size());
 
         return (User) entries;
     }
 
     public User addUserAttributeByUserInum(String userInum, String attributeName, String attributeValue) {
-    	log.debug("Add user attribute by user inum  to LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+    	log.debug("Add user attribute by user inum  to LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUserByInum(userInum);
         if (user == null) {
@@ -251,7 +215,7 @@ public class UserService {
     }
     
     public User addUserAttribute(String userId, String attributeName, String attributeValue) {
-        log.debug("Add user attribute to LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+        log.debug("Add user attribute to LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUser(userId);
         if (user == null) {
@@ -292,7 +256,7 @@ public class UserService {
 	}
 
     public User removeUserAttribute(String userId, String attributeName, String attributeValue) {
-        log.debug("Remove user attribute from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+        log.debug("Remove user attribute from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUser(userId);
         if (user == null) {
@@ -320,7 +284,7 @@ public class UserService {
     }
 
     public User replaceUserAttribute(String userId, String attributeName, String oldAttributeValue, String newAttributeValue) {
-        log.debug("Replace user attribute in LDAP: attributeName = '{0}', oldAttributeValue = '{1}', newAttributeValue = '{2}'", attributeName, oldAttributeValue, newAttributeValue);
+        log.debug("Replace user attribute in LDAP: attributeName = '{}', oldAttributeValue = '{}', newAttributeValue = '{}'", attributeName, oldAttributeValue, newAttributeValue);
 
         User user = getUser(userId);
         if (user == null) {
@@ -370,7 +334,7 @@ public class UserService {
 
     // this method must be called only if app mode = MEMORY, in ldap case it's anyway persisted in ldap.
     public boolean saveLongLivedToken(String userId, PersistentJwt longLivedToken) {
-        log.debug("Saving long-lived access token: userId = {0}", userId);
+        log.debug("Saving long-lived access token: userId = {}", userId);
         boolean succeed = false;
 
         User user = getUser(userId);
@@ -444,9 +408,5 @@ public class UserService {
 	public Date decodeGeneralizedTime(String date) {
 		return ldapEntryManager.decodeGeneralizedTime(date);
 	}
-
-    public static UserService instance() {
-        return (UserService) Component.getInstance(UserService.class);
-    }
 
 }

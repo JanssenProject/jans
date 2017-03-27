@@ -8,19 +8,17 @@ package org.xdi.oxauth.idgen.ws.rs;
 
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.util.INumGenerator;
 
 import com.unboundid.ldap.sdk.DN;
@@ -34,22 +32,21 @@ import com.unboundid.ldap.sdk.RDN;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 26/06/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("inumGenerator")
-@AutoCreate
+@Stateless
+@Named("inumGenerator")
 public class InumGenerator implements IdGenerator {
 
     public static final String SEPARATOR = "!";
 
     private static final int MAX = 100;
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
-    private StaticConf staticConfiguration;
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     @Override
     public String generateId(String p_idType, String p_idPrefix) {
@@ -57,7 +54,7 @@ public class InumGenerator implements IdGenerator {
         if (idType != null) {
             return generateId(idType, p_idPrefix);
         } else {
-            log.error("Unable to identify id type: {0}", p_idType);
+            log.error("Unable to identify id type: {}", p_idType);
         }
         return "";
     }
@@ -82,7 +79,7 @@ public class InumGenerator implements IdGenerator {
 
                 inum = sb.toString();
                 if (StringUtils.isBlank(inum)) {
-                    log.error("Unable to generate inum: {0}", inum);
+                    log.error("Unable to generate inum: {}", inum);
                     break;
                 }
 
@@ -101,7 +98,7 @@ public class InumGenerator implements IdGenerator {
             log.error(e.getMessage(), e);
             inum = e.getMessage();
         }
-        log.trace("Generated inum: {0}", inum);
+        log.trace("Generated inum: {}", inum);
         return inum;
     }
 

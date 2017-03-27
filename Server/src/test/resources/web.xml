@@ -35,7 +35,7 @@
     <!-- Change to "Production" when you are ready to deploy -->
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>${javax.faces.PROJECT_STAGE}</param-value>
+        <param-value>Production</param-value>
     </context-param>
 
     <context-param>
@@ -49,7 +49,7 @@
     <!-- Change to -1 when you don't want the compiler should check for changes -->
     <context-param>
         <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
-        <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
+        <param-value>10</param-value>
     </context-param>
 
     <!-- JSF -->

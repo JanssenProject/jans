@@ -6,49 +6,42 @@
 
 package org.xdi.oxauth.service;
 
-import java.security.Provider;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Factory;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.contexts.Context;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
+import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
-import org.xdi.oxauth.service.custom.CustomScriptManagerMigrator;
-import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
@@ -65,26 +58,37 @@ import com.unboundid.ldap.sdk.ResultCode;
  * @author Yuriy Zabrovarnyy
  * @version 0.1, 24/10/2011
  */
-@Scope(ScopeType.APPLICATION)
-@Name("appInitializer")
-@Startup
+@ApplicationScoped
+@Named
 public class AppInitializer {
 
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
-    public static final String DEFAULT_ACR_VALUES = "defaultAuthModeName";
+    public static final String DEFAULT_ACR_VALUES = "defaultAuthMode";
 
     public static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
 
     public static final String LDAP_ENTRY_MANAGER_NAME = "ldapEntryManager";
     public static final String LDAP_AUTH_ENTRY_MANAGER_NAME = "ldapAuthEntryManager";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
     
-    @In
+    @Inject
     private ApplianceService applianceService;
+
+    @Inject
+    private PythonService pythonService;
+
+    @Inject
+    private CustomScriptManager customScriptManager;
+
+	@Inject
+	private ConfigurationFactory configurationFactory;
+
+	@Inject
+	private BeanManager beanManager;
     
 	private FileConfiguration ldapConfig;
 	private List<GluuLdapConfiguration> ldapAuthConfigs;
@@ -97,40 +101,31 @@ public class AppInitializer {
 
     private AtomicBoolean isActive;
 	private long lastFinishedTime;
+	private AuthenticationMode authenticationMode;
 
-	@In
-	private ConfigurationFactory configurationFactory;
-
-	@Create
+	@PostConstruct
     public void createApplicationComponents() {
     	SecurityProviderUtility.installBCProvider();
+    }
 
-    	createStringEncrypter();
-
+    public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
+				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
     	createConnectionProvider();
         configurationFactory.create();
 
-        LdapEntryManager localLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true);
+        LdapEntryManager localLdapEntryManager = ServerUtil.bean(LdapEntryManager.class, LDAP_ENTRY_MANAGER_NAME);
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
         createAuthConnectionProviders(ldapAuthConfigs);
 
         setDefaultAuthenticationMethod(localLdapEntryManager);
 
-        addSecurityProviders();
-        PythonService.instance().initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
-    }
-
-
-	@Observer("org.jboss.seam.postInitialization")
-	@Asynchronous
-    public void postInitialization() {
-		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
-		CustomScriptManager.instance().init(supportedCustomScriptTypes);
-        CustomScriptManagerMigrator.instance().migrateOldConfigurations();
+        pythonService.initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
+        customScriptManager.init(supportedCustomScriptTypes);
 	}
 
-	private void createStringEncrypter() {
+    @Produces @ApplicationScoped
+	public StringEncrypter getStringEncrypter() {
 		String encodeSalt = configurationFactory.getCryptoConfigurationSalt();
     	
     	if (StringHelper.isEmpty(encodeSalt)) {
@@ -139,73 +134,59 @@ public class AppInitializer {
     	
     	try {
     		StringEncrypter stringEncrypter = StringEncrypter.instance(encodeSalt);
-
-    		Context applicationContext = Contexts.getApplicationContext();
-			applicationContext.set("stringEncrypter", stringEncrypter);
+    		
+    		return stringEncrypter;
 		} catch (EncryptionException ex) {
     		throw new ConfigurationException("Failed to create StringEncrypter instance");
 		}
 	}
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void initReloadTimer() {
-		this.isActive = new AtomicBoolean(false);
-		this.lastFinishedTime = System.currentTimeMillis();
-
-		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
+    // TODO: CDI: Fix
+//    public void init(@Initialized(ApplicationScoped.class) ServletContext init) {
+//		this.isActive = new AtomicBoolean(false);
+//		this.lastFinishedTime = System.currentTimeMillis();
+//
+//		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
+//    }
+//
+    public void destoy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
+    	// TODO:
+    	// Close connection here
+    	// Clean up caches, etc...
     }
-
-	@Observer(EVENT_TYPE)
-	@Asynchronous
-	public void reloadConfigurationTimerEvent() {
-		if (this.isActive.get()) {
-			return;
-		}
-
-		if (!this.isActive.compareAndSet(false, true)) {
-			return;
-		}
-
-		try {
-			reloadConfiguration();
-		} catch (Throwable ex) {
-			log.error("Exception happened while reloading application configuration", ex);
-		} finally {
-			this.isActive.set(false);
-			this.lastFinishedTime = System.currentTimeMillis();
-		}
-	}
+    
+//    public void reloadConfigurationTimerEvent(@Observes @AppReloadTimer @Event<String> reloadEvent) {
+//    	documentEvent.fireAsync(event, options)
+//		if (this.isActive.get()) {
+//			return;
+//		}
+//
+//		if (!this.isActive.compareAndSet(false, true)) {
+//			return;
+//		}
+//
+//		try {
+//			reloadConfiguration();
+//		} catch (Throwable ex) {
+//			log.error("Exception happened while reloading application configuration", ex);
+//		} finally {
+//			this.isActive.set(false);
+//			this.lastFinishedTime = System.currentTimeMillis();
+//		}
+//	}
 
 	private void reloadConfiguration() {
-        LdapEntryManager localLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME, true);
+        LdapEntryManager localLdapEntryManager = ServerUtil.bean(LdapEntryManager.class, LDAP_ENTRY_MANAGER_NAME);
 		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
 		
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
-			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
-			Events.instance().raiseEvent(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
+		    // TODO: CDI: Fix
+//			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
+//			Events.instance().raiseEvent(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
 		}
 
 		setDefaultAuthenticationMethod(localLdapEntryManager);
 	}
-
-	private void addSecurityProviders() {
-        try {
-            final Provider[] providers = Security.getProviders();
-            if (providers != null) {
-                boolean hasBC = false;
-                for (Provider p : providers) {
-                    if (p.getName().equalsIgnoreCase("BC")) {
-                        hasBC = true;
-                    }
-                }
-                if (!hasBC) {
-                    Security.addProvider(new BouncyCastleProvider());
-                }
-            }
-        } catch (Exception e) {
-            log.trace(e.getMessage(), e);
-        }
-    }
 
 	/*
 	 * Utility method which can be used in custom scripts
@@ -214,19 +195,25 @@ public class AppInitializer {
     	LdapConnectionProviders ldapConnectionProviders = createAuthConnectionProviders(ldapAuthConfig);
 
     	LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(ldapConnectionProviders.getConnectionProvider(), ldapConnectionProviders.getConnectionBindProvider()));
-	    log.debug("Created custom authentication LdapEntryManager: {0}", ldapAuthEntryManager);
+	    log.debug("Created custom authentication LdapEntryManager: {}", ldapAuthEntryManager);
 	        
 		return ldapAuthEntryManager;
 	}
 
-    @Factory(value = LDAP_ENTRY_MANAGER_NAME, scope = ScopeType.APPLICATION, autoCreate = true)
-    public LdapEntryManager createLdapEntryManager() {
+    @Produces @ApplicationScoped @Named(LDAP_ENTRY_MANAGER_NAME)
+    public LdapEntryManager getLdapEntryManager() {
         LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(this.connectionProvider, this.bindConnectionProvider));
-        log.debug("Created {0}: {1}", LDAP_ENTRY_MANAGER_NAME, ldapEntryManager);
+        log.debug("Created {}: {}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager });
+
         return ldapEntryManager;
     }
 
-	@Factory(value = LDAP_AUTH_ENTRY_MANAGER_NAME, scope = ScopeType.APPLICATION, autoCreate = true)
+    @Produces @ApplicationScoped @Named(LDAP_AUTH_CONFIG_NAME)
+    public List<GluuLdapConfiguration> createLdapAuthConfigs() {
+    	return ldapAuthConfigs;
+    }
+
+    @Produces @ApplicationScoped @Named(LDAP_AUTH_ENTRY_MANAGER_NAME)
 	public List<LdapEntryManager> createLdapAuthEntryManager() {
 		List<LdapEntryManager> ldapAuthEntryManagers = new ArrayList<LdapEntryManager>();
 		if (this.ldapAuthConfigs.size() == 0) {
@@ -235,7 +222,7 @@ public class AppInitializer {
 
 		for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
 			LdapEntryManager ldapAuthEntryManager = new LdapEntryManager(new OperationsFacade(this.authConnectionProviders.get(i), this.authBindConnectionProviders.get(i)));
-	        log.debug("Created {0}#{1}: {2}", LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager);
+	        log.debug("Created {}#{}: {}", new Object[] { LDAP_AUTH_ENTRY_MANAGER_NAME, i, ldapAuthEntryManager });
 	        
 	        ldapAuthEntryManagers.add(ldapAuthEntryManager);
 		}
@@ -243,41 +230,42 @@ public class AppInitializer {
 		return ldapAuthEntryManagers;
 	}
 
-    @Observer(ConfigurationFactory.LDAP_CONFIGUARION_RELOAD_EVENT_TYPE)
-    public void recreateLdapEntryManager() {
-    	// Backup current references to objects to allow shutdown properly
-    	LdapEntryManager oldLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME);
-
-    	// Recreate components
-    	createConnectionProvider();
-
-        // Destroy old components
-    	Contexts.getApplicationContext().remove(LDAP_ENTRY_MANAGER_NAME);
-    	oldLdapEntryManager.destroy();
-
-    	log.debug("Destroyed {0}: {1}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
-    }
-
-    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
-    	// Backup current references to objects to allow shutdown properly
-    	List<LdapEntryManager> oldLdapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(LDAP_AUTH_ENTRY_MANAGER_NAME);
-
-    	// Recreate components
-        createAuthConnectionProviders(newLdapAuthConfigs);
-
-        // Destroy old components
-    	Contexts.getApplicationContext().remove(LDAP_AUTH_ENTRY_MANAGER_NAME);
-
-		for (LdapEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
-			oldLdapAuthEntryManager.destroy();
-	        log.debug("Destroyed {0}: {1}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
-		}
-    }
+    // TODO: CDI: Fix
+//    @Observer(ConfigurationFactory.LDAP_CONFIGUARION_RELOAD_EVENT_TYPE)
+//    public void recreateLdapEntryManager() {
+//    	// Backup current references to objects to allow shutdown properly
+//    	LdapEntryManager oldLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME);
+//
+//    	// Recreate components
+//    	createConnectionProvider();
+//
+//        // Destroy old components
+//    	Contexts.getApplicationContext().remove(LDAP_ENTRY_MANAGER_NAME);
+//    	oldLdapEntryManager.destroy();
+//
+//    	log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
+//    }
+//
+//    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
+//    	// Backup current references to objects to allow shutdown properly
+//    	List<LdapEntryManager> oldLdapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(LDAP_AUTH_ENTRY_MANAGER_NAME);
+//
+//    	// Recreate components
+//        createAuthConnectionProviders(newLdapAuthConfigs);
+//
+//        // Destroy old components
+//    	Contexts.getApplicationContext().remove(LDAP_AUTH_ENTRY_MANAGER_NAME);
+//
+//		for (LdapEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
+//			oldLdapAuthEntryManager.destroy();
+//	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+//		}
+//    }
 
 	private void destroyLdapConnectionService(LdapConnectionService connectionProvider) {
 		if (connectionProvider != null) {
 			connectionProvider.closeConnectionPool();
-	        log.debug("Destoryed connectionProvider: {1}", connectionProvider);
+	        log.debug("Destoryed connectionProvider: {}", connectionProvider);
         }
 	}
 
@@ -304,11 +292,14 @@ public class AppInitializer {
     	}
 
 		this.ldapAuthConfigs = newLdapAuthConfigs;
-		Contexts.getApplicationContext().set(LDAP_AUTH_CONFIG_NAME, newLdapAuthConfigs);
+
+		// TODO: CDI: Verify
+		ServerUtil.destroy(List.class, LDAP_AUTH_CONFIG_NAME);
 
 		this.authConnectionProviders = tmpAuthConnectionProviders;
     	this.authBindConnectionProviders = tmpAuthBindConnectionProviders;
     }
+    
 
     public LdapConnectionProviders createAuthConnectionProviders(GluuLdapConfiguration ldapAuthConfig) {
         Properties connectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
@@ -349,7 +340,7 @@ public class AppInitializer {
 	}
 
 	private LdapConnectionService createConnectionProvider(Properties connectionProperties) {
-		EncryptionService securityService = EncryptionService.instance();
+		EncryptionService securityService = ServerUtil.bean(EncryptionService.class);
 		LdapConnectionService connectionProvider = new LdapConnectionService(securityService.decryptProperties(connectionProperties));
 
 		return connectionProvider;
@@ -406,7 +397,7 @@ public class AppInitializer {
 					configurations.add(configuration);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{0}'", ex, configurationJson);
+				log.error("Failed to create object by json: '{}'", ex, configurationJson);
 			}
 		}
 
@@ -416,17 +407,23 @@ public class AppInitializer {
 	private void setDefaultAuthenticationMethod(LdapEntryManager localLdapEntryManager) {
 		GluuAppliance appliance = loadAppliance(localLdapEntryManager, "oxAuthenticationMode");
 
-		String authenticationMode = null;
+		authenticationMode = null;
 		if (appliance != null) {
-			authenticationMode = appliance.getAuthenticationMode();
+			this.authenticationMode = new AuthenticationMode(appliance.getAuthenticationMode());
 		}
 
-		Contexts.getApplicationContext().set(DEFAULT_ACR_VALUES, authenticationMode);
+	    // TODO: CDI: Fix
+		ServerUtil.destroy(String.class, DEFAULT_ACR_VALUES);
+	}
+	
+	@Produces @ApplicationScoped @Named(DEFAULT_ACR_VALUES)
+	public AuthenticationMode getDefaultAuthenticationMode() {
+		return authenticationMode;
 	}
 
 	private GluuAppliance loadAppliance(LdapEntryManager localLdapEntryManager, String ... ldapReturnAttributes) {
 		String baseDn = configurationFactory.getBaseDn().getAppliance();
-		String applianceInum = configurationFactory.getConfiguration().getApplianceInum();
+		String applianceInum = configurationFactory.getAppConfiguration().getApplianceInum();
 		if (StringHelper.isEmpty(baseDn) || StringHelper.isEmpty(applianceInum)) {
 			return null;
 		}
@@ -454,7 +451,7 @@ public class AppInitializer {
 				return mapLdapConfig(configuration.getConfig());
 			}
 		} catch (Exception ex) {
-			log.error("Failed to create object by oxIDPAuthConf: '{0}'", ex, configuration);
+			log.error("Failed to create object by oxIDPAuthConf: '{}'", ex, configuration);
 		}
 
 		return null;
@@ -489,14 +486,15 @@ public class AppInitializer {
 		return clazzObject;
 	}
 	
-	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT)
-	public void updateLoggingSeverity(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
+    // TODO: CDI: Fix
+//	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT)
+	public void updateLoggingSeverity(AppConfiguration appConfiguration, StaticConfiguration staticConfiguration) {
 		String loggingLevel = appConfiguration.getLoggingLevel();
 		if (StringHelper.isEmpty(loggingLevel)) {
 			return;
 		}
 
-		log.info("Setting loggers level to: '{0}'", loggingLevel);
+		log.info("Setting loggers level to: '{}'", loggingLevel);
 		
 		LoggerContext loggerContext = LoggerContext.getContext(false);
 

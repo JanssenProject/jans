@@ -6,39 +6,39 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
-
-import java.util.List;
 
 /**
  * GluuAppliance service
  *
  * @author Reda Zerrad Date: 08.10.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("applianceService")
-@AutoCreate
+@Stateless
+@Named
 public class ApplianceService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-	@In
-	private StaticConf staticConfiguration;
+	@Inject
+	private StaticConfiguration staticConfiguration;
 	/**
 	 * Add new appliance
 	 * @param appliance Appliance
@@ -123,14 +123,6 @@ public class ApplianceService {
 
 	public String getApplianceInum() {
 		return appConfiguration.getApplianceInum();
-	}
-
-	/**
-	 * Get applianceService instance
-	 * @return ApplianceService instance
-	 */
-	public static ApplianceService instance() {
-		return (ApplianceService) Component.getInstance(ApplianceService.class);
 	}
 
 }
