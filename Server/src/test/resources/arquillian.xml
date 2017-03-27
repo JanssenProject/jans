@@ -7,14 +7,14 @@
       <property name="deploymentExportPath">target/deployments</property>
     </engine>
 
-    <container qualifier="jetty" default="false">
+    <container qualifier="jetty" default="true">
         <configuration>
             <property name="bindHttpPort">9595</property>
             <property name="jettyPlus">true</property>
             <property name="configurationClasses">org.eclipse.jetty.webapp.WebInfConfiguration,org.eclipse.jetty.webapp.WebXmlConfiguration,org.eclipse.jetty.webapp.MetaInfConfiguration,org.eclipse.jetty.webapp.FragmentConfiguration,org.eclipse.jetty.plus.webapp.EnvConfiguration,org.eclipse.jetty.plus.webapp.PlusConfiguration,org.eclipse.jetty.webapp.JettyWebXmlConfiguration,org.eclipse.jetty.annotations.AnnotationConfiguration</property>
         </configuration>
     </container>
-    <container qualifier="glassfish-embedded" default="true">
+    <container qualifier="glassfish-embedded" default="false">
 		    
 		</container>   
 </arquillian>
