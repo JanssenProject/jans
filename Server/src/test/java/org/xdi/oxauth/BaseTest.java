@@ -27,7 +27,11 @@ public abstract class BaseTest extends ConfigurableTest {
         System.out.println("#######################################################");
     }
 
-    public static void showResponse(String title, Response response) {
+    public void showResponse(String title, Response response) {
+    	showResponse(title, response, null);
+    }
+
+    public static void showResponse(String title, Response response, Object entity) {
         System.out.println(" ");
         System.out.println("RESPONSE FOR: " + title);
         System.out.println(response.getStatus());
@@ -37,7 +41,6 @@ public abstract class BaseTest extends ConfigurableTest {
                     + headers.getValue());
         }
         
-        Object entity = response.getEntity();
         if (entity != null) {
         	System.out.println(entity.toString().replace("\\n", "\n"));
         }
