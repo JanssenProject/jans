@@ -185,6 +185,12 @@
         </classes>
     </test>
 
+    <test name="Gluu Configuration test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.gluu.ws.rs.GluuConfigurationWSTest"/>
+        </classes>
+    </test>
+
 <!--     <test name="UMA. Configuration test" enabled="true"> -->
 <!--         <classes> -->
 <!--             <class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest"/> -->

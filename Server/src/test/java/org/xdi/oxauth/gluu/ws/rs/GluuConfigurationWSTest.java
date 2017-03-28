@@ -5,8 +5,8 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
+import java.net.URI;
 
-import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.extension.rest.client.ArquillianResteasyResource;
-import org.slf4j.Logger;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -27,18 +27,20 @@ import org.xdi.oxauth.util.ServerUtil;
  */
 public class GluuConfigurationWSTest extends BaseTest {
 
-	@RunAsClient
+	@ArquillianResource
+    private URI url;
+ 	@RunAsClient
     @Parameters({"gluuConfigurationPath", "webTarget"})
 	@Consumes(MediaType.APPLICATION_JSON)
     @Test
-    public void getConfigurationTest(String gluuConfigurationPath, @Optional @ArquillianResteasyResource("/.well-known/gluu-configuration") final WebTarget webTarget) throws Exception {
-        Response response = webTarget./*path(gluuConfigurationPath).*/request().get();
-        BaseTest.showResponse("UMA : TConfiguration.configuration", response);
+    public void getConfigurationTest(String gluuConfigurationPath, @Optional @ArquillianResteasyResource("seam/resource") final WebTarget webTarget) throws Exception {
+        Response response = webTarget.path(gluuConfigurationPath).request().get();
+        String entity = response.readEntity(String.class);
+        BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
 
         assertEquals(response.getStatus(), 200, "Unexpected response code.");
         try {
-        	System.err.println(response.readEntity(String.class));
-        	GluuConfiguration appConfiguration = ServerUtil.createJsonMapper().readValue(response.readEntity(String.class), GluuConfiguration.class);
+        	GluuConfiguration appConfiguration = ServerUtil.createJsonMapper().readValue(entity, GluuConfiguration.class);
         	System.err.println(appConfiguration.getIdGenerationEndpoint());
             assertNotNull(appConfiguration, "Meta data configuration is null");
             assertNotNull(appConfiguration.getIdGenerationEndpoint());
