@@ -27,7 +27,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -100,9 +99,9 @@ public abstract class BaseTest {
 
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         if (StringHelper.isEmpty(propertiesFile)) {
-            //propertiesFile = "target/test-classes/testng.properties";
+            propertiesFile = "target/test-classes/testng.properties";
             //propertiesFile = "U:\\own\\project\\git\\oxAuth\\Client\\src\\test\\resources\\testng_yuriy.properties";
-            propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
+            //propertiesFile = "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
         }
 
         FileInputStream conf = new FileInputStream(propertiesFile);
@@ -237,8 +236,8 @@ public abstract class BaseTest {
     }
 
     public void startSelenium() {
-        System.setProperty("webdriver.chrome.driver", "/Users/JAVIER/tmp/chromedriver");
-        driver = new ChromeDriver();
+        //System.setProperty("webdriver.chrome.driver", "/Users/JAVIER/tmp/chromedriver");
+        //driver = new ChromeDriver();
 
         //driver = new SafariDriver();
 
@@ -246,7 +245,7 @@ public abstract class BaseTest {
 
         //driver = new InternetExplorerDriver();
 
-        //driver = new HtmlUnitDriver(true);
+        driver = new HtmlUnitDriver(true);
     }
 
     public void stopSelenium() {
@@ -297,12 +296,6 @@ public abstract class BaseTest {
         }
 
         String authorizationResponseStr = driver.getCurrentUrl();
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
 
@@ -359,12 +352,6 @@ public abstract class BaseTest {
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
         WebElement doNotAllowButton = driver.findElement(By.name(authorizeFormDoNotAllowButton));
 
         final String previousURL = driver.getCurrentUrl();
@@ -410,12 +397,6 @@ public abstract class BaseTest {
         driver.navigate().to(authorizationRequestUrl);
 
         String authorizationResponseStr = driver.getCurrentUrl();
-
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
 
