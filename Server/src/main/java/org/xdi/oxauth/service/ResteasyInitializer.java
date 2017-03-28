@@ -10,6 +10,5 @@ import javax.ws.rs.core.Application;
  * @version 0.1, 03/21/2017
  */
 @ApplicationPath("/seam/resource/restv1")
-public class ResteasyInitializer extends Application {
-	
+public class ResteasyInitializer extends Application {	
 }
