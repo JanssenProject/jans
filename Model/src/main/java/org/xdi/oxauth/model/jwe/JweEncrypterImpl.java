@@ -64,8 +64,8 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
             if (getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.RSA_OAEP
                     || getKeyEncryptionAlgorithm() == KeyEncryptionAlgorithm.RSA1_5) {
                 if (publicKey != null) {
-                    //Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm(), "BC");
-                    Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm());
+                    Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm(), "BC");
+                    //Cipher cipher = Cipher.getInstance(getKeyEncryptionAlgorithm().getAlgorithm());
 
                     cipher.init(Cipher.ENCRYPT_MODE, publicKey);
                     byte[] encryptedKey = cipher.doFinal(contentMasterKey);
@@ -108,9 +108,9 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
             throw new InvalidJweException(e);
         } catch (InvalidKeyException e) {
             throw new InvalidJweException(e);
-        } /*catch (NoSuchProviderException e) {
+        } catch (NoSuchProviderException e) {
             throw new InvalidJweException(e);
-        }*/
+        }
     }
 
     @Override
@@ -165,8 +165,8 @@ public class JweEncrypterImpl extends AbstractJweEncrypter {
                     || getBlockEncryptionAlgorithm() == BlockEncryptionAlgorithm.A256CBC_PLUS_HS512) {
                 byte[] cek = KeyDerivationFunction.generateCek(contentMasterKey, getBlockEncryptionAlgorithm());
                 IvParameterSpec parameters = new IvParameterSpec(initializationVector);
-                //Cipher cipher = Cipher.getInstance(getBlockEncryptionAlgorithm().getAlgorithm(), "BC");
-                Cipher cipher = Cipher.getInstance(getBlockEncryptionAlgorithm().getAlgorithm());
+                Cipher cipher = Cipher.getInstance(getBlockEncryptionAlgorithm().getAlgorithm(), "BC");
+                //Cipher cipher = Cipher.getInstance(getBlockEncryptionAlgorithm().getAlgorithm());
                 SecretKeySpec secretKeySpec = new SecretKeySpec(cek, "AES");
                 cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, parameters);
                 byte[] cipherText = cipher.doFinal(plainText);
