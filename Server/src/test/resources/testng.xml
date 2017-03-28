@@ -291,6 +291,9 @@
     <!--<parameter name="requestFileBasePath" value="/var/www/html/oxAuth"/>-->
     <!--<parameter name="requestFileBaseUrl" value="http://localhost/oxAuth"/>-->
 
+    <!-- Gluu -->
+    <parameter name="umaConfigurationPath" value="/restv1/.well-known/gluu-configuration"/>
+
     <!-- UMA -->
     <parameter name="umaConfigurationPath" value="/restv1/oxauth/uma-configuration"/>
     <parameter name="umaRegisterResourcePath" value="/restv1/host/rsrc/resource_set"/>
