@@ -3,6 +3,8 @@ package org.xdi.oxauth.util;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.xdi.oxauth.auth.AuthenticationFilter;
+import org.xdi.oxauth.servlet.OpenIdConfiguration;
 
 /**
  * Creates a deployment from a build Web Archive using ShrinkWrap ZipImporter
@@ -32,8 +34,6 @@ public class Deployments {
 //	            .addClass(ResteasyInitializer.class)
 //	            .addPackage(GluuConfigurationWS.class.getPackage())
 	            // Servlets
-//	            .addPackage(OpenIdConfiguration.class.getPackage())
-//	            .addPackages(true, "org.xdi.oxauth")
 	         .addAsWebInfResource("jetty-env.xml")
 	         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
 	         .setWebXML("web.xml");

@@ -29,7 +29,8 @@ public class GluuConfigurationWSTest extends BaseTest {
 
 	@ArquillianResource
     private URI url;
- 	@RunAsClient
+
+	@RunAsClient
     @Parameters({"gluuConfigurationPath", "webTarget"})
 	@Consumes(MediaType.APPLICATION_JSON)
     @Test

@@ -44,9 +44,8 @@ public class DebugContentEncodingTest extends BaseTest {
 
     public static final ObjectMapper MAPPER = ServerUtil.createJsonMapper();
 
-    private Token pat;
-
-    private String umaRegisterResourcePath;
+    private static Token pat;
+    private static String umaRegisterResourcePath;
 
     @Override
     @BeforeSuite
