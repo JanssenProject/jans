@@ -236,7 +236,7 @@
             <class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest"/>
         </classes>
     </test>
-    <test name="UMA. Scope test" enabled="true">
+    <test name="UMA. Trust elevation test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.uma.ws.rs.TrustElevationWSTest"/>
         </classes>
