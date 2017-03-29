@@ -30,14 +30,6 @@ public class CleanUpClientTest extends BaseComponentTest {
 	@Inject
 	private ClientService clientService;
 
-	@Override
-	public void beforeClass() {
-	}
-
-	@Override
-	public void afterClass() {
-	}
-
 	@Test
 	@Parameters(value = "usedClients")
 	public void cleanUpClient(String usedClients) {

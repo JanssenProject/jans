@@ -1,50 +1,55 @@
 package org.xdi.oxauth.comp;
 
-import org.codehaus.jettison.json.JSONObject;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_ID;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import javax.inject.Inject;
+
+import org.codehaus.jettison.json.JSONObject;
+import org.testng.ITestContext;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseComponentTestAdapter;
+import org.xdi.oxauth.ConfigurableTest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
-import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_ID;
-import static org.testng.Assert.*;
-
 /**
  * @author Javier Rojas Blum
  * @version August 8, 2016
  */
-public class CryptoProviderTest extends BaseComponentTestAdapter {
+public class CryptoProviderTest extends ConfigurableTest {
 
 	@Inject
 	private ConfigurationFactory configurationFactory;
-
+	
     private final String SIGNING_INPUT = "Signing Input";
     private final String SHARED_SECRET = "secret";
 
-    private AbstractCryptoProvider cryptoProvider;
-    private Long expirationTime;
-    private String hs256Signature;
-    private String hs384Signature;
-    private String hs512Signature;
-    private String rs256Key;
-    private String rs256Signature;
-    private String rs384Key;
-    private String rs384Signature;
-    private String rs512Key;
-    private String rs512Signature;
-    private String es256Key;
-    private String es256Signature;
-    private String es384Key;
-    private String es384Signature;
-    private String es512Key;
-    private String es512Signature;
+    private static AbstractCryptoProvider cryptoProvider;
+    
+    private static Long expirationTime;
+    private static String hs256Signature;
+    private static String hs384Signature;
+    private static String hs512Signature;
+    private static String rs256Key;
+    private static String rs256Signature;
+    private static String rs384Key;
+    private static String rs384Signature;
+    private static String rs512Key;
+    private static String rs512Signature;
+    private static String es256Key;
+    private static String es256Signature;
+    private static String es384Key;
+    private static String es384Signature;
+    private static String es512Key;
+    private static String es512Signature;
 
     @Test
     public void configuration() {
@@ -189,8 +194,9 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
     }
 
     @Test(dependsOnMethods = {"testGenerateKeyRS256"})
-    public void testSignRS256() {
+    public void testSignRS256(ITestContext context) {
         try {
+        	rs256Key = (String) context.getAttribute("rs256Key");
             rs256Signature = cryptoProvider.sign(SIGNING_INPUT, rs256Key, null, SignatureAlgorithm.RS256);
             assertNotNull(rs256Signature);
         } catch (Exception e) {
@@ -309,7 +315,7 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
     }
 
     @Test(dependsOnMethods = {"testGenerateKeyES256"})
-    public void testSignES256() {
+    public void testSignES256(ITestContext context) {
         try {
             es256Signature = cryptoProvider.sign(SIGNING_INPUT, es256Key, null, SignatureAlgorithm.ES256);
             assertNotNull(es256Signature);
@@ -319,8 +325,9 @@ public class CryptoProviderTest extends BaseComponentTestAdapter {
     }
 
     @Test(dependsOnMethods = {"testSignES256"})
-    public void testVerifyES256() {
+    public void testVerifyES256(ITestContext context) {
         try {
+        	es256Signature = (String) context.getAttribute("es256Signature");
             boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, es256Signature, es256Key, null,
                     null, SignatureAlgorithm.ES256);
             assertTrue(signatureVerified);
