@@ -36,10 +36,10 @@ import static org.testng.Assert.*;
 
 public class RegisterPermissionWSTest extends BaseTest {
 
-    private Token pat;
-    private ResourceSetResponse resourceSet;
-    private String umaRegisterResourcePath;
-    private String umaPermissionPath;
+    private static Token pat;
+    private static ResourceSetResponse resourceSet;
+    private static String umaRegisterResourcePath;
+    private static String umaPermissionPath;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
