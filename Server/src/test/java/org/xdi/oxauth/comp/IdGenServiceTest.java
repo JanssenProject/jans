@@ -37,10 +37,10 @@ public class IdGenServiceTest extends BaseComponentTest {
 
 	@Inject
 	private CustomScriptService customScriptService;
-	
+
 	@Inject
 	private IdGenService idGenService;
-	
+
 	@Inject
 	private LdapEntryManager ldapEntryManager;
 

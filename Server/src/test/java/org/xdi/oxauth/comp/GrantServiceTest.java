@@ -27,52 +27,53 @@ import org.xdi.oxauth.service.GrantService;
 
 public class GrantServiceTest extends BaseComponentTest {
 
-    private static final String TEST_TOKEN_CODE = UUID.randomUUID().toString();
-    
-    @Inject
-    private GrantService grantService;
+	private static final String TEST_TOKEN_CODE = UUID.randomUUID().toString();
 
-    private static String m_clientId;
+	@Inject
+	private GrantService grantService;
 
-    private static TokenLdap m_tokenLdap;
+	private static String m_clientId;
 
-    @Parameters(value = "clientId")
-    @Test
-    public void createTestToken(String m_clientId) {
-        m_tokenLdap = createTestToken();
-        grantService.persist(m_tokenLdap);
-    }
+	private static TokenLdap m_tokenLdap;
 
-    @Test(dependsOnMethods = "createTestToken")
-    public void testCleanUp() {
-        grantService.cleanUp(); // clean up must remove just created token because expiration is set to new Date()
-        final TokenLdap t = grantService.getGrantsByCode(TEST_TOKEN_CODE);
-        Assert.assertTrue(t == null);
-    }
+	@Parameters(value = "clientId")
+	@Test
+	public void createTestToken(String m_clientId) {
+		m_tokenLdap = createTestToken();
+		grantService.persist(m_tokenLdap);
+	}
 
-    @Test(dependsOnMethods = "createTestToken")
-    public void removeTestTokens() {
-        final TokenLdap t = grantService.getGrantsByCode(TEST_TOKEN_CODE);
-        if (t != null) {
-            grantService.remove(t);
-        }
-    }
+	@Test(dependsOnMethods = "createTestToken")
+	public void testCleanUp() {
+		grantService.cleanUp(); // clean up must remove just created token
+								// because expiration is set to new Date()
+		final TokenLdap t = grantService.getGrantsByCode(TEST_TOKEN_CODE);
+		Assert.assertTrue(t == null);
+	}
 
-    private TokenLdap createTestToken() {
-        final String id = GrantService.generateGrantId();
-        final String grantId = GrantService.generateGrantId();
-        final String dn = grantService.buildDn(id, grantId, m_clientId);
+	@Test(dependsOnMethods = "createTestToken")
+	public void removeTestTokens() {
+		final TokenLdap t = grantService.getGrantsByCode(TEST_TOKEN_CODE);
+		if (t != null) {
+			grantService.remove(t);
+		}
+	}
 
-        final TokenLdap t = new TokenLdap();
-        t.setId(id);
-        t.setDn(dn);
-        t.setGrantId(grantId);
-        t.setClientId(m_clientId);
-        t.setTokenCode(TEST_TOKEN_CODE);
-        t.setTokenType(TokenType.ACCESS_TOKEN.getValue());
-        t.setCreationDate(new Date());
-        t.setExpirationDate(new Date());
-        return t;
-    }
+	private TokenLdap createTestToken() {
+		final String id = GrantService.generateGrantId();
+		final String grantId = GrantService.generateGrantId();
+		final String dn = grantService.buildDn(id, grantId, m_clientId);
+
+		final TokenLdap t = new TokenLdap();
+		t.setId(id);
+		t.setDn(dn);
+		t.setGrantId(grantId);
+		t.setClientId(m_clientId);
+		t.setTokenCode(TEST_TOKEN_CODE);
+		t.setTokenType(TokenType.ACCESS_TOKEN.getValue());
+		t.setCreationDate(new Date());
+		t.setExpirationDate(new Date());
+		return t;
+	}
 
 }
