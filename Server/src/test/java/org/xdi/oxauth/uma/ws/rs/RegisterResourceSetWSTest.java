@@ -30,54 +30,58 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 public class RegisterResourceSetWSTest extends BaseTest {
 
 	@ArquillianResource
-    private URI url;
+	private URI url;
 
-    private static Token pat;
-    private static ResourceSetResponse resourceSetStatus;
-    private static String umaRegisterResourcePath;
+	private static Token pat;
+	private static ResourceSetResponse resourceSetStatus;
+	private static String umaRegisterResourcePath;
 
-    @Test
-    @Parameters({"authorizePath", "tokenPath",
-            "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri", "umaRegisterResourcePath"})
-    public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-                     String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath) {
-        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
-        this.umaRegisterResourcePath = umaRegisterResourcePath;
-    }
+	@Test
+	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
+			"umaRedirectUri", "umaRegisterResourcePath" })
+	public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
+			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath) {
+		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+				umaPatClientSecret, umaRedirectUri);
+		this.umaRegisterResourcePath = umaRegisterResourcePath;
+	}
 
-    @Test(dependsOnMethods = {"init"})
-    public void testRegisterResourceSet() throws Exception {
-        resourceSetStatus = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
-        UmaTestUtil.assert_(resourceSetStatus);
-    }
+	@Test(dependsOnMethods = { "init" })
+	public void testRegisterResourceSet() throws Exception {
+		resourceSetStatus = TUma.registerResourceSet(url, pat, umaRegisterResourcePath,
+				UmaTestUtil.createResourceSet());
+		UmaTestUtil.assert_(resourceSetStatus);
+	}
 
-    @Test(dependsOnMethods = {"testRegisterResourceSet"})
-    public void testModifyResourceSet() throws Exception {
-        final ResourceSet resourceSet = new ResourceSet();
-        resourceSet.setName("Server Photo Album 2");
-        resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-        resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+	@Test(dependsOnMethods = { "testRegisterResourceSet" })
+	public void testModifyResourceSet() throws Exception {
+		final ResourceSet resourceSet = new ResourceSet();
+		resourceSet.setName("Server Photo Album 2");
+		resourceSet.setIconUri("http://www.example.com/icons/flower.png");
+		resourceSet.setScopes(
+				Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-        final ResourceSetResponse status = TUma.modifyResourceSet(url, pat, umaRegisterResourcePath, resourceSetStatus.getId(), resourceSet);
-        UmaTestUtil.assert_(status);
-    }
+		final ResourceSetResponse status = TUma.modifyResourceSet(url, pat, umaRegisterResourcePath,
+				resourceSetStatus.getId(), resourceSet);
+		UmaTestUtil.assert_(status);
+	}
 
-    /**
-     * Test for getting UMA resource set descriptions
-     */
-    @Test(dependsOnMethods = {"testModifyResourceSet"})
-    public void testGetResourceSets() throws Exception {
-        final List<String> list = TUma.getResourceSetList(url, pat, umaRegisterResourcePath);
+	/**
+	 * Test for getting UMA resource set descriptions
+	 */
+	@Test(dependsOnMethods = { "testModifyResourceSet" })
+	public void testGetResourceSets() throws Exception {
+		final List<String> list = TUma.getResourceSetList(url, pat, umaRegisterResourcePath);
 
-        assertTrue(list != null && !list.isEmpty() && list.contains(resourceSetStatus.getId()), "Resource set list is empty");
-    }
+		assertTrue(list != null && !list.isEmpty() && list.contains(resourceSetStatus.getId()),
+				"Resource set list is empty");
+	}
 
-
-    /**
-     * Test for deleting UMA resource set descriptions
-     */
-    @Test(dependsOnMethods = {"testGetResourceSets"})
-    public void testDeleteResourceSet() throws Exception {
-        TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSetStatus.getId());
-    }
+	/**
+	 * Test for deleting UMA resource set descriptions
+	 */
+	@Test(dependsOnMethods = { "testGetResourceSets" })
+	public void testDeleteResourceSet() throws Exception {
+		TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSetStatus.getId());
+	}
 }

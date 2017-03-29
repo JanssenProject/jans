@@ -24,12 +24,12 @@ import org.xdi.oxauth.model.uma.UmaTestUtil;
 public class UmaConfigurationWSTest extends BaseTest {
 
 	@ArquillianResource
-    private URI url;
+	private URI url;
 
-    @Parameters({"umaConfigurationPath"})
-    @Test
-    public void configurationPresence(final String umaConfigurationPath) throws Exception {
-        final UmaConfiguration c = TUma.requestConfiguration(url, umaConfigurationPath);
-        UmaTestUtil.assert_(c);
-    }
+	@Parameters({ "umaConfigurationPath" })
+	@Test
+	public void configurationPresence(final String umaConfigurationPath) throws Exception {
+		final UmaConfiguration c = TUma.requestConfiguration(url, umaConfigurationPath);
+		UmaTestUtil.assert_(c);
+	}
 }
