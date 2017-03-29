@@ -91,7 +91,7 @@ public class TrustElevationWSTest extends BaseTest {
 	// use normal test method instead of @AfterClass because it will not work
 	// with ResourceRequestEnvironment seam class which is used
 	// behind TUma wrapper.
-	@Test(dependsOnMethods = { "_7_requesterAccessProtectedResourceWithEnoughPermissionsRpt" })
+	@Test(dependsOnMethods = { "authorizePermission" })
 	@Parameters({ "umaRegisterResourcePath" })
 	public void cleanUp(String umaRegisterResourcePath) {
 		if (resourceSet != null) {
