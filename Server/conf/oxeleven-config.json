@@ -7,5 +7,5 @@
     },
     "pkcs11Pin": "1234",
     "dnName": "CN=oxAuth CA Certificate",
-    "testModeToken": "5be64765-7052-466b-ad1a-bd7dddcfdee4"
+    "testModeToken": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
