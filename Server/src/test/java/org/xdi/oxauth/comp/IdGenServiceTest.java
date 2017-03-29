@@ -23,7 +23,6 @@ import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.service.custom.CustomScriptService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.INumGenerator;
 
 /**
@@ -45,15 +44,7 @@ public class IdGenServiceTest extends BaseComponentTest {
 	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-	private String idCustomScriptDn;
-
-	@Override
-	public void beforeClass() {
-	}
-
-	@Override
-	public void afterClass() {
-	}
+	private static String idCustomScriptDn;
 
 	private CustomScript buildIdCustomScriptEntry(String idScript) {
 		String basedInum = configurationFactory.getAppConfiguration().getOrganizationInum();

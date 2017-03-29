@@ -1,16 +1,5 @@
 package org.xdi.oxauth.dev;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import net.spy.memcached.DefaultConnectionFactory;
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationFuture;
-import net.spy.memcached.ops.OperationStatus;
-import org.xdi.oxauth.model.common.MemcachedGrant;
-import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.registration.Client;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Date;
@@ -20,6 +9,19 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import org.xdi.oxauth.model.common.MemcachedGrant;
+import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.registration.Client;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import net.spy.memcached.DefaultConnectionFactory;
+import net.spy.memcached.MemcachedClient;
+import net.spy.memcached.internal.OperationFuture;
+import net.spy.memcached.ops.OperationStatus;
 
 /**
  * @author yuriyz on 02/02/2017.

@@ -41,14 +41,6 @@ public class SessionStateServiceTest extends BaseComponentTest {
 	@Inject
     private UserService userService;
 
-	@Override
-	public void beforeClass() {
-	}
-
-    @Override
-    public void afterClass() {
-    }
-
     private SessionState generateSession(String userInum) {
         String userDn = userService.getDnForUser(userInum);
         return m_service.generateUnauthenticatedSessionState(userDn, new Date(), SessionIdState.UNAUTHENTICATED, new HashMap<String, String>(), true);

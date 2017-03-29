@@ -6,30 +6,30 @@
 
 package org.xdi.oxauth.comp;
 
-import org.apache.commons.io.IOUtils;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import java.io.File;
+import java.io.FileInputStream;
 
 import javax.inject.Inject;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.io.IOUtils;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseComponentTestAdapter;
+import org.xdi.oxauth.ConfigurableTest;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.FileInputStream;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 03/01/2013
  */
 
-public class ConfigurationTest extends BaseComponentTestAdapter {
+public class ConfigurationTest extends ConfigurableTest {
 	
 	@Inject
 	private ConfigurationFactory configurationFactory;
