@@ -6,6 +6,15 @@
 
 package org.xdi.oxauth.dev;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
@@ -14,14 +23,6 @@ import org.xdi.oxauth.model.error.ErrorMessage;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
 import org.xdi.oxauth.util.ServerUtil;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -6,8 +6,6 @@
 
 package org.xdi.oxauth;
 
-import org.testng.annotations.AfterClass;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
@@ -15,15 +13,6 @@ import org.testng.annotations.AfterClass;
  */
 
 public abstract class BaseComponentTest extends BaseTest {
-
-    @AfterClass
-    public void cleanupClass() throws Exception {
-        afterClass();
-    }
-
-    public abstract void beforeClass();
-
-    public abstract void afterClass();
 
     public static void sleepSeconds(int p_seconds) {
         try {

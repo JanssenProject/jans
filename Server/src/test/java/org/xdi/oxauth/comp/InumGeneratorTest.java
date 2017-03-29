@@ -29,16 +29,6 @@ public class InumGeneratorTest extends BaseComponentTest {
     public void test() {
         final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
         Assert.assertTrue(StringUtils.isNotBlank(inum));
-
-//        final boolean contains = inumGenerator.contains("@!1111!0008!298D.5B20", IdType.LINK_CONTRACTS);
-//        Assert.assertTrue(contains);
     }
 
-    @Override
-    public void beforeClass() {
-    }
-
-    @Override
-    public void afterClass() {
-    }
 }
