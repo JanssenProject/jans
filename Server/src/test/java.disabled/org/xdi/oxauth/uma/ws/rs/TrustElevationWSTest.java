@@ -17,11 +17,11 @@ import static org.testng.Assert.assertNotNull;
 
 public class TrustElevationWSTest extends BaseTest {
 
-    private Token pat;
-    private Token aat;
-    private RPTResponse rpt;
-    private ResourceSetResponse resourceSet;
-    private PermissionTicket ticket;
+    private static Token pat;
+    private static Token aat;
+    private static RPTResponse rpt;
+    private static ResourceSetResponse resourceSet;
+    private static PermissionTicket ticket;
 
     @Test
     @Parameters({"authorizePath", "tokenPath", "umaUserId", "umaUserSecret",

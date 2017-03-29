@@ -6,6 +6,13 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import static org.testng.Assert.assertTrue;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -15,11 +22,6 @@ import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 15/03/2013
@@ -27,22 +29,25 @@ import static org.testng.Assert.*;
 
 public class RegisterResourceSetWSTest extends BaseTest {
 
-    private Token pat;
-    private ResourceSetResponse resourceSetStatus;
-    private String umaRegisterResourcePath;
+	@ArquillianResource
+    private URI url;
+
+    private static Token pat;
+    private static ResourceSetResponse resourceSetStatus;
+    private static String umaRegisterResourcePath;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
             "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri", "umaRegisterResourcePath"})
     public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                      String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath) {
-        pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
         this.umaRegisterResourcePath = umaRegisterResourcePath;
     }
 
     @Test(dependsOnMethods = {"init"})
     public void testRegisterResourceSet() throws Exception {
-        resourceSetStatus = TUma.registerResourceSet(this, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
+        resourceSetStatus = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
         UmaTestUtil.assert_(resourceSetStatus);
     }
 
@@ -53,7 +58,7 @@ public class RegisterResourceSetWSTest extends BaseTest {
         resourceSet.setIconUri("http://www.example.com/icons/flower.png");
         resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-        final ResourceSetResponse status = TUma.modifyResourceSet(this, pat, umaRegisterResourcePath, resourceSetStatus.getId(), resourceSet);
+        final ResourceSetResponse status = TUma.modifyResourceSet(url, pat, umaRegisterResourcePath, resourceSetStatus.getId(), resourceSet);
         UmaTestUtil.assert_(status);
     }
 
@@ -62,7 +67,7 @@ public class RegisterResourceSetWSTest extends BaseTest {
      */
     @Test(dependsOnMethods = {"testModifyResourceSet"})
     public void testGetResourceSets() throws Exception {
-        final List<String> list = TUma.getResourceSetList(this, pat, umaRegisterResourcePath);
+        final List<String> list = TUma.getResourceSetList(url, pat, umaRegisterResourcePath);
 
         assertTrue(list != null && !list.isEmpty() && list.contains(resourceSetStatus.getId()), "Resource set list is empty");
     }
@@ -73,6 +78,6 @@ public class RegisterResourceSetWSTest extends BaseTest {
      */
     @Test(dependsOnMethods = {"testGetResourceSets"})
     public void testDeleteResourceSet() throws Exception {
-        TUma.deleteResourceSet(this, pat, umaRegisterResourcePath, resourceSetStatus.getId());
+        TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSetStatus.getId());
     }
 }

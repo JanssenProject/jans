@@ -6,16 +6,28 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import static org.testng.Assert.assertNotNull;
+
+import java.net.URI;
+import java.util.Arrays;
+
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.*;
+import org.xdi.oxauth.model.uma.ClaimToken;
+import org.xdi.oxauth.model.uma.ClaimTokenList;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.RPTResponse;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
+import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
+import org.xdi.oxauth.model.uma.TUma;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-
-import java.util.Arrays;
-
-import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -24,18 +36,21 @@ import static org.testng.Assert.assertNotNull;
 
 public class AccessProtectedResourceFlowWSTest extends BaseTest {
 
-    private Token pat;
-    private Token aat;
-    private RPTResponse rpt;
-    private ResourceSetResponse resourceSet;
-    private PermissionTicket ticket;
+	@ArquillianResource
+    private URI url;
+
+    private static Token pat;
+    private static Token aat;
+    private static RPTResponse rpt;
+    private static ResourceSetResponse resourceSet;
+    private static PermissionTicket ticket;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
             "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
     public void init_0(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                        String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assert_(pat);
     }
 
@@ -44,7 +59,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
             "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
     public void init_1(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                        String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
+        aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assert_(aat);
     }
 
@@ -53,14 +68,14 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
             "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
     public void init_2(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                        String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-        aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
         UmaTestUtil.assert_(aat);
     }
 
     @Test(dependsOnMethods = {"init_2"})
     @Parameters({"umaRptPath", "umaAmHost"})
     public void init(String umaRptPath, String umaAmHost) {
-        rpt = TUma.requestRpt(this, aat, umaRptPath, umaAmHost);
+        rpt = TUma.requestRpt(url, aat, umaRptPath, umaAmHost);
         UmaTestUtil.assert_(rpt);
     }
 
@@ -70,7 +85,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaRegisterResourcePath"})
     public void _1_registerResourceSet(String umaRegisterResourcePath) throws Exception {
-        resourceSet = TUma.registerResourceSet(this, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
+        resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
         UmaTestUtil.assert_(resourceSet);
     }
 
@@ -90,7 +105,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_2_requesterAccessProtectedResourceWithNotEnoughPermissionsRpt"})
     @Parameters({"umaRptStatusPath", "umaAmHost"})
     public void _3_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
-        final RptIntrospectionResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, pat, rpt.getRpt());
+        final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, umaAmHost, pat, rpt.getRpt());
         Assert.assertTrue(status.getActive(), "Token response status is not active");
         Assert.assertTrue(status.getPermissions() == null || status.getPermissions().isEmpty(), "Permissions list is not empty.");
     }
@@ -105,7 +120,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
         r.setResourceSetId(resourceSet.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-        ticket = TUma.registerPermission(this, pat, umaAmHost, umaHost, r, umaPermissionPath);
+        ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
         UmaTestUtil.assert_(ticket);
     }
 
@@ -117,7 +132,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
         request.setTicket(ticket.getTicket());
         request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
 
-        final RptAuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, aat, request);
+        final RptAuthorizationResponse response = TUma.requestAuthorization(url, umaPermissionAuthorizationPath, umaAmHost, aat, request);
         assertNotNull(response, "Token response status is null");
     }
 
@@ -127,7 +142,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_5_authorizePermission"})
     @Parameters({"umaRptStatusPath", "umaAmHost"})
     public void _6_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
-        final RptIntrospectionResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, pat, rpt.getRpt());
+        final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, umaAmHost, pat, rpt.getRpt());
         UmaTestUtil.assert_(status);
 
     }
@@ -147,7 +162,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Parameters({"umaRegisterResourcePath"})
     public void cleanUp(String umaRegisterResourcePath) {
         if (resourceSet != null) {
-            TUma.deleteResourceSet(this, pat, umaRegisterResourcePath, resourceSet.getId());
+            TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSet.getId());
         }
     }
 

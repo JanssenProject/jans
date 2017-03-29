@@ -6,6 +6,10 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.net.URI;
+
+import org.jboss.arquillian.container.test.api.RunAsClient;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -20,21 +24,24 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 
 public class ObtainAatWSTest extends BaseTest {
 
-    private Token aat;
+	@ArquillianResource
+    private URI url;
+
+    private static Token aat;
 
     @Test
     @Parameters({"authorizePath", "tokenPath",
             "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
     public void requestAat(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                            String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-        aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+        aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
         UmaTestUtil.assert_(aat);
     }
 
     @Test(dependsOnMethods = "requestAat")
     @Parameters({"tokenPath", "umaAatClientId", "umaAatClientSecret"})
     public void requestNewAatByRefreshTokne(String tokenPath, String umaAatClientId, String umaAatClientSecret) {
-        final Token newAat = TUma.newTokenByRefreshToken(this, tokenPath, aat, umaAatClientId, umaAatClientSecret);
+        final Token newAat = TUma.newTokenByRefreshToken(url, tokenPath, aat, umaAatClientId, umaAatClientSecret);
         UmaTestUtil.assert_(newAat);
     }
 }
