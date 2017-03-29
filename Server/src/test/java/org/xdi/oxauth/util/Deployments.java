@@ -1,19 +1,8 @@
 package org.xdi.oxauth.util;
 
-import java.io.File;
-
-import org.jboss.shrinkwrap.api.ArchivePaths;
-import org.jboss.shrinkwrap.api.GenericArchive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
-import org.jboss.shrinkwrap.api.importer.ZipImporter;
-import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
-import org.xdi.oxauth.gluu.ws.rs.GluuConfigurationWS;
-import org.xdi.oxauth.service.ResteasyInitializer;
-import org.xdi.oxauth.servlet.OpenIdConfiguration;
-import org.xdi.oxauth.token.ws.rs.TokenRestWebService;
 
 /**
  * Creates a deployment from a build Web Archive using ShrinkWrap ZipImporter

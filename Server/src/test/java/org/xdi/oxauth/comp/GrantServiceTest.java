@@ -28,21 +28,13 @@ import org.xdi.oxauth.service.GrantService;
 public class GrantServiceTest extends BaseComponentTest {
 
     private static final String TEST_TOKEN_CODE = UUID.randomUUID().toString();
-
-    private String m_clientId;
     
     @Inject
     private GrantService grantService;
 
-    private TokenLdap m_tokenLdap;
+    private static String m_clientId;
 
-    @Override
-    public void beforeClass() {
-    }
-
-	@Override
-	public void afterClass() {
-	}
+    private static TokenLdap m_tokenLdap;
 
     @Parameters(value = "clientId")
     @Test

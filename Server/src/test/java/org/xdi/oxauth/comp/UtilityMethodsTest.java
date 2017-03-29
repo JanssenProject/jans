@@ -30,11 +30,4 @@ public class UtilityMethodsTest  extends BaseComponentTest {
         Assert.assertTrue(clientId.equals("@!1111!0008!FF81!2D39"));
     }
 
-	@Override
-	public void beforeClass() {
-	}
-
-	@Override
-	public void afterClass() {
-	}
 }
