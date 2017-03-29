@@ -25,22 +25,23 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 public class ObtainRptWSTest extends BaseTest {
 
 	@ArquillianResource
-    private URI url;
+	private URI url;
 
-    private static Token aat;
+	private static Token aat;
 
-    @Test
-    @Parameters({"authorizePath", "tokenPath",
-            "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
-    public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-                     String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-        aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
-    }
+	@Test
+	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret",
+			"umaRedirectUri" })
+	public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
+			String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
+		aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
+				umaAatClientSecret, umaRedirectUri);
+	}
 
-    @Test(dependsOnMethods = "init")
-    @Parameters({"umaRptPath", "umaAmHost"})
-    public void obtainRpt(String umaRptPath, String umaAmHost) {
-        final RPTResponse r = TUma.requestRpt(url, aat, umaRptPath, umaAmHost);
-        UmaTestUtil.assert_(r);
-    }
+	@Test(dependsOnMethods = "init")
+	@Parameters({ "umaRptPath", "umaAmHost" })
+	public void obtainRpt(String umaRptPath, String umaAmHost) {
+		final RPTResponse r = TUma.requestRpt(url, aat, umaRptPath, umaAmHost);
+		UmaTestUtil.assert_(r);
+	}
 }

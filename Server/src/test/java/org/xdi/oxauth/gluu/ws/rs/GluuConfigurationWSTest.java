@@ -28,29 +28,31 @@ import org.xdi.oxauth.util.ServerUtil;
 public class GluuConfigurationWSTest extends BaseTest {
 
 	@ArquillianResource
-    private URI url;
+	private URI url;
 
 	@RunAsClient
-    @Parameters({"gluuConfigurationPath", "webTarget"})
+	@Parameters({ "gluuConfigurationPath", "webTarget" })
 	@Consumes(MediaType.APPLICATION_JSON)
-    @Test
-    public void getConfigurationTest(String gluuConfigurationPath, @Optional @ArquillianResteasyResource("seam/resource") final WebTarget webTarget) throws Exception {
-        Response response = webTarget.path(gluuConfigurationPath).request().get();
-        String entity = response.readEntity(String.class);
-        BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
+	@Test
+	public void getConfigurationTest(String gluuConfigurationPath,
+			@Optional @ArquillianResteasyResource("seam/resource") final WebTarget webTarget) throws Exception {
+		Response response = webTarget.path(gluuConfigurationPath).request().get();
+		String entity = response.readEntity(String.class);
+		BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
 
-        assertEquals(response.getStatus(), 200, "Unexpected response code.");
-        try {
-        	GluuConfiguration appConfiguration = ServerUtil.createJsonMapper().readValue(entity, GluuConfiguration.class);
-        	System.err.println(appConfiguration.getIdGenerationEndpoint());
-            assertNotNull(appConfiguration, "Meta data configuration is null");
-            assertNotNull(appConfiguration.getIdGenerationEndpoint());
-            assertNotNull(appConfiguration.getIntrospectionEndpoint());
-            assertNotNull(appConfiguration.getAuthLevelMapping());
-            assertNotNull(appConfiguration.getScopeToClaimsMapping());
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
+		assertEquals(response.getStatus(), 200, "Unexpected response code.");
+		try {
+			GluuConfiguration appConfiguration = ServerUtil.createJsonMapper().readValue(entity,
+					GluuConfiguration.class);
+			System.err.println(appConfiguration.getIdGenerationEndpoint());
+			assertNotNull(appConfiguration, "Meta data configuration is null");
+			assertNotNull(appConfiguration.getIdGenerationEndpoint());
+			assertNotNull(appConfiguration.getIntrospectionEndpoint());
+			assertNotNull(appConfiguration.getAuthLevelMapping());
+			assertNotNull(appConfiguration.getScopeToClaimsMapping());
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
 }

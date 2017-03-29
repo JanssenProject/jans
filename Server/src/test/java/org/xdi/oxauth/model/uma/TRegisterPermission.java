@@ -17,8 +17,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.common.Holder;
