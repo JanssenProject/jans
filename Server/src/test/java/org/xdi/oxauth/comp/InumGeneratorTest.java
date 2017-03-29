@@ -21,14 +21,14 @@ import org.xdi.oxauth.model.common.IdType;
  */
 
 public class InumGeneratorTest extends BaseComponentTest {
-	
+
 	@Inject
 	private InumGenerator inumGenerator;
 
-    @Test
-    public void test() {
-        final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
-        Assert.assertTrue(StringUtils.isNotBlank(inum));
-    }
+	@Test
+	public void test() {
+		final String inum = inumGenerator.generateId(IdType.CLIENTS, "@!1111");
+		Assert.assertTrue(StringUtils.isNotBlank(inum));
+	}
 
 }

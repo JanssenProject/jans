@@ -17,12 +17,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -169,7 +167,8 @@ public class TTokenRequest {
 		authorizationRequest.setAuthPassword(userSecret);
 		authorizationRequest.getPrompts().add(Prompt.NONE);
 
-		Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + authorizePath + "?"  + authorizationRequest.getQueryString()).request();
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(baseUri.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
 		request.header("Accept", MediaType.TEXT_PLAIN);
 		Response response = request.get();

@@ -14,11 +14,11 @@ package org.xdi.oxauth;
 
 public abstract class BaseComponentTest extends BaseTest {
 
-    public static void sleepSeconds(int p_seconds) {
-        try {
-            Thread.sleep(p_seconds * 1000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+	public static void sleepSeconds(int p_seconds) {
+		try {
+			Thread.sleep(p_seconds * 1000L);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 }

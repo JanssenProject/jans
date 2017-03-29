@@ -30,53 +30,57 @@ import org.xdi.oxauth.util.ServerUtil;
  */
 
 public class ConfigurationTest extends ConfigurableTest {
-	
+
 	@Inject
 	private ConfigurationFactory configurationFactory;
-	
+
 	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-    /*
-    Configuration must be present, otherwise server will not start normally... There is fallback configuration from
-    file but server will not work as expected in cluster.`
-     */
-    @Test
-    public void configurationPresence() {
-        Assert.assertTrue((configurationFactory != null) && (configurationFactory.getLdapConfiguration() != null) &&
-        		(configurationFactory.getAppConfiguration() != null) && (configurationFactory.getErrorResponseFactory() != null) &&
-        		(configurationFactory.getStaticConfiguration() != null) && (configurationFactory.getWebKeysConfiguration() != null));
-    }
+	/*
+	 * Configuration must be present, otherwise server will not start
+	 * normally... There is fallback configuration from file but server will not
+	 * work as expected in cluster.`
+	 */
+	@Test
+	public void configurationPresence() {
+		Assert.assertTrue((configurationFactory != null) && (configurationFactory.getLdapConfiguration() != null)
+				&& (configurationFactory.getAppConfiguration() != null)
+				&& (configurationFactory.getErrorResponseFactory() != null)
+				&& (configurationFactory.getStaticConfiguration() != null)
+				&& (configurationFactory.getWebKeysConfiguration() != null));
+	}
 
-    /*
-    Useful test method to get create newest test configuration. It shouldn't be used directly for testing.
-     */
-//    @Test
-    public void createLatestTestConfInLdapFromFiles() throws Exception {
-        final String prefix = "U:\\own\\project\\oxAuth\\Server\\src\\test\\resources\\conf";
+	/*
+	 * Useful test method to get create newest test configuration. It shouldn't
+	 * be used directly for testing.
+	 */
+	// @Test
+	public void createLatestTestConfInLdapFromFiles() throws Exception {
+		final String prefix = "U:\\own\\project\\oxAuth\\Server\\src\\test\\resources\\conf";
 
-        final String errorsFile = prefix + "\\oxauth-errors.json";
-        final String staticFile = prefix + "\\oxauth-static-conf.json";
-        final String webKeysFile = prefix + "\\oxauth-web-keys.json";
-        final String configFile = prefix + "\\oxauth-config.xml";
+		final String errorsFile = prefix + "\\oxauth-errors.json";
+		final String staticFile = prefix + "\\oxauth-static-conf.json";
+		final String webKeysFile = prefix + "\\oxauth-web-keys.json";
+		final String configFile = prefix + "\\oxauth-config.xml";
 
-        final String errorsJson = IOUtils.toString(new FileInputStream(errorsFile));
-        final String staticConfJson = IOUtils.toString(new FileInputStream(staticFile));
-        final String webKeysJson = IOUtils.toString(new FileInputStream(webKeysFile));
-        final String configJson = ServerUtil.createJsonMapper().writeValueAsString(loadConfFromFile(configFile));
+		final String errorsJson = IOUtils.toString(new FileInputStream(errorsFile));
+		final String staticConfJson = IOUtils.toString(new FileInputStream(staticFile));
+		final String webKeysJson = IOUtils.toString(new FileInputStream(webKeysFile));
+		final String configJson = ServerUtil.createJsonMapper().writeValueAsString(loadConfFromFile(configFile));
 
-        final Conf c = new Conf();
-        c.setDn("ou=testconfiguration,o=@!1111,o=gluu");
-        c.setDynamic(configJson);
-        c.setErrors(errorsJson);
-        c.setStatics(staticConfJson);
-        c.setWebKeys(webKeysJson);
-        ldapEntryManager.persist(c);
-    }
+		final Conf c = new Conf();
+		c.setDn("ou=testconfiguration,o=@!1111,o=gluu");
+		c.setDynamic(configJson);
+		c.setErrors(errorsJson);
+		c.setStatics(staticConfJson);
+		c.setWebKeys(webKeysJson);
+		ldapEntryManager.persist(c);
+	}
 
-    private static AppConfiguration loadConfFromFile(String p_filePath) throws JAXBException {
-        final JAXBContext jc = JAXBContext.newInstance(AppConfiguration.class);
-        final Unmarshaller u = jc.createUnmarshaller();
-        return (AppConfiguration) u.unmarshal(new File(p_filePath));
-    }
+	private static AppConfiguration loadConfFromFile(String p_filePath) throws JAXBException {
+		final JAXBContext jc = JAXBContext.newInstance(AppConfiguration.class);
+		final Unmarshaller u = jc.createUnmarshaller();
+		return (AppConfiguration) u.unmarshal(new File(p_filePath));
+	}
 }
