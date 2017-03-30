@@ -17,11 +17,11 @@
     </test>
 
 <!--     Authorize test -->
-<!--     <test name="Authorize test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.AuthorizeRestWebServiceEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Authorize test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizeRestWebServiceEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Authorize with Response Mode test -->
     <test name="Authorize with Response Mode test (embedded)" enabled="true">
