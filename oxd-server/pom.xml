@@ -200,6 +200,11 @@
             <groupId>org.xdi</groupId>
             <artifactId>oxauth-client</artifactId>
         </dependency>
+        <dependency> <!-- added dependency manually because cross-dependency refers to wrong 3.0.12.Final version -->
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+            <version>3.0.21.Final</version>
+        </dependency>
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxauth-model</artifactId>
