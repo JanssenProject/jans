@@ -8,6 +8,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.xdi.oxauth.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import org.xdi.oxauth.gluu.ws.rs.GluuConfigurationWS;
+import org.xdi.oxauth.register.ws.rs.RegisterRestWebServiceImpl;
 import org.xdi.oxauth.token.ws.rs.TokenRestWebServiceImpl;
 import org.xdi.oxauth.uma.ws.rs.CreateRptWS;
 import org.xdi.oxauth.uma.ws.rs.PermissionRegistrationWS;
@@ -31,6 +32,7 @@ public class TestResteasyInitializer extends Application {
 		HashSet<Class<?>> classes = new HashSet<Class<?>>();
 		classes.add(AuthorizeRestWebServiceImpl.class);
 		classes.add(TokenRestWebServiceImpl.class);
+		classes.add(RegisterRestWebServiceImpl.class);
 
 		classes.add(CreateRptWS.class);
 		classes.add(PermissionRegistrationWS.class);
