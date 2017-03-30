@@ -121,9 +121,9 @@
     <test name="Token test (embedded)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithRSAlgEmbeddedTest"/>
-            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithESAlgEmbeddedTest"/>
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithRSAlgEmbeddedTest"/> -->
+<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithESAlgEmbeddedTest"/> -->
         </classes>
     </test>
 
