@@ -3,11 +3,11 @@
 <suite name="oxAuthServer" parallel="false">
 
     <!-- Application Type Restriction (embedded) -->
-<!--     <test name="Application Type Restriction (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.ApplicationTypeRestrictionEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Application Type Restriction (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ApplicationTypeRestrictionEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Authorization Code Flow test -->
 <!--     <test name="Authorization Code Flow test (embedded)" enabled="true"> -->
