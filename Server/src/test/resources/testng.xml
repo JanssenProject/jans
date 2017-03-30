@@ -24,18 +24,18 @@
 <!--     </test> -->
 
 <!--     Authorize with Response Mode test -->
-<!--     <test name="Authorize with Response Mode test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.AuthorizeWithResponseModeEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Authorize with Response Mode test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizeWithResponseModeEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Client Authentication Filter test (embedded) -->
-<!--     <test name="Client Authentication Filter test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.ClientAuthenticationFilterEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Client Authentication Filter test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ClientAuthenticationFilterEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Client Info test -->
 <!--     <test name="Client Info test (embedded)" enabled="true"> -->
