@@ -112,7 +112,7 @@ showResponse("dynamicClientRegistration", response, entity);
         final String state = UUID.randomUUID().toString();
 
 
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
             

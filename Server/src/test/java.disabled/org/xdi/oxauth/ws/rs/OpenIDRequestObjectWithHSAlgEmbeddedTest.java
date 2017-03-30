@@ -8,9 +8,10 @@ package org.xdi.oxauth.ws.rs;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -58,13 +59,13 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestParameterMethodHS256Step1(final String registerPath, final String redirectUris) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
@@ -76,21 +77,22 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     fail(e.getMessage(), e);
                 }
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS256Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestParameterMethodHS256Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
@@ -104,7 +106,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     fail(e.getMessage(), e);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -112,12 +114,12 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
     public void requestParameterMethodHS256Step2(final String authorizePath,
                                                  final String userId, final String userSecret,
                                                  final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                     List<String> scopes = Arrays.asList("openid");
@@ -140,8 +142,8 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -149,15 +151,16 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS256Step2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestParameterMethodHS256Step2", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -169,19 +172,19 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     fail(e.getMessage(), e);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestParameterMethodHS384Step1(final String registerPath, final String redirectUris) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
@@ -193,21 +196,22 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     fail(e.getMessage(), e);
                 }
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS384Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestParameterMethodHS384Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
@@ -221,7 +225,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     fail(e.getMessage(), e);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -229,12 +233,12 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
     public void requestParameterMethodHS384Step2(final String authorizePath,
                                                  final String userId, final String userSecret,
                                                  final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                     List<String> scopes = Arrays.asList("openid");
@@ -263,8 +267,8 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -272,15 +276,16 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS384Step2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestParameterMethodHS384Step2", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -292,19 +297,19 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     fail(e.getMessage(), e);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestParameterMethodHS512Step1(final String registerPath, final String redirectUris) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
@@ -316,21 +321,22 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     fail(e.getMessage(), e);
                 }
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS512Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestParameterMethodHS512Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
@@ -344,7 +350,7 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     fail(e.getMessage(), e);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -352,12 +358,12 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
     public void requestParameterMethodHS512Step2(final String authorizePath,
                                                  final String userId, final String userSecret,
                                                  final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                     List<String> scopes = Arrays.asList("openid");
@@ -386,8 +392,8 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -395,15 +401,16 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS512Step2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestParameterMethodHS512Step2", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -415,6 +422,6 @@ public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
                     fail(e.getMessage(), e);
                 }
             }
-        }.run();
+        
     }
 }

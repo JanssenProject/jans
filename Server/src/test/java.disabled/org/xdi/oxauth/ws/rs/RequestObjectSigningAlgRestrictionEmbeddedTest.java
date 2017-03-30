@@ -8,9 +8,10 @@ package org.xdi.oxauth.ws.rs;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -101,13 +102,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep1(final String registerPath, final String redirectUris,
                                                     final String jwksUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -117,7 +118,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -125,14 +126,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -146,10 +148,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationClientUri1 = jsonObj.getString(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -159,29 +161,30 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "omittedRequestObjectSigningAlgStep1")
     public void omittedRequestObjectSigningAlgStep2(final String registerPath) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+
                 ResourceRequestEnvironment.Method.GET, registerPath) {
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+            
+                
 
                 RegisterRequest registerRequest = new RegisterRequest(null);
 
-                request.addHeader("Authorization", "Bearer " + registrationAccessToken1);
+                request.header("Authorization", "Bearer " + registrationAccessToken1);
                 request.setContentType(MediaType.APPLICATION_JSON);
                 request.setQueryString(registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep2", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
@@ -198,10 +201,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("scopes"));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -212,13 +215,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3NONE(final String authorizePath,
                                                         final String userId, final String userSecret,
                                                         final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(
                             ResponseType.TOKEN,
@@ -253,8 +256,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -262,15 +265,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3NONE", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3NONE", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -284,7 +288,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -295,13 +299,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3HS256(final String authorizePath,
                                                          final String userId, final String userSecret,
                                                          final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(
                             ResponseType.TOKEN,
@@ -336,8 +340,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -345,15 +349,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3HS256", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3HS256", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -367,7 +372,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -378,13 +383,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3HS384(final String authorizePath,
                                                          final String userId, final String userSecret,
                                                          final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(
                             ResponseType.TOKEN,
@@ -419,8 +424,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -428,15 +433,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3HS384", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3HS384", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -450,7 +456,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -461,13 +467,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3HS512(final String authorizePath,
                                                          final String userId, final String userSecret,
                                                          final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(
                             ResponseType.TOKEN,
@@ -502,8 +508,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -511,15 +517,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3HS512", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3HS512", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -533,7 +540,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -545,12 +552,12 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3RS256(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri,
             final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
@@ -580,8 +587,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -589,15 +596,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3RS256", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3RS256", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -610,7 +618,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -622,12 +630,12 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3RS384(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri,
             final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
@@ -657,8 +665,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -666,15 +674,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3RS384", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3RS384", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -687,7 +696,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -699,12 +708,12 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3RS512(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri,
             final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
@@ -734,8 +743,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -743,15 +752,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3RS512", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3RS512", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -764,7 +774,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -776,12 +786,12 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3ES256(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri,
             final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
@@ -811,8 +821,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -820,15 +830,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3ES256", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3ES256", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -841,7 +852,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -853,12 +864,12 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3ES384(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri,
             final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
@@ -888,8 +899,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -897,15 +908,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3ES384", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3ES384", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -918,7 +930,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -930,12 +942,12 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void omittedRequestObjectSigningAlgStep3ES512(
             final String authorizePath, final String userId, final String userSecret, final String redirectUri,
             final String keyId, final String dnName, final String keyStoreFile, final String keyStoreSecret) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
@@ -965,8 +977,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -974,15 +986,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("omittedRequestObjectSigningAlgStep3ES512", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("omittedRequestObjectSigningAlgStep3ES512", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -995,7 +1008,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1006,13 +1019,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgNoneStep1(final String registerPath, final String redirectUris,
                                                  final String jwksUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1022,7 +1035,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1030,14 +1043,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgNoneStep1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgNoneStep1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1051,10 +1065,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationClientUri2 = jsonObj.getString(RegisterResponseParam.REGISTRATION_CLIENT_URI.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1064,27 +1078,28 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestObjectSigningAlgNoneStep1")
     public void requestObjectSigningAlgNoneStep2(final String registerPath) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+
                 ResourceRequestEnvironment.Method.GET, registerPath) {
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+            
+                
 
-                request.addHeader("Authorization", "Bearer " + registrationAccessToken2);
+                request.header("Authorization", "Bearer " + registrationAccessToken2);
                 request.setContentType(MediaType.APPLICATION_JSON);
                 request.setQueryString(registrationClientUri2.substring(registrationClientUri2.indexOf("?") + 1));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgNoneStep2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgNoneStep2", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
@@ -1103,10 +1118,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("scopes"));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1117,13 +1132,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgNoneStep3(final String authorizePath,
                                                  final String userId, final String userSecret,
                                                  final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(
                             ResponseType.TOKEN,
@@ -1158,8 +1173,8 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -1167,15 +1182,16 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgNoneStep3", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgNoneStep3", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -1189,7 +1205,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1235,13 +1251,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgHS256Step1(final String registerPath, final String redirectUris) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1251,7 +1267,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1259,14 +1275,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgHS256Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgHS256Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1279,10 +1296,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken3 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1336,13 +1353,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgHS384Step1(final String registerPath, final String redirectUris) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1352,7 +1369,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1360,14 +1377,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgHS384Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgHS384Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1380,10 +1398,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken4 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1437,13 +1455,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     @Test
     public void requestObjectSigningAlgHS512Step1(final String registerPath, final String redirectUris) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1453,7 +1471,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1461,14 +1479,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgHS512Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgHS512Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1481,10 +1500,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken5 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1539,13 +1558,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgRS256Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1556,7 +1575,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1564,14 +1583,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgRS256Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgRS256Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1584,10 +1604,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken6 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1642,13 +1662,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgRS384Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1659,7 +1679,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1667,14 +1687,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgRS384Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgRS384Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1687,10 +1708,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken7 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1745,13 +1766,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgRS512Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1762,7 +1783,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1770,14 +1791,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgRS512Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgRS512Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1790,10 +1812,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken8 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1848,13 +1870,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgES256Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1865,7 +1887,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1873,14 +1895,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgES256Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgES256Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1893,10 +1916,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken9 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
@@ -1951,13 +1974,13 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
     public void requestObjectSigningAlgES384Step1(final String registerPath, final String redirectUris,
                                                   final String jwksUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                             StringUtils.spaceSeparatedToList(redirectUris));
@@ -1968,7 +1991,7 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1976,14 +1999,15 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestObjectSigningAlgES256Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestObjectSigningAlgES256Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1996,10 +2020,10 @@ public class RequestObjectSigningAlgRestrictionEmbeddedTest extends BaseTest {
                     registrationAccessToken10 = jsonObj.getString(RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     /**
