@@ -15,6 +15,7 @@ import org.codehaus.jackson.annotate.JsonValue;
 public enum CommandType {
 
     // Register
+    SETUP_CLIENT("setup_client"),
     REGISTER_SITE("register_site"),
     UPDATE_SITE("update_site_registration"),
 

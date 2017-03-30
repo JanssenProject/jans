@@ -60,4 +60,8 @@ public class Utils {
         int result = (int) ((laterDate.getTime() / ONE_HOUR_MILLIS) - (earlierDate.getTime() / ONE_HOUR_MILLIS));
         return result >= 0 ? result : 0;
     }
+
+    public static long date(Date date) {
+        return date != null ? date.getTime() / 1000 : 0;
+    }
 }

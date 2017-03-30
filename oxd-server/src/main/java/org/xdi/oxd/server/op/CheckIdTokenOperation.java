@@ -11,11 +11,11 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
+import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.SiteConfiguration;
-
-import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,23 +32,26 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
 
     @Override
     public CommandResponse execute(CheckIdTokenParams params) throws Exception {
+        try {
+            OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
+            final SiteConfiguration site = getSite();
+            final String idToken = params.getIdToken();
+            final Jwt jwt = Jwt.parse(idToken);
+            final Validator validator = new Validator(jwt, discoveryResponse);
 
-        final SiteConfiguration site = getSite();
-        final String idToken = params.getIdToken();
-        final Jwt jwt = Jwt.parse(idToken);
-        final Validator validator = new Validator(jwt, discoveryResponse);
-
-        final Date issuedAt = jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT);
-        final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
-
-        final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
-        opResponse.setActive(validator.isIdTokenValid(site.getClientId()));
-        opResponse.setIssuedAt(issuedAt != null ? issuedAt.getTime() / 1000 : 0);
-        opResponse.setExpiresAt(expiresAt != null ? expiresAt.getTime() / 1000 : 0);
-        opResponse.setClaims(jwt.getClaims().toMap());
-        return okResponse(opResponse);
+            final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
+            opResponse.setActive(validator.isIdTokenValid(site.getClientId()));
+            opResponse.setIssuedAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT)));
+            opResponse.setExpiresAt(Utils.date(jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME)));
+            opResponse.setClaims(jwt.getClaims().toMap());
+            return okResponse(opResponse);
+        } catch (ErrorResponseException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
 }
