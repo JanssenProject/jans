@@ -9,11 +9,14 @@
     </Console>
   </Appenders>
 
+
   <Loggers>
-    <Logger name="org.apache.log4j.xml" level="TRACE">
+    <Logger name="org.xdi" level="TRACE">
       <AppenderRef ref="FILE"/>
+      <AppenderRef ref="STDOUT"/>
     </Logger>
-    <Root level="TRACE">
+    <Root level="INFO">
+      <AppenderRef ref="FILE"/>
       <AppenderRef ref="STDOUT"/>
     </Root>
   </Loggers>
