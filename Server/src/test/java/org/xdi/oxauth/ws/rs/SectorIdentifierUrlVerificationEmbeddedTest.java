@@ -72,8 +72,8 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
+		String registerRequestContent = null;
 		try {
-
 			List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
 			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -83,14 +83,13 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 			registerRequest.setSubjectType(SubjectType.PAIRWISE);
 
-			String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-			Response response = request.post(Entity.json(registerRequestContent));
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
 
-		Response response = request.get();
+		Response response = request.post(Entity.json(registerRequestContent));
 		String entity = response.readEntity(String.class);
 
 		showResponse("requestAuthorizationCodeWithSectorIdentifierStep1", response, entity);
@@ -186,21 +185,20 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
+		String registerRequestContent = null;
 		try {
-
 			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
 					StringUtils.spaceSeparatedToList(redirectUris));
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 			registerRequest.setSectorIdentifierUri("https://INVALID_SECTOR_IDENTIFIER_URL");
 
-			String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-			Response response = request.post(Entity.json(registerRequestContent));
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
 
-		Response response = request.get();
+		Response response = request.post(Entity.json(registerRequestContent));
 		String entity = response.readEntity(String.class);
 
 		showResponse("sectorIdentifierUrlVerificationFail1", response, entity);
@@ -225,8 +223,8 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
+		String registerRequestContent = null;
 		try {
-
 			String redirectUris = "https://INVALID_REDIRECT_URI https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2";
 
 			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -234,14 +232,13 @@ public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-			String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-			Response response = request.post(Entity.json(registerRequestContent));
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
 		} catch (JSONException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
 
-		Response response = request.get();
+		Response response = request.post(Entity.json(registerRequestContent));
 		String entity = response.readEntity(String.class);
 
 		showResponse("sectorIdentifierUrlVerificationFail2", response, entity);
