@@ -84,6 +84,7 @@ public class Processor {
                         LOG.error("No response from operation. Command: " + command);
                     }
                 } else {
+                    LOG.error("Operation is not supported!");
                     return CommandResponse.OPERATION_IS_NOT_SUPPORTED;
                 }
             } catch (ErrorResponseException e) {
