@@ -19,10 +19,6 @@ public class Configuration {
     private int port;
     @JsonProperty(value = "time_out_in_seconds")
     private int timeOutInSeconds;
-    @JsonProperty(value = "jetty_port")
-    private int jettyPort;
-    @JsonProperty(value = "start_jetty")
-    private boolean startJetty;
     //@JsonProperty(value = "register_client_app_type")
     private String registerClientAppType = "web";
     //    @JsonProperty(value = "register_client_response_types")
@@ -84,22 +80,6 @@ public class Configuration {
 
     public void setKeyStorePassword(String keyStorePassword) {
         this.keyStorePassword = keyStorePassword;
-    }
-
-    public int getJettyPort() {
-        return jettyPort;
-    }
-
-    public void setJettyPort(int jettyPort) {
-        this.jettyPort = jettyPort;
-    }
-
-    public boolean isStartJetty() {
-        return startJetty;
-    }
-
-    public void setStartJetty(boolean startJetty) {
-        this.startJetty = startJetty;
     }
 
     public String getLicenseId() {
@@ -212,8 +192,6 @@ public class Configuration {
         sb.append("Configuration");
         sb.append("{port=").append(port);
         sb.append(", timeOutInSeconds=").append(timeOutInSeconds);
-        sb.append(", jettyPort=").append(jettyPort);
-        sb.append(", startJetty=").append(startJetty);
         sb.append(", localhostOnly=").append(localhostOnly);
         sb.append(", useClientAuthenticationForPat=").append(useClientAuthenticationForPat);
         sb.append(", useClientAuthenticationForAat=").append(useClientAuthenticationForAat);
