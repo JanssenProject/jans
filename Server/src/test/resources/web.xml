@@ -9,19 +9,19 @@
 	<listener>
 		<listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
 	</listener>
-	
+
 	<filter>
 		<filter-name>Authentication Filter</filter-name>
 		<filter-class>org.xdi.oxauth.auth.AuthenticationFilter</filter-class>
 	</filter>
 
-    <filter-mapping>
-        <filter-name>Authentication Filter</filter-name>
-        <url-pattern>/seam/resource/restv1/oxauth/authorize</url-pattern>
-        <url-pattern>/seam/resource/restv1/oxauth/token</url-pattern>
-        <url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
-        <url-pattern>/seam/resource/restv1/oxauth/check_session</url-pattern>
-    </filter-mapping>
+	<filter-mapping>
+		<filter-name>Authentication Filter</filter-name>
+		<url-pattern>/seam/resource/restv1/oxauth/authorize</url-pattern>
+		<url-pattern>/seam/resource/restv1/oxauth/token</url-pattern>
+		<url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
+		<url-pattern>/seam/resource/restv1/oxauth/check_session</url-pattern>
+	</filter-mapping>
 
 	<context-param>
 		<param-name>resteasy.injector.factory</param-name>
@@ -33,19 +33,19 @@
 		<param-value>/seam/resource/restv1</param-value>
 	</context-param>
 
-    <servlet>
-        <servlet-name>Resteasy</servlet-name>
-       <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher</servlet-class>
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>org.xdi.oxauth.service.TestResteasyInitializer</param-value>
-        </init-param>
-    </servlet>
+	<servlet>
+		<servlet-name>Resteasy</servlet-name>
+		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>org.xdi.oxauth.service.TestResteasyInitializer</param-value>
+		</init-param>
+	</servlet>
 
-    <servlet-mapping>
-        <servlet-name>Resteasy</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Resteasy</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
 
 	<resource-env-ref>
 		<description>Object factory for the CDI Bean Manager</description>
