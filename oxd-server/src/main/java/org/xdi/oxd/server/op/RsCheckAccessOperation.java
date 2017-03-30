@@ -4,7 +4,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.codehaus.jackson.node.POJONode;
 import org.jboss.resteasy.client.ClientResponseFailure;
-import org.jboss.resteasy.core.ServerResponse;
+import org.jboss.resteasy.specimpl.BuiltResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.RptStatusService;
@@ -118,7 +118,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         }
 
         final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
-        final ServerResponse response = (ServerResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+        final BuiltResponse response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
 
         RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
         opResponse.setWwwAuthenticateHeader((String) response.getMetadata().getFirst("WWW-Authenticate"));
