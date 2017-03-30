@@ -57,9 +57,6 @@ public abstract class ConfigurableTest extends Arquillian {
 
 	@BeforeSuite
 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
-		Reporter.log("Invoked init test suite method \n", true);
-		// org.jboss.resteasy.logging.Logger test = null;
-
 		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
 		if (StringHelper.isEmpty(propertiesFile)) {
 			propertiesFile = "target/test-classes/testng.properties";
