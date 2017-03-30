@@ -112,7 +112,7 @@ showResponse("dynamicClientRegistration", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -168,7 +168,7 @@ showResponse("requestAuthorizationCode", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -227,7 +227,7 @@ showResponse("requestAuthorizationCodeNoRedirection", response, entity);
     public void requestAuthorizationCodeFail1(
             final String authorizePath, final String userId, final String userSecret) throws Exception {
         // Testing with missing parameters
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -268,7 +268,7 @@ showResponse("requestAuthorizationCodeFail1", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -317,7 +317,7 @@ showResponse("requestAuthorizationCodeFail2", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -370,7 +370,7 @@ showResponse("requestAuthorizationCodeFail3", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -435,7 +435,7 @@ showResponse("requestAuthorizationToken", response, entity);
         final String state = UUID.randomUUID().toString();
 
         // Testing with missing parameters
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -488,7 +488,7 @@ showResponse("requestAuthorizationTokenFail1", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -547,7 +547,7 @@ showResponse("requestAuthorizationTokenFail2", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -610,7 +610,7 @@ showResponse("requestAuthorizationTokenIdToken", response, entity);
         final String state = UUID.randomUUID().toString();
         final String nonce = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -668,7 +668,7 @@ showResponse("requestAuthorizationCodeIdToken", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -730,7 +730,7 @@ showResponse("requestAuthorizationTokenCode", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -793,7 +793,7 @@ showResponse("requestAuthorizationTokenCodeIdToken", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -852,7 +852,7 @@ showResponse("requestAuthorizationIdToken", response, entity);
         final String state = UUID.randomUUID().toString();
         final String nonce = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -911,7 +911,7 @@ showResponse("requestAuthorizationWithoutScope", response, entity);
         final String state = UUID.randomUUID().toString();
 
 
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
             
@@ -971,7 +971,7 @@ showResponse("requestAuthorizationPromptNone", response, entity);
         final String state = UUID.randomUUID().toString();
 
 
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
             
@@ -1026,7 +1026,7 @@ showResponse("requestAuthorizationPromptNoneFail", response, entity);
         final String state = UUID.randomUUID().toString();
 
 
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
             
@@ -1081,7 +1081,7 @@ showResponse("requestAuthorizationPromptLogin", response, entity);
         final String state = UUID.randomUUID().toString();
 
 
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
             
@@ -1136,7 +1136,7 @@ showResponse("requestAuthorizationPromptConsent", response, entity);
         final String state = UUID.randomUUID().toString();
 
 
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
             
@@ -1192,7 +1192,7 @@ showResponse("requestAuthorizationPromptLoginConsent", response, entity);
         final String state = UUID.randomUUID().toString();
 
 
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
             
@@ -1303,7 +1303,7 @@ showResponse("requestAuthorizationCodeWithoutRedirectUriStep1", response, entity
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -1358,7 +1358,7 @@ showResponse("requestAuthorizationCodeWithoutRedirectUriStep2", response, entity
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -1408,7 +1408,7 @@ showResponse("requestAuthorizationCodeWithoutRedirectUriFailStep", response, ent
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -1473,7 +1473,7 @@ showResponse("requestAuthorizationAccessTokenStep1", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
@@ -1531,7 +1531,7 @@ showResponse("requestAuthorizationAccessTokenStep2", response, entity);
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
             @Override
             
