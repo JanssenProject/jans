@@ -16,7 +16,6 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
-import org.xdi.oxd.server.jetty.JettyServer;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.SiteConfigurationService;
 import org.xdi.oxd.server.service.SocketService;
@@ -60,7 +59,6 @@ public class ServerLauncher {
         checkConfiguration();
 
         startOxd();
-        startJetty();
     }
 
     private static void printBuildNumber() {
@@ -104,18 +102,6 @@ public class ServerLauncher {
         throw new AssertionError("Failed to start oxd, system property " +
                 ConfigurationService.CONF_SYS_PROPERTY_NAME + " is not specified. (Please defined it as -D" +
                 ConfigurationService.CONF_SYS_PROPERTY_NAME + "=<path to oxd-conf.json>)");
-    }
-
-    private static void startJetty() {
-        try {
-            final Configuration conf = INJECTOR.getInstance(Configuration.class);
-            if (conf.isStartJetty()) {
-                JettyServer server = new JettyServer(conf.getJettyPort());
-                server.start();
-            }
-        } catch (Throwable e) {
-            LOG.error("Failed to start jetty server.", e);
-        }
     }
 
     private static void configureLogger() {
