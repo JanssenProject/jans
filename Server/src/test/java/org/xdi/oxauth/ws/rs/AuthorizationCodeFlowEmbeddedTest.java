@@ -175,7 +175,8 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
 		request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-		Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+		Response response = request
+				.post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
 		String entity = response.readEntity(String.class);
 
 		showResponse("completeFlowStep2", response, entity);

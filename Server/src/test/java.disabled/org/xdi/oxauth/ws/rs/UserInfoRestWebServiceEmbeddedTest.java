@@ -9,9 +9,10 @@ package org.xdi.oxauth.ws.rs;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
 import org.jboss.seam.mock.ResourceRequestEnvironment.Method;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -69,13 +70,13 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     public void dynamicClientRegistration(final String registerPath, final String redirectUris,
                                           final String sectorIdentifierUri) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(
                             ResponseType.CODE,
@@ -91,21 +92,22 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     fail(e.getMessage(), e);
                 }
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("dynamicClientRegistration", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("dynamicClientRegistration", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
+                    final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
                     ClientTestUtil.assert_(registerResponse);
 
                     clientId = registerResponse.getClientId();
@@ -114,7 +116,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     fail(e.getMessage(), e);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -125,14 +127,14 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
         final String userEncodedCredentials = Base64.encodeBase64String((userId + ":" + userSecret).getBytes());
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+
                 Method.GET, authorizePath) {
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Basic " + userEncodedCredentials);
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
+            
+                
+                request.header("Authorization", "Basic " + userEncodedCredentials);
+                request.header("Accept", MediaType.TEXT_PLAIN);
 
                 List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                 List<String> scopes = Arrays.asList(
@@ -151,16 +153,17 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfo step 1 Implicit Flow", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfo step 1 Implicit Flow", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                if (response.getHeader("Location") != null) {
+                if (response.getLocation() != null) {
                     try {
-                        URI uri = new URI(response.getHeader("Location").toString());
+                        URI uri = new URI(response.getLocation().toString());
                         assertNotNull(uri.getFragment(), "Fragment is null");
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -183,39 +186,40 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     }
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoStep1ImplicitFlow")
     public void requestUserInfoStep2PostImplicitFlow(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Bearer " + accessToken1);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Authorization", "Bearer " + accessToken1);
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfo step 2 POST Implicit Flow", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfo step 2 POST Implicit Flow", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null && response.getHeader("Cache-Control").equals(
-                        "no-store, private"), "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null && response.getHeaderString("Cache-Control").equals(
+                        "no-store, private"), "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(JwtClaimName.SUBJECT_IDENTIFIER));
                     assertTrue(jsonObj.has(JwtClaimName.NAME));
                     assertTrue(jsonObj.has(JwtClaimName.GIVEN_NAME));
@@ -223,25 +227,25 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has(JwtClaimName.EMAIL));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoStep1ImplicitFlow")
     public void requestUserInfoStep2GetImplicitFlow(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+
                 Method.GET, userInfoPath) {
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Bearer " + accessToken1);
+            
+                
+                request.header("Authorization", "Bearer " + accessToken1);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
@@ -249,18 +253,19 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfo step 2 GET Implicit Flow", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfo step 2 GET Implicit Flow", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null && response.getHeader("Cache-Control").equals(
-                        "no-store, private"), "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null && response.getHeaderString("Cache-Control").equals(
+                        "no-store, private"), "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(JwtClaimName.SUBJECT_IDENTIFIER));
                     assertTrue(jsonObj.has(JwtClaimName.NAME));
                     assertTrue(jsonObj.has(JwtClaimName.GIVEN_NAME));
@@ -268,13 +273,13 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has(JwtClaimName.EMAIL));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"tokenPath", "userId", "userSecret"})
@@ -282,11 +287,11 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
     public void requestUserInfoStep1PasswordFlow(final String tokenPath, final String userId, final String userSecret)
             throws Exception {
         // Testing with valid parameters
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
+ Method.POST, tokenPath) {
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+            
+                
 
                 TokenRequest tokenRequest = new TokenRequest(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS);
                 tokenRequest.setUsername(userId);
@@ -295,26 +300,27 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 tokenRequest.setAuthUsername(clientId);
                 tokenRequest.setAuthPassword(clientSecret);
 
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
+                request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoStep1PasswordFlow", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoStep1PasswordFlow", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertTrue(!response.getContentAsString().equals(null), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null
+                                && response.getHeaderString("Cache-Control").equals("no-store"),
+                        "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null
+                                && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertTrue(!entity.equals(null), "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
                     assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
                     assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
@@ -323,42 +329,43 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     accessToken4 = jsonObj.getString("access_token");
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoStep1PasswordFlow")
     public void requestUserInfoStep2PasswordFlow(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Bearer " + accessToken4);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Authorization", "Bearer " + accessToken4);
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoStep2PasswordFlow", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoStep2PasswordFlow", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null && response.getHeader("Cache-Control").equals(
-                        "no-store, private"), "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null && response.getHeaderString("Cache-Control").equals(
+                        "no-store, private"), "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(JwtClaimName.SUBJECT_IDENTIFIER));
                     assertTrue(jsonObj.has(JwtClaimName.NAME));
                     assertTrue(jsonObj.has(JwtClaimName.GIVEN_NAME));
@@ -366,96 +373,98 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has(JwtClaimName.EMAIL));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test
     public void requestUserInfoInvalidRequest(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoInvalidRequest", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoInvalidRequest", response, entity);
 
                 assertEquals(response.getStatus(), 400, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has("error"), "The error type is null");
                     assertTrue(jsonObj.has("error_description"), "The error description is null");
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test
     public void requestUserInfoInvalidToken(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest("INVALID_ACCESS_TOKEN");
                 userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoInvalidToken", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoInvalidToken", response, entity);
 
                 assertEquals(response.getStatus(), 400, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has("error"), "The error type is null");
                     assertTrue(jsonObj.has("error_description"), "The error description is null");
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test
     public void requestUserInfoInvalidSchema(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest("INVALID_ACCESS_TOKEN");
 
@@ -465,22 +474,23 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoInvalidSchema", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoInvalidSchema", response, entity);
 
                 assertEquals(response.getStatus(), 400, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has("error"), "The error type is null");
                     assertTrue(jsonObj.has("error_description"), "The error description is null");
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -489,12 +499,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                                                  final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+
                 Method.GET, authorizePath) {
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+            
+                
 
                 List<ResponseType> responseTypes = new ArrayList<ResponseType>();
                 responseTypes.add(ResponseType.TOKEN);
@@ -508,22 +518,23 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                 authorizationRequest.setAuthUsername(userId);
                 authorizationRequest.setAuthPassword(userSecret);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                request.header("Accept", MediaType.TEXT_PLAIN);
                 request.setQueryString(authorizationRequest.getQueryString());
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoInsufficientScope step 1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoInsufficientScope step 1", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                if (response.getHeader("Location") != null) {
+                if (response.getLocation() != null) {
                     try {
-                        URI uri = new URI(response.getHeader("Location").toString());
+                        URI uri = new URI(response.getLocation().toString());
                         assertNotNull(uri.getFragment(), "Fragment is null");
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -546,43 +557,44 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     }
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoInsufficientScope")
     public void requestUserInfoInsufficientScopeStep2(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken2);
                 userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoInsufficientScope step 2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoInsufficientScope step 2", response, entity);
 
                 assertEquals(response.getStatus(), 403, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has("error"), "The error type is null");
                     assertTrue(jsonObj.has("error_description"), "The error description is null");
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -592,13 +604,13 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
+
                 Method.GET, authorizePath) {
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = new ArrayList<ResponseType>();
                     responseTypes.add(ResponseType.TOKEN);
@@ -624,8 +636,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -633,16 +645,17 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoAdditionalClaims step 1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoAdditionalClaims step 1", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                if (response.getHeader("Location") != null) {
+                if (response.getLocation() != null) {
                     try {
-                        URI uri = new URI(response.getHeader("Location").toString());
+                        URI uri = new URI(response.getLocation().toString());
                         assertNotNull(uri.getFragment(), "Fragment is null");
 
                         Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -665,39 +678,40 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     }
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoAdditionalClaims")
     public void requestUserInfoAdditionalClaimsStep2(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(accessToken3);
                 userInfoRequest.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoAdditionalClaims step 2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoAdditionalClaims step 2", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null && response.getHeader("Cache-Control").equals(
-                        "no-store, private"), "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null && response.getHeaderString("Cache-Control").equals(
+                        "no-store, private"), "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(JwtClaimName.SUBJECT_IDENTIFIER));
                     assertTrue(jsonObj.has(JwtClaimName.NAME));
                     assertTrue(jsonObj.has(JwtClaimName.GIVEN_NAME));
@@ -709,26 +723,26 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     assertTrue(jsonObj.has("o"));
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestUserInfoHS256Step1(final String registerPath, final String redirectUris) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
@@ -740,7 +754,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -748,14 +762,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS256Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS256Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
@@ -767,10 +782,10 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     clientSecret1 = jsonObj.getString(CLIENT_SECRET.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -780,12 +795,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                     List<String> scopes = Arrays.asList("openid");
@@ -811,8 +826,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -820,15 +835,16 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS256Step2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS256Step2", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -844,40 +860,41 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoHS256Step2")
     public void requestUserInfoHS256Step3(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Bearer " + accessToken5);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Authorization", "Bearer " + accessToken5);
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS256Step3", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS256Step3", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null && response.getHeader("Cache-Control").equals(
-                        "no-store, private"), "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null && response.getHeaderString("Cache-Control").equals(
+                        "no-store, private"), "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertNotNull(entity, "Unexpected result: " + entity);
 
                 try {
-                    Jwt jwt = Jwt.parse(response.getContentAsString());
+                    Jwt jwt = Jwt.parse(entity);
 
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
@@ -885,26 +902,26 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.PICTURE));
                 } catch (InvalidJwtException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestUserInfoHS384Step1(final String registerPath, final String redirectUris) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
@@ -916,7 +933,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -924,14 +941,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS384Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS384Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
@@ -943,10 +961,10 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     clientSecret2 = jsonObj.getString(CLIENT_SECRET.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -956,12 +974,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                     List<String> scopes = Arrays.asList("openid");
@@ -987,8 +1005,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -996,15 +1014,16 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS384Step2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS384Step2", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -1020,40 +1039,41 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoHS384Step2")
     public void requestUserInfoHS384Step3(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Bearer " + accessToken6);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Authorization", "Bearer " + accessToken6);
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS384Step3", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS384Step3", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null && response.getHeader("Cache-Control").equals(
-                        "no-store, private"), "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null && response.getHeaderString("Cache-Control").equals(
+                        "no-store, private"), "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertNotNull(entity, "Unexpected result: " + entity);
 
                 try {
-                    Jwt jwt = Jwt.parse(response.getContentAsString());
+                    Jwt jwt = Jwt.parse(entity);
 
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
@@ -1061,26 +1081,26 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.PICTURE));
                 } catch (InvalidJwtException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void requestUserInfoHS512Step1(final String registerPath, final String redirectUris) throws Exception {
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
@@ -1092,7 +1112,7 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
 
                     request.setContentType(MediaType.APPLICATION_JSON);
                     String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
+                    Response response = request.post(Entity.json(registerRequestContent));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
@@ -1100,14 +1120,15 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS512Step1", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS512Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+                assertNotNull(entity, "Unexpected result: " + entity);
                 try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+                    JSONObject jsonObj = new JSONObject(entity);
                     assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
                     assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
                     assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
@@ -1119,10 +1140,10 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     clientSecret3 = jsonObj.getString(CLIENT_SECRET.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
@@ -1131,12 +1152,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
+            
                 try {
-                    super.prepareRequest(request);
+                    
 
                     List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
                     List<String> scopes = Arrays.asList("openid");
@@ -1162,8 +1183,8 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     authorizationRequest.setRequest(authJwt);
                     System.out.println("Request JWT: " + authJwt);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
+                    request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+                    request.header("Accept", MediaType.TEXT_PLAIN);
                     request.setQueryString(authorizationRequest.getQueryString());
                 } catch (Exception e) {
                     fail(e.getMessage(), e);
@@ -1171,15 +1192,16 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS512Step2", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS512Step2", response, entity);
 
                 assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+                assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
                 try {
-                    URI uri = new URI(response.getHeader("Location").toString());
+                    URI uri = new URI(response.getLocation().toString());
                     assertNotNull(uri.getFragment(), "Query string is null");
 
                     Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
@@ -1195,40 +1217,41 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     fail("Response URI is not well formed");
                 }
             }
-        }.run();
+        
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "requestUserInfoHS512Step2")
     public void requestUserInfoHS512Step3(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+
+                Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request()
 
             @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Bearer " + accessToken7);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+            
+                
+                request.header("Authorization", "Bearer " + accessToken7);
+                request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
                 UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
-                request.addParameters(userInfoRequest.getParameters());
+                Response response = request.post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
             }
 
             @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestUserInfoHS512Step3", response);
+            Response response = request.get();
+                
+                String entity = response.readEntity(String.class);
+showResponse("requestUserInfoHS512Step3", response, entity);
 
                 assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null && response.getHeader("Cache-Control").equals(
-                        "no-store, private"), "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+                assertTrue(response.getHeaderString("Cache-Control") != null && response.getHeaderString("Cache-Control").equals(
+                        "no-store, private"), "Unexpected result: " + response.getHeaderString("Cache-Control"));
+                assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                        "Unexpected result: " + response.getHeaderString("Pragma"));
+                assertNotNull(entity, "Unexpected result: " + entity);
 
                 try {
-                    Jwt jwt = Jwt.parse(response.getContentAsString());
+                    Jwt jwt = Jwt.parse(entity);
 
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NAME));
@@ -1236,12 +1259,12 @@ public class UserInfoRestWebServiceEmbeddedTest extends BaseTest {
                     assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.PICTURE));
                 } catch (InvalidJwtException e) {
                     e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
+                    fail(e.getMessage() + "\nResponse was: " + entity);
                 } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-        }.run();
+        
     }
 }
