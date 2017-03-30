@@ -73,14 +73,14 @@
     </test>
 
 <!--     OpenID Request Object test -->
-<!--     <test name="OpenID Request Object test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectEmbeddedTest"/> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithHSAlgEmbeddedTest"/> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithRSAlgEmbeddedTest"/> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithESAlgEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="OpenID Request Object test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectEmbeddedTest"/>
+            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithHSAlgEmbeddedTest"/>
+            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithRSAlgEmbeddedTest"/>
+            <class name="org.xdi.oxauth.ws.rs.OpenIDRequestObjectWithESAlgEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Register test -->
 <!--     <test name="Register test (embedded)" enabled="true"> -->
