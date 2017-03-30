@@ -9,12 +9,12 @@
         </classes>
     </test>
 
-<!--     Authorization Code Flow test -->
-<!--     <test name="Authorization Code Flow test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.AuthorizationCodeFlowEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    Authorization Code Flow test
+    <test name="Authorization Code Flow test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizationCodeFlowEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Authorize test -->
 <!--     <test name="Authorize test (embedded)" enabled="true"> -->
