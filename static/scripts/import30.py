@@ -178,7 +178,7 @@ class Migration(object):
         logging.info("Updating the CA Certs Keystore.")
         keys = ['httpd', 'idp-signing', 'idp-encryption', 'shibidp', 'asimba',
                 'openldap']
-        hostname = self.readFile(self.etc_hostname).strip()
+        hostname = self.getOutput(['hostname']).strip()
         # import all the keys into the keystore
         for key in keys:
             alias = "{0}_{1}".format(hostname, key)
@@ -283,6 +283,9 @@ class Migration(object):
         infile = open(f, 'r')
         output = ""
 
+        atypeRegex = re.compile('^attributeTypes:\s', re.IGNORECASE)
+        obclassRegex = re.compile('^objectClasses:\s', re.IGNORECASE)
+
         for line in infile:
             if re.match('^dn:', line) or re.match('^objectClass:', line) or \
                     re.match('^cn:', line):
@@ -295,18 +298,18 @@ class Migration(object):
             elif re.match('^\s', line):
                 line = re.sub('^\s', '\t', line)
             # Change the keyword for attributetype
-            elif re.match('^attributeTypes:\s', line, re.IGNORECASE):
-                line = re.sub('^attributeTypes:', '\nattributetype', line, 1,
-                              re.IGNORECASE)
+            elif atypeRegex.match(line):
+                line = atypeRegex.sub('\nattributetype ', line, 1)
                 oid = 'oxAttribute:' + str(self.attrs+1)
-                line = re.sub('\s[\d]+\s', ' '+oid+' ', line, 1, re.IGNORECASE)
+                oidregex = re.compile('\s[\d]+\s', re.IGNORECASE)
+                line = oidregex.sub(' '+oid+' ', line, 1)
                 self.attrs += 1
             # Change the keyword for objectclass
-            elif re.match('^objectClasses:\s', line, re.IGNORECASE):
-                line = re.sub('^objectClasses:', '\nobjectclass', line, 1,
-                              re.IGNORECASE)
+            elif obclassRegex.match(line):
+                line = obclassRegex.sub('\nobjectclass ', line, 1)
                 oid = 'oxObjectClass:' + str(self.objclasses+1)
-                line = re.sub('ox-[\w]+-oid', oid, line, 1, re.IGNORECASE)
+                oidregex = re.compile('ox-[\w]+-oid', re.IGNORECASE)
+                line = oidregex.sub(oid, line, 1)
                 self.objclasses += 1
             else:
                 logging.warning("Skipping Line: {}".format(line.strip()))
@@ -501,7 +504,7 @@ class Migration(object):
 
     def getLDAPServerType(self):
         choice = 1
-        print("~~~~~~~ Gluu Server Community Edition Migartion Tool ~~~~~~~")
+        print("~~~~~~~ Gluu Server Community Edition Migration Tool ~~~~~~~")
         try:
             choice = int(raw_input(
                 "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
