@@ -83,11 +83,11 @@
     </test>
 
 <!--     Register test -->
-<!--     <test name="Register test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.RegistrationRestWebServiceEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Register test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.RegistrationRestWebServiceEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Request Object Signing Alg Restriction test -->
 <!--     <test name="Request Object Signing Alg Restriction test (embedded)" enabled="true"> -->
