@@ -49,25 +49,29 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         super(command, injector, RegisterSiteParams.class);
     }
 
+    public RegisterSiteResponse execute_(RegisterSiteParams params) {
+        validateParametersAndFallbackIfNeeded(params);
+
+        String siteId = UUID.randomUUID().toString();
+
+        LOG.info("Creating site configuration ...");
+        persistSiteConfiguration(siteId, params);
+
+        LOG.info("Site configuration created: " + siteConfiguration);
+
+        RegisterSiteResponse opResponse = new RegisterSiteResponse();
+        opResponse.setOxdId(siteId);
+        opResponse.setOpHost(params.getOpHost());
+        return opResponse;
+    }
+
     @Override
     public CommandResponse execute(RegisterSiteParams params) {
         try {
-            validateParametersAndFallbackIfNeeded(params);
-
-            String siteId = UUID.randomUUID().toString();
-
-            LOG.info("Creating site configuration ...");
-            persistSiteConfiguration(siteId, params);
-
-            LOG.info("Site configuration created: " + siteConfiguration);
-
-            RegisterSiteResponse opResponse = new RegisterSiteResponse();
-            opResponse.setOxdId(siteId);
-            opResponse.setOpHost(params.getOpHost());
-            return okResponse(opResponse);
+            return okResponse(execute_(params));
         } catch (ErrorResponseException e) {
             throw e;
-        }  catch (Exception e) {
+        } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
@@ -260,7 +264,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         request.setGrantTypes(grantTypes);
 
         if (params.getClientLogoutUri() != null) {
-           request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
+            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
         }
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
@@ -297,7 +301,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         siteConf.setApplicationType("web");
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-           siteConf.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+            siteConf.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         }
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {

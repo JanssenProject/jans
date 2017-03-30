@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 
 import static junit.framework.Assert.*;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
@@ -147,11 +146,4 @@ public class RegisterSiteTest {
         assertTrue(!Strings.isNullOrEmpty(resp.getOxdId()));
         return resp;
     }
-
-    public static void main(String[] args) {
-        Date date = new Date();
-        date.setTime(1475178003981L);
-        System.out.println(date);
-    }
-
 }

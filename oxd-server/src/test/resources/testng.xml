@@ -85,4 +85,11 @@
             <class name="org.xdi.oxd.client.RpGetGatTest"/>
         </classes>
     </test>
+
+    <!-- Custom -->
+    <test name="Setup client" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.SetupClientTest"/>
+        </classes>
+    </test>
 </suite>
