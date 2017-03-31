@@ -173,6 +173,7 @@ class Migration(object):
             output, error = p.communicate()
             if error and 'Certificate was added to keystore' not in error:
                 logging.error(error)
+            logging.debug(output)
             return output
         except:
             logging.error("Error running command : %s" % " ".join(args))
