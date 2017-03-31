@@ -305,7 +305,6 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
 		Builder request = ResteasyClientBuilder.newClient()
 				.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
-
 		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
 		request.header("Accept", MediaType.TEXT_PLAIN);
 
