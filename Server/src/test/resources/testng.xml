@@ -38,11 +38,11 @@
     </test>
 
 <!--     Client Info test -->
-<!--     <test name="Client Info test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.ClientInfoRestWebServiceEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Client Info test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ClientInfoRestWebServiceEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     End Session test -->
     <test name="End Session test (embedded)" enabled="true">
@@ -52,11 +52,11 @@
     </test>
 
 <!--     Grant Types Restriction -->
-<!--     <test name="Grant Types Restriction (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Grant Types Restriction (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     JWK test -->
     <test name="JWK test (embedded)" enabled="true">
@@ -90,11 +90,11 @@
     </test>
 
 <!--     Request Object Signing Alg Restriction test -->
-<!--     <test name="Request Object Signing Alg Restriction test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.RequestObjectSigningAlgRestrictionEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Request Object Signing Alg Restriction test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.RequestObjectSigningAlgRestrictionEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Response Types Restriction -->
 <!--     <test name="Response Types Restriction (embedded)" enabled="true"> -->
