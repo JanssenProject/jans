@@ -121,9 +121,9 @@
     <test name="Token test (embedded)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceEmbeddedTest"/>
-<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest"/> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithRSAlgEmbeddedTest"/> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithESAlgEmbeddedTest"/> -->
+            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithHSAlgEmbeddedTest"/>
+            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithRSAlgEmbeddedTest"/>
+            <class name="org.xdi.oxauth.ws.rs.TokenRestWebServiceWithESAlgEmbeddedTest"/>
         </classes>
     </test>
 
@@ -142,18 +142,18 @@
 <!--     </test> -->
 
 <!--     Signature test -->
-<!--     <test name="Signature test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.SignatureTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Signature test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.SignatureTest"/>
+        </classes>
+    </test>
 
 <!--     Encryption test -->
-<!--     <test name="Encryption test (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.EncryptionTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Encryption test (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.EncryptionTest"/>
+        </classes>
+    </test>
 
     <test name="Utility methods test" enabled="true">
         <classes>
@@ -261,20 +261,10 @@
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest"/>
         </classes>
     </test>
-    <!-- Application Type Restriction (embedded) -->
-    <test name="Encryption test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.EncryptionTest"/>
-        </classes>
-    </test>
+
     <test name="Locale test (embedded)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.LocaleTest"/>
-        </classes>
-    </test>
-    <test name="Signature test (embedded)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.SignatureTest"/>
         </classes>
     </test>
 
