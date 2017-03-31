@@ -18,6 +18,7 @@ import traceback
 import shutil
 import json
 import re
+import subprocess
 
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter
@@ -69,7 +70,6 @@ class MyLDIF(LDIFParser):
 
 class Migration(object):
     def __init__(self, backup):
-        logging.info("Starting migration.")
         self.backupDir = backup
         self.ldifDir = os.path.join(backup, 'ldif')
         self.certsDir = os.path.join(backup, 'etc')
@@ -92,6 +92,7 @@ class Migration(object):
         self.ldif_export = "/opt/opendj/bin/export-ldif"
 
         self.ldapDataFile = "/opt/gluu/data/main_db/data.mdb"
+        self.ldapSiteFile = "/opt/gluu/data/site_db/data.mdb"
 
         self.currentData = os.path.join(self.workingDir, 'current.ldif')
         self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
@@ -102,8 +103,11 @@ class Migration(object):
         self.ldap_type = 'openldap'
 
     def readFile(self, inFilePath):
-        inFilePathText = None
+        if not os.path.exists(inFilePath):
+            logging.debug("Cannot read: %s. File does not exist.", inFilePath)
+            return None
 
+        inFilePathText = None
         try:
             f = open(inFilePath)
             inFilePathText = f.read()
@@ -164,7 +168,11 @@ class Migration(object):
     def getOutput(self, args):
         try:
             logging.debug("Running command : %s" % " ".join(args))
-            output = os.popen(" ".join(args)).read().strip()
+            p = subprocess.Popen(args, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
+            output, error = p.communicate()
+            if error:
+                logging.error(error)
             return output
         except:
             logging.error("Error running command : %s" % " ".join(args))
@@ -312,7 +320,7 @@ class Migration(object):
                 line = oidregex.sub(oid, line, 1)
                 self.objclasses += 1
             else:
-                logging.warning("Skipping Line: {}".format(line.strip()))
+                logging.debug("Skipping Line: {}".format(line.strip()))
                 line = ""
 
             output += line
@@ -474,10 +482,15 @@ class Migration(object):
                     outfile.write(line)
 
     def importDataIntoOpenldap(self):
-        count = len(os.listdir('/opt/gluu/data/'))
+        count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
         logging.debug("Moving %s to %s.", self.ldapDataFile, backupfile)
         shutil.move(self.ldapDataFile, backupfile)
+
+        count = len(os.listdir('/opt/gluu/data/site_db/')) - 1
+        backupfile = self.ldapSiteFile + ".bkp_{0:02d}".format(count)
+        logging.debug("Moving %s to %s.", self.ldapSiteFile, backupfile)
+        shutil.move(self.ldapSiteFile, backupfile)
 
         output = self.getOutput([self.slapadd, '-c', '-b', 'o=gluu', '-f',
                                 self.slapdConf, '-l', self.o_gluu])
@@ -504,7 +517,6 @@ class Migration(object):
 
     def getLDAPServerType(self):
         choice = 1
-        print("~~~~~~~ Gluu Server Community Edition Migration Tool ~~~~~~~")
         try:
             choice = int(raw_input(
                 "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
@@ -577,9 +589,17 @@ class Migration(object):
                     os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
                     '/opt/shibboleth-idp/ssl')
 
+    def fixPermissions(self):
+        logging.info('Fixing permissions for files.')
+        self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
+        self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+
     def migrate(self):
         """Main function for the migration of backup data
         """
+        print("~~~~~~~ Gluu Server Community Edition Migration Tool ~~~~~~~")
+        print("        ============================================        ")
+        logging.info("Starting migration.")
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
@@ -592,6 +612,7 @@ class Migration(object):
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
+        self.fixPermissions()
         self.startLDAPServer()
         self.startWebapps()
 
