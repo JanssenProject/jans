@@ -171,7 +171,7 @@ class Migration(object):
             p = subprocess.Popen(args, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             output, error = p.communicate()
-            if error:
+            if error and 'Certificate was added to keystore' not in error:
                 logging.error(error)
             return output
         except:
@@ -597,9 +597,10 @@ class Migration(object):
     def migrate(self):
         """Main function for the migration of backup data
         """
-        print("~~~~~~~ Gluu Server Community Edition Migration Tool ~~~~~~~")
-        print("        ============================================        ")
-        logging.info("Starting migration.")
+        print("\n")
+        print("------------------------------------------------------------")
+        print("        Gluu Server Community Edition Migration Tool        ")
+        print("============================================================")
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
