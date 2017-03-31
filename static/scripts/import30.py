@@ -101,6 +101,7 @@ class Migration(object):
         self.attrs = 1000
         self.objclasses = 1000
         self.ldap_type = 'openldap'
+        self.gluuSchemaDir = '/opt/gluu/schema/openldap/'
 
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
@@ -352,10 +353,10 @@ class Migration(object):
                     schema_100, '/opt/opendj/config/schema/100-user.ldif')
             return
 
-        # Process for openldap and then copy
+        # Process for openldap and then append the contents to custom schema
         new_user = os.path.join(self.workingDir, 'new_99.ldif')
-        user_file = os.path.join(self.workingDir, 'user.schema')
-        outfile = open(user_file, 'w')
+        custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
+        outfile = open(custom_schema, 'a')
         output = ""
 
         if os.path.isfile(schema_99):
@@ -367,9 +368,9 @@ class Migration(object):
             self.updateUserSchema(schema_100, new_user)
             output = self.convertSchema(new_user)
 
+        outfile.write("\n")
         outfile.write(output)
         outfile.close()
-        shutil.copyfile(user_file, '/opt/gluu/schema/openldap/user.schema')
 
     def getEntry(self, fn, dn):
         parser = MyLDIF(open(fn, 'rb'), sys.stdout)
