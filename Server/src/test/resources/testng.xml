@@ -282,7 +282,6 @@
 	<parameter name="jwksPath" value="seam/resource/restv1/oxauth/jwks" />
 	<parameter name="userInfoPath" value="seam/resource/restv1/oxauth/userinfo" />
 	<parameter name="clientInfoPath" value="seam/resource/restv1/oxauth/clientinfo" />
-	<parameter name="checkSessionPath" value="seam/resource/restv1/oxauth/check_session" />
 	<parameter name="endSessionPath" value="seam/resource/restv1/oxauth/end_session" />
 	<parameter name="endSessionPagePath" value="seam/resource/restv1/oxauth/end_session_page" />
 	<parameter name="registerPath" value="seam/resource/restv1/oxauth/register" />
