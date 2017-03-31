@@ -565,14 +565,17 @@ class Migration(object):
             self.startOpenDJ()
 
     def copyIDPFiles(self):
-        if os.path.isdir(os.path.join(self.backupDir, 'opt', 'idp')):
+        idp_dir = os.path.join(self.backupDir, 'opt', 'idp')
+        if os.path.isdir(idp_dir):
             logging.info('Copying Shibboleth IDP files...')
-            copy_tree(
-                os.path.join(self.backupDir, 'opt', 'idp', 'metadata'),
-                '/opt/shibboleth-idp/metadata')
-            copy_tree(
-                os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
-                '/opt/shibboleth-idp/ssl')
+            if os.path.isdir(os.path.join(idp_dir, 'metadata')):
+                copy_tree(
+                    os.path.join(self.backupDir, 'opt', 'idp', 'metadata'),
+                    '/opt/shibboleth-idp/metadata')
+            if os.path.isdir(os.path.join(idp_dir, 'ssl')):
+                copy_tree(
+                    os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
+                    '/opt/shibboleth-idp/ssl')
 
     def migrate(self):
         """Main function for the migration of backup data
