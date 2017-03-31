@@ -97,11 +97,11 @@
     </test>
 
 <!--     Response Types Restriction -->
-<!--     <test name="Response Types Restriction (embedded)" enabled="true"> -->
-<!--         <classes> -->
-<!--             <class name="org.xdi.oxauth.ws.rs.ResponseTypesRestrictionEmbeddedTest"/> -->
-<!--         </classes> -->
-<!--     </test> -->
+    <test name="Response Types Restriction (embedded)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.ResponseTypesRestrictionEmbeddedTest"/>
+        </classes>
+    </test>
 
 <!--     Sector Identifier URL Verification test -->
     <test name="Sector Identifier URL Verification (embedded)" enabled="true">
