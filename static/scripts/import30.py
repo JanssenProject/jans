@@ -487,12 +487,18 @@ class Migration(object):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
         logging.debug("Moving %s to %s.", self.ldapDataFile, backupfile)
-        shutil.move(self.ldapDataFile, backupfile)
+        try:
+            shutil.move(self.ldapDataFile, backupfile)
+        except IOError:
+            logging.debug(traceback.format_exc())
 
         count = len(os.listdir('/opt/gluu/data/site_db/')) - 1
         backupfile = self.ldapSiteFile + ".bkp_{0:02d}".format(count)
         logging.debug("Moving %s to %s.", self.ldapSiteFile, backupfile)
-        shutil.move(self.ldapSiteFile, backupfile)
+        try:
+            shutil.move(self.ldapSiteFile, backupfile)
+        except IOError:
+            logging.debug(traceback.format_exc())
 
         output = self.getOutput([self.slapadd, '-c', '-b', 'o=gluu', '-f',
                                 self.slapdConf, '-l', self.o_gluu])
