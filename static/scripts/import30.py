@@ -98,8 +98,8 @@ class Migration(object):
         self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
         self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
         self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
-        self.attrs = 1000
-        self.objclasses = 1000
+        self.attrs = 2000
+        self.objclasses = 2000
         self.ldap_type = 'openldap'
         self.gluuSchemaDir = '/opt/gluu/schema/openldap/'
 
