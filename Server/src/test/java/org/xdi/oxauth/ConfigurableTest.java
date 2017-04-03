@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -29,6 +30,7 @@ import org.xdi.util.properties.FileConfiguration;
  * 
  * @author Yuriy Movchan Date: 05/16/2016
  */
+@ArquillianSuiteDeployment
 public abstract class ConfigurableTest extends Arquillian {
 
 	public static FileConfiguration testData;
