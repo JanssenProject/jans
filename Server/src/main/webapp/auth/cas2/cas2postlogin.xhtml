@@ -39,7 +39,7 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['cas2login.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <h:form id="loginForm">
@@ -47,7 +47,7 @@
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Login (second step)</div>
+                    <div class="login-panel-header">#{msgs['cas2login.loginHeader']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
@@ -55,17 +55,17 @@
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </s:div>
 
-                        <p class="info">Please login here</p>
+                        <p class="info">#{msgs['cas2login.pleaseLoginHere']}</p>
 
                         <div class="dialog">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="username">Username</h:outputLabel>
+                                <h:outputLabel for="username">#{msgs['cas2login.username']}</h:outputLabel>
                                 <h:inputText id="username"
                                              value="#{credentials.username}" autocomplete="off"/>
-                                <h:outputLabel for="password">Password</h:outputLabel>
+                                <h:outputLabel for="password">#{msgs['cas2login.password']}</h:outputLabel>
                                 <h:inputSecret id="password"
                                                value="#{credentials.password}" autocomplete="off"/>
-                                <h:outputLabel for="rememberMe">Remember me</h:outputLabel>
+                                <h:outputLabel for="rememberMe">#{msgs['cas2login.rememberMe']}</h:outputLabel>
                                 <h:selectBooleanCheckbox id="rememberMe"
                                                          value="#{rememberMe.enabled}"/>
                             </h:panelGrid>
@@ -73,7 +73,7 @@
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['cas2login.termsPrivace']}</a>
                             </p>
                         </s:div>
 

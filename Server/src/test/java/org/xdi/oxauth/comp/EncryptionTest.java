@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.ws.rs;
+package org.xdi.oxauth.comp;
 
 import static org.testng.Assert.assertEquals;
 
