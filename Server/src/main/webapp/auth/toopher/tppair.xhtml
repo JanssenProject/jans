@@ -11,11 +11,11 @@
 
         <s:fragment rendered="#{param.toopher_user_uid != null}">
             <script type="text/javascript">
-            //<![CDATA[
+                //<![CDATA[
                 jQuery(document).ready(function() {
                     $("#loginForm").submit();
                 });
-            //]]>
+                //]]>
             </script>
         </s:fragment>
 
@@ -58,7 +58,7 @@
         <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Toopher Login (Pair with phone)</div>
+                    <div class="login-panel-header">#{msgs['toopher.loginPairWithPhone']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
                         <s:div rendered='#{!empty client.getLogoUri()}'>
@@ -66,23 +66,23 @@
                         </s:div>
 
                         <s:div styleClass="dialog" rendered="#{param.toopher_user_uid == null}">
-                            <p class="info">Please login here</p>
+                            <p class="info">#{msgs['toopher.pleaseLoginHere']}</p>
                         </s:div>
 
                         <s:div styleClass="dialog" rendered="#{param.toopher_user_uid == null}">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="pairing_phrase">Pairing phrases</h:outputLabel>
-				                <input name="pairing_phrase" type="text" autocomplete="off" />
+                                <h:outputLabel for="pairing_phrase">#{msgs['toopher.pairingPhrases']}</h:outputLabel>
+                                <input name="pairing_phrase" type="text" autocomplete="off" />
                             </h:panelGrid>
                         </s:div>
 
                         <s:div styleClass="dialog" rendered="#{param.toopher_user_uid != null}">
-                            <p class="info">Checking pairing status...</p>
+                            <p class="info">#{msgs['toopher.checkingPairing']}</p>
                         </s:div>
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['toopher.termsPrivacy']}</a>
                             </p>
                         </s:div>
 

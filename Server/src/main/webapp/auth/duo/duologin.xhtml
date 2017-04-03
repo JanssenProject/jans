@@ -11,11 +11,11 @@
         <script src="./js/Duo-Web-v2.min.js"/>
 
         <script>
-           Duo.init({
-               'host':'#{duo_host}',
-               'sig_request':'#{duo_sig_request}',
-               'post_action':'#{request.contextPath}/postlogin',
-           });
+            Duo.init({
+                'host':'#{duo_host}',
+                'sig_request':'#{duo_sig_request}',
+                'post_action':'#{request.contextPath}/postlogin',
+            });
         </script>
 
         <style type="text/css">
@@ -52,7 +52,7 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - DUO Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['duologin.title']}</ui:define>
 
     <ui:define name="body">
         <form method="post" id="duo_form"/>
@@ -60,7 +60,7 @@
         <h:form id="loginForm2">
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">DUO Login (second step)</div>
+                    <div class="login-panel-header">#{msgs['duologin.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
 
@@ -72,7 +72,7 @@
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['duologin.termsPrivacy']}</a>
                             </p>
                         </s:div>
                     </div>
