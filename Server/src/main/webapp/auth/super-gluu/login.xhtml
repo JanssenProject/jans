@@ -14,48 +14,48 @@
         <script src="../../js/gluu-auth.js"/>
 
         <script>
-			var helper = (function() {
-				var authResult = undefined;
+            var helper = (function() {
+                var authResult = undefined;
 
-				return {
-	 			    /**
-	 			    * Resume on getting authentication result from server
-	 			    */
-					onSignInCallback: function(authResult) {
-				        console.log('Get authentication result: ' + authResult);
-						helper.resumeAuthentication(authResult);
-					},
+                return {
+                    /**
+                     * Resume on getting authentication result from server
+                     */
+                    onSignInCallback: function(authResult) {
+                        console.log('Get authentication result: ' + authResult);
+                        helper.resumeAuthentication(authResult);
+                    },
 
-					/**
-					* Send form to server to resume authentication workflow
-					*/
-					resumeAuthentication: function(authResult) {
-						$('input#auth_result').val(authResult);
-						$('form#response').submit();
-					},
-				};
-			})();
-			
-			/**
-			 * Calls the helper method that handles the authentication flow.
-			 */
-			function onSignInCallback(authResult) {
-			  helper.onSignInCallback(authResult);
-			}
+                    /**
+                     * Send form to server to resume authentication workflow
+                     */
+                    resumeAuthentication: function(authResult) {
+                        $('input#auth_result').val(authResult);
+                        $('form#response').submit();
+                    },
+                };
+            })();
 
-			var request = '${super_gluu_request}';
-			var label = '${super_gluu_label}';
-			var qr_options = ${super_gluu_qr_options};
-			$(document).ready(function() {
+            /**
+             * Calls the helper method that handles the authentication flow.
+             */
+            function onSignInCallback(authResult) {
+                helper.onSignInCallback(authResult);
+            }
 
-				if (request == '') {
-					onSignInCallback('error');
-				}
+            var request = '${super_gluu_request}';
+            var label = '${super_gluu_label}';
+            var qr_options = ${super_gluu_qr_options};
+            $(document).ready(function() {
 
-				gluu_auth.renderQrCode('#container', request, qr_options, label);
-				gluu_auth.startProgressBar('#progressbar', 60);
-				gluu_auth.startSessionChecker(onSignInCallback, 60);
-			});
+                if (request == '') {
+                    onSignInCallback('error');
+                }
+
+                gluu_auth.renderQrCode('#container', request, qr_options, label);
+                gluu_auth.startProgressBar('#progressbar', 60);
+                gluu_auth.startSessionChecker(onSignInCallback, 60);
+            });
 
         </script>
 
@@ -118,9 +118,9 @@
                                         </s:div>
 
                                         <div class="dialog">
-                                        	<p>Scan QR code using Super-Gluu</p>
-                                        	<div id="container"></div>
-                                        	<div id="progressbar"></div>
+                                            <p>#{msgs['supergluu.scanQRCode']}</p>
+                                            <div id="container"></div>
+                                            <div id="progressbar"></div>
                                         </div>
 
                                         <s:div rendered='#{!empty client.getPolicyUri()}'>

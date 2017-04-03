@@ -82,6 +82,9 @@ public class AppInitializer {
     private PythonService pythonService;
 
     @Inject
+    private MetricService metricService;
+
+    @Inject
     private CustomScriptManager customScriptManager;
 
 	@Inject
@@ -122,6 +125,7 @@ public class AppInitializer {
 
         pythonService.initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
         customScriptManager.init(supportedCustomScriptTypes);
+        metricService.init();
 	}
 
     @Produces @ApplicationScoped
