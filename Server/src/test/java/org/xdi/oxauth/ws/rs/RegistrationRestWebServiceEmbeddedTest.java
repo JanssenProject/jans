@@ -6,12 +6,33 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -24,15 +45,6 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.uma.TestUtil;
 import org.xdi.oxauth.model.util.StringUtils;
-import org.xdi.util.Util;
-
-import javax.ws.rs.core.MediaType;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Functional tests for Client Registration Web Services (embedded)
@@ -42,322 +54,260 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  */
 public class RegistrationRestWebServiceEmbeddedTest extends BaseTest {
 
-    private String registrationAccessToken1;
-    private String registrationClientUri1;
+	@ArquillianResource
+	private URI url;
 
-    @Parameters({"registerPath", "redirectUris"})
-    @Test
-    public void requestClientAssociate1(final String registerPath, final String redirectUris) throws Exception {
+	private static String registrationAccessToken1;
+	private static String registrationClientUri1;
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	@Parameters({ "registerPath", "redirectUris" })
+	@Test
+	public void requestClientAssociate1(final String registerPath, final String redirectUris) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+		String registerRequestContent = null;
+		try {
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestClientAssociate1", response);
+		showResponse("requestClientAssociate1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
-                    ClientTestUtil.assert_(registerResponse);
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+			ClientTestUtil.assert_(registerResponse);
 
-                    registrationAccessToken1 = registerResponse.getRegistrationAccessToken();
-                    registrationClientUri1 = registerResponse.getRegistrationClientUri();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+			registrationAccessToken1 = registerResponse.getRegistrationAccessToken();
+			registrationClientUri1 = registerResponse.getRegistrationClientUri();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-    @Parameters({"registerPath", "redirectUris", "sectorIdentifierUri", "contactEmail1", "contactEmail2"})
-    @Test
-    public void requestClientAssociate2(final String registerPath, final String redirectUris,
-                                        final String sectorIdentifierUri, final String contactEmail1, final String contactEmail2) throws Exception {
+	@Parameters({ "registerPath", "redirectUris", "sectorIdentifierUri", "contactEmail1", "contactEmail2" })
+	@Test
+	public void requestClientAssociate2(final String registerPath, final String redirectUris,
+			final String sectorIdentifierUri, final String contactEmail1, final String contactEmail2) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+		String registerRequestContent = null;
+		try {
+			List<String> contacts = Arrays.asList(contactEmail1, contactEmail2);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.setContacts(contacts);
+			registerRequest.setScopes(Arrays.asList("openid", "clientinfo", "profile", "email", "invalid_scope"));
+			registerRequest.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
+			registerRequest.setClientUri("http://www.gluu.org/company/team");
+			registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+			registerRequest.setPolicyUri("http://www.gluu.org/policy");
+			registerRequest.setJwksUri("http://www.gluu.org/jwks");
+			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+			registerRequest.setSubjectType(SubjectType.PAIRWISE);
+			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
 
-                    List<String> contacts = Arrays.asList(contactEmail1, contactEmail2);
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.setContacts(contacts);
-                    registerRequest.setScopes(Arrays.asList("openid", "clientinfo", "profile", "email", "invalid_scope"));
-                    registerRequest.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
-                    registerRequest.setClientUri("http://www.gluu.org/company/team");
-                    registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
-                    registerRequest.setPolicyUri("http://www.gluu.org/policy");
-                    registerRequest.setJwksUri("http://www.gluu.org/jwks");
-                    registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-                    registerRequest.setSubjectType(SubjectType.PAIRWISE);
-                    registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+		showResponse("requestClientAssociate2", response, entity);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestClientAssociate2", response);
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+			ClientTestUtil.assert_(registerResponse);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
-                    ClientTestUtil.assert_(registerResponse);
+			JSONObject jsonObj = new JSONObject(entity);
 
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
+			// Registered Metadata
+			assertTrue(jsonObj.has(CLIENT_URI.toString()));
+			assertTrue(jsonObj.has(SCOPES.toString()));
 
-                    // Registered Metadata
-                    assertTrue(jsonObj.has(CLIENT_URI.toString()));
-                    assertTrue(jsonObj.has(SCOPES.toString()));
+			JSONArray scopesJsonArray = jsonObj.getJSONArray(SCOPES.toString());
+			assertEquals(scopesJsonArray.getString(0), "openid");
+			assertEquals(scopesJsonArray.getString(1), "clientinfo");
+			assertEquals(scopesJsonArray.getString(2), "profile");
+			assertEquals(scopesJsonArray.getString(3), "email");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-                    JSONArray scopesJsonArray = jsonObj.getJSONArray(SCOPES.toString());
-                    assertEquals(scopesJsonArray.getString(0), "openid");
-                    assertEquals(scopesJsonArray.getString(1), "clientinfo");
-                    assertEquals(scopesJsonArray.getString(2), "profile");
-                    assertEquals(scopesJsonArray.getString(3), "email");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+	@Parameters({ "registerPath" })
+	@Test(dependsOnMethods = "requestClientAssociate1")
+	public void requestClientRead(final String registerPath) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+				+ registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1)).request();
+		request.header("Authorization", "Bearer " + registrationAccessToken1);
 
-    @Parameters({"registerPath"})
-    @Test(dependsOnMethods = "requestClientAssociate1")
-    public void requestClientRead(final String registerPath) throws Exception {
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, registerPath) {
+		showResponse("requestClientRead", response, entity);
+		readResponseAssert(response, entity);
+	}
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+	public static void readResponseAssert(Response response, String entity) {
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
+			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-                request.addHeader("Authorization", "Bearer " + registrationAccessToken1);
-                request.setContentType(MediaType.APPLICATION_JSON);
-                request.setQueryString(registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1));
-            }
+			// Registered Metadata
+			assertTrue(jsonObj.has(REDIRECT_URIS.toString()));
+			assertTrue(jsonObj.has(APPLICATION_TYPE.toString()));
+			assertTrue(jsonObj.has(CLIENT_NAME.toString()));
+			assertTrue(jsonObj.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+			assertTrue(jsonObj.has("scopes"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestClientRead", response);
-                readResponseAssert(response);
-            }
-        }.run();
-    }
+	@Parameters({ "registerPath", "redirectUris", "contactEmail1", "contactEmail2" })
+	@Test(dependsOnMethods = "requestClientAssociate1")
+	public void requestClientUpdate(final String registerPath, final String redirectUris, final String contactEmail1,
+			final String contactEmail2) throws Exception {
+		final String contactEmailNewValue = contactEmail2;
+		final String logoUriNewValue = "http://www.gluu.org/test/yuriy/logo.png";
+		final String clientUriNewValue = "http://www.gluu.org/company/yuriy";
 
-    public static void readResponseAssert(EnhancedMockHttpServletResponse response) {
-        assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-        assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-        try {
-            JSONObject jsonObj = new JSONObject(response.getContentAsString());
-            assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-            assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-            assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath + "?"
+				+ registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1)).request();
 
-            // Registered Metadata
-            assertTrue(jsonObj.has(REDIRECT_URIS.toString()));
-            assertTrue(jsonObj.has(APPLICATION_TYPE.toString()));
-            assertTrue(jsonObj.has(CLIENT_NAME.toString()));
-            assertTrue(jsonObj.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-            assertTrue(jsonObj.has("scopes"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-            fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-        }
-    }
+		String registerRequestContent = null;
+		try {
+			final RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
 
-    @Parameters({"registerPath", "redirectUris", "contactEmail1", "contactEmail2"})
-    @Test(dependsOnMethods = "requestClientAssociate1")
-    public void requestClientUpdate(final String registerPath, final String redirectUris, final String contactEmail1, final String contactEmail2) throws Exception {
-        final String contactEmailNewValue = contactEmail2;
-        final String logoUriNewValue = "http://www.gluu.org/test/yuriy/logo.png";
-        final String clientUriNewValue = "http://www.gluu.org/company/yuriy";
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.PUT, registerPath) {
+			registerRequest.setContacts(Arrays.asList(contactEmail1, contactEmailNewValue));
+			registerRequest.setLogoUri(logoUriNewValue);
+			registerRequest.setClientUri(clientUriNewValue);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                try {
+			request.header("Authorization", "Bearer " + registrationAccessToken1);
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
 
-                    final RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
+		Response response = request.put(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-                    registerRequest.setContacts(Arrays.asList(contactEmail1, contactEmailNewValue));
-                    registerRequest.setLogoUri(logoUriNewValue);
-                    registerRequest.setClientUri(clientUriNewValue);
+		showResponse("requestClientRead", response, entity);
 
-                    final String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.addHeader("Authorization", "Bearer " + registrationAccessToken1);
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    request.setQueryString(registrationClientUri1.substring(registrationClientUri1.indexOf("?") + 1));
+		readResponseAssert(response, entity);
 
-                    request.setContent(registerRequestContent.getBytes(Util.UTF8));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail();
-                }
-            }
+		try {
+			// check whether values are really updated
+			RegisterRequest r = RegisterRequest.fromJson(entity);
+			assertTrue(r.getContacts() != null && r.getContacts().contains(contactEmailNewValue));
+			assertTrue(r.getClientUri().equals(clientUriNewValue));
+			assertTrue(r.getLogoUri().equals(logoUriNewValue));
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestClientRead", response);
+	@Parameters({ "registerPath" })
+	@Test
+	public void requestClientRegistrationFail1(final String registerPath) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-                readResponseAssert(response);
+		String registerRequestContent = null;
+		try {
+			RegisterRequest registerRequest = new RegisterRequest(null, null, null);
 
-                try {
-                    // check whether values are really updated
-                    RegisterRequest r = RegisterRequest.fromJson(response.getContentAsString());
-                    assertTrue(r.getContacts() != null && r.getContacts().contains(contactEmailNewValue));
-                    assertTrue(r.getClientUri().equals(clientUriNewValue));
-                    assertTrue(r.getLogoUri().equals(logoUriNewValue));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-    @Parameters({"registerPath"})
-    @Test
-    public void requestClientRegistrationFail1(final String registerPath) throws Exception {
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+		showResponse("requestClientRegistrationFail 1", response, entity);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+		assertEquals(response.getStatus(), 400, "Unexpected response code. " + entity);
+		TestUtil.assertErrorResponse(entity);
+	}
 
-                    RegisterRequest registerRequest = new RegisterRequest(null, null, null);
+	@Parameters({ "registerPath" })
+	@Test
+	public void requestClientRegistrationFail2(final String registerPath) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+		String registerRequestContent = null;
+		try {
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null); // Missing
+																													// redirect
+																													// URIs
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestClientRegistrationFail 1", response);
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-                assertEquals(response.getStatus(), 400, "Unexpected response code. " + response.getContentAsString());
-                TestUtil.assertErrorResponse(response.getContentAsString());
-            }
-        }.run();
-    }
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-    @Parameters({"registerPath"})
-    @Test
-    public void requestClientRegistrationFail2(final String registerPath) throws Exception {
+		showResponse("requestClientRegistrationFail 2", response, entity);
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+		assertEquals(response.getStatus(), 400, "Unexpected response code. " + entity);
+		TestUtil.assertErrorResponse(entity);
+	}
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+	@Parameters({ "registerPath" })
+	@Test
+	public void requestClientRegistrationFail3(final String registerPath) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", null); // Missing redirect URIs
+		String registerRequestContent = null;
+		try {
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					Arrays.asList("https://client.example.com/cb#fail_fragment"));
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestClientRegistrationFail 2", response);
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-                assertEquals(response.getStatus(), 400, "Unexpected response code. " + response.getContentAsString());
-                TestUtil.assertErrorResponse(response.getContentAsString());
-            }
-        }.run();
-    }
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-    @Parameters({"registerPath"})
-    @Test
-    public void requestClientRegistrationFail3(final String registerPath) throws Exception {
+		showResponse("requestClientRegistrationFail3", response, entity);
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+		assertEquals(response.getStatus(), 400, "Unexpected response code. " + entity);
+		TestUtil.assertErrorResponse(entity);
+	}
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
-
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            Arrays.asList("https://client.example.com/cb#fail_fragment"));
-
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestClientRegistrationFail3", response);
-
-                assertEquals(response.getStatus(), 400, "Unexpected response code. " + response.getContentAsString());
-                TestUtil.assertErrorResponse(response.getContentAsString());
-            }
-        }.run();
-    }
 }
