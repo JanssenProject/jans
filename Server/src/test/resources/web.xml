@@ -20,7 +20,6 @@
 		<url-pattern>/seam/resource/restv1/oxauth/authorize</url-pattern>
 		<url-pattern>/seam/resource/restv1/oxauth/token</url-pattern>
 		<url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
-		<url-pattern>/seam/resource/restv1/oxauth/check_session</url-pattern>
 	</filter-mapping>
 
 	<context-param>

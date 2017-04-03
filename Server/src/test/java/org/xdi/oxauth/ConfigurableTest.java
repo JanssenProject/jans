@@ -19,7 +19,6 @@ import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.BeforeClass;
 import org.testng.ITestContext;
-import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxauth.util.Deployments;
 import org.xdi.util.StringHelper;

@@ -1,17 +1,17 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:s="http://jboss.org/schema/seam/taglib"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:h="http://java.sun.com/jsf/html"
-	template="/WEB-INF/incl/layout/template.xhtml">
+				xmlns:s="http://jboss.org/schema/seam/taglib"
+				xmlns:ui="http://java.sun.com/jsf/facelets"
+				xmlns:h="http://java.sun.com/jsf/html"
+				template="/WEB-INF/incl/layout/template.xhtml">
 	<ui:define name="head">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
 		<!-- Google+ script -->
 		<script src="#{oxAuthConfigurationService.jsLocation}/jquery-1.12.4.min.js"></script>
 		<script src="https://apis.google.com/js/client:platform.js?onload=start" async="async" defer="defer"></script>
-	
+
 		<style type="text/css">
 			.login-panel {
 				border-style: solid;
@@ -20,11 +20,11 @@
 				background-color: #FFFFFF;
 				border-color: #C4C0B9;
 			}
-		
+
 			.login-panel-header {
 				background-color: #D4CFC7;
 				background-image:
-					url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
+						url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
 				background-position: left top;
 				background-repeat: repeat-x;
 				border-style: solid;
@@ -36,7 +36,7 @@
 				font-size: 11px;
 				font-weight: bold;
 			}
-		
+
 			.login-panel-body {
 				padding: 10px;
 				color: #000000;
@@ -46,7 +46,7 @@
 		</style>
 	</ui:define>
 
-	<ui:define name="pageTitle">oxAuth - Google+ Login</ui:define>
+	<ui:define name="pageTitle">#{msgs['gpluslogin.title']}</ui:define>
 
 	<ui:define name="body">
 		<table border="0" align="center">
@@ -76,23 +76,23 @@
 
 										<div class="dialog">
 											<h:panelGrid columns="3" border="0" rowClasses="prop"
-												columnClasses="name,value,hint">
+														 columnClasses="name,value,hint">
 												<h:outputLabel for="username"
-													value="#{msgs['login.username']}" />
+															   value="#{msgs['login.username']}" />
 												<h:inputText id="username" value="#{credentials.username}"
-													autocomplete="off" />
+															 autocomplete="off" />
 												<h:outputText value="" />
 
 												<h:outputLabel for="password"
-													value="#{msgs['login.password']}" />
+															   value="#{msgs['login.password']}" />
 												<h:inputSecret id="password" value="#{credentials.password}"
-													autocomplete="off" />
+															   autocomplete="off" />
 												<h:outputText value="" />
 
 												<h:outputLabel for="rememberMe"
-													value="#{msgs['login.rememberMe']}" />
+															   value="#{msgs['login.rememberMe']}" />
 												<h:selectBooleanCheckbox id="rememberMe"
-													value="#{rememberMe.enabled}" />
+																		 value="#{rememberMe.enabled}" />
 												<h:outputText value="" />
 											</h:panelGrid>
 										</div>
@@ -117,19 +117,19 @@
 
 										<div class="actionButtons">
 											<h:commandButton id="loginButton"
-												value="#{msgs['login.login']}"
-												action="#{authenticator.authenticate}" />
+															 value="#{msgs['login.login']}"
+															 action="#{authenticator.authenticate}" />
 										</div>
 									</div>
 								</div>
 								<div class="login-panel">
 									<div id="signinButton">
 										<span class="g-signin"
-											data-scope="https://www.googleapis.com/auth/plus.login email"
-											data-requestvisibleactions="http://schemas.google.com/AddActivity"
-											data-clientId="#{gplus_client_id}" data-accesstype="offline"
-											data-callback="onSignInCallback" data-theme="dark"
-											data-cookiepolicy="single_host_origin"></span>
+											  data-scope="https://www.googleapis.com/auth/plus.login email"
+											  data-requestvisibleactions="http://schemas.google.com/AddActivity"
+											  data-clientId="#{gplus_client_id}" data-accesstype="offline"
+											  data-callback="onSignInCallback" data-theme="dark"
+											  data-cookiepolicy="single_host_origin"></span>
 									</div>
 								</div>
 							</h:panelGroup>
@@ -139,52 +139,52 @@
 			</tr>
 		</table>
 		<script type="text/javascript">
-            window.onload = function() {
-                document.getElementById("loginForm:username").focus();
-            };
-        </script>
+			window.onload = function() {
+				document.getElementById("loginForm:username").focus();
+			};
+		</script>
 
 		<script type="text/javascript">
-        //<![CDATA[
+			//<![CDATA[
 			var helper = (function() {
-			  var authResult = undefined;
-			
-			  return {
-			    /**
-			     * Hides the sign-in button and connects the server-side app after
-			     * the user successfully signs in.
-			     *
-			     * @param {Object} authResult An Object which contains the access token and
-			     *   other authentication information.
-			     */
-			    onSignInCallback: function(authResult) {
+				var authResult = undefined;
+
+				return {
+					/**
+					 * Hides the sign-in button and connects the server-side app after
+					 * the user successfully signs in.
+					 *
+					 * @param {Object} authResult An Object which contains the access token and
+					 *   other authentication information.
+					 */
+					onSignInCallback: function(authResult) {
 //			      for (var field in authResult) {
 //	                        console.log('Auth result field: ' + field + ': ' + authResult[field]);
 //			      }
-			      if (authResult['access_token']) {
-			        // The user is signed in
-			        this.authResult = authResult;
-			        $('#gConnect').hide();
-			        helper.connectServer();
-			      } else if (authResult['error']) {
-			        // There was an error, which means the user is not signed in.
-			        // As an example, you can troubleshoot by writing to the console:
-			        console.log('There was an error: ' + authResult['error']);
-			        $('#gConnect').show();
-			      }
-			    },
-			    /**
-			     * Submit login form with tokens to server
-			     * For more information, see:
-			     *   https://developers.google.com/+/web/signin/server-side-flow
-			     */
-			    connectServer: function() {
-	              $("input[name='gplus_auth_code']").val(this.authResult["code"]);
-                  $(":input:submit[id='loginForm:loginButton']").click();
-			    },
-			  };
+						if (authResult['access_token']) {
+							// The user is signed in
+							this.authResult = authResult;
+							$('#gConnect').hide();
+							helper.connectServer();
+						} else if (authResult['error']) {
+							// There was an error, which means the user is not signed in.
+							// As an example, you can troubleshoot by writing to the console:
+							console.log('There was an error: ' + authResult['error']);
+							$('#gConnect').show();
+						}
+					},
+					/**
+					 * Submit login form with tokens to server
+					 * For more information, see:
+					 *   https://developers.google.com/+/web/signin/server-side-flow
+					 */
+					connectServer: function() {
+						$("input[name='gplus_auth_code']").val(this.authResult["code"]);
+						$(":input:submit[id='loginForm:loginButton']").click();
+					},
+				};
 			})();
-			
+
 			/**
 			 * Calls the helper method that handles the authentication flow.
 			 *
@@ -192,9 +192,9 @@
 			 *   other authentication information.
 			 */
 			function onSignInCallback(authResult) {
-			  helper.onSignInCallback(authResult);
+				helper.onSignInCallback(authResult);
 			}
-		//]]>
+			//]]>
 		</script>
 	</ui:define>
 </ui:composition>
