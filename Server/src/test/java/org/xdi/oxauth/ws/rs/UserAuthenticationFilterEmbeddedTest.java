@@ -79,7 +79,7 @@ public class UserAuthenticationFilterEmbeddedTest extends BaseTest {
 	private static String clientId4;
 	private static String clientSecret4;
 
-	String authorizationCode1;
+	private static String authorizationCode1;
 
 	@Parameters({ "registerPath", "redirectUris" })
 	@Test
