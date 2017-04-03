@@ -89,7 +89,7 @@ public class IntrospectionWebService {
 
                             if (tokenToIntrospect instanceof AccessToken) {
                                 AccessToken accessToken = (AccessToken) tokenToIntrospect;
-                                response.setTokenType(accessToken.getTokenType().getName());
+                                response.setTokenType(accessToken.getTokenType() != null ? accessToken.getTokenType().getName() : TokenType.BEARER.getName());
                             }
                         } else {
                             log.error("Failed to find grant for access_token: " + p_token);
