@@ -39,7 +39,7 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth Wikid - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['wikid.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <table border="0" align="center">
@@ -67,9 +67,9 @@
                                         <div class="dialog">
                                             <h:panelGrid columns="3" border="0" rowClasses="prop"
                                                          columnClasses="name,value,hint">
-				                                <h:outputLabel for="passcode">One-time passcode</h:outputLabel>
-								                <input name="passcode" type="text" autocomplete="off" />
-                                                <h:outputText value="One time passocde generated with token client"/>
+                                                <h:outputLabel for="passcode">#{msgs['wikid.oneTimePasscode']}</h:outputLabel>
+                                                <input name="passcode" type="text" autocomplete="off" />
+                                                <h:outputText value="#{msgs['wikid.oneTimePasscodeGenerated']}"/>
                                             </h:panelGrid>
                                         </div>
 
