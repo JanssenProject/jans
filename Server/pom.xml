@@ -536,6 +536,11 @@
 			<artifactId>arquillian-rest-client-impl-3x</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		    <groupId>org.eu.ingwar.tools</groupId>
+		    <artifactId>arquillian-suite-extension</artifactId>
+		    <scope>test</scope>
+		</dependency>
 
 		<!-- Test: Shrinkwrap -->
 		<dependency>
