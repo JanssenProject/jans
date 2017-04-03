@@ -586,6 +586,12 @@
 				<version>${arquillian.rest.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+			    <groupId>org.eu.ingwar.tools</groupId>
+			    <artifactId>arquillian-suite-extension</artifactId>
+			    <version>1.1.1</version>
+			    <scope>test</scope>
+			</dependency>
 
 	        <dependency>
 	            <groupId>org.jboss.shrinkwrap.resolver</groupId>
