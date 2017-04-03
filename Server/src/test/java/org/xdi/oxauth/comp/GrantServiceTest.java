@@ -38,7 +38,8 @@ public class GrantServiceTest extends BaseComponentTest {
 
 	@Parameters(value = "clientId")
 	@Test
-	public void createTestToken(String m_clientId) {
+	public void createTestToken(String clientId) {
+		this.m_clientId = clientId;
 		m_tokenLdap = createTestToken();
 		grantService.persist(m_tokenLdap);
 	}
