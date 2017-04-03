@@ -11,7 +11,6 @@ import java.util.TimeZone;
 import javax.inject.Inject;
 
 import org.codehaus.jettison.json.JSONObject;
-import org.testng.ITestContext;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.ConfigurableTest;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
@@ -194,9 +193,8 @@ public class CryptoProviderTest extends ConfigurableTest {
 	}
 
 	@Test(dependsOnMethods = { "testGenerateKeyRS256" })
-	public void testSignRS256(ITestContext context) {
+	public void testSignRS256() {
 		try {
-			rs256Key = (String) context.getAttribute("rs256Key");
 			rs256Signature = cryptoProvider.sign(SIGNING_INPUT, rs256Key, null, SignatureAlgorithm.RS256);
 			assertNotNull(rs256Signature);
 		} catch (Exception e) {
@@ -315,7 +313,7 @@ public class CryptoProviderTest extends ConfigurableTest {
 	}
 
 	@Test(dependsOnMethods = { "testGenerateKeyES256" })
-	public void testSignES256(ITestContext context) {
+	public void testSignES256() {
 		try {
 			es256Signature = cryptoProvider.sign(SIGNING_INPUT, es256Key, null, SignatureAlgorithm.ES256);
 			assertNotNull(es256Signature);
@@ -325,9 +323,8 @@ public class CryptoProviderTest extends ConfigurableTest {
 	}
 
 	@Test(dependsOnMethods = { "testSignES256" })
-	public void testVerifyES256(ITestContext context) {
+	public void testVerifyES256() {
 		try {
-			es256Signature = (String) context.getAttribute("es256Signature");
 			boolean signatureVerified = cryptoProvider.verifySignature(SIGNING_INPUT, es256Signature, es256Key, null,
 					null, SignatureAlgorithm.ES256);
 			assertTrue(signatureVerified);
