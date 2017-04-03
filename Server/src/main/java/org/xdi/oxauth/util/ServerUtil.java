@@ -263,7 +263,7 @@ public class ServerUtil {
     	URL parsedUrl1 = new URL(url1);
     	URL parsedUrl2 = new URL(url2);
     	
-    	return StringHelper.equals(parsedUrl1.getPath(), parsedUrl2.getPath());
+    	return parsedUrl1.getPath().endsWith(parsedUrl2.getPath());
     }
 
 }
