@@ -6,25 +6,13 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import com.google.common.collect.Lists;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.jboss.seam.mock.ResourceRequestEnvironment.Method;
-import org.jboss.seam.mock.ResourceRequestEnvironment.ResourceRequest;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.register.ApplicationType;
-import org.xdi.oxauth.model.util.StringUtils;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
 
-import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -32,8 +20,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.AuthorizationRequest;
+import org.xdi.oxauth.client.EndSessionRequest;
+import org.xdi.oxauth.client.QueryStringDecoder;
+import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
+import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.util.StringUtils;
+
+import com.google.common.collect.Lists;
 
 /**
  * Test cases for the end session web service (embedded)
@@ -43,249 +53,213 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID;
  */
 public class EndSessionRestWebServiceEmbeddedTest extends BaseTest {
 
-    private String clientId;
-    private String idToken;
-    private String sessionState;
+	@ArquillianResource
+	private URI url;
 
-    @Parameters({"registerPath", "redirectUris", "postLogoutRedirectUri"})
-    @Test
-    public void requestEndSessionStep1(final String registerPath, final String redirectUris,
-                                       final String postLogoutRedirectUri) throws Exception {
+	private static String clientId;
+	private static String idToken;
+	private static String sessionState;
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	@Parameters({ "registerPath", "redirectUris", "postLogoutRedirectUri" })
+	@Test
+	public void requestEndSessionStep1(final String registerPath, final String redirectUris,
+			final String postLogoutRedirectUri) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+		String registerRequestContent = null;
+		try {
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
+			registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
+			registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
-                    registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
-                    registerRequest.setFrontChannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestEndSessionStep1", response);
+		showResponse("requestEndSessionStep1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
-                    ClientTestUtil.assert_(registerResponse);
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+			ClientTestUtil.assert_(registerResponse);
 
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has(CLIENT_ID.toString()));
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has(CLIENT_ID.toString()));
 
-                    clientId = jsonObj.getString(CLIENT_ID.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+			clientId = jsonObj.getString(CLIENT_ID.toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "requestEndSessionStep1")
-    public void requestEndSessionStep2(final String authorizePath, final String userId, final String userSecret,
-                                       final String redirectUri) throws Exception {
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "requestEndSessionStep1")
+	public void requestEndSessionStep2(final String authorizePath, final String userId, final String userSecret,
+			final String redirectUri) throws Exception {
 
-        final String state = UUID.randomUUID().toString();
+		final String state = UUID.randomUUID().toString();
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, authorizePath) {
+		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+		String nonce = UUID.randomUUID().toString();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+				redirectUri, nonce);
+		authorizationRequest.setState(state);
+		authorizationRequest.getPrompts().add(Prompt.NONE);
+		authorizationRequest.setAuthUsername(userId);
+		authorizationRequest.setAuthPassword(userSecret);
 
-                List<ResponseType> responseTypes = Arrays.asList(
-                        ResponseType.TOKEN,
-                        ResponseType.ID_TOKEN);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-                String nonce = UUID.randomUUID().toString();
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+		request.header("Accept", MediaType.TEXT_PLAIN);
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
-            }
+		showResponse("requestEndSessionStep2", response, entity);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestEndSessionStep2", response);
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+		if (response.getLocation() != null) {
+			try {
+				URI uri = new URI(response.getLocation().toString());
+				assertNotNull(uri.getFragment(), "Fragment is null");
 
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getFragment(), "Fragment is null");
+				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+				assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
+				assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+				assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+				assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
+				assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
+				assertNull(params.get("refresh_token"), "The refresh_token must be null");
+				assertEquals(params.get(AuthorizeResponseParam.STATE), state);
 
-                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
-                        assertNull(params.get("refresh_token"), "The refresh_token must be null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+				idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
+				sessionState = params.get(AuthorizeResponseParam.SESSION_STATE);
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+				fail("Response URI is not well formed");
+			} catch (Exception e) {
+				e.printStackTrace();
+				fail(e.getMessage());
+			}
+		}
+	}
 
-                        idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
-                        sessionState = params.get(AuthorizeResponseParam.SESSION_STATE);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        }.run();
-    }
+	@Parameters({ "endSessionPath", "postLogoutRedirectUri" })
+	@Test(dependsOnMethods = "requestEndSessionStep2")
+	public void requestEndSessionStep3(final String endSessionPath, final String postLogoutRedirectUri)
+			throws Exception {
+		String state = UUID.randomUUID().toString();
 
-    @Parameters({"endSessionPath", "postLogoutRedirectUri"})
-    @Test(dependsOnMethods = "requestEndSessionStep2")
-    public void requestEndSessionStep3(final String endSessionPath, final String postLogoutRedirectUri) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, endSessionPath) {
+		EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
+		endSessionRequest.setSessionState(sessionState);
 
-            String state = UUID.randomUUID().toString();
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+		request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, state);
-                endSessionRequest.setSessionState(sessionState);
+		showResponse("requestEndSessionStep3", response, entity);
 
-                request.setQueryString(endSessionRequest.getQueryString());
-            }
+		assertEquals(response.getStatus(), 200, "Unexpected response code.");
+		assertNotNull(entity, "Unexpected html.");
+		assertTrue(entity.contains(postLogoutRedirectUri));
+		assertTrue(entity.contains(postLogoutRedirectUri));
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestEndSessionStep3", response);
+	}
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected html.");
-                assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
-                assertTrue(response.getContentAsString().contains(postLogoutRedirectUri));
+	// private void validateNonHttpBasedLogout(EnhancedMockHttpServletResponse
+	// response) {
+	// if (response.getLocation() != null) {
+	// try {
+	// URI uri = new URI(response.getLocation().toString());
+	// assertNotNull(uri.getQuery(), "The query string is null");
+	//
+	// Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+	//
+	// assertNotNull(params.get(EndSessionResponseParam.STATE), "The state is
+	// null");
+	// assertEquals(params.get(EndSessionResponseParam.STATE), endSessionState);
+	// } catch (URISyntaxException e) {
+	// e.printStackTrace();
+	// fail("Response URI is not well formed");
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// fail(e.getMessage());
+	// }
+	// }
+	// }
 
-            }
+	@Parameters({ "endSessionPath" })
+	@Test
+	public void requestEndSessionFail1(final String endSessionPath) throws Exception {
+		EndSessionRequest endSessionRequest = new EndSessionRequest(null, null, null);
 
-//            private void validateNonHttpBasedLogout(EnhancedMockHttpServletResponse response) {
-//                if (response.getHeader("Location") != null) {
-//                    try {
-//                        URI uri = new URI(response.getHeader("Location").toString());
-//                        assertNotNull(uri.getQuery(), "The query string is null");
-//
-//                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
-//
-//                        assertNotNull(params.get(EndSessionResponseParam.STATE), "The state is null");
-//                        assertEquals(params.get(EndSessionResponseParam.STATE), endSessionState);
-//                    } catch (URISyntaxException e) {
-//                        e.printStackTrace();
-//                        fail("Response URI is not well formed");
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        fail(e.getMessage());
-//                    }
-//                }
-//            }
-        }.run();
-    }
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+		request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-    @Parameters({"endSessionPath"})
-    @Test
-    public void requestEndSessionFail1(final String endSessionPath) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, endSessionPath) {
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+		showResponse("requestEndSessionFail1", response, entity);
 
-                EndSessionRequest endSessionRequest = new EndSessionRequest(null, null, null);
+		assertEquals(response.getStatus(), 400, "Unexpected response code.");
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has("error"), "The error type is null");
+			assertTrue(jsonObj.has("error_description"), "The error description is null");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-                request.setQueryString(endSessionRequest.getQueryString());
-            }
+	@Parameters({ "endSessionPath", "postLogoutRedirectUri" })
+	@Test
+	public void requestEndSessionFail2(final String endSessionPath, final String postLogoutRedirectUri)
+			throws Exception {
+		String endSessionState = UUID.randomUUID().toString();
+		EndSessionRequest endSessionRequest = new EndSessionRequest("INVALID_ACCESS_TOKEN", postLogoutRedirectUri,
+				endSessionState);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestEndSessionFail1", response);
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + endSessionPath + "?" + endSessionRequest.getQueryString()).request();
+		request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
-                assertEquals(response.getStatus(), 400, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("error"), "The error type is null");
-                    assertTrue(jsonObj.has("error_description"), "The error description is null");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-    @Parameters({"endSessionPath", "postLogoutRedirectUri"})
-    @Test
-    public void requestEndSessionFail2(final String endSessionPath, final String postLogoutRedirectUri) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, endSessionPath) {
+		showResponse("requestEndSessionFail2", response, entity);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+		assertEquals(response.getStatus(), 401, "Unexpected response code.");
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has("error"), "The error type is null");
+			assertTrue(jsonObj.has("error_description"), "The error description is null");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-                String endSessionState = UUID.randomUUID().toString();
-                EndSessionRequest endSessionRequest = new EndSessionRequest("INVALID_ACCESS_TOKEN", postLogoutRedirectUri, endSessionState);
-
-                request.setQueryString(endSessionRequest.getQueryString());
-            }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestEndSessionFail2", response);
-
-                assertEquals(response.getStatus(), 401, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("error"), "The error type is null");
-                    assertTrue(jsonObj.has("error_description"), "The error description is null");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
 }

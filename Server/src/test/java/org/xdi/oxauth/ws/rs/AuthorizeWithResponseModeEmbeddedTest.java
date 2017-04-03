@@ -6,10 +6,27 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONException;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -24,311 +41,255 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import javax.ws.rs.core.MediaType;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-
-import static org.testng.Assert.*;
-
 /**
  * @author Javier Rojas Blum
  * @version December 12, 2016
  */
 public class AuthorizeWithResponseModeEmbeddedTest extends BaseTest {
 
-    private String clientId;
+	@ArquillianResource
+	private URI url;
 
-    @Parameters({"registerPath", "redirectUris"})
-    @Test
-    public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
+	private static String clientId;
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	@Parameters({ "registerPath", "redirectUris" })
+	@Test
+	public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+		String registerRequestContent = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN,
+					ResponseType.ID_TOKEN);
 
-                    List<ResponseType> responseTypes = Arrays.asList(
-                            ResponseType.CODE,
-                            ResponseType.TOKEN,
-                            ResponseType.ID_TOKEN);
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.setResponseTypes(responseTypes);
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.setResponseTypes(responseTypes);
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("dynamicClientRegistration", response);
+		showResponse("dynamicClientRegistration", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
-                    ClientTestUtil.assert_(registerResponse);
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+			ClientTestUtil.assert_(registerResponse);
 
-                    clientId = registerResponse.getClientId();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+			clientId = registerResponse.getClientId();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void requestAuthorizationCodeWithResponseModeQuery(
-            final String authorizePath, final String userId, final String userSecret,
-            final String redirectUri) throws Exception {
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "dynamicClientRegistration")
+	public void requestAuthorizationCodeWithResponseModeQuery(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
+		final String state = UUID.randomUUID().toString();
 
-        final String state = UUID.randomUUID().toString();
+		List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+				redirectUri, null);
+		authorizationRequest.setState(state);
+		authorizationRequest.getPrompts().add(Prompt.NONE);
+		authorizationRequest.setAuthUsername(userId);
+		authorizationRequest.setAuthPassword(userSecret);
+		authorizationRequest.setResponseMode(ResponseMode.QUERY);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+		request.header("Accept", MediaType.TEXT_PLAIN);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, null);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
-                authorizationRequest.setResponseMode(ResponseMode.QUERY);
+		showResponse("requestAuthorizationCodeWithResponseModeQuery", response, entity);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
-            }
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestAuthorizationCodeWithResponseModeQuery", response);
+		try {
+			URI uri = new URI(response.getLocation().toString());
+			assertNotNull(uri.getQuery(), "Query string is null");
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+			Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
-                try {
-                    URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getQuery(), "Query string is null");
+			assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+			assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+			assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+			assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			fail("Response URI is not well formed");
+		}
+	}
 
-                    Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "dynamicClientRegistration")
+	public void requestAuthorizationCodeWithResponseModeFragment(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
 
-                    assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    fail("Response URI is not well formed");
-                }
-            }
-        }.run();
-    }
+		final String state = UUID.randomUUID().toString();
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void requestAuthorizationCodeWithResponseModeFragment(
-            final String authorizePath, final String userId, final String userSecret,
-            final String redirectUri) throws Exception {
+		List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+		responseTypes.add(ResponseType.CODE);
+		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        final String state = UUID.randomUUID().toString();
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+				redirectUri, null);
+		authorizationRequest.setState(state);
+		authorizationRequest.getPrompts().add(Prompt.NONE);
+		authorizationRequest.setAuthUsername(userId);
+		authorizationRequest.setAuthPassword(userSecret);
+		authorizationRequest.setResponseMode(ResponseMode.FRAGMENT);
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+		request.header("Accept", MediaType.TEXT_PLAIN);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-                responseTypes.add(ResponseType.CODE);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+		showResponse("requestAuthorizationCodeWithResponseModeFragment", response, entity);
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, null);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
-                authorizationRequest.setResponseMode(ResponseMode.FRAGMENT);
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
-            }
+		try {
+			URI uri = new URI(response.getLocation().toString());
+			assertNotNull(uri.getFragment(), "Fragment is null");
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestAuthorizationCodeWithResponseModeFragment", response);
+			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+			assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+			assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+			assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
 
-                try {
-                    URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getFragment(), "Fragment is null");
+			assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			fail("Response URI is not well formed");
+		}
+	}
 
-                    Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "dynamicClientRegistration")
+	public void requestAuthorizationTokenWithResponseModeQuery(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
 
-                    assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+		final String state = UUID.randomUUID().toString();
 
-                    assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    fail("Response URI is not well formed");
-                }
-            }
-        }.run();
-    }
+		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+		String nonce = UUID.randomUUID().toString();
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void requestAuthorizationTokenWithResponseModeQuery(
-            final String authorizePath, final String userId, final String userSecret,
-            final String redirectUri) throws Exception {
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+				redirectUri, nonce);
+		authorizationRequest.setState(state);
+		authorizationRequest.getPrompts().add(Prompt.NONE);
+		authorizationRequest.setAuthUsername(userId);
+		authorizationRequest.setAuthPassword(userSecret);
+		authorizationRequest.setResponseMode(ResponseMode.QUERY);
 
-        final String state = UUID.randomUUID().toString();
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+		request.header("Accept", MediaType.TEXT_PLAIN);
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+		showResponse("requestAuthorizationTokenWithResponseModeQuery", response, entity);
 
-                List<ResponseType> responseTypes = Arrays.asList(
-                        ResponseType.TOKEN,
-                        ResponseType.ID_TOKEN);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-                String nonce = UUID.randomUUID().toString();
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
-                authorizationRequest.setResponseMode(ResponseMode.QUERY);
+		if (response.getLocation() != null) {
+			try {
+				URI uri = new URI(response.getLocation().toString());
+				assertNotNull(uri.getQuery(), "Query is null");
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
-            }
+				Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestAuthorizationTokenWithResponseModeQuery", response);
+				assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
+				assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+				assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+				assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
+				assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
+				assertNull(params.get("refresh_token"), "The refresh_token must be null");
+				assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+				fail("Response URI is not well formed");
+			}
+		}
+	}
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "dynamicClientRegistration")
+	public void requestAuthorizationTokenWithResponseModeFragment(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
 
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getQuery(), "Query is null");
+		final String state = UUID.randomUUID().toString();
 
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+		List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+		String nonce = UUID.randomUUID().toString();
 
-                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
-                        assertNull(params.get("refresh_token"), "The refresh_token must be null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    }
-                }
-            }
-        }.run();
-    }
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+				redirectUri, nonce);
+		authorizationRequest.setState(state);
+		authorizationRequest.getPrompts().add(Prompt.NONE);
+		authorizationRequest.setAuthUsername(userId);
+		authorizationRequest.setAuthPassword(userSecret);
+		authorizationRequest.setResponseMode(ResponseMode.FRAGMENT);
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void requestAuthorizationTokenWithResponseModeFragment(
-            final String authorizePath, final String userId, final String userSecret,
-            final String redirectUri) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+		request.header("Accept", MediaType.TEXT_PLAIN);
 
-        final String state = UUID.randomUUID().toString();
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+		showResponse("requestAuthorizationTokenWithResponseModeFragment", response, entity);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                List<ResponseType> responseTypes = Arrays.asList(
-                        ResponseType.TOKEN,
-                        ResponseType.ID_TOKEN);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-                String nonce = UUID.randomUUID().toString();
+		if (response.getLocation() != null) {
+			try {
+				URI uri = new URI(response.getLocation().toString());
+				assertNotNull(uri.getFragment(), "Fragment is null");
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
-                authorizationRequest.setResponseMode(ResponseMode.FRAGMENT);
+				Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
-            }
+				assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
+				assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+				assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
+				assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
+				assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
+				assertNull(params.get("refresh_token"), "The refresh_token must be null");
+				assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+				fail("Response URI is not well formed");
+			}
+		}
+	}
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestAuthorizationTokenWithResponseModeFragment", response);
-
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
-
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getFragment(), "Fragment is null");
-
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
-
-                        assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.EXPIRES_IN), "The expires in value is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope must be null");
-                        assertNull(params.get("refresh_token"), "The refresh_token must be null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    }
-                }
-            }
-        }.run();
-    }
 }

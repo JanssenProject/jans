@@ -51,7 +51,7 @@ import org.xdi.util.StringHelper;
  */
 @WebFilter(asyncSupported = true, urlPatterns = {
 		"/seam/resource/restv1/oxauth/authorize", "/seam/resource/restv1/oxauth/token",
-		"/seam/resource/restv1/oxauth/userinfo", "/seam/resource/restv1/oxauth/check_session"
+		"/seam/resource/restv1/oxauth/userinfo"
 		}, displayName = "oxAuth"
 )
 public class AuthenticationFilter implements Filter {

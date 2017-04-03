@@ -1,92 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://java.sun.com/xml/ns/javaee"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-         version="3.0">
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 
-    <display-name>oxAuth Arquillian Server</display-name>
+	<display-name>oxAuth Test Server</display-name>
 
-    <!-- Seam -->
-    <listener>
-        <listener-class>org.jboss.seam.mock.MockSeamListener</listener-class>
-    </listener>
+	<!-- Weld -->
+	<listener>
+		<listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
+	</listener>
 
-    <filter>
-        <filter-name>Seam Filter</filter-name>
-        <filter-class>org.jboss.seam.servlet.SeamFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>Seam Filter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
+	<filter>
+		<filter-name>Authentication Filter</filter-name>
+		<filter-class>org.xdi.oxauth.auth.AuthenticationFilter</filter-class>
+	</filter>
 
-    <servlet>
-        <servlet-name>Seam Resource Servlet</servlet-name>
-        <servlet-class>org.jboss.seam.servlet.SeamResourceServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>Seam Resource Servlet</servlet-name>
-        <url-pattern>/seam/resource/*</url-pattern>
-    </servlet-mapping>
+	<filter-mapping>
+		<filter-name>Authentication Filter</filter-name>
+		<url-pattern>/seam/resource/restv1/oxauth/authorize</url-pattern>
+		<url-pattern>/seam/resource/restv1/oxauth/token</url-pattern>
+		<url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
+	</filter-mapping>
 
+	<context-param>
+		<param-name>resteasy.injector.factory</param-name>
+		<param-value>org.jboss.resteasy.cdi.CdiInjectorFactory</param-value>
+	</context-param>
 
-    <!-- Facelets development mode (disable in production) -->
-    <!-- Change to "Production" when you are ready to deploy -->
-    <context-param>
-        <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <param-value>${javax.faces.PROJECT_STAGE}</param-value>
-    </context-param>
+	<context-param>
+		<param-name>resteasy.servlet.mapping.prefix</param-name>
+		<param-value>/seam/resource/restv1</param-value>
+	</context-param>
 
-    <context-param>
-        <param-name>javax.faces.FACELETS_RESOURCE_RESOLVER</param-name>
-        <param-value>org.xdi.service.ExternalResourceHandler</param-value>
-    </context-param>
-    <context-param>
-        <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-        <param-value>client</param-value>
-    </context-param>
-    <!-- Change to -1 when you don't want the compiler should check for changes -->
-    <context-param>
-        <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
-        <param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
-    </context-param>
+	<servlet>
+		<servlet-name>Resteasy</servlet-name>
+		<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher</servlet-class>
+		<init-param>
+			<param-name>javax.ws.rs.Application</param-name>
+			<param-value>org.xdi.oxauth.service.TestResteasyInitializer</param-value>
+		</init-param>
+	</servlet>
 
-    <!-- JSF -->
-    <context-param>
-        <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
-        <param-value>.xhtml</param-value>
-    </context-param>
+	<servlet-mapping>
+		<servlet-name>Resteasy</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
 
-    <servlet>
-        <servlet-name>Faces Servlet</servlet-name>
-        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>Faces Servlet</servlet-name>
-        <url-pattern>*.htm</url-pattern>
-    </servlet-mapping>
-
-    <security-constraint>
-        <display-name>Restrict raw XHTML Documents</display-name>
-        <web-resource-collection>
-            <web-resource-name>XHTML</web-resource-name>
-            <url-pattern>*.xhtml</url-pattern>
-        </web-resource-collection>
-        <auth-constraint/>
-    </security-constraint>
-
-    <!-- Track session only in cookie -->
-    <session-config>
-        <session-timeout>30</session-timeout>
-        <tracking-mode>COOKIE</tracking-mode>
-    </session-config>
-
-    <context-param>
-        <param-name>com.sun.faces.expressionFactory</param-name>
-        <param-value>org.jboss.el.ExpressionFactoryImpl</param-value>
-    </context-param>
-
+	<resource-env-ref>
+		<description>Object factory for the CDI Bean Manager</description>
+		<resource-env-ref-name>BeanManager</resource-env-ref-name>
+		<resource-env-ref-type>javax.enterprise.inject.spi.BeanManager</resource-env-ref-type>
+	</resource-env-ref>
 </web-app>
