@@ -6,11 +6,32 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -29,17 +50,6 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import javax.ws.rs.core.MediaType;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
-
 /**
  * Functional tests for Sector Identifier URL Verification (embedded)
  *
@@ -48,232 +58,201 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  */
 public class SectorIdentifierUrlVerificationEmbeddedTest extends BaseTest {
 
-    private String clientId1;
-    private String clientSecret1;
+	@ArquillianResource
+	private URI url;
 
-    @Parameters({"registerPath", "redirectUris", "sectorIdentifierUri"})
-    @Test // This test requires a place to publish a sector identifier JSON array of redirect URIs via HTTPS
-    public void requestAuthorizationCodeWithSectorIdentifierStep1(final String registerPath, final String redirectUris,
-                                                                  final String sectorIdentifierUri) throws Exception {
+	private static String clientId1;
+	private static String clientSecret1;
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	@Parameters({ "registerPath", "redirectUris", "sectorIdentifierUri" })
+	@Test // This test requires a place to publish a sector identifier JSON
+			// array of redirect URIs via HTTPS
+	public void requestAuthorizationCodeWithSectorIdentifierStep1(final String registerPath, final String redirectUris,
+			final String sectorIdentifierUri) throws Exception {
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-                    List<ResponseType> responseTypes = Arrays.asList(
-                            ResponseType.CODE,
-                            ResponseType.ID_TOKEN);
+		String registerRequestContent = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
-                    registerRequest.setResponseTypes(responseTypes);
-                    registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-                    registerRequest.setSubjectType(SubjectType.PAIRWISE);
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.setResponseTypes(responseTypes);
+			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+			registerRequest.setSubjectType(SubjectType.PAIRWISE);
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestAuthorizationCodeWithSectorIdentifierStep1", response);
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-                    assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+		showResponse("requestAuthorizationCodeWithSectorIdentifierStep1", response, entity);
 
-                    clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-                    clientSecret1 = jsonObj.getString(CLIENT_SECRET.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
+			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-    // This test requires a place to publish a sector identifier JSON array of redirect URIs via HTTPS
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "requestAuthorizationCodeWithSectorIdentifierStep1")
-    public void requestAuthorizationCodeWithSectorIdentifierStep2(
-            final String authorizePath, final String userId, final String userSecret,
-            final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+			clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
+			clientSecret1 = jsonObj.getString(CLIENT_SECRET.toString());
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+	// This test requires a place to publish a sector identifier JSON array of
+	// redirect URIs via HTTPS
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "requestAuthorizationCodeWithSectorIdentifierStep1")
+	public void requestAuthorizationCodeWithSectorIdentifierStep2(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
 
-                List<ResponseType> responseTypes = Arrays.asList(
-                        ResponseType.CODE,
-                        ResponseType.ID_TOKEN);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-                String state = UUID.randomUUID().toString();
-                String nonce = UUID.randomUUID().toString();
+		List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+		List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+		String state = UUID.randomUUID().toString();
+		String nonce = UUID.randomUUID().toString();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId1, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+		AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+				redirectUri, nonce);
+		authorizationRequest.setState(state);
+		authorizationRequest.getPrompts().add(Prompt.NONE);
+		authorizationRequest.setAuthUsername(userId);
+		authorizationRequest.setAuthPassword(userSecret);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
-            }
+		Builder request = ResteasyClientBuilder.newClient()
+				.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+		request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+		request.header("Accept", MediaType.TEXT_PLAIN);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestAuthorizationCodeWithSectorIdentifierStep2", response);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+		showResponse("requestAuthorizationCodeWithSectorIdentifierStep2", response, entity);
 
-                try {
-                    URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getFragment());
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                    Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+		try {
+			URI uri = new URI(response.getLocation().toString());
+			assertNotNull(uri.getFragment());
 
-                    assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-                    assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The ID Token is null");
-                    assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-                    assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    String idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
+			assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+			assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The ID Token is null");
+			assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+			assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
 
-                    Jwt jwt = Jwt.parse(idToken);
-                    assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-                    assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-                } catch (URISyntaxException e) {
-                    e.printStackTrace();
-                    fail("Response URI is not well formed");
-                } catch (InvalidJwtException e) {
-                    e.printStackTrace();
-                    fail("Invalid JWT");
-                }
-            }
-        }.run();
-    }
+			String idToken = params.get(AuthorizeResponseParam.ID_TOKEN);
 
-    @Parameters({"registerPath", "redirectUris"})
-    @Test
-    public void sectorIdentifierUrlVerificationFail1(
-            final String registerPath, final String redirectUris) throws Exception {
+			Jwt jwt = Jwt.parse(idToken);
+			assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
+			assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
+			assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			fail("Response URI is not well formed");
+		} catch (InvalidJwtException e) {
+			e.printStackTrace();
+			fail("Invalid JWT");
+		}
+	}
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	@Parameters({ "registerPath", "redirectUris" })
+	@Test
+	public void sectorIdentifierUrlVerificationFail1(final String registerPath, final String redirectUris)
+			throws Exception {
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
-                    registerRequest.setSectorIdentifierUri("https://INVALID_SECTOR_IDENTIFIER_URL");
+		String registerRequestContent = null;
+		try {
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.setSectorIdentifierUri("https://INVALID_SECTOR_IDENTIFIER_URL");
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("sectorIdentifierUrlVerificationFail1", response);
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-                assertEquals(response.getStatus(), 400, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("error"), "The error type is null");
-                    assertTrue(jsonObj.has("error_description"), "The error description is null");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+		showResponse("sectorIdentifierUrlVerificationFail1", response, entity);
 
-    @Parameters({"registerPath", "sectorIdentifierUri"})
-    @Test // This test requires a place to publish a sector identifier JSON array of redirect URIs via HTTPS
-    public void sectorIdentifierUrlVerificationFail2(
-            final String registerPath, final String sectorIdentifierUri) throws Exception {
+		assertEquals(response.getStatus(), 400, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has("error"), "The error type is null");
+			assertTrue(jsonObj.has("error_description"), "The error description is null");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	@Parameters({ "registerPath", "sectorIdentifierUri" })
+	@Test // This test requires a place to publish a sector identifier JSON
+			// array of redirect URIs via HTTPS
+	public void sectorIdentifierUrlVerificationFail2(final String registerPath, final String sectorIdentifierUri)
+			throws Exception {
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
-                    String redirectUris = "https://INVALID_REDIRECT_URI https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2";
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
-                    registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+		String registerRequestContent = null;
+		try {
+			String redirectUris = "https://INVALID_REDIRECT_URI https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2";
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("sectorIdentifierUrlVerificationFail2", response);
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 
-                assertEquals(response.getStatus(), 400, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("error"), "The error type is null");
-                    assertTrue(jsonObj.has("error_description"), "The error description is null");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
-    }
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
+
+		showResponse("sectorIdentifierUrlVerificationFail2", response, entity);
+
+		assertEquals(response.getStatus(), 400, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has("error"), "The error type is null");
+			assertTrue(jsonObj.has("error_description"), "The error description is null");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage() + "\nResponse was: " + entity);
+		}
+	}
+
 }

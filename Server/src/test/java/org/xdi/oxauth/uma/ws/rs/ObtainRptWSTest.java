@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.net.URI;
+
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -21,20 +24,24 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 
 public class ObtainRptWSTest extends BaseTest {
 
-    private Token aat;
+	@ArquillianResource
+	private URI url;
 
-    @Test
-    @Parameters({"authorizePath", "tokenPath",
-            "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret", "umaRedirectUri"})
-    public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-                     String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-        aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
-    }
+	private static Token aat;
 
-    @Test(dependsOnMethods = "init")
-    @Parameters({"umaRptPath", "umaAmHost"})
-    public void obtainRpt(String umaRptPath, String umaAmHost) {
-        final RPTResponse r = TUma.requestRpt(this, aat, umaRptPath, umaAmHost);
-        UmaTestUtil.assert_(r);
-    }
+	@Test
+	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret",
+			"umaRedirectUri" })
+	public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
+			String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
+		aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
+				umaAatClientSecret, umaRedirectUri);
+	}
+
+	@Test(dependsOnMethods = "init")
+	@Parameters({ "umaRptPath", "umaAmHost" })
+	public void obtainRpt(String umaRptPath, String umaAmHost) {
+		final RPTResponse r = TUma.requestRpt(url, aat, umaRptPath, umaAmHost);
+		UmaTestUtil.assert_(r);
+	}
 }

@@ -37,7 +37,7 @@
 
 		<jetty.version>9.4.2.v20170220</jetty.version>
 
-        <arquillian.version>1.1.12.Final</arquillian.version>
+        <arquillian.version>1.1.11.Final</arquillian.version>
         <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
         <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
         <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
@@ -381,6 +381,11 @@
 				<version>${resteasy.version}</version>
 			</dependency>
 			<dependency>
+			    <groupId>org.jboss.resteasy</groupId>
+			    <artifactId>resteasy-client</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-servlet-initializer</artifactId>
 				<version>${resteasy.version}</version>
@@ -421,6 +426,13 @@
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-jaxrs</artifactId>
 				<version>${jackson.version}</version>
+			</dependency>
+
+			<!-- Jettison -->
+			<dependency>
+				<groupId>org.codehaus.jettison</groupId>
+				<artifactId>jettison</artifactId>
+				<version>${jettison.version}</version>
 			</dependency>
 
 			<!-- JMS -->
@@ -490,7 +502,7 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.10</version>
+				<version>6.11</version>
 				<scope>test</scope>
 			</dependency>
 
