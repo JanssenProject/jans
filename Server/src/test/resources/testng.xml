@@ -68,7 +68,7 @@
 	<!-- Key Generation test -->
 	<test name="Key Generation test (embedded)" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.ws.rs.KeyGenerationTest" />
+			<class name="org.xdi.oxauth.comp.KeyGenerationTest" />
 		</classes>
 	</test>
 
@@ -144,14 +144,14 @@
 	<!-- Signature test -->
 	<test name="Signature test (embedded)" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.ws.rs.SignatureTest" />
+			<class name="org.xdi.oxauth.comp.SignatureTest" />
 		</classes>
 	</test>
 
 	<!-- Encryption test -->
 	<test name="Encryption test (embedded)" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.ws.rs.EncryptionTest" />
+			<class name="org.xdi.oxauth.comp.EncryptionTest" />
 		</classes>
 	</test>
 
@@ -264,7 +264,7 @@
 
 	<test name="Locale test (embedded)" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.ws.rs.LocaleTest" />
+			<class name="org.xdi.oxauth.comp.LocaleTest" />
 		</classes>
 	</test>
 
