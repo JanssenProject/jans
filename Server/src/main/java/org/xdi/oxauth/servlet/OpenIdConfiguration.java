@@ -104,7 +104,9 @@ public class OpenIdConfiguration extends HttpServlet {
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
-	/**
+
+
+    /**
 	 * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
 	 * methods.
 	 *
@@ -359,6 +361,13 @@ public class OpenIdConfiguration extends HttpServlet {
 		} finally {
 			out.close();
 		}
+	}
+
+	@Override
+	public void init() throws ServletException {
+		// TODO Auto-generated method stub
+		super.init();
+		log.info("!!!! initialization");
 	}
 
 	/**

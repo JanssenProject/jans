@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import javax.inject.Inject;
+
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -16,17 +18,16 @@ import org.xdi.oxauth.service.EncryptionService;
  */
 public class KeyGenerationTest extends BaseTest {
 
-    @Parameters({"ldapAdminPassword"})
-    @Test
-    public void encryptLdapPassword(final String ldapAdminPassword) throws Exception {
-    	new ComponentTest() {
-			@Override
-			protected void testComponents() throws Exception {
-		        showTitle("TEST: encryptLdapPassword");
+	@Inject
+	private EncryptionService encryptionService;
 
-		        String password = EncryptionService.instance().encrypt(ldapAdminPassword);
-		        System.out.println("Encrypted LDAP Password: " + password);
-			}
-    	}.run();
-    }
+	@Parameters({ "ldapAdminPassword" })
+	@Test
+	public void encryptLdapPassword(final String ldapAdminPassword) throws Exception {
+		showTitle("TEST: encryptLdapPassword");
+
+		String password = encryptionService.encrypt(ldapAdminPassword);
+		System.out.println("Encrypted LDAP Password: " + password);
+	}
+
 }

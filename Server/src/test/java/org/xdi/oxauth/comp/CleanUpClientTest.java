@@ -26,17 +26,9 @@ import org.xdi.util.StringHelper;
  */
 
 public class CleanUpClientTest extends BaseComponentTest {
-	
+
 	@Inject
 	private ClientService clientService;
-
-	@Override
-	public void beforeClass() {
-	}
-
-	@Override
-	public void afterClass() {
-	}
 
 	@Test
 	@Parameters(value = "usedClients")
@@ -55,11 +47,11 @@ public class CleanUpClientTest extends BaseComponentTest {
 
 			existsMoreClients = clients.size() == clientsResultSetSize;
 			countResults += clients.size();
-	
+
 			Assert.assertNotNull(clients);
 			output("Found clients: " + clients.size());
 			output("Total clients: " + countResults);
-	
+
 			for (Client client : clients) {
 				String clientId = client.getClientId();
 				if (!usedClientsList.contains(clientId)) {
