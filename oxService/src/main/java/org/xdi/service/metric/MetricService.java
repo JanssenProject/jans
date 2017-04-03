@@ -34,7 +34,6 @@ import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.ldap.MetricEntry;
 import org.xdi.model.metric.ldap.MetricReport;
-import org.xdi.service.custom.inject.UpdateScript;
 import org.xdi.service.metric.inject.ReportMetric;
 import org.xdi.util.StringHelper;
 
@@ -74,7 +73,7 @@ public abstract class MetricService implements Serializable {
     	this.metricRegistry = new MetricRegistry();
     	this.registeredMetricTypes = new HashSet<MetricType>();
 
-    	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getComponentName()).build();
+    	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
 
     	int metricReporterInterval = metricInterval;
     	if (metricReporterInterval <= 0) {
@@ -379,6 +378,6 @@ public abstract class MetricService implements Serializable {
 	// Should return appliance Inum
 	public abstract String applianceInum();
 
-	public abstract String getComponentName();
+	public abstract MetricService getMetricServiceInstance();
 
 }
