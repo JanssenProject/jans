@@ -10,21 +10,7 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
  * @author Yuriy Movchan
  */
 public class Deployments {
-	private static final String ARCHIVE_NAME = "oxauth.war";
-	private static final String BUILD_DIRECTORY = "target";
 
-	// public static WebArchive createDeployment() {
-	// return ShrinkWrap.create(ZipImporter.class, ARCHIVE_NAME).importFrom(new
-	// File(BUILD_DIRECTORY + '/' + ARCHIVE_NAME))
-	// .as(WebArchive.class);
-	// }
-	// public static JavaArchive createDeployment() {
-	// return ShrinkWrap.create(JavaArchive.class, "test.jar").addClasses(
-	// GluuConfigurationWS.class)
-	// .addClass(ResteasyInitializer.class)
-	// .addPackage(GluuConfigurationWS.class.getPackage())
-	// .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
-	// }
 	public static WebArchive createDeployment() {
 		final WebArchive war = ShrinkWrap.create(WebArchive.class, "oxauth.war")
 				// adding the configuration class silences the logged exception
