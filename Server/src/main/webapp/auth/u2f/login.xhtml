@@ -10,44 +10,44 @@
         <script src="./scripts/u2f-api.js"/>
 
         <script>
-        var auth_request = ${fido_u2f_authentication_request};
-        var register_request = ${fido_u2f_registration_request};
+            var auth_request = ${fido_u2f_authentication_request};
+            var register_request = ${fido_u2f_registration_request};
 
-        function startRegistration() {
-            u2f.register(register_request.registerRequests, register_request.authenticateRequests,
-            function(data) {
-                if(data.errorCode) {
-                    alert("U2F failed with error: " + data.errorCode);
-                    return;
-                }
+            function startRegistration() {
+                u2f.register(register_request.registerRequests, register_request.authenticateRequests,
+                        function(data) {
+                            if(data.errorCode) {
+                                alert("U2F failed with error: " + data.errorCode);
+                                return;
+                            }
 
-                document.getElementById('tokenResponse').value = JSON.stringify(data);
-                document.getElementById('authMethod').value = 'enroll';
+                            document.getElementById('tokenResponse').value = JSON.stringify(data);
+                            document.getElementById('authMethod').value = 'enroll';
 
-                document.getElementById('u2f_form').submit();
-            });
-        }
+                            document.getElementById('u2f_form').submit();
+                        });
+            }
 
-        function startAuthentication() {
-            u2f.sign(auth_request.authenticateRequests,
-            function(data) {
-                if(data.errorCode) {
-                    alert("U2F failed with error code: " + data.errorCode);
-                    return;
-                }
+            function startAuthentication() {
+                u2f.sign(auth_request.authenticateRequests,
+                        function(data) {
+                            if(data.errorCode) {
+                                alert("U2F failed with error code: " + data.errorCode);
+                                return;
+                            }
 
-                document.getElementById('tokenResponse').value = JSON.stringify(data);
-                document.getElementById('authMethod').value = 'authenticate';
+                            document.getElementById('tokenResponse').value = JSON.stringify(data);
+                            document.getElementById('authMethod').value = 'authenticate';
 
-                document.getElementById('u2f_form').submit();
-            });
-        }
+                            document.getElementById('u2f_form').submit();
+                        });
+            }
 
-        if (auth_request != null) {
-            setTimeout(startAuthentication(), 1000);
-        } else {
-            setTimeout(startRegistration(), 1000);
-        }
+            if (auth_request != null) {
+                setTimeout(startAuthentication(), 1000);
+            } else {
+                setTimeout(startRegistration(), 1000);
+            }
         </script>
 
         <style type="text/css">
@@ -111,7 +111,7 @@
                                         </s:div>
 
                                         <div class="dialog">
-                                        	<p>Touch your U2F token.</p>
+                                            <p>Touch your U2F token.</p>
                                         </div>
 
                                         <s:div rendered='#{!empty client.getPolicyUri()}'>
@@ -134,8 +134,8 @@
                                     </div>
                                 </div>
                                 <div class="login-panel">
-                                	<s:fragment rendered="#{fido_u2f_authentication_request != 'null'}">
-                                	</s:fragment>
+                                    <s:fragment rendered="#{fido_u2f_authentication_request != 'null'}">
+                                    </s:fragment>
                                 </div>
                             </h:panelGroup>
                         </h:form>
