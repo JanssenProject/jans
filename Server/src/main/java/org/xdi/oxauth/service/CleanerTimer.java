@@ -108,7 +108,7 @@ public class CleanerTimer implements Job {
             interval = DEFAULT_INTERVAL;
         }
 
-        JobDetail job = JobBuilder.newJob(this.getClass()).withIdentity(
+        JobDetail job = JobBuilder.newJob(CleanerTimer.class).withIdentity(
 				"oxAuthCleanerJob").build();
 		Trigger trigger = TriggerBuilder.newTrigger()
 				.withIdentity(
