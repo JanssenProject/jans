@@ -21,6 +21,14 @@ import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.quartz.Job;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -32,6 +40,7 @@ import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
+import org.xdi.oxauth.service.job.quartz.JobShedule;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.RptManager;
 
@@ -43,7 +52,7 @@ import org.xdi.oxauth.service.uma.RptManager;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
-public class CleanerTimer {
+public class CleanerTimer implements Job {
 
     public final static int BATCH_SIZE = 100;
     private final static String EVENT_TYPE = "CleanerTimerEvent";
@@ -90,22 +99,32 @@ public class CleanerTimer {
     @Inject
     private AppConfiguration appConfiguration;
 
-    // TODO: CDI: Fix
-//    @Observer("org.jboss.seam.postInitialization")
-//    public void init() {
-//        log.debug("Initializing CleanerTimer");
-//        this.isActive = new AtomicBoolean(false);
-//
-//        long interval = appConfiguration.getCleanServiceInterval();
-//        if (interval <= 0) {
-//            interval = DEFAULT_INTERVAL;
-//        }
-//        interval = interval * 1000L;
-//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
-//    }
+    public JobShedule getJobShedule() {
+        log.debug("Initializing CleanerTimer");
+        this.isActive = new AtomicBoolean(false);
 
-    // TODO: CDI: Fix
-//    @Observer(EVENT_TYPE)
+        int interval = appConfiguration.getCleanServiceInterval();
+        if (interval <= 0) {
+            interval = DEFAULT_INTERVAL;
+        }
+
+        JobDetail job = JobBuilder.newJob(this.getClass()).withIdentity(
+				"oxAuthCleanerJob").build();
+		Trigger trigger = TriggerBuilder.newTrigger()
+				.withIdentity(
+						"oxAuthCleanerTrigger")
+				.startNow()
+				.withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(interval))
+				.build();
+		
+		return new JobShedule(job, trigger);
+    }
+
+	@Override
+	public void execute(JobExecutionContext context) throws JobExecutionException {
+		process();
+	}
+
     @Asynchronous
     public void process() {
         if (this.isActive.get()) {
