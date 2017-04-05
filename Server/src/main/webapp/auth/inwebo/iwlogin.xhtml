@@ -43,7 +43,7 @@
         </s:fragment>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['inwebo.title']}</ui:define>
 
     <ui:define name="body">
         <s:fragment rendered="#{helium_enabled}">
@@ -56,7 +56,7 @@
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Login</div>
+                    <div class="login-panel-header">#{msgs['inwebo.loginLabel']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
@@ -64,17 +64,17 @@
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </s:div>
 
-                        <p class="info">Please login here</p>
+                        <p class="info">#{msgs['inwebo.pleaseLoginHere']}</p>
 
                         <div class="dialog">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value">
-                                <h:outputLabel for="username">Username</h:outputLabel>
+                                <h:outputLabel for="username">#{msgs['inwebo.username']}</h:outputLabel>
                                 <h:inputText id="username"
                                              value="#{credentials.username}" autocomplete="off"/>
-                                <h:outputLabel for="password">Password</h:outputLabel>
+                                <h:outputLabel for="password">#{msgs['inwebo.password']}</h:outputLabel>
                                 <h:inputSecret id="password"
                                                value="#{credentials.password}" autocomplete="off"/>
-                                <h:outputLabel for="rememberMe">Remember me</h:outputLabel>
+                                <h:outputLabel for="rememberMe">#{msgs['inwebo.rememberMe']}</h:outputLabel>
                                 <h:selectBooleanCheckbox id="rememberMe"
                                                          value="#{rememberMe.enabled}"/>
                             </h:panelGrid>
@@ -82,7 +82,7 @@
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['inwebo.termsPrivacy']}</a>
                             </p>
                         </s:div>
 
@@ -95,29 +95,29 @@
                 </div>
             </h:panelGroup>
         </h:form>
-        
+
         <s:fragment rendered="#{helium_enabled}">
             <!-- Temporary solution because InWebo not support id with ':' character -->
             <form id="iwLoginForm" action="#{request.contextPath}/postlogin.seam">
                 <h:panelGroup rendered="#{not identity.loggedIn}">
                     <div class="login-panel">
-                        <div class="login-panel-header">Login</div>
+                        <div class="login-panel-header">#{msgs['inwebo.loginLabel']}</div>
                         <div class="login-panel-body">
                             <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
-    
+
                             <s:div rendered='#{!empty client.getLogoUri()}'>
                                 <h:graphicImage url='#{client.getLogoUri()}'/>
                             </s:div>
-    
-                            <p class="info">Please login here</p>
-    
+
+                            <p class="info">#{msgs['inwebo.pleaseLoginHere']}</p>
+
                             <div id="heliumForm"/>
                             <input type="hidden" name="login"/>
                             <input type="hidden" name="password"/>
-    
+
                             <s:div rendered='#{!empty client.getPolicyUri()}'>
                                 <p>
-                                    <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                    <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['inwebo.termsPrivacy']}</a>
                                 </p>
                             </s:div>
                         </div>
