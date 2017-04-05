@@ -62,7 +62,7 @@
         </script>
     </ui:define>
 
-    <ui:define name="pageTitle">Passport - PostLogin</ui:define>
+    <ui:define name="pageTitle">#{msgs['passport.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <h:form id="loginForm">
@@ -70,7 +70,7 @@
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Login (second step)</div>
+                    <div class="login-panel-header">#{msgs['passport.loginSecondStep']}</div>
                     <div class="login-panel-body">
                         <c:set var="client" value='#{clientService.getClient(redirect.parameters["client_id"])}'/>
 
@@ -78,11 +78,11 @@
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </s:div>
 
-                        <p class="info">Please login here</p>
+                        <p class="info">#{msgs['passport.pleaseLoginHere']}</p>
 
                         <div class="dialog">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="email">Email</h:outputLabel>
+                                <h:outputLabel for="email">#{msgs['passport.email']}</h:outputLabel>
                                 <h:inputText id="email"/>
                                 <h:inputHidden id="userid"/>
                                 <h:inputHidden id="displayname"/>
@@ -97,7 +97,7 @@
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['passport.termsPrivacy']}</a>
                             </p>
                         </s:div>
 

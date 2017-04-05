@@ -18,6 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.faces.context.ExternalContext;
@@ -127,21 +128,7 @@ public class ServerUtil {
     }    	
 
     public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
-    	class NamedAnnotation extends AnnotationLiteral<Named> implements Named {
-			private static final long serialVersionUID = 5873127661481517380L;
-
-			private final String value;
-
-    	     public NamedAnnotation(final String value) {
-    	         this.value = value;
-    	     }
-
-    	     public String value() {
-    	        return value;
-    	    }
-    	}
-
-		return CDI.current().select(p_clazz, new NamedAnnotation(name));
+		return CDI.current().select(p_clazz, NamedLiteral.of(name));
     }    	
 
     public static <T> T bean(Class<T> p_clazz, String name) {
@@ -276,7 +263,7 @@ public class ServerUtil {
     	URL parsedUrl1 = new URL(url1);
     	URL parsedUrl2 = new URL(url2);
     	
-    	return StringHelper.equals(parsedUrl1.getPath(), parsedUrl2.getPath());
+    	return parsedUrl1.getPath().endsWith(parsedUrl2.getPath());
     }
 
 }

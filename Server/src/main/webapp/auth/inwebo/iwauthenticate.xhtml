@@ -40,29 +40,29 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth InWebo - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['inwebo.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">InWebo Login (Token verification)</div>
+                    <div class="login-panel-header">#{msgs['inwebo.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
                         <s:div rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </s:div>
 
-                        <p class="info">Please login here</p>
+                        <p class="info">#{msgs['inwebo.pleaseLoginHere']}</p>
 
                         <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value">
-                            <h:outputLabel for="pairing_phrase">Authentication token</h:outputLabel>
-			                <input name="iw_token" type="text" autocomplete="off" />
+                            <h:outputLabel for="pairing_phrase">#{msgs['inwebo.authenticationToken']}</h:outputLabel>
+                            <input name="iw_token" type="text" autocomplete="off" />
                         </h:panelGrid>
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['inwebo.termsPrivacy']}</a>
                             </p>
                         </s:div>
 

@@ -11,11 +11,11 @@
 
         <s:fragment rendered="#{param.toopher_user_uid != null}">
             <script type="text/javascript">
-            //<![CDATA[
+                //<![CDATA[
                 jQuery(document).ready(function() {
                     $("#loginForm").submit();
                 });
-            //]]>
+                //]]>
             </script>
         </s:fragment>
 
@@ -52,13 +52,13 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth Toopher - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['toopher.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Toopher Login (Authentication request)</div>
+                    <div class="login-panel-header">#{msgs['toopher.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
                         <s:div rendered='#{!empty client.getLogoUri()}'>
@@ -66,12 +66,12 @@
                         </s:div>
 
                         <s:div styleClass="dialog" rendered="#{param.toopher_user_uid != null}">
-                            <p class="info">Sending authentication request...</p>
+                            <p class="info">#{msgs['toopher.sendingAuthentication']}</p>
                         </s:div>
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['toopher.termsPrivacy']}</a>
                             </p>
                         </s:div>
                     </div>

@@ -13,7 +13,7 @@
     </ui:define>
 
     <ui:define name="pageTitle">
-        <h:outputText value="oxAuth - Passport Login"/>
+        <h:outputText value="#{msgs['passport.oxAuthPassportLogin']}"/>
     </ui:define>
 
     <ui:define name="body">
@@ -35,7 +35,7 @@
                     </div><!-- end logo-->
 
                     <div class="login span4 offset6">
-                        Need a Gluu account?
+                        #{msgs['passport.needAGluuAccount']}
                         <a class="register,need-account"
                            href="../identity/register?redirectUri=https://support.gluu.org">Sign Up!</a>
                     </div>
@@ -106,8 +106,7 @@
                                     <li class="row-fluid">
                                         <div class="span9 offset3">
                                             <a class="need-account,register"
-                                               href="/identity/person/passwordReminder.htm">Forgot your
-                                                password?</a>
+                                               href="/identity/person/passwordReminder.htm">#{msgs['passport.forgotYourPassword']}</a>
                                         </div>
                                     </li>
                                     <s:div rendered='#{!empty client.getPolicyUri()}'>
@@ -137,14 +136,14 @@
                                                 <s:fragment rendered="#{external_auth_request_uri != Null}">
                                                     <a id="externalAuthButton"
                                                        href="#{external_auth_request_uri}"> <input
-                                                            type="button" value="Use External Authentification"/>
+                                                            type="button" value="#{msgs['passport.useExternalAuthentication']}"/>
                                                     </a>
                                                 </s:fragment>
                                                 <s:fragment rendered="#{external_registration_uri != Null}">
                                                     <a id="externalRegistrationButton"
                                                        href="#{external_registration_uri}"> <input
                                                             type="button" style="width:220px;"
-                                                            value="Register new user"/>
+                                                            value="#{msgs['passport.registerNewUser']}"/>
                                                     </a>
                                                 </s:fragment>
                                             </div>
