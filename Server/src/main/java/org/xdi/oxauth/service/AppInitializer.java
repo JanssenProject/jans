@@ -41,6 +41,8 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
+import org.xdi.oxauth.service.job.quartz.JobShedule;
+import org.xdi.oxauth.service.job.quartz.QuartzSchedulerManager;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
@@ -82,13 +84,22 @@ public class AppInitializer {
     private PythonService pythonService;
 
     @Inject
+    private MetricService metricService;
+
+    @Inject
     private CustomScriptManager customScriptManager;
 
 	@Inject
 	private ConfigurationFactory configurationFactory;
+	
+	@Inject
+	private CleanerTimer cleanerTimer;
 
 	@Inject
 	private BeanManager beanManager;
+	
+	@Inject
+	private QuartzSchedulerManager quartzSchedulerManager;
     
 	private FileConfiguration ldapConfig;
 	private List<GluuLdapConfiguration> ldapAuthConfigs;
@@ -122,6 +133,14 @@ public class AppInitializer {
 
         pythonService.initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
         customScriptManager.init(supportedCustomScriptTypes);
+        metricService.init();
+
+        // Start sheduler
+        quartzSchedulerManager.start();
+    	
+    	// Schedule quartz jobs
+    	JobShedule cleanerJobShedule = cleanerTimer.getJobShedule();
+    	quartzSchedulerManager.schedule(cleanerJobShedule);
 	}
 
     @Produces @ApplicationScoped
@@ -141,14 +160,15 @@ public class AppInitializer {
 		}
 	}
 
-    // TODO: CDI: Fix
 //    public void init(@Initialized(ApplicationScoped.class) ServletContext init) {
+//      Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
+
 //		this.isActive = new AtomicBoolean(false);
 //		this.lastFinishedTime = System.currentTimeMillis();
 //
 //		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
 //    }
-//
+
     public void destoy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
     	// TODO:
     	// Close connection here

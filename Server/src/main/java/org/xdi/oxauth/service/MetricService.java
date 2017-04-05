@@ -6,14 +6,12 @@
 
 package org.xdi.oxauth.service;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.slf4j.Logger;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
@@ -32,13 +30,10 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	private static final long serialVersionUID = 7875838160379126796L;
 
 	@Inject
-    private Logger log;
+    private Instance<MetricService> instance;
 
 	@Inject
     private ApplianceService applianceService;
-
-	@Inject
-	private ConfigurationFactory configurationFactory;
 
 	@Inject
 	private AppConfiguration appConfiguration;
@@ -46,8 +41,7 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@Inject
     private StaticConfiguration staticConfiguration;
 
-    @PostConstruct
-    public void create() {
+    public void init() {
     	init(this.appConfiguration.getMetricReporterInterval());
     }
 
@@ -62,8 +56,8 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	}
 
 	@Override
-	public String getComponentName() {
-		return METRIC_SERVICE_COMPONENT_NAME;
+	public org.xdi.service.metric.MetricService getMetricServiceInstance() {
+		return instance.get();
 	}
 
 }

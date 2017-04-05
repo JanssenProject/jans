@@ -40,13 +40,13 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">Twilio SMS - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['twiliosms.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <h:form id="TwilioSmsloginForm">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Twilio SMS Login (second step)</div>
+                    <div class="login-panel-header">#{msgs['twiliosms.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
 
@@ -54,23 +54,23 @@
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </s:div>
 
-                        <p class="info">Enter the Code You Received via SMS</p>
+                        <p class="info">#{msgs['twiliosms.enterTheCode']}</p>
 
                         <div class="dialog">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="passcode">Passcode</h:outputLabel>
-				                <input name="passcode" type="text" autocomplete="off" />
+                                <h:outputLabel for="passcode">#{msgs['twiliosms.passcode']}</h:outputLabel>
+                                <input name="passcode" type="text" autocomplete="off" />
                             </h:panelGrid>
                         </div>
 
                         <s:div rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['twiliosms.termsPrivacy']}</a>
                             </p>
                         </s:div>
 
                         <div class="actionButtons">
-                            <h:commandButton value="Login" action="#{authenticator.authenticate}"/>
+                            <h:commandButton value="#{msgs['twiliosms.loginLabel']}" action="#{authenticator.authenticate}"/>
                         </div>
                     </div>
                 </div>

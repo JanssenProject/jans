@@ -223,6 +223,25 @@
 					<scanIntervalSeconds>3</scanIntervalSeconds>
 				</configuration>
 			</plugin>
+			<plugin>
+				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>org.codehaus.mojo</groupId>
+				<executions>
+					<execution><!-- Run our version calculation script -->
+						<id>native2ascii</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${basedir}/src/main/resources/scripts/native2ascii.sh</executable>
+							<arguments>
+								<argument>${basedir}/src/main/resources/messages*.properties</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -434,6 +453,10 @@
 		    <artifactId>resteasy-cdi</artifactId>
 		</dependency>
 		<dependency>
+		    <groupId>org.jboss.resteasy</groupId>
+		    <artifactId>resteasy-client</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-servlet-initializer</artifactId>
 		</dependency>
@@ -482,6 +505,21 @@
 
 		<!-- Test -->
 		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxauth-model</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxauth-client</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
@@ -497,6 +535,11 @@
 			<groupId>org.jboss.arquillian.extension</groupId>
 			<artifactId>arquillian-rest-client-impl-3x</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.eu.ingwar.tools</groupId>
+		    <artifactId>arquillian-suite-extension</artifactId>
+		    <scope>test</scope>
 		</dependency>
 
 		<!-- Test: Shrinkwrap -->
@@ -668,6 +711,12 @@
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-jaxrs</artifactId>
+					<version>3.0.21.Final</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-cdi</artifactId>
 					<version>3.0.21.Final</version>
 					<scope>test</scope>
 				</dependency>
@@ -889,56 +938,6 @@
 			</dependencies>
 		</profile>
 
-		<profile>
-			<id>arq-tomcat-7-embedded</id>
-			<activation>
-				<property>
-					<name>maven.test.skip</name>
-					<value>false</value>
-				</property>
-			</activation>
-
-			<build>
-				<testResources>
-					<testResource>
-						<directory>src/test/resources</directory>
-					</testResource>
-					<testResource>
-						<directory>src/test/resources-tomcat-7-embedded</directory>
-					</testResource>
-				</testResources>
-			</build>
-
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.arquillian.container</groupId>
-					<artifactId>arquillian-tomcat-embedded-7</artifactId>
-					<version>1.0.0.CR7</version>
-					<scope>test</scope>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-core</artifactId>
-					<version>7.0.69</version>
-					<scope>provided</scope>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-jasper</artifactId>
-					<version>7.0.69</version>
-					<scope>provided</scope>
-				</dependency>
-
-				<dependency>
-					<groupId>org.apache.tomcat.embed</groupId>
-					<artifactId>tomcat-embed-logging-juli</artifactId>
-					<version>7.0.69</version>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
-		</profile>
 	</profiles>
 
 </project>
