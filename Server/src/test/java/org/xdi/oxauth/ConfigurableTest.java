@@ -14,12 +14,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.BeforeClass;
 import org.testng.ITestContext;
-import org.testng.Reporter;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxauth.util.Deployments;
 import org.xdi.util.StringHelper;
@@ -30,6 +30,7 @@ import org.xdi.util.properties.FileConfiguration;
  * 
  * @author Yuriy Movchan Date: 05/16/2016
  */
+@ArquillianSuiteDeployment
 public abstract class ConfigurableTest extends Arquillian {
 
 	public static FileConfiguration testData;
@@ -57,9 +58,6 @@ public abstract class ConfigurableTest extends Arquillian {
 
 	@BeforeSuite
 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
-		Reporter.log("Invoked init test suite method \n", true);
-//		org.jboss.resteasy.logging.Logger test = null;
-
 		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
 		if (StringHelper.isEmpty(propertiesFile)) {
 			propertiesFile = "target/test-classes/testng.properties";

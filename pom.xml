@@ -381,6 +381,11 @@
 				<version>${resteasy.version}</version>
 			</dependency>
 			<dependency>
+			    <groupId>org.jboss.resteasy</groupId>
+			    <artifactId>resteasy-client</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-servlet-initializer</artifactId>
 				<version>${resteasy.version}</version>
@@ -497,7 +502,7 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.10</version>
+				<version>6.9.10</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -580,6 +585,12 @@
 				<artifactId>arquillian-rest-client-impl-3x</artifactId>
 				<version>${arquillian.rest.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+			    <groupId>org.eu.ingwar.tools</groupId>
+			    <artifactId>arquillian-suite-extension</artifactId>
+			    <version>1.1.1</version>
+			    <scope>test</scope>
 			</dependency>
 
 	        <dependency>

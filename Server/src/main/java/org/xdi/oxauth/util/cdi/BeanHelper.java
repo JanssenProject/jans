@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
  * Utility class for performing programmatic bean lookups.
  */
 
-@Deprecated
 public class BeanHelper {
 
 	public final static Logger log = LoggerFactory.getLogger(BeanHelper.class);
