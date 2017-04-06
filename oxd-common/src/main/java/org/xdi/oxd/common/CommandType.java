@@ -40,9 +40,8 @@ public enum CommandType {
 
     // stateless
     AUTHORIZATION_CODE_FLOW("authorization_code_flow"),
-    IMPLICIT_FLOW("implicit_flow");
-
-
+    IMPLICIT_FLOW("implicit_flow"),
+    GET_CLIENT_TOKEN("get_client_token");
 
     private final String value;
 
