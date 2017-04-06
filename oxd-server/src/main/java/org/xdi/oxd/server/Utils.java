@@ -7,8 +7,8 @@ import com.google.common.base.Joiner;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Utility class with static methods.
@@ -48,7 +48,7 @@ public class Utils {
         return String.format("https://%s/.well-known/uma-configuration", p_amHost);
     }
 
-    public static String joinAndUrlEncode(List<String> list) throws UnsupportedEncodingException {
+    public static String joinAndUrlEncode(Collection<String> list) throws UnsupportedEncodingException {
         return URLEncoder.encode(Joiner.on(" ").join(list), "UTF-8");
     }
 
