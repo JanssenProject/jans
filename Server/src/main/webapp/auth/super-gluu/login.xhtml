@@ -104,7 +104,6 @@
                 <td>
                     <div>
                         <h:form id="loginForm">
-                            <s:token allowMultiplePosts="true"/>
                             <h:panelGroup rendered="#{not identity.loggedIn}">
                                 <div class="login-panel">
                                     <div class="login-panel-header">
@@ -113,9 +112,9 @@
                                     <div class="login-panel-body">
                                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-                                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                                        </s:div>
+                                        </h:panelGroup>
 
                                         <div class="dialog">
                                             <p>#{msgs['supergluu.scanQRCode']}</p>
@@ -123,23 +122,23 @@
                                             <div id="progressbar"></div>
                                         </div>
 
-                                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
                                                 <h:outputText value="#{msgs['common.agreePolicy']}"/>
                                                 <a target="_blank" href='#{client.getPolicyUri()}'>
                                                     <h:outputText value="#{msgs['common.privacyPolicy']}"/>
                                                 </a>
                                             </p>
-                                        </s:div>
+                                        </h:panelGroup>
 
-                                        <s:div rendered='#{!empty client.getTosUri()}'>
+                                        <h:panelGroup rendered='#{!empty client.getTosUri()}'>
                                             <p>
                                                 <h:outputText value="#{msgs['common.pleaseReadTheTos']}"/>
                                                 <a target="_blank" href='#{client.getTosUri()}'>
                                                     <h:outputText value="#{msgs['common.termsOfService']}"/>
                                                 </a>
                                             </p>
-                                        </s:div>
+                                        </h:panelGroup>
                                     </div>
                                 </div>
                             </h:panelGroup>
