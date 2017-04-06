@@ -81,5 +81,10 @@
             <class name="org.xdi.oxd.client.SetupClientTest"/>
         </classes>
     </test>
+    <test name="Get client token" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.GetClientTokenTest"/>
+        </classes>
+    </test>
 
 </suite>

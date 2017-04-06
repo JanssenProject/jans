@@ -62,6 +62,8 @@ public class OperationFactory {
                     return new RpGetGatOperation(command, injector);
                 case SETUP_CLIENT:
                     return new SetupClientOperation(command, injector);
+                case GET_CLIENT_TOKEN:
+                    return new GetClientTokenOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
