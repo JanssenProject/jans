@@ -2,7 +2,6 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:c="http://java.sun.com/jstl/core"
-                xmlns:s="http://jboss.com/products/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
@@ -66,7 +65,6 @@
 
     <ui:define name="body">
         <h:form id="loginForm">
-            <s:token/>
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
@@ -74,9 +72,9 @@
                     <div class="login-panel-body">
                         <c:set var="client" value='#{clientService.getClient(redirect.parameters["client_id"])}'/>
 
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
                         <p class="info">#{msgs['passport.pleaseLoginHere']}</p>
 
@@ -95,11 +93,11 @@
                             </h:panelGrid>
                         </div>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['passport.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
 
                         <div id="btn" class="actionButtons">
                             <h:commandButton value="Login" id="postForm" action="#{authenticator.authenticate}"/>
