@@ -16,19 +16,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ejb.Asynchronous;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.quartz.Job;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -40,7 +34,10 @@ import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.job.quartz.JobShedule;
+import org.xdi.oxauth.service.inject.CleanerEvent;
+import org.xdi.oxauth.service.inject.Scheduled;
+import org.xdi.oxauth.service.timer.event.TimerEvent;
+import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.RptManager;
 
@@ -52,7 +49,7 @@ import org.xdi.oxauth.service.uma.RptManager;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
-public class CleanerTimer implements Job {
+public class CleanerTimer {
 
     public final static int BATCH_SIZE = 100;
     private final static String EVENT_TYPE = "CleanerTimerEvent";
@@ -94,12 +91,15 @@ public class CleanerTimer implements Job {
     @Inject
     private ConfigurationFactory configurationFactory;
 
-    private AtomicBoolean isActive;
-
     @Inject
     private AppConfiguration appConfiguration;
 
-    public JobShedule getJobShedule() {
+    @Inject
+	private Event<TimerEvent> event;
+
+    private AtomicBoolean isActive;
+    
+    public void init() {
         log.debug("Initializing CleanerTimer");
         this.isActive = new AtomicBoolean(false);
 
@@ -108,25 +108,11 @@ public class CleanerTimer implements Job {
             interval = DEFAULT_INTERVAL;
         }
 
-        JobDetail job = JobBuilder.newJob(CleanerTimer.class).withIdentity(
-				"oxAuthCleanerJob").build();
-		Trigger trigger = TriggerBuilder.newTrigger()
-				.withIdentity(
-						"oxAuthCleanerTrigger")
-				.startNow()
-				.withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(interval))
-				.build();
-		
-		return new JobShedule(job, trigger);
+        event.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
-	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		process();
-	}
-
     @Asynchronous
-    public void process() {
+    public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
         if (this.isActive.get()) {
             return;
         }
