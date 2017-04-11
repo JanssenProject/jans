@@ -1,4 +1,4 @@
-package org.xdi.oxauth.service.job.quartz;
+package org.xdi.oxauth.service.timer;
 
 import java.util.Collections;
 import java.util.HashMap;

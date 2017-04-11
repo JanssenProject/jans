@@ -1,4 +1,4 @@
-package org.xdi.oxauth.service.job.quartz;
+package org.xdi.oxauth.service.timer.schedule;
 
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
