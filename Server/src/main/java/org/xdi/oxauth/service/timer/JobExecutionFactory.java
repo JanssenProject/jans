@@ -1,4 +1,4 @@
-package org.xdi.oxauth.service.job.quartz;
+ package org.xdi.oxauth.service.timer;
 
 import javax.inject.Inject;
 
