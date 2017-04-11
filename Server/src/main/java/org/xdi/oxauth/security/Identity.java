@@ -185,7 +185,7 @@ public class Identity implements Serializable {
 		return workingParameters;
 	}
 
-	public boolean gisSetWorkingParameter(String name) {
+	public boolean isSetWorkingParameter(String name) {
 		return this.workingParameters.containsKey(name);
 	}
 
