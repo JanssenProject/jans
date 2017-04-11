@@ -623,7 +623,10 @@ class Migration(object):
         self.importProcessedData()
         self.fixPermissions()
         self.startLDAPServer()
-        self.startWebapps()
+        # self.startWebapps()
+        print("------------------------------------------------------------")
+        print("The migration is complete. Gluu Server needs to be restarted.")
+        print("\tRun:\n\t# exit\n\t# service gluu-server-x.x.x restart")
 
 
 if __name__ == "__main__":
