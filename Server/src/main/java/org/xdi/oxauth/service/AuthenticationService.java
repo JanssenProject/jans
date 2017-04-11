@@ -644,7 +644,7 @@ public class AuthenticationService {
     }
 
     public boolean isParameterExists(String p_name) {
-        return identity.gisSetWorkingParameter(p_name);
+        return identity.isSetWorkingParameter(p_name);
     }
 
 }
