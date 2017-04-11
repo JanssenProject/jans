@@ -53,7 +53,7 @@
                 }
 
                 gluu_auth.renderQrCode('#container', request, qr_options, label);
-                gluu_auth.startProgressBar('#progressbar', 60);
+                gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
                 gluu_auth.startSessionChecker(onSignInCallback, 60);
             });
 
