@@ -41,8 +41,8 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
-import org.xdi.oxauth.service.job.quartz.JobShedule;
-import org.xdi.oxauth.service.job.quartz.QuartzSchedulerManager;
+import org.xdi.oxauth.service.timer.QuartzSchedulerManager;
+import org.xdi.oxauth.service.timer.schedule.JobShedule;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
@@ -139,8 +139,9 @@ public class AppInitializer {
         quartzSchedulerManager.start();
     	
     	// Schedule quartz jobs
-    	JobShedule cleanerJobShedule = cleanerTimer.getJobShedule();
-    	quartzSchedulerManager.schedule(cleanerJobShedule);
+        cleanerTimer.init();
+//    	JobShedule cleanerJobShedule = cleanerTimer.getJobShedule();
+//    	quartzSchedulerManager.schedule(cleanerJobShedule);
 	}
 
     @Produces @ApplicationScoped

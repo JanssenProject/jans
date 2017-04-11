@@ -1,21 +1,31 @@
-package org.xdi.oxauth.service.job.quartz;
+package org.xdi.oxauth.service.timer;
+
+import java.util.Date;
+import java.util.UUID;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.EverythingMatcher;
 import org.slf4j.Logger;
+import org.xdi.oxauth.service.timer.event.TimerEvent;
+import org.xdi.oxauth.service.timer.schedule.JobShedule;
+import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
 import org.xdi.util.init.Initializable;
+import org.quartz.JobBuilder;
+import org.quartz.TriggerBuilder;
 
 /**
- * @author Yuriy Movchan
- * Date: 04/04/2017
+ * @author Yuriy Movchan Date: 04/04/2017
  */
 @ApplicationScoped
 public class QuartzSchedulerManager extends Initializable {
@@ -40,7 +50,8 @@ public class QuartzSchedulerManager extends Initializable {
 
 			scheduler = factory.getScheduler();
 
-			// Register job listener to bound request context to every job execution
+			// Register job listener to bound request context to every job
+			// execution
 			scheduler.getListenerManager().addJobListener(jobListener, EverythingMatcher.allJobs());
 			// Replace default job factory
 			scheduler.setJobFactory(jobFactory);
@@ -62,6 +73,31 @@ public class QuartzSchedulerManager extends Initializable {
 			scheduler.scheduleJob(jobDetail, trigger);
 		} catch (SchedulerException ex) {
 			throw new IllegalStateException("Failed to shedule Quartz job", ex);
+		}
+	}
+
+	public void schedule(@Observes TimerEvent timerEvent) {
+		checkInitialized();
+		
+		JobDataMap dataMap = new JobDataMap();
+		dataMap.put(TimerJob.KEY_TIMER_EVENT, timerEvent);
+
+		String uuid = UUID.randomUUID().toString();
+
+		JobDetail timerJob = JobBuilder.newJob(TimerJob.class)
+				.withIdentity(TimerJob.class.getSimpleName() + "_" + uuid, TimerJob.TIMER_JOB_GROUP)
+				.usingJobData(dataMap).build();
+
+		TimerSchedule timerSchedule = timerEvent.getSchedule();
+		Date triggerStartTime = new Date(System.currentTimeMillis() + timerSchedule.getDelay() * 1000L);
+		Trigger timerTrigger = TriggerBuilder.newTrigger().withIdentity(uuid, TimerJob.TIMER_JOB_GROUP)
+				.startAt(triggerStartTime)
+				.withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(timerSchedule.getInterval())).build();
+
+		try {
+			scheduler.scheduleJob(timerJob, timerTrigger);
+		} catch (SchedulerException ex) {
+			throw new IllegalStateException("Failed to schedule Timer Event", ex);
 		}
 	}
 
@@ -122,8 +158,9 @@ public class QuartzSchedulerManager extends Initializable {
 	}
 
 	private void checkInitialized() {
-		if (!isInitialized())
+		if (!isInitialized()) {
 			throw new IllegalStateException("Quartz scheduler manager not initialized!");
+		}
 	}
 
 }
