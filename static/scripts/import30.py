@@ -87,7 +87,6 @@ class Migration(object):
         self.slapadd = "/opt/symas/bin/slapadd"
         self.keytool = "/opt/jre/bin/keytool"
         self.key_store = "/opt/jre/jre/lib/security/cacerts"
-        self.etc_hostname = "/etc/hostname"
         self.ldif_import = "/opt/opendj/bin/import-ldif"
         self.ldif_export = "/opt/opendj/bin/export-ldif"
 
@@ -192,7 +191,7 @@ class Migration(object):
         # import all the keys into the keystore
         for key in keys:
             alias = "{0}_{1}".format(hostname, key)
-            filename = "/etc/certs/{0}.crt".format(key)
+            filename = os.path.join(self.certsDir, key+".crt")
             if not os.path.isfile(filename):
                 continue  # skip the non-existant certs
 
