@@ -533,7 +533,10 @@ class Setup(object):
         self.run(['find', "%s" % self.osDefault, '-perm', '700', '-exec', self.cmd_chmod, "755", '{}', ';'])
         self.run(['find', "%s" % self.osDefault, '-perm', '600', '-exec', self.cmd_chmod, "644", '{}', ';'])
 
-        self.run(['/bin/chmod', '-R', '644', self.etc_hosts, self.etc_hostname])
+        self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
+
+        if self.os_type in ['debian', 'ubuntu']:
+            self.run(['/bin/chmod', '-R', '644', self.etc_hostname])
 
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
@@ -2415,6 +2418,7 @@ class Setup(object):
         else:
             if self.os_type in ['debian', 'ubuntu']:
                 self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
+                self.run(['/bin/chmod', '-R', '644', self.etc_hostname])
 
             if self.os_type in ['centos', 'redhat', 'fedora']:
                 self.copyFile("%s/network" % self.outputFolder, self.network)
@@ -2422,7 +2426,7 @@ class Setup(object):
             self.run(['/bin/hostname', self.hostname])
 
         self.copyFile("%s/hosts" % self.outputFolder, self.etc_hosts)
-        self.run(['/bin/chmod', '-R', '644', self.etc_hosts, self.etc_hostname])
+        self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
 
     def install_openldap(self):
         self.logIt("Installing OpenLDAP from package")
