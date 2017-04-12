@@ -363,13 +363,6 @@ public class OpenIdConfiguration extends HttpServlet {
 		}
 	}
 
-	@Override
-	public void init() throws ServletException {
-		// TODO Auto-generated method stub
-		super.init();
-		log.info("!!!! initialization");
-	}
-
 	/**
 	 * @deprecated theses params:
 	 *             <ul>
