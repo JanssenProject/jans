@@ -41,6 +41,8 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
+import org.xdi.oxauth.service.cdi.event.ConfigurationUpdate;
+import org.xdi.oxauth.service.cdi.event.LdapConfigurationReload;
 import org.xdi.oxauth.service.timer.QuartzSchedulerManager;
 import org.xdi.oxauth.service.timer.schedule.JobShedule;
 import org.xdi.oxauth.util.ServerUtil;
@@ -135,13 +137,12 @@ public class AppInitializer {
         customScriptManager.init(supportedCustomScriptTypes);
         metricService.init();
 
-        // Start sheduler
+        // Start timer
         quartzSchedulerManager.start();
     	
-    	// Schedule quartz jobs
-        cleanerTimer.init();
-//    	JobShedule cleanerJobShedule = cleanerTimer.getJobShedule();
-//    	quartzSchedulerManager.schedule(cleanerJobShedule);
+    	// Schedule timer tasks
+        cleanerTimer.initTimer();
+        configurationFactory.initTimer();
 	}
 
     @Produces @ApplicationScoped
@@ -177,7 +178,7 @@ public class AppInitializer {
     }
     
 //    public void reloadConfigurationTimerEvent(@Observes @AppReloadTimer @Event<String> reloadEvent) {
-//    	documentEvent.fireAsync(event, options)
+//    	documentEvent.fire(event, options)
 //		if (this.isActive.get()) {
 //			return;
 //		}
@@ -252,8 +253,7 @@ public class AppInitializer {
 	}
 
     // TODO: CDI: Fix
-//    @Observer(ConfigurationFactory.LDAP_CONFIGUARION_RELOAD_EVENT_TYPE)
-//    public void recreateLdapEntryManager() {
+    public void recreateLdapEntryManager(@Observes @LdapConfigurationReload String event) {
 //    	// Backup current references to objects to allow shutdown properly
 //    	LdapEntryManager oldLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME);
 //
@@ -265,9 +265,9 @@ public class AppInitializer {
 //    	oldLdapEntryManager.destroy();
 //
 //    	log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
-//    }
+    }
 //
-//    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
+    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
 //    	// Backup current references to objects to allow shutdown properly
 //    	List<LdapEntryManager> oldLdapAuthEntryManagers = (List<LdapEntryManager>) Component.getInstance(LDAP_AUTH_ENTRY_MANAGER_NAME);
 //
@@ -281,7 +281,7 @@ public class AppInitializer {
 //			oldLdapAuthEntryManager.destroy();
 //	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
 //		}
-//    }
+    }
 
 	private void destroyLdapConnectionService(LdapConnectionService connectionProvider) {
 		if (connectionProvider != null) {
@@ -507,9 +507,7 @@ public class AppInitializer {
 		return clazzObject;
 	}
 	
-    // TODO: CDI: Fix
-//	@Observer(ConfigurationFactory.CONFIGURATION_UPDATE_EVENT)
-	public void updateLoggingSeverity(AppConfiguration appConfiguration, StaticConfiguration staticConfiguration) {
+	public void updateLoggingSeverity(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
 		String loggingLevel = appConfiguration.getLoggingLevel();
 		if (StringHelper.isEmpty(loggingLevel)) {
 			return;
