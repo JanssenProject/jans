@@ -52,7 +52,6 @@ import org.xdi.oxauth.service.uma.RptManager;
 public class CleanerTimer {
 
     public final static int BATCH_SIZE = 100;
-    private final static String EVENT_TYPE = "CleanerTimerEvent";
     private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
     @Inject
@@ -108,7 +107,7 @@ public class CleanerTimer {
             interval = DEFAULT_INTERVAL;
         }
 
-        cleanerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+        cleanerEvent.fire(new TimerEvent(new TimerSchedule(30, 30), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
     @Asynchronous

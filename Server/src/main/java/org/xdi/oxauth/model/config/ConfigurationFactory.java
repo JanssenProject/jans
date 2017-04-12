@@ -96,6 +96,7 @@ public class ConfigurationFactory {
 
 	private String confDir, configFilePath, errorsFilePath, staticConfFilePath, webKeysFilePath, saltFilePath;
 
+	private boolean loaded = false;
 	private FileConfiguration ldapConfiguration;
 	private AppConfiguration conf;
 	private StaticConfiguration staticConf;
@@ -313,11 +314,14 @@ public class ConfigurationFactory {
 				init(c);
 
 				// Destroy old configuration
-				ServerUtil.destroy(AppConfiguration.class);
-				ServerUtil.destroy(StaticConfiguration.class);
-				ServerUtil.destroy(WebKeysConfiguration.class);
-				ServerUtil.destroy(ErrorResponseFactory.class);
+				if (this.loaded) {
+					ServerUtil.destroy(AppConfiguration.class);
+					ServerUtil.destroy(StaticConfiguration.class);
+					ServerUtil.destroy(WebKeysConfiguration.class);
+					ServerUtil.destroy(ErrorResponseFactory.class);
+				}
 
+				this.loaded = true;
 				configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(conf);
 
 				return true;
