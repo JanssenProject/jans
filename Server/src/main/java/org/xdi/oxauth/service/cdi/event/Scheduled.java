@@ -1,4 +1,4 @@
-package org.xdi.oxauth.service.inject;
+package org.xdi.oxauth.service.cdi.event;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
