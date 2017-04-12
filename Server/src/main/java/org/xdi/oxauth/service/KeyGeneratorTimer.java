@@ -31,7 +31,6 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
-import org.xdi.oxauth.service.cdi.event.ConfigurationEvent;
 import org.xdi.oxauth.service.cdi.event.KeyGenerationEvent;
 import org.xdi.oxauth.service.cdi.event.Scheduled;
 import org.xdi.oxauth.service.timer.event.TimerEvent;
@@ -76,7 +75,7 @@ public class KeyGeneratorTimer {
 		}
 
 		interval = interval * 3600;
-		timerEvent.fire(new TimerEvent(new TimerSchedule(30, 30), new KeyGenerationEvent(),
+		timerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new KeyGenerationEvent(),
 				Scheduled.Literal.INSTANCE));
 	}
 

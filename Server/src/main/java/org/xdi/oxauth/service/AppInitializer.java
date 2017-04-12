@@ -16,9 +16,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
@@ -37,14 +37,18 @@ import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
+import org.xdi.oxauth.service.cdi.event.AuthConfigurationEvent;
 import org.xdi.oxauth.service.cdi.event.ConfigurationUpdate;
 import org.xdi.oxauth.service.cdi.event.LdapConfigurationReload;
+import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
+import org.xdi.oxauth.service.cdi.event.Scheduled;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.service.timer.QuartzSchedulerManager;
-import org.xdi.oxauth.service.timer.schedule.JobShedule;
+import org.xdi.oxauth.service.timer.event.TimerEvent;
+import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
 import org.xdi.service.custom.script.CustomScriptManager;
@@ -78,7 +82,13 @@ public class AppInitializer {
 
     @Inject
     private Logger log;
-    
+
+	@Inject
+	private Event<String> event;
+
+	@Inject
+	private Event<TimerEvent> timerEvent;
+
     @Inject
     private ApplianceService applianceService;
 
@@ -144,6 +154,7 @@ public class AppInitializer {
         cleanerTimer.initTimer();
         configurationFactory.initTimer();
         keyGeneratorTimer.initTimer();
+        initTimer();
 	}
 
     @Produces @ApplicationScoped
@@ -163,14 +174,13 @@ public class AppInitializer {
 		}
 	}
 
-//    public void init(@Initialized(ApplicationScoped.class) ServletContext init) {
-//      Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
+    public void initTimer() {
+		this.isActive = new AtomicBoolean(false);
+		this.lastFinishedTime = System.currentTimeMillis();
 
-//		this.isActive = new AtomicBoolean(false);
-//		this.lastFinishedTime = System.currentTimeMillis();
-//
-//		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
-//    }
+		timerEvent.fire(new TimerEvent(new TimerSchedule(1 * 60, DEFAULT_INTERVAL), new AuthConfigurationEvent(),
+				Scheduled.Literal.INSTANCE));
+    }
 
     public void destoy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
     	// TODO:
@@ -178,34 +188,32 @@ public class AppInitializer {
     	// Clean up caches, etc...
     }
     
-//    public void reloadConfigurationTimerEvent(@Observes @AppReloadTimer @Event<String> reloadEvent) {
-//    	documentEvent.fire(event, options)
-//		if (this.isActive.get()) {
-//			return;
-//		}
-//
-//		if (!this.isActive.compareAndSet(false, true)) {
-//			return;
-//		}
-//
-//		try {
-//			reloadConfiguration();
-//		} catch (Throwable ex) {
-//			log.error("Exception happened while reloading application configuration", ex);
-//		} finally {
-//			this.isActive.set(false);
-//			this.lastFinishedTime = System.currentTimeMillis();
-//		}
-//	}
+    public void reloadConfigurationTimerEvent(@Observes @Scheduled AuthConfigurationEvent authConfigurationEvent) {
+		if (this.isActive.get()) {
+			return;
+		}
+
+		if (!this.isActive.compareAndSet(false, true)) {
+			return;
+		}
+
+		try {
+			reloadConfiguration();
+		} catch (Throwable ex) {
+			log.error("Exception happened while reloading application configuration", ex);
+		} finally {
+			this.isActive.set(false);
+			this.lastFinishedTime = System.currentTimeMillis();
+		}
+	}
 
 	private void reloadConfiguration() {
         LdapEntryManager localLdapEntryManager = ServerUtil.bean(LdapEntryManager.class, LDAP_ENTRY_MANAGER_NAME);
 		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
 		
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
-		    // TODO: CDI: Fix
-//			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
-//			Events.instance().raiseEvent(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
+			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
+			event.select(ReloadAuthScript.Literal.INSTANCE).fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
 		}
 
 		setDefaultAuthenticationMethod(localLdapEntryManager);
