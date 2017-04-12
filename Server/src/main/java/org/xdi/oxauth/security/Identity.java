@@ -39,9 +39,8 @@ public class Identity implements Serializable {
 
 	private SessionState sessionState;
 
-	// TODO: CDI review, use more CDI way
 	private User user;
-	private SessionClient setSessionClient;
+	private SessionClient sessionClient;
 
 	private HashMap<String, Object> workingParameters;
 
@@ -174,15 +173,15 @@ public class Identity implements Serializable {
 	}
 
 	public void setSessionClient(SessionClient sessionClient) {
-		this.setSessionClient = sessionClient;
+		this.sessionClient = sessionClient;
 	}
 
 	public SessionClient getSetSessionClient() {
-		return setSessionClient;
+		return sessionClient;
 	}
 
 	public void setSetSessionClient(SessionClient setSessionClient) {
-		this.setSessionClient = setSessionClient;
+		this.sessionClient = setSessionClient;
 	}
 
 	private synchronized void initWorkingParamaters() {

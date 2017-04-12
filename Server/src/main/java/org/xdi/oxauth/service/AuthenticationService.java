@@ -60,7 +60,6 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-// TODO: Review CDI injection Identity into stateless
 @Stateless
 @Named
 public class AuthenticationService {
@@ -314,7 +313,6 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String userName) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
         log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
