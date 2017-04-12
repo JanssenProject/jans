@@ -32,10 +32,10 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.cdi.event.CleanerEvent;
+import org.xdi.oxauth.service.cdi.event.Scheduled;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.inject.CleanerEvent;
-import org.xdi.oxauth.service.inject.Scheduled;
 import org.xdi.oxauth.service.timer.event.TimerEvent;
 import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
@@ -95,12 +95,12 @@ public class CleanerTimer {
     private AppConfiguration appConfiguration;
 
     @Inject
-	private Event<TimerEvent> event;
+	private Event<TimerEvent> cleanerEvent;
 
     private AtomicBoolean isActive;
     
-    public void init() {
-        log.debug("Initializing CleanerTimer");
+    public void initTimer() {
+        log.debug("Initializing Cleaner Timer");
         this.isActive = new AtomicBoolean(false);
 
         int interval = appConfiguration.getCleanServiceInterval();
@@ -108,7 +108,7 @@ public class CleanerTimer {
             interval = DEFAULT_INTERVAL;
         }
 
-        event.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+        cleanerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
     @Asynchronous
