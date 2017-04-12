@@ -96,9 +96,9 @@ public class AppInitializer {
 	
 	@Inject
 	private CleanerTimer cleanerTimer;
-
+	
 	@Inject
-	private BeanManager beanManager;
+	private KeyGeneratorTimer keyGeneratorTimer;
 	
 	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
@@ -143,6 +143,7 @@ public class AppInitializer {
     	// Schedule timer tasks
         cleanerTimer.initTimer();
         configurationFactory.initTimer();
+        keyGeneratorTimer.initTimer();
 	}
 
     @Produces @ApplicationScoped
