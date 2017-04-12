@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -37,8 +38,7 @@ import com.unboundid.ldap.sdk.RDN;
  *
  * @author Javier Rojas Blum Date: 09.29.2011
  */
-@Stateless
-@Named
+@RequestScoped
 public class AuthorizationGrantList implements IAuthorizationGrantList {
 
 	@Inject
