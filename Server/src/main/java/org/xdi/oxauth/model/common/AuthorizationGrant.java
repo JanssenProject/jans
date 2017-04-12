@@ -39,8 +39,6 @@ import org.xdi.util.security.StringEncrypter;
  * @author Javier Rojas Blum
  * @version November 11, 2016
  */
-@Stateless
-@Named
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private static final Logger log = LoggerFactory.getLogger(AuthorizationGrant.class);
@@ -48,23 +46,18 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Inject
     private CacheService cacheService;
 
+    @Inject
 	private GrantService grantService;
 
+    @Inject
 	private IdTokenFactory idTokenFactory;
 
     private boolean isCachedWithNoPersistence = false;
 
+	// TODO: Review CDI
     public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
                               Date authenticationTime, AppConfiguration appConfiguration) {
         super(user, authorizationGrantType, client, authenticationTime, appConfiguration);
-    }
-    
-    @Inject
-    public void init(GrantService grantService, IdTokenFactory idTokenFactory) {
-    	
-    	// TODO: CDI review
-    	this.grantService = grantService;
-    	this.idTokenFactory = idTokenFactory;
     }
 
     public IdToken createIdToken(

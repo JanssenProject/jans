@@ -64,8 +64,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		super(CustomScriptType.PERSON_AUTHENTICATION);
 	}
 
-	public void reload(@Observes @ReloadAuthScript String event) {
-		super.reload(event);
+	public void reloadAuthScript(@Observes @ReloadAuthScript String event) {
+		reload(event);
 	}
 
 	@Override
