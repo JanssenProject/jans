@@ -95,6 +95,12 @@ public class AppInitializer {
 	@Inject @Named(LDAP_AUTH_ENTRY_MANAGER_NAME)
 	private Instance<List<LdapEntryManager>> ldapAuthEntryManagerInstance;
 
+	@Inject @Named(LDAP_AUTH_CONFIG_NAME)
+	private Instance<List<GluuLdapConfiguration>> ldapAuthConfigInstance;
+
+	@Inject
+	private Instance<AuthenticationMode> authenticationModeInstance;
+
 	@Inject
 	private Instance<EncryptionService> encryptionServiceInstance;
 
@@ -195,7 +201,7 @@ public class AppInitializer {
 				Scheduled.Literal.INSTANCE));
     }
 
-    public void destoy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
+    public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
     	log.info("Closing LDAP connection at server shutdown...");
         LdapEntryManager ldapEntryManager = ldapEntryManagerInstance.get();
         closeLdapEntryManager(ldapEntryManager);
@@ -277,21 +283,17 @@ public class AppInitializer {
 		return ldapAuthEntryManagers;
 	}
 
-    // TODO: Review CDI CDI: Fix
     public void recreateLdapEntryManager(@Observes @LdapConfigurationReload String event) {
-//    	// Backup current references to objects to allow shutdown properly
-//    	LdapEntryManager oldLdapEntryManager = (LdapEntryManager) Component.getInstance(LDAP_ENTRY_MANAGER_NAME);
-//
-//    	// Recreate components
-//    	createConnectionProvider();
-//
-//        // Destroy old components
-//    	Contexts.getApplicationContext().remove(LDAP_ENTRY_MANAGER_NAME);
-//    	oldLdapEntryManager.destroy();
-//
-//    	log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
+    	// Backup current references to objects to allow shutdown properly
+    	LdapEntryManager oldLdapEntryManager = ldapEntryManagerInstance.get();
+
+    	// Recreate components
+    	createConnectionProvider();
+
+        // Destroy old component
+        closeLdapEntryManager(oldLdapEntryManager);
     }
-//
+
     public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
     	// Backup current references to objects to allow shutdown properly
     	List<LdapEntryManager> oldLdapAuthEntryManagers = ldapAuthEntryManagerInstance.get();
@@ -299,6 +301,7 @@ public class AppInitializer {
     	// Recreate components
         createAuthConnectionProviders(newLdapAuthConfigs);
 
+        // Destroy old components
         closeLdapAuthEntryManagers(oldLdapAuthEntryManagers);
     }
 
@@ -331,6 +334,9 @@ public class AppInitializer {
     }
 
     private void createAuthConnectionProviders(List<GluuLdapConfiguration> newLdapAuthConfigs) {
+    	// Backup current references to objects to allow shutdown properly
+    	List<GluuLdapConfiguration> oldLdapAuthConfigs = ldapAuthConfigInstance.get();
+
     	List<LdapConnectionService> tmpAuthConnectionProviders = new ArrayList<LdapConnectionService>();
     	List<LdapConnectionService> tmpAuthBindConnectionProviders = new ArrayList<LdapConnectionService>();
 
@@ -343,12 +349,10 @@ public class AppInitializer {
     	}
 
 		this.ldapAuthConfigs = newLdapAuthConfigs;
-
-		// TODO: Review CDI CDI: Verify
-		ServerUtil.destroy(List.class, LDAP_AUTH_CONFIG_NAME);
-
 		this.authConnectionProviders = tmpAuthConnectionProviders;
     	this.authBindConnectionProviders = tmpAuthBindConnectionProviders;
+
+		ldapAuthConfigInstance.destroy(oldLdapAuthConfigs);
     }
     
 
@@ -463,8 +467,7 @@ public class AppInitializer {
 			this.authenticationMode = new AuthenticationMode(appliance.getAuthenticationMode());
 		}
 
-	    // TODO: Review CDI: Fix
-		ServerUtil.destroy(AuthenticationMode.class);
+		authenticationModeInstance.destroy(authenticationModeInstance.get());
 	}
 	
 	@Produces @ApplicationScoped
