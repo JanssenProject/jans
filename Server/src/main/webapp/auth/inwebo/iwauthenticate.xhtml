@@ -1,7 +1,6 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://java.sun.com/jsf/html"
@@ -49,9 +48,9 @@
                     <div class="login-panel-header">#{msgs['inwebo.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
                         <p class="info">#{msgs['inwebo.pleaseLoginHere']}</p>
 
@@ -60,11 +59,11 @@
                             <input name="iw_token" type="text" autocomplete="off" />
                         </h:panelGrid>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['inwebo.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
 
                         <h:commandButton value="Authenticate" action="#{authenticator.authenticate}" />
                     </div>
