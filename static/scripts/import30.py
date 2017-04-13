@@ -72,7 +72,7 @@ class Migration(object):
     def __init__(self, backup):
         self.backupDir = backup
         self.ldifDir = os.path.join(backup, 'ldif')
-        self.certsDir = os.path.join(backup, 'etc')
+        self.certsDir = os.path.join(backup, 'etc', 'certs')
         self.currentDir = os.path.dirname(os.path.realpath(__file__))
         self.workingDir = os.path.join(self.currentDir, 'migration')
         self.jettyDir = "/opt/gluu/jetty/"
@@ -193,6 +193,7 @@ class Migration(object):
             alias = "{0}_{1}".format(hostname, key)
             filename = os.path.join(self.certsDir, key+".crt")
             if not os.path.isfile(filename):
+                logging.debug("Missing file: %s", filename)
                 continue  # skip the non-existant certs
 
             logging.debug('Deleting new %s', alias)
@@ -623,9 +624,11 @@ class Migration(object):
         self.fixPermissions()
         self.startLDAPServer()
         # self.startWebapps()
-        print("------------------------------------------------------------")
+        print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
-        print("\tRun:\n\t# exit\n\t# service gluu-server-x.x.x restart")
+        print("\n\n\t# exit\n\t# service gluu-server-x.x.x restart\n")
+        print("------------------------------------------------------------")
+        print("\n")
 
 
 if __name__ == "__main__":
