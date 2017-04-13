@@ -67,6 +67,9 @@ public class ConfigurationFactory {
 
 	@Inject @Named(AppInitializer.LDAP_ENTRY_MANAGER_NAME)
 	private Instance<LdapEntryManager> ldapEntryManagerInstance;
+	
+	@Inject
+	private Instance isntance;
 
 	public final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "ldapConfigurationReloadEvent";
 
@@ -320,10 +323,11 @@ public class ConfigurationFactory {
 
 				// Destroy old configuration
 				if (this.loaded) {
-					ServerUtil.destroy(AppConfiguration.class);
-					ServerUtil.destroy(StaticConfiguration.class);
-					ServerUtil.destroy(WebKeysConfiguration.class);
-					ServerUtil.destroy(ErrorResponseFactory.class);
+					destroy(AppConfiguration.class);
+					destroy(AppConfiguration.class);
+					destroy(StaticConfiguration.class);
+					destroy(WebKeysConfiguration.class);
+					destroy(ErrorResponseFactory.class);
 				}
 
 				this.loaded = true;
@@ -344,6 +348,11 @@ public class ConfigurationFactory {
 		}
 
 		return false;
+	}
+	
+	public <T> void destroy(Class<T> clazz) {
+		Instance<T> confInstance = isntance.select(clazz);
+		confInstance.destroy(confInstance.get());
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
