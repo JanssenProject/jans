@@ -81,11 +81,6 @@
 				<type>pom</type>
 			</dependency>
 			<dependency>
-				<groupId>org.jboss.spec.javax.annotation</groupId>
-				<artifactId>jboss-annotations-api_1.2_spec</artifactId>
-				<version>1.0.0.Final</version>
-			</dependency>
-			<dependency>
 				<groupId>com.sun.faces</groupId>
 				<artifactId>jsf-api</artifactId>
 				<version>${jsf.version}</version>
@@ -94,7 +89,7 @@
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
-				<version>3.0.1</version>
+				<version>3.1.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -260,6 +255,13 @@
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
 				<version>3.2.0</version>
+			</dependency>
+
+			<!-- Quartz -->
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.2.3</version>
 			</dependency>
 
 			<!-- Other -->
