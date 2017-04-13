@@ -1,7 +1,6 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-				xmlns:s="http://jboss.org/schema/seam/taglib"
 				xmlns:ui="http://java.sun.com/jsf/facelets"
 				xmlns:h="http://java.sun.com/jsf/html"
 				template="/WEB-INF/incl/layout/login-template.xhtml">
@@ -85,14 +84,14 @@
 						<ui:param name="client"
 								  value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-						<s:div rendered='#{!empty client.getLogoUri()}'>
+						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
 							<h:graphicImage url='#{client.getLogoUri()}' />
-						</s:div>
-						<s:div rendered='#{empty client.getLogoUri()}'>
+						</h:panelGroup>
+						<h:panelGroup rendered='#{empty client.getLogoUri()}'>
 							<a href="http://www.gluu.org/"> <h:graphicImage
 									url="../../img/logo.png" />
 							</a>
-						</s:div>
+						</h:panelGroup>
 					</div>
 					<!-- end logo-->
 				</div>
@@ -107,7 +106,6 @@
 						<h:panelGroup rendered="#{not identity.loggedIn}">
 							<div class="inner-form-container row-fluid">
 								<ul class="offset2 span10">
-									<s:token allowMultiplePosts="true" />
 									<h:messages style="color:red;" />
 									<div class="row-fluid">
 										<div class="dialog">
@@ -127,23 +125,23 @@
 											<span class="sprite-green_click_icon"></span>
 										</div>
 									</li>
-									<s:div rendered='#{!empty client.getPolicyUri()}'>
+									<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
 										<p>
 											<h:outputText value="#{msgs['common.agreePolicy']}" />
 											<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
 													value="#{msgs['common.privacyPolicy']}" />
 											</a>
 										</p>
-									</s:div>
+									</h:panelGroup>
 
-									<s:div rendered='#{!empty client.getTosUri()}'>
+									<h:panelGroup rendered='#{!empty client.getTosUri()}'>
 										<p>
 											<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
 											<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
 													value="#{msgs['common.termsOfService']}" />
 											</a>
 										</p>
-									</s:div>
+									</h:panelGroup>
 								</ul>
 
 							</div>
