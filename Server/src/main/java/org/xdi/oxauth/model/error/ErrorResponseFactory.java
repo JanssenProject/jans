@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
@@ -40,7 +41,7 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan
  */
 @Vetoed
-public class ErrorResponseFactory {
+public class ErrorResponseFactory implements Configuration {
 
     private static Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
 

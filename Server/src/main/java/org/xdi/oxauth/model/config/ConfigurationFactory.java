@@ -29,6 +29,7 @@ import org.gluu.site.ldap.persistence.exception.LdapMappingException;
 import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -69,7 +70,7 @@ public class ConfigurationFactory {
 	private Instance<LdapEntryManager> ldapEntryManagerInstance;
 	
 	@Inject
-	private Instance isntance;
+	private Instance<Configuration> configurationIsntance;
 
 	public final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "ldapConfigurationReloadEvent";
 
@@ -324,7 +325,6 @@ public class ConfigurationFactory {
 				// Destroy old configuration
 				if (this.loaded) {
 					destroy(AppConfiguration.class);
-					destroy(AppConfiguration.class);
 					destroy(StaticConfiguration.class);
 					destroy(WebKeysConfiguration.class);
 					destroy(ErrorResponseFactory.class);
@@ -350,9 +350,9 @@ public class ConfigurationFactory {
 		return false;
 	}
 	
-	public <T> void destroy(Class<T> clazz) {
-		Instance<T> confInstance = isntance.select(clazz);
-		confInstance.destroy(confInstance.get());
+	public void destroy(Class<? extends Configuration> clazz) {
+		Instance<? extends Configuration> confInstance = configurationIsntance.select(clazz);
+		configurationIsntance.destroy(confInstance.get());
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
