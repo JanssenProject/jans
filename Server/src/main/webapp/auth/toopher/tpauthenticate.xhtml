@@ -1,7 +1,6 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://java.sun.com/jsf/html"
@@ -9,7 +8,7 @@
     <ui:define name="head">
         <script src="#{oxAuthConfigurationService.getJsLocation()}/jquery-ui-1.12.1.min.js"/>
 
-        <s:fragment rendered="#{param.toopher_user_uid != null}">
+        <h:panelGroup rendered="#{param.toopher_user_uid != null}">
             <script type="text/javascript">
                 //<![CDATA[
                 jQuery(document).ready(function() {
@@ -17,7 +16,7 @@
                 });
                 //]]>
             </script>
-        </s:fragment>
+        </h:panelGroup>
 
         <style type="text/css">
             .login-panel {
@@ -61,19 +60,19 @@
                     <div class="login-panel-header">#{msgs['toopher.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
-                        <s:div styleClass="dialog" rendered="#{param.toopher_user_uid != null}">
+                        <h:panelGroup styleClass="dialog" rendered="#{param.toopher_user_uid != null}">
                             <p class="info">#{msgs['toopher.sendingAuthentication']}</p>
-                        </s:div>
+                        </h:panelGroup>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['toopher.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
                     </div>
                 </div>
             </h:panelGroup>
