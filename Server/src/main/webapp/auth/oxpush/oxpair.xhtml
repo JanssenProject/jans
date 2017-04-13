@@ -1,7 +1,6 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-				xmlns:s="http://jboss.org/schema/seam/taglib"
 				xmlns:ui="http://java.sun.com/jsf/facelets"
 				xmlns:f="http://java.sun.com/jsf/core"
 				xmlns:h="http://java.sun.com/jsf/html"
@@ -61,15 +60,15 @@
 					<div class="login-panel-body">
 						<ui:param name="client"
 								  value="#{clientService.getClient(redirect.parameters['client_id'])}" />
-						<s:div rendered='#{!empty client.getLogoUri()}'>
+						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
 							<h:graphicImage url='#{client.getLogoUri()}' />
-						</s:div>
+						</h:panelGroup>
 
-						<s:div styleClass="dialog"
+						<h:panelGroup styleClass="dialog"
 							   rendered="#{param.oxpush_user_uid != null}">
 							<p class="info">#{msgs['oxpush.checkingPairing']}</p>
-						</s:div>
-						<s:div styleClass="dialog"
+						</h:panelGroup>
+						<h:panelGroup styleClass="dialog"
 							   rendered="#{param.oxpush_user_uid == null}">
 							<p class="info">#{msgs['oxpush.waitingForUser']}</p>
 							<br/>
@@ -79,13 +78,13 @@
 
 							<p class="info">#{msgs['oxpush.pairingCode']}</p>
 							<h:outputText value="#{oxpush_pairing_code}" styleClass="bolded"/>
-						</s:div>
+						</h:panelGroup>
 
-						<s:div rendered='#{!empty client.getPolicyUri()}'>
+						<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
 							<p>
 								<a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['oxpush.termsPrivacy']}</a>
 							</p>
-						</s:div>
+						</h:panelGroup>
 					</div>
 				</div>
 			</h:panelGroup>

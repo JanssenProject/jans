@@ -1,7 +1,6 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
                 xmlns:h="http://java.sun.com/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
@@ -47,7 +46,6 @@
                 <td>
                     <div>
                         <h:form id="loginForm">
-                            <s:token allowMultiplePosts="true"/>
 
                             <h:panelGroup rendered="#{not identity.loggedIn}">
                                 <div class="login-panel">
@@ -55,9 +53,9 @@
                                     <div class="login-panel-body">
                                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-                                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                                        </s:div>
+                                        </h:panelGroup>
 
                                         <p class="info">#{msgs['oxpush.pleaseLoginHere']}</p>
 
@@ -81,27 +79,27 @@
                                             </h:panelGrid>
                                         </div>
 
-                                        <s:div>
+                                        <h:panelGroup>
                                             <h:outputText value="#{msgs['oxpush.beforeLogIn']}" style="color:blue"/>
                                             <h:panelGrid columns="1" border="0">
                                                 <h:outputLink value="#{oxpush_android_download_url}" title="Android" rendered="#{oxpush_android_download_url != null}">#{msgs['oxpush.androidMobileApplication']}</h:outputLink>
                                             </h:panelGrid>
-                                        </s:div>
+                                        </h:panelGroup>
 
-                                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
                                                 #{msgs['oxpush.byProceeding']}
                                                 <strong>#{client.getClientName()}</strong>
                                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['oxpush.privacyPolicy']}</a>
                                             </p>
-                                        </s:div>
+                                        </h:panelGroup>
 
-                                        <s:div rendered='#{!empty client.getTosUri()}'>
+                                        <h:panelGroup rendered='#{!empty client.getTosUri()}'>
                                             <p>
                                                 #{msgs['oxpush.pleaseRead']}
                                                 <a target="_blank" href='#{client.getTosUri()}'>#{msgs['oxpush.termsOfService']}</a>
                                             </p>
-                                        </s:div>
+                                        </h:panelGroup>
 
                                         <div class="actionButtons">
                                             <h:commandButton id="loginButton"
