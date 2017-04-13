@@ -6,16 +6,8 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
@@ -29,8 +21,14 @@ import org.xdi.oxauth.model.uma.persistence.UmaScopeType;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -187,18 +185,34 @@ public class ScopeService {
     }
 
     public List<ScopeDescription> getScopesByUrls(List<String> p_scopeUrls) {
+        List<ScopeDescription> scopes = new ArrayList<ScopeDescription>();
         try {
-            final Filter filter = createAnyFilterByUrls(p_scopeUrls);
+            // external scopes
+            Filter filter = createAnyFilterByUrls(p_scopeUrls);
             if (filter != null) {
                 final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
                 if (entries != null) {
-                    return entries;
+                    scopes.addAll(entries);
+                }
+            }
+
+            // internal scopes
+            filter = Filter.create(String.format("&(oxType=%s)", InternalExternal.INTERNAL.getValue()));
+            final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
+            if (entries != null && !entries.isEmpty()) {
+                for (String scopeUrl : p_scopeUrls) {
+                    for (ScopeDescription scopeDescription : entries) {
+                        final String internalScopeUrl = getInternalScopeUrl(scopeDescription);
+                        if (internalScopeUrl.equals(scopeUrl) && !scopes.contains(internalScopeUrl)) {
+                            scopes.add(scopeDescription);
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return Collections.emptyList();
+        return scopes;
     }
 
     // TODO: Optimize scopes loading. It's possible to loads all scope in one request.
