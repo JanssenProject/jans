@@ -226,11 +226,6 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.AccessProtectedResourceFlowWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Debug content test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.DebugContentEncodingTest" />
-		</classes>
-	</test>
 	<test name="UMA. Scope test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest" />
