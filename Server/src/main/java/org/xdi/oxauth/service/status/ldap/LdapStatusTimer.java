@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.cdi.event.LdapStatusEvent;
 import org.xdi.oxauth.service.cdi.event.Scheduled;
-import org.xdi.oxauth.service.timer.event.TimerEvent;
-import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
 
 /**
  * @author Yuriy Movchan
