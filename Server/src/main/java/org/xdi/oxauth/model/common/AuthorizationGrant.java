@@ -51,7 +51,6 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
 	private boolean isCachedWithNoPersistence = false;
 
-	// TODO: Review CDI don't use ServerUtil
 	public AuthorizationGrant() {}
 
 	public AuthorizationGrant(User user, AuthorizationGrantType authorizationGrantType, Client client,
