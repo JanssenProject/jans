@@ -230,9 +230,9 @@ public class AppInitializer {
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
 			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
 			event.select(ReloadAuthScript.Literal.INSTANCE).fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
-		}
 
-		setDefaultAuthenticationMethod(localLdapEntryManager);
+			setDefaultAuthenticationMethod(localLdapEntryManager);
+		}
 	}
 
 	/*
