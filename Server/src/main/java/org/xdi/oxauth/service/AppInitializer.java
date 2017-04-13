@@ -98,6 +98,9 @@ public class AppInitializer {
 	@Inject @Named(LDAP_AUTH_ENTRY_MANAGER_NAME)
 	private Instance<List<LdapEntryManager>> ldapAuthEntryManagerInstance;
 
+	@Inject
+	private Instance<EncryptionService> encryptionServiceInstance;
+
     @Inject
     private ApplianceService applianceService;
 
@@ -383,7 +386,7 @@ public class AppInitializer {
 	}
 
 	private LdapConnectionService createConnectionProvider(Properties connectionProperties) {
-		EncryptionService securityService = ServerUtil.bean(EncryptionService.class);
+		EncryptionService securityService = encryptionServiceInstance.get();
 		LdapConnectionService connectionProvider = new LdapConnectionService(securityService.decryptProperties(connectionProperties));
 
 		return connectionProvider;
@@ -456,7 +459,7 @@ public class AppInitializer {
 		}
 
 	    // TODO: Review CDI: Fix
-		ServerUtil.destroy(String.class, DEFAULT_ACR_VALUES);
+		ServerUtil.destroy(AuthenticationMode.class, DEFAULT_ACR_VALUES);
 	}
 	
 	@Produces @ApplicationScoped @Named(DEFAULT_ACR_VALUES)
