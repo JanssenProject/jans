@@ -36,10 +36,10 @@ import org.xdi.oxauth.service.cdi.event.CleanerEvent;
 import org.xdi.oxauth.service.cdi.event.Scheduled;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.timer.event.TimerEvent;
-import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.RptManager;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
 
 /**
  * @author Yuriy Zabrovarnyy
