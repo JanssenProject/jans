@@ -56,8 +56,7 @@ public class CustomScriptManager implements Serializable {
 
 	private static final long serialVersionUID = -4225890597520443390L;
 
-	private final static String EVENT_TYPE = "CustomScriptHolderTimerEvent";
-	public final static String MODIFIED_EVENT_TYPE = "CustomScriptModifiedEvent";
+	public final static String CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE = "customScriptModifiedEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
     
     public final static String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "oxRevision", "oxScriptType", "oxModuleProperty", "gluuStatus" };
@@ -130,7 +129,7 @@ public class CustomScriptManager implements Serializable {
 		boolean modified = reloadImpl();
 		
 		if (modified) {
-			event.select(ReloadScript.Literal.INSTANCE).fire(MODIFIED_EVENT_TYPE);
+			event.select(ReloadScript.Literal.INSTANCE).fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
 		}
 	}
 
