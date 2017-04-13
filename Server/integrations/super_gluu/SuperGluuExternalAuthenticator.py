@@ -507,6 +507,12 @@ class PersonAuthentication(PersonAuthenticationType):
         return enabled
 
     def sendPushNotification(self, client_redirect_uri, user, super_gluu_request):
+        try:
+            self.sendPushNotificationImpl(client_redirect_uri, user, super_gluu_request)
+        except:
+            print "Super-Gluu. end push notification. Failed to send push notification: ", sys.exc_info()[1]
+
+    def sendPushNotificationImpl(self, client_redirect_uri, user, super_gluu_request):
         if not self.enabledPushNotifications:
             return
 
