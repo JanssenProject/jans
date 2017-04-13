@@ -15,6 +15,7 @@ import javax.ejb.Asynchronous;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +32,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.cdi.event.ConfigurationEvent;
 import org.xdi.oxauth.service.cdi.event.ConfigurationUpdate;
 import org.xdi.oxauth.service.cdi.event.LdapConfigurationReload;
@@ -62,6 +64,9 @@ public class ConfigurationFactory {
 
 	@Inject
 	private Event<String> event;
+
+	@Inject @Named(AppInitializer.LDAP_ENTRY_MANAGER_NAME)
+	private Instance<LdapEntryManager> ldapEntryManagerInstance;
 
 	public final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "ldapConfigurationReloadEvent";
 
@@ -342,7 +347,7 @@ public class ConfigurationFactory {
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
-		final LdapEntryManager ldapManager = ServerUtil.getLdapManager();
+		final LdapEntryManager ldapManager = ldapEntryManagerInstance.get();
 		final String dn = getLdapConfiguration().getString("oxauth_ConfigurationEntryDN");
 		try {
 			final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
@@ -387,7 +392,7 @@ public class ConfigurationFactory {
 				long nextRevision = conf.getRevision() + 1;
 				conf.setRevision(nextRevision);
 
-				final LdapEntryManager ldapManager = ServerUtil.getLdapManager();
+				final LdapEntryManager ldapManager = ldapEntryManagerInstance.get();
 				ldapManager.merge(conf);
 
 				log.info("New JWKS generated successfully");

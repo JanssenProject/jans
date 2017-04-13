@@ -406,8 +406,6 @@ public class AuthenticationService {
     }
 
     public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-
         log.trace("configureSessionUser: credentials: '{}', sessionState: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
@@ -429,8 +427,6 @@ public class AuthenticationService {
     }
 
     public SessionState configureEventUser() {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-
         User user = getAuthenticatedUser();
         if (user == null) {
             return null;
@@ -489,7 +485,6 @@ public class AuthenticationService {
     }
 
     public void configureSessionClient() {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
         String clientInum = credentials.getUsername();
         log.debug("ConfigureSessionClient: username: '{}', credentials: '{}'", clientInum, System.identityHashCode(credentials));
 
