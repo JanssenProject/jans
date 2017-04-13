@@ -20,7 +20,6 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.literal.NamedLiteral;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
@@ -75,8 +74,6 @@ public class AppInitializer {
 
 	private final static String EVENT_TYPE = "AppInitializerTimerEvent";
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
-
-    public static final String DEFAULT_ACR_VALUES = "defaultAuthMode";
 
     public static final String LDAP_AUTH_CONFIG_NAME = "ldapAuthConfig";
 
@@ -199,9 +196,12 @@ public class AppInitializer {
     }
 
     public void destoy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
-    	// TODO: Review CDI
-    	// Close connection here
-    	// Clean up caches, etc...
+    	log.info("Closing LDAP connection at server shutdown...");
+        LdapEntryManager ldapEntryManager = ldapEntryManagerInstance.get();
+        closeLdapEntryManager(ldapEntryManager);
+        
+    	List<LdapEntryManager> ldapAuthEntryManagers = ldapAuthEntryManagerInstance.get();
+        closeLdapAuthEntryManagers(ldapAuthEntryManagers);
     }
     
     public void reloadConfigurationTimerEvent(@Observes @Scheduled AuthConfigurationEvent authConfigurationEvent) {
@@ -299,20 +299,25 @@ public class AppInitializer {
     	// Recreate components
         createAuthConnectionProviders(newLdapAuthConfigs);
 
-        // Destroy old components
-        ldapAuthEntryManagerInstance.destroy(oldLdapAuthEntryManagers);
+        closeLdapAuthEntryManagers(oldLdapAuthEntryManagers);
+    }
 
-		for (LdapEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
+	private void closeLdapEntryManager(LdapEntryManager ldapEntryManager) {
+		// Destroy old components
+        ldapEntryManagerInstance.destroy(ldapEntryManager);
+
+		ldapEntryManager.destroy();
+        log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, ldapEntryManager);
+	}
+
+	private void closeLdapAuthEntryManagers(List<LdapEntryManager> ldapAuthEntryManagers) {
+		// Destroy old components
+        ldapAuthEntryManagerInstance.destroy(ldapAuthEntryManagers);
+
+		for (LdapEntryManager oldLdapAuthEntryManager : ldapAuthEntryManagers) {
 			oldLdapAuthEntryManager.destroy();
 	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
 		}
-    }
-
-	private void destroyLdapConnectionService(LdapConnectionService connectionProvider) {
-		if (connectionProvider != null) {
-			connectionProvider.closeConnectionPool();
-	        log.debug("Destoryed connectionProvider: {}", connectionProvider);
-        }
 	}
 
     private void createConnectionProvider() {
@@ -459,10 +464,10 @@ public class AppInitializer {
 		}
 
 	    // TODO: Review CDI: Fix
-		ServerUtil.destroy(AuthenticationMode.class, DEFAULT_ACR_VALUES);
+		ServerUtil.destroy(AuthenticationMode.class);
 	}
 	
-	@Produces @ApplicationScoped @Named(DEFAULT_ACR_VALUES)
+	@Produces @ApplicationScoped
 	public AuthenticationMode getDefaultAuthenticationMode() {
 		return authenticationMode;
 	}
