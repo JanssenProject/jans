@@ -112,14 +112,25 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
+    /*
+     * Try to avoid using this method. it's better to use injected Instance into bean
+     */
     public static <T> Instance<T> instance(Class<T> p_clazz) {
 		return CDI.current().select(p_clazz);
     }    	
 
+    /*
+     * Try to avoid using this method. it's better to use injected Instance into bean
+     */
+    // TODO: CDI Review
     public static <T> T bean(Class<T> p_clazz) {
 		return instance(p_clazz).get();
     }    	
 
+    /*
+     * Try to avoid using this method. it's better to use injected Instance into bean
+     */
+    // TODO: CDI Review
     public static <T> void destroy(Class<T> p_clazz) {
 		Instance<T> instance = instance(p_clazz);
 		if (instance.isResolvable()) {
@@ -127,14 +138,24 @@ public class ServerUtil {
 		}
     }    	
 
+    /*
+     * Try to avoid using this method. it's better to use injected Instance into bean
+     */
     public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
 		return CDI.current().select(p_clazz, NamedLiteral.of(name));
     }    	
 
+    /*
+     * Try to avoid using this method. it's better to use injected Instance into bean
+     */
     public static <T> T bean(Class<T> p_clazz, String name) {
 		return instance(p_clazz, name).get();
     }    	
 
+    /*
+     * Try to avoid using this method. it's better to use injected Instance into bean
+     */
+    // TODO: CDI Review
     public static <T> void destroy(Class<T> p_clazz, String name) {
 		Instance<T> instance = instance(p_clazz, name);
 		if (instance.isResolvable()) {
@@ -142,6 +163,10 @@ public class ServerUtil {
 		}
     }    	
 
+    /*
+     * Try to avoid using this method. it's better to use injected Instance into bean
+     */
+    // TODO: CDI Review
     public static LdapEntryManager getLdapManager() {
         return bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }

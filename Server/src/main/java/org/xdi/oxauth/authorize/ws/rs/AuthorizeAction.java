@@ -169,7 +169,7 @@ public class AuthorizeAction {
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
             if (matchingLocale != null) {
-// TODO : Review CDI
+// TODO: Review CDI (we can use simular to Seam LocaleSelector bean)
 //                localeSelector.setLocale(matchingLocale);
             }
         }

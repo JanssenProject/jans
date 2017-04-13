@@ -72,7 +72,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant createAuthorizationGrant(User user, Client client, Date authenticationTime) {
-    	AuthorizationGrant grant =  grantInstance.select(AuthorizationGrant.class).get();
+    	AuthorizationGrant grant =  grantInstance.select(SimpleAuthorizationGrant.class).get();
     	grant.init(user, null, client, authenticationTime);
     	
     	return grant;
