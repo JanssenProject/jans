@@ -106,7 +106,7 @@ public class AuthorizeAction {
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @Inject @Named(AppInitializer.DEFAULT_ACR_VALUES)
+    @Inject
     private AuthenticationMode defaultAuthenticationMode;
 
 // TODO: Review CDI (we can use simular to Seam LocaleSelector bean)
