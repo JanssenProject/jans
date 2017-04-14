@@ -106,10 +106,10 @@ public class AuthorizeAction {
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @Inject @Named(AppInitializer.DEFAULT_ACR_VALUES)
+    @Inject
     private AuthenticationMode defaultAuthenticationMode;
 
-// TODO: CDI review
+// TODO: Review CDI (we can use simular to Seam LocaleSelector bean)
 //    @Inject("org.jboss.seam.international.localeSelector")
 //    private LocaleSelector localeSelector;
 
@@ -169,7 +169,7 @@ public class AuthorizeAction {
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
             if (matchingLocale != null) {
-// TODO : CDI review
+// TODO: Review CDI (we can use simular to Seam LocaleSelector bean)
 //                localeSelector.setLocale(matchingLocale);
             }
         }

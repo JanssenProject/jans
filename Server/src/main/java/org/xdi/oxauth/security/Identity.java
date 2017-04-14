@@ -5,6 +5,7 @@ import java.security.Principal;
 import java.util.HashMap;
 
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.security.auth.login.LoginException;
@@ -13,6 +14,9 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.session.SessionClient;
+import org.xdi.oxauth.security.event.Authenticated;
+import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 
 @RequestScoped
 @Named
@@ -20,20 +24,24 @@ public class Identity implements Serializable {
 
 	private static final long serialVersionUID = 3751659008033189259L;
 
+	public static final String EVENT_LOGIN_SUCCESSFUL = "org.jboss.seam.security.loginSuccessful";
+
 	@Inject
 	private Logger log;
 
 	@Inject
 	private Credentials credentials;
 
+	@Inject
+	private Event<String> event;
+
 	private Principal principal;
 
 	private SessionState sessionState;
 
-	// TODO: CDI review, use more CDI way
 	private User user;
-	private SessionClient setSessionClient;
-	
+	private SessionClient sessionClient;
+
 	private HashMap<String, Object> workingParameters;
 
 	/**
@@ -65,7 +73,8 @@ public class Identity implements Serializable {
 	/**
 	 * Attempts to authenticate the user.
 	 * 
-	 * @return String returns "loggedIn" if user is authenticated, or null if not.
+	 * @return String returns "loggedIn" if user is authenticated, or null if
+	 *         not.
 	 */
 	public String login() {
 		try {
@@ -83,6 +92,7 @@ public class Identity implements Serializable {
 				log.debug("Login successful for: " + credentials.getUsername());
 			}
 
+			event.select(Authenticated.Literal.INSTANCE).fire(EVENT_LOGIN_SUCCESSFUL);
 			return "loggedIn";
 		} catch (LoginException ex) {
 			credentials.invalidate();
@@ -120,9 +130,9 @@ public class Identity implements Serializable {
 		}
 	}
 
-    public void acceptExternallyAuthenticatedPrincipal(Principal principal) {
-        this.principal = principal;
-    }
+	public void acceptExternallyAuthenticatedPrincipal(Principal principal) {
+		this.principal = principal;
+	}
 
 	public Principal getPrincipal() {
 		return principal;
@@ -163,15 +173,15 @@ public class Identity implements Serializable {
 	}
 
 	public void setSessionClient(SessionClient sessionClient) {
-		this.setSessionClient = sessionClient;
+		this.sessionClient = sessionClient;
 	}
 
 	public SessionClient getSetSessionClient() {
-		return setSessionClient;
+		return sessionClient;
 	}
 
 	public void setSetSessionClient(SessionClient setSessionClient) {
-		this.setSessionClient = setSessionClient;
+		this.sessionClient = setSessionClient;
 	}
 
 	private synchronized void initWorkingParamaters() {
@@ -185,7 +195,7 @@ public class Identity implements Serializable {
 		return workingParameters;
 	}
 
-	public boolean gisSetWorkingParameter(String name) {
+	public boolean isSetWorkingParameter(String name) {
 		return this.workingParameters.containsKey(name);
 	}
 
