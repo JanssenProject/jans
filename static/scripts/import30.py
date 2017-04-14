@@ -411,7 +411,7 @@ class Migration(object):
 
         ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys',
                       'oxIDPAuthentication', 'gluuFreeMemory', 'gluuSystemUptime',
-                      'oxLogViewerConfig']
+                      'oxLogViewerConfig', 'gluuLastUpdate']
         multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
                            'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
                            'oxTrustEntitlements', 'oxTrustx509Certificate']
@@ -482,6 +482,8 @@ class Migration(object):
                 for line in infile:
                     line.replace("lastModifiedTime", "oxLastAccessTime")
                     line.replace("cn=directory manager", "cn=directory manager,o=gluu")
+                    if 'oxTrustConfigurationMode' in line and 'internal' in line:
+                        line.replace('internal', 'ldap_auth_server')
                     outfile.write(line)
 
     def importDataIntoOpenldap(self):
