@@ -6,23 +6,12 @@
 
 package org.xdi.oxauth.auth;
 
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
@@ -38,6 +27,17 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Authenticator component
@@ -83,6 +83,9 @@ public class Authenticator {
     @Inject
     private FacesService facesService;
 
+    @Inject
+    private LanguageBean languageBean;
+
     private String authAcr;
 
     private Integer authStep;
@@ -108,7 +111,7 @@ public class Authenticator {
         if (result) {
             return Constants.RESULT_SUCCESS;
         } else {
-    		addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate", null);
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
             return Constants.RESULT_FAILURE;
         }
 
@@ -228,9 +231,9 @@ public class Authenticator {
 
             int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
             if (apiVersion > 1) {
-            	log.trace("According to API version script supports steps overriding");
-            	overridenNextStep = externalAuthenticationService.getNextStep(customScriptConfiguration, externalContext.getRequestParameterValuesMap(), this.authStep);
-            	log.debug("Get next step from script: '{}'", apiVersion);
+                log.trace("According to API version script supports steps overriding");
+                overridenNextStep = externalAuthenticationService.getNextStep(customScriptConfiguration, externalContext.getRequestParameterValuesMap(), this.authStep);
+                log.debug("Get next step from script: '{}'", apiVersion);
             }
 
             if (!result && (overridenNextStep == -1)) {
@@ -239,15 +242,15 @@ public class Authenticator {
 
             boolean overrideCurrentStep = false;
             if (overridenNextStep > -1) {
-            	overrideCurrentStep = true;
-            	// Reload session state
+                overrideCurrentStep = true;
+                // Reload session state
                 sessionState = sessionStateService.getSessionState();
 
                 // Reset to pecified step
-            	sessionStateService.resetToStep(sessionState, overridenNextStep);
+                sessionStateService.resetToStep(sessionState, overridenNextStep);
 
-            	this.authStep = overridenNextStep;
-            	log.info("Authentication reset to step : '{}'", this.authStep);
+                this.authStep = overridenNextStep;
+                log.info("Authentication reset to step : '{}'", this.authStep);
             }
 
 
@@ -263,34 +266,34 @@ public class Authenticator {
 
             // Prepare for next step
             if (this.authStep < countAuthenticationSteps) {
-            	int nextStep;
-            	if (overrideCurrentStep) {
-            		nextStep = overridenNextStep;
-            	} else {
-            		nextStep = this.authStep + 1;
-            	}
+                int nextStep;
+                if (overrideCurrentStep) {
+                    nextStep = overridenNextStep;
+                } else {
+                    nextStep = this.authStep + 1;
+                }
 
-            	String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, nextStep);
+                String redirectTo = externalAuthenticationService.executeExternalGetPageForStep(customScriptConfiguration, nextStep);
                 if (StringHelper.isEmpty(redirectTo)) {
-                	redirectTo = "/login.xhtml";
+                    redirectTo = "/login.xhtml";
                 }
 
                 // Store/Update extra parameters in session attributes map
                 updateExtraParameters(customScriptConfiguration, nextStep, sessionIdAttributes);
 
                 if (!overrideCurrentStep) {
-	                // Update auth_step
-	                sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
+                    // Update auth_step
+                    sessionIdAttributes.put("auth_step", Integer.toString(nextStep));
 
-	                // Mark step as passed
-	                markAuthStepAsPassed(sessionIdAttributes, this.authStep);
+                    // Mark step as passed
+                    markAuthStepAsPassed(sessionIdAttributes, this.authStep);
                 }
 
                 if (sessionState != null) {
-                	boolean updateResult = updateSession(sessionState, sessionIdAttributes);
-                	if (!updateResult) {
-                		return false;
-                	}
+                    boolean updateResult = updateSession(sessionState, sessionIdAttributes);
+                    if (!updateResult) {
+                        return false;
+                    }
                 }
 
                 log.trace("Redirect to page: '{}'", redirectTo);
@@ -299,7 +302,7 @@ public class Authenticator {
             }
 
             if (this.authStep == countAuthenticationSteps) {
-            	SessionState eventSessionState = authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
+                SessionState eventSessionState = authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
 
                 Principal principal = new SimplePrincipal(credentials.getUsername());
                 identity.acceptExternallyAuthenticatedPrincipal(principal);
@@ -317,33 +320,33 @@ public class Authenticator {
             if (StringHelper.isNotEmpty(credentials.getUsername())) {
                 boolean authenticated = authenticationService.authenticate(credentials.getUsername(), credentials.getPassword());
                 if (authenticated) {
-                	SessionState eventSessionState = authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
+                    SessionState eventSessionState = authenticationService.configureSessionUser(sessionState, sessionIdAttributes);
 
                     // Redirect to authorization workflow
-                        log.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
-                        authenticationService.onSuccessfulLogin(eventSessionState);
+                    log.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
+                    authenticationService.onSuccessfulLogin(eventSessionState);
 // TODO: CDI Review                       
 //                        Events.instance().raiseEvent(Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL);
-                    }
+                }
 
-                    log.info("Authentication success for User: '{}'", credentials.getUsername());
-                    return true;
+                log.info("Authentication success for User: '{}'", credentials.getUsername());
+                return true;
             }
         }
 
         return false;
     }
 
-	private boolean updateSession(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-		sessionState.setSessionAttributes(sessionIdAttributes);
-		boolean updateResult = sessionStateService.updateSessionState(sessionState, true, true, true);
-		if (!updateResult) {
-		    log.debug("Failed to update session entry: '{}'", sessionState.getId());
-		    return false;
-		}
+    private boolean updateSession(SessionState sessionState, Map<String, String> sessionIdAttributes) {
+        sessionState.setSessionAttributes(sessionIdAttributes);
+        boolean updateResult = sessionStateService.updateSessionState(sessionState, true, true, true);
+        if (!updateResult) {
+            log.debug("Failed to update session entry: '{}'", sessionState.getId());
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     private boolean userAuthenticationService() {
         if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE)) {
@@ -383,31 +386,31 @@ public class Authenticator {
         return false;
     }
 
-	private void updateExtraParameters(CustomScriptConfiguration customScriptConfiguration, final int step, Map<String, String> sessionIdAttributes) {
-		List<String> extraParameters = externalAuthenticationService.executeExternalGetExtraParametersForStep(customScriptConfiguration, step);
-		if (extraParameters != null) {
-		    for (String extraParameter : extraParameters) {
-		    	if (authenticationService.isParameterExists(extraParameter)) {
-			        String extraParameterValue = authenticationService.getParameterValue(extraParameter);
-			        sessionIdAttributes.put(extraParameter, extraParameterValue);
-		    	}
-		    }
-		}
-	}
+    private void updateExtraParameters(CustomScriptConfiguration customScriptConfiguration, final int step, Map<String, String> sessionIdAttributes) {
+        List<String> extraParameters = externalAuthenticationService.executeExternalGetExtraParametersForStep(customScriptConfiguration, step);
+        if (extraParameters != null) {
+            for (String extraParameter : extraParameters) {
+                if (authenticationService.isParameterExists(extraParameter)) {
+                    String extraParameterValue = authenticationService.getParameterValue(extraParameter);
+                    sessionIdAttributes.put(extraParameter, extraParameterValue);
+                }
+            }
+        }
+    }
 
     public String prepareAuthenticationForStep() {
-    	String result = prepareAuthenticationForStepImpl();
-    	
-    	if (Constants.RESULT_SUCCESS.equals(result)) {
-    	} else if (Constants.RESULT_FAILURE.equals(result)) {
-    		addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate", null);
-    	} else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
-    		addMessage(FacesMessage.SEVERITY_ERROR, "You don't have permissions", null);
-    	} else if (Constants.RESULT_EXPIRED.equals(result)) {
-    		addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate. Authentication session has expired", null);
-		}
+        String result = prepareAuthenticationForStepImpl();
 
-    	return result;
+        if (Constants.RESULT_SUCCESS.equals(result)) {
+        } else if (Constants.RESULT_FAILURE.equals(result)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
+        } else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.youDontHavePermission");
+        } else if (Constants.RESULT_EXPIRED.equals(result)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
+        }
+
+        return result;
     }
 
     private String prepareAuthenticationForStepImpl() {
@@ -474,7 +477,7 @@ public class Authenticator {
                 sessionIdAttributes.put("auth_step", Integer.toString(1));
 
                 if (sessionState != null) {
-                	boolean updateResult = updateSession(sessionState, sessionIdAttributes);
+                    boolean updateResult = updateSession(sessionState, sessionIdAttributes);
                     if (!updateResult) {
                         return Constants.RESULT_EXPIRED;
                     }
@@ -499,10 +502,10 @@ public class Authenticator {
             updateExtraParameters(customScriptConfiguration, this.authStep, sessionIdAttributes);
 
             if (sessionState != null) {
-            	boolean updateResult = updateSession(sessionState, sessionIdAttributes);
-            	if (!updateResult) {
-            		return Constants.RESULT_FAILURE;
-            	}
+                boolean updateResult = updateSession(sessionState, sessionIdAttributes);
+                if (!updateResult) {
+                    return Constants.RESULT_FAILURE;
+                }
             }
 
             return Constants.RESULT_SUCCESS;
@@ -560,14 +563,14 @@ public class Authenticator {
 
     private boolean authenticationFailed() {
         if (!this.addedErrorMessage) {
-            facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage", "login.errorMessage"));
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage");
         }
         return false;
     }
 
     private void authenticationFailedSessionInvalid() {
         this.addedErrorMessage = true;
-        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage", "login.errorSessionInvalidMessage"));
+        addMessage(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
         facesService.redirect("/error.xhtml");
     }
 
@@ -600,9 +603,10 @@ public class Authenticator {
         authenticationService.configureSessionClient(client);
     }
 
-	public void addMessage(Severity severity, String summary, String detail) {
-		FacesMessage message = new FacesMessage(severity, summary, detail);
-		facesContext.addMessage(null, message);
-	}
+    public void addMessage(Severity severity, String summary) {
+        String msg = languageBean.getValue(summary);
+        FacesMessage message = new FacesMessage(severity, msg, null);
+        facesContext.addMessage(null, message);
+    }
 
 }
