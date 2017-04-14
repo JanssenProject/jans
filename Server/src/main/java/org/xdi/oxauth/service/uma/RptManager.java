@@ -60,10 +60,6 @@ public class RptManager extends AbstractRPTManager {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-    public RptManager() {
-        ldapEntryManager = ServerUtil.getLdapManager();
-    }
-
     public static String getDn(String clientDn, String uniqueIdentifier) {
         return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
     }

@@ -23,7 +23,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
  * @version March 9, 2017
  */
 @WebFilter(initParams = { @WebInitParam(name = "cors.allowed.origins", value = "*") }, urlPatterns = { "/.well-known/*",
-		"/seam/resource/restv1/oxauth/userinfo", "/seam/resource/restv1/oxauth/clientinfo" })
+		"/seam/resource/restv1/oxauth/*", "/opiframe" })
 public class CorsFilter extends AbstractCorsFilter {
 
 	@Inject
