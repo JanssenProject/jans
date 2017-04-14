@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ejb.Asynchronous;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -19,7 +21,11 @@ import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.cdi.event.LdapStatusEvent;
+import org.xdi.oxauth.service.cdi.event.Scheduled;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
 
 /**
  * @author Yuriy Movchan
@@ -30,27 +36,32 @@ import org.xdi.oxauth.util.ServerUtil;
 @Named
 public class LdapStatusTimer {
 
-    private final static String EVENT_TYPE = "LdapStatusTimerEvent";
-    private final static long DEFAULT_INTERVAL = 60 * 1000; // 1 minute
+    private final static int DEFAULT_INTERVAL = 60; // 1 minute
 
     @Inject
     private Logger log;
 
+	@Inject
+	private Event<TimerEvent> timerEvent;
+
+	@Inject
+    private LdapEntryManager ldapEntryManager;
+
+    @Inject @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    private List<LdapEntryManager> ldapAuthEntryManagers;
+
     private AtomicBoolean isActive;
 
-    // TODO: CDI: Fix
-//    @Observer("org.jboss.seam.postInitialization")
-//    public void init() {
-//        log.info("Initializing LdapStatusTimer");
-//        this.isActive = new AtomicBoolean(false);
-//
-//        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL));
-//    }
+    public void initTimer() {
+        log.info("Initializing Ldap Status Timer");
+        this.isActive = new AtomicBoolean(false);
 
-    // TODO: CDI: Fix
-//    @Observer(EVENT_TYPE)
+		timerEvent.fire(new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new LdapStatusEvent(),
+				Scheduled.Literal.INSTANCE));
+    }
+
     @Asynchronous
-    public void process() {
+    public void process(@Observes @Scheduled LdapStatusEvent ldapStatusEvent) {
         if (this.isActive.get()) {
             return;
         }
@@ -67,9 +78,6 @@ public class LdapStatusTimer {
     }
 
     private void processInt() {
-    	LdapEntryManager ldapEntryManager = ServerUtil.bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME); 
-    	List<LdapEntryManager> ldapAuthEntryManagers = ServerUtil.bean(List.class, AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME); 
-
     	logConnectionProviderStatistic(ldapEntryManager, "connectionProvider", "bindConnectionProvider");
 
     	for (int i = 0; i < ldapAuthEntryManagers.size(); i++) {

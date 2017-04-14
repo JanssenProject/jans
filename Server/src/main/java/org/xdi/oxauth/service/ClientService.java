@@ -52,7 +52,6 @@ public class ClientService {
 
 	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "oxAuthClient" };
 
-    public static final String EVENT_CLEAR_CLIENT_CACHE = "eventClearClient";
     private static final String CACHE_CLIENT_NAME = "ClientCache";
     private static final String CACHE_CLIENT_FILTER_NAME = "ClientFilterCache";
 
@@ -297,24 +296,6 @@ public class ClientService {
             cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
         } catch (Exception e) {
             log.error("Failed to remove client from cache.", e);
-        }
-    }
-
-    /**
-     * Remove all clients from caches after receiving event
-     */
-    
-    // TODO: CDI
-//    @Observes
-    //@Event<Cli>> (EVENT_CLEAR_CLIENT_CACHE)
-    public void clearClientCache() {
-        log.debug("Clearing up clients cache");
-
-        try {
-            cacheService.removeAll(CACHE_CLIENT_NAME);
-            cacheService.removeAll(CACHE_CLIENT_FILTER_NAME);
-        } catch (Exception e) {
-            log.error("Failed to clear cache.");
         }
     }
 
