@@ -482,7 +482,7 @@ class Migration(object):
                 for line in infile:
                     line.replace("lastModifiedTime", "oxLastAccessTime")
                     line.replace("cn=directory manager", "cn=directory manager,o=gluu")
-                    if 'oxTrustConfigurationMode' in line and 'internal' in line:
+                    if 'oxTrustAuthenticationMode' in line and 'internal' in line:
                         line.replace('internal', 'ldap_auth_server')
                     outfile.write(line)
 
