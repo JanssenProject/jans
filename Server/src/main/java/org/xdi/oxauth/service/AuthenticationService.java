@@ -60,7 +60,6 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-// TODO: Review CDI injection Identity into stateless
 @Stateless
 @Named
 public class AuthenticationService {
@@ -314,7 +313,6 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String userName) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
         log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
@@ -408,8 +406,6 @@ public class AuthenticationService {
     }
 
     public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-
         log.trace("configureSessionUser: credentials: '{}', sessionState: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
@@ -431,8 +427,6 @@ public class AuthenticationService {
     }
 
     public SessionState configureEventUser() {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-
         User user = getAuthenticatedUser();
         if (user == null) {
             return null;
@@ -491,7 +485,6 @@ public class AuthenticationService {
     }
 
     public void configureSessionClient() {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
         String clientInum = credentials.getUsername();
         log.debug("ConfigureSessionClient: username: '{}', credentials: '{}'", clientInum, System.identityHashCode(credentials));
 
@@ -509,7 +502,6 @@ public class AuthenticationService {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-//    @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
     public void onSuccessfulLogin(SessionState sessionUser) {
         log.info("Attempting to redirect user: SessionUser: {}", sessionUser);
 
@@ -644,7 +636,7 @@ public class AuthenticationService {
     }
 
     public boolean isParameterExists(String p_name) {
-        return identity.gisSetWorkingParameter(p_name);
+        return identity.isSetWorkingParameter(p_name);
     }
 
 }

@@ -1,4 +1,4 @@
-package org.xdi.oxauth.service.inject;
+package org.xdi.oxauth.service.cdi.event;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
@@ -14,21 +14,20 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 
 /**
- * @author Yuriy Movchan
- * Date: 03/17/2017
+ * @author Yuriy Movchan Date: 04/13/2017
  */
 @Qualifier
 @Retention(RUNTIME)
-@Target({ TYPE, METHOD, FIELD, PARAMETER })
+@Target({ METHOD, FIELD, PARAMETER, TYPE })
 @Documented
-public @interface ContainerInitialized {
+public @interface LdapConfigurationReload {
 
-    public static final class Literal extends AnnotationLiteral<ContainerInitialized> implements ContainerInitialized {
+	public static final class Literal extends AnnotationLiteral<LdapConfigurationReload> implements LdapConfigurationReload {
 
-        public static final Literal INSTANCE = new Literal();
+		public static final Literal INSTANCE = new Literal();
 
-        private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-    }
+	}
 
 }
