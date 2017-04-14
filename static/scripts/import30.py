@@ -394,9 +394,8 @@ class Migration(object):
         for fn in files:
             dnList = self.getDns(os.path.join(self.ldifDir, fn))
             for dn in dnList:
-                # skip the entry of Admin DN and appliance data
-                if (fn == 'people.ldif' and admin_dn in dn) or \
-                        ('appliance' in fn):
+                # skip the entry of Admin DN
+                if fn == 'people.ldif' and admin_dn in dn:
                     continue
                 dnMap[dn] = fn
         return dnMap
@@ -410,7 +409,9 @@ class Migration(object):
         currentDNs = self.getDns(self.currentData)
         old_dn_map = self.getOldEntryMap()
 
-        ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys']
+        ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys',
+                      'oxIDPAuthentication', 'gluuFreeMemory', 'gluuSystemUptime',
+                      'oxLogViewerConfig']
         multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
                            'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
                            'oxTrustEntitlements', 'oxTrustx509Certificate']
