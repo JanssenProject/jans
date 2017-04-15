@@ -480,10 +480,11 @@ class Migration(object):
         with open(self.processTempFile, 'r') as infile:
             with open(self.o_gluu, 'w') as outfile:
                 for line in infile:
-                    line.replace("lastModifiedTime", "oxLastAccessTime")
-                    line.replace("cn=directory manager", "cn=directory manager,o=gluu")
-                    if 'oxTrustAuthenticationMode' in line and 'internal' in line:
-                        line.replace('internal', 'ldap_auth_server')
+                    line = line.replace("lastModifiedTime", "oxLastAccessTime")
+                    if "cn=directory manager" in line and "cn=directory manager,o=gluu" not in line:
+                        line = line.replace("cn=directory manager", "cn=directory manager,o=gluu")
+                    if 'oxTrustAuthenticationMode' in line:
+                        line = line.replace('internal', 'ldap_auth_server')
                     outfile.write(line)
 
     def importDataIntoOpenldap(self):
