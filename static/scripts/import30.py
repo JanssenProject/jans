@@ -484,7 +484,7 @@ class Migration(object):
                     if "cn=directory manager" in line and "cn=directory manager,o=gluu" not in line:
                         line = line.replace("cn=directory manager", "cn=directory manager,o=gluu")
                     if 'oxTrustAuthenticationMode' in line:
-                        line = line.replace('internal', 'ldap_auth_server')
+                        line = line.replace('internal', 'auth_ldap_server')
                     outfile.write(line)
 
     def importDataIntoOpenldap(self):
