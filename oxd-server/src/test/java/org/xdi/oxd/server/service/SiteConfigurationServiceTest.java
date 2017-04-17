@@ -14,7 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -27,10 +27,14 @@ public class SiteConfigurationServiceTest {
 
     @Inject
     SiteConfigurationService service;
+    @Inject
+    PersistenceService persistenceService;
 
     @BeforeClass
     public void setUp() {
         Tester.setSystemConfPath();
+        persistenceService.create();
+        service.removeAllRps();
         service.load();
     }
 
@@ -41,18 +45,27 @@ public class SiteConfigurationServiceTest {
 
     @AfterSuite
     public void tearDownSuite() {
+        service.removeAllRps();
         EXECUTOR_SERVICE.shutdown();
     }
 
     @Test
     public void load() throws Exception {
-        assertTrue(service.getSites().size() == 2);
+        assertEquals(service.getSites().size(), 1);
     }
 
     @Test
     public void persist() throws Exception {
-        service.createNewFile(newSiteConfiguration());
-        assertTrue(service.getSites().size() == 3);
+        SiteConfiguration rp = newSiteConfiguration();
+
+        service.create(rp);
+        assertEquals(service.getSites().size(), 2);
+
+        rp.setClientName("Updated name");
+        service.update(rp);
+
+        assertEquals(service.getSite(rp.getOxdId()).getClientName(), "Updated name");
+        assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
     }
 
     @Test(invocationCount = 10, threadPoolSize = 10)
@@ -62,7 +75,7 @@ public class SiteConfigurationServiceTest {
         siteConfiguration.setOxdId(UUID.randomUUID().toString());
         siteConfiguration.setPat(UUID.randomUUID().toString());
 
-        service.createNewFile(siteConfiguration);
+        service.create(siteConfiguration);
 
         for (int i = 0; i < 11; i++) {
             EXECUTOR_SERVICE.submit(new Runnable() {
@@ -83,6 +96,7 @@ public class SiteConfigurationServiceTest {
     public SiteConfiguration newSiteConfiguration() {
         SiteConfiguration conf = new SiteConfiguration(service.defaultSiteConfiguration());
         conf.setOxdId(UUID.randomUUID().toString());
+        conf.setOpHost("test.gluu.org");
         return conf;
     }
 

@@ -194,7 +194,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 siteConfiguration.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
             }
 
-            getSiteService().createNewFile(siteConfiguration);
+            getSiteService().create(siteConfiguration);
         } catch (IOException e) {
             LOG.error("Failed to persist site configuration, params: " + params, e);
             throw new RuntimeException(e);

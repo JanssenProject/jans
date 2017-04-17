@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.PersistenceService;
 import org.xdi.oxd.server.service.SiteConfigurationService;
 import org.xdi.oxd.server.service.SocketService;
 
@@ -79,6 +80,7 @@ public class ServerLauncher {
     private static void startOxd() {
         try {
             INJECTOR.getInstance(ConfigurationService.class).load();
+            INJECTOR.getInstance(PersistenceService.class).create();
             INJECTOR.getInstance(SiteConfigurationService.class).load();
             INJECTOR.getInstance(SocketService.class).listenSocket();
             LOG.info("oxD Server started successfully.");
@@ -137,6 +139,7 @@ public class ServerLauncher {
     }
 
     public static void shutdown() {
+        INJECTOR.getInstance(PersistenceService.class).destroy();
         INJECTOR.getInstance(SocketService.class).shutdownNow();
     }
 

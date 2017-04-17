@@ -34,7 +34,7 @@ public class SetUpTest {
 
     private static void removeExistingSiteConfigurations() {
         ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).load();
-        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).removeAllExistingConfigurations();
+        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).removeAllRps();
     }
 
     @AfterSuite
