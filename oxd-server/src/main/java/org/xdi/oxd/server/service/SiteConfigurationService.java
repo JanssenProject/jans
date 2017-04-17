@@ -6,11 +6,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -33,48 +37,59 @@ public class SiteConfigurationService {
 
     private static final int FILE_NAME_LENGTH = (UUID.randomUUID().toString() + ".json").length();
 
-    private final SiteStorage storage;
+    private final Map<String, SiteConfiguration> sites = Maps.newConcurrentMap();
 
-    ConfigurationService configurationService;
+    private ConfigurationService configurationService;
 
-    ValidationService validationService;
+    private ValidationService validationService;
+
+    private PersistenceService persistenceService;
 
     @Inject
-    public SiteConfigurationService(ConfigurationService configurationService, ValidationService validationService, SiteStorage storage) {
+    public SiteConfigurationService(ConfigurationService configurationService, ValidationService validationService, PersistenceService persistenceService) {
         this.configurationService = configurationService;
         this.validationService = validationService;
-        this.storage = storage;
+        this.persistenceService = persistenceService;
     }
 
-    public void removeAllExistingConfigurations() {
-        for (File file : storage.getSiteFiles().values()) {
-            String path = file.getAbsolutePath();
-            if (file.delete()) {
-                LOG.debug("Removed site configuration file : " + path);
-            }
-        }
+    public void removeAllRps() {
+        persistenceService.removeAllRps();
     }
 
     public void load() {
+        for (SiteConfiguration rp : persistenceService.getRps()) {
+            put(rp);
+        }
 
-        // load all files
         final List<File> files = Lists.newArrayList(Files.fileTreeTraverser().children(configurationService.getConfDirectoryFile()));
         for (File file : files) {
-            if (file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON) ||
-                    (file.getName().length() == FILE_NAME_LENGTH &&
-                            file.getName().endsWith(".json"))) {
-                loadFile(file);
+            if (file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON)) {
+                LOG.trace("Loading site file name: {}", file.getName());
+                SiteConfiguration rp = parseRp(file);
+                if (rp != null) {
+                    sites.put(DEFAULT_SITE_CONFIG_JSON, rp);
+                }
+            }
+            if (file.getName().length() == FILE_NAME_LENGTH && file.getName().endsWith(".json")) {
+                LOG.trace("Loading site file name: {}", file.getName());
+
+                try {
+                    SiteConfiguration rp = parseRp(new FileInputStream(file));
+                    create(rp);
+
+                    String path = file.getAbsolutePath();
+                    if (file.delete()) {
+                        LOG.debug("Removed site configuration file : " + path + " and pushed it to database.");
+                    }
+                } catch (Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
     }
 
-    private void loadFile(File file) {
-        LOG.trace("Loading site file name: {}", file.getName());
-        storage.put(file);
-    }
-
     public SiteConfiguration defaultSiteConfiguration() {
-        SiteConfiguration siteConfiguration = storage.getSites().get(DEFAULT_SITE_CONFIG_JSON);
+        SiteConfiguration siteConfiguration = sites.get(DEFAULT_SITE_CONFIG_JSON);
         if (siteConfiguration == null) {
             LOG.error("Failed to load fallback configuration!");
             siteConfiguration = new SiteConfiguration();
@@ -86,30 +101,59 @@ public class SiteConfigurationService {
         Preconditions.checkNotNull(id);
         Preconditions.checkState(!Strings.isNullOrEmpty(id));
 
-        SiteConfiguration site = storage.getSites().get(id + ".json");
+        SiteConfiguration site = sites.get(id);
         return validationService.validate(site);
     }
 
     public Map<String, SiteConfiguration> getSites() {
-        return Maps.newHashMap(storage.getSites());
+        return Maps.newHashMap(sites);
     }
 
-    public static SiteConfiguration createConfiguration(InputStream p_stream) {
+    public static SiteConfiguration parseRp(InputStream p_stream) {
         try {
             try {
                 return CoreUtils.createJsonMapper().readValue(p_stream, SiteConfiguration.class);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
+                return null;
             }
-            return null;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
         }
     }
 
-    public void update(SiteConfiguration siteConfiguration) throws IOException {
-        storage.update(siteConfiguration);
+    public static SiteConfiguration parseRp(File file) {
+        InputStream fis = null;
+        try {
+            fis = new FileInputStream(file);
+            return parseRp(fis);
+        } catch (FileNotFoundException e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(fis);
+        }
+        return null;
+    }
+
+    public static SiteConfiguration parseRp(String rpAsJson) {
+        try {
+            try {
+                return CoreUtils.createJsonMapper().readValue(rpAsJson, SiteConfiguration.class);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                return null;
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+
+    public void update(SiteConfiguration rp) throws IOException {
+        put(rp);
+        persistenceService.update(rp);
     }
 
     public void updateSilently(SiteConfiguration siteConfiguration) {
@@ -120,7 +164,16 @@ public class SiteConfigurationService {
         }
     }
 
-    public void createNewFile(SiteConfiguration siteConfiguration) throws IOException {
-        storage.createNewFile(siteConfiguration);
+    public void create(SiteConfiguration siteConfiguration) throws IOException {
+        if (StringUtils.isBlank(siteConfiguration.getOxdId())) {
+            siteConfiguration.setOxdId(UUID.randomUUID().toString());
+        }
+
+        put(siteConfiguration);
+        persistenceService.create(siteConfiguration);
+    }
+
+    public SiteConfiguration put(SiteConfiguration rp) {
+        return sites.put(rp.getOxdId(), rp);
     }
 }
