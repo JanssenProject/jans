@@ -35,8 +35,8 @@ public class SetUpTest {
 
     private static void removeExistingSiteConfigurations() {
         ServerLauncher.getInjector().getInstance(PersistenceService.class).create();
-        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).load();
         ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).removeAllRps();
+        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).load();
     }
 
     @AfterSuite
