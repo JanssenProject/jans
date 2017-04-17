@@ -3,8 +3,10 @@
  */
 package org.xdi.oxd.web;
 
+import org.xdi.oxd.server.guice.GuiceModule;
+
 /**
  * Created by yuriy on 8/23/2015.
  */
-public class TestAppModule extends AppModule {
+public class TestAppModule extends GuiceModule {
 }
