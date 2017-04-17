@@ -1,6 +1,7 @@
 package org.xdi.oxd.server.service;
 
 import com.google.inject.Inject;
+import org.h2.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.rs.protect.Jackson;
@@ -52,6 +53,8 @@ public class PersistenceService {
             LOG.error("Failed to create schema. Error: " + e.getMessage(), e);
             rollbackSilently(conn);
             throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeSilently(conn);
         }
     }
 
@@ -73,6 +76,8 @@ public class PersistenceService {
             LOG.error("Failed to create RP: " + rp, e);
             rollbackSilently(conn);
             return false;
+        } finally {
+            IOUtils.closeSilently(conn);
         }
     }
 
@@ -94,6 +99,8 @@ public class PersistenceService {
             LOG.error("Failed to update RP: " + rp, e);
             rollbackSilently(conn);
             return false;
+        } finally {
+            IOUtils.closeSilently(conn);
         }
     }
 
@@ -124,6 +131,8 @@ public class PersistenceService {
             LOG.error("Failed to find RP by id: " + oxdId + ". Error: " + e.getMessage(), e);
             rollbackSilently(conn);
             throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeSilently(conn);
         }
     }
 
@@ -143,6 +152,8 @@ public class PersistenceService {
             LOG.error("Failed to drop all RPs", e);
             rollbackSilently(conn);
             return false;
+        } finally {
+            IOUtils.closeSilently(conn);
         }
     }
 
@@ -176,6 +187,8 @@ public class PersistenceService {
             LOG.error("Failed to fetch rps. Error: " + e.getMessage(), e);
             rollbackSilently(conn);
             throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeSilently(conn);
         }
     }
 
