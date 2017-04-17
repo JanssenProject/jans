@@ -6,6 +6,7 @@ package org.xdi.oxd.server;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.server.service.PersistenceService;
 import org.xdi.oxd.server.service.SiteConfigurationService;
 
 /**
@@ -33,6 +34,7 @@ public class SetUpTest {
     }
 
     private static void removeExistingSiteConfigurations() {
+        ServerLauncher.getInjector().getInstance(PersistenceService.class).create();
         ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).load();
         ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).removeAllRps();
     }
