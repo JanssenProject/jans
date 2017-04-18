@@ -20,6 +20,7 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
@@ -30,6 +31,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.model.SimpleProperty;
@@ -82,6 +84,9 @@ public class AppInitializer {
 
     @Inject
     private Logger log;
+
+	@Inject
+	private BeanManager beanManager;
 
 	@Inject
 	private Event<String> event;
@@ -231,6 +236,8 @@ public class AppInitializer {
 
 	private void reloadConfiguration() {
         LdapEntryManager localLdapEntryManager = ldapEntryManagerInstance.get();
+
+        log.trace("Attempting to use {}: {}", LDAP_ENTRY_MANAGER_NAME, localLdapEntryManager.getLdapOperationService());
 		List<GluuLdapConfiguration> newLdapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
 		
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
@@ -256,7 +263,7 @@ public class AppInitializer {
     @Produces @ApplicationScoped @Named(LDAP_ENTRY_MANAGER_NAME)
     public LdapEntryManager getLdapEntryManager() {
         LdapEntryManager ldapEntryManager = new LdapEntryManager(new OperationsFacade(this.connectionProvider, this.bindConnectionProvider));
-        log.debug("Created {}: {}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager });
+        log.info("Created {}: {}", new Object[] { LDAP_ENTRY_MANAGER_NAME, ldapEntryManager.getLdapOperationService() });
 
         return ldapEntryManager;
     }
@@ -284,53 +291,62 @@ public class AppInitializer {
 	}
 
     public void recreateLdapEntryManager(@Observes @LdapConfigurationReload String event) {
-    	// Backup current references to objects to allow shutdown properly
-    	LdapEntryManager oldLdapEntryManager = ldapEntryManagerInstance.get();
+    	// Get existing application scoped instance
+    	LdapEntryManager oldLdapEntryManager = ServerUtil.getContextBean(beanManager, LdapEntryManager.class, LDAP_ENTRY_MANAGER_NAME);
 
     	// Recreate components
     	createConnectionProvider();
 
-        // Destroy old component
-        closeLdapEntryManager(oldLdapEntryManager);
-    }
+        // Close existing connections
+    	closeLdapEntryManager(oldLdapEntryManager);
 
-    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
-    	// Backup current references to objects to allow shutdown properly
-    	List<LdapEntryManager> oldLdapAuthEntryManagers = ldapAuthEntryManagerInstance.get();
-
-    	// Recreate components
-        createAuthConnectionProviders(newLdapAuthConfigs);
-
-        // Destroy old components
-        closeLdapAuthEntryManagers(oldLdapAuthEntryManagers);
-    }
-
-	private void closeLdapEntryManager(LdapEntryManager ldapEntryManager) {
-		// Destroy old components
+        // Force to create new bean
+    	LdapEntryManager ldapEntryManager = ldapEntryManagerInstance.get();
         ldapEntryManagerInstance.destroy(ldapEntryManager);
-
-		ldapEntryManager.destroy();
-        log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, ldapEntryManager);
-	}
-
-	private void closeLdapAuthEntryManagers(List<LdapEntryManager> ldapAuthEntryManagers) {
-		// Destroy old components
-        ldapAuthEntryManagerInstance.destroy(ldapAuthEntryManagers);
-
-		for (LdapEntryManager oldLdapAuthEntryManager : ldapAuthEntryManagers) {
-			oldLdapAuthEntryManager.destroy();
-	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
-		}
-	}
+        log.info("Recreated instance {}: {}", LDAP_ENTRY_MANAGER_NAME, ldapEntryManager);
+    }
 
     private void createConnectionProvider() {
     	this.ldapConfig = configurationFactory.getLdapConfiguration();
 
         Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
         this.connectionProvider = createConnectionProvider(connectionProperties);
+        log.debug("Created connectionProvider: {}", connectionProvider);
 
         Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
         this.bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
+        log.debug("Created bindConnectionProvider: {}", bindConnectionProvider);
+    }
+
+	private void closeLdapEntryManager(LdapEntryManager oldLdapEntryManager) {
+		// Close existing connections
+    	log.debug("Attempting to destroy {}: {}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
+    	oldLdapEntryManager.destroy();
+        log.debug("Destroyed {}: {}", LDAP_ENTRY_MANAGER_NAME, oldLdapEntryManager);
+	}
+
+    public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
+    	// Get existing application scoped instance
+		List<LdapEntryManager> oldLdapAuthEntryManagers = ServerUtil.getContextBean(beanManager,
+				new ParameterizedTypeImpl(List.class, LdapEntryManager.class), LDAP_AUTH_ENTRY_MANAGER_NAME);
+
+    	// Recreate components
+        createAuthConnectionProviders(newLdapAuthConfigs);
+        
+        // Close existing connections
+        closeLdapAuthEntryManagers(oldLdapAuthEntryManagers);
+
+		// Destroy old Ldap auth entry managers
+		for (LdapEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
+	    	log.debug("Attempting to destroy {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+			oldLdapAuthEntryManager.destroy();
+	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+		}
+		
+        // Force to create new bean
+    	List<LdapEntryManager> ldapAuthEntryManagers = ldapAuthEntryManagerInstance.get();
+    	ldapAuthEntryManagerInstance.destroy(ldapAuthEntryManagers);
+        log.info("Recreated instance {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, ldapAuthEntryManagers);
     }
 
     private void createAuthConnectionProviders(List<GluuLdapConfiguration> newLdapAuthConfigs) {
@@ -354,7 +370,15 @@ public class AppInitializer {
 
 		ldapAuthConfigInstance.destroy(oldLdapAuthConfigs);
     }
-    
+
+	private void closeLdapAuthEntryManagers(List<LdapEntryManager> oldLdapAuthEntryManagers) {
+		// Close existing connections
+		for (LdapEntryManager oldLdapAuthEntryManager : oldLdapAuthEntryManagers) {
+	    	log.debug("Attempting to destroy {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+			oldLdapAuthEntryManager.destroy();
+	        log.debug("Destroyed {}: {}", LDAP_AUTH_ENTRY_MANAGER_NAME, oldLdapAuthEntryManager);
+		}
+	}
 
     public LdapConnectionProviders createAuthConnectionProviders(GluuLdapConfiguration ldapAuthConfig) {
         Properties connectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
@@ -551,7 +575,7 @@ public class AppInitializer {
 		LoggerContext loggerContext = LoggerContext.getContext(false);
 
 		if (StringHelper.equalsIgnoreCase("DEFAULT", loggingLevel)) {
-			log.info("Reloadming log4j configuration");
+			log.info("Reloading log4j configuration");
 			loggerContext.reconfigure();
 			return;
 		}

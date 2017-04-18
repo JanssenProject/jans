@@ -251,7 +251,6 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 		final StringBuilder grantedScopesSb = new StringBuilder();
 		for (String scope : scopes) {
 			grantedScopesSb.append(" ").append(scope);
-
 		}
 
 		final String grantedScopesSt = grantedScopesSb.toString().trim();
