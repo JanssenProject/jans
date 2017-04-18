@@ -711,8 +711,8 @@ class PersonAuthentication(PersonAuthenticationType):
         if (self.use_audit_group):
             is_member = self.isUserMemberOfGroup(user, self.audit_attribute, self.audit_group)
             if (is_member):
-                print "Duo. Authenticate for processAuditGroup. User '" + user.getUserId() + "' member of audit group"
-                print "Duo. Authenticate for processAuditGroup. Sending e-mail about user '" + user.getUserId() + "' login to", self.audit_email
+                print "Super-Gluu. Authenticate for processAuditGroup. User '" + user.getUserId() + "' member of audit group"
+                print "Super-Gluu. Authenticate for processAuditGroup. Sending e-mail about user '" + user.getUserId() + "' login to", self.audit_email
                 
                 # Send e-mail to administrator
                 user_id = user.getUserId()
