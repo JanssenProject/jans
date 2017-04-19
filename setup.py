@@ -2494,8 +2494,9 @@ class Setup(object):
 
         # 6. Setup Logging
         self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
-        self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
-        if not os.path.isdir('/etc/rsyslog.d/'):
+        if self.os_type in ['debian', 'ubuntu']:
+            self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
+	if not os.path.isdir('/etc/rsyslog.d/'):
             self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
         self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
