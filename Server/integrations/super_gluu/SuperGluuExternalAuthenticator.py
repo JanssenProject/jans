@@ -192,7 +192,8 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "Super-Gluu. Authenticate for step 1. User '%s' member of super_gluu group" % authenticated_user.getUserId()
                         super_gluu_count_login_steps = 2
                     else:
-                        self.processAuditGroup(authenticated_user)
+                        if self.use_audit_group:
+                            self.processAuditGroup(authenticated_user, self.audit_attribute, self.audit_group)
                         super_gluu_count_login_steps = 1
     
                     context.set("super_gluu_count_login_steps", super_gluu_count_login_steps)
@@ -256,9 +257,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 super_gluu_request = json.loads(session_device_status['super_gluu_request'])
                 auth_method = super_gluu_request['method']
                 if auth_method in ['enroll', 'authenticate']:
-                    if validation_result:
+                    if validation_result and self.use_audit_group:
                         user = authenticationService.getAuthenticatedUser()
-                        self.processAuditGroup(user)
+                        self.processAuditGroup(user, self.audit_attribute, self.audit_group)
 
                     return validation_result
 
@@ -708,16 +709,15 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return is_member
 
-    def processAuditGroup(self, user):
-        if (self.use_audit_group):
-            is_member = self.isUserMemberOfGroup(user, self.audit_attribute, self.audit_group)
-            if (is_member):
-                print "Super-Gluu. Authenticate for processAuditGroup. User '" + user.getUserId() + "' member of audit group"
-                print "Super-Gluu. Authenticate for processAuditGroup. Sending e-mail about user '" + user.getUserId() + "' login to", self.audit_email
-                
-                # Send e-mail to administrator
-                user_id = user.getUserId()
-                mailService = Component.getInstance(MailService)
-                subject = "User log in: " + user_id
-                body = "User log in: " + user_id
-                mailService.sendMail(self.audit_email, subject, body)
+    def processAuditGroup(self, user, attribute, group):
+        is_member = self.isUserMemberOfGroup(user, attribute, group)
+        if (is_member):
+            print "Super-Gluu. Authenticate for processAuditGroup. User '%s' member of audit group" % user.getUserId()
+            print "Super-Gluu. Authenticate for processAuditGroup. Sending e-mail about user '%s' login to %s" % (user.getUserId(), self.audit_email)
+            
+            # Send e-mail to administrator
+            user_id = user.getUserId()
+            mailService = Component.getInstance(MailService)
+            subject = "User log in: %s" % user_id
+            body = "User log in: %s" % user_id
+            mailService.sendMail(self.audit_email, subject, body)
