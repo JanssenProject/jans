@@ -189,7 +189,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Super-Gluu. Authenticate for step 1. Checking if user belong to super_gluu group"
                     is_member_super_gluu_group = self.isUserMemberOfGroup(authenticated_user, self.audit_attribute, self.super_gluu_group)
                     if (is_member_super_gluu_group):
-                        print "Super-Gluu. Authenticate for step 1. User '%s' member of super_gluu group" % user.getUserId()
+                        print "Super-Gluu. Authenticate for step 1. User '%s' member of super_gluu group" % authenticated_user.getUserId()
                         super_gluu_count_login_steps = 2
                     else:
                         self.processAuditGroup(authenticated_user)
