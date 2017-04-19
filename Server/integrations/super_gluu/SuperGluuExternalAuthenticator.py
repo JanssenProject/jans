@@ -257,7 +257,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 auth_method = super_gluu_request['method']
                 if auth_method in ['enroll', 'authenticate']:
                     if validation_result:
-                        self.processAuditGroup(authenticated_user)
+                        user = authenticationService.getAuthenticatedUser()
+                        self.processAuditGroup(user)
 
                     return validation_result
 
