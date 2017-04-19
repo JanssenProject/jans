@@ -536,7 +536,7 @@ class Setup(object):
         self.run(['/bin/chmod', '-R', '644', self.etc_hosts])
 
         if self.os_type in ['debian', 'ubuntu']:
-            self.run(['/bin/chmod', '-R', '644', self.etc_hostname])
+            self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
 
         if self.installSaml:
             realIdp3Folder = os.path.realpath(self.idp3Folder)
@@ -2418,7 +2418,7 @@ class Setup(object):
         else:
             if self.os_type in ['debian', 'ubuntu']:
                 self.copyFile("%s/hostname" % self.outputFolder, self.etc_hostname)
-                self.run(['/bin/chmod', '-R', '644', self.etc_hostname])
+                self.run(['/bin/chmod', '-f', '644', self.etc_hostname])
 
             if self.os_type in ['centos', 'redhat', 'fedora']:
                 self.copyFile("%s/network" % self.outputFolder, self.network)
