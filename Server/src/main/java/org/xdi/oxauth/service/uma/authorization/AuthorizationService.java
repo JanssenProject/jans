@@ -25,6 +25,7 @@ import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.ClaimTokenList;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
+import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.uma.ScopeService;
 
@@ -44,6 +45,9 @@ public class AuthorizationService {
 
     @Inject
     private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
+
+    @Inject
+	private AttributeService attributeService;
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
         log.trace("Check policies for permission, id: '{}'", permission.getDn());
@@ -67,7 +71,7 @@ public class AuthorizationService {
             return true;
         } else {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(grant);
-            final AuthorizationContext context = new AuthorizationContext(rpt, permission, unmodifiableAuthorizationGrant, httpRequest, claims);
+            final AuthorizationContext context = new AuthorizationContext(attributeService, rpt, permission, unmodifiableAuthorizationGrant, httpRequest, claims);
             for (String authorizationPolicy : authorizationPolicies) {
                 // if at least one policy returns false then whole result is false
                 if (!applyPolicy(authorizationPolicy, context)) {

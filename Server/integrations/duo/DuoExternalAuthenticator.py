@@ -68,7 +68,6 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
 
-
         print "Duo. Initialized successfully"
         return True   
 

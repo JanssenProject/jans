@@ -701,6 +701,7 @@
 		<profile>
 			<id>jetty-embedded</id>
 			<activation>
+				<activeByDefault>true</activeByDefault>
 				<property>
 					<name>jetty.embedded</name>
 				</property>
