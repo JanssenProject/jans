@@ -1,6 +1,6 @@
 JAVA_HOME=%(jre_home)s
 JAVA=$JAVA_HOME/bin/java
-JAVA_OPTIONS="-server -Xms128m -Xmx%(cas_max_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dcatalina.base=%(jetty_base)s/cas -Dcatalina.home=%(jetty_base)s/cas"
+JAVA_OPTIONS="-server -Xms128m -XX:MaxMetaspaceSize=%(cas_max_mem)sm -XX:+DisableExplicitGC -Dgluu.base=%(gluuBaseFolder)s -Dcatalina.base=%(jetty_base)s/cas -Dcatalina.home=%(jetty_base)s/cas"
 
 JETTY_HOME=%(jetty_home)s
 JETTY_BASE=%(jetty_base)s/cas
