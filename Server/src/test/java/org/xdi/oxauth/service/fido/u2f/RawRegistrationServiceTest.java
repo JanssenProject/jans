@@ -2,22 +2,14 @@ package org.xdi.oxauth.service.fido.u2f;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-
-import java.util.Arrays;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.python.bouncycastle.util.encoders.Hex;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
-import org.xdi.oxauth.model.fido.u2f.message.RawAuthenticateResponse;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.util.ArrayHelper;
 
 public class RawRegistrationServiceTest extends BaseComponentTest {
 

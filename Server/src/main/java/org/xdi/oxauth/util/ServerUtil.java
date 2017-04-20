@@ -8,17 +8,22 @@ package org.xdi.oxauth.util;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.faces.context.ExternalContext;
@@ -35,6 +40,7 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.CustomAttribute;
@@ -112,6 +118,32 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
+    public static <T> T getContextBean(BeanManager beanManager, Type type, String beanName) {
+		Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, NamedLiteral.of(beanName)));
+		if (bean == null) {
+			return null;
+		}
+
+		T existingInstance = beanManager.getContext(bean.getScope()).get(bean, beanManager.createCreationalContext(bean));
+
+    	return existingInstance;
+	}
+
+    public static <T> T getContextualReference(BeanManager bm, Set<Bean<?>> beans, Class<?> type) {
+		if (beans == null || beans.size() == 0) {
+			return null;
+		}
+
+		// If we would resolve to multiple beans then BeanManager#resolve would throw an AmbiguousResolutionException
+		Bean<?> bean = bm.resolve(beans);
+		if (bean == null) {
+			return null;
+		} else {
+			CreationalContext<?> creationalContext = bm.createCreationalContext(bean);
+			return (T) bm.getReference(bean, type, creationalContext);
+		}
+	}
+
     /*
      * Try to avoid using this method. It's better to use injected Instance into bean
      */
@@ -122,8 +154,22 @@ public class ServerUtil {
     /*
      * Try to avoid using this method. It's better to use injected Instance into bean
      */
+    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
+		return CDI.current().select(p_clazz, NamedLiteral.of(name));
+    }    	
+
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static <T> T bean(Class<T> p_clazz) {
 		return instance(p_clazz).get();
+    }    	
+
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
+    public static <T> T bean(Class<T> p_clazz, String name) {
+		return instance(p_clazz, name).get();
     }    	
 
     /*
@@ -139,25 +185,16 @@ public class ServerUtil {
     /*
      * Try to avoid using this method. It's better to use injected Instance into bean
      */
-    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
-		return CDI.current().select(p_clazz, NamedLiteral.of(name));
-    }    	
-
-    /*
-     * Try to avoid using this method. It's better to use injected Instance into bean
-     */
-    public static <T> T bean(Class<T> p_clazz, String name) {
-		return instance(p_clazz, name).get();
-    }    	
-
-    /*
-     * Try to avoid using this method. It's better to use injected Instance into bean
-     */
-    public static <T> void destroy(Class<T> p_clazz, String name) {
+    public static <T> T destroy(Class<T> p_clazz, String name) {
 		Instance<T> instance = instance(p_clazz, name);
 		if (instance.isResolvable()) {
-			instance.destroy(instance.get());
+			T obj = instance.get();
+			instance.destroy(obj);
+			
+			return obj;
 		}
+
+		return null;
     }    	
 
     /*

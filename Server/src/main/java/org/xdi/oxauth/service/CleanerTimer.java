@@ -88,9 +88,6 @@ public class CleanerTimer {
     private DeviceRegistrationService deviceRegistrationService;
 
     @Inject
-    private ConfigurationFactory configurationFactory;
-
-    @Inject
     private AppConfiguration appConfiguration;
 
     @Inject
