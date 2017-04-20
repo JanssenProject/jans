@@ -801,6 +801,7 @@
 			</activation>
 			<properties>
 				<log4j.default.log.level>TRACE</log4j.default.log.level>
+				<weld.debug>true</weld.debug>
 			</properties>
 		</profile>
 	</profiles>

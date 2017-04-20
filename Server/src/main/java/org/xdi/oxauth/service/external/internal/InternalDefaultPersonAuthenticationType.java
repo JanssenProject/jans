@@ -28,7 +28,6 @@ public class InternalDefaultPersonAuthenticationType extends DummyPersonAuthenti
 	private Credentials credentials;
 
 	public InternalDefaultPersonAuthenticationType() {
-		this.authenticationService = ServerUtil.bean(AuthenticationService.class);
 	}
 
 	@Override
