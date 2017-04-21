@@ -43,20 +43,20 @@ public class UmaTokenService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UmaTokenService.class);
 
-    private final SiteConfigurationService siteService;
+    private final RpService rpService;
     private final ValidationService validationService;
     private final DiscoveryService discoveryService;
     private final HttpService httpService;
     private final Configuration configuration;
 
     @Inject
-    public UmaTokenService(SiteConfigurationService siteService,
+    public UmaTokenService(RpService rpService,
                            ValidationService validationService,
                            DiscoveryService discoveryService,
                            HttpService httpService,
                            Configuration configuration
     ) {
-        this.siteService = siteService;
+        this.rpService = rpService;
         this.validationService = validationService;
         this.discoveryService = discoveryService;
         this.httpService = httpService;
@@ -64,7 +64,7 @@ public class UmaTokenService {
     }
 
     public String getRpt(String oxdId, boolean forceNew) {
-        Rp site = siteService.getSite(oxdId);
+        Rp site = rpService.getRp(oxdId);
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!forceNew && !Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
@@ -87,7 +87,7 @@ public class UmaTokenService {
                 site.setRpt(rptResponse.getRpt());
                 site.setRptCreatedAt(status.getIssuedAt());
                 site.setRptExpiresAt(status.getExpiresAt());
-                siteService.updateSilently(site);
+                rpService.updateSilently(site);
 
                 return rptResponse.getRpt();
             }
@@ -102,7 +102,7 @@ public class UmaTokenService {
     }
 
     public String getGat(String oxdId, List<String> scopes) {
-        Rp site = siteService.getSite(oxdId);
+        Rp site = rpService.getRp(oxdId);
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!Strings.isNullOrEmpty(site.getGat()) && site.getGatExpiresAt() != null) {
@@ -126,7 +126,7 @@ public class UmaTokenService {
                 site.setGat(response.getRpt());
                 site.setGatCreatedAt(status.getIssuedAt());
                 site.setGatExpiresAt(status.getExpiresAt());
-                siteService.updateSilently(site);
+                rpService.updateSilently(site);
 
                 return response.getRpt();
             }
@@ -139,7 +139,7 @@ public class UmaTokenService {
     public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = siteService.getSite(oxdId);
+        Rp site = rpService.getRp(oxdId);
 
         if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -156,7 +156,7 @@ public class UmaTokenService {
     }
 
     public Pat obtainPat(String oxdId) {
-        Rp site = siteService.getSite(oxdId);
+        Rp site = rpService.getRp(oxdId);
         UmaToken token = obtainToken(oxdId, UmaScopeType.PROTECTION, site);
 
         site.setPat(token.getToken());
@@ -164,7 +164,7 @@ public class UmaTokenService {
         site.setPatExpiresIn(token.getExpiresIn());
         site.setPatRefreshToken(token.getRefreshToken());
 
-        siteService.updateSilently(site);
+        rpService.updateSilently(site);
 
         return (Pat) token;
     }
@@ -172,7 +172,7 @@ public class UmaTokenService {
     public Aat getAat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        Rp site = siteService.getSite(oxdId);
+        Rp site = rpService.getRp(oxdId);
 
         if (site.getAat() != null && site.getAatCreatedAt() != null && site.getAatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -189,7 +189,7 @@ public class UmaTokenService {
     }
 
     public Aat obtainAat(String oxdId) {
-        Rp site = siteService.getSite(oxdId);
+        Rp site = rpService.getRp(oxdId);
         UmaToken token = obtainToken(oxdId, UmaScopeType.AUTHORIZATION, site);
 
         site.setAat(token.getToken());
@@ -197,7 +197,7 @@ public class UmaTokenService {
         site.setAatExpiresIn(token.getExpiresIn());
         site.setAatRefreshToken(token.getRefreshToken());
 
-        siteService.updateSilently(site);
+        rpService.updateSilently(site);
 
         return (Aat) token;
     }
