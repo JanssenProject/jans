@@ -64,7 +64,7 @@ public class UmaTokenService {
     }
 
     public String getRpt(String oxdId, boolean forceNew) {
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!forceNew && !Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
@@ -102,7 +102,7 @@ public class UmaTokenService {
     }
 
     public String getGat(String oxdId, List<String> scopes) {
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
         UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!Strings.isNullOrEmpty(site.getGat()) && site.getGatExpiresAt() != null) {
@@ -139,7 +139,7 @@ public class UmaTokenService {
     public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
 
         if (site.getPat() != null && site.getPatCreatedAt() != null && site.getPatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -156,7 +156,7 @@ public class UmaTokenService {
     }
 
     public Pat obtainPat(String oxdId) {
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
         UmaToken token = obtainToken(oxdId, UmaScopeType.PROTECTION, site);
 
         site.setPat(token.getToken());
@@ -172,7 +172,7 @@ public class UmaTokenService {
     public Aat getAat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
 
         if (site.getAat() != null && site.getAatCreatedAt() != null && site.getAatExpiresIn() > 0) {
             Calendar expiredAt = Calendar.getInstance();
@@ -189,7 +189,7 @@ public class UmaTokenService {
     }
 
     public Aat obtainAat(String oxdId) {
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
         UmaToken token = obtainToken(oxdId, UmaScopeType.AUTHORIZATION, site);
 
         site.setAat(token.getToken());
@@ -202,7 +202,7 @@ public class UmaTokenService {
         return (Aat) token;
     }
 
-    private UmaToken obtainToken(String oxdId, UmaScopeType scopeType, SiteConfiguration site) {
+    private UmaToken obtainToken(String oxdId, UmaScopeType scopeType, Rp site) {
 
         OpenIdConfigurationResponse discovery = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId);
 
@@ -228,7 +228,7 @@ public class UmaTokenService {
         }
     }
 
-    private UmaToken obtainTokenWithClientCredentials(OpenIdConfigurationResponse discovery, SiteConfiguration site, UmaScopeType scopeType) {
+    private UmaToken obtainTokenWithClientCredentials(OpenIdConfigurationResponse discovery, Rp site, UmaScopeType scopeType) {
         final TokenClient tokenClient = new TokenClient(discovery.getTokenEndpoint());
         tokenClient.setExecutor(httpService.getClientExecutor());
         final TokenResponse response = tokenClient.execClientCredentialsGrant(scopesAsString(scopeType), site.getClientId(), site.getClientSecret());
@@ -269,7 +269,7 @@ public class UmaTokenService {
         return scopesAsString.trim();
     }
 
-    private UmaToken obtainTokenWithUserCredentials(OpenIdConfigurationResponse discovery, SiteConfiguration site, UmaScopeType scopeType) {
+    private UmaToken obtainTokenWithUserCredentials(OpenIdConfigurationResponse discovery, Rp site, UmaScopeType scopeType) {
 
         // 1. Request authorization and receive the authorization code.
         final List<ResponseType> responseTypes = Lists.newArrayList();

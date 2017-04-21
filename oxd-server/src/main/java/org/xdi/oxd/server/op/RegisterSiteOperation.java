@@ -21,7 +21,7 @@ import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.SiteConfigurationService;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
-    private SiteConfiguration siteConfiguration;
+    private Rp siteConfiguration;
 
     /**
      * Base constructor
@@ -78,7 +78,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
-        SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
+        Rp fallback = getSiteService().defaultSiteConfiguration();
 
         // op_host
         if (Strings.isNullOrEmpty(params.getOpHost())) {
@@ -289,11 +289,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         return request;
     }
 
-    private SiteConfiguration createSiteConfiguration(String siteId, RegisterSiteParams params) {
+    private Rp createSiteConfiguration(String siteId, RegisterSiteParams params) {
 
         Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
 
-        final SiteConfiguration siteConf = new SiteConfiguration(getSiteService().defaultSiteConfiguration());
+        final Rp siteConf = new Rp(getSiteService().defaultSiteConfiguration());
         siteConf.setOxdId(siteId);
         siteConf.setOpHost(params.getOpHost());
         siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());

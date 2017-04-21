@@ -37,7 +37,7 @@ public class SiteConfigurationService {
 
     private static final int FILE_NAME_LENGTH = (UUID.randomUUID().toString() + ".json").length();
 
-    private final Map<String, SiteConfiguration> sites = Maps.newConcurrentMap();
+    private final Map<String, Rp> sites = Maps.newConcurrentMap();
 
     private ConfigurationService configurationService;
 
@@ -57,7 +57,7 @@ public class SiteConfigurationService {
     }
 
     public void load() {
-        for (SiteConfiguration rp : persistenceService.getRps()) {
+        for (Rp rp : persistenceService.getRps()) {
             put(rp);
         }
 
@@ -65,7 +65,7 @@ public class SiteConfigurationService {
         for (File file : files) {
             if (file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON)) {
                 LOG.trace("Loading site file name: {}", file.getName());
-                SiteConfiguration rp = parseRp(file);
+                Rp rp = parseRp(file);
                 if (rp != null) {
                     sites.put(DEFAULT_SITE_CONFIG_JSON, rp);
                 }
@@ -74,7 +74,7 @@ public class SiteConfigurationService {
                 LOG.trace("Loading site file name: {}", file.getName());
 
                 try {
-                    SiteConfiguration rp = parseRp(new FileInputStream(file));
+                    Rp rp = parseRp(new FileInputStream(file));
                     create(rp);
 
                     String path = file.getAbsolutePath();
@@ -88,31 +88,31 @@ public class SiteConfigurationService {
         }
     }
 
-    public SiteConfiguration defaultSiteConfiguration() {
-        SiteConfiguration siteConfiguration = sites.get(DEFAULT_SITE_CONFIG_JSON);
+    public Rp defaultSiteConfiguration() {
+        Rp siteConfiguration = sites.get(DEFAULT_SITE_CONFIG_JSON);
         if (siteConfiguration == null) {
             LOG.error("Failed to load fallback configuration!");
-            siteConfiguration = new SiteConfiguration();
+            siteConfiguration = new Rp();
         }
         return siteConfiguration;
     }
 
-    public SiteConfiguration getSite(String id) {
+    public Rp getSite(String id) {
         Preconditions.checkNotNull(id);
         Preconditions.checkState(!Strings.isNullOrEmpty(id));
 
-        SiteConfiguration site = sites.get(id);
+        Rp site = sites.get(id);
         return validationService.validate(site);
     }
 
-    public Map<String, SiteConfiguration> getSites() {
+    public Map<String, Rp> getSites() {
         return Maps.newHashMap(sites);
     }
 
-    public static SiteConfiguration parseRp(InputStream p_stream) {
+    public static Rp parseRp(InputStream p_stream) {
         try {
             try {
-                return CoreUtils.createJsonMapper().readValue(p_stream, SiteConfiguration.class);
+                return CoreUtils.createJsonMapper().readValue(p_stream, Rp.class);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 return null;
@@ -123,7 +123,7 @@ public class SiteConfigurationService {
         }
     }
 
-    public static SiteConfiguration parseRp(File file) {
+    public static Rp parseRp(File file) {
         InputStream fis = null;
         try {
             fis = new FileInputStream(file);
@@ -136,10 +136,10 @@ public class SiteConfigurationService {
         return null;
     }
 
-    public static SiteConfiguration parseRp(String rpAsJson) {
+    public static Rp parseRp(String rpAsJson) {
         try {
             try {
-                return CoreUtils.createJsonMapper().readValue(rpAsJson, SiteConfiguration.class);
+                return CoreUtils.createJsonMapper().readValue(rpAsJson, Rp.class);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 return null;
@@ -151,12 +151,12 @@ public class SiteConfigurationService {
     }
 
 
-    public void update(SiteConfiguration rp) throws IOException {
+    public void update(Rp rp) throws IOException {
         put(rp);
         persistenceService.update(rp);
     }
 
-    public void updateSilently(SiteConfiguration siteConfiguration) {
+    public void updateSilently(Rp siteConfiguration) {
         try {
             update(siteConfiguration);
         } catch (IOException e) {
@@ -164,7 +164,7 @@ public class SiteConfigurationService {
         }
     }
 
-    public void create(SiteConfiguration siteConfiguration) throws IOException {
+    public void create(Rp siteConfiguration) throws IOException {
         if (StringUtils.isBlank(siteConfiguration.getOxdId())) {
             siteConfiguration.setOxdId(UUID.randomUUID().toString());
         }
@@ -173,7 +173,7 @@ public class SiteConfigurationService {
         persistenceService.create(siteConfiguration);
     }
 
-    public SiteConfiguration put(SiteConfiguration rp) {
+    public Rp put(Rp rp) {
         return sites.put(rp.getOxdId(), rp);
     }
 }

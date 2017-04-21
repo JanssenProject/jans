@@ -25,7 +25,7 @@ import org.xdi.oxd.rs.protect.resteasy.RptPreProcessInterceptor;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.model.UmaResource;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +52,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
     public CommandResponse execute(final RsCheckAccessParams params) throws Exception {
         validate(params);
 
-        SiteConfiguration site = getSite();
+        Rp site = getSite();
         UmaResource resource = site.umaResource(params.getPath(), params.getHttpMethod());
         if (resource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
