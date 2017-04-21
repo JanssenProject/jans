@@ -13,5 +13,6 @@
     "license_password":"8Udn8shi73Mrk83s1JOI",
     "support-google-logout":true,
     "state_expiration_in_minutes":5,
-    "nonce_expiration_in_minutes":5
+    "nonce_expiration_in_minutes":5,
+    "key_expiration_in_minutes":60
 }
