@@ -90,15 +90,15 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(UmaTokenService.class);
     }
 
-    public SiteConfigurationService getSiteService() {
-        return getInstance(SiteConfigurationService.class);
+    public RpService getSiteService() {
+        return getInstance(RpService.class);
     }
 
     public Rp getSite() {
         if (params instanceof HasOxdIdParams) {
             getValidationService().validate((HasOxdIdParams) params);
             HasOxdIdParams hasOxdId = (HasOxdIdParams) params;
-            return getSiteService().getSite(hasOxdId.getOxdId());
+            return getSiteService().getRp(hasOxdId.getOxdId());
         }
         throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
     }
