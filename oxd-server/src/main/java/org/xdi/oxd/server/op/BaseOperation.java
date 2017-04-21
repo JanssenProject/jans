@@ -70,8 +70,8 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(HttpService.class);
     }
 
-    public KeyService getKeyService() {
-        return getInstance(KeyService.class);
+    public PublicOpKeyService getKeyService() {
+        return getInstance(PublicOpKeyService.class);
     }
 
     public <T> T getInstance(Class<T> type) {
