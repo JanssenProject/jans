@@ -37,7 +37,7 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
             RegisterSiteResponse setupClient = registerSiteOperation.execute_(params);
             RegisterSiteResponse registeredClient = registerSiteOperation.execute_(params);
 
-            Rp setup = getSiteService().getSite(setupClient.getOxdId());
+            Rp setup = getSiteService().getRp(setupClient.getOxdId());
 
             SetupClientResponse response = new SetupClientResponse();
             response.setOxdId(registeredClient.getOxdId());

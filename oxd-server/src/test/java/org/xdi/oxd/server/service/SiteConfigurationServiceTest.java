@@ -26,7 +26,7 @@ public class SiteConfigurationServiceTest {
     private static ExecutorService EXECUTOR_SERVICE;
 
     @Inject
-    SiteConfigurationService service;
+    RpService service;
     @Inject
     PersistenceService persistenceService;
 
@@ -51,53 +51,53 @@ public class SiteConfigurationServiceTest {
 
     @Test
     public void load() throws Exception {
-        assertEquals(service.getSites().size(), 1);
+        assertEquals(service.getRps().size(), 1);
     }
 
     @Test
     public void persist() throws Exception {
-        Rp rp = newSiteConfiguration();
+        Rp rp = newRp();
 
         service.create(rp);
-        assertEquals(service.getSites().size(), 2);
+        assertEquals(service.getRps().size(), 2);
 
         rp.setClientName("Updated name");
         service.update(rp);
 
-        assertEquals(service.getSite(rp.getOxdId()).getClientName(), "Updated name");
+        assertEquals(service.getRp(rp.getOxdId()).getClientName(), "Updated name");
         assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
     }
 
     @Test(invocationCount = 10, threadPoolSize = 10)
     public void stressTest() throws IOException {
 
-        final Rp siteConfiguration = service.defaultSiteConfiguration();
-        siteConfiguration.setOxdId(UUID.randomUUID().toString());
-        siteConfiguration.setPat(UUID.randomUUID().toString());
+        final Rp rp = service.defaultRp();
+        rp.setOxdId(UUID.randomUUID().toString());
+        rp.setPat(UUID.randomUUID().toString());
 
-        service.create(siteConfiguration);
+        service.create(rp);
 
         for (int i = 0; i < 11; i++) {
             EXECUTOR_SERVICE.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        siteConfiguration.setPat(UUID.randomUUID().toString());
-                        service.update(siteConfiguration);
-                        System.out.println("Updated PAT: " + siteConfiguration.getPat() + ", for site: " + siteConfiguration.getOxdId());
+                        rp.setPat(UUID.randomUUID().toString());
+                        service.update(rp);
+                        System.out.println("Updated PAT: " + rp.getPat() + ", for site: " + rp.getOxdId());
                     } catch (Throwable e) {
-                        throw new AssertionError("Failed to update configuration: " + siteConfiguration.getOxdId());
+                        throw new AssertionError("Failed to update configuration: " + rp.getOxdId());
                     }
                 }
             });
         }
     }
 
-    public Rp newSiteConfiguration() {
-        Rp conf = new Rp(service.defaultSiteConfiguration());
-        conf.setOxdId(UUID.randomUUID().toString());
-        conf.setOpHost("test.gluu.org");
-        return conf;
+    public Rp newRp() {
+        Rp rp = new Rp(service.defaultRp());
+        rp.setOxdId(UUID.randomUUID().toString());
+        rp.setOpHost("test.gluu.org");
+        return rp;
     }
 
 }

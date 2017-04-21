@@ -26,12 +26,12 @@ import java.util.UUID;
  * @version 0.9, 28/09/2015
  */
 
-public class SiteConfigurationService {
+public class RpService {
 
     /**
      * Logger
      */
-    private static final Logger LOG = LoggerFactory.getLogger(SiteConfigurationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RpService.class);
 
     public static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
 
@@ -46,7 +46,7 @@ public class SiteConfigurationService {
     private PersistenceService persistenceService;
 
     @Inject
-    public SiteConfigurationService(ConfigurationService configurationService, ValidationService validationService, PersistenceService persistenceService) {
+    public RpService(ConfigurationService configurationService, ValidationService validationService, PersistenceService persistenceService) {
         this.configurationService = configurationService;
         this.validationService = validationService;
         this.persistenceService = persistenceService;
@@ -88,16 +88,16 @@ public class SiteConfigurationService {
         }
     }
 
-    public Rp defaultSiteConfiguration() {
-        Rp siteConfiguration = sites.get(DEFAULT_SITE_CONFIG_JSON);
-        if (siteConfiguration == null) {
+    public Rp defaultRp() {
+        Rp rp = sites.get(DEFAULT_SITE_CONFIG_JSON);
+        if (rp == null) {
             LOG.error("Failed to load fallback configuration!");
-            siteConfiguration = new Rp();
+            rp = new Rp();
         }
-        return siteConfiguration;
+        return rp;
     }
 
-    public Rp getSite(String id) {
+    public Rp getRp(String id) {
         Preconditions.checkNotNull(id);
         Preconditions.checkState(!Strings.isNullOrEmpty(id));
 
@@ -105,7 +105,7 @@ public class SiteConfigurationService {
         return validationService.validate(site);
     }
 
-    public Map<String, Rp> getSites() {
+    public Map<String, Rp> getRps() {
         return Maps.newHashMap(sites);
     }
 
@@ -164,13 +164,13 @@ public class SiteConfigurationService {
         }
     }
 
-    public void create(Rp siteConfiguration) throws IOException {
-        if (StringUtils.isBlank(siteConfiguration.getOxdId())) {
-            siteConfiguration.setOxdId(UUID.randomUUID().toString());
+    public void create(Rp rp) throws IOException {
+        if (StringUtils.isBlank(rp.getOxdId())) {
+            rp.setOxdId(UUID.randomUUID().toString());
         }
 
-        put(siteConfiguration);
-        persistenceService.create(siteConfiguration);
+        put(rp);
+        persistenceService.create(rp);
     }
 
     public Rp put(Rp rp) {

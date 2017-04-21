@@ -22,7 +22,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.service.Rp;
-import org.xdi.oxd.server.service.SiteConfigurationService;
+import org.xdi.oxd.server.service.RpService;
 
 import java.io.IOException;
 import java.util.List;
@@ -78,16 +78,16 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
-        Rp fallback = getSiteService().defaultSiteConfiguration();
+        Rp fallback = getSiteService().defaultRp();
 
         // op_host
         if (Strings.isNullOrEmpty(params.getOpHost())) {
-            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
+            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + RpService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
             String fallbackOpHost = fallback.getOpHost();
             if (Strings.isNullOrEmpty(fallbackOpHost)) {
                 throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
             }
-            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON);
+            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + RpService.DEFAULT_SITE_CONFIG_JSON);
             params.setOpHost(fallbackOpHost);
         }
 
@@ -293,7 +293,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
 
-        final Rp siteConf = new Rp(getSiteService().defaultSiteConfiguration());
+        final Rp siteConf = new Rp(getSiteService().defaultRp());
         siteConf.setOxdId(siteId);
         siteConf.setOpHost(params.getOpHost());
         siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
