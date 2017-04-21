@@ -77,7 +77,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
             final Jwt idToken = Jwt.parse(response.getIdToken());
 
-            final Validator validator = new Validator(idToken, discoveryResponse);
+            final Validator validator = new Validator(idToken, discoveryResponse, getKeyService());
             validator.validateNonce(getStateService());
             validator.validateIdToken(site.getClientId());
             validator.validateAccessToken(response.getAccessToken());

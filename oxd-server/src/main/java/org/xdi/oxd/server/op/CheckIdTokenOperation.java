@@ -38,7 +38,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
             final SiteConfiguration site = getSite();
             final String idToken = params.getIdToken();
             final Jwt jwt = Jwt.parse(idToken);
-            final Validator validator = new Validator(jwt, discoveryResponse);
+            final Validator validator = new Validator(jwt, discoveryResponse, getKeyService());
 
             final CheckIdTokenResponse opResponse = new CheckIdTokenResponse();
             opResponse.setActive(validator.isIdTokenValid(site.getClientId()));
