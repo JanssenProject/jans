@@ -50,7 +50,7 @@ public class DiscoveryService {
     public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
         return getConnectDiscoveryResponse(site.getOpHost());
     }
 
@@ -82,7 +82,7 @@ public class DiscoveryService {
     public UmaConfiguration getUmaDiscoveryByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        SiteConfiguration site = siteService.getSite(oxdId);
+        Rp site = siteService.getSite(oxdId);
         return getUmaDiscovery(site.getOpHost());
     }
 

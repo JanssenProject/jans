@@ -18,7 +18,7 @@ import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +46,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
         validate(params);
 
-        final SiteConfiguration site = getSite();
+        final Rp site = getSite();
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);

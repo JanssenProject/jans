@@ -17,7 +17,7 @@ import org.xdi.oxd.rs.protect.resteasy.PatProvider;
 import org.xdi.oxd.rs.protect.resteasy.ResourceRegistrar;
 import org.xdi.oxd.rs.protect.resteasy.ServiceProvider;
 import org.xdi.oxd.server.model.UmaResource;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.io.IOException;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     public CommandResponse execute(final RsProtectParams params) throws Exception {
         validate(params);
 
-        SiteConfiguration site = getSite();
+        Rp site = getSite();
 
         PatProvider patProvider = new PatProvider() {
             @Override
@@ -62,7 +62,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         return okResponse(new RsProtectResponse(site.getOxdId()));
     }
 
-    private void persist(ResourceRegistrar registrar, SiteConfiguration site) throws IOException {
+    private void persist(ResourceRegistrar registrar, Rp site) throws IOException {
         Map<Key,RsResource> resourceMapCopy = registrar.getResourceMapCopy();
 
         for (Map.Entry<Key, String> entry : registrar.getIdMapCopy().entrySet()) {

@@ -15,7 +15,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.CheckIdTokenParams;
 import org.xdi.oxd.common.response.CheckIdTokenResponse;
 import org.xdi.oxd.server.Utils;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -35,7 +35,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         try {
             OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
-            final SiteConfiguration site = getSite();
+            final Rp site = getSite();
             final String idToken = params.getIdToken();
             final Jwt jwt = Jwt.parse(idToken);
             final Validator validator = new Validator(jwt, discoveryResponse, getKeyService());

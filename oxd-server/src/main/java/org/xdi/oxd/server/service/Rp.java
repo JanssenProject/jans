@@ -16,7 +16,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SiteConfiguration implements Serializable {
+public class Rp implements Serializable {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -112,10 +112,10 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "gat_created_at")
     private Date gatCreatedAt;
 
-    public SiteConfiguration() {
+    public Rp() {
     }
 
-    public SiteConfiguration(SiteConfiguration conf) {
+    public Rp(Rp conf) {
         this.oxdId = conf.oxdId;
 
         this.opHost = conf.opHost;
