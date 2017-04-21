@@ -17,13 +17,30 @@ import org.xml.sax.SAXParseException;
  */
 public class GluuErrorHandler implements ErrorHandler {
 
+        public static final String VALIDATOR_INTERNAL_ERROR_MESSAGE = "Internal error of validator";
+        public static final String SCHEMA_CREATING_ERROR_MESSAGE = "Error of schema creating";
+        
 	private boolean result = true;
-	private final List<String> validationLog = new ArrayList<String>();
+        private boolean internalError = false;
+	private final List<String> validationLog;
+    
+        public GluuErrorHandler() {
+            validationLog = new ArrayList<String>();
+        }
+        
+        public GluuErrorHandler(boolean result, boolean internalError, List<String> validationLog) {
+            this.result = result;
+            this.internalError = internalError;
+            this.validationLog = validationLog;
+        }
 
 	public boolean isValid() {
 		return result;
-
 	}
+
+        public boolean isInternalError() {
+                return internalError;
+        }
 
 	public List<String> getLog() {
 		return validationLog.isEmpty() ? null : validationLog;
