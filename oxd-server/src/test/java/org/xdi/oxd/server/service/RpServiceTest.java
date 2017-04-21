@@ -21,7 +21,7 @@ import static junit.framework.Assert.assertEquals;
  * @version 0.9, 05/10/2015
  */
 @Guice(modules = TestAppModule.class)
-public class SiteConfigurationServiceTest {
+public class RpServiceTest {
 
     private static ExecutorService EXECUTOR_SERVICE;
 
