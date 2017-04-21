@@ -20,16 +20,16 @@ import java.util.concurrent.TimeUnit;
  * @version 0.9, 20/04/2017
  */
 
-public class KeyService {
+public class PublicOpKeyService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KeyService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PublicOpKeyService.class);
 
     private final Cache<Pair<String, String>, RSAPublicKey> cache;
 
     @Inject
-    public KeyService(ConfigurationService configurationService) {
+    public PublicOpKeyService(ConfigurationService configurationService) {
         this.cache = CacheBuilder.newBuilder()
-                .expireAfterWrite(configurationService.get().getKeyExpirationInMinutes(), TimeUnit.MINUTES)
+                .expireAfterWrite(configurationService.get().getPublicOpKeyCacheExpirationInMinutes(), TimeUnit.MINUTES)
                 .build();
     }
 

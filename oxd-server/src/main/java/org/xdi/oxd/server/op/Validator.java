@@ -13,7 +13,7 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
-import org.xdi.oxd.server.service.KeyService;
+import org.xdi.oxd.server.service.PublicOpKeyService;
 import org.xdi.oxd.server.service.StateService;
 
 import java.util.Date;
@@ -29,10 +29,10 @@ public class Validator {
 
     private final Jwt idToken;
     private final OpenIdConfigurationResponse discoveryResponse;
-    private final KeyService keyService;
+    private final PublicOpKeyService keyService;
     private RSASigner rsaSigner;
 
-    public Validator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, KeyService keyService) {
+    public Validator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService) {
         Preconditions.checkNotNull(idToken);
         Preconditions.checkNotNull(discoveryResponse);
 
@@ -58,7 +58,7 @@ public class Validator {
         }
     }
 
-    public static RSASigner createRSASigner(Jwt jwt, OpenIdConfigurationResponse discoveryResponse, KeyService keyService) {
+    public static RSASigner createRSASigner(Jwt jwt, OpenIdConfigurationResponse discoveryResponse, PublicOpKeyService keyService) {
         final String jwkUrl = discoveryResponse.getJwksUri();
         final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
         final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
