@@ -10,7 +10,7 @@ import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.SetupClientResponse;
 import org.xdi.oxd.server.Utils;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,7 +37,7 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
             RegisterSiteResponse setupClient = registerSiteOperation.execute_(params);
             RegisterSiteResponse registeredClient = registerSiteOperation.execute_(params);
 
-            SiteConfiguration setup = getSiteService().getSite(setupClient.getOxdId());
+            Rp setup = getSiteService().getSite(setupClient.getOxdId());
 
             SetupClientResponse response = new SetupClientResponse();
             response.setOxdId(registeredClient.getOxdId());

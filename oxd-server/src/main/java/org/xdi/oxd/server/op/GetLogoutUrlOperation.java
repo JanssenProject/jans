@@ -12,7 +12,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
 import org.xdi.oxd.server.service.ConfigurationService;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.net.URLEncoder;
 
@@ -38,7 +38,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     @Override
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
-        final SiteConfiguration site = getSite();
+        final Rp site = getSite();
 
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
@@ -76,7 +76,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         return okResponse(new LogoutResponse(uri));
     }
 
-    private String getIdToken(GetLogoutUrlParams params, SiteConfiguration site) {
+    private String getIdToken(GetLogoutUrlParams params, Rp site) {
         if (!Strings.isNullOrEmpty(params.getIdTokenHint())) {
             return params.getIdTokenHint();
         }

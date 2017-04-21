@@ -13,7 +13,7 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.UpdateSiteParams;
 import org.xdi.oxd.common.response.UpdateSiteResponse;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     @Override
     public CommandResponse execute(UpdateSiteParams params) {
-        final SiteConfiguration site = getSite();
+        final Rp site = getSite();
 
         LOG.info("Updating site configuration ...");
         persistSiteConfiguration(site, params);
@@ -50,7 +50,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         return okResponse(response);
     }
 
-    private void persistSiteConfiguration(SiteConfiguration site, UpdateSiteParams params) {
+    private void persistSiteConfiguration(Rp site, UpdateSiteParams params) {
 
         try {
             updateRegisteredClient(site, params);
@@ -62,7 +62,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
     }
 
-    private void updateRegisteredClient(SiteConfiguration site, UpdateSiteParams params) {
+    private void updateRegisteredClient(Rp site, UpdateSiteParams params) {
         final RegisterClient registerClient = new RegisterClient(site.getClientRegistrationClientUri());
         registerClient.setRequest(createRegisterClientRequest(site, params));
         registerClient.setExecutor(getHttpService().getClientExecutor());
@@ -84,7 +84,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         throw new RuntimeException("Failed to register client for site. Details:" + response.getEntity());
     }
 
-    private RegisterRequest createRegisterClientRequest(SiteConfiguration site, UpdateSiteParams params) {
+    private RegisterRequest createRegisterClientRequest(Rp site, UpdateSiteParams params) {
 
         final RegisterRequest request = new RegisterRequest(site.getClientRegistrationAccessToken());
         request.setHttpMethod(HttpMethod.PUT); // force update

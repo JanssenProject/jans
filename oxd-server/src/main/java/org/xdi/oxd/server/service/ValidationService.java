@@ -45,7 +45,7 @@ public class ValidationService {
         notBlankOxdId(params.getOxdId());
     }
 
-    public SiteConfiguration validate(SiteConfiguration site) {
+    public Rp validate(Rp site) {
         if (site == null) {
             throw new ErrorResponseException(ErrorResponseCode.INVALID_OXD_ID);
         }

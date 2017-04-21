@@ -56,7 +56,7 @@ public class SiteConfigurationServiceTest {
 
     @Test
     public void persist() throws Exception {
-        SiteConfiguration rp = newSiteConfiguration();
+        Rp rp = newSiteConfiguration();
 
         service.create(rp);
         assertEquals(service.getSites().size(), 2);
@@ -71,7 +71,7 @@ public class SiteConfigurationServiceTest {
     @Test(invocationCount = 10, threadPoolSize = 10)
     public void stressTest() throws IOException {
 
-        final SiteConfiguration siteConfiguration = service.defaultSiteConfiguration();
+        final Rp siteConfiguration = service.defaultSiteConfiguration();
         siteConfiguration.setOxdId(UUID.randomUUID().toString());
         siteConfiguration.setPat(UUID.randomUUID().toString());
 
@@ -93,8 +93,8 @@ public class SiteConfigurationServiceTest {
         }
     }
 
-    public SiteConfiguration newSiteConfiguration() {
-        SiteConfiguration conf = new SiteConfiguration(service.defaultSiteConfiguration());
+    public Rp newSiteConfiguration() {
+        Rp conf = new Rp(service.defaultSiteConfiguration());
         conf.setOxdId(UUID.randomUUID().toString());
         conf.setOpHost("test.gluu.org");
         return conf;

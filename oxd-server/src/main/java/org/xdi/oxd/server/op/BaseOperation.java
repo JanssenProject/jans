@@ -94,7 +94,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(SiteConfigurationService.class);
     }
 
-    public SiteConfiguration getSite() {
+    public Rp getSite() {
         if (params instanceof HasOxdIdParams) {
             getValidationService().validate((HasOxdIdParams) params);
             HasOxdIdParams hasOxdId = (HasOxdIdParams) params;

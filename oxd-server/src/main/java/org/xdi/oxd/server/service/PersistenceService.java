@@ -58,7 +58,7 @@ public class PersistenceService {
         }
     }
 
-    public boolean create(SiteConfiguration rp) {
+    public boolean create(Rp rp) {
         Connection conn = null;
         try {
             conn = provider.getConnection();
@@ -81,7 +81,7 @@ public class PersistenceService {
         }
     }
 
-    public boolean update(SiteConfiguration rp) {
+    public boolean update(Rp rp) {
         Connection conn = null;
         try {
             conn = provider.getConnection();
@@ -104,7 +104,7 @@ public class PersistenceService {
         }
     }
 
-    public SiteConfiguration getRp(String oxdId) {
+    public Rp getRp(String oxdId) {
         Connection conn = null;
         try {
             conn = provider.getConnection();
@@ -119,7 +119,7 @@ public class PersistenceService {
             query.close();
             conn.commit();
 
-            SiteConfiguration rp = SiteConfigurationService.parseRp(data);
+            Rp rp = SiteConfigurationService.parseRp(data);
             if (rp != null) {
                 LOG.debug("Found RP id: " + oxdId + ", RP : " + rp);
                 return rp;
@@ -157,7 +157,7 @@ public class PersistenceService {
         }
     }
 
-    public Set<SiteConfiguration> getRps() {
+    public Set<Rp> getRps() {
         Connection conn = null;
         try {
             conn = provider.getConnection();
@@ -166,12 +166,12 @@ public class PersistenceService {
             PreparedStatement query = conn.prepareStatement("select id, data from rp");
             ResultSet rs = query.executeQuery();
 
-            Set<SiteConfiguration> result = new HashSet<>();
+            Set<Rp> result = new HashSet<>();
             while (rs.next()) {
                 String id = rs.getString("id");
                 String data = rs.getString("data");
 
-                SiteConfiguration rp = SiteConfigurationService.parseRp(data);
+                Rp rp = SiteConfigurationService.parseRp(data);
                 if (rp != null) {
                     result.add(rp);
                 } else {
