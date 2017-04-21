@@ -49,6 +49,8 @@ public class Configuration {
     private int stateExpirationInMinutes = 5;
     @JsonProperty(value = "nonce_expiration_in_minutes")
     private int nonceExpirationInMinutes = 5;
+    @JsonProperty(value = "key_expiration_in_minutes")
+    private int keyExpirationInMinutes = 60;
 
     public int getStateExpirationInMinutes() {
         return stateExpirationInMinutes;
@@ -56,6 +58,14 @@ public class Configuration {
 
     public void setStateExpirationInMinutes(int stateExpirationInMinutes) {
         this.stateExpirationInMinutes = stateExpirationInMinutes;
+    }
+
+    public int getKeyExpirationInMinutes() {
+        return keyExpirationInMinutes;
+    }
+
+    public void setKeyExpirationInMinutes(int keyExpirationInMinutes) {
+        this.keyExpirationInMinutes = keyExpirationInMinutes;
     }
 
     public int getNonceExpirationInMinutes() {
@@ -205,6 +215,7 @@ public class Configuration {
         sb.append(", supportGoogleLogout='").append(supportGoogleLogout).append('\'');
         sb.append(", stateExpirationInMinutes='").append(stateExpirationInMinutes).append('\'');
         sb.append(", nonceExpirationInMinutes='").append(nonceExpirationInMinutes).append('\'');
+        sb.append(", keyExpirationInMinutes='").append(keyExpirationInMinutes).append('\'');
         sb.append('}');
         return sb.toString();
     }

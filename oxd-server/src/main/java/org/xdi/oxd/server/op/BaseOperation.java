@@ -15,13 +15,7 @@ import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.Convertor;
-import org.xdi.oxd.server.service.DiscoveryService;
-import org.xdi.oxd.server.service.HttpService;
-import org.xdi.oxd.server.service.SiteConfiguration;
-import org.xdi.oxd.server.service.SiteConfigurationService;
-import org.xdi.oxd.server.service.StateService;
-import org.xdi.oxd.server.service.UmaTokenService;
-import org.xdi.oxd.server.service.ValidationService;
+import org.xdi.oxd.server.service.*;
 
 /**
  * Base abstract class for all operations.
@@ -74,6 +68,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
 
     public HttpService getHttpService() {
         return getInstance(HttpService.class);
+    }
+
+    public KeyService getKeyService() {
+        return getInstance(KeyService.class);
     }
 
     public <T> T getInstance(Class<T> type) {

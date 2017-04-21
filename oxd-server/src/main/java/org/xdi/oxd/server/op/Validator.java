@@ -2,22 +2,18 @@ package org.xdi.oxd.server.op;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.JwkClient;
-import org.xdi.oxauth.client.JwkResponse;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
-import org.xdi.oxauth.model.crypto.PublicKey;
 import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
-import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
+import org.xdi.oxd.server.service.KeyService;
 import org.xdi.oxd.server.service.StateService;
 
 import java.util.Date;
@@ -32,16 +28,18 @@ public class Validator {
     private static final Logger LOG = LoggerFactory.getLogger(Validator.class);
 
     private final Jwt idToken;
-    private final RSASigner rsaSigner;
     private final OpenIdConfigurationResponse discoveryResponse;
+    private final KeyService keyService;
+    private RSASigner rsaSigner;
 
-    public Validator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse) {
+    public Validator(Jwt idToken, OpenIdConfigurationResponse discoveryResponse, KeyService keyService) {
         Preconditions.checkNotNull(idToken);
         Preconditions.checkNotNull(discoveryResponse);
 
         this.idToken = idToken;
         this.discoveryResponse = discoveryResponse;
-        this.rsaSigner = createRSASigner(idToken, discoveryResponse);
+        this.keyService = keyService;
+        this.rsaSigner = createRSASigner(idToken, discoveryResponse, keyService);
     }
 
     public void validateAccessToken(String accessToken) {
@@ -60,35 +58,14 @@ public class Validator {
         }
     }
 
-    public static RSASigner createRSASigner(Jwt jwt, OpenIdConfigurationResponse discoveryResponse) {
+    public static RSASigner createRSASigner(Jwt jwt, OpenIdConfigurationResponse discoveryResponse, KeyService keyService) {
         final String jwkUrl = discoveryResponse.getJwksUri();
         final String kid = jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
         final String algorithm = jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
         final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm);
 
-        final RSAPublicKey publicKey = getRSAPublicKey(jwkUrl, kid);
+        final RSAPublicKey publicKey = keyService.getRSAPublicKey(jwkUrl, kid);
         return new RSASigner(signatureAlgorithm, publicKey);
-    }
-
-    public static RSAPublicKey getRSAPublicKey(String jwkSetUri, String keyId) {
-        try {
-            RSAPublicKey publicKey = null;
-
-            JwkClient jwkClient = new JwkClient(jwkSetUri);
-            jwkClient.setExecutor(new ApacheHttpClient4Executor(CoreUtils.createHttpClientTrustAll()));
-            JwkResponse jwkResponse = jwkClient.exec();
-            if (jwkResponse != null && jwkResponse.getStatus() == 200) {
-                PublicKey pk = jwkResponse.getPublicKey(keyId);
-                if (pk instanceof RSAPublicKey) {
-                    publicKey = (RSAPublicKey) pk;
-                }
-            }
-
-            return publicKey;
-        } catch (Exception e) {
-            LOG.error("Failed to obtain public key.", e);
-            throw new RuntimeException("Failed to obtain public key.", e);
-        }
     }
 
     public void validateNonce(StateService stateService) {
@@ -141,10 +118,22 @@ public class Validator {
             }
 
             // 2. validate signature
-            final boolean signature = rsaSigner.validate(idToken);
+            boolean signature = rsaSigner.validate(idToken);
             if (!signature) {
-                LOG.error("ID Token signature is invalid.");
-                throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
+                final String jwkUrl = discoveryResponse.getJwksUri();
+                final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+
+                keyService.refetchKey(jwkUrl, kid);
+
+                RSASigner signerWithRefreshedKey = createRSASigner(idToken, discoveryResponse, keyService);
+                signature = signerWithRefreshedKey.validate(idToken);
+
+                if (!signature) {
+                    LOG.error("ID Token signature is invalid.");
+                    throw new ErrorResponseException(ErrorResponseCode.INVALID_ID_TOKEN_BAD_SIGNATURE);
+                } else {
+                    this.rsaSigner = signerWithRefreshedKey;
+                }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
