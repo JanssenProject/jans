@@ -266,8 +266,6 @@
 	<test name="Fido U2F test (embedded)" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.service.fido.u2f.RawAuthenticationServiceTest" />
-		</classes>
-		<classes>
 			<class name="org.xdi.oxauth.service.fido.u2f.RawRegistrationServiceTest" />
 		</classes>
 	</test>
