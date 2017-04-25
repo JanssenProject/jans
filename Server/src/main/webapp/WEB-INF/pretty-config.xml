@@ -1,45 +1,155 @@
-<pretty-config xmlns="http://ocpsoft.org/schema/rewrite-config-prettyfaces" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://ocpsoft.org/schema/rewrite-config-prettyfaces
+<pretty-config xmlns="http://ocpsoft.org/schema/rewrite-config-prettyfaces"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://ocpsoft.org/schema/rewrite-config-prettyfaces
                       http://ocpsoft.org/xml/ns/prettyfaces/rewrite-config-prettyfaces.xsd">
 
-	<url-mapping id="login">
-		<pattern value="/login" />
-		<view-id value="/login.htm" />
-	</url-mapping>
+    <url-mapping id="login">
+        <pattern value="/login"/>
+        <view-id value="/login.htm"/>
+    </url-mapping>
 
-	<url-mapping id="authorize">
-		<pattern value="/authorize" />
-		<view-id value="/authorize.htm" />
-	</url-mapping>
+    <url-mapping id="authorize">
+        <pattern value="/authorize"/>
+        <view-id value="/authorize.htm"/>
+    </url-mapping>
 
-	<url-mapping id="logout">
-		<pattern value="/logout" />
-		<view-id value="/logout.htm" />
-	</url-mapping>
+    <url-mapping id="logout">
+        <pattern value="/logout"/>
+        <view-id value="/logout.htm"/>
+    </url-mapping>
 
-	<url-mapping id="postlogin">
-		<pattern value="/postlogin" />
-		<view-id value="/postlogin.htm" />
-	</url-mapping>
+    <url-mapping id="postlogin">
+        <pattern value="/postlogin"/>
+        <view-id value="/postlogin.htm"/>
+    </url-mapping>
 
-	<url-mapping id="opiframe">
-		<pattern value="/opiframe" />
-		<view-id value="/opiframe.htm" />
-	</url-mapping>
+    <url-mapping id="opiframe">
+        <pattern value="/opiframe"/>
+        <view-id value="/opiframe.htm"/>
+    </url-mapping>
 
-	<url-mapping id="error">
-		<pattern value="/error" />
-		<view-id value="/error.htm" />
-	</url-mapping>
+    <url-mapping id="error">
+        <pattern value="/error"/>
+        <view-id value="/error.htm"/>
+    </url-mapping>
 
-	<url-mapping id="error_service">
-		<pattern value="/error_service" />
-		<view-id value="/error_service.htm" />
-	</url-mapping>
+    <url-mapping id="error_service">
+        <pattern value="/error_service"/>
+        <view-id value="/error_service.htm"/>
+    </url-mapping>
 
-	<url-mapping id="cert-login">
-		<pattern value="/cert-login" />
-		<view-id value="/cert-login.htm" />
-	</url-mapping>
+    <!-- cas2 -->
+    <url-mapping id="cas2login">
+        <pattern value="/auth/cas2/cas2login-login"/>
+        <view-id value="/auth/cas2/cas2login.htm"/>
+    </url-mapping>
+    <url-mapping id="cas2postlogin">
+        <pattern value="/auth/cas2/cas2-post-login"/>
+        <view-id value="/auth/cas2/cas2postlogin.htm"/>
+    </url-mapping>
+
+    <!-- cert -->
+    <url-mapping id="cert-invalid">
+        <pattern value="/auth/cert/cert-invalid"/>
+        <view-id value="/auth/cert/cert-invalid.htm"/>
+    </url-mapping>
+    <url-mapping id="cert-login">
+        <pattern value="/auth/cert/cert-login"/>
+        <view-id value="/auth/cert/cert-login.htm"/>
+    </url-mapping>
+    <url-mapping id="cert-not-selected">
+        <pattern value="/auth/cert/cert-not-selected"/>
+        <view-id value="/auth/cert/cert-not-selected.htm"/>
+    </url-mapping>
+    <url-mapping id="cert.login">
+        <pattern value="/auth/cert/login"/>
+        <view-id value="/auth/cert/login.htm"/>
+    </url-mapping>
+
+    <!-- duo -->
+    <url-mapping id="duo-login">
+        <pattern value="/auth/duo/duo-login"/>
+        <view-id value="/auth/duo/duologin.htm"/>
+    </url-mapping>
+
+    <!-- gplus -->
+    <url-mapping id="gplus-login">
+        <pattern value="/auth/gplus/gplus-login"/>
+        <view-id value="/auth/gplus/gpluslogin.htm"/>
+    </url-mapping>
+    <url-mapping id="gplus-post-login">
+        <pattern value="/auth/gplus/gplus-post-login"/>
+        <view-id value="/auth/gplus/gpluspostlogin.htm"/>
+    </url-mapping>
+
+    <!-- otp -->
+    <url-mapping id="enroll">
+        <pattern value="/auth/otp/enroll"/>
+        <view-id value="/auth/otp/enroll.htm"/>
+    </url-mapping>
+    <url-mapping id="otplogin">
+        <pattern value="/auth/otp/otplogin"/>
+        <view-id value="/auth/otp/otplogin.htm"/>
+    </url-mapping>
+
+    <!-- oxpush -->
+    <url-mapping id="ox-authenticate">
+        <pattern value="/auth/oxpush/ox-authenticate"/>
+        <view-id value="/auth/oxpush/oxauthenticate.htm"/>
+    </url-mapping>
+    <url-mapping id="ox-login">
+        <pattern value="/auth/oxpush/ox-login"/>
+        <view-id value="/auth/oxpush/oxlogin.htm"/>
+    </url-mapping>
+    <url-mapping id="ox-pair">
+        <pattern value="/auth/oxpush/ox-pair"/>
+        <view-id value="/auth/oxpush/oxpair.htm"/>
+    </url-mapping>
+
+    <!-- passport -->
+    <url-mapping id="passport-login">
+        <pattern value="/auth/passport/passport-login"/>
+        <view-id value="/auth/passport/passportlogin.htm"/>
+    </url-mapping>
+    <url-mapping id="passport-post-login">
+        <pattern value="/auth/passport/passport-post-login"/>
+        <view-id value="/auth/passport/passportpostlogin.htm"/>
+    </url-mapping>
+
+    <!-- saml -->
+    <url-mapping id="samllogin-login">
+        <pattern value="/auth/saml/samllogin-login"/>
+        <view-id value="/auth/saml/samllogin.htm"/>
+    </url-mapping>
+    <url-mapping id="saml-post-login">
+        <pattern value="/auth/saml/saml-post-login"/>
+        <view-id value="/auth/saml/samlpostlogin.htm"/>
+    </url-mapping>
+
+    <!-- super-gluu -->
+    <url-mapping id="super-gluu-login">
+        <pattern value="/auth/super-gluu/login"/>
+        <view-id value="/auth/super-gluu/login.htm"/>
+    </url-mapping>
+
+    <!-- twiliosms -->
+    <url-mapping id="twiliosms-login">
+        <pattern value="/auth/twiliosms/twiliosms-login"/>
+        <view-id value="/auth/twiliosms/twiliosms.htm"/>
+    </url-mapping>
+
+    <!-- u2f -->
+    <url-mapping id="u2f-login">
+        <pattern value="/auth/u2f/login"/>
+        <view-id value="/auth/u2f/login.htm"/>
+    </url-mapping>
+
+    <!-- uaf -->
+    <url-mapping id="uaf-login">
+        <pattern value="/auth/uaf/login"/>
+        <view-id value="/auth/uaf/login.htm"/>
+    </url-mapping>
+
+    <!-- oneid, inwebo, phonefactor, toopher and wikid are deprecated-->
 
 </pretty-config>
