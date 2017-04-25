@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.filter;
 
-import org.gluu.oxserver.filters.AbstractCorsFilter;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-
 import javax.inject.Inject;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
+
+import org.gluu.oxserver.filters.AbstractCorsFilter;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
  * CORS wrapper to support both Tomcat and Jetty
@@ -22,7 +22,7 @@ import javax.servlet.annotation.WebInitParam;
  * @author Javier Rojas Blum
  * @version March 9, 2017
  */
-@WebFilter(initParams = { @WebInitParam(name = "cors.allowed.origins", value = "*") }, urlPatterns = { "/.well-known/*",
+@WebFilter(asyncSupported = true, initParams = { @WebInitParam(name = "cors.allowed.origins", value = "*") }, urlPatterns = { "/.well-known/*",
 		"/seam/resource/restv1/oxauth/*", "/opiframe" })
 public class CorsFilter extends AbstractCorsFilter {
 

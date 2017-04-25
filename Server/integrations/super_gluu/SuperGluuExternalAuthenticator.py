@@ -66,6 +66,32 @@ class PersonAuthentication(PersonAuthenticationType):
         if configurationAttributes.containsKey("qr_options"):
             self.customQrOptions = configurationAttributes.get("qr_options").getValue2()
 
+        self.use_super_gluu_group = False
+        if configurationAttributes.containsKey("super_gluu_group"):
+            self.super_gluu_group = configurationAttributes.get("super_gluu_group").getValue2()
+            self.use_super_gluu_group = True
+            print "Super-Gluu. Initialization. Using super_gluu only if user belong to group: %s" % self.super_gluu_group
+
+        self.use_audit_group = False
+        if configurationAttributes.containsKey("audit_group"):
+            self.audit_group = configurationAttributes.get("audit_group").getValue2()
+
+            if (not configurationAttributes.containsKey("audit_group_email")):
+                print "Super-Gluu. Initialization. Property audit_group_email is not specified"
+                return False
+
+            self.audit_email = configurationAttributes.get("audit_group_email").getValue2()
+            self.use_audit_group = True
+
+            print "Super-Gluu. Initialization. Using audit group: %s" % self.audit_group
+            
+        if self.use_super_gluu_group or self.use_audit_group:
+            if not configurationAttributes.containsKey("audit_attribute"):
+                print "Super-Gluu. Initialization. Property audit_attribute is not specified"
+                return False
+            else:
+                self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
+
         print "Super-Gluu. Initialized successfully. oneStep: '%s', twoStep: '%s', pushNotifications: '%s', customLabel: '%s'" % (self.oneStep, self.twoStep, self.enabledPushNotifications, self.customLabel)
 
         return True   
@@ -117,7 +143,6 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "Super-Gluu. Authenticate for step 1"
             if self.oneStep:
-  
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
                     return False
@@ -159,6 +184,22 @@ class PersonAuthentication(PersonAuthenticationType):
                 authenticated_user = self.processBasicAuthentication(credentials)
                 if authenticated_user == None:
                     return False
+
+                if (self.use_super_gluu_group):
+                    print "Super-Gluu. Authenticate for step 1. Checking if user belong to super_gluu group"
+                    is_member_super_gluu_group = self.isUserMemberOfGroup(authenticated_user, self.audit_attribute, self.super_gluu_group)
+                    if (is_member_super_gluu_group):
+                        print "Super-Gluu. Authenticate for step 1. User '%s' member of super_gluu group" % authenticated_user.getUserId()
+                        super_gluu_count_login_steps = 2
+                    else:
+                        if self.use_audit_group:
+                            self.processAuditGroup(authenticated_user, self.audit_attribute, self.audit_group)
+                        super_gluu_count_login_steps = 1
+    
+                    context.set("super_gluu_count_login_steps", super_gluu_count_login_steps)
+                    
+                    if super_gluu_count_login_steps == 1:
+                        return True
     
                 auth_method = 'authenticate'
                 enrollment_mode = ServerUtil.getFirstValue(requestParameters, "loginForm:registerButton")
@@ -216,6 +257,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 super_gluu_request = json.loads(session_device_status['super_gluu_request'])
                 auth_method = super_gluu_request['method']
                 if auth_method in ['enroll', 'authenticate']:
+                    if validation_result and self.use_audit_group:
+                        user = authenticationService.getAuthenticatedUser()
+                        self.processAuditGroup(user, self.audit_attribute, self.audit_group)
+
                     return validation_result
 
                 print "Super-Gluu. Authenticate for step 2. U2F auth_method is invalid"
@@ -652,3 +697,27 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         return response
+
+    def isUserMemberOfGroup(self, user, attribute, group):
+        is_member = False
+        member_of_list = user.getAttributeValues(attribute)
+        if (member_of_list != None):
+            for member_of in member_of_list:
+                if StringHelper.equalsIgnoreCase(group, member_of) or member_of.endswith(group):
+                    is_member = True
+                    break
+
+        return is_member
+
+    def processAuditGroup(self, user, attribute, group):
+        is_member = self.isUserMemberOfGroup(user, attribute, group)
+        if (is_member):
+            print "Super-Gluu. Authenticate for processAuditGroup. User '%s' member of audit group" % user.getUserId()
+            print "Super-Gluu. Authenticate for processAuditGroup. Sending e-mail about user '%s' login to %s" % (user.getUserId(), self.audit_email)
+            
+            # Send e-mail to administrator
+            user_id = user.getUserId()
+            mailService = Component.getInstance(MailService)
+            subject = "User log in: %s" % user_id
+            body = "User log in: %s" % user_id
+            mailService.sendMail(self.audit_email, subject, body)
