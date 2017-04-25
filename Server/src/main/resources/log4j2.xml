@@ -65,15 +65,11 @@
 
 	<Loggers>
 		<!-- ############### oxAuth ################# -->
-		<Logger name="org.xdi.oxauth" level="${log4j.default.log.level}" />
-		<Logger name="org.xdi.service" level="${log4j.default.log.level}" />
+		<AsyncLogger name="org.xdi.oxauth" level="${log4j.default.log.level}" />
+		<AsyncLogger name="org.xdi.service" level="${log4j.default.log.level}" />
 
 		<!-- ############### Gluu ################# -->
-		<Logger name="org.gluu" level="${log4j.default.log.level}" />
-
-		<!-- ############### Embedded JBoss AS ################# -->
-		<Logger name="org.jboss" level="error" />
-		<Logger name="com.arjuna" level="error" />
+		<AsyncLogger name="org.gluu" level="${log4j.default.log.level}" />
 
 		<!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message -->
 		<Logger name="jboss.resource.adapter.jms.inflow.JmsActivation" level="error" />
@@ -81,60 +77,33 @@
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
 
-		<!-- ############### Ajax4jsf logging ################# -->
-		<Logger name="org.ajax4jsf.cache" level="error" />
-
-
-		<!-- ############### Seam logging ################### -->
-		<Logger name="org.jboss.seam" level="info" />
-
-		<!-- These things are too noisy
-		<category name="org.jboss.seam.jsf.SeamVariableResolver" level="info" />
-		<category name="org.jboss.seam.contexts.Contexts" level="info" />
-		<category name="org.jboss.seam.Component" level="info" />
-		<category name="org.jboss.seam.deployment.Scanner" level="info" />
-		<category name="org.jboss.seam.util.Naming" level="info" />
-		<category name="org.jboss.seam.debug.hot" level="info" />
-		<category name="org.jboss.seam.core.Events" level="info" />
-		-->
-
-		<!-- Debugging conversations and persistence contexts
-		<Logger name="org.jboss.seam.core.Manager" level="debug" />
-		<Logger name="org.jboss.seam.core.ManagedPersistenceContext" level="debug" />
-		<Logger name="org.jboss.seam.jsf.AbstractSeamPhaseListener" level="debug" />
-		<Logger name="org.jboss.seam.interceptors.ConversationInterceptor" level="debug" />
-		<Logger name="org.jboss.seam.contexts.Lifecycle" level="debug" />
-		<Logger name="org.hibernate.impl.SessionImpl" level="debug" />
-		<Logger name="org.hibernate.event.def.AbstractFlushingEventListener" level="debug" />
-		-->
-
-		<logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
+		<AsyncLogger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
-		</logger>
+		</AsyncLogger>
 
-		<logger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
+		<AsyncLogger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
-		</logger>
+		</AsyncLogger>
 
-		<logger name="org.xdi.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
+		<AsyncLogger name="org.xdi.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
-		</logger>
+		</AsyncLogger>
 
-		<logger name="org.xdi.service.PythonService" level="${log4j.default.log.level}" additivity="false">
+		<AsyncLogger name="org.xdi.service.PythonService" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
-		</logger>
+		</AsyncLogger>
 
-		<logger name="org.xdi.service.custom.script" level="${log4j.default.log.level}" additivity="false">
+		<AsyncLogger name="org.xdi.service.custom.script" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
-		</logger>
+		</AsyncLogger>
 
-		<logger name="org.xdi.oxauth.service.custom" level="${log4j.default.log.level}" additivity="false">
+		<AsyncLogger name="org.xdi.oxauth.service.custom" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
-		</logger>
+		</AsyncLogger>
 
-		<logger name="org.xdi.oxauth.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
+		<AsyncLogger name="org.xdi.oxauth.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_AUDIT_LOG_FILE" />
-		</logger>
+		</AsyncLogger>
 
 		<Root level="info">
 			<AppenderRef ref="FILE" />

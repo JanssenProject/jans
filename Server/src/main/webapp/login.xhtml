@@ -14,7 +14,7 @@
 	</f:metadata>
 
 	<ui:define name="head">
-		<meta name="description" content="Gluu Inc." />
+		<meta name="description" content="Gluu, Inc." />
 	</ui:define>
 
 	<ui:define name="pageTitle">
@@ -139,8 +139,7 @@
 											</a>
 										</p>
 									</h:panelGroup>
-									<h:panelGroup layout="block"
-										rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
+									<ui:fragment rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
 										<li class="row-fluid submit-container">
 											<div class="gradient contact-button green span2 offset3"
 												style="width: 220px;">
@@ -150,16 +149,16 @@
 														type="button" value="Use External Authentification" />
 													</a>
 												</h:panelGroup>
-												<h:panelGroup layout="block" rendered="#{external_registration_uri != Null}">
+												<ui:fragment rendered="#{external_registration_uri != Null}">
 													<a id="externalRegistrationButton"
 														href="#{external_registration_uri}"> <input
 														type="button" style="width: 220px;"
 														value="Register new user" />
 													</a>
-												</h:panelGroup>
+												</ui:fragment>
 											</div>
 										</li>
-									</h:panelGroup>
+									</ui:fragment>
 								</ul>
 
 							</div>
@@ -170,7 +169,7 @@
 			<div id="footer">
 				<p>
 					<h:outputText value="#{msgs['common.gluuInc']}" />
-					, |
+					. |
 					<h:outputText value="#{msgs['common.caution']}" escape="false" />
 				</p>
 			</div>
