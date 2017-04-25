@@ -4,24 +4,22 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
-from org.xdi.oxauth.client.fido.u2f import FidoU2fClientFactory
-from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.oxauth.model.config import Constants
+import java
+import sys
+from javax.ws.rs.core import Response
 from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
-from javax.ws.rs.core import Response
-from java.util import Arrays
+from org.jboss.seam import Component
+from org.jboss.seam.contexts import Contexts
+from org.jboss.seam.security import Identity
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.client.fido.u2f import FidoU2fClientFactory
+from org.xdi.oxauth.model.config import Constants
+from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
+from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
+from org.xdi.oxauth.util import ServerUtil
+from org.xdi.util import StringHelper
 
-import sys
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -36,7 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         metaDataConfigurationService = FidoU2fClientFactory.instance().createMetaDataConfigurationService(u2f_server_metadata_uri)
 
-        max_attempts = 5
+        max_attempts = 10
         for attempt in range(1, max_attempts):
             try:
                 self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()

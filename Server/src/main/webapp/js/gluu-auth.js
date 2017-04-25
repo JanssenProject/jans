@@ -176,7 +176,7 @@ var gluu_auth = {
 				},
 				complete: function(xhr, status) {
 					if (gluu_auth.endTime < (new Date()).getTime()) {
-						callCallback(callback, 'error');
+						callCallback(callback, 'timeout');
 					}
 					// Schedule the next request when the current one's complete
 					if (!gluu_auth.checker.stop) {

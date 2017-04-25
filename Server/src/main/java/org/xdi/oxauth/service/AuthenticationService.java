@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.service;
 
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -50,8 +29,19 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.security.Credentials;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
+
+import javax.annotation.Nonnull;
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
 
 /**
  * Authentication service methods
@@ -60,7 +50,6 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-// TODO: Review CDI injection Identity into stateless
 @Stateless
 @Named
 public class AuthenticationService {
@@ -314,7 +303,6 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String userName) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
         log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
@@ -408,8 +396,6 @@ public class AuthenticationService {
     }
 
     public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-
         log.trace("configureSessionUser: credentials: '{}', sessionState: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
@@ -431,8 +417,6 @@ public class AuthenticationService {
     }
 
     public SessionState configureEventUser() {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
-
         User user = getAuthenticatedUser();
         if (user == null) {
             return null;
@@ -491,7 +475,6 @@ public class AuthenticationService {
     }
 
     public void configureSessionClient() {
-        Credentials credentials = ServerUtil.bean(Credentials.class);
         String clientInum = credentials.getUsername();
         log.debug("ConfigureSessionClient: username: '{}', credentials: '{}'", clientInum, System.identityHashCode(credentials));
 
@@ -509,7 +492,6 @@ public class AuthenticationService {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-//    @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
     public void onSuccessfulLogin(SessionState sessionUser) {
         log.info("Attempting to redirect user: SessionUser: {}", sessionUser);
 
@@ -644,7 +626,7 @@ public class AuthenticationService {
     }
 
     public boolean isParameterExists(String p_name) {
-        return identity.gisSetWorkingParameter(p_name);
+        return identity.isSetWorkingParameter(p_name);
     }
 
 }

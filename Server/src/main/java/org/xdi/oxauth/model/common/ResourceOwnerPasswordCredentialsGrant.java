@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 
 /**
@@ -28,8 +27,11 @@ import org.xdi.oxauth.model.registration.Client;
  * </p>
  *
  * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Yuriy Movchan
  */
 public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
+	
+	public ResourceOwnerPasswordCredentialsGrant() {}
 
     /**
      * Constructs a resource owner password credentials grant.
@@ -38,7 +40,12 @@ public class ResourceOwnerPasswordCredentialsGrant extends AuthorizationGrant {
      * @param client An application making protected resource requests on behalf of
      *               the resource owner and with its authorization.
      */
-    public ResourceOwnerPasswordCredentialsGrant(User user, Client client, AppConfiguration appConfiguration) {
-        super(user, AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS, client, null, appConfiguration);
+    public ResourceOwnerPasswordCredentialsGrant(User user, Client client) {
+        init(user, client);
     }
+
+    public void init(User user, Client client) {
+        super.init(user, AuthorizationGrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS, client, null);
+    }
+
 }

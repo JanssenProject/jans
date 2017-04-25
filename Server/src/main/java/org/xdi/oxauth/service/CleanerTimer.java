@@ -6,29 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ejb.Asynchronous;
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.quartz.Job;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -38,11 +17,24 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.cdi.event.CleanerEvent;
+import org.xdi.oxauth.service.cdi.event.Scheduled;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.job.quartz.JobShedule;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.RptManager;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
+
+import javax.ejb.Asynchronous;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,10 +44,9 @@ import org.xdi.oxauth.service.uma.RptManager;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
-public class CleanerTimer implements Job {
+public class CleanerTimer {
 
     public final static int BATCH_SIZE = 100;
-    private final static String EVENT_TYPE = "CleanerTimerEvent";
     private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
     @Inject
@@ -94,13 +85,16 @@ public class CleanerTimer implements Job {
     @Inject
     private ConfigurationFactory configurationFactory;
 
-    private AtomicBoolean isActive;
-
     @Inject
     private AppConfiguration appConfiguration;
 
-    public JobShedule getJobShedule() {
-        log.debug("Initializing CleanerTimer");
+    @Inject
+	private Event<TimerEvent> cleanerEvent;
+
+    private AtomicBoolean isActive;
+    
+    public void initTimer() {
+        log.debug("Initializing Cleaner Timer");
         this.isActive = new AtomicBoolean(false);
 
         int interval = appConfiguration.getCleanServiceInterval();
@@ -108,25 +102,11 @@ public class CleanerTimer implements Job {
             interval = DEFAULT_INTERVAL;
         }
 
-        JobDetail job = JobBuilder.newJob(CleanerTimer.class).withIdentity(
-				"oxAuthCleanerJob").build();
-		Trigger trigger = TriggerBuilder.newTrigger()
-				.withIdentity(
-						"oxAuthCleanerTrigger")
-				.startNow()
-				.withSchedule(SimpleScheduleBuilder.repeatSecondlyForever(interval))
-				.build();
-		
-		return new JobShedule(job, trigger);
+        cleanerEvent.fire(new TimerEvent(new TimerSchedule(30, 30), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
-	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		process();
-	}
-
     @Asynchronous
-    public void process() {
+    public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
         if (this.isActive.get()) {
             return;
         }
