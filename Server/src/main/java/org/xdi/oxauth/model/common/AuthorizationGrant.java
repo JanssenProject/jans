@@ -6,13 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +21,12 @@ import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.security.StringEncrypter;
+
+import javax.inject.Inject;
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base class for all the types of authorization grant.
