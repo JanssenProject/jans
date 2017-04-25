@@ -1,43 +1,35 @@
 package org.xdi.oxauth.audit;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.ejb.Asynchronous;
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.QueueConnection;
-import javax.jms.QueueSession;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
+import com.google.common.base.Objects;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.service.cdi.event.ConfigurationUpdate;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.google.common.base.Objects;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.Asynchronous;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.jms.*;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Named
 @ApplicationScoped
 @DependsOn("appInitializer")
 public class ApplicationAuditLogger {
-
-	private static final String APPLICATION_AUDIT_LOGGER_REFRESH_TIMER = "applicationAuditLoggerRefreshTimer";
 
 	@Inject
 	private Logger log;
@@ -62,9 +54,7 @@ public class ApplicationAuditLogger {
 	private boolean updateState;
 	private Boolean enabledOAuthAuditnLogging;
 
-    // TODO: CDI: Fix
-//	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(AppConfiguration appConfiguration, StaticConfiguration staticConfiguration) {
+	public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
 		this.updateState = true;
 	}
 

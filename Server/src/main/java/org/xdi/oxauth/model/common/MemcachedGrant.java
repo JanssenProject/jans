@@ -1,11 +1,11 @@
 package org.xdi.oxauth.model.common;
 
+import org.xdi.oxauth.model.registration.Client;
+
+import javax.enterprise.inject.Instance;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
-
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.registration.Client;
 
 /**
  * @author yuriyz on 02/14/2017.
@@ -135,9 +135,10 @@ public class MemcachedGrant implements Serializable {
         this.sessionDn = sessionDn;
     }
 
-    public AuthorizationCodeGrant asCodeGrant(AppConfiguration appConfiguration) {
+    public AuthorizationCodeGrant asCodeGrant(Instance<AbstractAuthorizationGrant> grantInstance) {
+    	AuthorizationCodeGrant grant =  grantInstance.select(AuthorizationCodeGrant.class).get();
+    	grant.init(user, client, authenticationTime);
 
-        AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
         grant.setAuthorizationCode(new AuthorizationCode(authorizationCodeString, authorizationCodeCreationDate, authorizationCodeExpirationDate));
         grant.setScopes(scopes);
         grant.setGrantId(grantId);

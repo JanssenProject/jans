@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
-import javax.enterprise.inject.spi.CDI;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -43,8 +22,25 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
 import org.xdi.util.Util;
+
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.spi.CDI;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.CacheControl;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -112,14 +108,23 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static <T> Instance<T> instance(Class<T> p_clazz) {
 		return CDI.current().select(p_clazz);
     }    	
 
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static <T> T bean(Class<T> p_clazz) {
 		return instance(p_clazz).get();
     }    	
 
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static <T> void destroy(Class<T> p_clazz) {
 		Instance<T> instance = instance(p_clazz);
 		if (instance.isResolvable()) {
@@ -127,14 +132,23 @@ public class ServerUtil {
 		}
     }    	
 
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
 		return CDI.current().select(p_clazz, NamedLiteral.of(name));
     }    	
 
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static <T> T bean(Class<T> p_clazz, String name) {
 		return instance(p_clazz, name).get();
     }    	
 
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static <T> void destroy(Class<T> p_clazz, String name) {
 		Instance<T> instance = instance(p_clazz, name);
 		if (instance.isResolvable()) {
@@ -142,6 +156,9 @@ public class ServerUtil {
 		}
     }    	
 
+    /*
+     * Try to avoid using this method. It's better to use injected Instance into bean
+     */
     public static LdapEntryManager getLdapManager() {
         return bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }

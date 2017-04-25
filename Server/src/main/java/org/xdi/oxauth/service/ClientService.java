@@ -6,17 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.collect.Sets;
+import com.unboundid.ldap.sdk.Filter;
 import org.codehaus.jettison.json.JSONArray;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -36,8 +27,10 @@ import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
-import com.google.common.collect.Sets;
-import com.unboundid.ldap.sdk.Filter;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
 
 /**
  * Provides operations with clients.
@@ -52,7 +45,6 @@ public class ClientService {
 
 	public static final String[] CLIENT_OBJECT_CLASSES = new String[] { "oxAuthClient" };
 
-    public static final String EVENT_CLEAR_CLIENT_CACHE = "eventClearClient";
     private static final String CACHE_CLIENT_NAME = "ClientCache";
     private static final String CACHE_CLIENT_FILTER_NAME = "ClientFilterCache";
 
@@ -297,24 +289,6 @@ public class ClientService {
             cacheService.remove(CACHE_CLIENT_NAME, getClientDnCacheKey(clientDn));
         } catch (Exception e) {
             log.error("Failed to remove client from cache.", e);
-        }
-    }
-
-    /**
-     * Remove all clients from caches after receiving event
-     */
-    
-    // TODO: CDI
-//    @Observes
-    //@Event<Cli>> (EVENT_CLEAR_CLIENT_CACHE)
-    public void clearClientCache() {
-        log.debug("Clearing up clients cache");
-
-        try {
-            cacheService.removeAll(CACHE_CLIENT_NAME);
-            cacheService.removeAll(CACHE_CLIENT_FILTER_NAME);
-        } catch (Exception e) {
-            log.error("Failed to clear cache.");
         }
     }
 
