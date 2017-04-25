@@ -372,6 +372,10 @@
 		    <groupId>org.apache.logging.log4j</groupId>
 		    <artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>
+		<dependency>
+		    <groupId>com.lmax</groupId>
+		    <artifactId>disruptor</artifactId>
+		</dependency>
 
 		<!-- Security -->
 		<dependency>
@@ -701,6 +705,7 @@
 		<profile>
 			<id>jetty-embedded</id>
 			<activation>
+				<activeByDefault>true</activeByDefault>
 				<property>
 					<name>jetty.embedded</name>
 				</property>

@@ -6,21 +6,13 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.IOException;
-import java.util.Map;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
@@ -32,6 +24,14 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.JsonService;
 import org.xdi.util.StringHelper;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 03.13.2012
@@ -67,6 +67,9 @@ public class LogoutAction {
 
     @Inject
     private FacesContext facesContext;
+
+	@Inject
+	private LanguageBean languageBean;
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
@@ -246,12 +249,14 @@ public class LogoutAction {
 	}
 
 	public void missingLogoutParameters() {
-        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "logout.missingParameters", "logout.missingParameters"));
+		String message = languageBean.getValue("logout.missingParameters");
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
 		facesService.redirect("/error.xhtml");
 	}
 
 	public void logoutFailed() {
-        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failed to process logout", "Failed to process logout"));
+		String message = languageBean.getValue("logout.failedToProceed");
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
 		facesService.redirect("/error.xhtml");
 	}
 	

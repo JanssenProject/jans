@@ -6,21 +6,6 @@
 
 package org.xdi.oxauth.model.registration;
 
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -36,25 +21,40 @@ import org.xdi.oxauth.model.util.URLPatternList;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Validates the parameters received for the register web service.
  *
  * @author Javier Rojas Blum
- * @version September 21, 2016
+ * @version April 19, 2017
  */
 @Stateless
 @Named
 public class RegisterParamsValidator {
 
-	@Inject
+    @Inject
     private Logger log;
 
-	@Inject
+    @Inject
     private AppConfiguration appConfiguration;
 
-    //private static final String HTTP = "http";
+    private static final String HTTP = "http";
     private static final String HTTPS = "https";
     private static final String LOCALHOST = "localhost";
+    private static final String LOOPBACK = "127.0.0.1";
 
     /**
      * Validates the parameters for a register request.
@@ -67,7 +67,7 @@ public class RegisterParamsValidator {
      * @return Whether the parameters of client register is valid or not.
      */
     public boolean validateParamsClientRegister(ApplicationType applicationType, SubjectType subjectType,
-                                                       List<String> redirectUris, String sectorIdentifierUrl) {
+                                                List<String> redirectUris, String sectorIdentifierUrl) {
         boolean valid = applicationType != null && redirectUris != null && !redirectUris.isEmpty();
 
         if (subjectType == null || !appConfiguration.getSubjectTypesSupported().contains(subjectType.toString())) {
@@ -98,7 +98,7 @@ public class RegisterParamsValidator {
      * @return Whether the Redirect URI parameters are valid or not.
      */
     public boolean validateRedirectUris(ApplicationType applicationType, SubjectType subjectType,
-                                               List<String> redirectUris, String sectorIdentifierUrl) {
+                                        List<String> redirectUris, String sectorIdentifierUrl) {
         boolean valid = true;
         Set<String> redirectUriHosts = new HashSet<String>();
 
@@ -112,11 +112,13 @@ public class RegisterParamsValidator {
                         redirectUriHosts.add(uri.getHost());
                         switch (applicationType) {
                             case WEB:
-                                if (!HTTPS.equalsIgnoreCase(uri.getScheme())) {
-                                    log.error("Invalid protocol for redirect_uri: " + redirectUri + " (only https protocol is allowed for application_type=web)");
-                                    valid = false;
-                                } else if (LOCALHOST.equalsIgnoreCase(uri.getHost())) {
-                                    valid = false;
+                                if (HTTP.equalsIgnoreCase(uri.getScheme())) {
+                                    if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
+                                        log.error("Invalid protocol for redirect_uri: " +
+                                                redirectUri +
+                                                " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
+                                        valid = false;
+                                    }
                                 }
                                 break;
                             case NATIVE:
