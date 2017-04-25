@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.service;
 
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -50,8 +29,19 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.security.Credentials;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
+
+import javax.annotation.Nonnull;
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
 
 /**
  * Authentication service methods

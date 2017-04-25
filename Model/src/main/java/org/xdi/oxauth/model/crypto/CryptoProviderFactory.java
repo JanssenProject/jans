@@ -11,7 +11,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version April 25, 2017
  */
 public class CryptoProviderFactory {
 
@@ -31,7 +31,8 @@ public class CryptoProviderFactory {
                         configuration.getOxElevenGenerateKeyEndpoint(),
                         configuration.getOxElevenSignEndpoint(),
                         configuration.getOxElevenVerifySignatureEndpoint(),
-                        configuration.getOxElevenDeleteKeyEndpoint());
+                        configuration.getOxElevenDeleteKeyEndpoint(),
+                        configuration.getOxElevenTestModeToken());
                 break;
         }
 
