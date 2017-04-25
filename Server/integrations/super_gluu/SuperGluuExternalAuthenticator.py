@@ -4,25 +4,25 @@
 # Author: Yuriy Movchan
 #
 
-import sys
 import datetime
 import urllib
 
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+import sys
+from com.google.android.gcm.server import Sender, Message
+from com.notnoop.apns import APNS
+from java.util import Arrays
+from org.apache.http.params import CoreConnectionPNames
 from org.jboss.seam import Component
 from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.model.config import ConfigurationFactory
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.xdi.util import StringHelper
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util.security import StringEncrypter
-from org.xdi.oxauth.model.config import ConfigurationFactory
-from java.util import Arrays
 from org.xdi.oxauth.service.net import HttpService
-from org.apache.http.params import CoreConnectionPNames
-from com.notnoop.apns import APNS
-from com.google.android.gcm.server import Sender, Message
+from org.xdi.oxauth.util import ServerUtil
+from org.xdi.util import StringHelper
+from org.xdi.util.security import StringEncrypter
 
 try:
     import json
@@ -76,7 +76,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def getApiVersion(self):
-        return 1
+        return 2
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
@@ -98,6 +98,20 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.setEventContextParameters(context)
 
+        # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
+        context.set("retry_current_step", False)
+        form_auth_result = ServerUtil.getFirstValue(requestParameters, "auth_result")
+        if StringHelper.isNotEmpty(form_auth_result):
+            print "Super-Gluu. Authenticate for step %s. Get auth_result: '%s'" % (step, form_auth_result)
+            if form_auth_result in ['error']:
+                return False
+
+            if form_auth_result in ['timeout']:
+                if ((step == 1) and self.oneStep) or ((step == 2) and self.twoStep):        
+                    print "Super-Gluu. Authenticate for step %s. Reinitializing current step" % step
+                    context.set("retry_current_step", True)
+                    return False
+
         userService = Component.getInstance(UserService)
         deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
         if step == 1:
@@ -106,7 +120,7 @@ class PersonAuthentication(PersonAuthenticationType):
   
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
-                    return
+                    return False
 
                 u2f_device_id = session_device_status['device_id']
 
@@ -257,8 +271,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             if session_attributes.containsKey("super_gluu_request"):
-                print "Super-Gluu. Prepare for step 2. Request was generated already"
-                return True
+               super_gluu_request = session_attributes.get("super_gluu_request")
+               if not StringHelper.equalsIgnoreCase(super_gluu_request, "timeout"):
+                   print "Super-Gluu. Prepare for step 2. Request was generated already"
+                   return True
             
             session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
@@ -293,6 +309,22 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         else:
             return False
+
+    def getNextStep(self, configurationAttributes, requestParameters, step):
+        # If user not pass current step change step to previous
+        context = Contexts.getEventContext()
+        retry_current_step = context.get("retry_current_step")
+        if retry_current_step:
+            print "Super-Gluu. Get next step. Retrying current step"
+
+            # Remove old QR code
+            context = Contexts.getEventContext()
+            context.set("super_gluu_request", "timeout")
+
+            resultStep = step
+            return resultStep
+
+        return -1
 
     def getExtraParametersForStep(self, configurationAttributes, step):
         if step == 1:
@@ -475,6 +507,12 @@ class PersonAuthentication(PersonAuthenticationType):
         return enabled
 
     def sendPushNotification(self, client_redirect_uri, user, super_gluu_request):
+        try:
+            self.sendPushNotificationImpl(client_redirect_uri, user, super_gluu_request)
+        except:
+            print "Super-Gluu. end push notification. Failed to send push notification: ", sys.exc_info()[1]
+
+    def sendPushNotificationImpl(self, client_redirect_uri, user, super_gluu_request):
         if not self.enabledPushNotifications:
             return
 

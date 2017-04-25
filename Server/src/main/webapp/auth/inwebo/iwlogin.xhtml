@@ -1,9 +1,8 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
     <ui:define name="head">
         <style type="text/css">
@@ -38,21 +37,20 @@
             }
         </style>
 
-        <s:fragment rendered="#{helium_enabled}">
+        <h:panelGroup rendered="#{helium_enabled}">
             <script src="https://ult-inwebo.com/webapp/js/helium.min.js"/>
-        </s:fragment>
+        </h:panelGroup>
     </ui:define>
 
     <ui:define name="pageTitle">#{msgs['inwebo.title']}</ui:define>
 
     <ui:define name="body">
-        <s:fragment rendered="#{helium_enabled}">
+        <h:panelGroup rendered="#{helium_enabled}">
             <div id="inweboDetect" alias="#{helium_alias}" action="authenticate" lang="auto" style="display:none" />
             <div id="heliumDesign" displaytype="inline" container="heliumForm" top="10" left="40" rounded="0" shaded="0" skin="default" maincolor="#28AA28" withlogo="1" withactiontitle="1" withborder="0" bordercolor="#28AA28" bgcolor="#999999" withtitle="0" titlebgcolor="#28AA28" titlecolor="#FFFFFF" />
-        </s:fragment>
+        </h:panelGroup>
 
         <h:form id="loginForm" rendered="#{not helium_enabled}">
-            <s:token allowMultiplePosts="true" />
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
@@ -60,9 +58,9 @@
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
                         <p class="info">#{msgs['inwebo.pleaseLoginHere']}</p>
 
@@ -80,11 +78,11 @@
                             </h:panelGrid>
                         </div>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['inwebo.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
 
                         <div class="actionButtons">
                             <h:commandButton id="loginButton"
@@ -96,7 +94,7 @@
             </h:panelGroup>
         </h:form>
 
-        <s:fragment rendered="#{helium_enabled}">
+        <h:panelGroup rendered="#{helium_enabled}">
             <!-- Temporary solution because InWebo not support id with ':' character -->
             <form id="iwLoginForm" action="#{request.contextPath}/postlogin.seam">
                 <h:panelGroup rendered="#{not identity.loggedIn}">
@@ -105,9 +103,9 @@
                         <div class="login-panel-body">
                             <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-                            <s:div rendered='#{!empty client.getLogoUri()}'>
+                            <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                 <h:graphicImage url='#{client.getLogoUri()}'/>
-                            </s:div>
+                            </h:panelGroup>
 
                             <p class="info">#{msgs['inwebo.pleaseLoginHere']}</p>
 
@@ -115,15 +113,15 @@
                             <input type="hidden" name="login"/>
                             <input type="hidden" name="password"/>
 
-                            <s:div rendered='#{!empty client.getPolicyUri()}'>
+                            <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                                 <p>
                                     <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['inwebo.termsPrivacy']}</a>
                                 </p>
-                            </s:div>
+                            </h:panelGroup>
                         </div>
                     </div>
                 </h:panelGroup>
             </form>
-        </s:fragment>
+        </h:panelGroup>
     </ui:define>
 </ui:composition>

@@ -6,18 +6,8 @@
 
 package org.xdi.oxauth.service.external;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
@@ -27,13 +17,19 @@ import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
 import org.xdi.oxauth.service.external.internal.InternalDefaultPersonAuthenticationType;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.OxConstants;
 import org.xdi.util.StringHelper;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Provides factory methods needed to create external authenticator
@@ -62,15 +58,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		super(CustomScriptType.PERSON_AUTHENTICATION);
 	}
 
-    // TODO: CDI: Fix
-//	@Observer(MODIFIED_INTERNAL_TYPES_EVENT_TYPE)
-//	public void reload() {
-//		super.reload();
-//	}
-//	
-//	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
-//		log.debug("Created");
-//	}
+	public void reloadAuthScript(@Observes @ReloadAuthScript String event) {
+		reload(event);
+	}
 
 	@Override
 	protected void reloadExternal() {
