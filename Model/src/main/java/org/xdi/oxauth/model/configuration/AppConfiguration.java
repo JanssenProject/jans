@@ -19,7 +19,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 15, 2017
+ * @version March 23, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -127,6 +127,7 @@ public class AppConfiguration implements Configuration {
     private String keyStoreFile;
     private String keyStoreSecret;
     //oxEleven
+    private String oxElevenTestModeToken;
     private String oxElevenGenerateKeyEndpoint;
     private String oxElevenSignEndpoint;
     private String oxElevenVerifySignatureEndpoint;
@@ -1030,6 +1031,14 @@ public class AppConfiguration implements Configuration {
 
     public void setKeyStoreSecret(String keyStoreSecret) {
         this.keyStoreSecret = keyStoreSecret;
+    }
+
+    public String getOxElevenTestModeToken() {
+        return oxElevenTestModeToken;
+    }
+
+    public void setOxElevenTestModeToken(String oxElevenTestModeToken) {
+        this.oxElevenTestModeToken = oxElevenTestModeToken;
     }
 
     public String getOxElevenGenerateKeyEndpoint() {

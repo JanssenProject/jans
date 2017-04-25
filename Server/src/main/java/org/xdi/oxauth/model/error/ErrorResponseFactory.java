@@ -6,15 +6,6 @@
 
 package org.xdi.oxauth.model.error;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -32,6 +23,12 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
+
+import javax.enterprise.inject.Vetoed;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Provides an easy way to get Error responses based in an error response type

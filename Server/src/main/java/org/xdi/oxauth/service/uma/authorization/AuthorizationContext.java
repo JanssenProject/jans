@@ -6,14 +6,6 @@
 
 package org.xdi.oxauth.service.uma.authorization;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
@@ -22,6 +14,9 @@ import org.xdi.oxauth.model.uma.ClaimToken;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
