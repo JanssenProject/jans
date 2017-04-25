@@ -1,9 +1,8 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
     <ui:define name="head">
         <style type="text/css">
@@ -43,7 +42,6 @@
 
     <ui:define name="body">
         <h:form id="loginForm">
-            <s:token allowMultiplePosts="true" />
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
@@ -51,9 +49,9 @@
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
                         <p class="info">#{msgs['gpluslogin.pleaseLoginHere']}</p>
 
@@ -71,11 +69,11 @@
                             </h:panelGrid>
                         </div>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['gpluslogin.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
 
                         <div class="actionButtons">
                             <h:commandButton value="Login" action="#{authenticator.authenticate}" />
