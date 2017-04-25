@@ -1,19 +1,22 @@
 package org.xdi.oxauth.security;
 
-import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.session.SessionClient;
-import org.xdi.oxauth.security.event.Authenticated;
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.HashMap;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.security.auth.login.LoginException;
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.session.SessionClient;
+import org.xdi.oxauth.security.event.Authenticated;
+import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
+import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 
 @RequestScoped
 @Named
