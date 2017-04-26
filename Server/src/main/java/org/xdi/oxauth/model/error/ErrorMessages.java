@@ -6,19 +6,15 @@
 
 package org.xdi.oxauth.model.error;
 
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import javax.xml.bind.annotation.*;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 26/12/2012
+ * @author Javier Rojas Blum
+ * @version April 26, 2017
  */
 @XmlRootElement(name = "errors")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -46,9 +42,6 @@ public class ErrorMessages {
     @XmlElementWrapper(name = "user-info")
     @XmlElement(name = "error")
     private List<ErrorMessage> userInfo;
-    @XmlElementWrapper(name = "validate-token")
-    @XmlElement(name = "error")
-    private List<ErrorMessage> validateToken;
 
     @XmlElementWrapper(name = "fido")
     @XmlElement(name = "error")
@@ -110,20 +103,12 @@ public class ErrorMessages {
         userInfo = p_userInfo;
     }
 
-    public List<ErrorMessage> getValidateToken() {
-        return validateToken;
+    public List<ErrorMessage> getFido() {
+        return fido;
     }
 
-    public void setValidateToken(List<ErrorMessage> p_validateToken) {
-        validateToken = p_validateToken;
+    public void setFido(List<ErrorMessage> fido) {
+        this.fido = fido;
     }
-
-	public List<ErrorMessage> getFido() {
-		return fido;
-	}
-
-	public void setFido(List<ErrorMessage> fido) {
-		this.fido = fido;
-	}
 
 }

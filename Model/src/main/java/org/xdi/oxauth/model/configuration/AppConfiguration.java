@@ -19,7 +19,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version March 23, 2017
+ * @version April 26, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -36,7 +36,6 @@ public class AppConfiguration implements Configuration {
     private String endSessionEndpoint;
     private String jwksUri;
     private String registrationEndpoint;
-    private String validateTokenEndpoint;
     private String openIdDiscoveryEndpoint;
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
@@ -410,14 +409,6 @@ public class AppConfiguration implements Configuration {
      */
     public void setRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
-    }
-
-    public String getValidateTokenEndpoint() {
-        return validateTokenEndpoint;
-    }
-
-    public void setValidateTokenEndpoint(String validateTokenEndpoint) {
-        this.validateTokenEndpoint = validateTokenEndpoint;
     }
 
     public String getOpenIdDiscoveryEndpoint() {
