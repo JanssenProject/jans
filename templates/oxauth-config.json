@@ -11,7 +11,6 @@
     "endSessionEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/end_session",
     "jwksUri":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/jwks",
     "registrationEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/register",
-    "validateTokenEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/oxauth/validate",
     "openIdDiscoveryEndpoint":"https://%(hostname)s/.well-known/webfinger",
     "openIdConfigurationEndpoint":"https://%(hostname)s/.well-known/openid-configuration",
     "idGenerationEndpoint":"https://%(hostname)s/oxauth/seam/resource/restv1/id",
