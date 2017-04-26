@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+        http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd" version="2.2">
+
+    <application>
+        <locale-config>
+            <default-locale>en</default-locale>
+            <supported-locale>en</supported-locale>
+            <supported-locale>bg</supported-locale>
+            <supported-locale>de</supported-locale>
+            <supported-locale>es</supported-locale>
+            <supported-locale>fr</supported-locale>
+            <supported-locale>it</supported-locale>
+            <supported-locale>tr</supported-locale>
+        </locale-config>
+
+        <resource-bundle>
+            <base-name>messages</base-name>
+            <var>msgs</var>
+        </resource-bundle>
+    </application>
+
+    <!-- /login.xhtml -->
+    <navigation-rule>
+        <from-view-id>/login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/login.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>expired</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- /postlogin.xhtml -->
+    <navigation-rule>
+        <from-view-id>/postlogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.authenticateWithOutcome}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect>
+                <redirect-param>
+                    <name>faces-redirect</name>
+                    <value>true</value>
+                </redirect-param>
+            </redirect>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <!-- cas2 -->
+    <navigation-rule>
+        <from-view-id>/auth/cas2/cas2login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/cas2/cas2postlogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/cas2/cas2postlogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <!-- cert -->
+    <navigation-rule>
+        <from-view-id>/auth/cert/cert-login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/postlogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>expired</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/cert/login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/cert/login.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- duo -->
+    <navigation-rule>
+        <from-view-id>/auth/duo/duologin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/duo/duologin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- gplus -->
+    <navigation-rule>
+        <from-view-id>/auth/gplus/gpluslogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/gplus/gpluslogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/gplus/gpluspostlogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/gplus/gpluspostlogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- otp -->
+    <navigation-rule>
+        <from-view-id>/auth/otp/enroll.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/otp/enroll.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/otp/otplogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/otp/otplogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- oxpush -->
+    <navigation-rule>
+        <from-view-id>/auth/oxpush/oxauthenticate.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/oxpush/oxauthenticate.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/oxpush/oxlogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/oxpush/oxlogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/oxpush/oxpair.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/oxpush/oxpair.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- passport -->
+    <navigation-rule>
+        <from-view-id>/auth/passport/passportlogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/passport/passportlogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>expired</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/passport/passportpostlogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/passport/passportpostlogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <!-- saml -->
+    <navigation-rule>
+        <from-view-id>/auth/saml/samllogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/auth/saml/samlpostlogin.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/saml/samlpostlogin.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- super-gluu -->
+    <navigation-rule>
+        <from-view-id>/auth/super-gluu/login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/super-gluu/login.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- u2f -->
+    <navigation-rule>
+        <from-view-id>/auth/u2f/login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/u2f/login.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- uaf -->
+    <navigation-rule>
+        <from-view-id>/auth/uaf/login.xhtml</from-view-id>
+
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>success</from-outcome>
+            <to-view-id>/auth/uaf/login.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>no_permissions</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
+            <from-outcome>failure</from-outcome>
+            <to-view-id>/error.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- oneid, inwebo, phonefactor, toopher and wikid are deprecated-->
+
+</faces-config>
