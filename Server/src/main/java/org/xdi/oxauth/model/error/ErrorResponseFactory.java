@@ -6,15 +6,6 @@
 
 package org.xdi.oxauth.model.error;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -26,12 +17,17 @@ import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
-import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaErrorResponse;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
+
+import javax.enterprise.inject.Vetoed;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Provides an easy way to get Error responses based in an error response type
@@ -39,6 +35,7 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
+ * @version April 26, 2017
  */
 @Vetoed
 public class ErrorResponseFactory implements Configuration {
@@ -47,13 +44,14 @@ public class ErrorResponseFactory implements Configuration {
 
     private ErrorMessages messages;
 
-    public ErrorResponseFactory() {}
+    public ErrorResponseFactory() {
+    }
 
-	public ErrorResponseFactory(ErrorMessages messages) {
-    	this.messages = messages;
-	}
+    public ErrorResponseFactory(ErrorMessages messages) {
+        this.messages = messages;
+    }
 
-	public ErrorMessages getMessages() {
+    public ErrorMessages getMessages() {
         return messages;
     }
 
@@ -148,8 +146,6 @@ public class ErrorResponseFactory implements Configuration {
                 list = messages.getUma();
             } else if (type instanceof UserInfoErrorResponseType) {
                 list = messages.getUserInfo();
-            } else if (type instanceof ValidateTokenErrorResponseType) {
-                list = messages.getValidateToken();
             } else if (type instanceof U2fErrorResponseType) {
                 list = messages.getFido();
             }
@@ -206,15 +202,15 @@ public class ErrorResponseFactory implements Configuration {
 
     public String getJsonErrorResponse(IErrorType type) {
         final DefaultErrorResponse response = getErrorResponse(type);
-        
+
         JsonErrorResponse jsonErrorResponse = new JsonErrorResponse(response);
 
         try {
-			return ServerUtil.asJson(jsonErrorResponse);
-		} catch (IOException ex) {
+            return ServerUtil.asJson(jsonErrorResponse);
+        } catch (IOException ex) {
             log.error("Failed to generate error response", ex);
             return null;
-		}
+        }
     }
 
 }
