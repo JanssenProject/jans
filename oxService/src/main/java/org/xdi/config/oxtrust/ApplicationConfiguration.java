@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * oxTrust configuration
@@ -20,6 +21,17 @@ public final class ApplicationConfiguration implements Serializable {
 
 	private static final long serialVersionUID = -8991383390239617013L;
 
+	@JsonProperty("ScimProperties")
+	private ScimProperties scimProperties;
+
+	public ScimProperties getScimProperties() {
+		return scimProperties;
+	}
+
+	public void setScimProperties(ScimProperties scimProperties) {
+		this.scimProperties = scimProperties;
+	}
+	
 	private String baseDN;
 
 	private String orgInum;
