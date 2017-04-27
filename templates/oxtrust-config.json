@@ -136,5 +136,8 @@
     "idp3EncryptionCert":"/etc/certs/idp-encryption.crt",
 
     "clientWhiteList": ["*"],
-    "clientBlackList": ["*.attacker.com/*"]
+    "clientBlackList": ["*.attacker.com/*"],
+	"ScimProperties": {
+		"maxCount": 200
+	}
 }
