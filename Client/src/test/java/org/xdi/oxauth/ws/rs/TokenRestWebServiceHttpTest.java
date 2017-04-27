@@ -24,13 +24,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 /**
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version April 26, 2017
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -1321,18 +1322,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
 
         String longLivedAccessToken = tokenResponse.getAccessToken();
 
-        // 4. Validate long lived access_token
-        ValidateTokenClient validateTokenClient = new ValidateTokenClient(validateTokenEndpoint);
-        ValidateTokenResponse validateTokenResponse = validateTokenClient.execValidateToken(longLivedAccessToken);
-
-        showClient(validateTokenClient);
-        assertEquals(validateTokenResponse.getStatus(), 200, "Unexpected response code: " + validateTokenResponse.getStatus());
-        assertNotNull(validateTokenResponse.getEntity(), "The entity is null");
-        assertTrue(validateTokenResponse.isValid(), "The token is not valid");
-        assertNotNull(validateTokenResponse.getExpiresIn(), "The expires in value is null");
-        assertTrue(validateTokenResponse.getExpiresIn() > 0, "The expires in value is not greater than zero");
-
-        // 5. Request user info
+        // 4. Request user info
         UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(longLivedAccessToken);
 
