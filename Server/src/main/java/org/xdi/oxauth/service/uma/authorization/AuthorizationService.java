@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth.service.uma.authorization;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -28,6 +17,16 @@ import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.uma.ScopeService;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy

@@ -1,15 +1,15 @@
 package org.xdi.oxauth.service.fido.u2f;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import javax.inject.Inject;
-
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.fido.u2f.message.RawRegisterResponse;
 import org.xdi.oxauth.model.util.Base64Util;
+
+import javax.inject.Inject;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class RawRegistrationServiceTest extends BaseComponentTest {
 

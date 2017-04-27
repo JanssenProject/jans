@@ -20,7 +20,7 @@
 	</context-param>
 	<context-param>
 		<param-name>javax.faces.PROJECT_STAGE</param-name>
-		<param-value>${javax.faces.PROJECT_STAGE}</param-value>
+		<param-value>Production</param-value>
 	</context-param>
 	<context-param>
 		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>

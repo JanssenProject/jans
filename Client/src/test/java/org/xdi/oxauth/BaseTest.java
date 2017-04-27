@@ -62,7 +62,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version January 20, 2016
+ * @version April 26, 2017
  */
 public abstract class BaseTest {
 
@@ -78,7 +78,6 @@ public abstract class BaseTest {
     protected String endSessionEndpoint;
     protected String jwksUri;
     protected String registrationEndpoint;
-    protected String validateTokenEndpoint;
     protected String configurationEndpoint;
     protected String idGenEndpoint;
     protected String introspectionEndpoint;
@@ -193,14 +192,6 @@ public abstract class BaseTest {
 
     public void setRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
-    }
-
-    public String getValidateTokenEndpoint() {
-        return validateTokenEndpoint;
-    }
-
-    public void setValidateTokenEndpoint(String validateTokenEndpoint) {
-        this.validateTokenEndpoint = validateTokenEndpoint;
     }
 
     public String getIntrospectionEndpoint() {
@@ -656,7 +647,6 @@ public abstract class BaseTest {
             endSessionEndpoint = response.getEndSessionEndpoint();
             jwksUri = response.getJwksUri();
             registrationEndpoint = response.getRegistrationEndpoint();
-            validateTokenEndpoint = response.getValidateTokenEndpoint();
             idGenEndpoint = response.getIdGenerationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
@@ -672,7 +662,6 @@ public abstract class BaseTest {
             endSessionEndpoint = context.getCurrentXmlTest().getParameter("endSessionEndpoint");
             jwksUri = context.getCurrentXmlTest().getParameter("jwksUri");
             registrationEndpoint = context.getCurrentXmlTest().getParameter("registrationEndpoint");
-            validateTokenEndpoint = context.getCurrentXmlTest().getParameter("validateTokenEndpoint");
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             idGenEndpoint = context.getCurrentXmlTest().getParameter("idGenEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
