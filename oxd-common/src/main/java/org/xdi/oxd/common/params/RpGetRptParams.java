@@ -12,14 +12,24 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetRptParams implements HasOxdIdParams {
+public class RpGetRptParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
     @JsonProperty(value = "force_new")
     private boolean forceNew;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public RpGetRptParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public String getOxdId() {
@@ -44,6 +54,7 @@ public class RpGetRptParams implements HasOxdIdParams {
         sb.append("RpGetRptParams");
         sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", forceNew=").append(forceNew);
+        sb.append(", protectionAccessToken=").append(protectionAccessToken);
         sb.append('}');
         return sb.toString();
     }
