@@ -88,6 +88,8 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             getSiteService().update(site);
             getStateService().invalidateState(params.getState());
 
+            LOG.trace("Scope: " + response.getScope());
+
             final Map<String, List<String>> claims = idToken.getClaims() != null ? idToken.getClaims().toMap() : new HashMap<String, List<String>>();
 
             final GetTokensByCodeResponse opResponse = new GetTokensByCodeResponse();

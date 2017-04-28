@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetAuthorizationUrlParams implements HasOxdIdParams {
+public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -23,8 +23,18 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
     private List<String> scope;
     @JsonProperty(value = "hd")
     private String hostedDomain; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public GetAuthorizationUrlParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public String getHostedDomain() {
@@ -96,6 +106,7 @@ public class GetAuthorizationUrlParams implements HasOxdIdParams {
         sb.append(", prompt='").append(prompt).append('\'');
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", hostedDomain='").append(hostedDomain).append('\'');
+        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }

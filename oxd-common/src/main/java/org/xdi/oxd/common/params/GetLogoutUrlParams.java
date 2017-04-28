@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetLogoutUrlParams implements HasOxdIdParams {
+public class GetLogoutUrlParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -22,8 +22,18 @@ public class GetLogoutUrlParams implements HasOxdIdParams {
     private String state;
     @JsonProperty(value = "session_state")
     private String sessionState;
+    @JsonProperty(value = "protection_access_token")
+        private String protectionAccessToken;
 
     public GetLogoutUrlParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public String getPostLogoutRedirectUri() {
@@ -71,10 +81,11 @@ public class GetLogoutUrlParams implements HasOxdIdParams {
         final StringBuilder sb = new StringBuilder();
         sb.append("LogoutParams");
         sb.append("{oxdId=").append(oxdId);
-        sb.append("{idTokenHint=").append(idTokenHint);
-        sb.append("{postLogoutRedirectUri=").append(postLogoutRedirectUri);
-        sb.append("{state=").append(state);
-        sb.append("{sessionState=").append(sessionState);
+        sb.append(", idTokenHint=").append(idTokenHint);
+        sb.append(", postLogoutRedirectUri=").append(postLogoutRedirectUri);
+        sb.append(", state=").append(state);
+        sb.append(", sessionState=").append(sessionState);
+        sb.append(", protectionAccessToken=").append(protectionAccessToken);
         sb.append('}');
         return sb.toString();
     }
