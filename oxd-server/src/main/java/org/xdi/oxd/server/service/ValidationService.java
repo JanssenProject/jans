@@ -1,7 +1,6 @@
 package org.xdi.oxd.server.service;
 
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +23,6 @@ import org.xdi.oxd.server.ServerLauncher;
 public class ValidationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
-
-    private final Configuration configuration;
-
-    @Inject
-    public ValidationService(Configuration configuration) {
-        this.configuration = configuration;
-    }
 
     public void notNull(IParams params) {
         if (params == null) {
@@ -61,6 +53,7 @@ public class ValidationService {
     }
 
     private void validate(HasProtectionAccessTokenParams params) {
+        final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
             return; // skip validation since protectCommandsWithAccessToken=false
         }
