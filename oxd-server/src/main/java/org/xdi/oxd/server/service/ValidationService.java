@@ -2,7 +2,6 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.HasProtectionAccessTokenParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.ServerLauncher;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -26,12 +26,10 @@ public class ValidationService {
     private static final Logger LOG = LoggerFactory.getLogger(ValidationService.class);
 
     private final Configuration configuration;
-    private final Injector injector;
 
     @Inject
-    public ValidationService(Injector injector, Configuration configuration) {
+    public ValidationService(Configuration configuration) {
         this.configuration = configuration;
-        this.injector = injector;
     }
 
     public void notNull(IParams params) {
@@ -72,9 +70,9 @@ public class ValidationService {
             throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
 
-        final RpService rpService = injector.getInstance(RpService.class);
-        final DiscoveryService discoveryService = injector.getInstance(DiscoveryService.class);
-        final UmaTokenService umaTokenService = injector.getInstance(UmaTokenService.class);
+        final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+        final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
+        final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
 
         final Rp rp = rpService.getRp(params.getOxdId());
         if (StringUtils.isBlank(rp.getSetupOxdId())) {
