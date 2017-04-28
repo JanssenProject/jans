@@ -30,7 +30,7 @@ public class SetUpTest {
         });
         // from one side we should give time to start server, from other we can't start in current
         // thread because it will block suite thread, ugly but works...
-        CoreUtils.sleep(7);
+        CoreUtils.sleep(10);
     }
 
     private static void removeExistingSiteConfigurations() {
