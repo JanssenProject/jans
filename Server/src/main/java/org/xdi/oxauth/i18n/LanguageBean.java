@@ -9,15 +9,15 @@ import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Named("language")
 @ApplicationScoped
 public class LanguageBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    private static final String BASE_NAME = "messages";
 
     @Inject
     private SessionStateService sessionStateService;
@@ -28,6 +28,8 @@ public class LanguageBean implements Serializable {
     private String localeCode = "en";
 
     private static Map<String, Object> countries;
+
+    private ResourceBundle bundle;
 
     static {
         countries = new LinkedHashMap<String, Object>();
@@ -46,7 +48,7 @@ public class LanguageBean implements Serializable {
     }
 
     public String getLocaleCode() {
-        if(FacesContext.getCurrentInstance().getViewRoot().getLocale().getLanguage() != localeCode)
+        if (FacesContext.getCurrentInstance().getViewRoot().getLocale().getLanguage() != localeCode)
             FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
         return localeCode;
     }
@@ -62,5 +64,17 @@ public class LanguageBean implements Serializable {
                 FacesContext.getCurrentInstance().getViewRoot().setLocale((Locale) entry.getValue());
             }
         }
+    }
+
+    public String getValue(String key) {
+        String result = null;
+        try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            ResourceBundle bundle = ResourceBundle.getBundle(BASE_NAME, new Locale(this.localeCode), loader);
+            result = bundle.getString(key);
+        } catch (MissingResourceException e) {
+            result = "???" + key + "??? not found";
+        }
+        return result;
     }
 }

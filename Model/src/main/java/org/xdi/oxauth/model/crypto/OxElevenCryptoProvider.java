@@ -13,7 +13,7 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version April 25, 2017
  */
 public class OxElevenCryptoProvider extends AbstractCryptoProvider {
 
@@ -21,12 +21,15 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     private String signEndpoint;
     private String verifySignatureEndpoint;
     private String deleteKeyEndpoint;
+    private String accessToken;
 
-    public OxElevenCryptoProvider(String generateKeyEndpoint, String signEndpoint, String verifySignatureEndpoint, String deleteKeyEndpoint) {
+    public OxElevenCryptoProvider(String generateKeyEndpoint, String signEndpoint, String verifySignatureEndpoint,
+                                  String deleteKeyEndpoint, String accessToken) {
         this.generateKeyEndpoint = generateKeyEndpoint;
         this.signEndpoint = signEndpoint;
         this.verifySignatureEndpoint = verifySignatureEndpoint;
         this.deleteKeyEndpoint = deleteKeyEndpoint;
+        this.accessToken = accessToken;
     }
 
     @Override
@@ -34,6 +37,7 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
         GenerateKeyRequest request = new GenerateKeyRequest();
         request.setSignatureAlgorithm(signatureAlgorithm.getName());
         request.setExpirationTime(expirationTime);
+        request.setAccessToken(accessToken);
 
         GenerateKeyClient client = new GenerateKeyClient(generateKeyEndpoint);
         client.setRequest(request);
@@ -53,6 +57,7 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
         request.getSignRequestParam().setAlias(keyId);
         request.getSignRequestParam().setSharedSecret(shardSecret);
         request.getSignRequestParam().setSignatureAlgorithm(signatureAlgorithm.getName());
+        request.setAccessToken(accessToken);
 
         SignClient client = new SignClient(signEndpoint);
         client.setRequest(request);
@@ -73,6 +78,7 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
         request.getVerifySignatureRequestParam().setAlias(keyId);
         request.getVerifySignatureRequestParam().setSharedSecret(sharedSecret);
         request.getVerifySignatureRequestParam().setSignatureAlgorithm(signatureAlgorithm.getName());
+        request.setAccessToken(accessToken);
         if (jwks != null) {
             request.getVerifySignatureRequestParam().setJwksRequestParam(getJwksRequestParam(jwks));
         }
@@ -92,6 +98,7 @@ public class OxElevenCryptoProvider extends AbstractCryptoProvider {
     public boolean deleteKey(String keyId) throws Exception {
         DeleteKeyRequest request = new DeleteKeyRequest();
         request.setAlias(keyId);
+        request.setAccessToken(accessToken);
 
         DeleteKeyClient client = new DeleteKeyClient(deleteKeyEndpoint);
         client.setRequest(request);

@@ -6,28 +6,12 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.ejb.Asynchronous;
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
@@ -36,10 +20,20 @@ import org.xdi.oxauth.service.cdi.event.CleanerEvent;
 import org.xdi.oxauth.service.cdi.event.Scheduled;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.timer.event.TimerEvent;
-import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.service.uma.RptManager;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
+
+import javax.ejb.Asynchronous;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -86,9 +80,6 @@ public class CleanerTimer {
 
     @Inject
     private DeviceRegistrationService deviceRegistrationService;
-
-    @Inject
-    private ConfigurationFactory configurationFactory;
 
     @Inject
     private AppConfiguration appConfiguration;

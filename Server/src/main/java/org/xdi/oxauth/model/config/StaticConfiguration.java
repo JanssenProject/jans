@@ -6,13 +6,14 @@
 
 package org.xdi.oxauth.model.config;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.xdi.oxauth.model.configuration.Configuration;
+
 import javax.enterprise.inject.Vetoed;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Vetoed
-public class StaticConfiguration {
+public class StaticConfiguration implements Configuration {
 
     @XmlElement(name = "base-dn")
     private BaseDnConfiguration baseDn;

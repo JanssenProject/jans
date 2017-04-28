@@ -6,23 +6,12 @@
 
 package org.xdi.oxauth.auth;
 
-import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
@@ -38,6 +27,17 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Authenticator component
@@ -83,7 +83,10 @@ public class Authenticator {
 	@Inject
 	private FacesService facesService;
 
-	private String authAcr;
+    @Inject
+    private LanguageBean languageBean;
+
+    private String authAcr;
 
 	private Integer authStep;
 
@@ -103,14 +106,14 @@ public class Authenticator {
 		}
 	}
 
-	public String authenticateWithOutcome() {
-		boolean result = authenticateImpl(true, false);
-		if (result) {
-			return Constants.RESULT_SUCCESS;
-		} else {
-			addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate", null);
-			return Constants.RESULT_FAILURE;
-		}
+    public String authenticateWithOutcome() {
+        boolean result = authenticateImpl(true, false);
+        if (result) {
+            return Constants.RESULT_SUCCESS;
+        } else {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
+            return Constants.RESULT_FAILURE;
+        }
 
 	}
 
@@ -357,8 +360,8 @@ public class Authenticator {
 			return false;
 		}
 
-		return true;
-	}
+        return true;
+    }
 
 	private boolean userAuthenticationService() {
 		if (externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.SERVICE)) {
@@ -415,17 +418,17 @@ public class Authenticator {
 		}
 	}
 
-	public String prepareAuthenticationForStep() {
-		String result = prepareAuthenticationForStepImpl();
+    public String prepareAuthenticationForStep() {
+        String result = prepareAuthenticationForStepImpl();
 
-		if (Constants.RESULT_SUCCESS.equals(result)) {
-		} else if (Constants.RESULT_FAILURE.equals(result)) {
-			addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate", null);
-		} else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
-			addMessage(FacesMessage.SEVERITY_ERROR, "You don't have permissions", null);
-		} else if (Constants.RESULT_EXPIRED.equals(result)) {
-			addMessage(FacesMessage.SEVERITY_ERROR, "Failed to authenticate. Authentication session has expired", null);
-		}
+        if (Constants.RESULT_SUCCESS.equals(result)) {
+        } else if (Constants.RESULT_FAILURE.equals(result)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.failedToAuthenticate");
+        } else if (Constants.RESULT_NO_PERMISSIONS.equals(result)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.youDontHavePermission");
+        } else if (Constants.RESULT_EXPIRED.equals(result)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
+        }
 
 		return result;
 	}
@@ -586,20 +589,18 @@ public class Authenticator {
 		this.authAcr = sessionIdAttributes.get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
 	}
 
-	private boolean authenticationFailed() {
-		if (!this.addedErrorMessage) {
-			facesContext.addMessage(null,
-					new FacesMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage", "login.errorMessage"));
-		}
-		return false;
-	}
+    private boolean authenticationFailed() {
+        if (!this.addedErrorMessage) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage");
+        }
+        return false;
+    }
 
-	private void authenticationFailedSessionInvalid() {
-		this.addedErrorMessage = true;
-		facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage",
-				"login.errorSessionInvalidMessage"));
-		facesService.redirect("/error.xhtml");
-	}
+    private void authenticationFailedSessionInvalid() {
+        this.addedErrorMessage = true;
+        addMessage(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
+        facesService.redirect("/error.xhtml");
+    }
 
 	private void markAuthStepAsPassed(Map<String, String> sessionIdAttributes, Integer authStep) {
 		String key = String.format("auth_step_passed_%d", authStep);
@@ -630,9 +631,10 @@ public class Authenticator {
 		authenticationService.configureSessionClient(client);
 	}
 
-	public void addMessage(Severity severity, String summary, String detail) {
-		FacesMessage message = new FacesMessage(severity, summary, detail);
-		facesContext.addMessage(null, message);
-	}
+    public void addMessage(Severity severity, String summary) {
+        String msg = languageBean.getValue(summary);
+        FacesMessage message = new FacesMessage(severity, msg, null);
+        facesContext.addMessage(null, message);
+    }
 
 }

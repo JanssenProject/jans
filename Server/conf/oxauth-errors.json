@@ -262,18 +262,6 @@
             "uri":null
         }
     ],
-    "validateToken":[
-        {
-            "id":"invalid_request",
-            "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed.",
-            "uri":null
-        },
-        {
-            "id":"invalid_grant",
-            "description":"The provided access token is invalid, or was issued to another client.",
-            "uri":null
-        }
-    ],
     "fido":[
         {
             "id":"server_error",
