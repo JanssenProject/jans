@@ -151,4 +151,22 @@ public class IntrospectionResponse {
     public void setJti(String jti) {
         this.jti = jti;
     }
+
+    @Override
+    public String toString() {
+        return "IntrospectionResponse{" +
+                "active=" + active +
+                ", scopes=" + scopes +
+                ", clientId='" + clientId + '\'' +
+                ", username='" + username + '\'' +
+                ", tokenType='" + tokenType + '\'' +
+                ", expiresAt=" + expiresAt +
+                ", issuedAt=" + issuedAt +
+                ", subject='" + subject + '\'' +
+                ", audience='" + audience + '\'' +
+                ", issuer='" + issuer + '\'' +
+                ", jti='" + jti + '\'' +
+                ", acrValues='" + acrValues + '\'' +
+                '}';
+    }
 }
