@@ -11,14 +11,24 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetGatParams implements HasOxdIdParams {
+public class RpGetGatParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
     @JsonProperty(value = "scopes")
     private List<String> scopes;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public RpGetGatParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public String getOxdId() {
@@ -43,6 +53,7 @@ public class RpGetGatParams implements HasOxdIdParams {
         sb.append("RpGetGatParams");
         sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", scopes=").append(scopes);
+        sb.append(", protectionAccessToken=").append(protectionAccessToken);
         sb.append('}');
         return sb.toString();
     }
