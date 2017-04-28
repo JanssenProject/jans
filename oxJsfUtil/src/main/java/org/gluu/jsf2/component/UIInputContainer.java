@@ -363,6 +363,7 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
 
             propertyName = (String) new ValueExpressionAnalyzer(((UIComponent) inputs.get(0)).getValueExpression("value"))
                     .getValueReference(context.getELContext()).getProperty();
+
             return propertyName;
         }
 
