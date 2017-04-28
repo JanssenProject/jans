@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.service;
 
+import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 /**
  * Store and retrieve metric
@@ -55,7 +55,6 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 		return applianceService.getApplianceInum();
 	}
 
-	@Override
 	public org.xdi.service.metric.MetricService getMetricServiceInstance() {
 		return instance.get();
 	}

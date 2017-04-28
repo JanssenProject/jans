@@ -6,9 +6,29 @@
 
 package org.xdi.oxauth.model.config;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jettison.json.JSONObject;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.site.ldap.persistence.exception.LdapMappingException;
+import org.slf4j.Logger;
+import org.xdi.exception.ConfigurationException;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.configuration.Configuration;
+import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
+import org.xdi.oxauth.model.error.ErrorMessages;
+import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.cdi.event.ConfigurationEvent;
+import org.xdi.oxauth.service.cdi.event.ConfigurationUpdate;
+import org.xdi.oxauth.service.cdi.event.LdapConfigurationReload;
+import org.xdi.oxauth.service.cdi.event.Scheduled;
+import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
+import org.xdi.util.StringHelper;
+import org.xdi.util.properties.FileConfiguration;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Asynchronous;
@@ -19,29 +39,9 @@ import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jettison.json.JSONObject;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.LdapMappingException;
-import org.slf4j.Logger;
-import org.xdi.exception.ConfigurationException;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
-import org.xdi.oxauth.model.error.ErrorMessages;
-import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.cdi.event.ConfigurationEvent;
-import org.xdi.oxauth.service.cdi.event.ConfigurationUpdate;
-import org.xdi.oxauth.service.cdi.event.LdapConfigurationReload;
-import org.xdi.oxauth.service.cdi.event.Scheduled;
-import org.xdi.oxauth.service.timer.event.TimerEvent;
-import org.xdi.oxauth.service.timer.schedule.TimerSchedule;
-import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.util.StringHelper;
-import org.xdi.util.properties.FileConfiguration;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -67,6 +67,9 @@ public class ConfigurationFactory {
 
 	@Inject @Named(AppInitializer.LDAP_ENTRY_MANAGER_NAME)
 	private Instance<LdapEntryManager> ldapEntryManagerInstance;
+	
+	@Inject
+	private Instance<Configuration> configurationIsntance;
 
 	public final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "ldapConfigurationReloadEvent";
 
@@ -320,10 +323,10 @@ public class ConfigurationFactory {
 
 				// Destroy old configuration
 				if (this.loaded) {
-					ServerUtil.destroy(AppConfiguration.class);
-					ServerUtil.destroy(StaticConfiguration.class);
-					ServerUtil.destroy(WebKeysConfiguration.class);
-					ServerUtil.destroy(ErrorResponseFactory.class);
+					destroy(AppConfiguration.class);
+					destroy(StaticConfiguration.class);
+					destroy(WebKeysConfiguration.class);
+					destroy(ErrorResponseFactory.class);
 				}
 
 				this.loaded = true;
@@ -344,6 +347,11 @@ public class ConfigurationFactory {
 		}
 
 		return false;
+	}
+	
+	public void destroy(Class<? extends Configuration> clazz) {
+		Instance<? extends Configuration> confInstance = configurationIsntance.select(clazz);
+		configurationIsntance.destroy(confInstance.get());
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
