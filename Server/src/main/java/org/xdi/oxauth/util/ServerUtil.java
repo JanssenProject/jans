@@ -6,27 +6,6 @@
 
 package org.xdi.oxauth.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
-import javax.enterprise.inject.spi.CDI;
-import javax.enterprise.util.AnnotationLiteral;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -43,8 +22,30 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
 import org.xdi.util.Util;
+
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.CDI;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.CacheControl;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -112,25 +113,48 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
-    /*
-     * Try to avoid using this method. it's better to use injected Instance into bean
-     */
+    public static <T> T getContextBean(BeanManager beanManager, Type type, String beanName) {
+		Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, NamedLiteral.of(beanName)));
+		if (bean == null) {
+			return null;
+		}
+
+		T existingInstance = beanManager.getContext(bean.getScope()).get(bean, beanManager.createCreationalContext(bean));
+
+    	return existingInstance;
+	}
+
+    public static <T> T getContextualReference(BeanManager bm, Set<Bean<?>> beans, Class<?> type) {
+		if (beans == null || beans.size() == 0) {
+			return null;
+		}
+
+		// If we would resolve to multiple beans then BeanManager#resolve would throw an AmbiguousResolutionException
+		Bean<?> bean = bm.resolve(beans);
+		if (bean == null) {
+			return null;
+		} else {
+			CreationalContext<?> creationalContext = bm.createCreationalContext(bean);
+			return (T) bm.getReference(bean, type, creationalContext);
+		}
+	}
+
     public static <T> Instance<T> instance(Class<T> p_clazz) {
 		return CDI.current().select(p_clazz);
     }    	
 
-    /*
-     * Try to avoid using this method. it's better to use injected Instance into bean
-     */
-    // TODO: CDI Review
+    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
+		return CDI.current().select(p_clazz, NamedLiteral.of(name));
+    }    	
+
     public static <T> T bean(Class<T> p_clazz) {
 		return instance(p_clazz).get();
     }    	
 
-    /*
-     * Try to avoid using this method. it's better to use injected Instance into bean
-     */
-    // TODO: CDI Review
+    public static <T> T bean(Class<T> p_clazz, String name) {
+		return instance(p_clazz, name).get();
+    }    	
+
     public static <T> void destroy(Class<T> p_clazz) {
 		Instance<T> instance = instance(p_clazz);
 		if (instance.isResolvable()) {
@@ -138,35 +162,18 @@ public class ServerUtil {
 		}
     }    	
 
-    /*
-     * Try to avoid using this method. it's better to use injected Instance into bean
-     */
-    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
-		return CDI.current().select(p_clazz, NamedLiteral.of(name));
-    }    	
-
-    /*
-     * Try to avoid using this method. it's better to use injected Instance into bean
-     */
-    public static <T> T bean(Class<T> p_clazz, String name) {
-		return instance(p_clazz, name).get();
-    }    	
-
-    /*
-     * Try to avoid using this method. it's better to use injected Instance into bean
-     */
-    // TODO: CDI Review
-    public static <T> void destroy(Class<T> p_clazz, String name) {
+    public static <T> T destroy(Class<T> p_clazz, String name) {
 		Instance<T> instance = instance(p_clazz, name);
 		if (instance.isResolvable()) {
-			instance.destroy(instance.get());
+			T obj = instance.get();
+			instance.destroy(obj);
+			
+			return obj;
 		}
+
+		return null;
     }    	
 
-    /*
-     * Try to avoid using this method. it's better to use injected Instance into bean
-     */
-    // TODO: CDI Review
     public static LdapEntryManager getLdapManager() {
         return bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }

@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version February 22, 2017
+ * @version April 20, 2017
  */
 public class ApplicationTypeRestrictionHttpTest extends BaseTest {
 
@@ -150,26 +150,6 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         showTitle("applicationTypeWebFail1");
 
         final String redirectUris = "http://client.example.com/cb";
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 400, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getEntity(), "The entity is null");
-        assertNotNull(registerResponse.getErrorType(), "The error type is null");
-        assertNotNull(registerResponse.getErrorDescription(), "The error description is null");
-    }
-
-    /**
-     * Fail: Register a client with Application Type <code>web</code> and Redirect URI with the host localhost.
-     */
-    @Test
-    public void applicationTypeWebFail2() throws Exception {
-        showTitle("applicationTypeWebFail2");
-
-        final String redirectUris = "https://localhost/cb";
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         RegisterResponse registerResponse = registerClient.execRegister(ApplicationType.WEB, "oxAuth test app",

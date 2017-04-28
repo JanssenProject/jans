@@ -8,13 +8,13 @@
 	<!-- Weld -->
 	<context-param>
 		<param-name>org.jboss.weld.development</param-name>
-		<param-value>true</param-value>
+		<param-value>${weld.debug}</param-value>
 	</context-param>
-	
+
 	<!-- JSF -->
 	<context-param>
 		<param-name>javax.faces.PROJECT_STAGE</param-name>
-		<param-value>${javax.faces.PROJECT_STAGE}</param-value>
+		<param-value>Production</param-value>
 	</context-param>
 	<context-param>
 		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
@@ -23,6 +23,11 @@
 	<context-param>
 		<param-name>javax.faces.FACELETS_RESOURCE_RESOLVER</param-name>
 		<param-value>org.xdi.service.ExternalResourceHandler</param-value>
+	</context-param>
+	<!-- Change to -1 when you don't want the compiler should check for changes -->
+	<context-param>
+		<param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
+		<param-value>${javax.faces.FACELETS_REFRESH_PERIOD}</param-value>
 	</context-param>
 	<context-param>
 		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
@@ -68,6 +73,7 @@
 
 	<session-config>
 		<session-timeout>30</session-timeout>
+		<tracking-mode>COOKIE</tracking-mode>
 	</session-config>
 
 	<security-constraint>

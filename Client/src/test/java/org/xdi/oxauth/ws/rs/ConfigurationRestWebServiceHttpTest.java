@@ -22,7 +22,7 @@ import static org.testng.Assert.*;
  * Functional tests for OpenId Configuration Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version August 28, 2016
+ * @version April 26, 2017
  */
 public class ConfigurationRestWebServiceHttpTest extends BaseTest {
 
@@ -59,7 +59,6 @@ public class ConfigurationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getEndSessionEndpoint(), "The endSessionEndpoint is null");
         assertNotNull(response.getJwksUri(), "The jwksUri is null");
         assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
-        assertNotNull(response.getValidateTokenEndpoint(), "The validateTokenEndpoint is null");
         assertNotNull(response.getIntrospectionEndpoint(), "The introspectionEndpoint is null");
         assertNotNull(response.getIdGenerationEndpoint(), "The idGenerationEndpoint is null");
 
