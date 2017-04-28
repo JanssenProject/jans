@@ -184,13 +184,6 @@
         </classes>
     </test>
 
-    <!-- Validate Token Endpoint test -->
-    <test name="Validate Token Endpoint test (HTTP)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.ValidateTokenEndpointHttpTest"/>
-        </classes>
-    </test>
-
     <test name="Web Keys Test" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.WebKeysTest"/>
