@@ -15,7 +15,20 @@
 	<context-param>
 		<param-name>javax.faces.CONFIG_FILES</param-name>
 		<param-value>
-			/WEB-INF/oxauth.faces-config.xml
+			/WEB-INF/oxauth.faces-config.xml,
+			/WEB-INF/navigation/cas2.faces-config.xml,
+			/WEB-INF/navigation/cert.faces-config.xml,
+			/WEB-INF/navigation/duo.faces-config.xml,
+			/WEB-INF/navigation/gplus.faces-config.xml,
+			/WEB-INF/navigation/login.faces-config.xml,
+			/WEB-INF/navigation/otp.faces-config.xml,
+			/WEB-INF/navigation/oxpush.faces-config.xml,
+			/WEB-INF/navigation/passport.faces-config.xml,
+			/WEB-INF/navigation/postlogin.faces-config.xml,
+			/WEB-INF/navigation/saml.faces-config.xml,
+			/WEB-INF/navigation/super-gluu.faces-config.xml,
+			/WEB-INF/navigation/u2f.faces-config.xml,
+			/WEB-INF/navigation/uaf.faces-config.xml
 		</param-value>
 	</context-param>
 	<context-param>
