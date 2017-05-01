@@ -8,7 +8,6 @@ import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
-import org.xdi.util.StringHelper;
 
 import javax.servlet.ServletContext;
 import java.io.File;
@@ -23,14 +22,11 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
     public Configuration getConfiguration(final ServletContext context) {
         ConfigurationBuilder builder = ConfigurationBuilder.begin();
         addRulesForAllXHTML(context.getRealPath(""), builder);
-        String externalResourceBase = System.getProperty("catalina.base");
-        if (StringHelper.isNotEmpty(externalResourceBase)) {
-            externalResourceBase += "/custom/pages";
-            File folder = new File(externalResourceBase);
-            if (folder.exists() && folder.isDirectory()) {
-                addRulesForAllXHTML(externalResourceBase, builder);
-            }
-        }
+
+        if (!Utils.isCustomPagesDirExists())
+            return builder;
+        addRulesForAllXHTML(Utils.getCustomPagesPath(), builder);
+
         return builder;
     }
 
