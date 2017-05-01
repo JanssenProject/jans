@@ -8,7 +8,7 @@ package org.xdi.oxauth.model.configuration;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 January 22, 2015
+ * @version April 26, 2017
  */
 public interface ConfigurationResponseClaim {
 
@@ -20,7 +20,6 @@ public interface ConfigurationResponseClaim {
     public static final String CHECK_SESSION_IFRAME = "check_session_iframe";
     public static final String END_SESSION_ENDPOINT = "end_session_endpoint";
     public static final String JWKS_URI = "jwks_uri";
-    public static final String VALIDATE_TOKEN_ENDPOINT = "validate_token_endpoint";
     public static final String REGISTRATION_ENDPOINT = "registration_endpoint";
     public static final String ID_GENERATION_ENDPOINT = "id_generation_endpoint";
     public static final String INTROSPECTION_ENDPOINT = "introspection_endpoint";
@@ -58,5 +57,5 @@ public interface ConfigurationResponseClaim {
     public static final String FRONTCHANNEL_LOGOUT_SUPPORTED = "frontchannel_logout_supported";
     public static final String FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
     public static final String AUTH_LEVEL_MAPPING = "auth_level_mapping";
-    public static final String FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED="frontchannel_logout_session_supported";
+    public static final String FRONT_CHANNEL_LOGOUT_SESSION_SUPPORTED = "frontchannel_logout_session_supported";
 }
