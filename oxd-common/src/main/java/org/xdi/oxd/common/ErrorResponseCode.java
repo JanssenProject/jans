@@ -24,6 +24,7 @@ public enum ErrorResponseCode {
     NO_ID_TOKEN_PARAM("no_id_token", "id_token is not provided in request to oxd."),
     NO_ACCESS_TOKEN_RETURNED("no_access_token", "access_token is not returned."),
     INVALID_NONCE("invalid_nonce", "Nonce value is not registered by oxd."),
+    INVALID_STATE("invalid_state", "State value is not registered by oxd."),
     INVALID_ID_TOKEN("invalid_id_token", "id_token is invalid."),
     INVALID_ID_TOKEN_BAD_NONCE("invalid_id_token_bad_nonce", "Invalid id_token. Nonce value from token does not match nonce from request."),
     INVALID_ID_TOKEN_BAD_AUDIENCE("invalid_id_token_bad_audience", "Invalid id_token. Audience value from token does not match audience from request."),
