@@ -48,19 +48,22 @@ public class UmaTokenService {
     private final DiscoveryService discoveryService;
     private final HttpService httpService;
     private final Configuration configuration;
+    private final StateService stateService;
 
     @Inject
     public UmaTokenService(RpService rpService,
                            ValidationService validationService,
                            DiscoveryService discoveryService,
                            HttpService httpService,
-                           Configuration configuration
+                           Configuration configuration,
+                           StateService stateService
     ) {
         this.rpService = rpService;
         this.validationService = validationService;
         this.discoveryService = discoveryService;
         this.httpService = httpService;
         this.configuration = configuration;
+        this.stateService = stateService;
     }
 
     public String getRpt(String oxdId, boolean forceNew) {
@@ -276,9 +279,10 @@ public class UmaTokenService {
         responseTypes.add(ResponseType.CODE);
         responseTypes.add(ResponseType.ID_TOKEN);
 
+        final String state = stateService.generateState();
 
         final AuthorizationRequest request = new AuthorizationRequest(responseTypes, site.getClientId(), scopes(scopeType), site.getAuthorizationRedirectUri(), null);
-        request.setState("af0ifjsldkj");
+        request.setState(state);
         request.setAuthUsername(site.getUserId());
         request.setAuthPassword(site.getUserSecret());
         request.getPrompts().add(Prompt.NONE);
@@ -292,6 +296,9 @@ public class UmaTokenService {
 
         final String scope = response1.getScope();
         final String authorizationCode = response1.getCode();
+        if (!state.equals(response1.getState())) {
+            throw new ErrorResponseException(ErrorResponseCode.INVALID_STATE);
+        }
 
         if (Util.allNotBlank(authorizationCode)) {
 
