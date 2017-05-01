@@ -1,8 +1,7 @@
 package org.xdi.oxauth.model.auth;
 
-import java.io.Serializable;
-
 import javax.enterprise.inject.Vetoed;
+import java.io.Serializable;
 
 /**
  * @author Yuriy Movchan

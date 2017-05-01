@@ -4,17 +4,16 @@
 # Author: Yuriy Movchan
 #
 
+import duo_web
 from org.jboss.seam import Component
-from org.jboss.seam.contexts import Context, Contexts
+from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, UserGroupService, AuthenticationService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.service import MailService
-from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper
 
-import java
-import duo_web
 try:
     import json
 except ImportError:

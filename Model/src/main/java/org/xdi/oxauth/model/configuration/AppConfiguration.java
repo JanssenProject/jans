@@ -19,7 +19,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 15, 2017
+ * @version April 26, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -36,7 +36,6 @@ public class AppConfiguration implements Configuration {
     private String endSessionEndpoint;
     private String jwksUri;
     private String registrationEndpoint;
-    private String validateTokenEndpoint;
     private String openIdDiscoveryEndpoint;
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
@@ -127,6 +126,7 @@ public class AppConfiguration implements Configuration {
     private String keyStoreFile;
     private String keyStoreSecret;
     //oxEleven
+    private String oxElevenTestModeToken;
     private String oxElevenGenerateKeyEndpoint;
     private String oxElevenSignEndpoint;
     private String oxElevenVerifySignatureEndpoint;
@@ -409,14 +409,6 @@ public class AppConfiguration implements Configuration {
      */
     public void setRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
-    }
-
-    public String getValidateTokenEndpoint() {
-        return validateTokenEndpoint;
-    }
-
-    public void setValidateTokenEndpoint(String validateTokenEndpoint) {
-        this.validateTokenEndpoint = validateTokenEndpoint;
     }
 
     public String getOpenIdDiscoveryEndpoint() {
@@ -1030,6 +1022,14 @@ public class AppConfiguration implements Configuration {
 
     public void setKeyStoreSecret(String keyStoreSecret) {
         this.keyStoreSecret = keyStoreSecret;
+    }
+
+    public String getOxElevenTestModeToken() {
+        return oxElevenTestModeToken;
+    }
+
+    public void setOxElevenTestModeToken(String oxElevenTestModeToken) {
+        this.oxElevenTestModeToken = oxElevenTestModeToken;
     }
 
     public String getOxElevenGenerateKeyEndpoint() {
