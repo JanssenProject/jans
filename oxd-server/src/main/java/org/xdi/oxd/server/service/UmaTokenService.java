@@ -323,6 +323,8 @@ public class UmaTokenService {
                 token.setRefreshToken(response2.getRefreshToken());
                 token.setExpiresIn(response2.getExpiresIn());
                 return token;
+            } else {
+                LOG.error("Status: " + response2.getStatus() + ", Entity: " + response2.getEntity());
             }
         } else {
             LOG.debug("Authorization code is blank.");
