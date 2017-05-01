@@ -6,8 +6,14 @@
 
 package org.xdi.oxauth.service.status.ldap;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import org.gluu.site.ldap.LDAPConnectionProvider;
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.slf4j.Logger;
+import org.xdi.oxauth.service.AppInitializer;
+import org.xdi.oxauth.service.cdi.event.LdapStatusEvent;
+import org.xdi.oxauth.service.cdi.event.Scheduled;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
 
 import javax.ejb.Asynchronous;
 import javax.ejb.DependsOn;
@@ -16,16 +22,8 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.gluu.site.ldap.LDAPConnectionProvider;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.slf4j.Logger;
-import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.cdi.event.LdapStatusEvent;
-import org.xdi.oxauth.service.cdi.event.Scheduled;
-import org.xdi.oxauth.util.ServerUtil;
-import org.xdi.service.timer.event.TimerEvent;
-import org.xdi.service.timer.schedule.TimerSchedule;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Movchan

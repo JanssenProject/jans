@@ -4,25 +4,25 @@
 # Author: Yuriy Movchan
 #
 
-import sys
 import datetime
 import urllib
 
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+import sys
+from com.google.android.gcm.server import Sender, Message
+from com.notnoop.apns import APNS
+from java.util import Arrays
+from org.apache.http.params import CoreConnectionPNames
 from org.jboss.seam import Component
 from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.model.config import ConfigurationFactory
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
-from org.xdi.util import StringHelper
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util.security import StringEncrypter
-from org.xdi.oxauth.model.config import ConfigurationFactory
-from java.util import Arrays
 from org.xdi.oxauth.service.net import HttpService
-from org.apache.http.params import CoreConnectionPNames
-from com.notnoop.apns import APNS
-from com.google.android.gcm.server import Sender, Message
+from org.xdi.oxauth.util import ServerUtil
+from org.xdi.util import StringHelper
+from org.xdi.util.security import StringEncrypter
 
 try:
     import json
