@@ -38,7 +38,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
     @Override
     public CommandResponse execute(GetClientTokenParams params) throws Exception {
         try {
-            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost()).getTokenEndpoint());
+            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint());
             tokenClient.setExecutor(getHttpService().getClientExecutor());
             final TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant(scopeAsString(params), params.getClientId(), params.getClientSecret());
             if (tokenResponse != null) {

@@ -15,6 +15,8 @@ public class RegisterSiteParams implements IParams {
 
     @JsonProperty(value = "op_host")
     private String opHost;
+    @JsonProperty(value = "op_discovery_path")
+    private String opDiscoveryPath;
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
     @JsonProperty(value = "post_logout_redirect_uri")
@@ -82,6 +84,14 @@ public class RegisterSiteParams implements IParams {
 
     public void setOpHost(String opHost) {
         this.opHost = opHost;
+    }
+
+    public String getOpDiscoveryPath() {
+        return opDiscoveryPath;
+    }
+
+    public void setOpDiscoveryPath(String opDiscoveryPath) {
+        this.opDiscoveryPath = opDiscoveryPath;
     }
 
     public String getClientSectorIdentifierUri() {
@@ -226,6 +236,7 @@ public class RegisterSiteParams implements IParams {
         sb.append("RegisterSiteParams");
         sb.append("{acrValues=").append(acrValues);
         sb.append(", opHost='").append(opHost).append('\'');
+        sb.append(", opDiscoveryPath='").append(opDiscoveryPath).append('\'');
         sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
         sb.append(", redirectUris=").append(redirectUris);
         sb.append(", responseTypes=").append(responseTypes);
