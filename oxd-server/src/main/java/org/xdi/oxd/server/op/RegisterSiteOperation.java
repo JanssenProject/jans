@@ -206,7 +206,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private RegisterResponse registerClient(RegisterSiteParams params) {
-        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost()).getRegistrationEndpoint();
+        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
             LOG.error("This OP (" + params.getOpHost() + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
                     "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to oxd register_site command.");
@@ -293,45 +293,46 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
 
-        final Rp siteConf = new Rp(getSiteService().defaultRp());
-        siteConf.setOxdId(siteId);
-        siteConf.setOpHost(params.getOpHost());
-        siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
-        siteConf.setRedirectUris(params.getRedirectUris());
-        siteConf.setApplicationType("web");
+        final Rp rp = new Rp(getSiteService().defaultRp());
+        rp.setOxdId(siteId);
+        rp.setOpHost(params.getOpHost());
+        rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
+        rp.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
+        rp.setRedirectUris(params.getRedirectUris());
+        rp.setApplicationType("web");
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-            siteConf.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+            rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         }
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
-            siteConf.setAcrValues(params.getAcrValues());
+            rp.setAcrValues(params.getAcrValues());
         }
 
         if (params.getClaimsLocales() != null && !params.getClaimsLocales().isEmpty()) {
-            siteConf.setClaimsLocales(params.getClaimsLocales());
+            rp.setClaimsLocales(params.getClaimsLocales());
         }
 
         if (!Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret())) {
-            siteConf.setClientId(params.getClientId());
-            siteConf.setClientSecret(params.getClientSecret());
+            rp.setClientId(params.getClientId());
+            rp.setClientSecret(params.getClientSecret());
         }
 
         if (params.getContacts() != null && !params.getContacts().isEmpty()) {
-            siteConf.setContacts(params.getContacts());
+            rp.setContacts(params.getContacts());
         }
 
-        siteConf.setGrantType(params.getGrantType());
-        siteConf.setResponseTypes(params.getResponseTypes());
+        rp.setGrantType(params.getGrantType());
+        rp.setResponseTypes(params.getResponseTypes());
 
         if (params.getScope() != null && !params.getScope().isEmpty()) {
-            siteConf.setScope(params.getScope());
+            rp.setScope(params.getScope());
         }
 
         if (params.getUiLocales() != null && !params.getUiLocales().isEmpty()) {
-            siteConf.setUiLocales(params.getUiLocales());
+            rp.setUiLocales(params.getUiLocales());
         }
 
-        return siteConf;
+        return rp;
     }
 }
