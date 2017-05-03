@@ -37,7 +37,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
     public CommandResponse execute(GetAuthorizationUrlParams params) throws Exception {
         final Rp site = getSite();
 
-        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint();
+        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint();
 
         List<String> scope = Lists.newArrayList();
         if (params.getScope() != null && !params.getScope().isEmpty()) {

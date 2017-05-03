@@ -47,7 +47,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
         validate(params);
 
         final Rp site = getSite();
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(params.getCode());

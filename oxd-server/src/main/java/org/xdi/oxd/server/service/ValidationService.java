@@ -55,7 +55,9 @@ public class ValidationService {
     private void validate(HasProtectionAccessTokenParams params) {
         final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
-            return; // skip validation since protectCommandsWithAccessToken=false
+            if (StringUtils.isBlank(params.getProtectionAccessToken())) {
+                return; // skip validation since protectCommandsWithAccessToken=false
+            } // otherwise if token is not blank then let it validate it
         }
 
         final String accessToken = params.getProtectionAccessToken();

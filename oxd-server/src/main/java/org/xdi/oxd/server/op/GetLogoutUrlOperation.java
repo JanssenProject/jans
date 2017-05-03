@@ -40,7 +40,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
         final Rp site = getSite();
 
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
         String postLogoutRedirectUrl = params.getPostLogoutRedirectUri();
@@ -57,7 +57,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
                 return okResponse(new LogoutResponse(logoutUrl));
             }
 
-            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site.getOpHost()));
+            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site));
             throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
 
