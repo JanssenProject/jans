@@ -12,6 +12,7 @@
 			<supported-locale>es</supported-locale>
 			<supported-locale>fr</supported-locale>
 			<supported-locale>it</supported-locale>
+			<supported-locale>ru</supported-locale>
 			<supported-locale>tr</supported-locale>
 		</locale-config>
 
