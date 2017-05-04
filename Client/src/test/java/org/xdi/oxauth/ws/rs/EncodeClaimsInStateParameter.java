@@ -654,6 +654,387 @@ public class EncodeClaimsInStateParameter extends BaseTest {
         assertTrue(validJwt);
     }
 
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri",
+            "keyStoreFile", "keyStoreSecret", "dnName", "RS256_keyId", "clientJwksUri"})
+    @Test
+    public void encodeClaimsInStateParameterAlgRSAOAEPEncA256GCM(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String keyStoreFile, final String keyStoreSecret,
+            final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+        showTitle("encodeClaimsInStateParameterAlgRSAOAEPEncA256GCM");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt(jwks);
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Decrypt state
+        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+        Jwe jwe = Jwe.parse(state, privateKey, null);
+        assertNotNull(jwe.getClaims().getClaimAsString(KID));
+        assertNotNull(jwe.getClaims().getClaimAsString(RFP));
+        assertNotNull(jwe.getClaims().getClaimAsString(JTI));
+        assertNotNull(jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS));
+
+        JSONObject addClaims = jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS);
+        assertEquals(addClaims.getString("first_name"), "Javier");
+        assertEquals(addClaims.getString("last_name"), "Rojas");
+        assertEquals(addClaims.getInt("age"), 34);
+        assertNotNull(addClaims.getJSONArray("more"));
+        assertEquals(addClaims.getJSONArray("more").length(), 2);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri",
+            "keyStoreFile", "keyStoreSecret", "dnName", "RS256_keyId", "clientJwksUri"})
+    @Test
+    public void encodeClaimsInStateParameterAlgRSA15EncA128CBCPLUSHS256(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String keyStoreFile, final String keyStoreSecret,
+            final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+        showTitle("encodeClaimsInStateParameterAlgRSA15EncA128CBCPLUSHS256");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A128CBC_PLUS_HS256, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt(jwks);
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Decrypt state
+        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+        Jwe jwe = Jwe.parse(state, privateKey, null);
+        assertNotNull(jwe.getClaims().getClaimAsString(KID));
+        assertNotNull(jwe.getClaims().getClaimAsString(RFP));
+        assertNotNull(jwe.getClaims().getClaimAsString(JTI));
+        assertNotNull(jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS));
+
+        JSONObject addClaims = jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS);
+        assertEquals(addClaims.getString("first_name"), "Javier");
+        assertEquals(addClaims.getString("last_name"), "Rojas");
+        assertEquals(addClaims.getInt("age"), 34);
+        assertNotNull(addClaims.getJSONArray("more"));
+        assertEquals(addClaims.getJSONArray("more").length(), 2);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri",
+            "keyStoreFile", "keyStoreSecret", "dnName", "RS256_keyId", "clientJwksUri"})
+    @Test
+    public void encodeClaimsInStateParameterAlgRSA15EncA256CBCPLUSHS512(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri, final String keyStoreFile, final String keyStoreSecret,
+            final String dnName, final String keyId, final String clientJwksUri) throws Exception {
+        showTitle("encodeClaimsInStateParameterAlgRSA15EncA256CBCPLUSHS512");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        JSONObject jwks = JwtUtil.getJSONWebKeys(clientJwksUri);
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(KeyEncryptionAlgorithm.RSA1_5, BlockEncryptionAlgorithm.A256CBC_PLUS_HS512, cryptoProvider);
+        jwtState.setKeyId(keyId);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt(jwks);
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Decrypt state
+        PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
+        Jwe jwe = Jwe.parse(state, privateKey, null);
+        assertNotNull(jwe.getClaims().getClaimAsString(KID));
+        assertNotNull(jwe.getClaims().getClaimAsString(RFP));
+        assertNotNull(jwe.getClaims().getClaimAsString(JTI));
+        assertNotNull(jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS));
+
+        JSONObject addClaims = jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS);
+        assertEquals(addClaims.getString("first_name"), "Javier");
+        assertEquals(addClaims.getString("last_name"), "Rojas");
+        assertEquals(addClaims.getInt("age"), 34);
+        assertNotNull(addClaims.getJSONArray("more"));
+        assertEquals(addClaims.getJSONArray("more").length(), 2);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void encodeClaimsInStateParameterAlgA128KWEncA128GCM(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("encodeClaimsInStateParameterAlgA128KWEncA128GCM");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request authorization
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(KeyEncryptionAlgorithm.A128KW, BlockEncryptionAlgorithm.A128GCM, clientSecret);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Decrypt state
+        Jwe jwe = Jwe.parse(state, null, clientSecret.getBytes());
+        assertNotNull(jwe.getClaims().getClaimAsString(RFP));
+        assertNotNull(jwe.getClaims().getClaimAsString(JTI));
+        assertNotNull(jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS));
+
+        JSONObject addClaims = jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS);
+        assertEquals(addClaims.getString("first_name"), "Javier");
+        assertEquals(addClaims.getString("last_name"), "Rojas");
+        assertEquals(addClaims.getInt("age"), 34);
+        assertNotNull(addClaims.getJSONArray("more"));
+        assertEquals(addClaims.getJSONArray("more").length(), 2);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void encodeClaimsInStateParameterAlgA256KWEncA256GCM(
+            final String userId, final String userSecret, final String redirectUris, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("encodeClaimsInStateParameterAlgA256KWEncA256GCM");
+
+        List<ResponseType> responseTypes = Arrays.asList(
+                ResponseType.TOKEN,
+                ResponseType.ID_TOKEN);
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request authorization
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
+        String rfp = UUID.randomUUID().toString();
+        String jti = UUID.randomUUID().toString();
+
+        JwtState jwtState = new JwtState(KeyEncryptionAlgorithm.A256KW, BlockEncryptionAlgorithm.A256GCM, clientSecret);
+        jwtState.setRfp(rfp);
+        jwtState.setJti(jti);
+        jwtState.setAdditionalClaims(new JSONObject(additionalClaims));
+        String encodedState = jwtState.getEncodedJwt();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(encodedState);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
+        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
+        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+
+        String state = authorizationResponse.getState();
+
+        // 3. Decrypt state
+        Jwe jwe = Jwe.parse(state, null, clientSecret.getBytes());
+        assertNotNull(jwe.getClaims().getClaimAsString(RFP));
+        assertNotNull(jwe.getClaims().getClaimAsString(JTI));
+        assertNotNull(jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS));
+
+        JSONObject addClaims = jwe.getClaims().getClaimAsJSON(ADDITIONAL_CLAIMS);
+        assertEquals(addClaims.getString("first_name"), "Javier");
+        assertEquals(addClaims.getString("last_name"), "Rojas");
+        assertEquals(addClaims.getInt("age"), 34);
+        assertNotNull(addClaims.getJSONArray("more"));
+        assertEquals(addClaims.getJSONArray("more").length(), 2);
+    }
+
     @Test
     public void jwtStateNONETest() throws Exception {
         showTitle("jwtStateNONETest");
