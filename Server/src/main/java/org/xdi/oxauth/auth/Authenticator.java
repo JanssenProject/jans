@@ -632,7 +632,7 @@ public class Authenticator {
 	}
 
     public void addMessage(Severity severity, String summary) {
-        String msg = languageBean.getValue(summary);
+        String msg = languageBean.getMessage(summary);
         FacesMessage message = new FacesMessage(severity, msg, null);
         facesContext.addMessage(null, message);
     }

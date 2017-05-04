@@ -249,13 +249,13 @@ public class LogoutAction {
 	}
 
 	public void missingLogoutParameters() {
-		String message = languageBean.getValue("logout.missingParameters");
+		String message = languageBean.getMessage("logout.missingParameters");
         facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
 		facesService.redirect("/error.xhtml");
 	}
 
 	public void logoutFailed() {
-		String message = languageBean.getValue("logout.failedToProceed");
+		String message = languageBean.getMessage("logout.failedToProceed");
         facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
 		facesService.redirect("/error.xhtml");
 	}
