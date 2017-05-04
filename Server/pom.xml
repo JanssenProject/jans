@@ -17,7 +17,7 @@
 	</prerequisites>
 
 	<build>
-		<finalName>oxauth</finalName>
+		<finalName>${project.artifactId}</finalName>
 
 		<filters>
 			<filter>profiles/${cfg}/config-build.properties</filter>
@@ -138,7 +138,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-  					<configuration>
+				<configuration>
 					<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
 						-Dcatalina.base=${project.build.directory}
 						-Dgluu.base=${project.build.directory}
@@ -313,12 +313,12 @@
 
 		<!-- Pretty Faces -->
 		<dependency>
-		    <groupId>org.ocpsoft.rewrite</groupId>
-		    <artifactId>rewrite-servlet</artifactId>
+			<groupId>org.ocpsoft.rewrite</groupId>
+			<artifactId>rewrite-servlet</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.ocpsoft.rewrite</groupId>
-		    <artifactId>rewrite-config-prettyfaces</artifactId>
+			<groupId>org.ocpsoft.rewrite</groupId>
+			<artifactId>rewrite-config-prettyfaces</artifactId>
 		</dependency>
 
 		<!-- Commons libs -->
@@ -369,12 +369,12 @@
 			<artifactId>log4j-core</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-slf4j-impl</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>com.lmax</groupId>
-		    <artifactId>disruptor</artifactId>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
 		</dependency>
 
 		<!-- Security -->
@@ -428,10 +428,6 @@
 			<groupId>org.python</groupId>
 			<artifactId>jython</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.codehaus.jettison</groupId>
-			<artifactId>jettison</artifactId>
-		</dependency>
 
 		<!-- JMS -->
 		<dependency>
@@ -453,12 +449,12 @@
 
 		<!-- RestEasy -->
 		<dependency>
-		    <groupId>org.jboss.resteasy</groupId>
-		    <artifactId>resteasy-cdi</artifactId>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-cdi</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.jboss.resteasy</groupId>
-		    <artifactId>resteasy-client</artifactId>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -481,6 +477,10 @@
 			<artifactId>resteasy-jackson-provider</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>jaxrs-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-core-asl</artifactId>
 		</dependency>
@@ -491,16 +491,16 @@
 
 		<!-- Other -->
 		<dependency>
+			<groupId>org.codehaus.jettison</groupId>
+			<artifactId>jettison</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.mvel</groupId>
 			<artifactId>mvel2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>jaxrs-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
@@ -531,9 +531,9 @@
 
 		<!-- Test: Arquillian container and extensions -->
 		<dependency>
-		  <groupId>org.jboss.arquillian.testng</groupId>
-		  <artifactId>arquillian-testng-container</artifactId>
-		  <scope>test</scope>
+			<groupId>org.jboss.arquillian.testng</groupId>
+			<artifactId>arquillian-testng-container</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.extension</groupId>
@@ -541,9 +541,9 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.eu.ingwar.tools</groupId>
-		    <artifactId>arquillian-suite-extension</artifactId>
-		    <scope>test</scope>
+			<groupId>org.eu.ingwar.tools</groupId>
+			<artifactId>arquillian-suite-extension</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Test: Shrinkwrap -->
@@ -553,15 +553,15 @@
 			<type>pom</type>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap.resolver</groupId>
-            <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.shrinkwrap.descriptors</groupId>
-            <artifactId>shrinkwrap-descriptors-impl-javaee</artifactId>
-            <scope>test</scope>
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.resolver</groupId>
+			<artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.shrinkwrap.descriptors</groupId>
+			<artifactId>shrinkwrap-descriptors-impl-javaee</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<!-- Documentation -->
@@ -644,10 +644,6 @@
 					<artifactId>jetty-plus</artifactId>
 					<scope>test</scope>
 				</dependency>
-				<dependency>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-deploy</artifactId>
-				</dependency>
 			</dependencies>
 
 			<build>
@@ -712,7 +708,7 @@
 			</activation>
 
 			<dependencies>
-				<!--  Remove after oxAuth client update to same version -->
+				<!-- Remove after oxAuth client update to same version -->
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-jaxrs</artifactId>
@@ -755,19 +751,19 @@
 			</activation>
 
 			<dependencies>
-			    <!-- Glassfish -->
-			    <dependency>
-			      <groupId>org.glassfish.main.extras</groupId>
-			      <artifactId>glassfish-embedded-all</artifactId>
-			      <version>4.1.2</version>
-			      <scope>test</scope>
-			    </dependency>
-			    <dependency>
-			      <groupId>org.jboss.arquillian.container</groupId>
-			      <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-			      <version>1.0.0.Final</version>
-			      <scope>test</scope>
-			    </dependency>
+				<!-- Glassfish -->
+				<dependency>
+					<groupId>org.glassfish.main.extras</groupId>
+					<artifactId>glassfish-embedded-all</artifactId>
+					<version>4.1.2</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.jboss.arquillian.container</groupId>
+					<artifactId>arquillian-glassfish-embedded-3.1</artifactId>
+					<version>1.0.0.Final</version>
+					<scope>test</scope>
+				</dependency>
 			</dependencies>
 		</profile>
 
