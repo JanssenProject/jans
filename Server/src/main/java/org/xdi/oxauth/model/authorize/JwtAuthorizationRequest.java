@@ -37,6 +37,7 @@ import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.security.StringEncrypter;
 
 import com.google.common.base.Strings;
@@ -102,7 +103,7 @@ public class JwtAuthorizationRequest {
                         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
                         jweDecrypter = new JweDecrypterImpl(privateKey);
                     } else {
-                        ClientService clientService = ServerUtil.bean(ClientService.class); 
+                        ClientService clientService = CdiUtil.bean(ClientService.class); 
                         jweDecrypter = new JweDecrypterImpl(clientService.decryptSecret(client.getClientSecret()).getBytes(Util.UTF8_STRING_ENCODING));
                     }
                     jweDecrypter.setKeyEncryptionAlgorithm(keyEncryptionAlgorithm);
@@ -321,7 +322,7 @@ public class JwtAuthorizationRequest {
     }
 
     private boolean validateSignature(SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
-        ClientService clientService = ServerUtil.bean(ClientService.class); 
+        ClientService clientService = CdiUtil.bean(ClientService.class); 
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
         JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
                 JwtUtil.getJSONWebKeys(client.getJwksUri()) :

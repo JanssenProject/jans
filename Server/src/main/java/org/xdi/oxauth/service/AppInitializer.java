@@ -28,8 +28,11 @@ import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.service.cdi.event.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.service.status.ldap.LdapStatusTimer;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.PythonService;
+import org.xdi.service.cdi.event.ConfigurationUpdate;
+import org.xdi.service.cdi.event.LdapConfigurationReload;
+import org.xdi.service.cdi.event.Scheduled;
+import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.service.timer.QuartzSchedulerManager;
@@ -87,7 +90,7 @@ public class AppInitializer {
 
 	@Inject
 	private Event<TimerEvent> timerEvent;
-	
+
 	@Inject @Named(LDAP_ENTRY_MANAGER_NAME)
 	private Instance<LdapEntryManager> ldapEntryManagerInstance;
 	
@@ -123,7 +126,7 @@ public class AppInitializer {
 	
 	@Inject
 	private KeyGeneratorTimer keyGeneratorTimer;
-	
+
 	@Inject
 	private LdapStatusTimer ldapStatusTimer;
 	
@@ -149,8 +152,6 @@ public class AppInitializer {
     }
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
-		List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
     	createConnectionProvider();
         configurationFactory.create();
 
@@ -160,8 +161,14 @@ public class AppInitializer {
 
         setDefaultAuthenticationMethod(localLdapEntryManager);
 
+		// Initialize python interpreter
         pythonService.initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
+
+		// Initialize script manager
+        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
+				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
         customScriptManager.init(supportedCustomScriptTypes);
+
         metricService.init();
 
         // Start timer
@@ -286,7 +293,7 @@ public class AppInitializer {
 
     public void recreateLdapEntryManager(@Observes @LdapConfigurationReload String event) {
     	// Get existing application scoped instance
-    	LdapEntryManager oldLdapEntryManager = ServerUtil.getContextBean(beanManager, LdapEntryManager.class, LDAP_ENTRY_MANAGER_NAME);
+    	LdapEntryManager oldLdapEntryManager = CdiUtil.getContextBean(beanManager, LdapEntryManager.class, LDAP_ENTRY_MANAGER_NAME);
 
     	// Recreate components
     	createConnectionProvider();
@@ -321,7 +328,7 @@ public class AppInitializer {
 
     public void recreateLdapAuthEntryManagers(List<GluuLdapConfiguration> newLdapAuthConfigs) {
     	// Get existing application scoped instance
-		List<LdapEntryManager> oldLdapAuthEntryManagers = ServerUtil.getContextBean(beanManager,
+		List<LdapEntryManager> oldLdapAuthEntryManagers = CdiUtil.getContextBean(beanManager,
 				new ParameterizedTypeImpl(List.class, LdapEntryManager.class), LDAP_AUTH_ENTRY_MANAGER_NAME);
 
     	// Recreate components
