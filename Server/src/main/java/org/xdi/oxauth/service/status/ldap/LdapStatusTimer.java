@@ -10,8 +10,8 @@ import org.gluu.site.ldap.LDAPConnectionProvider;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.cdi.event.LdapStatusEvent;
-import org.xdi.oxauth.service.cdi.event.Scheduled;
+import org.xdi.service.cdi.event.LdapStatusEvent;
+import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 
