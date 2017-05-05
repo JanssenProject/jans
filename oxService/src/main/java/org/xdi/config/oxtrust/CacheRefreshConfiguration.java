@@ -17,7 +17,7 @@ import org.xdi.model.ldap.GluuLdapConfiguration;
  * @author Yuriy Movchan Date: 07.13.2011
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CacheRefreshConfiguration {
+public class CacheRefreshConfiguration implements Configuration {
 
 	private List<GluuLdapConfiguration> sourceConfigs;
 	private GluuLdapConfiguration inumConfig;

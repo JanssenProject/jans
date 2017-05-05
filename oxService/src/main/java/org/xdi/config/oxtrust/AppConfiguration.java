@@ -17,7 +17,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @version 0.1, 05/15/2013
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class ApplicationConfiguration implements Serializable {
+public final class AppConfiguration implements Configuration, Serializable {
 
 	private static final long serialVersionUID = -8991383390239617013L;
 

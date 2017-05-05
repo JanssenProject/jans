@@ -28,7 +28,7 @@ public class LdapOxTrustConfiguration extends Entry {
 
 	@LdapJsonObject
 	@LdapAttribute(name = "oxTrustConfApplication")
-    private ApplicationConfiguration application;
+    private AppConfiguration application;
 
 	@LdapJsonObject
 	@LdapAttribute(name = "oxTrustConfCacheRefresh")
@@ -44,11 +44,11 @@ public class LdapOxTrustConfiguration extends Entry {
 	public LdapOxTrustConfiguration() {
 	}
 
-	public ApplicationConfiguration getApplication() {
+	public AppConfiguration getApplication() {
 		return application;
 	}
 
-	public void setApplication(ApplicationConfiguration application) {
+	public void setApplication(AppConfiguration application) {
 		this.application = application;
 	}
 
