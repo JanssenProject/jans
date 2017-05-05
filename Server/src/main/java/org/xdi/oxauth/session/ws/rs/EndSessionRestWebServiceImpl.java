@@ -18,6 +18,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import org.xdi.model.security.Identity;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -32,7 +33,6 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionParamsValidator;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.RedirectionUriService;
