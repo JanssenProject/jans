@@ -56,6 +56,8 @@ public enum ErrorResponseCode {
     NO_UMA_RPT_PARAMETER("invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
     FAILED_TO_GET_END_SESSION_ENDPOINT("no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_REVOCATION_ENDPOINT("no_revocation_endpoint_at_op", "Failed to get revocation_endpoint at https://accounts.google.com/.well-known/openid-configuration"),
+    PROVIDED_AAT_IS_INACTIVE("aat_inactive", "AAT provided in parameters is not active (does not exist or otherwise expired)."),
+    PROVIDED_AAT_NO_UMA_AUTHORIZATION_SCOPE("aat_no_uma_scope", "AAT provided in parameters does not have required 'uma_authorization' scope."),
     FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
     FAILED_TO_GET_GAT("internal_error", "Failed to get GAT.");
 

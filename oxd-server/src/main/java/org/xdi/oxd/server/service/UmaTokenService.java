@@ -7,12 +7,15 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.client.service.ClientFactory;
+import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.client.uma.CreateGatService;
 import org.xdi.oxauth.client.uma.CreateRptService;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.uma.GatRequest;
@@ -330,5 +333,29 @@ public class UmaTokenService {
             LOG.debug("Authorization code is blank.");
         }
         throw new RuntimeException("Failed to obtain Token, scopeType: " + scopeType + ", site: " + site);
+    }
+
+    public void putAat(String aat, String oxdId) {
+        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint());
+        final IntrospectionResponse response = introspectionService.introspectToken("Bearer " + getPat(oxdId).getToken(), aat);
+        LOG.trace("Introspection for RP provided AAT: " + response);
+
+        if (response.isActive()) {
+            LOG.debug("AAT is not active.");
+            throw new ErrorResponseException(ErrorResponseCode.PROVIDED_AAT_IS_INACTIVE);
+        }
+        if (!response.getScopes().contains("uma_authorization")) {
+            LOG.debug("AAT does not have required uma_authorization scope");
+            throw new ErrorResponseException(ErrorResponseCode.PROVIDED_AAT_NO_UMA_AUTHORIZATION_SCOPE);
+        }
+
+        Rp site = rpService.getRp(oxdId);
+
+        site.setAat(aat);
+        site.setAatCreatedAt(response.getIssuedAt());
+        site.setAatExpiresIn((int) ((response.getExpiresAt().getTime() - response.getIssuedAt().getTime()) / 1000));
+        site.setAatRefreshToken(null);
+
+        rpService.updateSilently(site);
     }
 }
