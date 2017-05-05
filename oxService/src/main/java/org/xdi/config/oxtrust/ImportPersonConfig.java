@@ -26,4 +26,5 @@ public class ImportPersonConfig implements Configuration, Serializable {
 	public void setMappings(List<ImportPerson> mappings) {
 		this.mappings = mappings;
 	}
+
 }
