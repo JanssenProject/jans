@@ -2,7 +2,7 @@ package org.xdi.oxauth.service.external.internal;
 
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.type.auth.DummyPersonAuthenticationType;
-import org.xdi.oxauth.security.Credentials;
+import org.xdi.model.security.Credentials;
 import org.xdi.oxauth.service.AuthenticationService;
 
 import javax.ejb.Stateless;
