@@ -3,6 +3,7 @@ package org.gluu.oxserver.filters;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 
+import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -21,7 +22,8 @@ import org.slf4j.LoggerFactory;
  */
 public class AbstractCorsFilter implements Filter {
 
-	private static final Logger log = LoggerFactory.getLogger(AbstractCorsFilter.class);
+	@Inject
+	private Logger log;
 
 	private static final String CORS_FILTERS[] = { "org.apache.catalina.filters.CorsFilter",
 			"org.eclipse.jetty.servlets.CrossOriginFilter" };
