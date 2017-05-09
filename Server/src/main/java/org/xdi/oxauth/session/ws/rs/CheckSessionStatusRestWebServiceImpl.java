@@ -22,8 +22,8 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.Logger;
+import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;

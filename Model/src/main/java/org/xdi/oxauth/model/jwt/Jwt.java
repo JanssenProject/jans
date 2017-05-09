@@ -18,7 +18,8 @@ import org.xdi.oxauth.model.token.JsonWebResponse;
  * a JSON Web Signature (JWS). JWTs may also be optionally encrypted using JSON
  * Web Encryption (JWE).
  *
- * @author Javier Rojas Blum Date: 11.09.2012
+ * @author Javier Rojas Blum
+ * @version May 3, 2017
  */
 public class Jwt extends JsonWebResponse {
 
@@ -55,14 +56,22 @@ public class Jwt extends JsonWebResponse {
             return null;
         }
 
+        String encodedHeader = null;
+        String encodedClaims = null;
+        String encodedSignature = null;
+
         String[] jwtParts = encodedJwt.split("\\.");
-        if (jwtParts.length != 3) {
+        if (jwtParts.length == 2) { // Signature Algorithm NONE
+            encodedHeader = jwtParts[0];
+            encodedClaims = jwtParts[1];
+            encodedSignature = "";
+        } else if (jwtParts.length == 3) {
+            encodedHeader = jwtParts[0];
+            encodedClaims = jwtParts[1];
+            encodedSignature = jwtParts[2];
+        } else {
             throw new InvalidJwtException("Invalid JWT format.");
         }
-
-        String encodedHeader = jwtParts[0];
-        String encodedClaims = jwtParts[1];
-        String encodedSignature = jwtParts[2];
 
         Jwt jwt = new Jwt();
         jwt.setHeader(new JwtHeader(encodedHeader));

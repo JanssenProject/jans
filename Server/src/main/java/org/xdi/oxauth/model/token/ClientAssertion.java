@@ -25,6 +25,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.security.StringEncrypter;
 
 import com.google.common.base.Strings;
@@ -87,7 +88,7 @@ public class ClientAssertion {
 
                         // Validate expiration
                         if (expirationTime.after(new Date())) {
-                            ClientService clientService = ServerUtil.bean(ClientService.class);
+                            ClientService clientService = CdiUtil.bean(ClientService.class);
                             Client client = clientService.getClient(subject);
 
                             // Validate client

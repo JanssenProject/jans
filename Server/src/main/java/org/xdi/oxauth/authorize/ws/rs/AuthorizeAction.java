@@ -14,7 +14,9 @@ import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.security.Identity;
 import org.xdi.oxauth.auth.Authenticator;
+import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
@@ -32,7 +34,6 @@ import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.net.NetworkService;
@@ -56,7 +57,7 @@ import java.util.*;
 @Named
 public class AuthorizeAction {
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject
@@ -92,9 +93,8 @@ public class AuthorizeAction {
     @Inject
     private AuthenticationMode defaultAuthenticationMode;
 
-// TODO: Review CDI (we can use simular to Seam LocaleSelector bean)
-//    @Inject("org.jboss.seam.international.localeSelector")
-//    private LocaleSelector localeSelector;
+    @Inject
+    private LanguageBean languageBean;
 
     @Inject
     private NetworkService networkService;
@@ -151,10 +151,8 @@ public class AuthorizeAction {
             }
             Locale matchingLocale = LocaleUtil.localeMatch(uiLocalesList, supportedLocales);
 
-            if (matchingLocale != null) {
-// TODO: Review CDI (we can use simular to Seam LocaleSelector bean)
-//                localeSelector.setLocale(matchingLocale);
-            }
+            if (matchingLocale != null)
+                languageBean.setLocaleCode(matchingLocale.getLanguage());
         }
     }
 
@@ -754,65 +752,50 @@ public class AuthorizeAction {
         this.codeChallengeMethod = codeChallengeMethod;
     }
 
-    public String encodeParameters(String url, Map<String, Object> parameters)
-    {
-       if ( parameters.isEmpty() ) return url;
-       
-       StringBuilder builder = new StringBuilder(url);
-       for ( Map.Entry<String, Object> param: parameters.entrySet() )
-       {
-          String parameterName = param.getKey();
-          if ( !containsParameter(url, parameterName) )
-          {
-             Object parameterValue = param.getValue();
-             if (parameterValue instanceof Iterable)
-             {
-                for ( Object value: (Iterable) parameterValue )
-                {
-                   builder.append('&')
-                         .append(parameterName)
-                         .append('=');
-                   if (value!=null)
-                   {
-                      builder.append(encode(value));
-                   }
+    public String encodeParameters(String url, Map<String, Object> parameters) {
+        if (parameters.isEmpty()) return url;
+
+        StringBuilder builder = new StringBuilder(url);
+        for (Map.Entry<String, Object> param : parameters.entrySet()) {
+            String parameterName = param.getKey();
+            if (!containsParameter(url, parameterName)) {
+                Object parameterValue = param.getValue();
+                if (parameterValue instanceof Iterable) {
+                    for (Object value : (Iterable) parameterValue) {
+                        builder.append('&')
+                                .append(parameterName)
+                                .append('=');
+                        if (value != null) {
+                            builder.append(encode(value));
+                        }
+                    }
+                } else {
+                    builder.append('&')
+                            .append(parameterName)
+                            .append('=');
+                    if (parameterValue != null) {
+                        builder.append(encode(parameterValue));
+                    }
                 }
-             }
-             else
-             {
-                builder.append('&')
-                      .append(parameterName)
-                      .append('=');
-                if (parameterValue!=null)
-                {
-                   builder.append(encode(parameterValue));
-                }
-             }
-          }
-       }
-       if ( url.indexOf('?')<0 ) 
-       {
-          builder.setCharAt( url.length() ,'?' );
-       }
-       return builder.toString();
+            }
+        }
+        if (url.indexOf('?') < 0) {
+            builder.setCharAt(url.length(), '?');
+        }
+        return builder.toString();
     }
 
-    private boolean containsParameter(String url, String parameterName)
-    {
-       return url.indexOf('?' + parameterName + '=')>0 || 
-             url.indexOf( '&' + parameterName + '=')>0;
+    private boolean containsParameter(String url, String parameterName) {
+        return url.indexOf('?' + parameterName + '=') > 0 ||
+                url.indexOf('&' + parameterName + '=') > 0;
     }
 
-    private String encode(Object value)
-    {
-       try
-       {
-          return URLEncoder.encode(String.valueOf(value), "UTF-8");
-       }
-       catch (UnsupportedEncodingException iee)
-       {
-          throw new RuntimeException(iee);
-       }
+    private String encode(Object value) {
+        try {
+            return URLEncoder.encode(String.valueOf(value), "UTF-8");
+        } catch (UnsupportedEncodingException iee) {
+            throw new RuntimeException(iee);
+        }
     }
 
 }
