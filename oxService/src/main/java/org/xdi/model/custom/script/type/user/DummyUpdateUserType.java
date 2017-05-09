@@ -13,6 +13,7 @@ import org.xdi.model.SimpleCustomProperty;
  * Dummy implementation of interface UpdateUserType
  *
  * @author Yuriy Movchan Date: 12/30/2014
+ * 
  */
 public class DummyUpdateUserType implements UpdateUserType {
 
@@ -33,6 +34,21 @@ public class DummyUpdateUserType implements UpdateUserType {
 
 	@Override
 	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	@Override
+	public boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	@Override
+	public boolean addUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	@Override
+	public boolean deleteUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
 
