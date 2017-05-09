@@ -21,6 +21,7 @@ import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
 
@@ -113,69 +114,8 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
-    public static <T> T getContextBean(BeanManager beanManager, Type type, String beanName) {
-		Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, NamedLiteral.of(beanName)));
-		if (bean == null) {
-			return null;
-		}
-
-		T existingInstance = beanManager.getContext(bean.getScope()).get(bean, beanManager.createCreationalContext(bean));
-
-    	return existingInstance;
-	}
-
-    public static <T> T getContextualReference(BeanManager bm, Set<Bean<?>> beans, Class<?> type) {
-		if (beans == null || beans.size() == 0) {
-			return null;
-		}
-
-		// If we would resolve to multiple beans then BeanManager#resolve would throw an AmbiguousResolutionException
-		Bean<?> bean = bm.resolve(beans);
-		if (bean == null) {
-			return null;
-		} else {
-			CreationalContext<?> creationalContext = bm.createCreationalContext(bean);
-			return (T) bm.getReference(bean, type, creationalContext);
-		}
-	}
-
-    public static <T> Instance<T> instance(Class<T> p_clazz) {
-		return CDI.current().select(p_clazz);
-    }    	
-
-    public static <T> Instance<T> instance(Class<T> p_clazz, String name) {
-		return CDI.current().select(p_clazz, NamedLiteral.of(name));
-    }    	
-
-    public static <T> T bean(Class<T> p_clazz) {
-		return instance(p_clazz).get();
-    }    	
-
-    public static <T> T bean(Class<T> p_clazz, String name) {
-		return instance(p_clazz, name).get();
-    }    	
-
-    public static <T> void destroy(Class<T> p_clazz) {
-		Instance<T> instance = instance(p_clazz);
-		if (instance.isResolvable()) {
-			instance.destroy(instance.get());
-		}
-    }    	
-
-    public static <T> T destroy(Class<T> p_clazz, String name) {
-		Instance<T> instance = instance(p_clazz, name);
-		if (instance.isResolvable()) {
-			T obj = instance.get();
-			instance.destroy(obj);
-			
-			return obj;
-		}
-
-		return null;
-    }    	
-
     public static LdapEntryManager getLdapManager() {
-        return bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
+        return CdiUtil.bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }
 
     public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {
