@@ -23,6 +23,7 @@ from org.xdi.oxauth.service.net import HttpService
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util import StringHelper
 from org.xdi.util.security import StringEncrypter
+from org.xdi.service import MailService
 
 try:
     import json

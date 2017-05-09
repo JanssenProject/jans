@@ -17,6 +17,7 @@ import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.cdi.util.CdiUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -58,7 +59,7 @@ public class JwtSigner {
             signatureAlgorithm = SignatureAlgorithm.fromString(client.getIdTokenSignedResponseAlg());
         }
         
-        ClientService clientService = ServerUtil.bean(ClientService.class); 
+        ClientService clientService = CdiUtil.bean(ClientService.class); 
         return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
     }
 

@@ -20,11 +20,11 @@ import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.error.ErrorMessages;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.cdi.event.ConfigurationEvent;
-import org.xdi.oxauth.service.cdi.event.ConfigurationUpdate;
-import org.xdi.oxauth.service.cdi.event.LdapConfigurationReload;
-import org.xdi.oxauth.service.cdi.event.Scheduled;
 import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.service.cdi.event.ConfigurationEvent;
+import org.xdi.service.cdi.event.ConfigurationUpdate;
+import org.xdi.service.cdi.event.LdapConfigurationReload;
+import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 import org.xdi.util.StringHelper;
@@ -69,7 +69,7 @@ public class ConfigurationFactory {
 	private Instance<LdapEntryManager> ldapEntryManagerInstance;
 	
 	@Inject
-	private Instance<Configuration> configurationIsntance;
+	private Instance<Configuration> configurationInstance;
 
 	public final static String LDAP_CONFIGUARION_RELOAD_EVENT_TYPE = "ldapConfigurationReloadEvent";
 
@@ -78,8 +78,7 @@ public class ConfigurationFactory {
 	static {
 		if (System.getProperty("gluu.base") != null) {
 			BASE_DIR = System.getProperty("gluu.base");
-		} else if ((System.getProperty("catalina.base") != null)
-				&& (System.getProperty("catalina.base.ignore") == null)) {
+		} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
 			BASE_DIR = System.getProperty("catalina.base");
 		} else if (System.getProperty("catalina.home") != null) {
 			BASE_DIR = System.getProperty("catalina.home");
@@ -127,15 +126,18 @@ public class ConfigurationFactory {
 			String ldapFileName = determineLdapConfigurationFileName();
 			this.prevLdapFileName = loadLdapConfiguration(ldapFileName);
 			this.confDir = confDir();
+
 			this.configFilePath = confDir + CONFIG_FILE_NAME;
 			this.errorsFilePath = confDir + ERRORS_FILE_NAME;
 			this.staticConfFilePath = confDir + STATIC_CONF_FILE_NAME;
+
 			String certsDir = getLdapConfiguration().getString("certsDir");
 			if (StringHelper.isEmpty(certsDir)) {
 				certsDir = confDir;
 			}
 			this.webKeysFilePath = certsDir + File.separator + WEB_KEYS_FILE_NAME;
 			this.saltFilePath = confDir + SALT_FILE_NAME;
+
 			loadCryptoConfigurationSalt();
 		} finally {
 			this.isActive.set(false);
@@ -186,9 +188,8 @@ public class ConfigurationFactory {
 		File ldapFile = new File(ldapFileName);
 		if (ldapFile.exists()) {
 			final long lastModified = ldapFile.lastModified();
-			if (!StringHelper.equalsIgnoreCase(this.prevLdapFileName, ldapFileName)
-					|| (lastModified > ldapFileLastModifiedTime)) {
-				// reload configuration only if it was modified
+			if (!StringHelper.equalsIgnoreCase(this.prevLdapFileName, ldapFileName) || (lastModified > ldapFileLastModifiedTime)) {
+				// Reload configuration only if it was modified
 				this.prevLdapFileName = loadLdapConfiguration(ldapFileName);
 				event.select(LdapConfigurationReload.Literal.INSTANCE).fire(LDAP_CONFIGUARION_RELOAD_EVENT_TYPE);
 			}
@@ -348,10 +349,10 @@ public class ConfigurationFactory {
 
 		return false;
 	}
-	
+
 	public void destroy(Class<? extends Configuration> clazz) {
-		Instance<? extends Configuration> confInstance = configurationIsntance.select(clazz);
-		configurationIsntance.destroy(confInstance.get());
+		Instance<? extends Configuration> confInstance = configurationInstance.select(clazz);
+		configurationInstance.destroy(confInstance.get());
 	}
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {

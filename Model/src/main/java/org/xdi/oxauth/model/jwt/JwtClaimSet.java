@@ -19,7 +19,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version July 31, 2016
+ * @version May 3, 2017
  */
 public abstract class JwtClaimSet {
 
@@ -51,6 +51,22 @@ public abstract class JwtClaimSet {
         } else {
             return null;
         }
+    }
+
+    public JSONObject getClaimAsJSON(String key) {
+        String claim = getClaimAsString(key);
+
+        try {
+            if (claim != null) {
+                JSONObject json = null;
+                json = new JSONObject(claim);
+                return json;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public List<String> getClaimAsStringList(String key) {
