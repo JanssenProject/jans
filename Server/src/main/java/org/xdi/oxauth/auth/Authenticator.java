@@ -11,6 +11,8 @@ import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.security.Credentials;
+import org.xdi.model.security.SimplePrincipal;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
@@ -19,9 +21,7 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.security.Credentials;
 import org.xdi.oxauth.security.Identity;
-import org.xdi.oxauth.security.SimplePrincipal;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
@@ -632,7 +632,7 @@ public class Authenticator {
 	}
 
     public void addMessage(Severity severity, String summary) {
-        String msg = languageBean.getValue(summary);
+        String msg = languageBean.getMessage(summary);
         FacesMessage message = new FacesMessage(severity, msg, null);
         facesContext.addMessage(null, message);
     }
