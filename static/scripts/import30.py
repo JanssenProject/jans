@@ -19,6 +19,8 @@ import shutil
 import json
 import re
 import subprocess
+import time
+import datetime
 
 from distutils.dir_util import copy_tree
 from ldif import LDIFParser, LDIFWriter
@@ -485,6 +487,14 @@ class Migration(object):
                         line = line.replace("cn=directory manager", "cn=directory manager,o=gluu")
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
+		    if 'oxAuthAuthenticationTime' in line:
+                        dateString = line.replace('oxAuthAuthenticationTime:','').strip()
+                        dateTimestamp = time.mktime(time.strptime(dateString, "%a %b %d %H:%M:%S %Z %Y"))
+                        dateString = time.strftime("%Y%m%d%H%M%S", time.gmtime(dateTimestamp))
+                        ts = time.time()
+                        utc_offset = (datetime.datetime.fromtimestamp(ts) - datetime.datetime.utcfromtimestamp(ts)).total_seconds()
+                        dateString = "%s.%03dZ" % (time.strftime("%Y%m%d%H%M%S", time.localtime(dateTimestamp)), int(utc_offset//60))
+                        line = "%s: %s\n" % ('oxAuthAuthenticationTime', dateString)
                     outfile.write(line)
 
     def importDataIntoOpenldap(self):
