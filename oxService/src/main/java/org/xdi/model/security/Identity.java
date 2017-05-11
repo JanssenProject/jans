@@ -2,13 +2,16 @@ package org.xdi.model.security;
 
 import java.io.Serializable;
 import java.security.Principal;
+import java.security.acl.Group;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
 import org.slf4j.Logger;
@@ -23,6 +26,8 @@ public class Identity implements Serializable {
 
 	public static final String EVENT_LOGIN_SUCCESSFUL = "org.jboss.seam.security.loginSuccessful";
 
+	public static final String ROLES_GROUP = "Roles";
+
 	@Inject
 	private Logger log;
 
@@ -35,6 +40,13 @@ public class Identity implements Serializable {
 	private Principal principal;
 
 	private HashMap<String, Object> workingParameters;
+
+	private Subject subject;
+
+	@PostConstruct
+	public void create() {
+		this.subject = new Subject();
+	}
 
 	/**
 	 * Simple check that returns true if the user is logged in, without
@@ -129,6 +141,10 @@ public class Identity implements Serializable {
 	public Principal getPrincipal() {
 		return principal;
 	}
+	   
+	public Subject getSubject() {
+		return subject;
+	}
 
 	public Credentials getCredentials() {
 		return credentials;
@@ -160,15 +176,52 @@ public class Identity implements Serializable {
 	}
 
 	public boolean isSetWorkingParameter(String name) {
-		return this.workingParameters.containsKey(name);
+		return getWorkingParameters().containsKey(name);
 	}
 
 	public Object getWorkingParameter(String name) {
-		return this.workingParameters.get(name);
+		return getWorkingParameters().get(name);
 	}
 
 	public void setWorkingParameter(String name, Object value) {
-		this.workingParameters.put(name, value);
+		getWorkingParameters().put(name, value);
+	}
+
+	/**
+	 * Adds a role to the authenticated user.
+	 * 
+	 * @param role
+	 *            The name of the role to add
+	 */
+	public boolean addRole(String role) {
+		if (role == null || "".equals(role)) {
+			return false;
+		}
+
+		if (!isLoggedIn()) {
+			return false;
+		} else {
+			for (Group sg : getSubject().getPrincipals(Group.class)) {
+				if (ROLES_GROUP.equals(sg.getName())) {
+					return sg.addMember(new Role(role));
+				}
+			}
+
+			SimpleGroup roleGroup = new SimpleGroup(ROLES_GROUP);
+			roleGroup.addMember(new Role(role));
+			getSubject().getPrincipals().add(roleGroup);
+			return true;
+		}
+	}
+
+	public boolean hasPermission(String name, String action, Object... arg) {
+		// TODO: CDI Use custom script
+		return false;
+	}
+
+	public boolean hasPermission(String name, String action) {
+		// TODO: CDI Use custom script
+		return false;
 	}
 
 }
