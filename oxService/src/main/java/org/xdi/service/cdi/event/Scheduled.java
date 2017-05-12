@@ -15,7 +15,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Qualifier
 @Retention(RUNTIME)
 @Target({ METHOD, FIELD, PARAMETER, TYPE })
-@Documented
 public @interface Scheduled {
 
 	public static final class Literal extends AnnotationLiteral<Scheduled> implements Scheduled {

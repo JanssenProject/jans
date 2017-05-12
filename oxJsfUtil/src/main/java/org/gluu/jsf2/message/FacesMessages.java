@@ -18,9 +18,13 @@ public class FacesMessages {
 		facesContext.addMessage(null, new FacesMessage(severity, message, message));
 	}
 
+	public void add(String clientId, Severity severity, String message) {
+		facesContext.addMessage(clientId, new FacesMessage(severity, message, message));
+	}
+
 	public void add(Severity severity, String message, Object ... params) {
-		
 		// TODO: CDI Review
+		add(severity, message);
 	}
 
 }
