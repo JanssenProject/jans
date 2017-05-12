@@ -7,6 +7,8 @@
 import java.io.Serializable;
 import java.util.List;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -16,6 +18,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Yuriy Movchan
  * @version 0.1, 05/15/2013
  */
+@Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class AppConfiguration implements Configuration, Serializable {
 
