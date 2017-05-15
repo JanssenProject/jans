@@ -6,6 +6,17 @@
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 		</Console>
 
+		<RollingFile name="OX_HTTP_REQUEST_RESPONSE_FILE" fileName="${sys:catalina.base}/logs/http_request_response.log" filePattern="${sys:catalina.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log">
+
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
 		<RollingFile name="FILE" fileName="${sys:catalina.base}/logs/oxauth.log" filePattern="${sys:catalina.base}/logs/oxauth-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
@@ -76,6 +87,10 @@
 
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
+
+        <AsyncLogger name="org.xdi.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
+            <AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE"/>
+        </AsyncLogger>
 
 		<AsyncLogger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
