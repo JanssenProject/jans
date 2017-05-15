@@ -74,14 +74,14 @@
                 <div class="dialog">
                     <h:panelGrid columns="1" border="0" rowClasses="prop" columnClasses="value">
                         <p></p>
-                        <p class="body-section">#{msgs['cert.thisCanHappen']}</p>
-                        <ul class="body-list"><li>#{msgs['cert.youHaveExpired']}</li></ul>
-                        <ul class="body-list"><li>#{msgs['cert.youSelectedInvalid']}</li></ul>
+                        <p class="body-section"><h:outputText value="#{msgs['cert.thisCanHappen']}" escape="false"/></p>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.youHaveExpired']}" escape="false"/></li></ul>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.youSelectedInvalid']}" escape="false"/></li></ul>
 
                         <p></p>
-                        <p class="body-section">#{msgs['cert.noteInternetExplorer']}</p>
-                        <ul class="body-list"><li>#{msgs['cert.ifYouAreUsing']}</li></ul>
-                        <ul class="body-list"><li>#{msgs['cert.ifYouUseFireFox']}</li></ul>
+                        <p class="body-section"><h:outputText value="#{msgs['cert.noteInternetExplorer']}" escape="false"/></p>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.ifYouAreUsing']}" escape="false"/> </li></ul>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.ifYouUseFireFox']}" escape="false"/></li></ul>
                     </h:panelGrid>
                 </div>
 

@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
-import org.xdi.service.cache.CacheConfiguration;
-import org.xdi.service.cache.InMemoryConfiguration;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
@@ -25,7 +23,12 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  *
  * @author Yuriy Movchan Date: 05/22/2015
  */
+@ApplicationScoped
+@Named
 public class ApplicationFactory {
+
+    @Inject
+    private Logger log;
     
     @Inject
     private ApplianceService applianceService;
@@ -33,30 +36,10 @@ public class ApplicationFactory {
     @Inject
     private EncryptionService encryptionService;
 
-    @Inject
-    private Logger log;
-
     @Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
         return new SHA256withECDSASignatureVerification();
     }
-
-	@Produces @ApplicationScoped
-	public CacheConfiguration getCacheConfiguration() {
-		CacheConfiguration cacheConfiguration = applianceService.getAppliance().getCacheConfiguration();
-		if (cacheConfiguration == null || cacheConfiguration.getCacheProviderType() == null) {
-			log.error("Failed to read cache configuration from LDAP. Please check appliance oxCacheConfiguration attribute " +
-					"that must contain cache configuration JSON represented by CacheConfiguration.class. Applieance DN: " + applianceService.getAppliance().getDn());
-			log.info("Creating fallback IN-MEMORY cache configuration ... ");
-
-			cacheConfiguration = new CacheConfiguration();
-			cacheConfiguration.setInMemoryConfiguration(new InMemoryConfiguration());
-
-			log.info("IN-MEMORY cache configuration is created.");
-		}
-		log.info("Cache configuration: " + cacheConfiguration);
-		return cacheConfiguration;
-	}
 
 	@Produces @ApplicationScoped
 	public SmtpConfiguration getSmtpConfiguration() {

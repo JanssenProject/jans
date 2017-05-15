@@ -1,23 +1,30 @@
 package org.xdi.oxauth.i18n;
 
+import org.apache.logging.log4j.util.Strings;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.SessionStateService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ValueChangeEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 @Named("language")
 @ApplicationScoped
 public class LanguageBean implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
     private static final String BASE_NAME = "messages";
+    private static final String COOKIE_NAME = "org.gluu.i18n.Locale";
+    private static final int DEFAULT_MAX_AGE = 31536000; // 1 year in seconds
+    private static final String COOKIE_PATH = "/";
 
     @Inject
     private SessionStateService sessionStateService;
@@ -25,49 +32,29 @@ public class LanguageBean implements Serializable {
     @Inject
     private AuthenticationService authenticationService;
 
-    private String localeCode = "en";
-
-    private static Map<String, Object> countries;
-
-    private ResourceBundle bundle;
-
-    static {
-        countries = new LinkedHashMap<String, Object>();
-        countries.put("Bulgarian", new Locale("bg"));
-        countries.put("Germany", new Locale("de"));
-        countries.put("English", Locale.ENGLISH); //label, value
-        countries.put("Spanish", new Locale("es"));
-        countries.put("French", Locale.FRENCH);
-        countries.put("Italian", new Locale("it"));
-        countries.put("Russian", new Locale("ru"));
-        countries.put("Turkish", new Locale("tr"));
-    }
-
-    public Map<String, Object> getCountriesInMap() {
-        return countries;
-    }
+    private String localeCode = Locale.ENGLISH.getLanguage();
 
     public String getLocaleCode() {
-        if (FacesContext.getCurrentInstance().getViewRoot().getLocale().getLanguage() != localeCode)
-            FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
-        return localeCode;
+        String localeCode = getCookieValue();
+        if (localeCode != null) setLocaleCode(localeCode);
+
+        return this.localeCode;
     }
 
     public void setLocaleCode(String localeCode) {
-        this.localeCode = localeCode;
-    }
-
-    public void countryLocaleCodeChanged(ValueChangeEvent e) {
-        String newLocaleValue = e.getNewValue().toString();
-        for (Map.Entry<String, Object> entry : countries.entrySet()) {
-            if (entry.getValue().toString().equals(newLocaleValue)) {
-                FacesContext.getCurrentInstance().getViewRoot().setLocale((Locale) entry.getValue());
+        Iterator<Locale> locales = FacesContext.getCurrentInstance().getApplication().getSupportedLocales();
+        while (locales.hasNext()) {
+            Locale locale = locales.next();
+            if (!Strings.isEmpty(locale.getLanguage()) && locale.getLanguage().equals(localeCode)) {
+                this.localeCode = localeCode;
+                FacesContext.getCurrentInstance().getViewRoot().setLocale(new Locale(localeCode));
+                setCookieValue(localeCode);
             }
         }
     }
 
-    public String getValue(String key) {
-        String result = null;
+    public String getMessage(String key) {
+        String result;
         try {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             ResourceBundle bundle = ResourceBundle.getBundle(BASE_NAME, new Locale(this.localeCode), loader);
@@ -76,5 +63,31 @@ public class LanguageBean implements Serializable {
             result = "???" + key + "??? not found";
         }
         return result;
+    }
+
+    private void setCookieValue(String value) {
+        FacesContext ctx = FacesContext.getCurrentInstance();
+
+        if (ctx == null)
+            return;
+        HttpServletResponse response = (HttpServletResponse) ctx.getExternalContext().getResponse();
+        Cookie cookie = new Cookie(COOKIE_NAME, value);
+        cookie.setMaxAge(DEFAULT_MAX_AGE);
+        cookie.setPath(COOKIE_PATH);
+        response.addCookie(cookie);
+    }
+
+    private String getCookieValue() {
+        Cookie cookie = getCookie();
+        return cookie == null ? null : cookie.getValue();
+    }
+
+    private Cookie getCookie() {
+        FacesContext ctx = FacesContext.getCurrentInstance();
+        if (ctx != null) {
+            return (Cookie) ctx.getExternalContext().getRequestCookieMap().get(COOKIE_NAME);
+        } else {
+            return null;
+        }
     }
 }
