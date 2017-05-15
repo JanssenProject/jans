@@ -22,6 +22,7 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
@@ -261,6 +262,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (StringUtils.isNotBlank(requestObject.getSectorIdentifierUri())) {
             p_client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
+       
         List<ResponseType> responseTypes = requestObject.getResponseTypes();
         if (responseTypes != null && !responseTypes.isEmpty()) {
             responseTypes = new ArrayList<ResponseType>(new HashSet<ResponseType>(responseTypes)); // Remove repeated elements
@@ -277,6 +279,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
         if (StringUtils.isNotBlank(requestObject.getClientUri())) {
             p_client.setClientUri(requestObject.getClientUri());
+        }
+        List<GrantType> grantTypes = requestObject.getGrantTypes();
+        if (grantTypes != null && grantTypes.isEmpty()){
+        	String[] availableGrantTypes = getGrantTypeArray(grantTypes);
+        	if(availableGrantTypes != null){
+        		p_client.setGrantTypes(availableGrantTypes);
+        	}
         }
         if (StringUtils.isNotBlank(requestObject.getPolicyUri())) {
             p_client.setPolicyUri(requestObject.getPolicyUri());
@@ -499,6 +508,28 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
+    private String[] getGrantTypeArray(List<GrantType> grantTypes){
+    	String[] availableGrantTypeArray = null ;
+    	if(appConfiguration.getEnableClientGrantUpdate()) {
+			if(grantTypes != null && !grantTypes.isEmpty()){
+				List<String> dynamicClientRegDefaultGrantType = appConfiguration.getDynamicClientRegDefaultGrantTypes();
+				List<String> grantTypesValue = new ArrayList<String>();
+				for(GrantType grantType: grantTypes){
+					grantTypesValue.add(grantType.toString());
+				}
+				List<String> availableGrantTypes = new ArrayList<String>(dynamicClientRegDefaultGrantType);
+				availableGrantTypes.retainAll(grantTypesValue);
+				availableGrantTypeArray = new String[availableGrantTypes.size()];
+				availableGrantTypeArray = availableGrantTypes.toArray(availableGrantTypeArray);
+				return availableGrantTypeArray;
+			}
+		}
+    	else{
+    		log.trace("Client don't have authentication for grant type update.");
+    	}
+		return availableGrantTypeArray;
+	}
+    
     private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
         final JSONObject jsonObject = getJSONObject(p_client);
         return jsonObject.toString(4).replace("\\/", "/");
