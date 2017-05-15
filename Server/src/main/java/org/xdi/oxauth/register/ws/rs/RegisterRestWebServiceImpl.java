@@ -6,15 +6,71 @@
 
 package org.xdi.oxauth.register.ws.rs;
 
+import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.TOS_URI;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+import static org.xdi.oxauth.model.util.StringUtils.toList;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.model.metric.MetricType;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
@@ -26,7 +82,7 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -46,20 +102,6 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.net.URI;
-import java.util.*;
-
-import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
-import static org.xdi.oxauth.model.util.StringUtils.toList;
-
 /**
  * Implementation for register REST web services.
  *
@@ -68,38 +110,38 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Yuriy Movchan
  * @version October 31, 2016
  */
-@Name("registerRestWebService")
+@Path("/oxauth")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
-    @In
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+    @Inject
     private ScopeService scopeService;
-    @In
+    @Inject
     private InumService inumService;
-    @In
+    @Inject
     private ClientService clientService;
-    @In
+    @Inject
     private TokenService tokenService;
 
-    @In
+    @Inject
     private MetricService metricService;
 
-    @In
+    @Inject
     private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
     
-    @In
+    @Inject
     private RegisterParamsValidator registerParamsValidator;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
-    private StaticConf staticConfiguration;
+    @Inject
+    private StaticConfiguration staticConfiguration;
 
     @Override
     public Response requestRegister(String requestParams, String authorization, HttpServletRequest httpRequest, SecurityContext securityContext) {
@@ -118,7 +160,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             if (appConfiguration.getDynamicRegistrationEnabled()) {
                 final RegisterRequest r = RegisterRequest.fromJson(requestParams);
 
-                log.debug("Attempting to register client: applicationType = {0}, clientName = {1}, redirectUris = {2}, isSecure = {3}, sectorIdentifierUri = {4}, params = {5}",
+                log.debug("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, params = {}",
                         r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
 
                 if (r.getSubjectType() == null) {
@@ -154,7 +196,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             final Client client = new Client();
                             client.setDn("inum=" + inum + "," + clientsBaseDN);
                             client.setClientId(inum);
-                            client.setClientSecret(generatedClientSecret);
+                            client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
                             client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
 
                             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -404,7 +446,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_UPDATE);
         oAuth2AuditLog.setClientId(clientId);
         try {
-            log.debug("Attempting to UPDATE client, client_id: {0}, requestParams = {1}, isSecure = {3}",
+            log.debug("Attempting to UPDATE client, client_id: {}, requestParams = {}, isSecure = {}",
                     clientId, requestParams, securityContext.isSecure());
             final String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
 
@@ -461,7 +503,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     public Response requestClientRead(String clientId, String authorization, HttpServletRequest httpRequest,
                                       SecurityContext securityContext) {
         String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-        log.debug("Attempting to read client: clientId = {0}, registrationAccessToken = {1} isSecure = {2}",
+        log.debug("Attempting to read client: clientId = {}, registrationAccessToken = {} isSecure = {}",
                 clientId, accessToken, securityContext.isSecure());
         Response.ResponseBuilder builder = Response.ok();
 
@@ -539,7 +581,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         JSONObject responseJsonObject = new JSONObject();
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
-        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), client.getClientSecret());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
         		appConfiguration.getRegistrationEndpoint() + "?" +
@@ -615,7 +657,6 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         // custom attributes (custom attributes must be in custom object class)
         final List<String> attrList = appConfiguration.getDynamicRegistrationCustomAttributes();
         if (attrList != null && !attrList.isEmpty()) {
-            final Log staticLog = Logging.getLog(RegisterRestWebServiceImpl.class);
             for (String attr : attrList) {
                 if (p_requestObject.has(attr)) {
                     final JSONArray parameterValuesJsonArray = p_requestObject.optJSONArray(attr);
@@ -629,7 +670,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                         		p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
                         	}
                         } catch (Exception e) {
-                            staticLog.debug(e.getMessage(), e);
+                            log.debug(e.getMessage(), e);
                         }
                     }
                 }

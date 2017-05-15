@@ -6,41 +6,52 @@
 
 package org.xdi.oxauth;
 
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
+import java.util.List;
+import java.util.Map.Entry;
+
+import javax.ws.rs.core.Response;
+
 import org.testng.Assert;
 
 /**
- * @author Javier Rojas Date: 10.10.2011
+ * @author Javier Rojas
+ * @author Yuriy Movchan Date: 10.10.2011
  */
 public abstract class BaseTest extends ConfigurableTest {
 
-    public void showTitle(String title) {
-        title = "TEST: " + title;
+	public void showTitle(String title) {
+		title = "TEST: " + title;
 
-        System.out.println("#######################################################");
-        System.out.println(title);
-        System.out.println("#######################################################");
-    }
+		System.out.println("#######################################################");
+		System.out.println(title);
+		System.out.println("#######################################################");
+	}
 
-    public static void showResponse(String title,
-                                    EnhancedMockHttpServletResponse response) {
-        System.out.println(" ");
-        System.out.println("RESPONSE FOR: " + title);
-        System.out.println(response.getStatus());
-        for (Object headerName : response.getHeaderNames()) {
-            System.out.println(headerName + ": "
-                    + response.getHeader(headerName.toString()));
-        }
-        System.out.println(response.getContentAsString().replace("\\n", "\n"));
-        System.out.println(" ");
-        System.out.println("Status message: " + response.getStatusMessage());
-    }
+	public void showResponse(String title, Response response) {
+		showResponse(title, response, null);
+	}
 
-    public static void fails(Throwable e) {
-        Assert.fail(e.getMessage(), e);
-    }
+	public static void showResponse(String title, Response response, Object entity) {
+		System.out.println(" ");
+		System.out.println("RESPONSE FOR: " + title);
+		System.out.println(response.getStatus());
+		for (Entry<String, List<Object>> headers : response.getHeaders().entrySet()) {
+			String headerName = headers.getKey();
+			System.out.println(headerName + ": " + headers.getValue());
+		}
 
-    public static void output(String p_msg) {
-        System.out.println(p_msg);
-    }
+		if (entity != null) {
+			System.out.println(entity.toString().replace("\\n", "\n"));
+		}
+		System.out.println(" ");
+		System.out.println("Status message: " + response.getStatus());
+	}
+
+	public static void fails(Throwable e) {
+		Assert.fail(e.getMessage(), e);
+	}
+
+	public static void output(String p_msg) {
+		System.out.println(p_msg);
+	}
 }

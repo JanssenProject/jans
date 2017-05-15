@@ -6,11 +6,17 @@
 
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
-import com.wordnik.swagger.annotations.Api;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
@@ -33,8 +39,7 @@ import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * The endpoint allows to start and finish U2F authentication process
@@ -43,28 +48,27 @@ import javax.ws.rs.core.Response;
  */
 @Path("/fido/u2f/authentication")
 @Api(value = "/fido/u2f/registration", description = "The endpoint at which the application U2F device start registration process.")
-@Name("u2fAuthenticationRestWebService")
 public class U2fAuthenticationWS {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private ErrorResponseFactory errorResponseFactory;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@In
+	@Inject
 	private AuthenticationService u2fAuthenticationService;
 
-	@In
+	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
 
-	@In
+	@Inject
 	private UserSessionStateService userSessionStateService;
 
-	@In
+	@Inject
 	private ValidationService u2fValidationService;
 
 	@GET
@@ -72,7 +76,7 @@ public class U2fAuthenticationWS {
 	public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState) {
 		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
-			log.debug("Startig authentication with username '{0}', keyhandle '{1}' for appId '{2}' and session_state '{3}'", userName, keyHandle, appId, sessionState);
+			log.debug("Startig authentication with username '{}', keyhandle '{}' for appId '{}' and session_state '{}'", userName, keyHandle, appId, sessionState);
 
 			if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
 				throw new BadInputException(String.format("The request should contains either username or keyhandle"));
@@ -129,7 +133,7 @@ public class U2fAuthenticationWS {
 	public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
 		String sessionState = null;
 		try {
-			log.debug("Finishing authentication for username '{0}' with response '{1}'", userName, authenticateResponseString);
+			log.debug("Finishing authentication for username '{}' with response '{}'", userName, authenticateResponseString);
 
 			AuthenticateResponse authenticateResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(authenticateResponseString, AuthenticateResponse.class);
 
@@ -188,7 +192,7 @@ public class U2fAuthenticationWS {
 				try {
 					deviceRegistrationService.disableUserDeviceRegistration(deviceRegistration);
 				} catch (Exception ex2) {
-					log.error("Failed to mark device '{0}' as compomised", ex2, deviceRegistration.getId());
+					log.error("Failed to mark device '{}' as compomised", ex2, deviceRegistration.getId());
 				}
 				throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
 						.entity(errorResponseFactory.getErrorResponse(U2fErrorResponseType.DEVICE_COMPROMISED)).build());

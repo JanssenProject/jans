@@ -6,18 +6,19 @@
 
 package org.xdi.oxauth.cert.validation;
 
-import org.apache.log4j.Logger;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
-import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
-import org.xdi.oxauth.model.util.SecurityProviderUtility;
-
 import java.security.Principal;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus.CertificateValidity;
+import org.xdi.oxauth.cert.validation.model.ValidationStatus.ValidatorSourceType;
+import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
 /**
  * Certificate verifier based on CRL
@@ -27,7 +28,7 @@ import java.util.List;
  */
 public class GenericCertificateVerifier implements CertificateVerifier {
 
-	private static final Logger log = Logger.getLogger(GenericCertificateVerifier.class);
+	private static final Logger log = LoggerFactory.getLogger(GenericCertificateVerifier.class);
 
 	public GenericCertificateVerifier() {
 		SecurityProviderUtility.installBCProvider(true);

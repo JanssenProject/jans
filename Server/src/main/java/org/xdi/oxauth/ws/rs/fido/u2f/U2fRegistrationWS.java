@@ -6,17 +6,29 @@
 
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
-import com.wordnik.swagger.annotations.Api;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.fido.u2f.*;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
+import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
+import org.xdi.oxauth.model.fido.u2f.RegisterRequestMessageLdap;
+import org.xdi.oxauth.model.fido.u2f.U2fConstants;
+import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.exception.RegistrationNotAllowed;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
@@ -32,9 +44,7 @@ import org.xdi.oxauth.service.fido.u2f.ValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-import java.util.List;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * The endpoint allows to start and finish U2F registration process
@@ -43,39 +53,41 @@ import java.util.List;
  */
 @Path("/fido/u2f/registration")
 @Api(value = "/fido/u2f/registration", description = "The endpoint at which the U2F device start registration process.")
-@Name("u2fRegistrationRestWebService")
 public class U2fRegistrationWS {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@In
+	@Inject
 	private ErrorResponseFactory errorResponseFactory;
 
-	@In
+	@Inject
 	private RegistrationService u2fRegistrationService;
 
-	@In
+	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
-	@In
+	@Inject
 	private UserSessionStateService userSessionStateService;
 
-	@In
+	@Inject
 	private ValidationService u2fValidationService;
+	
+	@Inject
+	private ExternalAuthenticationService service;
 
 	@GET
 	@Produces({ "application/json" })
 	public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState, @QueryParam("enrollment_code") String enrollmentCode) {
 		// Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
 		try {
-			log.debug("Startig registration with username '{0}' for appId '{1}'. session_state '{2}', enrollment_code '{3}'", userName, appId, sessionState, enrollmentCode);
+			log.debug("Startig registration with username '{}' for appId '{}'. session_state '{}', enrollment_code '{}'", userName, appId, sessionState, enrollmentCode);
 
 			String userInum = null;
 
@@ -147,7 +159,7 @@ public class U2fRegistrationWS {
 	public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
 		String sessionState = null;
 		try {
-			log.debug("Finishing registration for username '{0}' with response '{1}'", userName, registerResponseString);
+			log.debug("Finishing registration for username '{}' with response '{}'", userName, registerResponseString);
 
 			RegisterResponse registerResponse = ServerUtil.jsonMapperWithWrapRoot().readValue(registerResponseString, RegisterResponse.class);
 
@@ -215,7 +227,6 @@ public class U2fRegistrationWS {
 		if (acrValuesStr == null)
 			return false;
 
-		ExternalAuthenticationService service = ExternalAuthenticationService.instance();
 		CustomScriptConfiguration u2fScriptConfiguration = service.getCustomScriptConfigurationByName("u2f");
 		if (u2fScriptConfiguration == null)
 			return false;

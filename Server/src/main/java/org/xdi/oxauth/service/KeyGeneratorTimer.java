@@ -10,20 +10,23 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.Conf;
 import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
 import org.xdi.oxauth.model.crypto.CryptoProviderFactory;
+import org.xdi.oxauth.service.cdi.event.KeyGenerationEvent;
+import org.xdi.service.cdi.event.Scheduled;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
 
+import javax.ejb.Asynchronous;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,127 +37,115 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Name("keyGeneratorTimer")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
+@ApplicationScoped
+@Named
 public class KeyGeneratorTimer {
 
-    private final static String EVENT_TYPE = "KeyGeneratorTimerEvent";
-    private final static int DEFAULT_INTERVAL = 48; // 48 hours
+	private final static String EVENT_TYPE = "KeyGeneratorTimerEvent";
+	private final static int DEFAULT_INTERVAL = 48; // 48 hours
 
-    @Logger
-    private Log log;
+	@Inject
+	private Logger log;
 
-    @In
-    private ConfigurationFactory configurationFactory;
+	@Inject
+	private Event<TimerEvent> timerEvent;
 
-    @In
-    private LdapEntryManager ldapEntryManager;
+	@Inject
+	private ConfigurationFactory configurationFactory;
 
-    @In
-    private AppConfiguration appConfiguration;
+	@Inject
+	private LdapEntryManager ldapEntryManager;
 
-    private AtomicBoolean isActive;
+	@Inject
+	private AppConfiguration appConfiguration;
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.debug("Initializing KeyGeneratorTimer");
+	private AtomicBoolean isActive;
 
-        this.isActive = new AtomicBoolean(false);
+	public void initTimer() {
+		log.debug("Initializing Key Generator Timer");
 
-        long interval = appConfiguration.getKeyRegenerationInterval();
-        if (interval <= 0) {
-            interval = DEFAULT_INTERVAL;
-        }
+		this.isActive = new AtomicBoolean(false);
 
-        interval = interval * 3600L * 1000L;
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
-    }
+		int interval = appConfiguration.getKeyRegenerationInterval();
+		if (interval <= 0) {
+			interval = DEFAULT_INTERVAL;
+		}
 
-    @Observer(EVENT_TYPE)
-    @Asynchronous
-    public void process() {
-        if (!appConfiguration.getKeyRegenerationEnabled()) {
-            return;
-        }
+		interval = interval * 3600;
+		timerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new KeyGenerationEvent(),
+				Scheduled.Literal.INSTANCE));
+	}
 
-        if (this.isActive.get()) {
-            return;
-        }
+	@Asynchronous
+	public void process(@Observes @Scheduled KeyGenerationEvent keyGenerationEvent) {
+		if (!appConfiguration.getKeyRegenerationEnabled()) {
+			return;
+		}
 
-        if (!this.isActive.compareAndSet(false, true)) {
-            return;
-        }
+		if (this.isActive.get()) {
+			return;
+		}
 
-        try {
-            updateKeys();
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            this.isActive.set(false);
-        }
-    }
+		if (!this.isActive.compareAndSet(false, true)) {
+			return;
+		}
 
-    public String updateKeys() throws JSONException, Exception {
-        String dn = configurationFactory.getLdapConfiguration().getString("configurationEntryDN");
-        Conf conf = ldapEntryManager.find(Conf.class, dn);
+		try {
+			updateKeys();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			this.isActive.set(false);
+		}
+	}
 
-        JSONObject jwks = new JSONObject(conf.getWebKeys());
-        conf.setWebKeys(updateKeys(jwks).toString());
+	public String updateKeys() throws JSONException, Exception {
+		String dn = configurationFactory.getLdapConfiguration().getString("configurationEntryDN");
+		Conf conf = ldapEntryManager.find(Conf.class, dn);
 
-        long nextRevision = conf.getRevision() + 1;
-        conf.setRevision(nextRevision);
-        ldapEntryManager.merge(conf);
+		JSONObject jwks = new JSONObject(conf.getWebKeys());
+		conf.setWebKeys(updateKeys(jwks).toString());
 
-        return conf.getWebKeys();
-    }
+		long nextRevision = conf.getRevision() + 1;
+		conf.setRevision(nextRevision);
+		ldapEntryManager.merge(conf);
 
-    private JSONObject updateKeys(JSONObject jwks) throws Exception {
-        JSONObject jsonObject = AbstractCryptoProvider.generateJwks(
-        		appConfiguration.getKeyRegenerationInterval(),
-        		appConfiguration.getIdTokenLifetime(),
-        		appConfiguration);
+		return conf.getWebKeys();
+	}
 
-        JSONArray keys = jwks.getJSONArray(JSON_WEB_KEY_SET);
-        for (int i = 0; i < keys.length(); i++) {
-            JSONObject key = keys.getJSONObject(i);
+	private JSONObject updateKeys(JSONObject jwks) throws Exception {
+		JSONObject jsonObject = AbstractCryptoProvider.generateJwks(appConfiguration.getKeyRegenerationInterval(),
+				appConfiguration.getIdTokenLifetime(), appConfiguration);
 
-            if (key.has(EXPIRATION_TIME) && !key.isNull(EXPIRATION_TIME)) {
-                GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                expirationDate.setTimeInMillis(key.getLong(EXPIRATION_TIME));
+		JSONArray keys = jwks.getJSONArray(JSON_WEB_KEY_SET);
+		for (int i = 0; i < keys.length(); i++) {
+			JSONObject key = keys.getJSONObject(i);
 
-                if (expirationDate.before(now)) {
-                    // The expired key is not added to the array of keys
-                    log.debug("Removing JWK: {0}, Expiration date: {1}",
-                            key.getString(KEY_ID),
-                            key.getString(EXPIRATION_TIME));
-                    AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                    		appConfiguration);
-                    cryptoProvider.deleteKey(key.getString(KEY_ID));
-                } else {
-                    jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
-                }
-            } else {
-                GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                expirationTime.add(GregorianCalendar.HOUR, appConfiguration.getKeyRegenerationInterval());
-                expirationTime.add(GregorianCalendar.SECOND, appConfiguration.getIdTokenLifetime());
-                key.put(EXPIRATION_TIME, expirationTime.getTimeInMillis());
+			if (key.has(EXPIRATION_TIME) && !key.isNull(EXPIRATION_TIME)) {
+				GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+				GregorianCalendar expirationDate = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+				expirationDate.setTimeInMillis(key.getLong(EXPIRATION_TIME));
 
-                jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
-            }
-        }
+				if (expirationDate.before(now)) {
+					// The expired key is not added to the array of keys
+					log.debug("Removing JWK: {}, Expiration date: {}", key.getString(KEY_ID),
+							key.getString(EXPIRATION_TIME));
+					AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
+					cryptoProvider.deleteKey(key.getString(KEY_ID));
+				} else {
+					jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
+				}
+			} else {
+				GregorianCalendar expirationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+				expirationTime.add(GregorianCalendar.HOUR, appConfiguration.getKeyRegenerationInterval());
+				expirationTime.add(GregorianCalendar.SECOND, appConfiguration.getIdTokenLifetime());
+				key.put(EXPIRATION_TIME, expirationTime.getTimeInMillis());
 
-        return jsonObject;
-    }
+				jsonObject.getJSONArray(JSON_WEB_KEY_SET).put(key);
+			}
+		}
 
-    /**
-     * Get KeyGeneratorTimer instance
-     *
-     * @return KeyGeneratorTimer instance
-     */
-    public static KeyGeneratorTimer instance() {
-        return (KeyGeneratorTimer) Component.getInstance(KeyGeneratorTimer.class);
-    }
+		return jsonObject;
+	}
 
 }

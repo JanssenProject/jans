@@ -19,10 +19,10 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version December 29, 2016
+ * @version April 26, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppConfiguration  {
+public class AppConfiguration implements Configuration {
 
     private String issuer;
     private String loginPage;
@@ -36,7 +36,6 @@ public class AppConfiguration  {
     private String endSessionEndpoint;
     private String jwksUri;
     private String registrationEndpoint;
-    private String validateTokenEndpoint;
     private String openIdDiscoveryEndpoint;
     private String openIdConfigurationEndpoint;
     private String idGenerationEndpoint;
@@ -102,6 +101,7 @@ public class AppConfiguration  {
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
+    private List<CorsConfigurationFilter> corsConfigurationFilters;
 
     private String applianceInum;
     private int sessionIdUnusedLifetime;
@@ -129,6 +129,7 @@ public class AppConfiguration  {
     private String keyStoreFile;
     private String keyStoreSecret;
     //oxEleven
+    private String oxElevenTestModeToken;
     private String oxElevenGenerateKeyEndpoint;
     private String oxElevenSignEndpoint;
     private String oxElevenVerifySignatureEndpoint;
@@ -143,21 +144,21 @@ public class AppConfiguration  {
     private List<String> clientBlackList;
     private Boolean legacyIdTokenClaims;
     private Boolean customHeadersWithAuthorizationResponse;
-    private Boolean frontChannelLogoutSessionSupported; 
+    private Boolean frontChannelLogoutSessionSupported;
     private String loggingLevel;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
-		return frontChannelLogoutSessionSupported;
-	}
+        return frontChannelLogoutSessionSupported;
+    }
 
-	public void setFrontChannelLogoutSessionSupported(
-			Boolean frontChannelLogoutSessionSupported) {
-		this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
-	}
+    public void setFrontChannelLogoutSessionSupported(
+            Boolean frontChannelLogoutSessionSupported) {
+        this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+    }
 
-	public Boolean getUmaRptAsJwt() {
+    public Boolean getUmaRptAsJwt() {
         return umaRptAsJwt;
     }
 
@@ -411,14 +412,6 @@ public class AppConfiguration  {
      */
     public void setRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
-    }
-
-    public String getValidateTokenEndpoint() {
-        return validateTokenEndpoint;
-    }
-
-    public void setValidateTokenEndpoint(String validateTokenEndpoint) {
-        this.validateTokenEndpoint = validateTokenEndpoint;
     }
 
     public String getOpenIdDiscoveryEndpoint() {
@@ -869,6 +862,15 @@ public class AppConfiguration  {
         return clientAuthenticationFilters;
     }
 
+
+    public List<CorsConfigurationFilter> getCorsConfigurationFilters() {
+        if (corsConfigurationFilters == null) {
+            corsConfigurationFilters = new ArrayList<CorsConfigurationFilter>();
+        }
+
+        return corsConfigurationFilters;
+    }
+
     public String getApplianceInum() {
         return applianceInum;
     }
@@ -1025,6 +1027,14 @@ public class AppConfiguration  {
         this.keyStoreSecret = keyStoreSecret;
     }
 
+    public String getOxElevenTestModeToken() {
+        return oxElevenTestModeToken;
+    }
+
+    public void setOxElevenTestModeToken(String oxElevenTestModeToken) {
+        this.oxElevenTestModeToken = oxElevenTestModeToken;
+    }
+
     public String getOxElevenGenerateKeyEndpoint() {
         return oxElevenGenerateKeyEndpoint;
     }
@@ -1149,13 +1159,13 @@ public class AppConfiguration  {
         this.updateClientAccessTime = updateClientAccessTime;
     }
 
-	public String getLoggingLevel() {
-		return loggingLevel;
-	}
+    public String getLoggingLevel() {
+        return loggingLevel;
+    }
 
-	public void setLoggingLevel(String loggingLevel) {
-		this.loggingLevel = loggingLevel;
-	}
+    public void setLoggingLevel(String loggingLevel) {
+        this.loggingLevel = loggingLevel;
+    }
 
 	public Boolean getEnableClientGrantUpdate() {
 		return enableClientGrantUpdate;

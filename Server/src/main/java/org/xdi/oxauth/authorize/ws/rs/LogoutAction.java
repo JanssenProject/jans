@@ -6,22 +6,13 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.faces.FacesManager;
-import org.jboss.seam.faces.FacesMessages;
-import org.jboss.seam.international.StatusMessage.Severity;
-import org.jboss.seam.log.Log;
+import org.gluu.jsf2.service.FacesService;
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.SessionState;
@@ -34,37 +25,51 @@ import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.service.JsonService;
 import org.xdi.util.StringHelper;
 
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.IOException;
+import java.util.Map;
+
 /**
  * @author Javier Rojas Blum Date: 03.13.2012
  * @author Yuriy Movchan Date: 09/01/2016
  */
-@Name("logoutAction")
-@Scope(ScopeType.EVENT)
+@RequestScoped
+@Named
 public class LogoutAction {
 
 	private static final String EXTERNAL_LOGOUT = "external_logout";
 	private static final String EXTERNAL_LOGOUT_DATA = "external_logout_data";
 
-    @Logger
-    private Log log;
+    @Inject
+    private Logger log;
 
-    @In
-    private FacesMessages facesMessages;
-
-    @In
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
     
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private JsonService jsonService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private FacesService facesService;
+
+    @Inject
+    private FacesContext facesContext;
+
+	@Inject
+	private LanguageBean languageBean;
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
@@ -129,7 +134,7 @@ public class LogoutAction {
             sb.append("&"+EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI+"=").append(postLogoutRedirectUri);
         }
         
-        FacesManager.instance().redirectToExternalURL("seam/resource/restv1/oxauth/end_session?" + sb.toString());
+        facesService.redirectToExternalURL("seam/resource/restv1/oxauth/end_session?" + sb.toString());
     }
 
 	private boolean validateParameters() {
@@ -162,16 +167,16 @@ public class LogoutAction {
 
 		boolean isExternalAuthenticatorLogoutPresent = StringHelper.isNotEmpty(acrValues);
 		if (isExternalAuthenticatorLogoutPresent) {
-			log.debug("Attemptinmg to execute logout method of '{0}' external authenticator.", acrValues);
+			log.debug("Attemptinmg to execute logout method of '{}' external authenticator.", acrValues);
 
 			CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.getCustomScriptConfigurationByName(acrValues);
 			if (customScriptConfiguration == null) {
-				log.error("Failed to get ExternalAuthenticatorConfiguration. acr_values: {0}", acrValues);
+				log.error("Failed to get ExternalAuthenticatorConfiguration. acr_values: {}", acrValues);
 				return ExternalLogoutResult.FAILURE;
 			} else {
 				boolean scriptExternalLogoutResult = externalAuthenticationService.executeExternalLogout(customScriptConfiguration, null);
 				ExternalLogoutResult externalLogoutResult = scriptExternalLogoutResult ? ExternalLogoutResult.SUCCESS : ExternalLogoutResult.FAILURE;
-				log.debug("Logout result is '{0}' for session '{1}', userDn: '{2}'", externalLogoutResult, sessionState.getId(), sessionState.getUserDn());					
+				log.debug("Logout result is '{}' for session '{}', userDn: '{}'", externalLogoutResult, sessionState.getId(), sessionState.getUserDn());					
 
 				int apiVersion = externalAuthenticationService.executeExternalGetApiVersion(customScriptConfiguration);
 	            if (apiVersion < 3) {
@@ -181,7 +186,7 @@ public class LogoutAction {
 	            	
             	log.trace("According to API version script supports logout redirects");
             	String logoutExternalUrl = externalAuthenticationService.getLogoutExternalUrl(customScriptConfiguration, null);
-            	log.debug("External logout result is '{0}' for user '{1}'", logoutExternalUrl, sessionState.getUserDn());
+            	log.debug("External logout result is '{}' for user '{}'", logoutExternalUrl, sessionState.getUserDn());
 				
 				if (StringHelper.isEmpty(logoutExternalUrl)) {
 					return externalLogoutResult;
@@ -197,7 +202,7 @@ public class LogoutAction {
 				}
 				
 				// Redirect to external URL
-				FacesManager.instance().redirectToExternalURL(logoutExternalUrl);
+				facesService.redirectToExternalURL(logoutExternalUrl);
 				return ExternalLogoutResult.REDIRECT;
 			}
 		} else {
@@ -244,15 +249,16 @@ public class LogoutAction {
 	}
 
 	public void missingLogoutParameters() {
-		facesMessages.addFromResourceBundle(Severity.ERROR, "logout.missingParameters");
-		FacesManager.instance().redirect("/error.xhtml");
+		String message = languageBean.getMessage("logout.missingParameters");
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
+		facesService.redirect("/error.xhtml");
 	}
 
 	public void logoutFailed() {
-		facesMessages.add(Severity.ERROR, "Failed to process logout");
-		FacesManager.instance().redirect("/error.xhtml");
+		String message = languageBean.getMessage("logout.failedToProceed");
+        facesContext.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message));
+		facesService.redirect("/error.xhtml");
 	}
-	
 	
 	public static class LogoutParameters {
 		private String idTokenHint;

@@ -86,6 +86,12 @@
         </classes>
     </test>
 
+    <test name="Encode claims in state parameter" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.EncodeClaimsInStateParameter"/>
+        </classes>
+    </test>
+
     <!-- End Session test -->
     <test name="End Session test (HTTP)" enabled="true">
         <classes>
@@ -181,13 +187,6 @@
     <test name="User Info test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.UserInfoRestWebServiceHttpTest"/>
-        </classes>
-    </test>
-
-    <!-- Validate Token Endpoint test -->
-    <test name="Validate Token Endpoint test (HTTP)" enabled="true">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.ValidateTokenEndpointHttpTest"/>
         </classes>
     </test>
 

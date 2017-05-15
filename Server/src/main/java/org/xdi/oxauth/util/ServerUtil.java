@@ -14,39 +14,49 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.ArrayHelper;
-import org.xdi.util.StringHelper;
 import org.xdi.util.Util;
 
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.literal.NamedLiteral;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.CDI;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  * @version 0.9, 26/12/2012
  */
 
 public class ServerUtil {
 
-    private final static Log LOG = Logging.getLog(ServerUtil.class);
+    private final static Logger log = LoggerFactory.getLogger(ServerUtil.class);
 
     private ServerUtil() {
     }
@@ -55,7 +65,7 @@ public class ServerUtil {
         try {
             return asJson(p_object);
         } catch (IOException e) {
-            LOG.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
             return "";
         }
     }
@@ -104,16 +114,8 @@ public class ServerUtil {
         return createJsonMapper().configure(DeserializationConfig.Feature.UNWRAP_ROOT_VALUE, true);
     }
 
-    public static <T> T instance(Class p_clazz) {
-        return (T) Component.getInstance(p_clazz);
-    }
-
-    public static <T> T instance(String p_name) {
-        return (T) Component.getInstance(p_name);
-    }
-
     public static LdapEntryManager getLdapManager() {
-        return instance(AppInitializer.LDAP_ENTRY_MANAGER_NAME);
+        return CdiUtil.bean(LdapEntryManager.class, AppInitializer.LDAP_ENTRY_MANAGER_NAME);
     }
 
     public static CustomAttribute getAttributeByName(List<CustomAttribute> p_list, String p_attributeName) {
@@ -140,7 +142,7 @@ public class ServerUtil {
             try {
                 return URLDecoder.decode(p_str, Util.UTF8);
             } catch (UnsupportedEncodingException e) {
-                LOG.trace(e.getMessage(), e);
+                log.trace(e.getMessage(), e);
             }
         }
         return p_str;
@@ -233,7 +235,7 @@ public class ServerUtil {
     	URL parsedUrl1 = new URL(url1);
     	URL parsedUrl2 = new URL(url2);
     	
-    	return StringHelper.equals(parsedUrl1.getPath(), parsedUrl2.getPath());
+    	return parsedUrl1.getPath().endsWith(parsedUrl2.getPath());
     }
 
 }

@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version April 28, 2017
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -523,6 +523,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -577,6 +579,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -631,6 +635,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -684,6 +690,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -737,6 +745,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -790,6 +800,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -843,6 +855,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -896,6 +910,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
@@ -949,6 +965,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ISSUER));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.AUDIENCE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));

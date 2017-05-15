@@ -6,12 +6,19 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -22,40 +29,43 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
+import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.
  */
 @Path("/requester/perm")
 @Api(value = "/requester/perm", description = "RPT authorization endpoint. RPT is authorized with new permission(s).")
-@Name("rptPermissionAuthorizationRestWebService")
 public class RptPermissionAuthorizationWS {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
-    private RPTManager rptManager;
-    @In
+
+    @Inject
+    private RptManager rptManager;
+
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+
+    @Inject
     private UmaValidationService umaValidationService;
-    @In
+
+    @Inject
     private AuthorizationService umaAuthorizationService;
-    @In
+
+    @Inject
     private ClientService clientService;
-    @In
+
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
     @POST

@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"/>
-    <title>
-        oxAuth - RP iFrame
-    </title>
-    <script type="text/javascript" src="js/crypto-js-3.1.2/rollups/sha256.js"></script>
-    <script>
+	<meta charset="UTF-8" />
+	<title>oxAuth - RP iFrame</title>
+
+	<script type="text/javascript" src="js/crypto-js-3.1.2/rollups/sha256.js"></script>
+	<script>
         //<![CDATA[
         var rpOrigin = window.location.origin;
         var opOrigin = null;
@@ -58,11 +57,13 @@
             }
         }
         //]]>
-    </script>
+	</script>
 </head>
+
 <body onload="loadParams(); updateMes(); setTimer()">
-<input id="sessionState" type="hidden" value='#{request.getParameter("session_state")}'/>
-<input id="clientId" type="hidden" value='#{request.getParameter("client_id")}'/>
-<input id="opOrigin" type="hidden" value='#{request.getParameter("op_origin")}'/>
+	<input id="sessionState" type="hidden" value='#{request.getParameter("session_state")}' />
+	<input id="clientId" type="hidden" value='#{request.getParameter("client_id")}' />
+	<input id="opOrigin" type="hidden"value='#{request.getParameter("op_origin")}' />
 </body>
+
 </html>

@@ -1,23 +1,21 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:f="http://java.sun.com/jsf/core"
-                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
     <ui:define name="head">
         <script src="#{oxAuthConfigurationService.getJsLocation()}/jquery-ui-1.12.1.min.js"/>
 
-        <s:fragment rendered="#{param.toopher_user_uid != null}">
+        <h:panelGroup rendered="#{param.toopher_user_uid != null}">
             <script type="text/javascript">
-            //<![CDATA[
+                //<![CDATA[
                 jQuery(document).ready(function() {
                     $("#loginForm").submit();
                 });
-            //]]>
+                //]]>
             </script>
-        </s:fragment>
+        </h:panelGroup>
 
         <style type="text/css">
             .login-panel {
@@ -58,37 +56,37 @@
         <form id="loginForm" method="post" action="#{request.contextPath}/postlogin.seam">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Toopher Login (Pair with phone)</div>
+                    <div class="login-panel-header">#{msgs['toopher.loginPairWithPhone']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
-                        <s:div styleClass="dialog" rendered="#{param.toopher_user_uid == null}">
-                            <p class="info">Please login here</p>
-                        </s:div>
+                        <h:panelGroup styleClass="dialog" rendered="#{param.toopher_user_uid == null}">
+                            <p class="info">#{msgs['toopher.pleaseLoginHere']}</p>
+                        </h:panelGroup>
 
-                        <s:div styleClass="dialog" rendered="#{param.toopher_user_uid == null}">
+                        <h:panelGroup styleClass="dialog" rendered="#{param.toopher_user_uid == null}">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="pairing_phrase">Pairing phrases</h:outputLabel>
-				                <input name="pairing_phrase" type="text" autocomplete="off" />
+                                <h:outputLabel for="pairing_phrase">#{msgs['toopher.pairingPhrases']}</h:outputLabel>
+                                <input name="pairing_phrase" type="text" autocomplete="off" />
                             </h:panelGrid>
-                        </s:div>
+                        </h:panelGroup>
 
-                        <s:div styleClass="dialog" rendered="#{param.toopher_user_uid != null}">
-                            <p class="info">Checking pairing status...</p>
-                        </s:div>
+                        <h:panelGroup styleClass="dialog" rendered="#{param.toopher_user_uid != null}">
+                            <p class="info">#{msgs['toopher.checkingPairing']}</p>
+                        </h:panelGroup>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['toopher.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
 
-                        <s:div styleClass="actionButtons" rendered="#{param.toopher_user_uid == null}">
+                        <h:panelGroup styleClass="actionButtons" rendered="#{param.toopher_user_uid == null}">
                             <h:commandButton value="Pair" action="#{authenticator.authenticate}" />
-                        </s:div>
+                        </h:panelGroup>
                     </div>
                 </div>
             </h:panelGroup>
