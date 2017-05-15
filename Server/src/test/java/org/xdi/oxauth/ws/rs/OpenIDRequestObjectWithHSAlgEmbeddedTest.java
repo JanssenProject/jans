@@ -6,11 +6,32 @@
 
 package org.xdi.oxauth.ws.rs;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -29,17 +50,6 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import javax.ws.rs.core.MediaType;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
-
 /**
  * Functional tests for OpenID Request Object (embedded)
  *
@@ -48,373 +58,338 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
  */
 public class OpenIDRequestObjectWithHSAlgEmbeddedTest extends BaseTest {
 
-    private String clientId1;
-    private String clientSecret1;
-    private String clientId2;
-    private String clientSecret2;
-    private String clientId3;
-    private String clientSecret3;
+	@ArquillianResource
+	private URI url;
 
-    @Parameters({"registerPath", "redirectUris"})
-    @Test
-    public void requestParameterMethodHS256Step1(final String registerPath, final String redirectUris) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	private static String clientId1;
+	private static String clientSecret1;
+	private static String clientId2;
+	private static String clientSecret2;
+	private static String clientId3;
+	private static String clientSecret3;
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+	@Parameters({ "registerPath", "redirectUris" })
+	@Test
+	public void requestParameterMethodHS256Step1(final String registerPath, final String redirectUris)
+			throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+		String registerRequestContent = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.setResponseTypes(responseTypes);
-                    registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.setResponseTypes(responseTypes);
+			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS256);
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			fail(e.getMessage(), e);
+		}
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS256Step1", response);
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-                    assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+		showResponse("requestParameterMethodHS256Step1", response, entity);
 
-                    clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-                    clientSecret1 = jsonObj.getString(CLIENT_SECRET.toString());
-                } catch (JSONException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
-        }.run();
-    }
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
+			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "requestParameterMethodHS256Step1")
-    public void requestParameterMethodHS256Step2(final String authorizePath,
-                                                 final String userId, final String userSecret,
-                                                 final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+			clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
+			clientSecret1 = jsonObj.getString(CLIENT_SECRET.toString());
+		} catch (JSONException e) {
+			fail(e.getMessage(), e);
+		}
+	}
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "requestParameterMethodHS256Step1")
+	public void requestParameterMethodHS256Step2(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
+		Builder request = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+			List<String> scopes = Arrays.asList("openid");
+			String state = "STATE0";
+			String nonce = UUID.randomUUID().toString();
 
-                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                    List<String> scopes = Arrays.asList("openid");
-                    String state = "STATE0";
-                    String nonce = UUID.randomUUID().toString();
+			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId1, scopes,
+					redirectUri, nonce);
+			authorizationRequest.setState(state);
+			authorizationRequest.getPrompts().add(Prompt.NONE);
+			authorizationRequest.setAuthUsername(userId);
+			authorizationRequest.setAuthPassword(userSecret);
 
-                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                            responseTypes, clientId1, scopes, redirectUri, nonce);
-                    authorizationRequest.setState(state);
-                    authorizationRequest.getPrompts().add(Prompt.NONE);
-                    authorizationRequest.setAuthUsername(userId);
-                    authorizationRequest.setAuthPassword(userSecret);
+			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+					SignatureAlgorithm.HS256, clientSecret1, cryptoProvider);
+			jwtAuthorizationRequest
+					.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
+			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+			authorizationRequest.setRequest(authJwt);
+			System.out.println("Request JWT: " + authJwt);
 
-                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
-                            authorizationRequest, SignatureAlgorithm.HS256, clientSecret1, cryptoProvider);
-                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.SUBJECT_IDENTIFIER, ClaimValue.createSingleValue(userId)));
-                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                    authorizationRequest.setRequest(authJwt);
-                    System.out.println("Request JWT: " + authJwt);
+			request = ResteasyClientBuilder.newClient()
+					.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+			request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+			request.header("Accept", MediaType.TEXT_PLAIN);
+		} catch (Exception e) {
+			fail(e.getMessage(), e);
+		}
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                    request.setQueryString(authorizationRequest.getQueryString());
-                } catch (Exception e) {
-                    fail(e.getMessage(), e);
-                }
-            }
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS256Step2", response);
+		showResponse("requestParameterMethodHS256Step2", response, entity);
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                try {
-                    URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getFragment(), "Query string is null");
+		try {
+			URI uri = new URI(response.getLocation().toString());
+			assertNotNull(uri.getFragment(), "Query string is null");
 
-                    Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
-                } catch (URISyntaxException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
-        }.run();
-    }
+			assertNotNull(params.get("access_token"), "The accessToken is null");
+			assertNotNull(params.get("scope"), "The scope is null");
+			assertNotNull(params.get("state"), "The state is null");
+		} catch (URISyntaxException e) {
+			fail(e.getMessage(), e);
+		}
+	}
 
-    @Parameters({"registerPath", "redirectUris"})
-    @Test
-    public void requestParameterMethodHS384Step1(final String registerPath, final String redirectUris) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+	@Parameters({ "registerPath", "redirectUris" })
+	@Test
+	public void requestParameterMethodHS384Step1(final String registerPath, final String redirectUris)
+			throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+		String registerRequestContent = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.setResponseTypes(responseTypes);
+			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.setResponseTypes(responseTypes);
-                    registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS384);
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			fail(e.getMessage(), e);
+		}
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS384Step1", response);
+		showResponse("requestParameterMethodHS384Step1", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-                    assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
+			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-                    clientId2 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-                    clientSecret2 = jsonObj.getString(CLIENT_SECRET.toString());
-                } catch (JSONException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
-        }.run();
-    }
+			clientId2 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
+			clientSecret2 = jsonObj.getString(CLIENT_SECRET.toString());
+		} catch (JSONException e) {
+			fail(e.getMessage(), e);
+		}
+	}
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "requestParameterMethodHS384Step1")
-    public void requestParameterMethodHS384Step2(final String authorizePath,
-                                                 final String userId, final String userSecret,
-                                                 final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "requestParameterMethodHS384Step1")
+	public void requestParameterMethodHS384Step2(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
+		Builder request = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+			List<String> scopes = Arrays.asList("openid");
+			String nonce = UUID.randomUUID().toString();
+			String state = UUID.randomUUID().toString();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId2, scopes,
+					redirectUri, nonce);
+			authorizationRequest.setState(state);
+			authorizationRequest.getPrompts().add(Prompt.NONE);
+			authorizationRequest.setAuthUsername(userId);
+			authorizationRequest.setAuthPassword(userSecret);
 
-                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                    List<String> scopes = Arrays.asList("openid");
-                    String nonce = UUID.randomUUID().toString();
-                    String state = UUID.randomUUID().toString();
+			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                            responseTypes, clientId2, scopes, redirectUri, nonce);
-                    authorizationRequest.setState(state);
-                    authorizationRequest.getPrompts().add(Prompt.NONE);
-                    authorizationRequest.setAuthUsername(userId);
-                    authorizationRequest.setAuthPassword(userSecret);
+			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+					SignatureAlgorithm.HS384, clientSecret2, cryptoProvider);
+			jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+			jwtAuthorizationRequest
+					.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+			jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+			jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+			jwtAuthorizationRequest
+					.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+			jwtAuthorizationRequest
+					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
+					ClaimValue.createValueList(new String[] { "2" })));
+			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+			authorizationRequest.setRequest(authJwt);
+			System.out.println("Request JWT: " + authJwt);
 
-                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+			request = ResteasyClientBuilder.newClient()
+					.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+			request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+			request.header("Accept", MediaType.TEXT_PLAIN);
+		} catch (Exception e) {
+			fail(e.getMessage(), e);
+		}
 
-                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
-                            authorizationRequest, SignatureAlgorithm.HS384, clientSecret2, cryptoProvider);
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
-                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                    authorizationRequest.setRequest(authJwt);
-                    System.out.println("Request JWT: " + authJwt);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                    request.setQueryString(authorizationRequest.getQueryString());
-                } catch (Exception e) {
-                    fail(e.getMessage(), e);
-                }
-            }
+		showResponse("requestParameterMethodHS384Step2", response, entity);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS384Step2", response);
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+		try {
+			URI uri = new URI(response.getLocation().toString());
+			assertNotNull(uri.getFragment(), "Query string is null");
 
-                try {
-                    URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getFragment(), "Query string is null");
+			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                    Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
+			assertNotNull(params.get("access_token"), "The accessToken is null");
+			assertNotNull(params.get("scope"), "The scope is null");
+			assertNotNull(params.get("state"), "The state is null");
+		} catch (URISyntaxException e) {
+			fail(e.getMessage(), e);
+		}
+	}
 
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
-                } catch (URISyntaxException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
-        }.run();
-    }
+	@Parameters({ "registerPath", "redirectUris" })
+	@Test
+	public void requestParameterMethodHS512Step1(final String registerPath, final String redirectUris)
+			throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-    @Parameters({"registerPath", "redirectUris"})
-    @Test
-    public void requestParameterMethodHS512Step1(final String registerPath, final String redirectUris) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+		String registerRequestContent = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+			RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+					StringUtils.spaceSeparatedToList(redirectUris));
+			registerRequest.setResponseTypes(responseTypes);
+			registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
+			registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+			registerRequestContent = registerRequest.getJSONParameters().toString(4);
+		} catch (JSONException e) {
+			fail(e.getMessage(), e);
+		}
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.setResponseTypes(responseTypes);
-                    registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.HS512);
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+		Response response = request.post(Entity.json(registerRequestContent));
+		String entity = response.readEntity(String.class);
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
+		showResponse("requestParameterMethodHS512Step1", response, entity);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS512Step1", response);
+		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+		assertNotNull(entity, "Unexpected result: " + entity);
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
+			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
+			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
+			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-                    assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-                    assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-                    assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
+			clientId3 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
+			clientSecret3 = jsonObj.getString(CLIENT_SECRET.toString());
+		} catch (JSONException e) {
+			fail(e.getMessage(), e);
+		}
+	}
 
-                    clientId3 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-                    clientSecret3 = jsonObj.getString(CLIENT_SECRET.toString());
-                } catch (JSONException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
-        }.run();
-    }
+	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
+	@Test(dependsOnMethods = "requestParameterMethodHS512Step1")
+	public void requestParameterMethodHS512Step2(final String authorizePath, final String userId,
+			final String userSecret, final String redirectUri) throws Exception {
+		Builder request = null;
+		try {
+			List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+			List<String> scopes = Arrays.asList("openid");
+			String nonce = UUID.randomUUID().toString();
+			String state = UUID.randomUUID().toString();
 
-    @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
-    @Test(dependsOnMethods = "requestParameterMethodHS512Step1")
-    public void requestParameterMethodHS512Step2(final String authorizePath,
-                                                 final String userId, final String userSecret,
-                                                 final String redirectUri) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, authorizePath) {
+			AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId3, scopes,
+					redirectUri, nonce);
+			authorizationRequest.setState(state);
+			authorizationRequest.getPrompts().add(Prompt.NONE);
+			authorizationRequest.setAuthUsername(userId);
+			authorizationRequest.setAuthPassword(userSecret);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+			OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
 
-                    List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
-                    List<String> scopes = Arrays.asList("openid");
-                    String nonce = UUID.randomUUID().toString();
-                    String state = UUID.randomUUID().toString();
+			JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+					SignatureAlgorithm.HS512, clientSecret3, cryptoProvider);
+			jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
+			jwtAuthorizationRequest
+					.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
+			jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
+			jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
+			jwtAuthorizationRequest
+					.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
+			jwtAuthorizationRequest
+					.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
+			jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE,
+					ClaimValue.createValueList(new String[] { "2" })));
+			String authJwt = jwtAuthorizationRequest.getEncodedJwt();
+			authorizationRequest.setRequest(authJwt);
+			System.out.println("Request JWT: " + authJwt);
 
-                    AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                            responseTypes, clientId3, scopes, redirectUri, nonce);
-                    authorizationRequest.setState(state);
-                    authorizationRequest.getPrompts().add(Prompt.NONE);
-                    authorizationRequest.setAuthUsername(userId);
-                    authorizationRequest.setAuthPassword(userSecret);
+			request = ResteasyClientBuilder.newClient()
+					.target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+			request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+			request.header("Accept", MediaType.TEXT_PLAIN);
+		} catch (Exception e) {
+			fail(e.getMessage(), e);
+		}
 
-                    OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                    JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
-                            authorizationRequest, SignatureAlgorithm.HS512, clientSecret3, cryptoProvider);
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-                    jwtAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, ClaimValue.createValueList(new String[]{"2"})));
-                    String authJwt = jwtAuthorizationRequest.getEncodedJwt();
-                    authorizationRequest.setRequest(authJwt);
-                    System.out.println("Request JWT: " + authJwt);
+		showResponse("requestParameterMethodHS512Step2", response, entity);
 
-                    request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                    request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                    request.setQueryString(authorizationRequest.getQueryString());
-                } catch (Exception e) {
-                    fail(e.getMessage(), e);
-                }
-            }
+		assertEquals(response.getStatus(), 302, "Unexpected response code.");
+		assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestParameterMethodHS512Step2", response);
+		try {
+			URI uri = new URI(response.getLocation().toString());
+			assertNotNull(uri.getFragment(), "Query string is null");
 
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
+			Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
-                try {
-                    URI uri = new URI(response.getHeader("Location").toString());
-                    assertNotNull(uri.getFragment(), "Query string is null");
+			assertNotNull(params.get("access_token"), "The accessToken is null");
+			assertNotNull(params.get("scope"), "The scope is null");
+			assertNotNull(params.get("state"), "The state is null");
+		} catch (URISyntaxException e) {
+			fail(e.getMessage(), e);
+		}
+	}
 
-                    Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
-
-                    assertNotNull(params.get("access_token"), "The accessToken is null");
-                    assertNotNull(params.get("scope"), "The scope is null");
-                    assertNotNull(params.get("state"), "The state is null");
-                } catch (URISyntaxException e) {
-                    fail(e.getMessage(), e);
-                }
-            }
-        }.run();
-    }
 }

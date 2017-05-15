@@ -40,15 +40,16 @@ public class BenchmarkRequestAccessToken extends BaseTest {
     private String clientId;
 	private String clientSecret;
 
-	@Parameters({"userId", "userSecret", "redirectUris"})
+	@Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @BeforeClass
-    public void registerClient(final String userId, final String userSecret, String redirectUris) throws Exception {
+    public void registerClient(final String userId, final String userSecret, String redirectUris, String sectorIdentifierUri) throws Exception {
         Reporter.log("Register client", true);
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

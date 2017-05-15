@@ -6,35 +6,32 @@
 
 package org.xdi.oxauth.service;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.idgen.ws.rs.IdGenService;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.Pair;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * Provides operations with clients.
  *
  * @author Javier Rojas Date: 01.12.2012
  */
-@Scope(ScopeType.STATELESS)
-@Name("inumService")
-@AutoCreate
+@Stateless
+@Named
 public class InumService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private IdGenService idGenService;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     public String generateClientInum() {
@@ -58,7 +55,7 @@ public class InumService {
         final StringBuilder dnSb = new StringBuilder("inum=");
         dnSb.append(inum).append(",").append(baseDn);
         final String dn = dnSb.toString();
-        log.trace("Generated dn: {0}", dn);
+        log.trace("Generated dn: {}", dn);
         return new Pair<String, String>(inum, dn);
     }
 

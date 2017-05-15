@@ -6,15 +6,19 @@
 
 package org.xdi.oxauth.model.uma;
 
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.util.ServerUtil;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 import java.io.IOException;
+import java.net.URI;
 
-import static org.testng.Assert.*;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -23,50 +27,42 @@ import static org.testng.Assert.*;
 
 class TConfiguration {
 
-    private final BaseTest baseTest;
-    private UmaConfiguration configuration = null;
+	private final URI baseUri;
+	private UmaConfiguration configuration = null;
 
-    public TConfiguration(BaseTest p_baseTest) {
-        assertNotNull(p_baseTest); // must not be null
-        baseTest = p_baseTest;
-    }
+	public TConfiguration(URI baseUri) {
+		assertNotNull(baseUri); // must not be null
+		this.baseUri = baseUri;
+	}
 
-    public UmaConfiguration getConfiguration(final String umaConfigurationPath) {
-        if (configuration == null) {
-            try {
-                configuration(umaConfigurationPath);
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail();
-            }
-        }
-        UmaTestUtil.assert_(configuration);
-        return configuration;
-    }
+	public UmaConfiguration getConfiguration(final String umaConfigurationPath) {
+		if (configuration == null) {
+			try {
+				configuration(umaConfigurationPath);
+			} catch (Exception e) {
+				e.printStackTrace();
+				fail();
+			}
+		}
+		UmaTestUtil.assert_(configuration);
+		return configuration;
+	}
 
-    private void configuration(final String umaConfigurationPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.GET, umaConfigurationPath) {
+	private void configuration(final String umaConfigurationPath) throws Exception {
+		Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + umaConfigurationPath).request();
+		request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
-            }
+		BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                BaseTest.showResponse("UMA : TConfiguration.configuration", response);
-
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                try {
-                    configuration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), UmaConfiguration.class);
-                    UmaTestUtil.assert_(configuration);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    fail();
-                }
-            }
-        }.run();
-    }
+		assertEquals(response.getStatus(), 200, "Unexpected response code.");
+		try {
+			configuration = ServerUtil.createJsonMapper().readValue(entity, UmaConfiguration.class);
+			UmaTestUtil.assert_(configuration);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
 }

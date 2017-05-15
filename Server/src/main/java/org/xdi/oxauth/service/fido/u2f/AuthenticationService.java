@@ -6,16 +6,25 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.unboundid.ldap.sdk.Filter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
 import org.xdi.oxauth.exception.fido.u2f.InvalidKeyHandleDeviceException;
 import org.xdi.oxauth.exception.fido.u2f.NoEligableDevicesException;
-import org.xdi.oxauth.model.config.StaticConf;
+import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.AuthenticateRequestMessageLdap;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
@@ -29,44 +38,43 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
 
-import java.util.*;
+import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Provides operations with U2F authentication request
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("u2fAuthenticationService")
-@AutoCreate
+@Stateless
+@Named("u2fAuthenticationService")
 public class AuthenticationService extends RequestService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-	@In
+	@Inject
 	private ApplicationService applicationService;
 
-	@In
+	@Inject
 	private RawAuthenticationService rawAuthenticationService;
 
-	@In
+	@Inject
 	private ClientDataValidationService clientDataValidationService;
 
-	@In
+	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
 
-	@In
+	@Inject
 	private UserService userService;
 
-	@In(value = "randomChallengeGenerator")
+	@Inject @Named("randomChallengeGenerator")
 	private ChallengeGenerator challengeGenerator;
 
-	@In
-	private StaticConf staticConfiguration;
+	@Inject
+	private StaticConfiguration staticConfiguration;
 
 	public AuthenticateRequestMessage buildAuthenticateRequestMessage(String appId, String userInum) throws BadInputException, NoEligableDevicesException {
 		if (applicationService.isValidateApplication()) {
@@ -157,7 +165,7 @@ public class AuthenticationService extends RequestService {
 		boolean approved = StringHelper.equals(RawAuthenticationService.AUTHENTICATE_GET_TYPE, clientData.getTyp());
 		if (!approved) {
 			status = DeviceRegistrationResult.Status.CANCELED;
-			log.debug("Authentication request with keyHandle '{0}' was canceled", response.getKeyHandle());
+			log.debug("Authentication request with keyHandle '{}' was canceled", response.getKeyHandle());
 		}
 
 		return new DeviceRegistrationResult(usedDeviceRegistration, status);

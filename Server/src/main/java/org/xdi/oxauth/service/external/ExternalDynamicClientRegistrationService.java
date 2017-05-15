@@ -8,12 +8,10 @@ package org.xdi.oxauth.service.external;
 
 import java.util.Map;
 
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Named;
+
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -27,10 +25,9 @@ import org.xdi.service.custom.script.ExternalScriptService;
  *
  * @author Yuriy Movchan Date: 01/08/2015
  */
-@Scope(ScopeType.APPLICATION)
-@Name("externalDynamicClientRegistrationService")
-@AutoCreate
-@Startup
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named
 public class ExternalDynamicClientRegistrationService extends ExternalScriptService {
 
 	private static final long serialVersionUID = 1416361273036208685L;
@@ -63,9 +60,5 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
 
 		return result;
 	}
-
-    public static ExternalDynamicClientRegistrationService instance() {
-        return (ExternalDynamicClientRegistrationService) Component.getInstance(ExternalDynamicClientRegistrationService.class);
-    }
 
 }

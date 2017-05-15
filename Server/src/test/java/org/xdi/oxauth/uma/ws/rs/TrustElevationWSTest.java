@@ -1,14 +1,25 @@
 package org.xdi.oxauth.uma.ws.rs;
 
+import static org.testng.Assert.assertNotNull;
+
+import java.net.URI;
+import java.util.Arrays;
+
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.*;
+import org.xdi.oxauth.model.uma.ClaimToken;
+import org.xdi.oxauth.model.uma.ClaimTokenList;
+import org.xdi.oxauth.model.uma.PermissionTicket;
+import org.xdi.oxauth.model.uma.RPTResponse;
+import org.xdi.oxauth.model.uma.ResourceSetResponse;
+import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
+import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
+import org.xdi.oxauth.model.uma.TUma;
+import org.xdi.oxauth.model.uma.UmaPermission;
+import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-
-import java.util.Arrays;
-
-import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -17,72 +28,75 @@ import static org.testng.Assert.assertNotNull;
 
 public class TrustElevationWSTest extends BaseTest {
 
-    private Token pat;
-    private Token aat;
-    private RPTResponse rpt;
-    private ResourceSetResponse resourceSet;
-    private PermissionTicket ticket;
+	@ArquillianResource
+	private URI url;
 
-    @Test
-    @Parameters({"authorizePath", "tokenPath", "umaUserId", "umaUserSecret",
-            "umaPatClientId", "umaPatClientSecret",
-            "umaAatClientId", "umaAatClientSecret",
-            "umaRedirectUri", "umaRptPath", "umaAmHost",
-            "umaRegisterResourcePath"
-    })
-    public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-                     String umaPatClientId, String umaPatClientSecret,
-                     String umaAatClientId, String umaAatClientSecret,
-                     String umaRedirectUri, String umaRptPath, String umaAmHost,
-                     String umaRegisterResourcePath) {
-        pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
-        aat = TUma.requestAat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId, umaAatClientSecret, umaRedirectUri);
+	private static Token pat;
+	private static Token aat;
+	private static RPTResponse rpt;
+	private static ResourceSetResponse resourceSet;
+	private static PermissionTicket ticket;
 
-        rpt = TUma.requestRpt(this, aat, umaRptPath, umaAmHost);
+	@Test
+	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
+			"umaAatClientId", "umaAatClientSecret", "umaRedirectUri", "umaRptPath", "umaAmHost",
+			"umaRegisterResourcePath" })
+	public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
+			String umaPatClientId, String umaPatClientSecret, String umaAatClientId, String umaAatClientSecret,
+			String umaRedirectUri, String umaRptPath, String umaAmHost, String umaRegisterResourcePath) {
+		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+				umaPatClientSecret, umaRedirectUri);
+		aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
+				umaAatClientSecret, umaRedirectUri);
 
-        UmaTestUtil.assert_(pat);
-        UmaTestUtil.assert_(aat);
-        UmaTestUtil.assert_(rpt);
+		rpt = TUma.requestRpt(url, aat, umaRptPath, umaAmHost);
 
-        resourceSet = TUma.registerResourceSet(this, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
-        UmaTestUtil.assert_(resourceSet);
-    }
+		UmaTestUtil.assert_(pat);
+		UmaTestUtil.assert_(aat);
+		UmaTestUtil.assert_(rpt);
 
-    @Test(dependsOnMethods = {"init"})
-    @Parameters({"umaAmHost", "umaHost", "umaPermissionPath"})
-    public void registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath) throws Exception {
-        final UmaPermission r = new UmaPermission();
-        r.setResourceSetId(resourceSet.getId());
-        r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
+		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
+		UmaTestUtil.assert_(resourceSet);
+	}
 
-        ticket = TUma.registerPermission(this, pat, umaAmHost, umaHost, r, umaPermissionPath);
-        UmaTestUtil.assert_(ticket);
-    }
+	@Test(dependsOnMethods = { "init" })
+	@Parameters({ "umaAmHost", "umaHost", "umaPermissionPath" })
+	public void registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath)
+			throws Exception {
+		final UmaPermission r = new UmaPermission();
+		r.setResourceSetId(resourceSet.getId());
+		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-    @Test(dependsOnMethods = {"registerPermissionForRpt"})
-    @Parameters({"umaPermissionAuthorizationPath", "umaAmHost"})
-    public void authorizePermission(String umaPermissionAuthorizationPath, String umaAmHost) {
-        final RptAuthorizationRequest request = new RptAuthorizationRequest();
-        request.setRpt(rpt.getRpt());
-        request.setTicket(ticket.getTicket());
-        request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
+		ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
+		UmaTestUtil.assert_(ticket);
+	}
 
-        final RptAuthorizationResponse response = TUma.requestAuthorization(this, umaPermissionAuthorizationPath, umaAmHost, aat, request);
-        assertNotNull(response, "Token response status is null");
+	@Test(dependsOnMethods = { "registerPermissionForRpt" })
+	@Parameters({ "umaPermissionAuthorizationPath", "umaAmHost" })
+	public void authorizePermission(String umaPermissionAuthorizationPath, String umaAmHost) {
+		final RptAuthorizationRequest request = new RptAuthorizationRequest();
+		request.setRpt(rpt.getRpt());
+		request.setTicket(ticket.getTicket());
+		request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
 
-//        final RptIntrospectionResponse status = TUma.requestRptStatus(this, umaRptStatusPath, umaAmHost, m_pat, m_rpt.getRpt());
-//        UmaTestUtil.assert_(status);
-    }
+		final RptAuthorizationResponse response = TUma.requestAuthorization(url, umaPermissionAuthorizationPath,
+				umaAmHost, aat, request);
+		assertNotNull(response, "Token response status is null");
 
-    // use normal test method instead of @AfterClass because it will not work with ResourceRequestEnvironment seam class which is used
-    // behind TUma wrapper.
-    @Test(dependsOnMethods = {"_7_requesterAccessProtectedResourceWithEnoughPermissionsRpt"})
-    @Parameters({"umaRegisterResourcePath"})
-    public void cleanUp(String umaRegisterResourcePath) {
-        if (resourceSet != null) {
-            TUma.deleteResourceSet(this, pat, umaRegisterResourcePath, resourceSet.getId());
-        }
-    }
+		// final RptIntrospectionResponse status = TUma.requestRptStatus(this,
+		// umaRptStatusPath, umaAmHost, m_pat, m_rpt.getRpt());
+		// UmaTestUtil.assert_(status);
+	}
 
+	// use normal test method instead of @AfterClass because it will not work
+	// with ResourceRequestEnvironment seam class which is used
+	// behind TUma wrapper.
+	@Test(dependsOnMethods = { "authorizePermission" })
+	@Parameters({ "umaRegisterResourcePath" })
+	public void cleanUp(String umaRegisterResourcePath) {
+		if (resourceSet != null) {
+			TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSet.getId());
+		}
+	}
 
 }

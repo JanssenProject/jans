@@ -6,8 +6,11 @@
 
 package org.xdi.oxauth.comp;
 
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseComponentTest;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 
 /**
@@ -15,12 +18,16 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
  * @version 0.9, 09/01/2013
  */
 
-public class UtilityMethodsTest {
+public class UtilityMethodsTest extends BaseComponentTest {
 
-    @Test
-    public void test() {
-        final String dn = "oxAuthTokenCode=d76e48fe-c9f9-4d82-871c-b097f6c52875,inum=@!1111!0008!FF81!2D39,ou=clients,o=@!1111,o=gluu";
-        final String clientId = AuthorizationGrantList.extractClientIdFromTokenDn(dn);
-        Assert.assertTrue(clientId.equals("@!1111!0008!FF81!2D39"));
-    }
+	@Inject
+	private AuthorizationGrantList authorizationGrantList;
+
+	@Test
+	public void test() {
+		final String dn = "oxAuthTokenCode=d76e48fe-c9f9-4d82-871c-b097f6c52875,inum=@!1111!0008!FF81!2D39,ou=clients,o=@!1111,o=gluu";
+		final String clientId = authorizationGrantList.extractClientIdFromTokenDn(dn);
+		Assert.assertTrue(clientId.equals("@!1111!0008!FF81!2D39"));
+	}
+
 }

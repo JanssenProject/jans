@@ -7,38 +7,35 @@
 package org.xdi.oxauth.service;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.contexts.Context;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.faces.FacesManager;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.security.Credentials;
-import org.jboss.seam.security.Identity;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.model.metric.MetricType;
+import org.xdi.model.security.Credentials;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.exception.InvalidStateException;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import javax.annotation.Nonnull;
+import javax.ejb.Stateless;
 import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
@@ -53,12 +50,11 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STAT
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("authenticationService")
-@AutoCreate
+@Stateless
+@Named
 public class AuthenticationService {
 
-    // use only "acr" instead of "acr_values" #334
+	// use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
             AuthorizeRequestParam.RESPONSE_TYPE,
@@ -82,48 +78,48 @@ public class AuthenticationService {
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
             AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS));
     private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
-    @Logger
-    private Log log;
 
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private Identity identity;
+    
+    @Inject
+    private Credentials credentials;
 
-    @In(value = "#{facesContext.externalContext}", required = false)
-    private ExternalContext externalContext;
-
-    @In(value = AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In(value = AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    @Inject @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
     private List<LdapEntryManager> ldapAuthEntryManagers;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
-    @In
+    @Inject
     private MetricService metricService;
 
-    @In("org.jboss.seam.core.manager")
-    private FacesManager facesManager;
+    @Inject
+    private ExternalContext externalContext;
 
-    public static AuthenticationService instance() {
-        return ServerUtil.instance(AuthenticationService.class);
-    }
+    @Inject
+    private FacesService facesService;
 
     /**
      * Authenticate user.
@@ -133,17 +129,16 @@ public class AuthenticationService {
      * @return <code>true</code> if success, otherwise <code>false</code>.
      */
     public boolean authenticate(String userName, String password) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
-        log.debug("Authenticating user with LDAP: username: '{0}', credentials: '{1}'", userName, System.identityHashCode(credentials));
+        log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
 
         com.codahale.metrics.Timer.Context timerContext = metricService.getTimer(MetricType.OXAUTH_USER_AUTHENTICATION_RATE).time();
         try {
             if ((this.ldapAuthConfigs == null) || (this.ldapAuthConfigs.size() == 0)) {
-                authenticated = localAuthenticate(credentials, userName, password);
+                authenticated = localAuthenticate(userName, password);
             } else {
-                authenticated = externalAuthenticate(credentials, userName, password);
+                authenticated = externalAuthenticate(userName, password);
             }
         } finally {
             timerContext.stop();
@@ -174,7 +169,7 @@ public class AuthenticationService {
         }
     }
 
-    private boolean localAuthenticate(Credentials credentials, String userName, String password) {
+    private boolean localAuthenticate(String userName, String password) {
         User user = userService.getUser(userName);
         if (user != null) {
             if (!checkUserStatus(user)) {
@@ -187,7 +182,7 @@ public class AuthenticationService {
                 configureAuthenticatedUser(user);
                 updateLastLogonUserTime(user);
 
-                log.trace("Authenticate: credentials: '{0}', credentials.userName: '{1}', authenticatedUser.userId: '{2}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
             }
 
             return authenticated;
@@ -196,7 +191,7 @@ public class AuthenticationService {
         return false;
     }
 
-    private boolean externalAuthenticate(Credentials credentials, String keyValue, String password) {
+    private boolean externalAuthenticate(String keyValue, String password) {
         for (int i = 0; i < this.ldapAuthConfigs.size(); i++) {
             GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
             LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
@@ -211,7 +206,7 @@ public class AuthenticationService {
                 localPrimaryKey = ldapAuthConfig.getLocalPrimaryKey();
             }
 
-            boolean authenticated = authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+            boolean authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
             if (authenticated) {
                 return authenticated;
             }
@@ -221,10 +216,8 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
-
         if (this.ldapAuthConfigs == null) {
-            return authenticate(credentials, null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+            return authenticate(null, ldapEntryManager, keyValue, password, primaryKey, localPrimaryKey);
         }
 
         boolean authenticated = false;
@@ -235,7 +228,7 @@ public class AuthenticationService {
                 GluuLdapConfiguration ldapAuthConfig = this.ldapAuthConfigs.get(i);
                 LdapEntryManager ldapAuthEntryManager = this.ldapAuthEntryManagers.get(i);
 
-                authenticated = authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
+                authenticated = authenticate(ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
                 if (authenticated) {
                     break;
                 }
@@ -260,12 +253,7 @@ public class AuthenticationService {
      * Utility method which can be used in custom scripts
      */
     public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
-        return authenticate(credentials, ldapAuthConfig, ldapAuthEntryManager, keyValue, password, primaryKey, localPrimaryKey);
-    }
-
-    public boolean authenticate(Credentials credentials, GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
-        log.debug("Attempting to find userDN by primary key: '{0}' and key value: '{1}', credentials: '{2}'", primaryKey, keyValue, System.identityHashCode(credentials));
+        log.debug("Attempting to find userDN by primary key: '{}' and key value: '{}', credentials: '{}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
         List<?> baseDNs;
         if (ldapAuthConfig == null) {
@@ -286,11 +274,11 @@ public class AuthenticationService {
                 User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
                 if (user != null) {
                     String userDn = user.getDn();
-                    log.debug("Attempting to authenticate userDN: {0}", userDn);
+                    log.debug("Attempting to authenticate userDN: {}", userDn);
                     if (ldapAuthEntryManager.authenticate(userDn, password)) {
-                        log.debug("User authenticated: {0}", userDn);
+                        log.debug("User authenticated: {}", userDn);
 
-                        log.debug("Attempting to find userDN by local primary key: {0}", localPrimaryKey);
+                        log.debug("Attempting to find userDN by local primary key: {}", localPrimaryKey);
                         User localUser = userService.getUserByAttribute(localPrimaryKey, keyValue);
                         if (localUser != null) {
                             if (!checkUserStatus(localUser)) {
@@ -300,7 +288,7 @@ public class AuthenticationService {
                             configureAuthenticatedUser(localUser);
                             updateLastLogonUserTime(localUser);
 
-                            log.trace("authenticate_external: credentials: '{0}', credentials.userName: '{1}', authenticatedUser.userId: '{2}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                            log.trace("authenticate_external: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
 
                             return true;
                         }
@@ -315,8 +303,7 @@ public class AuthenticationService {
     }
 
     public boolean authenticate(String userName) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
-        log.debug("Authenticating user with LDAP: username: '{0}', credentials: '{1}'", userName, System.identityHashCode(credentials));
+        log.debug("Authenticating user with LDAP: username: '{}', credentials: '{}'", userName, System.identityHashCode(credentials));
 
         boolean authenticated = false;
 
@@ -328,7 +315,7 @@ public class AuthenticationService {
                 configureAuthenticatedUser(user);
                 updateLastLogonUserTime(user);
 
-                log.trace("Authenticate: credentials: '{0}', credentials.userName: '{1}', authenticatedUser.userId: '{2}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+                log.trace("Authenticate: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
 
                 authenticated = true;
             }
@@ -351,7 +338,7 @@ public class AuthenticationService {
     }
 
     private User getUserByAttribute(LdapEntryManager ldapAuthEntryManager, String baseDn, String attributeName, String attributeValue) {
-        log.debug("Getting user information from LDAP: attributeName = '{0}', attributeValue = '{1}'", attributeName, attributeValue);
+        log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         if (StringHelper.isEmpty(attributeValue)) {
             return null;
@@ -365,9 +352,9 @@ public class AuthenticationService {
 
         sampleUser.setCustomAttributes(customAttributes);
 
-        log.debug("Searching user by attributes: '{0}', baseDn: '{1}'", customAttributes, baseDn);
+        log.debug("Searching user by attributes: '{}', baseDn: '{}'", customAttributes, baseDn);
         List<User> entries = ldapAuthEntryManager.findEntries(sampleUser, 1);
-        log.debug("Found '{0}' entries", entries.size());
+        log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
             SimpleUser foundUser = entries.get(0);
@@ -385,7 +372,7 @@ public class AuthenticationService {
             return true;
         }
 
-        log.warn("User '{0}' was disabled", user.getUserId());
+        log.warn("User '{}' was disabled", user.getUserId());
         return false;
     }
 
@@ -404,14 +391,12 @@ public class AuthenticationService {
         try {
             ldapEntryManager.merge(customEntry);
         } catch (EntryPersistenceException epe) {
-            log.error("Failed to update oxLastLoginTime of user '{0}'", user.getUserId());
+            log.error("Failed to update oxLastLoginTime of user '{}'", user.getUserId());
         }
     }
 
     public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
-
-        log.trace("configureSessionUser: credentials: '{0}', sessionState: '{1}', credentials.userName: '{2}', authenticatedUser.userId: '{3}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
+        log.trace("configureSessionUser: credentials: '{}', sessionState: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
 
@@ -421,7 +406,7 @@ public class AuthenticationService {
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-            log.trace("configureSessionUser sessionState: '{0}', sessionState.auth_user: '{1}'", sessionState, sessionAuthUser);
+            log.trace("configureSessionUser sessionState: '{}', sessionState.auth_user: '{}'", sessionState, sessionAuthUser);
 
             newSessionState = sessionStateService.setSessionStateAuthenticated(sessionState, user.getDn());
         }
@@ -432,14 +417,12 @@ public class AuthenticationService {
     }
 
     public SessionState configureEventUser() {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
-
         User user = getAuthenticatedUser();
         if (user == null) {
             return null;
         }
 
-        log.debug("ConfigureEventUser: username: '{0}', credentials: '{1}'", user.getUserId(), System.identityHashCode(credentials));
+        log.debug("ConfigureEventUser: username: '{}', credentials: '{}'", user.getUserId(), System.identityHashCode(credentials));
 
         SessionState sessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn());
 
@@ -455,19 +438,16 @@ public class AuthenticationService {
     }
 
     private void configureEventUserContext(SessionState sessionState) {
-        identity.addRole("user");
-
-        Contexts.getEventContext().set("sessionUser", sessionState);
+        identity.setSessionState(sessionState);
     }
 
     private void configureAuthenticatedUser(User user) {
-        Contexts.getEventContext().set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
+        identity.setUser(user);
     }
 
     public User getAuthenticatedUser() {
-        Context eventContext = Contexts.getEventContext();
-        if (eventContext.isSet(EVENT_CONTEXT_AUTHENTICATED_USER)) {
-            return (User) eventContext.get(EVENT_CONTEXT_AUTHENTICATED_USER);
+        if (identity.getUser() != null) {
+            return identity.getUser();
         } else {
             SessionState sessionState = sessionStateService.getSessionState();
             if (sessionState != null) {
@@ -475,7 +455,7 @@ public class AuthenticationService {
                 String userId = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
                 if (StringHelper.isNotEmpty(userId)) {
                     User user = userService.getUser(userId);
-                    eventContext.set(EVENT_CONTEXT_AUTHENTICATED_USER, user);
+                    identity.setUser(user);
 
                     return user;
                 }
@@ -494,30 +474,26 @@ public class AuthenticationService {
         return null;
     }
 
-    public void configureSessionClient(Context context) {
-        Credentials credentials = ServerUtil.instance(Credentials.class);
+    public void configureSessionClient() {
         String clientInum = credentials.getUsername();
-        log.debug("ConfigureSessionClient: username: '{0}', credentials: '{1}'", clientInum, System.identityHashCode(credentials));
+        log.debug("ConfigureSessionClient: username: '{}', credentials: '{}'", clientInum, System.identityHashCode(credentials));
 
         Client client = clientService.getClient(clientInum);
-        configureSessionClient(context, client);
+        configureSessionClient(client);
     }
 
-    public void configureSessionClient(Context context, Client client) {
-        identity.addRole("client");
-
+    public void configureSessionClient(Client client) {
         SessionClient sessionClient = new SessionClient();
         sessionClient.setClient(client);
 
-        context.set("sessionClient", sessionClient);
+        identity.setSessionClient(sessionClient);
 
         clientService.updatAccessTime(client, true);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-//    @Observer(value = {Constants.EVENT_OXAUTH_CUSTOM_LOGIN_SUCCESSFUL, Identity.EVENT_LOGIN_SUCCESSFUL})
     public void onSuccessfulLogin(SessionState sessionUser) {
-        log.info("Attempting to redirect user: SessionUser: {0}", sessionUser);
+        log.info("Attempting to redirect user: SessionUser: {}", sessionUser);
 
         if ((sessionUser == null) || StringUtils.isBlank(sessionUser.getUserDn())) {
             return;
@@ -525,7 +501,7 @@ public class AuthenticationService {
 
         User user = userService.getUserByDn(sessionUser.getUserDn());
 
-        log.info("Attempting to redirect user: User: {0}", user);
+        log.info("Attempting to redirect user: User: {}", user);
 
         if (user != null) {
             final Map<String, String> result = sessionUser.getSessionAttributes();
@@ -533,12 +509,12 @@ public class AuthenticationService {
 
             result.put(SESSION_STATE, sessionUser.getId());
 
-            log.trace("Logged in successfully! User: {0}, page: /authorize.xhtml, map: {1}", user, allowedParameters);
-            facesManager.redirect("/authorize.xhtml", (Map) allowedParameters, false);
+            log.trace("Logged in successfully! User: {}, page: /authorize.xhtml, map: {}", user, allowedParameters);
+            facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
         }
     }
 
-    public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
+    public static Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
         final Map<String, String> result = new HashMap<String, String>();
         if (!requestParameterMap.isEmpty()) {
             final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
@@ -634,7 +610,7 @@ public class AuthenticationService {
     }
 
     public String getParameterValue(String p_name) {
-        final Object o = Contexts.getEventContext().get(p_name);
+        final Object o = identity.getWorkingParameter(p_name);
         if (o instanceof String) {
             final String s = (String) o;
             return s;
@@ -650,7 +626,7 @@ public class AuthenticationService {
     }
 
     public boolean isParameterExists(String p_name) {
-        return Contexts.getEventContext().isSet(p_name);
+        return identity.isSetWorkingParameter(p_name);
     }
 
 }

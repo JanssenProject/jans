@@ -1,55 +1,58 @@
 package org.xdi.oxauth.gluu.ws.rs;
 
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
+import java.io.IOException;
+import java.net.URI;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.jboss.arquillian.container.test.api.RunAsClient;
+import org.jboss.arquillian.extension.rest.client.ArquillianResteasyResource;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.gluu.GluuConfiguration;
-import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.util.ServerUtil;
-
-import java.io.IOException;
-
-import static org.testng.Assert.*;
 
 /**
  * Created by eugeniuparvan on 8/12/16.
  */
 public class GluuConfigurationWSTest extends BaseTest {
 
-    @Parameters({"gluuConfigurationPath"})
-    @Test
-    public void getConfigurationTest(String gluuConfigurationPath) throws Exception {
-        final BaseTest baseTest = this;
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(baseTest), ResourceRequestEnvironment.Method.GET, gluuConfigurationPath) {
-            private GluuConfiguration appConfiguration;
+	@ArquillianResource
+	private URI url;
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
-            }
+	@RunAsClient
+	@Parameters({ "gluuConfigurationPath", "webTarget" })
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Test
+	public void getConfigurationTest(String gluuConfigurationPath,
+			@Optional @ArquillianResteasyResource("seam/resource") final WebTarget webTarget) throws Exception {
+		Response response = webTarget.path(gluuConfigurationPath).request().get();
+		String entity = response.readEntity(String.class);
+		BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                BaseTest.showResponse("UMA : TConfiguration.configuration", response);
-
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                try {
-                	appConfiguration = ServerUtil.createJsonMapper().readValue(response.getContentAsString(), GluuConfiguration.class);
-                    assertNotNull(appConfiguration, "Meta data configuration is null");
-                    assertNotNull(appConfiguration.getIdGenerationEndpoint());
-                    assertNotNull(appConfiguration.getIntrospectionEndpoint());
-                    assertNotNull(appConfiguration.getAuthLevelMapping());
-                    assertNotNull(appConfiguration.getScopeToClaimsMapping());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    fail();
-                }
-            }
-        }.run();
-    }
+		assertEquals(response.getStatus(), 200, "Unexpected response code.");
+		try {
+			GluuConfiguration appConfiguration = ServerUtil.createJsonMapper().readValue(entity,
+					GluuConfiguration.class);
+			System.err.println(appConfiguration.getIdGenerationEndpoint());
+			assertNotNull(appConfiguration, "Meta data configuration is null");
+			assertNotNull(appConfiguration.getIdGenerationEndpoint());
+			assertNotNull(appConfiguration.getIntrospectionEndpoint());
+			assertNotNull(appConfiguration.getAuthLevelMapping());
+			assertNotNull(appConfiguration.getScopeToClaimsMapping());
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
 }

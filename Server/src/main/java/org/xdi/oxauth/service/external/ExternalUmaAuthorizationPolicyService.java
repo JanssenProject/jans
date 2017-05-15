@@ -10,13 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -31,15 +29,14 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 01/14/2015
  */
-@Scope(ScopeType.APPLICATION)
-@Name("externalUmaAuthorizationPolicyService")
-@AutoCreate
-@Startup
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named
 public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService {
 
 	private static final long serialVersionUID = -8609727759114795432L;
 	
-	@In
+	@Inject
 	private LookupService lookupService;
 
 	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsInumMap;
@@ -89,9 +86,5 @@ public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService
 		
 		return false;
 	}
-
-    public static ExternalUmaAuthorizationPolicyService instance() {
-        return (ExternalUmaAuthorizationPolicyService) Component.getInstance(ExternalUmaAuthorizationPolicyService.class);
-    }
 
 }

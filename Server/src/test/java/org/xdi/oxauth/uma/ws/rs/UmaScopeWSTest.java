@@ -8,11 +8,13 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import static org.testng.Assert.assertEquals;
 
+import java.net.URI;
+
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
 
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -28,39 +30,35 @@ import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 public class UmaScopeWSTest extends BaseTest {
 
-//    private MetadataConfiguration m_configuration;
-//
-//    @Parameters({"umaConfigurationPath"})
-//    @Test
-//    public void init(final String umaConfigurationPath) {
-//        m_configuration = TUma.requestConfiguration(this, umaConfigurationPath);
-//        UmaTestUtil.assert_(m_configuration);
-//    }
+	@ArquillianResource
+	private URI url;
 
-    @Parameters({"umaScopePath"})
-    @Test
-    public void scopePresence(final String umaScopePath) throws Exception {
-        String path = umaScopePath + "/" + "modify";
-        System.out.println("Path: " + path);
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this), ResourceRequestEnvironment.Method.GET, path) {
+	// private MetadataConfiguration m_configuration;
+	//
+	// @Parameters({"umaConfigurationPath"})
+	// @Test
+	// public void init(final String umaConfigurationPath) {
+	// m_configuration = TUma.requestConfiguration(this, umaConfigurationPath);
+	// UmaTestUtil.assert_(m_configuration);
+	// }
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Accept", UmaConstants.JSON_MEDIA_TYPE);
-            }
+	@Parameters({ "umaScopePath" })
+	@Test
+	public void scopePresence(final String umaScopePath) throws Exception {
+		String path = umaScopePath + "/" + "modify";
+		System.out.println("Path: " + path);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                BaseTest.showResponse("UMA : UmaScopeWSTest.scopePresence() : ", response);
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
+		request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
+		BaseTest.showResponse("UMA : UmaScopeWSTest.scopePresence() : ", response, entity);
 
-                final ScopeDescription scope = TUma.readJsonValue(response.getContentAsString(), ScopeDescription.class);
+		assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
 
-                UmaTestUtil.assert_(scope);
-            }
-        }.run();
-    }
+		final ScopeDescription scope = TUma.readJsonValue(entity, ScopeDescription.class);
+
+		UmaTestUtil.assert_(scope);
+	}
 }

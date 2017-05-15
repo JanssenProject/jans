@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version February 22, 2017
+ * @version April 19, 2017
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -371,5 +371,79 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void registerWithHttp1(final String redirectUris) throws Exception {
+        showTitle("registerWithHttp1");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+        redirectUriList.add("http://localhost/cb"); // URI with HTTP schema
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI",
+                redirectUriList);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void registerWithHttp2(final String redirectUris) throws Exception {
+        showTitle("registerWithHttp2");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+        redirectUriList.add("http://127.0.0.1/cb"); // URI with HTTP schema
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI",
+                redirectUriList);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+    }
+
+    @Parameters({"redirectUris"})
+    @Test
+    public void registerWithHttpFail(final String redirectUris) throws Exception {
+        showTitle("registerWithHttpFail");
+
+        List<String> redirectUriList = Lists.newArrayList(StringUtils.spaceSeparatedToList(redirectUris));
+        redirectUriList.add("http://www.example.com/cb"); // URI with HTTP schema
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth web test app with HTTP schema in URI",
+                redirectUriList);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setExecutor(clientExecutor(true));
+        registerClient.setRequest(registerRequest);
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 400);
+        assertNotNull(response.getEntity());
+        assertNotNull(response.getErrorType());
+        assertNotNull(response.getErrorDescription());
     }
 }
