@@ -63,7 +63,7 @@ public abstract class ConfigurableTest extends Arquillian {
 			propertiesFile = "target/test-classes/testng.properties";
 		}
 
-		// Load test paramters
+		// Load test parameters
 		// propertiesFile =
 		// "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
 		FileInputStream conf = new FileInputStream(propertiesFile);
