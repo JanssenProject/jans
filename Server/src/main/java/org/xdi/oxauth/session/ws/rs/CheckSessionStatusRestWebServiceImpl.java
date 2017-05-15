@@ -9,6 +9,7 @@ package org.xdi.oxauth.session.ws.rs;
 import java.io.IOException;
 import java.util.Date;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -20,11 +21,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.security.Identity;
+import org.slf4j.Logger;
+import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -41,16 +39,15 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @Path("/oxauth")
 @Api(value = "/oxauth", description = "Check Session Status Endpoint")
-@Name("checkSessionStatusRestWebService")
 public class CheckSessionStatusRestWebServiceImpl {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
-	@In(required = false)
+	@Inject
 	private Identity identity;
 
     @GET
@@ -69,7 +66,7 @@ public class CheckSessionStatusRestWebServiceImpl {
 	public Response requestCheckSessionStatus(@Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse,
 			@Context SecurityContext securityContext) throws IOException {
 		String sessionStateCookie = sessionStateService.getSessionStateFromCookie(httpRequest);
-		log.debug("Found session '{0}' cookie: '{1}'", SessionStateService.SESSION_STATE_COOKIE_NAME, sessionStateCookie);
+		log.debug("Found session '{}' cookie: '{}'", SessionStateService.SESSION_STATE_COOKIE_NAME, sessionStateCookie);
 
 		CheckSessionResponse response = new CheckSessionResponse("unknown", "");
 
@@ -85,7 +82,7 @@ public class CheckSessionStatusRestWebServiceImpl {
 		}
 
 		String responseJson = ServerUtil.asJson(response);
-		log.debug("Check session status response: '{0}'", responseJson);
+		log.debug("Check session status response: '{}'", responseJson);
 
 		return Response.ok().type(MediaType.APPLICATION_JSON).entity(responseJson).build();
 	}

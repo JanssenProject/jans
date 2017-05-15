@@ -8,18 +8,17 @@ package org.xdi.oxauth.session.ws.rs;
 
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.security.Identity;
+import org.slf4j.Logger;
+import org.xdi.model.security.Identity;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -51,41 +50,47 @@ import com.google.common.collect.Sets;
  * @author Yuriy Zabrovarnyy
  * @version December 15, 2015
  */
-@Name("endSessionRestWebService")
+@Path("/oxauth")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+
+    @Inject
     private RedirectionUriService redirectionUriService;
-    @In
+
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+
+    @Inject
     private ExternalApplicationSessionService externalApplicationSessionService;
-    @In
+
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
     private GrantService grantService;
 
-    @In(required = false)
+    @Inject
     private Identity identity;
-    @In
+
+    @Inject
     private ApplicationAuditLogger applicationAuditLogger;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionState,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
 
-        log.debug("Attempting to end session, idTokenHint: {0}, postLogoutRedirectUri: {1}, sessionState: {2}, Is Secure = {3}",
+        log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionState: {}, Is Secure = {}",
                 idTokenHint, postLogoutRedirectUri, sessionState, sec.isSecure());
 
         EndSessionParamsValidator.validateParams(idTokenHint, sessionState, errorResponseFactory);
@@ -132,7 +137,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         SessionState ldapSessionState = removeSessionState(sessionState, httpRequest, httpResponse);
         if ((authorizationGrant == null) && (ldapSessionState == null)) {
-            log.info("Failed to find out authorization grant for id_token_hint '{0}' and session_state '{1}'", idTokenHint, sessionState);
+            log.info("Failed to find out authorization grant for id_token_hint '{}' and session_state '{}'", idTokenHint, sessionState);
             errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
         }
 
@@ -143,7 +148,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         if (isExternalLogoutPresent && (ldapSessionState != null)) {
         	String userName = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
             externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, ldapSessionState);
-            log.info("End session result for '{0}': '{1}'", userName, "logout", externalLogoutResult);
+            log.info("End session result for '{}': '{}'", userName, "logout", externalLogoutResult);
         }
 
         boolean isGrantAndExternalLogoutSuccessful = isExternalLogoutPresent && externalLogoutResult;
@@ -219,10 +224,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 if (ldapSessionState != null) {
                     boolean result = sessionStateService.remove(ldapSessionState);
                     if (!result) {
-                        log.error("Failed to remove session_state '{0}' from LDAP", id);
+                        log.error("Failed to remove session_state '{}' from LDAP", id);
                     }
                 } else {
-                    log.error("Failed to load session from LDAP by session_state: '{0}'", id);
+                    log.error("Failed to load session from LDAP by session_state: '{}'", id);
                 }
             }
         } catch (Exception e) {

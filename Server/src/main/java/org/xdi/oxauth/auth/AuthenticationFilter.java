@@ -6,25 +6,31 @@
 
 package org.xdi.oxauth.auth;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.intercept.BypassInterceptors;
-import org.jboss.seam.annotations.web.Filter;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.security.Identity;
-import org.jboss.seam.security.NotLoggedInException;
-import org.jboss.seam.servlet.ContextualHttpServletRequest;
-import org.jboss.seam.util.Base64;
-import org.jboss.seam.web.AbstractFilter;
+import org.slf4j.Logger;
+import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -39,396 +45,367 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
 /**
  * @author Javier Rojas Blum
  * @version March 4, 2016
  */
-@Scope(ScopeType.APPLICATION)
-@Name("org.jboss.seam.web.authenticationFilter")
-@Install(value = false, precedence = Install.BUILT_IN)
-@BypassInterceptors
-@Filter(within = "org.jboss.seam.web.exceptionFilter")
-public class AuthenticationFilter extends AbstractFilter {
+@WebFilter(asyncSupported = true, urlPatterns = {
+		"/seam/resource/restv1/oxauth/authorize", "/seam/resource/restv1/oxauth/token",
+		"/seam/resource/restv1/oxauth/userinfo"
+		}, displayName = "oxAuth"
+)
+public class AuthenticationFilter implements Filter {
 
-    @Logger
-    private Log log;
+	@Inject
+	private Logger log;
 
-    @In
-    private SessionStateService sessionStateService;
+	@Inject
+	private Authenticator authenticator;
 
-    @In
-    private ClientService clientService;
+	@Inject
+	private SessionStateService sessionStateService;
 
-    @In
-    private ClientFilterService clientFilterService;
+	@Inject
+	private ClientService clientService;
 
-    @In
-    private ErrorResponseFactory errorResponseFactory;
+	@Inject
+	private ClientFilterService clientFilterService;
 
+	@Inject
+	private ErrorResponseFactory errorResponseFactory;
+
+	@Inject
 	private AppConfiguration appConfiguration;
 
-	@Observer( ConfigurationFactory.CONFIGURATION_UPDATE_EVENT )
-	public void updateConfiguration(AppConfiguration appConfiguration, StaticConf staticConfiguration) {
-		this.appConfiguration = appConfiguration;
+	@Inject
+	private Identity identity;
+
+	private String realm;
+	public static final String REALM = "oxAuth";
+
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
 	}
 
-    private String realm;
-    public static final String REALM = "oxAuth";
+	@Override
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, final FilterChain filterChain)
+			throws IOException, ServletException {
+		final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+		final HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
-    private void init() {
-        if (sessionStateService == null) {
-            sessionStateService = SessionStateService.instance();
-        }
-        if (clientService == null) {
-            clientService = (ClientService) Component.getInstance(ClientService.class, true);
-        }
-        if (clientFilterService == null) {
-            clientFilterService = ClientFilterService.instance();
-        }
-        if (errorResponseFactory == null) {
-            errorResponseFactory = (ErrorResponseFactory) Component.getInstance(ErrorResponseFactory.class, true);
-        }
-    }
+		try {
+			final String requestUrl = httpRequest.getRequestURL().toString();
+			log.trace("Get request to: '{}'", requestUrl);
+			if (requestUrl.endsWith("/token")
+					&& ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) {
+				log.debug("Starting token endpoint authentication");
+				if (httpRequest.getParameter("client_assertion") != null
+						&& httpRequest.getParameter("client_assertion_type") != null) {
+					log.debug("Starting JWT token endpoint authentication");
+					processJwtAuth(httpRequest, httpResponse, filterChain);
+				} else if (httpRequest.getHeader("Authorization") != null
+						&& httpRequest.getHeader("Authorization").startsWith("Basic ")) {
+					log.debug("Starting Basic Auth token endpoint authentication");
+					processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
+				} else {
+					log.debug("Starting POST Auth token endpoint authentication");
+					processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse,
+							filterChain);
+				}
+			} else if (httpRequest.getHeader("Authorization") != null) {
+				String header = httpRequest.getHeader("Authorization");
+				if (header.startsWith("Bearer ")) {
+					processBearerAuth(httpRequest, httpResponse, filterChain);
+				} else if (header.startsWith("Basic ")) {
+					processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
+				} else {
+					httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-                         final FilterChain filterChain) throws IOException, ServletException {
-        final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-        final HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
+					httpResponse.sendError(401, "Not authorized");
+				}
+			} else {
+				String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
+				List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
-        new ContextualHttpServletRequest(httpRequest) {
+				if (StringUtils.isBlank(sessionState)) {
+					// OXAUTH-297 : check whether session_state is present in
+					// cookie
+					sessionState = sessionStateService.getSessionStateFromCookie(httpRequest);
+				}
 
-            @Override
-            public void process() {
-                final Identity identity = Identity.instance();
-                init();
+				SessionState sessionStateObject = null;
+				if (StringUtils.isNotBlank(sessionState)) {
+					sessionStateObject = sessionStateService.getSessionState(sessionState);
+				}
+				if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState()
+						&& !prompts.contains(Prompt.LOGIN)) {
+					processSessionAuth(errorResponseFactory, sessionState, httpRequest, httpResponse, filterChain);
+				} else {
+					filterChain.doFilter(httpRequest, httpResponse);
+				}
+			}
+		} catch (IOException ex) {
+			log.error(ex.getMessage(), ex);
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+		}
+	}
 
-                // Workaround for tomcat
-                if (appConfiguration == null) {
-                	appConfiguration = (AppConfiguration) Component.getInstance("appConfiguration", true);
-                }
+	private void processSessionAuth(ErrorResponseFactory errorResponseFactory, String p_sessionState,
+			HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain)
+			throws IOException, ServletException {
+		boolean requireAuth;
 
-                try {
-                    final String requestUrl = httpRequest.getRequestURL().toString();
-					log.trace("Get request to: '{0}'", requestUrl);
-                    if (requestUrl.endsWith("/token") && ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) {
-                    	log.debug("Starting token endpoint authentication");
-                        if (httpRequest.getParameter("client_assertion") != null
-                                && httpRequest.getParameter("client_assertion_type") != null) {
-							log.debug("Starting JWT token endpoint authentication");
-                            processJwtAuth(errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        } else if (httpRequest.getHeader("Authorization") != null && httpRequest.getHeader("Authorization").startsWith("Basic ")) {
-							log.debug("Starting Basic Auth token endpoint authentication");
-                            processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        } else {
-							log.debug("Starting POST Auth token endpoint authentication");
-                            processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        }
-                    } else if (httpRequest.getHeader("Authorization") != null) {
-                        String header = httpRequest.getHeader("Authorization");
-                        if (header.startsWith("Bearer ")) {
-                            processBearerAuth(httpRequest, httpResponse, filterChain);
-                        } else if (header.startsWith("Basic ")) {
-                            processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain, identity);
-                        } else {
-                            httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+		requireAuth = !authenticator.authenticateBySessionState(p_sessionState);
+		log.trace("Process Session Auth, sessionState = {}, requireAuth = {}", p_sessionState, requireAuth);
 
-                            httpResponse.sendError(401, "Not authorized");
-                        }
-                    } else {
-                        String sessionState = httpRequest.getParameter(AuthorizeRequestParam.SESSION_STATE);
-                        List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
+		if (!requireAuth) {
+			try {
+				p_filterChain.doFilter(p_httpRequest, p_httpResponse);
+			} catch (Exception ex) {
+				log.error("Failed to process session authentication", ex);
+				requireAuth = true;
+			}
+		}
 
-                        if (StringUtils.isBlank(sessionState)) {
-                            // OXAUTH-297 : check whether session_state is present in cookie
-                            sessionState = sessionStateService.getSessionStateFromCookie(httpRequest);
-                        }
+		if (requireAuth) {
+			sendError(p_httpResponse);
+		}
+	}
 
-                        SessionState sessionStateObject = null;
-                        if (StringUtils.isNotBlank(sessionState)) {
-                            sessionStateObject = sessionStateService.getSessionState(sessionState);
-                        }
-                        if (sessionStateObject != null && SessionIdState.AUTHENTICATED == sessionStateObject.getState() && !prompts.contains(Prompt.LOGIN)) {
-                            processSessionAuth(errorResponseFactory, sessionState, httpRequest, httpResponse, filterChain);
-                        } else {
-                            filterChain.doFilter(httpRequest, httpResponse);
-                        }
-                    }
-                } catch (IOException ex) {
-                    log.error(ex.getMessage(), ex);
-                } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
-                }
-            }
-        }.run();
-    }
+	private void processBasicAuth(ClientService clientService, ErrorResponseFactory errorResponseFactory,
+			HttpServletRequest servletRequest, HttpServletResponse servletResponse, FilterChain filterChain) {
+		boolean requireAuth = true;
 
-    private void processSessionAuth(ErrorResponseFactory errorResponseFactory, String p_sessionState, HttpServletRequest p_httpRequest, HttpServletResponse p_httpResponse, FilterChain p_filterChain) throws IOException, ServletException {
-        boolean requireAuth;
+		try {
+			String header = servletRequest.getHeader("Authorization");
+			if (header != null && header.startsWith("Basic ")) {
+				String base64Token = header.substring(6);
+				String token = new String(Base64.decodeBase64(base64Token), Util.UTF8_STRING_ENCODING);
 
-        requireAuth = !authenticator().authenticateBySessionState(p_sessionState);
-        log.trace("Process Session Auth, sessionState = {0}, requireAuth = {1}", p_sessionState, requireAuth);
+				String username = "";
+				String password = "";
+				int delim = token.indexOf(":");
 
-        if (!requireAuth) {
-            try {
-                p_filterChain.doFilter(p_httpRequest, p_httpResponse);
-            } catch (Exception ex) {
-                log.error("Failed to process session authentication", ex);
-                requireAuth = true;
-            }
-        }
+				if (delim != -1) {
+					username = token.substring(0, delim);
+					password = token.substring(delim + 1);
+				}
 
-        if (requireAuth) {
-            sendError(errorResponseFactory, p_httpResponse);
-        }
-    }
+				requireAuth = !StringHelper.equals(username, identity.getCredentials().getUsername())
+						|| !identity.isLoggedIn();
 
-    private void processBasicAuth(ClientService clientService, ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                                  FilterChain filterChain, Identity identity) {
-        boolean requireAuth = true;
+				// Only authenticate if username doesn't match Identity.username
+				// and user isn't authenticated
+				if (requireAuth) {
+					if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
+						if (servletRequest.getRequestURI().endsWith("/token")) {
+							Client client = clientService.getClient(username);
+							if (client == null
+									|| AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
+								throw new Exception("The Token Authentication Method is not valid.");
+							}
+						}
 
-        try {
-            String header = servletRequest.getHeader("Authorization");
-            if (header != null && header.startsWith("Basic ")) {
-                String base64Token = header.substring(6);
-                String token = new String(Base64.decode(base64Token), Util.UTF8_STRING_ENCODING);
+						identity.getCredentials().setUsername(username);
+						identity.getCredentials().setPassword(password);
 
-                String username = "";
-                String password = "";
-                int delim = token.indexOf(":");
+						requireAuth = !authenticator.authenticateWebService();
+					}
+				}
+			}
 
-                if (delim != -1) {
-                    username = token.substring(0, delim);
-                    password = token.substring(delim + 1);
-                }
+			if (!requireAuth) {
+				filterChain.doFilter(servletRequest, servletResponse);
+				return;
+			}
+		} catch (UnsupportedEncodingException ex) {
+			log.info("Basic authentication failed", ex);
+		} catch (ServletException ex) {
+			log.info("Basic authentication failed", ex);
+		} catch (IOException ex) {
+			log.info("Basic authentication failed", ex);
+		} catch (Exception ex) {
+			log.info("Basic authentication failed", ex);
+		}
 
-                requireAuth = !StringHelper.equals(username, identity.getCredentials().getUsername()) || !identity.isLoggedIn();
+		try {
+			if (requireAuth && !identity.isLoggedIn()) {
+				sendError(servletResponse);
+			}
+		} catch (IOException ex) {
+			log.error(ex.getMessage(), ex);
+		}
+	}
 
-                // Only authenticate if username doesn't match Identity.username and user isn't authenticated
-                if (requireAuth) {
-                    if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
-                        if (servletRequest.getRequestURI().endsWith("/token")) {
-                            Client client = clientService.getClient(username);
-                            if (client == null || AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
-                                throw new Exception("The Token Authentication Method is not valid.");
-                            }
-                        }
+	private void processBearerAuth(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+			FilterChain filterChain) {
+		try {
+			String header = servletRequest.getHeader("Authorization");
+			if (header != null && header.startsWith("Bearer ")) {
+				// Immutable object
+				// servletRequest.getParameterMap().put("access_token", new
+				// String[]{accessToken});
+				filterChain.doFilter(servletRequest, servletResponse);
+			}
+		} catch (ServletException ex) {
+			log.info("Bearer authorization failed: {}", ex);
+		} catch (IOException ex) {
+			log.info("Bearer authorization failed: {}", ex);
+		} catch (Exception ex) {
+			log.info("Bearer authorization failed: {}", ex);
+		}
+	}
 
-                        identity.getCredentials().setUsername(username);
-                        identity.getCredentials().setPassword(password);
+	private void processPostAuth(ClientService clientService, ClientFilterService clientFilterService,
+			ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest,
+			HttpServletResponse servletResponse, FilterChain filterChain) {
+		try {
+			String clientId = "";
+			String clientSecret = "";
+			boolean isExistUserPassword = false;
+			if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))
+					&& StringHelper.isNotEmpty(servletRequest.getParameter("client_secret"))) {
+				clientId = servletRequest.getParameter("client_id");
+				clientSecret = servletRequest.getParameter("client_secret");
+				isExistUserPassword = true;
+			}
+			log.trace("isExistUserPassword: {}", isExistUserPassword);
 
-                        final Authenticator authenticator = authenticator();
-                        requireAuth = !authenticator.authenticateWebService();
-                    }
-                }
-            }
+			boolean requireAuth = !StringHelper.equals(clientId, identity.getCredentials().getUsername())
+					|| !identity.isLoggedIn();
+			log.debug("requireAuth: '{}'", requireAuth);
 
-            try {
-                if (!requireAuth) {
-                    filterChain.doFilter(servletRequest, servletResponse);
-                    return;
-                }
-            } catch (NotLoggedInException ex) {
-                requireAuth = true;
-            }
-        } catch (UnsupportedEncodingException ex) {
-            log.info("Basic authentication failed", ex);
-        } catch (ServletException ex) {
-            log.info("Basic authentication failed", ex);
-        } catch (IOException ex) {
-            log.info("Basic authentication failed", ex);
-        } catch (Exception ex) {
-            log.info("Basic authentication failed", ex);
-        }
+			if (requireAuth) {
+				if (isExistUserPassword) {
+					Client client = clientService.getClient(clientId);
+					if (client != null && AuthenticationMethod.CLIENT_SECRET_POST == client.getAuthenticationMethod()) {
+						// Only authenticate if username doesn't match
+						// Identity.username and user isn't authenticated
+						if (!clientId.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
+							identity.logout();
 
-        try {
-            if (requireAuth && !identity.isLoggedIn()) {
-                sendError(errorResponseFactory, servletResponse);
-            }
-        } catch (IOException ex) {
-            log.error(ex.getMessage(), ex);
-        }
-    }
+							identity.getCredentials().setUsername(clientId);
+							identity.getCredentials().setPassword(clientSecret);
 
-    private Authenticator authenticator() {
-        return (Authenticator) Component.getInstance(Authenticator.class, true);
-    }
+							requireAuth = !authenticator.authenticateWebService();
+						} else {
+							authenticator.configureSessionClient(client);
+						}
+					}
+				} else if (Boolean.TRUE.equals(appConfiguration.getClientAuthenticationFiltersEnabled())) {
+					String clientDn = clientFilterService
+							.processAuthenticationFilters(servletRequest.getParameterMap());
+					if (clientDn != null) {
+						Client client = clientService.getClientByDn(clientDn);
 
-    private void processBearerAuth(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                                   FilterChain filterChain) {
-        try {
-            String header = servletRequest.getHeader("Authorization");
-            if (header != null && header.startsWith("Bearer ")) {
-                // Immutable object
-                //servletRequest.getParameterMap().put("access_token", new String[]{accessToken});
-                filterChain.doFilter(servletRequest, servletResponse);
-            }
-        } catch (ServletException ex) {
-            log.info("Bearer authorization failed: {0}", ex, ex.getMessage());
-        } catch (IOException ex) {
-            log.info("Bearer authorization failed: {0}", ex, ex.getMessage());
-        } catch (Exception ex) {
-            log.info("Bearer authorization failed: {0}", ex, ex.getMessage());
-        }
-    }
+						identity.logout();
 
-    private void processPostAuth(ClientService clientService, ClientFilterService clientFilterService, ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                                 FilterChain filterChain, Identity identity) {
-        try {
-            String clientId = "";
-            String clientSecret = "";
-            boolean isExistUserPassword = false;
-            if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id")) && StringHelper.isNotEmpty(servletRequest.getParameter("client_secret"))) {
-                clientId = servletRequest.getParameter("client_id");
-                clientSecret = servletRequest.getParameter("client_secret");
-                isExistUserPassword = true;
-            }
-        	log.trace("isExistUserPassword: {0}", isExistUserPassword);
+						identity.getCredentials().setUsername(client.getClientId());
+						identity.getCredentials().setPassword(null);
 
-            boolean requireAuth = !StringHelper.equals(clientId, identity.getCredentials().getUsername()) || !identity.isLoggedIn();
-        	log.debug("requireAuth: '{0}'", requireAuth);
+						requireAuth = !authenticator.authenticateWebService(true);
+					}
+				}
+			}
 
-            if (requireAuth) {
-                Authenticator authenticator = authenticator();
-                if (isExistUserPassword) {
-                    Client client = clientService.getClient(clientId);
-                    if (client != null && AuthenticationMethod.CLIENT_SECRET_POST == client.getAuthenticationMethod()) {
-                        // Only authenticate if username doesn't match Identity.username and user isn't authenticated
-                        if (!clientId.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
-                            identity.logout();
+			if (!requireAuth) {
+				filterChain.doFilter(servletRequest, servletResponse);
+				return;
+			}
 
-                            identity.getCredentials().setUsername(clientId);
-                            identity.getCredentials().setPassword(clientSecret);
+			if (requireAuth && !identity.isLoggedIn()) {
+				sendError(servletResponse);
+			}
+		} catch (ServletException ex) {
+			log.error("Post authentication failed: {}", ex);
+		} catch (IOException ex) {
+			log.error("Post authentication failed: {}", ex);
+		} catch (Exception ex) {
+			log.error("Post authentication failed: {}", ex);
+		}
+	}
 
-                            requireAuth = !authenticator.authenticateWebService();
-                        } else {
-                        	authenticator.configureSessionClient(client);
-                        }
-                    }
-                } else if (Boolean.TRUE.equals(appConfiguration.getClientAuthenticationFiltersEnabled())) {
-                    String clientDn = clientFilterService.processAuthenticationFilters(servletRequest.getParameterMap());
-                    if (clientDn != null) {
-                        Client client = clientService.getClientByDn(clientDn);
+	private void processJwtAuth(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
+			FilterChain filterChain) {
+		boolean authorized = false;
 
-                        identity.logout();
+		try {
+			if (servletRequest.getParameter("client_assertion") != null
+					&& servletRequest.getParameter("client_assertion_type") != null) {
+				String clientId = servletRequest.getParameter("client_id");
+				ClientAssertionType clientAssertionType = ClientAssertionType
+						.fromString(servletRequest.getParameter("client_assertion_type"));
+				String encodedAssertion = servletRequest.getParameter("client_assertion");
 
-                        identity.getCredentials().setUsername(client.getClientId());
-                        identity.getCredentials().setPassword(null);
+				if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
+					ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, clientId,
+							clientAssertionType, encodedAssertion);
 
-                        requireAuth = !authenticator.authenticateWebService(true);
-                    }
-                }
-            }
+					String username = clientAssertion.getSubjectIdentifier();
+					String password = clientAssertion.getClientSecret();
 
-            try {
-                if (!requireAuth) {
-                    filterChain.doFilter(servletRequest, servletResponse);
-                    return;
-                }
-            } catch (NotLoggedInException ex) {
-                requireAuth = true;
-            }
+					// Only authenticate if username doesn't match
+					// Identity.username and user isn't authenticated
+					if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
+						identity.getCredentials().setUsername(username);
+						identity.getCredentials().setPassword(password);
 
-            if (requireAuth && !identity.isLoggedIn()) {
-                sendError(errorResponseFactory, servletResponse);
-            }
-        } catch (ServletException ex) {
-            log.error("Post authentication failed: {0}", ex, ex.getMessage());
-        } catch (IOException ex) {
-            log.error("Post authentication failed: {0}", ex, ex.getMessage());
-        } catch (Exception ex) {
-            log.error("Post authentication failed: {0}", ex, ex.getMessage());
-        }
-    }
+						authenticator.authenticateWebService(true);
+						authorized = true;
+					}
+				}
+			}
 
-    private void processJwtAuth(ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                                FilterChain filterChain, Identity identity) {
-        boolean authorized = false;
+			filterChain.doFilter(servletRequest, servletResponse);
+		} catch (ServletException ex) {
+			log.info("JWT authentication failed: {}", ex);
+		} catch (IOException ex) {
+			log.info("JWT authentication failed: {}", ex);
+		} catch (InvalidJwtException ex) {
+			log.info("JWT authentication failed: {}", ex);
+		}
 
-        try {
-            if (servletRequest.getParameter("client_assertion") != null
-                    && servletRequest.getParameter("client_assertion_type") != null) {
-                String clientId = servletRequest.getParameter("client_id");
-                ClientAssertionType clientAssertionType = ClientAssertionType.fromString(
-                        servletRequest.getParameter("client_assertion_type"));
-                String encodedAssertion = servletRequest.getParameter("client_assertion");
+		try {
+			if (!authorized) {
+				sendError(servletResponse);
+			}
+		} catch (IOException ex) {
+		}
+	}
 
-                if (clientAssertionType == ClientAssertionType.JWT_BEARER) {
-                    ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, clientId, clientAssertionType, encodedAssertion);
+	private void sendError(HttpServletResponse servletResponse) throws IOException {
+		PrintWriter out = null;
+		try {
+			out = servletResponse.getWriter();
 
-                    String username = clientAssertion.getSubjectIdentifier();
-                    String password = clientAssertion.getClientSecret();
+			servletResponse.setStatus(401);
+			servletResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
+			servletResponse.setContentType("application/json;charset=UTF-8");
+			out.write(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT));
+		} catch (IOException ex) {
+			log.error(ex.getMessage(), ex);
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+		}
+	}
 
-                    // Only authenticate if username doesn't match Identity.username and user isn't authenticated
-                    if (!username.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
-                        identity.getCredentials().setUsername(username);
-                        identity.getCredentials().setPassword(password);
+	public String getRealm() {
+		if (realm != null) {
+			return realm;
+		} else {
+			return REALM;
+		}
+	}
 
-                        final Authenticator authenticator = (Authenticator) Component.getInstance(Authenticator.class, true);
-                        authenticator.authenticateWebService(true);
-                        authorized = true;
-                    }
-                }
-            }
+	public void setRealm(String realm) {
+		this.realm = realm;
+	}
 
-            filterChain.doFilter(servletRequest, servletResponse);
-        } catch (NotLoggedInException ex) {
-            log.info("JWT authentication failed: {0}", ex, ex.getMessage());
-        } catch (ServletException ex) {
-            log.info("JWT authentication failed: {0}", ex, ex.getMessage());
-        } catch (IOException ex) {
-            log.info("JWT authentication failed: {0}", ex, ex.getMessage());
-        } catch (InvalidJwtException ex) {
-            log.info("JWT authentication failed: {0}", ex, ex.getMessage());
-        }
-
-        try {
-            if (!authorized) {
-                sendError(errorResponseFactory, servletResponse);
-            }
-        } catch (IOException ex) {
-        }
-    }
-
-    private void sendError(ErrorResponseFactory errorResponseFactory, HttpServletResponse servletResponse) throws IOException {
-        PrintWriter out = null;
-        try {
-            out = servletResponse.getWriter();
-
-            servletResponse.setStatus(401);
-            servletResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
-            servletResponse.setContentType("application/json;charset=UTF-8");
-            out.write(errorResponseFactory.getErrorAsJson(TokenErrorResponseType.INVALID_CLIENT));
-        } catch (IOException ex) {
-            log.error(ex.getMessage(), ex);
-        } finally {
-            if (out != null) {
-                out.close();
-            }
-        }
-    }
-
-    public String getRealm() {
-        if (realm != null) {
-            return realm;
-        } else {
-            return REALM;
-        }
-    }
-
-    public void setRealm(String realm) {
-        this.realm = realm;
-    }
+	@Override
+	public void destroy() {
+	}
 
 }

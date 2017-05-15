@@ -1,10 +1,13 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+    </f:metadata>
     <ui:define name="head">
         <style type="text/css">
             .login-panel {
@@ -39,43 +42,42 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">oxAuth - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['saml.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <h:form id="loginForm">
-            <s:token allowMultiplePosts="true" />
 
             <h:panelGroup rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Login (second step)</div>
+                    <div class="login-panel-header">#{msgs['saml.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
                         <p class="info">Please login here</p>
 
                         <div class="dialog">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="username">Username</h:outputLabel>
+                                <h:outputLabel for="username">#{msgs['saml.username']}</h:outputLabel>
                                 <h:inputText id="username"
                                              value="#{credentials.username}" autocomplete="off"/>
-                                <h:outputLabel for="password">Password</h:outputLabel>
+                                <h:outputLabel for="password">#{msgs['saml.password']}</h:outputLabel>
                                 <h:inputSecret id="password"
                                                value="#{credentials.password}" autocomplete="off"/>
-                                <h:outputLabel for="rememberMe">Remember me</h:outputLabel>
+                                <h:outputLabel for="rememberMe">#{msgs['saml.rememberMe']}</h:outputLabel>
                                 <h:selectBooleanCheckbox id="rememberMe"
                                                          value="#{rememberMe.enabled}"/>
                             </h:panelGrid>
                         </div>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['saml.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
 
                         <div class="actionButtons">
                             <h:commandButton value="Login" action="#{authenticator.authenticate}" />

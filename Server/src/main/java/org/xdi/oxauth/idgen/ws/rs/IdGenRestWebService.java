@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -19,18 +20,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.RPTManager;
+import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.resourceserver.PermissionService;
 import org.xdi.oxauth.service.uma.resourceserver.RsResourceType;
 import org.xdi.oxauth.service.uma.resourceserver.RsScopeType;
@@ -46,24 +43,27 @@ import com.wordnik.swagger.annotations.ApiParam;
  * @version 0.9, 24/06/2013
  */
 
-@Name("idGenWS")
 @Path("/id")
 @Api(value = "/id", description = "ID Generation")
 public class IdGenRestWebService {
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private IdGenService idGenService;
-    @In
+
+    @Inject
     private TokenService tokenService;
-    @In
+
+    @Inject
     private PermissionService umaRsPermissionService;
-    @In
-    private RPTManager rptManager;
+
+    @Inject
+    private RptManager rptManager;
 
     @GET
     @Path("/{prefix}/{type}/")
@@ -150,7 +150,7 @@ public class IdGenRestWebService {
         // along with providing the authorization server's URI in an "as_uri" property
         // to facilitate authorization server configuration data discovery,
         // including discovery of the endpoint where the client can request an RPT (Section 3.4.1).
-        log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {0}",
+        log.debug("Client does not present RPT. Return HTTP 401 (Unauthorized)\n with reference to AM as_uri: {}",
         		appConfiguration.getUmaConfigurationEndpoint());
 
         return new Pair<Boolean, Response>(false, unauthorizedResponse());
@@ -188,7 +188,7 @@ public class IdGenRestWebService {
 
     private String generateId(String prefix, String type) {
         final String id = idGenService.generateId(type, prefix);
-        log.trace("Generated id: {0}, prefix: {1}, type: {2}", id, prefix, type);
+        log.trace("Generated id: {}, prefix: {}, type: {}", id, prefix, type);
         return id;
     }
 

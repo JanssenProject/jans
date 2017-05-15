@@ -16,11 +16,7 @@ import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,10 +34,13 @@ public class AuthorizationContext extends ExternalScriptContext {
     private NeedInfoAuthenticationContext needInfoAuthenticationContext;
     private NeedInfoRequestingPartyClaims needInfoRequestingPartyClaims;
 
-    public AuthorizationContext(UmaRPT p_rpt, ResourceSetPermission p_permission, IAuthorizationGrant p_grant,
+    private AttributeService attributeService;
+
+    public AuthorizationContext(AttributeService attributeService, UmaRPT p_rpt, ResourceSetPermission p_permission, IAuthorizationGrant p_grant,
                                 HttpServletRequest p_httpRequest, List<ClaimToken> claims) {
     	super(p_httpRequest);
 
+    	this.attributeService = attributeService;
         this.rpt = p_rpt;
         this.permission = p_permission;
         this.grant = p_grant;
@@ -81,7 +80,7 @@ public class AuthorizationContext extends ExternalScriptContext {
     }
 
     public String getUserClaim(String p_claimName) {
-        GluuAttribute gluuAttribute = AttributeService.instance().getByClaimName(p_claimName);
+        GluuAttribute gluuAttribute = attributeService.getByClaimName(p_claimName);
 
         if (gluuAttribute != null) {
             String ldapClaimName = gluuAttribute.getName();

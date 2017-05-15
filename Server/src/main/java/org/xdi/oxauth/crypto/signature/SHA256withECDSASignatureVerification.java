@@ -14,6 +14,8 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 
+import javax.inject.Named;
+
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -21,6 +23,7 @@ import org.bouncycastle.jce.spec.ECPublicKeySpec;
 import org.bouncycastle.math.ec.ECPoint;
 import org.xdi.oxauth.model.exception.SignatureException;
 
+@Named
 public class SHA256withECDSASignatureVerification implements SignatureVerification {
 
     @Override

@@ -6,10 +6,25 @@
 
 package org.xdi.oxauth.service.uma;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
@@ -23,39 +38,33 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.util.StringHelper;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
-
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.*;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 04/02/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("umaValidationService")
-@AutoCreate
+@Named
+@Stateless
 public class UmaValidationService {
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private ErrorResponseFactory errorResponseFactory;
-    @In
+
+    @Inject
     private TokenService tokenService;
-    @In
+
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+
+    @Inject
    	private ResourceSetService resourceSetService;
-    @In
+
+    @Inject
     private ScopeService umaScopeService;
-    @In
+
+    @Inject
     private AppConfiguration appConfiguration;
 
     public String validateAmHost(String host) {
@@ -74,7 +83,7 @@ public class UmaValidationService {
         		hostUri = (new URI("https://" + host)).getHost();
         	}
         } catch (URISyntaxException ex) {
-            log.error("Failed to parse AM host: '{0}'", ex, host);
+            log.error("Failed to parse AM host: '{}'", ex, host);
             throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
@@ -82,12 +91,12 @@ public class UmaValidationService {
         try {
             URI umaBaseEndpoint = new URI(appConfiguration.getBaseEndpoint());
             if (!StringHelper.equalsIgnoreCase(hostUri, umaBaseEndpoint.getHost())) {
-                log.error("Get request for another AM: '{0}'. Expected: '{1}'", hostUri, umaBaseEndpoint.getHost());
+                log.error("Get request for another AM: '{}'. Expected: '{}'", hostUri, umaBaseEndpoint.getHost());
                 throw new WebApplicationException(Response.status(BAD_REQUEST)
                         .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
             }
         } catch (URISyntaxException ex) {
-            log.error("Failed to parse AM host: '{0}'", ex, hostUri);
+            log.error("Failed to parse AM host: '{}'", ex, hostUri);
             throw new WebApplicationException(Response.status(BAD_REQUEST)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
         }
@@ -111,7 +120,7 @@ public class UmaValidationService {
 //        		hostUri = (new URI("https://" + host)).getHost();
 //        	}
 //   		} catch (URISyntaxException ex) {
-//   			log.error("Failed to parse host: '{0}'", ex, host);
+//   			log.error("Failed to parse host: '{}'", ex, host);
 //   			throw new WebApplicationException(Response.status(BAD_REQUEST)
 //   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
 //   		}
@@ -129,7 +138,7 @@ public class UmaValidationService {
     }
 
     private AuthorizationGrant validateAuthorization(String authorization, UmaScopeType umaScopeType) {
-        log.trace("Validate authorization: {0}", authorization);
+        log.trace("Validate authorization: {}", authorization);
         if (StringHelper.isEmpty(authorization)) {
             throw new WebApplicationException(Response.status(UNAUTHORIZED)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UNAUTHORIZED_CLIENT)).build());

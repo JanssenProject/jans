@@ -8,26 +8,30 @@ package org.xdi.oxauth.service;
 
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.async.TimerSchedule;
-import org.jboss.seam.core.Events;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.service.cdi.event.CleanerEvent;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.uma.RPTManager;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
+import org.xdi.oxauth.service.uma.RptManager;
+import org.xdi.service.cdi.event.Scheduled;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
 
+import javax.ejb.Asynchronous;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,66 +40,69 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@Name("cleanerTimer")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
-@Startup
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named
 public class CleanerTimer {
 
     public final static int BATCH_SIZE = 100;
-    private final static String EVENT_TYPE = "CleanerTimerEvent";
     private final static int DEFAULT_INTERVAL = 600; // 10 minutes
 
-    @Logger
-    private Log log;
-    @In
+    @Inject
+    private Logger log;
+
+    @Inject
     private LdapEntryManager ldapEntryManager;
-    @In
+
+    @Inject
     private AuthorizationGrantList authorizationGrantList;
-    @In
+
+    @Inject
     private ClientService clientService;
-    @In
+
+    @Inject
     private GrantService grantService;
-    @In
-    private RPTManager rptManager;
-    @In
+
+    @Inject
+    private RptManager rptManager;
+
+    @Inject
     private ResourceSetPermissionManager resourceSetPermissionManager;
-    @In
+
+    @Inject
     private SessionStateService sessionStateService;
 
-    @In
+    @Inject @Named("u2fRequestService")
     private RequestService u2fRequestService;
 
-    @In
+    @Inject
     private MetricService metricService;
 
-    @In
+    @Inject
     private DeviceRegistrationService deviceRegistrationService;
 
-    @In
-    private ConfigurationFactory configurationFactory;
-
-    private AtomicBoolean isActive;
-
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @Observer("org.jboss.seam.postInitialization")
-    public void init() {
-        log.debug("Initializing CleanerTimer");
+    @Inject
+	private Event<TimerEvent> cleanerEvent;
+
+    private AtomicBoolean isActive;
+    
+    public void initTimer() {
+        log.debug("Initializing Cleaner Timer");
         this.isActive = new AtomicBoolean(false);
 
-        long interval = appConfiguration.getCleanServiceInterval();
+        int interval = appConfiguration.getCleanServiceInterval();
         if (interval <= 0) {
             interval = DEFAULT_INTERVAL;
         }
-        interval = interval * 1000L;
-        Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(interval, interval));
+
+        cleanerEvent.fire(new TimerEvent(new TimerSchedule(30, 30), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
-    @Observer(EVENT_TYPE)
     @Asynchronous
-    public void process() {
+    public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
         if (this.isActive.get()) {
             return;
         }
@@ -147,7 +154,7 @@ public class CleanerTimer {
                             List<AuthorizationGrant> toRemove = authorizationGrantList.getAuthorizationGrant(client.getClientId());
                             authorizationGrantList.removeAuthorizationGrants(toRemove);
 
-                            log.debug("Removing Client: {0}, Expiration date: {1}",
+                            log.debug("Removing Client: {}, Expiration date: {}",
                                     client.getClientId(),
                                     client.getClientSecretExpiresAt());
                             clientService.remove(client);
@@ -180,7 +187,7 @@ public class CleanerTimer {
             protected void performAction(List<RequestMessageLdap> entries) {
                 for (RequestMessageLdap requestMessageLdap : entries) {
                     try {
-                        log.debug("Removing RequestMessageLdap: {0}, Creation date: {1}",
+                        log.debug("Removing RequestMessageLdap: {}, Creation date: {}",
                                 requestMessageLdap.getRequestId(),
                                 requestMessageLdap.getCreationDate());
                         u2fRequestService.removeRequestMessage(requestMessageLdap);
@@ -211,7 +218,7 @@ public class CleanerTimer {
             protected void performAction(List<DeviceRegistration> entries) {
                 for (DeviceRegistration deviceRegistration : entries) {
                     try {
-                        log.debug("Removing DeviceRegistration: {0}, Creation date: {1}",
+                        log.debug("Removing DeviceRegistration: {}, Creation date: {}",
                                 deviceRegistration.getId(),
                                 deviceRegistration.getCreationDate());
                         deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);

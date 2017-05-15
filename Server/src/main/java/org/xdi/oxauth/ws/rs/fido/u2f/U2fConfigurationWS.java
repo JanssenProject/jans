@@ -6,25 +6,24 @@
 
 package org.xdi.oxauth.ws.rs.fido.u2f;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
+import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.fido.u2f.U2fConfiguration;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * The endpoint at which the requester can obtain FIDO U2F metadata
@@ -32,18 +31,17 @@ import javax.ws.rs.core.Response;
  *
  * @author Yuriy Movchan Date: 05/13/2015
  */
-@Name("u2fMetaDataConfigurationRestWebService")
 @Path("/oxauth/fido-u2f-configuration")
 @Api(value = "/.well-known/fido-u2f-configuration", description = "The FIDO server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/fido-u2f-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the FIDO U2f server.")
 public class U2fConfigurationWS {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private AppConfiguration appConfiguration;
 
-	@In
+	@Inject
 	private ErrorResponseFactory errorResponseFactory;
 
 	@GET
@@ -64,7 +62,7 @@ public class U2fConfigurationWS {
 			// convert manually to avoid possible conflicts between resteasy
 			// providers, e.g. jettison, jackson
 			final String entity = ServerUtil.asPrettyJson(conf);
-			log.trace("FIDO U2F configuration: {0}", entity);
+			log.trace("FIDO U2F configuration: {}", entity);
 
 			return Response.ok(entity).build();
 		} catch (Throwable ex) {

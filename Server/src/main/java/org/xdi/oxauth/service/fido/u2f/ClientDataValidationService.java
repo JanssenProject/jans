@@ -11,33 +11,26 @@ import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.ArrayUtils;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.fido.u2f.exception.BadInputException;
 import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Client data validation service
  *
  * @author Yuriy Movchan Date: 05/20/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("clientDataValidationService")
-@AutoCreate
+@Stateless
+@Named
 public class ClientDataValidationService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
 	public void checkContent(ClientData clientData, String[] types, String challenge, Set<String> facets) throws BadInputException {
 		if (!ArrayUtils.contains(types, clientData.getTyp())) {

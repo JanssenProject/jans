@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 
 /**
@@ -20,8 +19,11 @@ import org.xdi.oxauth.model.registration.Client;
  * arranged with the authorization server.
  *
  * @author Javier Rojas Blum Date: 09.29.2011
+ * @author Yuriy Movchan
  */
 public class ClientCredentialsGrant extends AuthorizationGrant {
+
+    public ClientCredentialsGrant() {}
 
     /**
      * Construct a client credentials grant.
@@ -30,8 +32,12 @@ public class ClientCredentialsGrant extends AuthorizationGrant {
      * @param client An application making protected resource requests on behalf of
      *               the resource owner and with its authorization.
      */
-    public ClientCredentialsGrant(User user, Client client, AppConfiguration appConfiguration) {
-        super(user, AuthorizationGrantType.CLIENT_CREDENTIALS, client, null, appConfiguration);
+    public ClientCredentialsGrant(User user, Client client) {
+        init(user, client);
+    }
+
+    public void init(User user, Client client) {
+        super.init(user, AuthorizationGrantType.CLIENT_CREDENTIALS, client, null);
     }
 
     /**

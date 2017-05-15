@@ -6,41 +6,37 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
-import org.xdi.oxauth.model.config.ConfigurationFactory;
-import org.xdi.oxauth.model.config.StaticConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
-
-import java.util.Map;
 
 /**
  * Provides operations with authentication filters
  *
  * @author Yuriy Movchan Date: 07.20.2012
  */
-@Scope(ScopeType.APPLICATION)
-@Name("authenticationFilterService")
-@AutoCreate
-@Startup
+@ApplicationScoped
+@DependsOn("appInitializer")
+@Named
 public class AuthenticationFilterService extends BaseAuthFilterService {
 
-    @Logger
-    private Log log;
-
-    @In
+    @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @In
+    @Inject
     private AppConfiguration appConfiguration;
 
-    @Create
+    @PostConstruct
     public void init() {
         super.init(appConfiguration.getAuthenticationFilters(), Boolean.TRUE.equals(appConfiguration.getAuthenticationFiltersEnabled()), true);
     }
@@ -61,7 +57,7 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
 
         String bindPasswordAttribute = authenticationFilterWithParameters.getAuthenticationFilter().getBindPasswordAttribute();
         if (StringHelper.isEmpty(bindPasswordAttribute)) {
-            log.error("Skipping authentication filter:\n '{0}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilterWithParameters.getAuthenticationFilter());
+            log.error("Skipping authentication filter:\n '{}'\n. It should contains not empty bind-password-attribute attribute. ", authenticationFilterWithParameters.getAuthenticationFilter());
             return null;
         }
 
@@ -79,7 +75,4 @@ public class AuthenticationFilterService extends BaseAuthFilterService {
         return null;
     }
 
-    public static AuthenticationFilterService instance() {
-        return (AuthenticationFilterService) Component.getInstance(AuthenticationFilterService.class);
-    }
 }

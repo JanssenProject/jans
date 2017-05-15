@@ -1,10 +1,8 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:f="http://java.sun.com/jsf/core"
-                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
     <ui:define name="head">
         <style type="text/css">
@@ -40,37 +38,37 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">Twilio SMS - Login</ui:define>
+    <ui:define name="pageTitle">#{msgs['twiliosms.pageTitle']}</ui:define>
 
     <ui:define name="body">
         <h:form id="TwilioSmsloginForm">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
                 <div class="login-panel">
-                    <div class="login-panel-header">Twilio SMS Login (second step)</div>
+                    <div class="login-panel-header">#{msgs['twiliosms.login']}</div>
                     <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
 
-                        <s:div rendered='#{!empty client.getLogoUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
-                        </s:div>
+                        </h:panelGroup>
 
-                        <p class="info">Enter the Code You Received via SMS</p>
+                        <p class="info">#{msgs['twiliosms.enterTheCode']}</p>
 
                         <div class="dialog">
                             <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="passcode">Passcode</h:outputLabel>
-				                <input name="passcode" type="text" autocomplete="off" />
+                                <h:outputLabel for="passcode">#{msgs['twiliosms.passcode']}</h:outputLabel>
+                                <input name="passcode" type="text" autocomplete="off" />
                             </h:panelGrid>
                         </div>
 
-                        <s:div rendered='#{!empty client.getPolicyUri()}'>
+                        <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
-                                <a target="_blank" href='#{client.getPolicyUri()}'>Terms &amp; Privacy</a>
+                                <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['twiliosms.termsPrivacy']}</a>
                             </p>
-                        </s:div>
+                        </h:panelGroup>
 
                         <div class="actionButtons">
-                            <h:commandButton value="Login" action="#{authenticator.authenticate}"/>
+                            <h:commandButton value="#{msgs['twiliosms.loginLabel']}" action="#{authenticator.authenticate}"/>
                         </div>
                     </div>
                 </div>

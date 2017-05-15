@@ -1,93 +1,93 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:s="http://jboss.org/schema/seam/taglib"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html"
-	template="/WEB-INF/incl/layout/template.xhtml">
+				xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				template="/WEB-INF/incl/layout/template.xhtml">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+	</f:metadata>
 	<ui:define name="head">
 		<script src="#{oxAuthConfigurationService.getJsLocation()}/jquery-ui-1.12.1.min.js" />
 
 		<script type="text/javascript">
-        //<![CDATA[
-            jQuery(document).ready(function() {
-                $("#loginForm").submit();
-            });
-        //]]>
-        </script>
+			//<![CDATA[
+			jQuery(document).ready(function() {
+				$("#loginForm").submit();
+			});
+			//]]>
+		</script>
 
 		<style type="text/css">
-.login-panel {
-	border-style: solid;
-	border-width: 1px;
-	padding: 1px;
-	background-color: #FFFFFF;
-	border-color: #C4C0B9;
-}
+			.login-panel {
+				border-style: solid;
+				border-width: 1px;
+				padding: 1px;
+				background-color: #FFFFFF;
+				border-color: #C4C0B9;
+			}
 
-.login-panel-header {
-	background-color: #D4CFC7;
-	background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
-	background-position: left top;
-	background-repeat: repeat-x;
-	border-style: solid;
-	border-width: 1px;
-	padding: 2px;
-	border-color: #D4CFC7;
-	color: #000000;
-	font-family: Arial, Verdana, sans-serif;
-	font-size: 11px;
-	font-weight: bold;
-}
+			.login-panel-header {
+				background-color: #D4CFC7;
+				background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
+				background-position: left top;
+				background-repeat: repeat-x;
+				border-style: solid;
+				border-width: 1px;
+				padding: 2px;
+				border-color: #D4CFC7;
+				color: #000000;
+				font-family: Arial, Verdana, sans-serif;
+				font-size: 11px;
+				font-weight: bold;
+			}
 
-.login-panel-body {
-	padding: 10px;
-	color: #000000;
-	font-family: Arial, Verdana, sans-serif;
-	font-size: 11px;
-}
-</style>
+			.login-panel-body {
+				padding: 10px;
+				color: #000000;
+				font-family: Arial, Verdana, sans-serif;
+				font-size: 11px;
+			}
+		</style>
 	</ui:define>
 
-	<ui:define name="pageTitle">oxAuth oxPush - Login</ui:define>
+	<ui:define name="pageTitle">#{msgs['oxpush.pageTitle']}</ui:define>
 
 	<ui:define name="body">
 		<form id="loginForm" method="post"
-			action="#{request.contextPath}/postlogin.seam">
+			  action="#{request.contextPath}/postlogin.seam">
 			<h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
 				<div class="login-panel">
-					<div class="login-panel-header">oxPush Login (Pairing
-						request)</div>
+					<div class="login-panel-header">#{msgs['oxpush.loginPairingRequest']}</div>
 					<div class="login-panel-body">
 						<ui:param name="client"
-							value="#{clientService.getClient(redirect.parameters['client_id'])}" />
-						<s:div rendered='#{!empty client.getLogoUri()}'>
+								  value="#{clientService.getClient(redirect.parameters['client_id'])}" />
+						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
 							<h:graphicImage url='#{client.getLogoUri()}' />
-						</s:div>
+						</h:panelGroup>
 
-						<s:div styleClass="dialog"
-							rendered="#{param.oxpush_user_uid != null}">
-							<p class="info">Checking pairing status...</p>
-						</s:div>
-						<s:div styleClass="dialog"
-							rendered="#{param.oxpush_user_uid == null}">
-							<p class="info">Waiting for user approval...</p>
+						<h:panelGroup styleClass="dialog"
+							   rendered="#{param.oxpush_user_uid != null}">
+							<p class="info">#{msgs['oxpush.checkingPairing']}</p>
+						</h:panelGroup>
+						<h:panelGroup styleClass="dialog"
+							   rendered="#{param.oxpush_user_uid == null}">
+							<p class="info">#{msgs['oxpush.waitingForUser']}</p>
 							<br/>
 
-							<p class="info">Pairing QR code:</p>
+							<p class="info">#{msgs['oxpush.pairingQRCode']}</p>
 							<h:outputText value="#{oxpush_pairing_qr_image}" escape="false" />
 
-							<p class="info">Pairing code:</p>
+							<p class="info">#{msgs['oxpush.pairingCode']}</p>
 							<h:outputText value="#{oxpush_pairing_code}" styleClass="bolded"/>
-						</s:div>
+						</h:panelGroup>
 
-						<s:div rendered='#{!empty client.getPolicyUri()}'>
+						<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
 							<p>
-								<a target="_blank" href='#{client.getPolicyUri()}'>Terms
-									&amp; Privacy</a>
+								<a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['oxpush.termsPrivacy']}</a>
 							</p>
-						</s:div>
+						</h:panelGroup>
 					</div>
 				</div>
 			</h:panelGroup>
