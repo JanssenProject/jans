@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
@@ -42,9 +43,11 @@ import org.xml.sax.SAXException;
  */
 @Stateless
 @Named
-public class XmlService {
+public class XmlService implements Serializable {
 
-    @Inject
+	private static final long serialVersionUID = -4805285557592935972L;
+
+	@Inject
     private Logger log;
 
     private JAXBContext jaxbContext;

@@ -41,15 +41,4 @@ public class FacesResources {
 		return null;
 	}
 
-	@Produces
-	@Dependent
-	public HttpServletRequest getHttpServletRequest() {
-		ExternalContext externalContext = getExternalContext();
-		if (externalContext != null) {
-			return (HttpServletRequest) externalContext.getRequest();
-		}
-		
-		return null;
-	}
-
 }

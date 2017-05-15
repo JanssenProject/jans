@@ -5,6 +5,7 @@
  */
 package org.xdi.service;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +26,9 @@ import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
  * @author Oleksiy Tataryn
  * @author Yuriy Movchan Date: 01/06/2015
  */
-public abstract class AttributeService {
+public abstract class AttributeService implements Serializable {
+
+	private static final long serialVersionUID = -1311784648561611479L;
 
 	@Inject
 	protected Logger log;

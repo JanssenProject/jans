@@ -5,6 +5,7 @@
  */package org.xdi.service;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
@@ -24,9 +25,11 @@ import org.slf4j.Logger;
  */
 @Stateless
 @Named
-public class JsonService {
+public class JsonService implements Serializable {
 
-    @Inject
+	private static final long serialVersionUID = -1595376054267897007L;
+
+	@Inject
     private Logger log;
 
     private ObjectMapper mapper;
