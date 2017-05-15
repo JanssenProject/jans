@@ -111,6 +111,9 @@ public class AppConfiguration  {
     private Boolean sessionStateHttpOnly;
     private int configurationUpdateInterval;
 
+    private Boolean enableClientGrantUpdate;
+    private List<String> dynamicClientRegDefaultGrantTypes;
+    
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
@@ -1154,4 +1157,20 @@ public class AppConfiguration  {
 		this.loggingLevel = loggingLevel;
 	}
 
+	public Boolean getEnableClientGrantUpdate() {
+		return enableClientGrantUpdate;
+	}
+
+	public void setEnableClientGrantUpdate(Boolean enableClientGrantUpdate) {
+		this.enableClientGrantUpdate = enableClientGrantUpdate;
+	}
+
+	public List<String> getDynamicClientRegDefaultGrantTypes() {
+		return dynamicClientRegDefaultGrantTypes;
+	}
+
+	public void setDynamicClientRegDefaultGrantTypes(List<String> dynamicClientRegDefaultGrantTypes) {
+		this.dynamicClientRegDefaultGrantTypes = dynamicClientRegDefaultGrantTypes;
+	}
+	
 }
