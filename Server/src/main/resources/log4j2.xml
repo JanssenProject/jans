@@ -76,11 +76,11 @@
 
 	<Loggers>
 		<!-- ############### oxAuth ################# -->
-		<AsyncLogger name="org.xdi.oxauth" level="${log4j.default.log.level}" />
-		<AsyncLogger name="org.xdi.service" level="${log4j.default.log.level}" />
+		<Logger name="org.xdi.oxauth" level="${log4j.default.log.level}" />
+		<Logger name="org.xdi.service" level="${log4j.default.log.level}" />
 
 		<!-- ############### Gluu ################# -->
-		<AsyncLogger name="org.gluu" level="${log4j.default.log.level}" />
+		<Logger name="org.gluu" level="${log4j.default.log.level}" />
 
 		<!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message -->
 		<Logger name="jboss.resource.adapter.jms.inflow.JmsActivation" level="error" />
@@ -88,37 +88,38 @@
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
 
-        <AsyncLogger name="org.xdi.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
-            <AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE"/>
-        </AsyncLogger>
 
-		<AsyncLogger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
+    <AsyncLogger name="org.xdi.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
+        <AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE"/>
+    </AsyncLogger>
+
+		<Logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
-		</AsyncLogger>
+		</Logger>
 
-		<AsyncLogger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
-		</AsyncLogger>
+		</Logger>
 
-		<AsyncLogger name="org.xdi.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.oxauth.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_LDAP_STATISTICS_FILE" />
-		</AsyncLogger>
+		</Logger>
 
-		<AsyncLogger name="org.xdi.service.PythonService" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.service.PythonService" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
-		</AsyncLogger>
+		</Logger>
 
-		<AsyncLogger name="org.xdi.service.custom.script" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.service.custom.script" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
-		</AsyncLogger>
+		</Logger>
 
-		<AsyncLogger name="org.xdi.oxauth.service.custom" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.oxauth.service.custom" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_SCRIPT_LOG_FILE" />
-		</AsyncLogger>
+		</Logger>
 
-		<AsyncLogger name="org.xdi.oxauth.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="org.xdi.oxauth.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_AUDIT_LOG_FILE" />
-		</AsyncLogger>
+		</Logger>
 
 		<Root level="info">
 			<AppenderRef ref="FILE" />
