@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.net.util.SubnetUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
@@ -27,7 +27,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 public class ExternalScriptContext {
 
-    private static final Log log = Logging.getLog(ExternalScriptContext.class);
+    private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
     private LdapEntryManager ldapEntryManager;
     protected HttpServletRequest httpRequest;
@@ -47,7 +47,7 @@ public class ExternalScriptContext {
     	}
     }
 
-    public Log getLog() {
+    public Logger getLog() {
         return log;
     }
 
@@ -73,7 +73,7 @@ public class ExternalScriptContext {
 		try {
 	    	return ldapEntryManager.find(CustomEntry.class, dn, ldapReturnAttributes);
 		} catch (EntryPersistenceException epe) {
-		    log.error("Failed to find entry '{0}'", dn);
+		    log.error("Failed to find entry '{}'", dn);
 		}
 
 		return null;

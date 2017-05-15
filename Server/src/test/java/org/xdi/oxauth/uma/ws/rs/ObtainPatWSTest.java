@@ -6,6 +6,9 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
+import java.net.URI;
+
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -20,21 +23,25 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 
 public class ObtainPatWSTest extends BaseTest {
 
-    private Token pat;
+	@ArquillianResource
+	private URI url;
 
-    @Test
-    @Parameters({"authorizePath", "tokenPath",
-            "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret", "umaRedirectUri"})
-    public void requestPat(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-                           String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        pat = TUma.requestPat(this, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId, umaPatClientSecret, umaRedirectUri);
-        UmaTestUtil.assert_(pat);
-    }
+	private static Token pat;
 
-    @Test(dependsOnMethods = "requestPat")
-    @Parameters({"tokenPath", "umaPatClientId", "umaPatClientSecret"})
-    public void requestNewPatByRefreshTokne(String tokenPath, String umaPatClientId, String umaPatClientSecret) {
-        final Token newPat = TUma.newTokenByRefreshToken(this, tokenPath, pat, umaPatClientId, umaPatClientSecret);
-        UmaTestUtil.assert_(newPat);
-    }
+	@Test
+	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
+			"umaRedirectUri" })
+	public void requestPat(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
+			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
+		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+				umaPatClientSecret, umaRedirectUri);
+		UmaTestUtil.assert_(pat);
+	}
+
+	@Test(dependsOnMethods = "requestPat")
+	@Parameters({ "tokenPath", "umaPatClientId", "umaPatClientSecret" })
+	public void requestNewPatByRefreshTokne(String tokenPath, String umaPatClientId, String umaPatClientSecret) {
+		final Token newPat = TUma.newTokenByRefreshToken(url, tokenPath, pat, umaPatClientId, umaPatClientSecret);
+		UmaTestUtil.assert_(newPat);
+	}
 }

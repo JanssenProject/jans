@@ -12,17 +12,21 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
+import java.net.URI;
+
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
+
 /**
  * Functional tests for JWK Web Services (embedded)
  *
@@ -30,37 +34,33 @@ import org.xdi.oxauth.BaseTest;
  */
 public class JwkRestWebServiceEmbeddedTest extends BaseTest {
 
-    @Parameters({"jwksPath"})
-    @Test
-    public void requestJwks(final String jwksPath) throws Exception {
+	@ArquillianResource
+	private URI url;
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.GET, jwksPath) {
+	@Parameters({ "jwksPath" })
+	@Test
+	public void requestJwks(final String jwksPath) throws Exception {
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Accept", MediaType.APPLICATION_JSON);
-            }
+		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + jwksPath).request();
+		request.header("Accept", MediaType.APPLICATION_JSON);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("requestJwks", response);
+		Response response = request.get();
+		String entity = response.readEntity(String.class);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
+		showResponse("requestJwks", response, entity);
 
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has(JSON_WEB_KEY_SET), "Unexpected result: keys not found");
-                    JSONArray keys = jsonObj.getJSONArray(JSON_WEB_KEY_SET);
-                    assertNotNull(keys, "Unexpected result: keys is null");
-                    assertTrue(keys.length() > 0, "Unexpected result: keys is empty");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
-    }
+		assertEquals(response.getStatus(), 200, "Unexpected response code.");
+
+		try {
+			JSONObject jsonObj = new JSONObject(entity);
+			assertTrue(jsonObj.has(JSON_WEB_KEY_SET), "Unexpected result: keys not found");
+			JSONArray keys = jsonObj.getJSONArray(JSON_WEB_KEY_SET);
+			assertNotNull(keys, "Unexpected result: keys is null");
+			assertTrue(keys.length() > 0, "Unexpected result: keys is empty");
+		} catch (JSONException e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
 }

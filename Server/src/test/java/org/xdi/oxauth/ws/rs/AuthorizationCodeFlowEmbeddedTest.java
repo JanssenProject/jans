@@ -8,12 +8,8 @@ package org.xdi.oxauth.ws.rs;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.mock.AbstractSeamTest;
-import org.jboss.seam.mock.EnhancedMockHttpServletRequest;
-import org.jboss.seam.mock.EnhancedMockHttpServletResponse;
-import org.jboss.seam.mock.ResourceRequestEnvironment;
-import org.jboss.seam.mock.ResourceRequestEnvironment.Method;
-import org.jboss.seam.mock.ResourceRequestEnvironment.ResourceRequest;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -27,7 +23,11 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -41,740 +41,541 @@ import static org.testng.Assert.*;
  * Test cases for the authorization code flow (embedded)
  *
  * @author Javier Rojas Blum
- * @version December 12, 2016
+ * @version April 26, 2017
  */
 public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
 
-    private String clientId;
-    private String clientSecret;
-    private String authorizationCode1;
-    private String authorizationCode2;
-    private String authorizationCode3;
-    private String authorizationCode4;
-    private String accessToken1;
-    private String refreshToken1;
+    @ArquillianResource
+    private URI url;
+
+    private static String clientId;
+    private static String clientSecret;
+    private static String authorizationCode1;
+    private static String authorizationCode2;
+    private static String authorizationCode3;
+    private static String authorizationCode4;
+    private static String accessToken1;
+    private static String refreshToken1;
 
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
 
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                ResourceRequestEnvironment.Method.POST, registerPath) {
+        String registerRequestContent = null;
+        try {
+            RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                    StringUtils.spaceSeparatedToList(redirectUris));
+            registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                try {
-                    super.prepareRequest(request);
+            registerRequestContent = registerRequest.getJSONParameters().toString(4);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
 
-                    RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                            StringUtils.spaceSeparatedToList(redirectUris));
-                    registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+        Response response = request.post(Entity.json(registerRequestContent));
+        String entity = response.readEntity(String.class);
 
-                    request.setContentType(MediaType.APPLICATION_JSON);
-                    String registerRequestContent = registerRequest.getJSONParameters().toString(4);
-                    request.setContent(registerRequestContent.getBytes());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
+        showResponse("dynamicClientRegistration", response, entity);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("dynamicClientRegistration", response);
+        assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
+            ClientTestUtil.assert_(registerResponse);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    final RegisterResponse registerResponse = RegisterResponse.valueOf(response.getContentAsString());
-                    ClientTestUtil.assert_(registerResponse);
-
-                    clientId = registerResponse.getClientId();
-                    clientSecret = registerResponse.getClientSecret();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
+            clientId = registerResponse.getClientId();
+            clientSecret = registerResponse.getClientSecret();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        }
     }
 
     /**
-     * Test for the complete Authorization Code Flow:
-     * 1. Request authorization and receive the authorization code.
-     * 2. Request access token using the authorization code.
-     * 3. Validate access token.
-     * 4. Request new access token using the refresh token.
+     * Test for the complete Authorization Code Flow: 1. Request authorization
+     * and receive the authorization code. 2. Request access token using the
+     * authorization code. 3. Validate access token. 4. Request new access token
+     * using the refresh token.
      */
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
     @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void completeFlowStep1(final String authorizePath,
-                                  final String userId, final String userSecret,
+    public void completeFlowStep1(final String authorizePath, final String userId, final String userSecret,
                                   final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+                redirectUri, null);
+        authorizationRequest.setState(state);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        Builder request = ResteasyClientBuilder.newClient()
+                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+        request.header("Accept", MediaType.TEXT_PLAIN);
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, null);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+        Response response = request.get();
+        String entity = response.readEntity(String.class);
+        showResponse("completeFlowStep1", response, entity);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+        assertEquals(response.getStatus(), 302, "Unexpected response code.");
+        assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
+
+        if (response.getLocation() != null) {
+            try {
+                URI uri = new URI(response.getLocation().toString());
+                assertNotNull(uri.getQuery(), "The query string is null");
+
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+
+                assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+                assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+
+                authorizationCode1 = params.get(AuthorizeResponseParam.CODE);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                fail("Response URI is not well formed");
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.getMessage());
             }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowStep1", response);
-
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
-
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getQuery(), "The query string is null");
-
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
-
-                        assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-
-                        authorizationCode1 = params.get(AuthorizeResponseParam.CODE);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        }.run();
+        }
     }
 
     @Parameters({"tokenPath", "validateTokenPath", "redirectUri"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowStep1"})
-    public void completeFlowStep2(final String tokenPath, final String validateTokenPath,
-                                  final String redirectUri) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
+    public void completeFlowStep2(final String tokenPath, final String validateTokenPath, final String redirectUri)
+            throws Exception {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode1);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-                tokenRequest.setCode(authorizationCode1);
-                tokenRequest.setRedirectUri(redirectUri);
-                tokenRequest.setAuthUsername(clientId);
-                tokenRequest.setAuthPassword(clientSecret);
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
-            }
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowStep2", response);
+        showResponse("completeFlowStep2", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
-                    assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-                    assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
-                    assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
+        assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        assertTrue(
+                response.getHeaderString("Cache-Control") != null
+                        && response.getHeaderString("Cache-Control").equals("no-store"),
+                "Unexpected result: " + response.getHeaderString("Cache-Control"));
+        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
+            assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
+            assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
+            assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
 
-                    String accessToken = jsonObj.getString("access_token");
-                    String refreshToken = jsonObj.getString("refresh_token");
+            String accessToken = jsonObj.getString("access_token");
+            String refreshToken = jsonObj.getString("refresh_token");
 
-                    completeFlowStep3(tokenPath, validateTokenPath, accessToken, refreshToken);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
+            completeFlowStep3(tokenPath, refreshToken);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
-    public void completeFlowStep3(final String tokenPath, final String validateTokenPath,
-                                  final String accessToken, final String refreshToken) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, validateTokenPath) {
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+    public void completeFlowStep3(final String tokenPath, final String refreshToken) throws Exception {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-                ValidateTokenRequest validateTokenRequest = new ValidateTokenRequest();
-                validateTokenRequest.setAccessToken(accessToken);
+        TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
+        tokenRequest.setRefreshToken(refreshToken);
+        tokenRequest.setScope("email read_stream manage_pages");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
 
-                request.setQueryString(validateTokenRequest.getQueryString());
-            }
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowStep3", response);
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store, private"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
+        showResponse("completeFlowStep3", response, entity);
 
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("valid"), "Unexpected result: valid not found");
-                    assertTrue(jsonObj.getBoolean("valid"), "Unexpected result: valid is false");
-                    assertTrue(jsonObj.has("expires_in"), "Unexpected result: expires_in not found");
-
-                    completeFlowStep4(tokenPath, refreshToken);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
-    }
-
-    public void completeFlowStep4(final String tokenPath, final String refreshToken) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
-
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-
-                TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
-                tokenRequest.setRefreshToken(refreshToken);
-                tokenRequest.setScope("email read_stream manage_pages");
-                tokenRequest.setAuthUsername(clientId);
-                tokenRequest.setAuthPassword(clientSecret);
-
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
-            }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowStep4", response);
-
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(),
-                        "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
-                    assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-                    assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
+        assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        assertTrue(
+                response.getHeaderString("Cache-Control") != null
+                        && response.getHeaderString("Cache-Control").equals("no-store"),
+                "Unexpected result: " + response.getHeaderString("Cache-Control"));
+        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
+            assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
+            assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
     @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void completeFlowWithOptionalNonceStep1(
-            final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
+    public void completeFlowWithOptionalNonceStep1(final String authorizePath, final String userId,
+                                                   final String userSecret, final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        String nonce = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+                redirectUri, nonce);
+        authorizationRequest.setState(state);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        Builder request = ResteasyClientBuilder.newClient()
+                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+        request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+        request.header("Accept", MediaType.TEXT_PLAIN);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
-                String nonce = UUID.randomUUID().toString();
+        Response response = request.get();
+        String entity = response.readEntity(String.class);
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, nonce);
-                authorizationRequest.setState(state);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
+        showResponse("completeFlowWithOptionalNonceStep1", response, entity);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+        assertEquals(response.getStatus(), 302, "Unexpected response code.");
+        assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
+
+        if (response.getLocation() != null) {
+            try {
+                URI uri = new URI(response.getLocation().toString());
+                assertNotNull(uri.getQuery(), "The query string is null");
+
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+
+                assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+                assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+
+                authorizationCode4 = params.get(AuthorizeResponseParam.CODE);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                fail("Response URI is not well formed");
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.getMessage());
             }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowWithOptionalNonceStep1", response);
-
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
-
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getQuery(), "The query string is null");
-
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
-
-                        assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-
-                        authorizationCode4 = params.get(AuthorizeResponseParam.CODE);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        }.run();
+        }
     }
 
     @Parameters({"tokenPath", "validateTokenPath", "redirectUri"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "completeFlowWithOptionalNonceStep1"})
     public void completeFlowWithOptionalNonceStep2(final String tokenPath, final String validateTokenPath,
                                                    final String redirectUri) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode4);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-                tokenRequest.setCode(authorizationCode4);
-                tokenRequest.setRedirectUri(redirectUri);
-                tokenRequest.setAuthUsername(clientId);
-                tokenRequest.setAuthPassword(clientSecret);
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
-            }
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowWithOptionalNonceStep2", response);
+        showResponse("completeFlowWithOptionalNonceStep2", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
-                    assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-                    assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
-                    assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
+        assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        assertTrue(
+                response.getHeaderString("Cache-Control") != null
+                        && response.getHeaderString("Cache-Control").equals("no-store"),
+                "Unexpected result: " + response.getHeaderString("Cache-Control"));
+        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
+            assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
+            assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
+            assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
 
-                    String accessToken = jsonObj.getString("access_token");
-                    String refreshToken = jsonObj.getString("refresh_token");
-                    String idToken = jsonObj.getString("id_token");
-                    Jwt jwt = Jwt.parse(idToken);
-                    assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE));
+            String accessToken = jsonObj.getString("access_token");
+            String refreshToken = jsonObj.getString("refresh_token");
+            String idToken = jsonObj.getString("id_token");
+            Jwt jwt = Jwt.parse(idToken);
+            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.NONCE));
 
-                    completeFlowWithOptionalNonceStep3(tokenPath, validateTokenPath, accessToken, refreshToken);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
+            completeFlowWithOptionalNonceStep3(tokenPath, refreshToken);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
-    public void completeFlowWithOptionalNonceStep3(final String tokenPath, final String validateTokenPath,
-                                                   final String accessToken, final String refreshToken) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, validateTokenPath) {
+    public void completeFlowWithOptionalNonceStep3(final String tokenPath, final String refreshToken) throws Exception {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
+        tokenRequest.setRefreshToken(refreshToken);
+        tokenRequest.setScope("email read_stream manage_pages");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
 
-                ValidateTokenRequest validateTokenRequest = new ValidateTokenRequest();
-                validateTokenRequest.setAccessToken(accessToken);
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-                request.setQueryString(validateTokenRequest.getQueryString());
-            }
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowWithOptionalNonceStep3", response);
+        showResponse("completeFlowWithOptionalNonceStep3", response, entity);
 
-                assertEquals(response.getStatus(), 200, "Unexpected response code. " + response.getContentAsString());
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store, private"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("valid"), "Unexpected result: valid not found");
-                    assertTrue(jsonObj.getBoolean("valid"), "Unexpected result: valid is false");
-                    assertTrue(jsonObj.has("expires_in"), "Unexpected result: expires_in not found");
-
-                    completeFlowWithOptionalNonceStep4(tokenPath, refreshToken);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
-    }
-
-    public void completeFlowWithOptionalNonceStep4(final String tokenPath, final String refreshToken) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
-
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-
-                TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
-                tokenRequest.setRefreshToken(refreshToken);
-                tokenRequest.setScope("email read_stream manage_pages");
-                tokenRequest.setAuthUsername(clientId);
-                tokenRequest.setAuthPassword(clientSecret);
-
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
-            }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("completeFlowWithOptionalNonceStep4", response);
-
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(),
-                        "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
-                    assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-                    assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
+        assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        assertTrue(
+                response.getHeaderString("Cache-Control") != null
+                        && response.getHeaderString("Cache-Control").equals("no-store"),
+                "Unexpected result: " + response.getHeaderString("Cache-Control"));
+        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
+            assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
+            assertTrue(jsonObj.has("scope"), "Unexpected result: scope not found");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     /**
      * When an authorization code is used more than once, all the tokens issued
-     * for that authorization code must be revoked:
-     * 1. Request authorization and receive the authorization code.
-     * 2. Request access token using the authorization code.
-     * 3. Request access token using the same authorization code one more time. This call must fail.
-     * 4. Request new access token using the refresh token. This call must fail too.
-     * 5. Request user info must fail.
+     * for that authorization code must be revoked: 1. Request authorization and
+     * receive the authorization code. 2. Request access token using the
+     * authorization code. 3. Request access token using the same authorization
+     * code one more time. This call must fail. 4. Request new access token
+     * using the refresh token. This call must fail too. 5. Request user info
+     * must fail.
      */
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
     @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void revokeTokensStep1(
-            final String authorizePath, final String userId, final String userSecret, final String redirectUri) throws Exception {
+    public void revokeTokensStep1(final String authorizePath, final String userId, final String userSecret,
+                                  final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+                redirectUri, null);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
+        authorizationRequest.setState(state);
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        Builder request = ResteasyClientBuilder.newClient()
+                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+        request.header("Accept", MediaType.TEXT_PLAIN);
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, null);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
-                authorizationRequest.setState(state);
+        Response response = request.get();
+        String entity = response.readEntity(String.class);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+        showResponse("revokeTokensStep1", response, entity);
+
+        assertEquals(response.getStatus(), 302, "Unexpected response code.");
+        assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
+
+        if (response.getLocation() != null) {
+            try {
+                URI uri = new URI(response.getLocation().toString());
+                assertNotNull(uri.getQuery(), "The query string is null");
+
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+
+                assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+                assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+
+                authorizationCode2 = params.get(AuthorizeResponseParam.CODE);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                fail("Response URI is not well formed");
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.getMessage());
             }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("revokeTokensStep1", response);
-
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
-
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getQuery(), "The query string is null");
-
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
-
-                        assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-
-                        authorizationCode2 = params.get(AuthorizeResponseParam.CODE);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        }.run();
+        }
     }
 
     @Parameters({"tokenPath", "redirectUri"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "revokeTokensStep1"})
     public void revokeTokensStep2n3(final String tokenPath, final String redirectUri) throws Exception {
-        final AbstractSeamTest test = this;
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode2);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-                tokenRequest.setCode(authorizationCode2);
-                tokenRequest.setRedirectUri(redirectUri);
-                tokenRequest.setAuthUsername(clientId);
-                tokenRequest.setAuthPassword(clientSecret);
+        showResponse("revokeTokensStep2n3", response, entity);
 
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
+        assertEquals(response.getStatus(), 200, "Unexpected response code.");
+        assertTrue(
+                response.getHeaderString("Cache-Control") != null
+                        && response.getHeaderString("Cache-Control").equals("no-store"),
+                "Unexpected result: " + response.getHeaderString("Cache-Control"));
+        assertTrue(response.getHeaderString("Pragma") != null && response.getHeaderString("Pragma").equals("no-cache"),
+                "Unexpected result: " + response.getHeaderString("Pragma"));
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
+            assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
+            assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
+            assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
+
+            accessToken1 = jsonObj.getString("access_token");
+            refreshToken1 = jsonObj.getString("refresh_token");
+
+            Builder request2 = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+            TokenRequest tokenRequest2 = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+            tokenRequest2.setCode(authorizationCode2);
+            tokenRequest2.setRedirectUri(redirectUri);
+            tokenRequest2.setAuthUsername(clientId);
+            tokenRequest2.setAuthPassword(clientSecret);
+
+            request2.header("Authorization", "Basic " + tokenRequest2.getEncodedCredentials());
+
+            Response response2 = request2
+                    .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest2.getParameters())));
+            String entity2 = response2.readEntity(String.class);
+
+            showResponse("revokeTokens step 3", response2, entity2);
+
+            assertEquals(response2.getStatus(), 400, "Unexpected response code.");
+            assertNotNull(entity2, "Unexpected result: " + entity2);
+            try {
+                JSONObject jsonObj2 = new JSONObject(entity2);
+                assertTrue(jsonObj2.has("error"), "The error type is null");
+                assertTrue(jsonObj2.has("error_description"), "The error description is null");
+            } catch (JSONException e) {
+                e.printStackTrace();
+                fail(e.getMessage() + "\nResponse was: " + entity2);
             }
+        } catch (
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("revokeTokensStep2n3", response);
-
-                assertEquals(response.getStatus(), 200, "Unexpected response code.");
-                assertTrue(response.getHeader("Cache-Control") != null
-                                && response.getHeader("Cache-Control").equals("no-store"),
-                        "Unexpected result: " + response.getHeader("Cache-Control"));
-                assertTrue(response.getHeader("Pragma") != null
-                                && response.getHeader("Pragma").equals("no-cache"),
-                        "Unexpected result: " + response.getHeader("Pragma"));
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("access_token"), "Unexpected result: access_token not found");
-                    assertTrue(jsonObj.has("token_type"), "Unexpected result: token_type not found");
-                    assertTrue(jsonObj.has("refresh_token"), "Unexpected result: refresh_token not found");
-                    assertTrue(jsonObj.has("id_token"), "Unexpected result: id_token not found");
-
-                    accessToken1 = jsonObj.getString("access_token");
-                    refreshToken1 = jsonObj.getString("refresh_token");
-
-                    new ResourceRequest(new ResourceRequestEnvironment(test), Method.POST, tokenPath) {
-
-                        @Override
-                        protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                            super.prepareRequest(request);
-
-                            TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-                            tokenRequest.setCode(authorizationCode2);
-                            tokenRequest.setRedirectUri(redirectUri);
-                            tokenRequest.setAuthUsername(clientId);
-                            tokenRequest.setAuthPassword(clientSecret);
-
-                            request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                            request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                            request.addParameters(tokenRequest.getParameters());
-                        }
-
-                        @Override
-                        protected void onResponse(EnhancedMockHttpServletResponse response) {
-                            super.onResponse(response);
-                            showResponse("revokeTokens step 3", response);
-
-                            assertEquals(response.getStatus(), 400, "Unexpected response code.");
-                            assertNotNull(response.getContentAsString(),
-                                    "Unexpected result: " + response.getContentAsString());
-                            try {
-                                JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                                assertTrue(jsonObj.has("error"), "The error type is null");
-                                assertTrue(jsonObj.has("error_description"), "The error description is null");
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                            }
-                        }
-                    }.run();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    fail(e.getMessage());
-                }
-            }
-        }.run();
+                JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
     @Parameters({"tokenPath"})
     @Test(dependsOnMethods = {"dynamicClientRegistration", "revokeTokensStep2n3"})
     public void revokeTokensStep4(final String tokenPath) throws Exception {
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
+        tokenRequest.setRefreshToken(refreshToken1);
+        tokenRequest.setScope("email read_stream manage_pages");
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
-                tokenRequest.setRefreshToken(refreshToken1);
-                tokenRequest.setScope("email read_stream manage_pages");
-                tokenRequest.setAuthUsername(clientId);
-                tokenRequest.setAuthPassword(clientSecret);
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
-            }
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("revokeTokensStep4", response);
+        showResponse("revokeTokensStep4", response, entity);
 
-                assertEquals(response.getStatus(), 401, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("error"), "The error type is null");
-                    assertTrue(jsonObj.has("error_description"), "The error description is null");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
+        assertEquals(response.getStatus(), 401, "Unexpected response code.");
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("error"), "The error type is null");
+            assertTrue(jsonObj.has("error_description"), "The error description is null");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        }
     }
 
     @Parameters({"userInfoPath"})
     @Test(dependsOnMethods = "revokeTokensStep4")
     public void revokeTokensStep5(final String userInfoPath) throws Exception {
-        new ResourceRequestEnvironment.ResourceRequest(new ResourceRequestEnvironment(this),
-                Method.POST, userInfoPath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + userInfoPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
-                request.addHeader("Authorization", "Bearer " + accessToken1);
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+        request.header("Authorization", "Bearer " + accessToken1);
 
-                UserInfoRequest userInfoRequest = new UserInfoRequest(null);
+        UserInfoRequest userInfoRequest = new UserInfoRequest(null);
 
-                request.addParameters(userInfoRequest.getParameters());
-            }
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(userInfoRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("revokeTokensStep5", response);
+        showResponse("revokeTokensStep5", response, entity);
 
-                assertEquals(response.getStatus(), 400, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("error"), "The error type is null");
-                    assertTrue(jsonObj.has("error_description"), "The error description is null");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
+        assertEquals(response.getStatus(), 400, "Unexpected response code.");
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("error"), "The error type is null");
+            assertTrue(jsonObj.has("error_description"), "The error description is null");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        }
     }
 
     /**
-     * Test to verify the token expiration
-     * 1. Request authorization and receive the authorization code.
-     * ...Wait until the authorization code expires...
+     * Test to verify the token expiration 1. Request authorization and receive
+     * the authorization code. ...Wait until the authorization code expires...
      * 2. Request access token using the expired authorization code. This call
      * must fail.
      *
@@ -782,64 +583,56 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
      */
     @Parameters({"authorizePath", "userId", "userSecret", "redirectUri"})
     @Test(dependsOnMethods = "dynamicClientRegistration")
-    public void tokenExpirationStep1(final String authorizePath,
-                                     final String userId, final String userSecret,
+    public void tokenExpirationStep1(final String authorizePath, final String userId, final String userSecret,
                                      final String redirectUri) throws Exception {
 
         final String state = UUID.randomUUID().toString();
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.GET, authorizePath) {
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,
+                redirectUri, null);
+        authorizationRequest.getPrompts().add(Prompt.NONE);
+        authorizationRequest.setAuthUsername(userId);
+        authorizationRequest.setAuthPassword(userSecret);
+        authorizationRequest.setState(state);
 
-                List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-                List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+        Builder request = ResteasyClientBuilder.newClient()
+                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
-                AuthorizationRequest authorizationRequest = new AuthorizationRequest(
-                        responseTypes, clientId, scopes, redirectUri, null);
-                authorizationRequest.getPrompts().add(Prompt.NONE);
-                authorizationRequest.setAuthUsername(userId);
-                authorizationRequest.setAuthPassword(userSecret);
-                authorizationRequest.setState(state);
+        request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
+        request.header("Accept", MediaType.TEXT_PLAIN);
 
-                request.addHeader("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
-                request.addHeader("Accept", MediaType.TEXT_PLAIN);
-                request.setQueryString(authorizationRequest.getQueryString());
+        Response response = request.get();
+        String entity = response.readEntity(String.class);
+
+        showResponse("tokenExpirationStep1", response, entity);
+
+        assertEquals(response.getStatus(), 302, "Unexpected response code.");
+        assertNotNull(response.getLocation(), "Unexpected result: " + response.getLocation());
+
+        if (response.getLocation() != null) {
+            try {
+                URI uri = new URI(response.getLocation().toString());
+                assertNotNull(uri.getQuery(), "The query string is null");
+
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
+
+                assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
+                assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
+                assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
+                assertEquals(params.get(AuthorizeResponseParam.STATE), state);
+
+                authorizationCode3 = params.get(AuthorizeResponseParam.CODE);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+                fail("Response URI is not well formed");
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.getMessage());
             }
-
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("tokenExpirationStep1", response);
-
-                assertEquals(response.getStatus(), 302, "Unexpected response code.");
-                assertNotNull(response.getHeader("Location"), "Unexpected result: " + response.getHeader("Location"));
-
-                if (response.getHeader("Location") != null) {
-                    try {
-                        URI uri = new URI(response.getHeader("Location").toString());
-                        assertNotNull(uri.getQuery(), "The query string is null");
-
-                        Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
-
-                        assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
-                        assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
-                        assertEquals(params.get(AuthorizeResponseParam.STATE), state);
-
-                        authorizationCode3 = params.get(AuthorizeResponseParam.CODE);
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                        fail("Response URI is not well formed");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        fail(e.getMessage());
-                    }
-                }
-            }
-        }.run();
+        }
     }
 
     @Parameters({"tokenPath", "redirectUri"})
@@ -849,39 +642,31 @@ public class AuthorizationCodeFlowEmbeddedTest extends BaseTest {
         System.out.println("Sleeping for 20 seconds .....");
         Thread.sleep(20000);
 
-        new ResourceRequest(new ResourceRequestEnvironment(this), Method.POST, tokenPath) {
+        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
 
-            @Override
-            protected void prepareRequest(EnhancedMockHttpServletRequest request) {
-                super.prepareRequest(request);
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode3);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
 
-                TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
-                tokenRequest.setCode(authorizationCode3);
-                tokenRequest.setRedirectUri(redirectUri);
-                tokenRequest.setAuthUsername(clientId);
-                tokenRequest.setAuthPassword(clientSecret);
+        request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
 
-                request.addHeader("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
-                request.addHeader("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-                request.addParameters(tokenRequest.getParameters());
-            }
+        Response response = request
+                .post(Entity.form(new MultivaluedHashMap<String, String>(tokenRequest.getParameters())));
+        String entity = response.readEntity(String.class);
 
-            @Override
-            protected void onResponse(EnhancedMockHttpServletResponse response) {
-                super.onResponse(response);
-                showResponse("tokenExpirationStep2", response);
+        showResponse("tokenExpirationStep2", response, entity);
 
-                assertEquals(response.getStatus(), 400, "Unexpected response code.");
-                assertNotNull(response.getContentAsString(), "Unexpected result: " + response.getContentAsString());
-                try {
-                    JSONObject jsonObj = new JSONObject(response.getContentAsString());
-                    assertTrue(jsonObj.has("error"), "The error type is null");
-                    assertTrue(jsonObj.has("error_description"), "The error description is null");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    fail(e.getMessage() + "\nResponse was: " + response.getContentAsString());
-                }
-            }
-        }.run();
+        assertEquals(response.getStatus(), 400, "Unexpected response code.");
+        assertNotNull(entity, "Unexpected result: " + entity);
+        try {
+            JSONObject jsonObj = new JSONObject(entity);
+            assertTrue(jsonObj.has("error"), "The error type is null");
+            assertTrue(jsonObj.has("error_description"), "The error description is null");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            fail(e.getMessage() + "\nResponse was: " + entity);
+        }
     }
 }

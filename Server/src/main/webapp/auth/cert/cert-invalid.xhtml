@@ -1,9 +1,8 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
 
     <ui:define name="head">
@@ -41,7 +40,7 @@
             .info-section, .info {
                 font-weight: bold;
             }
-            
+
             .body-section, .login-panel-body {
                 font-weight: bold;
             }
@@ -52,58 +51,58 @@
     </ui:define>
 
     <ui:define name="pageTitle">
-        <h:outputText value="#{messages['login.pageTitle']}"/>
+        <h:outputText value="#{msgs['login.pageTitle']}"/>
     </ui:define>
 
     <ui:define name="body">
-	    <div class="login-panel">
-	        <div class="login-panel-header">
-	            <h:outputText value="Failed to check certificate"/>
-	        </div>
+        <div class="login-panel">
+            <div class="login-panel-header">
+                <h:outputText value="#{msgs['cert.failedToCheckCertificate']}"/>
+            </div>
 
-	        <div class="login-panel-body">
-	            <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
-	
-	            <s:div rendered='#{!empty client.getLogoUri()}'>
-	                <h:graphicImage url='#{client.getLogoUri()}'/>
-	            </s:div>
-	
-	            <p class="info-section">
-	                <h:outputText value="oxAuth Login error when validating current certificate"/>
-	            </p>
-	
-	            <div class="dialog">
-	                <h:panelGrid columns="1" border="0" rowClasses="prop" columnClasses="value">
-	                    <p></p>
-	                    <p class="body-section">This can happen in the following cases:</p>
-	                    <ul class="body-list"><li>You have expired certificate. <br/>Please, registered with the system and get new certificate.</li></ul>
-	                    <ul class="body-list"><li>You selected invalid certificate.<br/>Please, restart your browser and try to log in again.</li></ul>
+            <div class="login-panel-body">
+                <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
 
-	                    <p></p>
-	                    <p class="body-section">Note: Internet Explorer and Mozilla Firefox allow to clear the SSL state without restarting the browser:</p>
-	                    <ul class="body-list"><li>If you are using Internet Explorer, you can use the "Clear SSL" button in the settings section: Contents (click Tools → Internet Options).</li></ul>
-	                    <ul class="body-list"><li>If you use FireFox, you can use the menu: Options → Privacy → Clear all current history → select “Active Logins” → press button Clear Now.</li></ul>
-	                </h:panelGrid>
-	            </div>
-	
-	            <s:div rendered='#{!empty client.getPolicyUri()}'>
-	                <p>
-	                    <h:outputText value="#{messages['common.agreePolicy']}"/>
-	                    <a target="_blank" href='#{client.getPolicyUri()}'>
-	                        <h:outputText value="#{messages['common.privacyPolicy']}"/>
-	                    </a>
-	                </p>
-	            </s:div>
-	
-	            <s:div rendered='#{!empty client.getTosUri()}'>
-	                <p>
-	                    <h:outputText value="#{messages['common.pleaseReadTheTos']}"/>
-	                    <a target="_blank" href='#{client.getTosUri()}'>
-	                        <h:outputText value="#{messages['common.termsOfService']}"/>
-	                    </a>
-	                </p>
-	            </s:div>
-	        </div>
-	    </div>
+                <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
+                    <h:graphicImage url='#{client.getLogoUri()}'/>
+                </h:panelGroup>
+
+                <p class="info-section">
+                    <h:outputText value="oxAuth Login error when validating current certificate"/>
+                </p>
+
+                <div class="dialog">
+                    <h:panelGrid columns="1" border="0" rowClasses="prop" columnClasses="value">
+                        <p></p>
+                        <p class="body-section"><h:outputText value="#{msgs['cert.thisCanHappen']}" escape="false"/></p>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.youHaveExpired']}" escape="false"/></li></ul>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.youSelectedInvalid']}" escape="false"/></li></ul>
+
+                        <p></p>
+                        <p class="body-section"><h:outputText value="#{msgs['cert.noteInternetExplorer']}" escape="false"/></p>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.ifYouAreUsing']}" escape="false"/> </li></ul>
+                        <ul class="body-list"><li><h:outputText value="#{msgs['cert.ifYouUseFireFox']}" escape="false"/></li></ul>
+                    </h:panelGrid>
+                </div>
+
+                <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
+                    <p>
+                        <h:outputText value="#{msgs['common.agreePolicy']}"/>
+                        <a target="_blank" href='#{client.getPolicyUri()}'>
+                            <h:outputText value="#{msgs['common.privacyPolicy']}"/>
+                        </a>
+                    </p>
+                </h:panelGroup>
+
+                <h:panelGroup rendered='#{!empty client.getTosUri()}'>
+                    <p>
+                        <h:outputText value="#{msgs['common.pleaseReadTheTos']}"/>
+                        <a target="_blank" href='#{client.getTosUri()}'>
+                            <h:outputText value="#{msgs['common.termsOfService']}"/>
+                        </a>
+                    </p>
+                </h:panelGroup>
+            </div>
+        </div>
     </ui:define>
 </ui:composition>

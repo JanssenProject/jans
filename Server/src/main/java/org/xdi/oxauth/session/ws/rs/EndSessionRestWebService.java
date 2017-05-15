@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import com.wordnik.swagger.annotations.*;
-import org.xdi.oxauth.model.session.EndSessionRequestParam;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -20,11 +17,18 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import org.xdi.oxauth.model.session.EndSessionRequestParam;
+
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+
 /**
  * @author Javier Rojas Blum
  * @version December 15, 2015
  */
-@Path("/oxauth")
 @Api(value = "/oxauth", description = "End Session Endpoint - URL at the OP to which an RP can perform a redirect to request that the End-User be logged out at the OP")
 public interface EndSessionRestWebService {
 

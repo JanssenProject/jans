@@ -6,13 +6,11 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -26,18 +24,17 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 05/11/2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("u2fValidationService")
-@AutoCreate
+@Stateless
+@Named("u2fValidationService")
 public class ValidationService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
-	@In
+	@Inject
 	private UserService userService;
 
 	public boolean isValidSessionState(String userName, String sessionState) {
@@ -48,13 +45,13 @@ public class ValidationService {
 		
 		SessionState ldapSessionState = sessionStateService.getSessionState(sessionState);
 		if (ldapSessionState == null) {
-			log.error("Specified session_state '{0}' is invalid", sessionState);
+			log.error("Specified session_state '{}' is invalid", sessionState);
 			return false;
 		}
 		
 		String sessionStateUser = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
 		if (!StringHelper.equalsIgnoreCase(userName, sessionStateUser)) {
-			log.error("Username '{0}' and session_state '{1}' don't match", userName, sessionState);
+			log.error("Username '{}' and session_state '{}' don't match", userName, sessionState);
 			return false;
 		}
 
@@ -69,18 +66,18 @@ public class ValidationService {
 		
 		User user = userService.getUser(userName, U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
 		if (user == null) {
-			log.error("Specified user_name '{0}' is invalid", userName);
+			log.error("Specified user_name '{}' is invalid", userName);
 			return false;
 		}
 		
 		String userEnrollmentCode = user.getAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
 		if (userEnrollmentCode == null) {
-			log.error("Specified enrollment_code '{0}' is invalid", enrollmentCode);
+			log.error("Specified enrollment_code '{}' is invalid", enrollmentCode);
 			return false;
 		}
 
 		if (!StringHelper.equalsIgnoreCase(userEnrollmentCode, enrollmentCode)) {
-			log.error("Username '{0}' and enrollment_code '{1}' don't match", userName, enrollmentCode);
+			log.error("Username '{}' and enrollment_code '{}' don't match", userName, enrollmentCode);
 			return false;
 		}
 

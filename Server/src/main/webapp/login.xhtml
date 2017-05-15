@@ -1,39 +1,48 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:s="http://jboss.org/schema/seam/taglib"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                template="/WEB-INF/incl/layout/login-template.xhtml">
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/WEB-INF/incl/layout/login-template.xhtml">
 
-    <ui:define name="head">
-          <meta name="description" content="Gluu Inc." />
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+			if="#{sessionStateService.notSessionStateAuthenticated}" />
 
-     </ui:define>
-     
-     <ui:define name="pageTitle">
-        <h:outputText value="#{messages['login.pageTitle']}"/>
-    </ui:define>
-    
- <ui:define name="body">
-          <header>
-               <div class="container">
-                    <div id="header" class="row-fluid">
-                         <div class="logo span2">
-                         <ui:param name="client"
-                                 value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
+		<f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
+	</f:metadata>
 
-                              <s:div rendered='#{!empty client.getLogoUri()}'>
-                                   <h:graphicImage url='#{client.getLogoUri()}'/>
-                              </s:div>
-                               <s:div rendered='#{empty client.getLogoUri()}'>
-                               	<a href="http://www.gluu.org/">
-                                    <h:graphicImage url="img/logo.png" />
-                                </a>
-                              </s:div>
-                         </div><!-- end logo-->
+	<ui:define name="head">
+		<meta name="description" content="Gluu, Inc." />
+	</ui:define>
 
-                         <!--
+	<ui:define name="pageTitle">
+		<h:outputText value="#{msgs['login.pageTitle']}" />
+	</ui:define>
+
+	<ui:define name="body">
+		<header>
+		<div class="container">
+			<div id="header" class="row-fluid">
+				<div class="logo span2">
+					<ui:param name="client"
+						value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
+
+					<h:panelGroup layout="block"
+						rendered='#{!empty client.logoUri}'>
+						<h:graphicImage url='#{client.logoUri}' />
+					</h:panelGroup>
+					<h:panelGroup layout="block"
+						rendered='#{empty client.logoUri}'>
+						<a href="http://www.gluu.org/"> <h:graphicImage
+								url="img/logo.png" />
+						</a>
+					</h:panelGroup>
+				</div>
+				<!-- end logo-->
+
+				<!--
                          <div class="login span4 offset6">
 							 Need a Gluu account?
 							 <a class="register,need-account"
@@ -42,24 +51,24 @@
                        	                        	 
                         </div>
                         -->
-                    </div>
-               </div>
+			</div>
+		</div>
 
-          </header>
-          <!-- end header-->
-          <div class="container">
-               <div id="content" class="sign-in-page">
-		        <div class="row-fluid">
-			       <h:form id="loginForm" class="signin-form span6 offset3">
-			        <h:panelGroup rendered="#{sessionStateService.notSessionStateAuthenticated}">
-				      <div class="inner-form-container row-fluid">
+		</header>
+		<!-- end header-->
+		<div class="container">
+			<div id="content" class="sign-in-page">
+				<div class="row-fluid">
+					<h:form id="loginForm" class="signin-form span6 offset3">
+						<h:panelGroup
+							rendered="#{sessionStateService.notSessionStateAuthenticated}">
+							<div class="inner-form-container row-fluid">
 								<ul class="offset2 span10">
 
-									<s:token allowMultiplePosts="true" />
 									<h:messages style="color:red;" />
 									<div class="row-fluid">
 										<span class="input-name span3"> <h:outputLabel
-												for="username" value="#{messages['login.username']}" />
+												for="username" value="#{msgs['login.username']}" />
 										</span>
 
 										<div class="span6">
@@ -71,7 +80,7 @@
 
 									<div class="row-fluid">
 										<span class="input-name span3"> <h:outputLabel
-												for="password" value="#{messages['login.password']}" />
+												for="password" value="#{msgs['login.password']}" />
 										</span>
 										<div class="span6">
 											<h:inputSecret id="password" value="#{credentials.password}"
@@ -84,24 +93,24 @@
 										<div class="gradient contact-button green span2 offset3">
 											<div id="submit_block" class="login_input">
 												<h:commandButton id="loginButton" style="padding-left: 35%;"
-													value="#{messages['login.login']}"
+													value="#{msgs['login.login']}"
 													action="#{authenticator.authenticate}" />
 											</div>
 											<span class="sprite-green_click_icon"></span>
 										</div>
 									</li>
-									<li class="row-fluid submit-container"><s:div
-											id="registerId" style="display:none">
+									<li class="row-fluid submit-container"><h:panelGroup
+											layout="block" id="registerId" style="display:none">
 											<div class="gradient contact-button green span2 offset3">
 												<div id="submit_block" class="login_input">
 													<h:commandButton id="registerButton"
 														style="padding-left: 35%;"
-														value="#{messages['login.register']}"
+														value="#{msgs['login.register']}"
 														action="#{authenticator.authenticate}" />
 												</div>
 												<span class="sprite-green_click_icon"></span>
 											</div>
-										</s:div></li>
+										</h:panelGroup></li>
 									<!--
 									<li class="row-fluid">
 										<div class="span9 offset3">
@@ -111,54 +120,62 @@
 										</div>
 									</li>
 									-->
-									<s:div rendered='#{!empty client.getPolicyUri()}'>
+									<h:panelGroup layout="block"
+										rendered='#{!empty client.policyUri}'>
 										<p>
-											<h:outputText value="#{messages['common.agreePolicy']}" />
-											<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-													value="#{messages['common.privacyPolicy']}" />
+											<h:outputText value="#{msgs['common.agreePolicy']}" />
+											<a target="_blank" href='#{client.policyUri}'> <h:outputText
+													value="#{msgs['common.privacyPolicy']}" />
 											</a>
 										</p>
-									</s:div>
+									</h:panelGroup>
 
-									<s:div rendered='#{!empty client.getTosUri()}'>
+									<h:panelGroup layout="block"
+										rendered='#{!empty client.tosUri}'>
 										<p>
-											<h:outputText value="#{messages['common.pleaseReadTheTos']}" />
-											<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-													value="#{messages['common.termsOfService']}" />
+											<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
+											<a target="_blank" href='#{client.tosUri}'> <h:outputText
+													value="#{msgs['common.termsOfService']}" />
 											</a>
 										</p>
-									</s:div>
-									<s:fragment rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
+									</h:panelGroup>
+									<ui:fragment rendered="#{external_auth_request_uri != Null or external_registration_uri != Null}">
 										<li class="row-fluid submit-container">
-											<div class="gradient contact-button green span2 offset3" style="width:220px;">
-												<s:fragment rendered="#{external_auth_request_uri != Null}">
+											<div class="gradient contact-button green span2 offset3"
+												style="width: 220px;">
+												<h:panelGroup layout="block" rendered="#{external_auth_request_uri != Null}">
 													<a id="externalAuthButton"
 														href="#{external_auth_request_uri}"> <input
 														type="button" value="Use External Authentification" />
 													</a>
-												</s:fragment>
-												<s:fragment rendered="#{external_registration_uri != Null}">
+												</h:panelGroup>
+												<ui:fragment rendered="#{external_registration_uri != Null}">
 													<a id="externalRegistrationButton"
 														href="#{external_registration_uri}"> <input
-														type="button" style="width:220px;" value="Register new user" />
+														type="button" style="width: 220px;"
+														value="Register new user" />
 													</a>
-												</s:fragment>
+												</ui:fragment>
 											</div>
 										</li>
-									</s:fragment>
+									</ui:fragment>
 								</ul>
 
 							</div>
-                    </h:panelGroup>
-                    </h:form>
-                    </div>
-               </div> 
-               <div id="footer">
-                    <p><h:outputText value="#{messages['common.gluuInc']}" />,  |  <h:outputText value="#{messages['common.caution']}" escape="false" /></p>
-               </div>                             
-               </div>
-               
-            <script type="text/javascript">
+						</h:panelGroup>
+					</h:form>
+				</div>
+			</div>
+			<div id="footer">
+				<p>
+					<h:outputText value="#{msgs['common.gluuInc']}" />
+					. |
+					<h:outputText value="#{msgs['common.caution']}" escape="false" />
+				</p>
+			</div>
+		</div>
+
+		<script type="text/javascript">
             window.onload = function () {
                 var userNameField = document.getElementById("loginForm:username");
                 var passwordField = document.getElementById("loginForm:password");
@@ -179,5 +196,5 @@
                 }
             };
         </script>
-    </ui:define>
+	</ui:define>
 </ui:composition>

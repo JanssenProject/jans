@@ -10,38 +10,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.uma.persistence.ResourceSet;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.uma.ResourceSetService;
 import org.xdi.oxauth.service.uma.ScopeService;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 02/07/2013
  */
-@Scope(ScopeType.STATELESS)
-@Name("umaRsResourceService")
-@AutoCreate
+@Stateless
+@Named("umaRsResourceService")
 public class RsResourceService {
 
-    @Logger
-    private Log log;
-    @In
-    private ResourceSetService resourceSetService;
-    @In
-    private ScopeService umaScopeService;
+    @Inject
+    private Logger log;
 
-    public static RsResourceService instance() {
-        return ServerUtil.instance(RsResourceService.class);
-    }
+    @Inject
+    private ResourceSetService resourceSetService;
+
+    @Inject
+    private ScopeService umaScopeService;
 
     public ResourceSet getResource(RsResourceType p_type) {
         final ResourceSet criteria = new ResourceSet();
@@ -51,7 +45,7 @@ public class RsResourceService {
         final List<ResourceSet> ldapResourceSets = resourceSetService
                 .findResourceSets(criteria);
         if (ldapResourceSets == null || ldapResourceSets.isEmpty()) {
-            log.trace("No resource set for type: {0}", p_type);
+            log.trace("No resource set for type: {}", p_type);
             return createResourceSet(p_type);
         } else {
             final int size = ldapResourceSets.size();
@@ -86,7 +80,7 @@ public class RsResourceService {
     }
 
     private ResourceSet createResourceSet(RsResourceType p_type) {
-        log.trace("Creating new internal resource set, type: {0} ...", p_type);
+        log.trace("Creating new internal resource set, type: {} ...", p_type);
         // Create resource set description branch if needed
         if (!resourceSetService.containsBranch()) {
             resourceSetService.addBranch();
@@ -108,7 +102,7 @@ public class RsResourceService {
 //            }
 
         resourceSetService.addResourceSet(s);
-        log.trace("New internal resource set created, type: {0}.", p_type);
+        log.trace("New internal resource set created, type: {}.", p_type);
         return s;
     }
 }

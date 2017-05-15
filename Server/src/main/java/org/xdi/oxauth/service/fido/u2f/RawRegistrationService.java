@@ -6,12 +6,15 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
+import java.io.IOException;
+import java.security.cert.CertificateException;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.io.IOUtils;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.cert.CertificateParser;
 import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.exception.SignatureException;
@@ -22,18 +25,20 @@ import org.xdi.oxauth.model.fido.u2f.protocol.ClientData;
 import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.util.io.ByteDataInputStream;
 
-import java.io.IOException;
-import java.security.cert.CertificateException;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 
 /**
  * Provides operations with U2F RAW registration response
  *
  * @author Yuriy Movchan Date: 05/20/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("rawRegistrationService")
-@AutoCreate
+@Stateless
+@Named
 public class RawRegistrationService {
+
+	@Inject
+	private Logger log;
 
 	public static final byte REGISTRATION_RESERVED_BYTE_VALUE = (byte) 0x05;
 	public static final byte REGISTRATION_SIGNED_RESERVED_BYTE_VALUE = (byte) 0x00;
@@ -43,10 +48,8 @@ public class RawRegistrationService {
 	public static final String REGISTER_CANCEL_TYPE = "navigator.id.cancelEnrollment";
 	public static final String[] SUPPORTED_REGISTER_TYPES = new String[] { REGISTER_FINISH_TYPE, REGISTER_CANCEL_TYPE };
 
-	@Logger
-	private Log log;
-
-	@In(value = "sha256withECDSASignatureVerification")
+	@Inject
+	@Named("sha256withECDSASignatureVerification")
 	private SHA256withECDSASignatureVerification signatureVerification;
 
 	public RawRegisterResponse parseRawRegisterResponse(String rawDataBase64) throws BadInputException {

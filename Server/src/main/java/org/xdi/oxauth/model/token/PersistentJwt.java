@@ -14,8 +14,8 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationGrantType;
 import org.xdi.oxauth.model.common.IdToken;
@@ -27,7 +27,7 @@ import org.xdi.oxauth.model.util.Util;
  */
 public class PersistentJwt {
 
-    private final static Log LOG = Logging.getLog(PersistentJwt.class);
+    private final static Logger log = LoggerFactory.getLogger(PersistentJwt.class);
 
     private String userId;
     private String clientId;
@@ -46,7 +46,7 @@ public class PersistentJwt {
         try {
             load(jwt);
         } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -219,7 +219,7 @@ public class PersistentJwt {
 
 
         } catch (JSONException e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         return jsonObject.toString();

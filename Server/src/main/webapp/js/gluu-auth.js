@@ -161,6 +161,7 @@ var gluu_auth = {
 		(function worker() {
 			$.ajax({
 				url: '/oxauth/seam/resource/restv1/oxauth/session_status',
+				cache: false,
 				timeout: gluu_auth.checker.timeout,
 				success: function(result, status, xhr) {
 					if ((result.state == 'unknown') || ((result.state == 'unauthenticated') && ((result.custom_state == 'declined') || (result.custom_state == 'expired')))) {
@@ -175,7 +176,7 @@ var gluu_auth = {
 				},
 				complete: function(xhr, status) {
 					if (gluu_auth.endTime < (new Date()).getTime()) {
-						callCallback(callback, 'error');
+						callCallback(callback, 'timeout');
 					}
 					// Schedule the next request when the current one's complete
 					if (!gluu_auth.checker.stop) {

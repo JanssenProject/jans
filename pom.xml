@@ -1,36 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.xdi</groupId>
 	<artifactId>oxauth</artifactId>
 	<packaging>pom</packaging>
 	<version>3.1.0-SNAPSHOT</version>
 	<name>oxAuth</name>
-	<url>http://ox.gluu.org</url>
+	<url>http://www.gluu.org</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.min-version>3.0.3</maven.min-version>
-		<oxCore.version>3.1.0-SNAPSHOT</oxCore.version>
+		<maven.min-version>3.3.9</maven.min-version>
+
+		<oxcore.version>3.1.0.weld-SNAPSHOT</oxcore.version>
 		<oxeleven.version>3.1.0-SNAPSHOT</oxeleven.version>
+
 		<jackson.version>1.9.11</jackson.version>
-		<jettison.version>1.3</jettison.version>
-		<resteasy.version>2.3.7.Final</resteasy.version>
-		<httpcore.version>4.3.3</httpcore.version>
-		<httpclient.version>4.3.6</httpclient.version>
-		<slf4j.version>1.7.2</slf4j.version>
-		<seam.version>2.3.1.Final</seam.version>
-		<drools.version>5.3.3.Final</drools.version>
-		<richfaces.version>4.3.7.Final</richfaces.version>
-		<hibernate.version>4.1.8.Final</hibernate.version>
+		<jettison.version>1.3.2</jettison.version>
+		<resteasy.version>3.0.21.Final</resteasy.version>
+		<jaxr.version>3.0.12.Final</jaxr.version>
+
+		<httpcore.version>4.4.6</httpcore.version>
+		<httpclient.version>4.5.3</httpclient.version>
+
+		<log4j.version>2.8.2</log4j.version>
+		<slf4j.version>1.7.25</slf4j.version>
+
+		<weld.version>3.0.0.CR2</weld.version>
+		<richfaces.version>4.5.17.Final</richfaces.version>
+		<jsf.version>2.2.14</jsf.version>
+		<uel.version>2.2</uel.version>
+		<omnifaces.version>2.6.1</omnifaces.version>
+
 		<swagger.version>1.3.7</swagger.version>
 
-		<jetty.version>9.3.10.v20160621</jetty.version>
+		<jetty.version>9.4.2.v20170220</jetty.version>
 
-		<version.arquillian_core>1.1.11.Final</version.arquillian_core>
-		<version.arquillian.seam2>1.0.0.Beta1</version.arquillian.seam2>
-		<fest.assert.version>1.4</fest.assert.version>
+        <arquillian.version>1.1.11.Final</arquillian.version>
+        <arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
+        <arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
+        <arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
+		<shrinkwrap.version>2.1.0</shrinkwrap.version>
 	</properties>
 
 	<prerequisites>
@@ -70,14 +82,14 @@
 		<module>Model</module>
 		<module>Client</module>
 		<module>oxAuthStatic</module>
-		<module>Server</module>
 		<module>RP</module>
 		<module>RP-Demo</module>
+		<module>Server</module>
 	</modules>
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- Gluu -->
+			<!-- oxAuth -->
 			<dependency>
 				<groupId>org.xdi</groupId>
 				<artifactId>oxauth-model</artifactId>
@@ -89,6 +101,53 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxauth-static</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<!-- Gluu -->
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-util</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-ldap-annotations</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-ldap</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-service</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-server</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-jsf-util</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-saml</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-model</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.gluu</groupId>
 				<artifactId>oxeleven-client</artifactId>
 				<version>${oxeleven.version}</version>
@@ -98,113 +157,71 @@
 				<artifactId>oxeleven-model</artifactId>
 				<version>${oxeleven.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxService</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxServer</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxLdap-annotations</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxLdap</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxUtil</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxSaml</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxModel</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xdi</groupId>
-				<artifactId>oxTomcat</artifactId>
-				<version>${oxCore.version}</version>
-			</dependency>
 
-			<!-- Seam -->
+			<!-- Weld -->
 			<dependency>
-				<groupId>org.jboss.seam</groupId>
-				<artifactId>bom</artifactId>
-				<version>${seam.version}</version>
-				<type>pom</type>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core-parent</artifactId>
+				<version>${weld.version}</version>
 				<scope>import</scope>
+				<type>pom</type>
 			</dependency>
 			<dependency>
-				<groupId>org.jboss.seam</groupId>
-				<artifactId>jboss-seam</artifactId>
-				<version>${seam.version}</version>
+				<groupId>javax.el</groupId>
+				<artifactId>el-api</artifactId>
+				<version>2.2.1-b04</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>dom4j</groupId>
-				<artifactId>dom4j</artifactId>
-				<version>1.6.1</version>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>el-impl</artifactId>
+				<version>${uel.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javassist</groupId>
-				<artifactId>javassist</artifactId>
-				<version>3.12.1.GA</version>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>${jsf.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.persistence</groupId>
-				<artifactId>persistence-api</artifactId>
-				<version>1.0.2</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.transaction</groupId>
-				<artifactId>jta</artifactId>
-				<version>1.1</version>
-			</dependency>
-			<dependency>
-				<groupId>net.sf.ehcache</groupId>
-				<artifactId>ehcache-core</artifactId>
-				<version>2.4.3</version>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-impl</artifactId>
+				<version>${jsf.version}</version>
 			</dependency>
 
 			<!-- Richfaces -->
 			<dependency>
 				<groupId>org.richfaces</groupId>
-				<artifactId>richfaces-bom</artifactId>
-				<version>${richfaces.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.richfaces.core</groupId>
-				<artifactId>richfaces-core-api</artifactId>
+				<artifactId>richfaces</artifactId>
 				<version>${richfaces.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.richfaces.core</groupId>
-				<artifactId>richfaces-core-impl</artifactId>
+				<groupId>org.richfaces</groupId>
+				<artifactId>richfaces-core</artifactId>
 				<version>${richfaces.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.richfaces.ui</groupId>
-				<artifactId>richfaces-components-ui</artifactId>
+				<groupId>org.richfaces</groupId>
+				<artifactId>richfaces-a4j</artifactId>
 				<version>${richfaces.version}</version>
 			</dependency>
+
+			<!-- Omnifaces -->
 			<dependency>
-				<groupId>org.richfaces.ui</groupId>
-				<artifactId>richfaces-components-api</artifactId>
-				<version>${richfaces.version}</version>
+				<groupId>org.omnifaces</groupId>
+				<artifactId>omnifaces</artifactId>
+				<version>${omnifaces.version}</version>
+			</dependency>
+
+			<!-- Prettyfaces -->
+			<dependency>
+			    <groupId>org.ocpsoft.rewrite</groupId>
+			    <artifactId>rewrite-servlet</artifactId>
+			    <version>3.4.1.Final</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.ocpsoft.rewrite</groupId>
+			    <artifactId>rewrite-config-prettyfaces</artifactId>
+			    <version>3.4.1.Final</version>
 			</dependency>
 
 			<!-- Commons libs -->
@@ -253,28 +270,39 @@
 				<artifactId>commons-httpclient</artifactId>
 				<version>3.1</version>
 			</dependency>
-            <dependency>
-                <groupId>commons-cli</groupId>
-                <artifactId>commons-cli</artifactId>
-                <version>1.3.1</version>
-            </dependency>
+			<dependency>
+				<groupId>commons-cli</groupId>
+				<artifactId>commons-cli</artifactId>
+				<version>1.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-pool2</artifactId>
+				<version>2.4.2</version>
+			</dependency>
 
 			<!-- Logging -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-api</artifactId>
-				<version>2.7</version>
+				<version>${log4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-1.2-api</artifactId>
-				<version>2.7</version>
+				<version>${log4j.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j-core</artifactId>
-				<version>2.7</version>
+				<version>${log4j.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j-impl</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
@@ -284,6 +312,13 @@
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-log4j12</artifactId>
 				<version>${slf4j.version}</version>
+			</dependency>
+
+			<!-- Enable async loggers -->
+			<dependency>
+			    <groupId>com.lmax</groupId>
+			    <artifactId>disruptor</artifactId>
+			    <version>3.3.6</version>
 			</dependency>
 
 			<!-- Security -->
@@ -341,27 +376,6 @@
 				<version>1.3.9</version>
 			</dependency>
 
-			<!-- Hibernate -->
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-validator</artifactId>
-				<version>4.3.0.Final</version>
-			</dependency>
-
-			<!-- JBoss -->
-			<dependency>
-				<groupId>jboss</groupId>
-				<artifactId>jboss-common-core</artifactId>
-				<version>2.2.0.GA</version>
-			</dependency>
-
-			<!-- Debug -->
-			<dependency>
-				<groupId>org.jboss.seam</groupId>
-				<artifactId>jboss-seam-debug</artifactId>
-				<version>${seam.version}</version>
-			</dependency>
-
 			<!-- Jython -->
 			<dependency>
 				<groupId>org.python</groupId>
@@ -372,7 +386,22 @@
 			<!-- RestEasy -->
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxb-provider</artifactId>
+				<artifactId>jaxrs-api</artifactId>
+				<version>${jaxr.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.jboss.resteasy</groupId>
+			    <artifactId>resteasy-cdi</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.jboss.resteasy</groupId>
+			    <artifactId>resteasy-client</artifactId>
+				<version>${resteasy.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-servlet-initializer</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
 			<dependency>
@@ -382,12 +411,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jettison-provider</artifactId>
+				<artifactId>resteasy-jaxb-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>jaxrs-api</artifactId>
+				<artifactId>resteasy-jackson-provider</artifactId>
 				<version>${resteasy.version}</version>
 			</dependency>
 
@@ -420,23 +449,6 @@
 				<version>${jettison.version}</version>
 			</dependency>
 
-			<!-- JSF -->
-			<dependency>
-				<groupId>com.sun.faces</groupId>
-				<artifactId>jsf-api</artifactId>
-				<version>2.1.28</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.faces</groupId>
-				<artifactId>jsf-impl</artifactId>
-				<version>2.1.28-jbossorg-1</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.spec.javax.faces</groupId>
-				<artifactId>jboss-jsf-api_2.1_spec</artifactId>
-				<version>2.1.28.Final</version>
-			</dependency>
-
 			<!-- JMS -->
 			<dependency>
 				<groupId>javax.jms</groupId>
@@ -453,18 +465,17 @@
 				<artifactId>activemq-pool</artifactId>
 				<version>5.13.3</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-pool2</artifactId>
-				<version>2.4.2</version>
-			</dependency>
-			
+
 			<!-- Other -->
 			<dependency>
-			    <groupId>com.googlecode.json-simple</groupId>
-			    <artifactId>json-simple</artifactId>
-			    <version>1.1.1</version>
+				<groupId>net.sf.ehcache</groupId>
+				<artifactId>ehcache-core</artifactId>
+				<version>2.4.3</version>
+			</dependency>
+			<dependency>
+				<groupId>com.googlecode.json-simple</groupId>
+				<artifactId>json-simple</artifactId>
+				<version>1.1.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mvel</groupId>
@@ -479,20 +490,13 @@
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
-				<version>3.0.1</version>
+				<version>3.1.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.el</groupId>
-				<artifactId>el-api</artifactId>
-				<version>2.2.1-b04</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax.ejb</groupId>
-				<artifactId>ejb-api</artifactId>
-				<version>3.0</version>
-				<scope>provided</scope>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.2.3</version>
 			</dependency>
 
 			<!-- Test -->
@@ -503,35 +507,112 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.jboss.arquillian.junit</groupId>
-				<artifactId>arquillian-junit-container</artifactId>
-				<version>${version.arquillian_core}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.arquillian.extension</groupId>
-				<artifactId>arquillian-seam2</artifactId>
-				<version>${version.arquillian.seam2}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
 				<version>6.9.10</version>
 				<scope>test</scope>
 			</dependency>
+
+	        <dependency>
+	            <groupId>org.eclipse.jetty</groupId>
+	            <artifactId>jetty-webapp</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+	        
+	        <dependency>
+	            <groupId>org.eclipse.jetty</groupId>
+	            <artifactId>jetty-deploy</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+	
+	        <dependency>
+	            <!-- Jetty annotations needed for Servlet 3.1 support -->
+	            <groupId>org.eclipse.jetty</groupId>
+	            <artifactId>jetty-annotations</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+	
+	        <dependency>
+	            <!-- Jetty plus and naming required for testing resource injections -->
+	            <groupId>org.eclipse.jetty</groupId>
+	            <artifactId>jetty-plus</artifactId>
+	            <version>${jetty.version}</version>
+	            <scope>provided</scope>
+	        </dependency>
+
+            <dependency>
+                <groupId>org.jboss.shrinkwrap.resolver</groupId>
+                <artifactId>shrinkwrap-resolver-bom</artifactId>
+                <version>${shrinkwrap.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.shrinkwrap.resolver</groupId>
+                <artifactId>shrinkwrap-resolver-depchain</artifactId>
+                <version>${shrinkwrap.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+			</dependency>
+
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>${arquillian.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.arquillian.graphene</groupId>
+                <artifactId>graphene-webdriver</artifactId>
+                <version>${arquillian.graphene.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.extension</groupId>
+                <artifactId>arquillian-drone-bom</artifactId>
+                <version>${arquillian.drone.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian.extension</groupId>
+                <artifactId>arquillian-drone-webdriver-depchain</artifactId>
+                <version>${arquillian.drone.version}</version>
+                <type>pom</type>
+                <scope>test</scope>
+            </dependency>
 			<dependency>
-				<groupId>org.easytesting</groupId>
-				<artifactId>fest-assert</artifactId>
-				<version>${fest.assert.version}</version>
+				<groupId>org.jboss.arquillian.extension</groupId>
+				<artifactId>arquillian-rest-client-impl-3x</artifactId>
+				<version>${arquillian.rest.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+			    <groupId>org.eu.ingwar.tools</groupId>
+			    <artifactId>arquillian-suite-extension</artifactId>
+			    <version>1.1.1</version>
+			    <scope>test</scope>
+			</dependency>
+
+	        <dependency>
+	            <groupId>org.jboss.shrinkwrap.resolver</groupId>
+	            <artifactId>shrinkwrap-resolver-depchain</artifactId>
+	            <type>pom</type>
+                <scope>test</scope>
+	        </dependency>
 
 			<!-- Documentation -->
 			<dependency>
 				<groupId>com.wordnik</groupId>
 				<artifactId>swagger-annotations</artifactId>
 				<version>${swagger.version}</version>
+	            <scope>provided</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -598,7 +679,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.17</version>
+					<version>2.19.1</version>
 					<configuration>
 						<!-- Needed as we have both junit and testng -->
 						<failIfNoTests>false</failIfNoTests>
@@ -619,14 +700,14 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>2.5.2</version>
+					<version>3.0.4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
 					<version>2.3</version>
 				</plugin>
- 				<plugin>
+				<plugin>
 					<groupId>org.eclipse.jetty</groupId>
 					<artifactId>jetty-maven-plugin</artifactId>
 					<version>${jetty.version}</version>
@@ -672,7 +753,7 @@
 
 		<profile>
 			<!-- Neded to resolve test dependencies -->
-			<id>set-skip-test-varible</id>
+			<id>set-skip-test-variable</id>
 			<activation>
 				<property>
 					<name>!maven.test.skip</name>
@@ -722,6 +803,7 @@
 			</activation>
 			<properties>
 				<log4j.default.log.level>TRACE</log4j.default.log.level>
+				<weld.debug>true</weld.debug>
 			</properties>
 		</profile>
 	</profiles>

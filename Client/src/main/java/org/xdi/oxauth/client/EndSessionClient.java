@@ -91,8 +91,8 @@ public class EndSessionClient extends BaseClient<EndSessionRequest, EndSessionRe
             String entity = clientResponse.getEntity(String.class);
             getResponse().setEntity(entity);
             getResponse().setHeaders(clientResponse.getMetadata());
-            if (clientResponse.getLocation() != null) {
-                String location = clientResponse.getLocation().getHref();
+            if (clientResponse.getLocationLink() != null) {
+                String location = clientResponse.getLocationLink().getHref();
                 getResponse().setLocation(location);
 
                 int queryStringIndex = location.indexOf("?");

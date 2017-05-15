@@ -8,25 +8,22 @@ package org.xdi.oxauth.model.error;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.clientinfo.ClientInfoErrorResponseType;
+import org.xdi.oxauth.model.configuration.Configuration;
 import org.xdi.oxauth.model.fido.u2f.U2fErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.token.TokenErrorResponseType;
-import org.xdi.oxauth.model.token.ValidateTokenErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaErrorResponse;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.userinfo.UserInfoErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
+import javax.enterprise.inject.Vetoed;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -37,16 +34,22 @@ import java.util.List;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
+ * @version April 26, 2017
  */
-@Name("errorResponseFactory")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
-public class ErrorResponseFactory {
+@Vetoed
+public class ErrorResponseFactory implements Configuration {
 
-    @Logger
-    private Log log;
+    private static Logger log = LoggerFactory.getLogger(ErrorResponseFactory.class);
 
-    private volatile ErrorMessages messages;
+    private ErrorMessages messages;
+
+    public ErrorResponseFactory() {
+    }
+
+    public ErrorResponseFactory(ErrorMessages messages) {
+        this.messages = messages;
+    }
 
     public ErrorMessages getMessages() {
         return messages;
@@ -64,18 +67,18 @@ public class ErrorResponseFactory {
      * @return Error message or <code>null</code> if not found.
      */
     private ErrorMessage getError(List<ErrorMessage> p_list, IErrorType type) {
-        log.debug("Looking for the error with id: {0}", type);
+        log.debug("Looking for the error with id: {}", type);
 
         if (p_list != null) {
             for (ErrorMessage error : p_list) {
                 if (error.getId().equals(type.getParameter())) {
-                    log.debug("Found error, id: {0}", type);
+                    log.debug("Found error, id: {}", type);
                     return error;
                 }
             }
         }
 
-        log.debug("Error not found, id: {0}", type);
+        log.debug("Error not found, id: {}", type);
         return null;
     }
 
@@ -143,8 +146,6 @@ public class ErrorResponseFactory {
                 list = messages.getUma();
             } else if (type instanceof UserInfoErrorResponseType) {
                 list = messages.getUserInfo();
-            } else if (type instanceof ValidateTokenErrorResponseType) {
-                list = messages.getValidateToken();
             } else if (type instanceof U2fErrorResponseType) {
                 list = messages.getFido();
             }
@@ -201,15 +202,15 @@ public class ErrorResponseFactory {
 
     public String getJsonErrorResponse(IErrorType type) {
         final DefaultErrorResponse response = getErrorResponse(type);
-        
+
         JsonErrorResponse jsonErrorResponse = new JsonErrorResponse(response);
 
         try {
-			return ServerUtil.asJson(jsonErrorResponse);
-		} catch (IOException ex) {
+            return ServerUtil.asJson(jsonErrorResponse);
+        } catch (IOException ex) {
             log.error("Failed to generate error response", ex);
             return null;
-		}
+        }
     }
 
 }

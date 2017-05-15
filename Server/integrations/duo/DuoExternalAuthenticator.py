@@ -4,17 +4,16 @@
 # Author: Yuriy Movchan
 #
 
+import duo_web
 from org.jboss.seam import Component
-from org.jboss.seam.contexts import Context, Contexts
+from org.jboss.seam.contexts import Contexts
 from org.jboss.seam.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, UserGroupService, AuthenticationService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.service import MailService
-from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper
 
-import java
-import duo_web
 try:
     import json
 except ImportError:
@@ -67,7 +66,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             else:
                 self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
-
 
         print "Duo. Initialized successfully"
         return True   
@@ -195,7 +193,7 @@ class PersonAuthentication(PersonAuthenticationType):
         member_of_list = user.getAttributeValues(attribute)
         if (member_of_list != None):
             for member_of in member_of_list:
-                if StringHelper.equalsIgnoreCase(group, member_of) or member_of.endsWith(group):
+                if StringHelper.equalsIgnoreCase(group, member_of) or member_of.endswith(group):
                     is_member = True
                     break
 

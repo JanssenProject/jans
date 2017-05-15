@@ -6,9 +6,13 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.log.Log;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationResult;
@@ -16,22 +20,19 @@ import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.ws.rs.fido.u2f.U2fAuthenticationWS;
 import org.xdi.util.StringHelper;
 
-import java.util.Map;
-
 /**
  * Configure user session to confirm user {@link U2fAuthenticationWS} authentication
  *
  * @author Yuriy Movchan Date: 05/19/2015
  */
-@Scope(ScopeType.STATELESS)
-@Name("userSessionStateService")
-@AutoCreate
+@Stateless
+@Named
 public class UserSessionStateService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private SessionStateService sessionStateService;
 
 	public void updateUserSessionStateOnFinishRequest(String sessionState, String userInum, DeviceRegistrationResult deviceRegistrationResult, boolean enroll, boolean oneStep) {
@@ -73,12 +74,12 @@ public class UserSessionStateService {
 
 		SessionState ldapSessionState = sessionStateService.getSessionState(sessionState);
 		if (ldapSessionState == null) {
-			log.warn("Failed to load session state '{0}'", sessionState);
+			log.warn("Failed to load session state '{}'", sessionState);
 			return null;
 		}
 		
 		if (SessionIdState.UNAUTHENTICATED != ldapSessionState.getState()) {
-			log.warn("Unexpected session '{0}' state: '{1}'", sessionState, ldapSessionState.getState());
+			log.warn("Unexpected session '{}' state: '{}'", sessionState, ldapSessionState.getState());
 			return null;
 		}
 

@@ -11,11 +11,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.RDN;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.*;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.TokenLdap;
@@ -26,6 +22,9 @@ import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.service.CacheService;
 
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,27 +35,28 @@ import java.util.List;
  *
  * @author Javier Rojas Blum Date: 09.29.2011
  */
-@Name("authorizationGrantList")
-@AutoCreate
-@Scope(ScopeType.APPLICATION)
-@Startup
+@RequestScoped
 public class AuthorizationGrantList implements IAuthorizationGrantList {
 
-    private static final Log LOGGER = Logging.getLog(AuthorizationGrantList.class);
+	@Inject
+    private Logger log;
 
-    @In
+	@Inject
+    private Instance<AbstractAuthorizationGrant> grantInstance;
+
+    @Inject
     private GrantService grantService;
 
-    @In
+    @Inject
     private UserService userService;
 
-    @In
+    @Inject
     private ClientService clientService;
 
-    @In
+    @Inject
 	private AppConfiguration appConfiguration;
 
-    @In
+    @Inject
     private CacheService cacheService;
 
     @Override
@@ -70,31 +70,45 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant createAuthorizationGrant(User user, Client client, Date authenticationTime) {
-        return new AuthorizationGrant(user, null, client, authenticationTime, appConfiguration);
+    	AuthorizationGrant grant =  grantInstance.select(SimpleAuthorizationGrant.class).get();
+    	grant.init(user, null, client, authenticationTime);
+    	
+    	return grant;
     }
 
     @Override
     public AuthorizationCodeGrant createAuthorizationCodeGrant(User user, Client client, Date authenticationTime) {
-        final AuthorizationCodeGrant grant = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
+    	AuthorizationCodeGrant grant =  grantInstance.select(AuthorizationCodeGrant.class).get();
+    	grant.init(user, client, authenticationTime);
+
         MemcachedGrant memcachedGrant = new MemcachedGrant(grant);
         cacheService.put(Integer.toString(grant.getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
-        LOGGER.trace("Put authorization grant in cache, code: " + grant.getAuthorizationCode().getCode() + ", clientId: " + grant.getClientId());
+        log.trace("Put authorization grant in cache, code: " + grant.getAuthorizationCode().getCode() + ", clientId: " + grant.getClientId());
         return grant;
     }
 
     @Override
     public ImplicitGrant createImplicitGrant(User user, Client client, Date authenticationTime) {
-        return new ImplicitGrant(user, client, authenticationTime, appConfiguration);
+    	ImplicitGrant grant =  grantInstance.select(ImplicitGrant.class).get();
+    	grant.init(user, client, authenticationTime);
+    	
+    	return grant;
     }
 
     @Override
     public ClientCredentialsGrant createClientCredentialsGrant(User user, Client client) {
-        return new ClientCredentialsGrant(user, client, appConfiguration);
+    	ClientCredentialsGrant grant =  grantInstance.select(ClientCredentialsGrant.class).get();
+    	grant.init(user, client);
+    	
+    	return grant;
     }
 
     @Override
     public ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client) {
-        return new ResourceOwnerPasswordCredentialsGrant(user, client, appConfiguration);
+    	ResourceOwnerPasswordCredentialsGrant grant =  grantInstance.select(ResourceOwnerPasswordCredentialsGrant.class).get();
+    	grant.init(user, client);
+    	
+    	return grant;
     }
 
     @Override
@@ -103,9 +117,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
             cachedGrant = cacheService.get(null, MemcachedGrant.cacheKey(clientId, authorizationCode));
-            LOGGER.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode + ", clientId: " + clientId);
+            log.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode + ", clientId: " + clientId);
         }
-        return cachedGrant instanceof MemcachedGrant ? ((MemcachedGrant) cachedGrant).asCodeGrant(appConfiguration) : null;
+        return cachedGrant instanceof MemcachedGrant ? ((MemcachedGrant) cachedGrant).asCodeGrant(grantInstance) : null;
     }
 
     @Override
@@ -127,7 +141,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 }
             }
         } catch (Exception e) {
-            LOGGER.trace(e.getMessage(), e);
+        	log.trace(e.getMessage(), e);
         }
         return result;
     }
@@ -154,7 +168,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         return asGrant(grantService.getGrantsByCodeAndClient(p_code, clientId));
     }
 
-    public static String extractClientIdFromTokenDn(String p_dn) {
+    public String extractClientIdFromTokenDn(String p_dn) {
         try {
             if (StringUtils.isNotBlank(p_dn)) {
                 final RDN[] rdNs = DN.getRDNs(p_dn);
@@ -171,7 +185,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 }
             }
         } catch (LDAPException e) {
-            LOGGER.trace(e.getMessage(), e);
+        	log.trace(e.getMessage(), e);
         }
 
         return "";
@@ -189,16 +203,28 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 AuthorizationGrant result;
                 switch (grantType) {
                     case AUTHORIZATION_CODE:
-                        result = new AuthorizationCodeGrant(user, client, authenticationTime, appConfiguration);
+                    	AuthorizationCodeGrant authorizationCodeGrant = grantInstance.select(AuthorizationCodeGrant.class).get();
+                    	authorizationCodeGrant.init(user, client, authenticationTime);
+
+                    	result = authorizationCodeGrant;
                         break;
                     case CLIENT_CREDENTIALS:
-                        result = new ClientCredentialsGrant(user, client, appConfiguration);
+                    	ClientCredentialsGrant clientCredentialsGrant = grantInstance.select(ClientCredentialsGrant.class).get();
+                    	clientCredentialsGrant.init(user, client);
+
+                    	result = clientCredentialsGrant;
                         break;
                     case IMPLICIT:
-                        result = new ImplicitGrant(user, client, authenticationTime, appConfiguration);
+                    	ImplicitGrant implicitGrant = grantInstance.select(ImplicitGrant.class).get();
+                    	implicitGrant.init(user, client, authenticationTime);
+
+                    	result = implicitGrant;
                         break;
                     case RESOURCE_OWNER_PASSWORD_CREDENTIALS:
-                        result = new ResourceOwnerPasswordCredentialsGrant(user, client, appConfiguration);
+                    	ResourceOwnerPasswordCredentialsGrant resourceOwnerPasswordCredentialsGrant = grantInstance.select(ResourceOwnerPasswordCredentialsGrant.class).get();
+                    	resourceOwnerPasswordCredentialsGrant.init(user, client);
+
+                    	result = resourceOwnerPasswordCredentialsGrant;
                         break;
                     default:
                         return null;
@@ -223,7 +249,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                     try {
                         result.setJwtAuthorizationRequest(new JwtAuthorizationRequest(appConfiguration, jwtRequest, client));
                     } catch (Exception e) {
-                        LOGGER.trace(e.getMessage(), e);
+                    	log.trace(e.getMessage(), e);
                     }
                 }
 
