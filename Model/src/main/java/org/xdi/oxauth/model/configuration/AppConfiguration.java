@@ -146,6 +146,16 @@ public class AppConfiguration implements Configuration {
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
 
+    /**
+     * Used in ServletLoggingFilter to enable http request/response logging.
+     */
+    private Boolean httpLoggingEnabled;
+
+    /**
+     * Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/oxauth/img", "/oxauth/stylesheet"]
+     */
+    private Set<String> httpLoggingExludePaths;
+
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
     }
@@ -1154,6 +1164,22 @@ public class AppConfiguration implements Configuration {
 
     public void setUpdateClientAccessTime(Boolean updateClientAccessTime) {
         this.updateClientAccessTime = updateClientAccessTime;
+    }
+
+    public Boolean getHttpLoggingEnabled() {
+        return httpLoggingEnabled;
+    }
+
+    public void setHttpLoggingEnabled(Boolean httpLoggingEnabled) {
+        this.httpLoggingEnabled = httpLoggingEnabled;
+    }
+
+    public Set<String> getHttpLoggingExludePaths() {
+        return httpLoggingExludePaths;
+    }
+
+    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
+        this.httpLoggingExludePaths = httpLoggingExludePaths;
     }
 
     public String getLoggingLevel() {
