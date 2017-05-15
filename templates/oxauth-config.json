@@ -149,6 +149,12 @@
         "en",
         "es"
     ],
+    "dynamicClientRegDefaultGrantType":[
+    	"authorization_code", 
+    	"implicit", 
+    	"refresh_token", 
+    	"client_credentials"
+    ],
     "claimsParameterSupported":true,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
@@ -229,6 +235,7 @@
     "frontChannelLogoutSessionSupported":true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
+    "enableClientGrantUpdate": false,
     "corsConfigurationFilters": [
         {
             "filterName": "CorsFilter",
