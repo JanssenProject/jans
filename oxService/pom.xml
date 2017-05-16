@@ -70,11 +70,11 @@
 			<artifactId>validation-api</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>ejb-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.jboss.spec.javax.ejb</groupId>
+            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
 		<!-- Jython -->
 		<dependency>

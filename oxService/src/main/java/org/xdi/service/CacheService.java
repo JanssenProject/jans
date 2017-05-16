@@ -9,11 +9,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.xdi.service.cache.CacheProvider;
-
-import com.kenai.jaffl.annotations.In;
 
 /**
  * Provides operations with cache
