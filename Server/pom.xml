@@ -619,6 +619,12 @@
 					<artifactId>weld-jsf</artifactId>
 				</dependency>
 
+		        <dependency>
+		            <groupId>org.jboss.spec.javax.ejb</groupId>
+		            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
+		            <scope>provided</scope>
+		        </dependency>
+
 				<!-- Test: Embedded Jetty -->
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
