@@ -70,6 +70,12 @@
 			<artifactId>validation-api</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>javax.ejb</groupId>
+			<artifactId>ejb-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Jython -->
 		<dependency>
 			<groupId>org.python</groupId>

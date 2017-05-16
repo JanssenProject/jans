@@ -102,10 +102,18 @@
 				<artifactId>jsf-impl</artifactId>
 				<version>${jsf.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
 				<version>1.0.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.ejb</groupId>
+				<artifactId>ejb-api</artifactId>
+				<version>3.0</version>
+				<scope>provided</scope>
 			</dependency>
 
 			<!-- Richfaces -->
