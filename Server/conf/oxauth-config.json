@@ -232,7 +232,7 @@
             "filterName": "CorsFilter",
             "corsAllowedOrigins": "*",
             "corsAllowedMethods": "GET,POST,HEAD,OPTIONS",
-            "corsAllowedHeaders": "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
+            "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
             "corsExposedHeaders": "",
             "corsSupportCredentials": true,
             "corsLoggingEnabled": false,
