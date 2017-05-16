@@ -16,10 +16,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven.min-version>3.0.3</maven.min-version>
-        <seam.version>2.3.1.Final</seam.version>
-        <richfaces.version>4.3.7.Final</richfaces.version>
+
+		<resteasy.version>3.0.21.Final</resteasy.version>
+
+		<weld.version>3.0.0.CR2</weld.version>
+		<richfaces.version>4.5.17.Final</richfaces.version>
+		<jsf.version>2.2.14</jsf.version>
+		<uel.version>2.2</uel.version>
+
         <jackson.version>1.9.13</jackson.version>
-        <resteasy.version>2.3.4.Final</resteasy.version>
         <gxt.version>3.0.1</gxt.version>
         <gwt.version>2.5.0</gwt.version>
         <tomcat.version>7.0.67</tomcat.version>
@@ -67,21 +72,48 @@
     <dependencyManagement>
         <dependencies>
             <!-- Instruct Maven which versions to use -->
-        	<dependency>
-                <groupId>org.jboss.seam</groupId>
-                <artifactId>bom</artifactId>
-                <version>${seam.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
-            <dependency>
-                <groupId>org.richfaces</groupId>
-                <artifactId>richfaces-bom</artifactId>
-                <version>${richfaces.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+			<!-- Weld -->
+			<dependency>
+				<groupId>org.jboss.weld</groupId>
+				<artifactId>weld-core-parent</artifactId>
+				<version>${weld.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>el-api</artifactId>
+				<version>2.2.1-b04</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.web</groupId>
+				<artifactId>el-impl</artifactId>
+				<version>${uel.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>${jsf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.faces</groupId>
+				<artifactId>jsf-impl</artifactId>
+				<version>${jsf.version}</version>
+			</dependency>
+
+			<!-- Richfaces -->
+			<dependency>
+				<groupId>org.richfaces</groupId>
+				<artifactId>richfaces</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.richfaces</groupId>
+				<artifactId>richfaces-core</artifactId>
+				<version>${richfaces.version}</version>
+			</dependency>
 
             <dependency>
                 <groupId>net.jodah</groupId>
@@ -146,6 +178,13 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+			<!-- Jython -->
+			<dependency>
+				<groupId>org.python</groupId>
+				<artifactId>jython</artifactId>
+				<version>2.7.0</version>
+			</dependency>
+
             <!-- Resteasy -->
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
@@ -157,6 +196,25 @@
                 <artifactId>resteasy-jackson-provider</artifactId>
                 <version>${resteasy.version}</version>
             </dependency>
+            
+            <!-- Net -->
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>1.4.7</version>
+			</dependency>
+
+			<!-- Cache -->
+			<dependency>
+				<groupId>net.spy</groupId>
+				<artifactId>spymemcached</artifactId>
+	            <version>2.12.2</version>
+			</dependency>
+			<dependency>
+				<groupId>redis.clients</groupId>
+				<artifactId>jedis</artifactId>
+	            <version>2.9.0</version>
+			</dependency>
 
             <!-- Gwt stuff -->
             <dependency>
@@ -194,16 +252,18 @@
 				<artifactId>metrics-core</artifactId>
 				<version>3.1.2</version>
 			</dependency>
-            
-            <dependency>
-                <groupId>com.sun.faces</groupId>
-                <artifactId>jsf-api</artifactId>
-                <version>2.1.28</version>
-            </dependency>
+			
+			<!-- Other -->
 			<dependency>
-				<groupId>com.sun.faces</groupId>
-				<artifactId>jsf-impl</artifactId>
-				<version>2.1.28-jbossorg-1</version>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>3.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.2.3</version>
 			</dependency>
         </dependencies>
     </dependencyManagement>
