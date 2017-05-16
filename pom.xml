@@ -19,7 +19,7 @@
 
 		<resteasy.version>3.0.21.Final</resteasy.version>
 
-		<weld.version>3.0.0.CR2</weld.version>
+		<weld.version>3.0.0.Final</weld.version>
 		<richfaces.version>4.5.17.Final</richfaces.version>
 		<jsf.version>2.2.14</jsf.version>
 		<uel.version>2.2</uel.version>
