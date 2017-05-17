@@ -44,7 +44,6 @@ public class AppConfiguration implements Configuration {
     private Boolean sessionAsJwt = false;
 
     private String umaConfigurationEndpoint;
-    private Boolean umaRptAsJwt = false;
     private int umaRequesterPermissionTokenLifetime;
     private Boolean umaAddScopesAutomatically;
     private Boolean umaKeepClientDuringResourceSetRegistration;
@@ -153,14 +152,6 @@ public class AppConfiguration implements Configuration {
     public void setFrontChannelLogoutSessionSupported(
             Boolean frontChannelLogoutSessionSupported) {
         this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
-    }
-
-    public Boolean getUmaRptAsJwt() {
-        return umaRptAsJwt;
-    }
-
-    public void setUmaRptAsJwt(Boolean umaRptAsJwt) {
-        this.umaRptAsJwt = umaRptAsJwt;
     }
 
     public Boolean getSessionAsJwt() {
