@@ -25,7 +25,7 @@ public class ScopeHttpTest {
     @Parameters({"umaMetaDataUrl"})
     public void scopePresence(final String umaMetaDataUrl) {
         final UmaConfiguration conf = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
-        final ScopeService scopeService = UmaClientFactory.instance().createScopeService(conf);
+        final ScopeService scopeService = UmaClientFactory.instance().createScopeService(conf.getScopeEndpoint());
         final ScopeDescription modifyScope = scopeService.getScope("modify");
         UmaTestUtil.assert_(modifyScope);
     }
