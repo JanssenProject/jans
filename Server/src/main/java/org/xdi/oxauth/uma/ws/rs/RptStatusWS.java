@@ -6,22 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -30,18 +15,16 @@ import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
-import org.xdi.oxauth.service.uma.AbstractRPTManager;
 import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.google.common.collect.Lists;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The endpoint at which the host requests the status of an RPT presented to it by a requester.
@@ -115,9 +98,6 @@ public class RptStatusWS {
 
             final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
 
-            if (rpt != null && AbstractRPTManager.isGat(rpt.getCode())) {
-                return gatResponse(rpt);
-            }
             if (!isValid(rpt)) {
                 return Response.status(Response.Status.OK).
                         entity(new RptIntrospectionResponse(false)).
@@ -147,34 +127,6 @@ public class RptStatusWS {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
-    }
-
-    private Response gatResponse(UmaRPT rpt) throws IOException {
-        if (!isValid(rpt)) {
-            return Response.status(Response.Status.OK).
-                    entity(new RptIntrospectionResponse(false)).
-                    cacheControl(ServerUtil.cacheControl(true)).
-                    build();
-        }
-
-        UmaPermission permission = new UmaPermission();
-        permission.setScopes(rpt.getPermissions());
-        permission.setExpiresAt(rpt.getExpirationDate());
-        permission.setIssuedAt(new Date());
-
-        final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
-        statusResponse.setActive(true);
-        statusResponse.setExpiresAt(rpt.getExpirationDate());
-        statusResponse.setIssuedAt(rpt.getCreationDate());
-        statusResponse.setPermissions(Lists.newArrayList(permission));
-
-        // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-        final String entity = ServerUtil.asJson(statusResponse);
-
-        return Response.status(Response.Status.OK).
-                entity(entity).
-                cacheControl(ServerUtil.cacheControl(true)).
-                build();
     }
 
     private boolean isValid(UmaRPT p_rpt) {

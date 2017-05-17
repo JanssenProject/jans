@@ -1,6 +1,5 @@
 package org.xdi.oxauth.ws.rs.uma;
 
-import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -8,9 +7,6 @@ import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
 import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
-import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
@@ -26,8 +22,6 @@ import java.util.List;
 public class TrustElevationHttpTest extends BaseTest {
 
     protected UmaConfiguration metadataConfiguration;
-
-    protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
 
     protected RegisterResourceSetFlowHttpTest umaRegisterResourceSetFlowHttpTest;
     protected RegisterResourceSetPermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
@@ -50,7 +44,6 @@ public class TrustElevationHttpTest extends BaseTest {
         this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
         UmaTestUtil.assert_(this.metadataConfiguration);
 
-        this.umaObtainRptTokenFlowHttpTest = new ObtainRptTokenFlowHttpTest(this.metadataConfiguration);
         this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceSetFlowHttpTest(this.metadataConfiguration);
         this.umaRegisterResourceSetPermissionFlowHttpTest = new RegisterResourceSetPermissionFlowHttpTest(this.metadataConfiguration);
 
@@ -66,15 +59,12 @@ public class TrustElevationHttpTest extends BaseTest {
         final List<String> rsScopes = Arrays.asList("http://gluu.example.com/dev/scopes/view", "http://gluu.example.com/dev/scopes/all");
 
         this.umaRegisterResourceSetFlowHttpTest.m_pat = m_pat;
-        final String resourceId = this.umaRegisterResourceSetFlowHttpTest.registerResourceSet(
-                rsScopes);
-
-        this.umaObtainRptTokenFlowHttpTest.m_aat = this.m_aat;
-        this.umaObtainRptTokenFlowHttpTest.testObtainRptTokenFlow(umaAmHost);
+        final String resourceId = this.umaRegisterResourceSetFlowHttpTest.registerResourceSet(rsScopes);
 
         this.umaRegisterResourceSetPermissionFlowHttpTest.umaRegisterResourceSetFlowHttpTest = umaRegisterResourceSetFlowHttpTest;
         this.umaRegisterResourceSetPermissionFlowHttpTest.registerResourceSetPermission(umaAmHost, resourceId, rsScopes);
 
+        /**
         RptIntrospectionResponse rptStatus = this.rptStatusService.requestRptStatus("Bearer " + m_pat.getAccessToken(),
                 this.umaObtainRptTokenFlowHttpTest.rptToken, "");
 
@@ -90,6 +80,6 @@ public class TrustElevationHttpTest extends BaseTest {
 
         rptStatus = this.rptStatusService.requestRptStatus("Bearer " + m_pat.getAccessToken(),
                        this.umaObtainRptTokenFlowHttpTest.rptToken, "");
-
+        **/
     }
 }

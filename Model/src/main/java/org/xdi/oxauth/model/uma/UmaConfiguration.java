@@ -47,6 +47,11 @@ public class UmaConfiguration extends OAuth2Discovery {
     @XmlElement(name = "resource_registration_endpoint")
     private String resourceRegistrationEndpoint;
 
+    @ApiModelProperty(required = true, value = "The Scope endpoint URI.")
+    @JsonProperty(value = "scope_endpoint")
+    @XmlElement(name = "scope_endpoint")
+    private String scopeEndpoint;
+
     public String getClaimsInteractionEndpoint() {
         return claimsInteractionEndpoint;
     }
@@ -79,6 +84,13 @@ public class UmaConfiguration extends OAuth2Discovery {
         this.resourceRegistrationEndpoint = resourceRegistrationEndpoint;
     }
 
+    public String getScopeEndpoint() {
+        return scopeEndpoint;
+    }
+
+    public void setScopeEndpoint(String scopeEndpoint) {
+        this.scopeEndpoint = scopeEndpoint;
+    }
 
     @Override
     public String toString() {
@@ -87,6 +99,7 @@ public class UmaConfiguration extends OAuth2Discovery {
                 ", umaProfilesSupported=" + Arrays.toString(umaProfilesSupported) +
                 ", permissionEndpoint='" + permissionEndpoint + '\'' +
                 ", resourceRegistrationEndpoint='" + resourceRegistrationEndpoint + '\'' +
+                ", scopeEndpoint='" + scopeEndpoint + '\'' +
                 "} " + super.toString();
     }
 }

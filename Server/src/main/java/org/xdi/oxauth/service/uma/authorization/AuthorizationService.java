@@ -54,11 +54,6 @@ public class AuthorizationService {
         return allowToAddPermission(grant, rpt, scopes, permission, httpRequest, claims);
     }
 
-    public boolean allowToAddPermissionForGat(AuthorizationGrant grant, UmaRPT rpt, List<String> scopes, HttpServletRequest httpRequest, ClaimTokenList claims) {
-        List<ScopeDescription> scopesByUrls = umaScopeService.getScopesByUrls(scopes);
-        return allowToAddPermission(grant, rpt, scopesByUrls, new ResourceSetPermission(), httpRequest, claims);
-    }
-
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<ScopeDescription> scopes,
                                         ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
         log.trace("Check policies for scopes: '{}'", scopes);

@@ -172,11 +172,11 @@ public class RptManager extends AbstractRPTManager {
     }
 
     @Override
-    public UmaRPT createRPT(String authorization, String amHost, boolean isGat) {
+    public UmaRPT createRPT(String authorization, String amHost) {
         String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
         IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
 
-        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken, isGat);
+        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken);
 
         addRPT(rpt, authorizationGrant.getClientDn());
         return rpt;

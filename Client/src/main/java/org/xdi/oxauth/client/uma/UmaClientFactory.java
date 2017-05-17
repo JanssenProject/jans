@@ -35,28 +35,12 @@ public class UmaClientFactory {
         return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceRegistrationEndpoint(), clientExecutor);
     }
 
-    public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration) {
-        return ProxyFactory.create(CreateRptService.class, metadataConfiguration.getRptEndpoint());
-    }
-
-    public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(CreateRptService.class, metadataConfiguration.getRptEndpoint(), clientExecutor);
-    }
-
-    public CreateGatService createGatService(UmaConfiguration metadataConfiguration) {
-        return ProxyFactory.create(CreateGatService.class, metadataConfiguration.getGatEndpoint());
-    }
-
-    public CreateGatService createGatService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(CreateGatService.class, metadataConfiguration.getGatEndpoint(), clientExecutor);
-    }
-
     public PermissionRegistrationService createResourceSetPermissionRegistrationService(UmaConfiguration metadataConfiguration) {
-        return ProxyFactory.create(PermissionRegistrationService.class, metadataConfiguration.getPermissionRegistrationEndpoint());
+        return ProxyFactory.create(PermissionRegistrationService.class, metadataConfiguration.getPermissionEndpoint());
     }
 
     public PermissionRegistrationService createResourceSetPermissionRegistrationService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(PermissionRegistrationService.class, metadataConfiguration.getPermissionRegistrationEndpoint(), clientExecutor);
+        return ProxyFactory.create(PermissionRegistrationService.class, metadataConfiguration.getPermissionEndpoint(), clientExecutor);
     }
 
     public RptStatusService createRptStatusService(UmaConfiguration metadataConfiguration) {
@@ -83,12 +67,8 @@ public class UmaClientFactory {
         return ProxyFactory.create(UmaConfigurationService.class, umaMetaDataUri, clientExecutor);
     }
 
-    public ScopeService createScopeService(UmaConfiguration p_configuration) {
-        return createScopeService(p_configuration.getScopeEndpoint());
-    }
-
-    public ScopeService createScopeService(String umaMetaDataUri) {
-        return ProxyFactory.create(ScopeService.class, umaMetaDataUri);
+    public ScopeService createScopeService(String scopeEndpointUri) {
+        return ProxyFactory.create(ScopeService.class, scopeEndpointUri);
     }
 
 }
