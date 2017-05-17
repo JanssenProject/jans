@@ -41,22 +41,11 @@ public class UmaTestUtil {
 
     public static void assert_(UmaConfiguration configuration) {
         assertNotNull(configuration, "Meta data configuration is null");
-        assertEquals(configuration.getVersion(), "1.0", "Version isn't correct");
         assertNotNull(configuration.getIssuer(), "Issuer isn't correct");
-        assertEquals(configuration.getPatProfilesSupported(), new String[]{"bearer"}, "Supported PAT profiles aren't correct");
-        assertEquals(configuration.getAatProfilesSupported(), new String[]{"bearer"}, "Supported AAT profiles aren't correct");
-        assertTrue(Arrays.equals(configuration.getRptProfilesSupported(), new String[]{"bearer"}) ||
-                Arrays.equals(configuration.getRptProfilesSupported(), new String[]{"https://docs.kantarainitiative.org/uma/profiles/uma-token-bearer-1.0"})
-                , "Supported RPT profiles aren't correct");
-        assertTrue(Arrays.asList(configuration.getPatGrantTypesSupported()).contains("authorization_code"), "Supported PAT grant types aren't correct");
-        assertTrue(Arrays.asList(configuration.getAatGrantTypesSupported()).contains("authorization_code"), "Supported AAT grant types aren't correct");
-        assertEquals(configuration.getClaimTokenProfilesSupported(), new String[]{"openid"}, "Supported claim profiles aren't correct");
         assertNotNull(configuration.getTokenEndpoint(), "Token endpoint isn't correct");
-        assertNotNull(configuration.getGatEndpoint(), "Token endpoint isn't correct");
         assertNotNull(configuration.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
-        assertNotNull(configuration.getResourceSetRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
-        assertNotNull(configuration.getPermissionRegistrationEndpoint(), "Permission registration endpoint isn't correct");
-        assertNotNull(configuration.getRptEndpoint(), "RPT endpoint isn't correct");
+        assertNotNull(configuration.getResourceRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
+        assertNotNull(configuration.getPermissionEndpoint(), "Permission registration endpoint isn't correct");
         assertNotNull(configuration.getAuthorizationEndpoint(), "Authorization request endpoint isn't correct");
     }
 

@@ -28,11 +28,11 @@ public class UmaClientFactory {
     }
 
     public ResourceSetRegistrationService createResourceSetRegistrationService(UmaConfiguration metadataConfiguration) {
-        return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceSetRegistrationEndpoint());
+        return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceRegistrationEndpoint());
     }
 
     public ResourceSetRegistrationService createResourceSetRegistrationService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceSetRegistrationEndpoint(), clientExecutor);
+        return ProxyFactory.create(ResourceSetRegistrationService.class, metadataConfiguration.getResourceRegistrationEndpoint(), clientExecutor);
     }
 
     public CreateRptService createRequesterPermissionTokenService(UmaConfiguration metadataConfiguration) {
