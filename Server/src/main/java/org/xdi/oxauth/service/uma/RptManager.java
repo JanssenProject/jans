@@ -18,7 +18,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.StaticConfiguration;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.token.TokenService;
@@ -137,7 +137,7 @@ public class RptManager extends AbstractRPTManager {
     }
 
     @Override
-    public void addPermissionToRPT(UmaRPT p_rpt, ResourceSetPermission p_permission) {
+    public void addPermissionToRPT(UmaRPT p_rpt, UmaPermission p_permission) {
         final List<String> permissions = new ArrayList<String>();
         if (p_rpt.getPermissions() != null) {
             permissions.addAll(p_rpt.getPermissions());
@@ -153,13 +153,13 @@ public class RptManager extends AbstractRPTManager {
     }
 
     @Override
-    public List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt) {
-        final List<ResourceSetPermission> result = new ArrayList<ResourceSetPermission>();
+    public List<UmaPermission> getRptPermissions(UmaRPT p_rpt) {
+        final List<UmaPermission> result = new ArrayList<UmaPermission>();
         try {
             if (p_rpt != null && p_rpt.getPermissions() != null) {
                 final List<String> permissionDns = p_rpt.getPermissions();
                 for (String permissionDn : permissionDns) {
-                    final ResourceSetPermission permissionObject = ldapEntryManager.find(ResourceSetPermission.class, permissionDn);
+                    final UmaPermission permissionObject = ldapEntryManager.find(UmaPermission.class, permissionDn);
                     if (permissionObject != null) {
                         result.add(permissionObject);
                     }
@@ -183,13 +183,13 @@ public class RptManager extends AbstractRPTManager {
     }
 
     @Override
-    public ResourceSetPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId) {
+    public UmaPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId) {
         try {
             if (p_rpt != null && p_rpt.getPermissions() != null && Util.allNotBlank(p_resourceSetId)) {
                 final List<String> permissionDns = p_rpt.getPermissions();
                 for (String permissionDn : permissionDns) {
-                    final ResourceSetPermission permissionObject = ldapEntryManager.find(ResourceSetPermission.class, permissionDn);
-                    if (permissionObject != null && p_resourceSetId.equals(permissionObject.getResourceSetId())) {
+                    final UmaPermission permissionObject = ldapEntryManager.find(UmaPermission.class, permissionDn);
+                    if (permissionObject != null && p_resourceSetId.equals(permissionObject.getResourceId())) {
                         return permissionObject;
                     }
                 }

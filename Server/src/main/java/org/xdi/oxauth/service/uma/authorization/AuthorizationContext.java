@@ -11,7 +11,7 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.ClaimToken;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 
@@ -28,7 +28,7 @@ import java.util.*;
 public class AuthorizationContext extends ExternalScriptContext {
 
     private final UmaRPT rpt;
-    private final ResourceSetPermission permission;
+    private final UmaPermission permission;
     private final IAuthorizationGrant grant;
     private final Map<String, List<String>> claims;
     private NeedInfoAuthenticationContext needInfoAuthenticationContext;
@@ -36,7 +36,7 @@ public class AuthorizationContext extends ExternalScriptContext {
 
     private AttributeService attributeService;
 
-    public AuthorizationContext(AttributeService attributeService, UmaRPT p_rpt, ResourceSetPermission p_permission, IAuthorizationGrant p_grant,
+    public AuthorizationContext(AttributeService attributeService, UmaRPT p_rpt, UmaPermission p_permission, IAuthorizationGrant p_grant,
                                 HttpServletRequest p_httpRequest, List<ClaimToken> claims) {
     	super(p_httpRequest);
 
@@ -98,7 +98,7 @@ public class AuthorizationContext extends ExternalScriptContext {
         return rpt;
     }
 
-    public ResourceSetPermission getPermission() {
+    public UmaPermission getPermission() {
         return permission;
     }
 

@@ -6,23 +6,6 @@
 
 package org.xdi.oxauth.service.uma;
 
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.ACCESS_DENIED;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_TOKEN;
-import static org.xdi.oxauth.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -31,12 +14,25 @@ import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxauth.model.uma.UmaScopeType;
-import org.xdi.oxauth.model.uma.persistence.ResourceSet;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.util.StringHelper;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Set;
+
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -59,7 +55,7 @@ public class UmaValidationService {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-   	private ResourceSetService resourceSetService;
+   	private UmaResourceService resourceSetService;
 
     @Inject
     private ScopeService umaScopeService;
@@ -183,7 +179,7 @@ public class UmaValidationService {
    		}
    	}
 
-    public void validateResourceSetPermission(ResourceSetPermission resourceSetPermission) {
+    public void validateResourceSetPermission(UmaPermission resourceSetPermission) {
    		if (resourceSetPermission == null || "invalidated".equalsIgnoreCase(resourceSetPermission.getAmHost())) {
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
@@ -196,7 +192,7 @@ public class UmaValidationService {
    		}
    	}
 
-    public void validateResourceSet(UmaPermission resourceSetPermissionRequest) {
+    public void validateResourceSet(org.xdi.oxauth.model.uma.UmaPermission resourceSetPermissionRequest) {
    		String resourceSetId = resourceSetPermissionRequest.getResourceSetId();
    		if (StringHelper.isEmpty(resourceSetId)) {
    			log.error("Resource set id is empty");
@@ -204,12 +200,12 @@ public class UmaValidationService {
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
    		}
 
-   		ResourceSet resourceSet;
+   		UmaResource resourceSet;
    		try {
-   			ResourceSet exampleResourceSet = new ResourceSet();
+   			UmaResource exampleResourceSet = new UmaResource();
    			exampleResourceSet.setDn(resourceSetService.getBaseDnForResourceSet());
    			exampleResourceSet.setId(resourceSetId);
-            List<ResourceSet> resourceSets = resourceSetService.findResourceSets(exampleResourceSet);
+            List<UmaResource> resourceSets = resourceSetService.findResourceSets(exampleResourceSet);
             if (resourceSets.size() != 1) {
        			log.error("Resource set isn't registered or there are two resource set with same Id");
        			throw new WebApplicationException(Response.status(BAD_REQUEST)

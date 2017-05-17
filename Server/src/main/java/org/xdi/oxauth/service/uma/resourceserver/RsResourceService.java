@@ -6,19 +6,18 @@
 
 package org.xdi.oxauth.service.uma.resourceserver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
+import org.xdi.oxauth.model.uma.persistence.UmaResource;
+import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.service.uma.UmaResourceService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.slf4j.Logger;
-import org.xdi.oxauth.model.uma.persistence.ResourceSet;
-import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
-import org.xdi.oxauth.service.uma.ResourceSetService;
-import org.xdi.oxauth.service.uma.ScopeService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -32,24 +31,24 @@ public class RsResourceService {
     private Logger log;
 
     @Inject
-    private ResourceSetService resourceSetService;
+    private UmaResourceService resourceSetService;
 
     @Inject
     private ScopeService umaScopeService;
 
-    public ResourceSet getResource(RsResourceType p_type) {
-        final ResourceSet criteria = new ResourceSet();
+    public UmaResource getResource(RsResourceType p_type) {
+        final UmaResource criteria = new UmaResource();
         criteria.setDn(resourceSetService.getBaseDnForResourceSet());
         criteria.setName(p_type.getValue());
 
-        final List<ResourceSet> ldapResourceSets = resourceSetService
+        final List<UmaResource> ldapResourceSets = resourceSetService
                 .findResourceSets(criteria);
         if (ldapResourceSets == null || ldapResourceSets.isEmpty()) {
             log.trace("No resource set for type: {}", p_type);
             return createResourceSet(p_type);
         } else {
             final int size = ldapResourceSets.size();
-            final ResourceSet first = ldapResourceSets.get(0);
+            final UmaResource first = ldapResourceSets.get(0);
             if (size > 1) {
                 // it's allowed to keep only one internal resource set for id generation : remove rest of resources
 
@@ -79,7 +78,7 @@ public class RsResourceService {
         return result;
     }
 
-    private ResourceSet createResourceSet(RsResourceType p_type) {
+    private UmaResource createResourceSet(RsResourceType p_type) {
         log.trace("Creating new internal resource set, type: {} ...", p_type);
         // Create resource set description branch if needed
         if (!resourceSetService.containsBranch()) {
@@ -89,7 +88,7 @@ public class RsResourceService {
         final String rsid = String.valueOf(System.currentTimeMillis());
 
 
-        final ResourceSet s = new ResourceSet();
+        final UmaResource s = new UmaResource();
         s.setId(rsid);
         s.setRev("1");
         s.setName(p_type.getValue());
@@ -101,7 +100,7 @@ public class RsResourceService {
 //                s.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
 //            }
 
-        resourceSetService.addResourceSet(s);
+        resourceSetService.addResource(s);
         log.trace("New internal resource set created, type: {}.", p_type);
         return s;
     }
