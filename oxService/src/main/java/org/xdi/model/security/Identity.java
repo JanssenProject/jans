@@ -141,7 +141,7 @@ public class Identity implements Serializable {
 	public Principal getPrincipal() {
 		return principal;
 	}
-	   
+
 	public Subject getSubject() {
 		return subject;
 	}
@@ -212,6 +212,17 @@ public class Identity implements Serializable {
 			getSubject().getPrincipals().add(roleGroup);
 			return true;
 		}
+	}
+
+	public boolean hasRole(String role) {
+		tryLogin();
+
+		for (Group sg : getSubject().getPrincipals(Group.class)) {
+			if (ROLES_GROUP.equals(sg.getName())) {
+				return sg.isMember(new Role(role));
+			}
+		}
+		return false;
 	}
 
 	public boolean hasPermission(String name, String action, Object... arg) {
