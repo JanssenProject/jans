@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Date;
-import java.util.List;
-
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,21 +20,21 @@ import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
 
 public interface IRPTManager {
 
-    public void addRPT(UmaRPT requesterPermissionToken, String clientDn);
+    void addRPT(UmaRPT requesterPermissionToken, String clientDn);
 
-    public UmaRPT getRPTByCode(String requesterPermissionTokenCode);
+    UmaRPT getRPTByCode(String requesterPermissionTokenCode);
 
-    UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat, boolean isGat);
+    UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat);
 
-    public void deleteRPT(String rptCode);
+    void deleteRPT(String rptCode);
 
-    public void cleanupRPTs(Date now);
+    void cleanupRPTs(Date now);
 
-    public void addPermissionToRPT(UmaRPT p_rpt, ResourceSetPermission p_permission);
+    void addPermissionToRPT(UmaRPT p_rpt, ResourceSetPermission p_permission);
 
-    public ResourceSetPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId);
+    ResourceSetPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId);
 
-    public List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt);
+    List<ResourceSetPermission> getRptPermissions(UmaRPT p_rpt);
 
-    UmaRPT createRPT(String authorization, String amHost, boolean isGat);
+    UmaRPT createRPT(String authorization, String amHost);
 }

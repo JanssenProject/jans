@@ -76,6 +76,7 @@ public class UmaConfigurationWS {
             c.setIntrospectionEndpoint(baseEndpointUri + "/rpt/status");
             c.setResourceRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setPermissionEndpoint(baseEndpointUri + "/host/rsrc_pr");
+            c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);

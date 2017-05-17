@@ -6,17 +6,7 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.Api;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -35,7 +25,11 @@ import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.
@@ -102,7 +96,7 @@ public class RptPermissionAuthorizationWS {
                                           String amHost) {
         UmaRPT rpt;
         if (Util.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
-            rpt = rptManager.createRPT(authorization, amHost, false);
+            rpt = rptManager.createRPT(authorization, amHost);
         } else {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
