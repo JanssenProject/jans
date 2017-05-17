@@ -67,7 +67,7 @@ public class CustomScriptManager implements Serializable {
 	@Inject
 	private PythonService pythonService;
 	
-	@Inject @Named("customScriptService")
+	@Inject
 	protected AbstractCustomScriptService customScriptService;
 
 	@Inject
