@@ -6,29 +6,8 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
+import com.google.common.collect.Lists;
+import com.wordnik.swagger.annotations.*;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -40,18 +19,22 @@ import org.xdi.oxauth.model.uma.ResourceSet;
 import org.xdi.oxauth.model.uma.ResourceSetResponse;
 import org.xdi.oxauth.model.uma.ResourceSetWithId;
 import org.xdi.oxauth.model.uma.UmaConstants;
+import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.ResourceSetService;
+import org.xdi.oxauth.service.uma.UmaResourceService;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.google.common.collect.Lists;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This AM's endpoint is part of resource set registration API.
@@ -68,7 +51,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  */
 @Path("/host/rsrc/resource_set")
 @Api(value = "/host/rsrc/resource_set", description = "The resource server uses the RESTful API at the authorization server's resource set registration endpoint to create, read, update, and delete resource set descriptions, along with retrieving lists of such descriptions.")
-public class ResourceSetRegistrationWS {
+public class ResourceRegistrationWS {
 
     private static final int NOT_ALLOWED_STATUS = 405;
 
@@ -82,7 +65,7 @@ public class ResourceSetRegistrationWS {
     private UmaValidationService umaValidationService;
 
     @Inject
-    private ResourceSetService resourceSetService;
+    private UmaResourceService resourceSetService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -181,7 +164,7 @@ public class ResourceSetRegistrationWS {
 
             log.debug("Getting resource set description: '{}'", rsid);
 
-            final org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = resourceSetService.getResourceSetById(rsid);
+            final UmaResource ldapResourceSet = resourceSetService.getResourceSetById(rsid);
 
             final ResourceSetWithId response = new ResourceSetWithId();
 
@@ -238,11 +221,11 @@ public class ResourceSetRegistrationWS {
             final AuthorizationGrant authorizationGrant = umaValidationService.assertHasProtectionScope(authorization);
             final String clientDn = authorizationGrant.getClientDn();
 
-            final List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
-                    .getResourceSetsByAssociatedClient(clientDn);
+            final List<UmaResource> ldapResourceSets = resourceSetService
+                    .getResourcesByAssociatedClient(clientDn);
 
             final List<String> result = new ArrayList<String>(ldapResourceSets.size());
-            for (org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet : ldapResourceSets) {
+            for (UmaResource ldapResourceSet : ldapResourceSets) {
 
                 // if scope parameter is not null then filter by it, otherwise just add to result
                 if (StringUtils.isNotBlank(scope)) {
@@ -318,8 +301,8 @@ public class ResourceSetRegistrationWS {
         }
 
         // Load resource set description
-        org.xdi.oxauth.model.uma.persistence.ResourceSet ldapUpdatedResourceSet = resourceSetService
-                .getResourceSetByDn(resourceSetDn);
+        UmaResource ldapUpdatedResourceSet = resourceSetService
+                .getResourceByDn(resourceSetDn);
 
         ResourceSetResponse response = new ResourceSetResponse();
         response.setId(ldapUpdatedResourceSet.getId());
@@ -336,7 +319,7 @@ public class ResourceSetRegistrationWS {
         final String resourceSetDn = resourceSetService.getDnForResourceSet(rsid);
         final List<String> scopeDNs = umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resourceSet.getScopes());
 
-        final org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = new org.xdi.oxauth.model.uma.persistence.ResourceSet();
+        final UmaResource ldapResourceSet = new UmaResource();
         BeanUtils.copyProperties(ldapResourceSet, resourceSet);
 
         ldapResourceSet.setName(resourceSet.getName());
@@ -353,7 +336,7 @@ public class ResourceSetRegistrationWS {
             ldapResourceSet.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
         }
 
-        resourceSetService.addResourceSet(ldapResourceSet);
+        resourceSetService.addResource(ldapResourceSet);
 
         return resourceSetDn;
     }
@@ -361,11 +344,11 @@ public class ResourceSetRegistrationWS {
     private String updateResourceSet(String rsid, ResourceSet resourceSet) throws IllegalAccessException, InvocationTargetException {
         log.debug("Updating resource set description: '{}'.", rsid);
 
-        org.xdi.oxauth.model.uma.persistence.ResourceSet ldapResourceSet = new org.xdi.oxauth.model.uma.persistence.ResourceSet();
+        UmaResource ldapResourceSet = new UmaResource();
         ldapResourceSet.setDn(resourceSetService.getBaseDnForResourceSet());
         ldapResourceSet.setId(rsid);
 
-        List<org.xdi.oxauth.model.uma.persistence.ResourceSet> ldapResourceSets = resourceSetService
+        List<UmaResource> ldapResourceSets = resourceSetService
                 .findResourceSets(ldapResourceSet);
         if (ldapResourceSets.size() == 0) {
             throwNotFoundException(rsid);

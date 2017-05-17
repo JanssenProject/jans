@@ -6,26 +6,16 @@
 
 package org.xdi.oxauth.idgen.ws.rs;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.resourceserver.PermissionService;
@@ -34,9 +24,13 @@ import org.xdi.oxauth.service.uma.resourceserver.RsScopeType;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -139,7 +133,7 @@ public class IdGenRestWebService {
             if (rpt != null) {
                 rpt.checkExpired();
                 if (rpt.isValid()) {
-                    final List<ResourceSetPermission> rptPermissions = rptManager.getRptPermissions(rpt);
+                    final List<UmaPermission> rptPermissions = rptManager.getRptPermissions(rpt);
                     return umaRsPermissionService.hasEnoughPermissionsWithTicketRegistration(rpt, rptPermissions, RsResourceType.ID_GENERATION, p_scopes);
                 }
             }

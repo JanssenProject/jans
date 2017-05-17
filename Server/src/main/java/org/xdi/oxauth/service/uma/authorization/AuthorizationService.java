@@ -12,7 +12,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.ClaimTokenList;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
@@ -48,14 +48,14 @@ public class AuthorizationService {
     @Inject
 	private AttributeService attributeService;
 
-    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
+    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, UmaPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
         log.trace("Check policies for permission, id: '{}'", permission.getDn());
         List<ScopeDescription> scopes = umaScopeService.getScopesByDns(permission.getScopeDns());
         return allowToAddPermission(grant, rpt, scopes, permission, httpRequest, claims);
     }
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<ScopeDescription> scopes,
-                                        ResourceSetPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
+                                        UmaPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
         log.trace("Check policies for scopes: '{}'", scopes);
 
         Set<String> authorizationPolicies = getAuthorizationPolicies(scopes);
