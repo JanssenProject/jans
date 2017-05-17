@@ -17,33 +17,24 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
 
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.literal.NamedLiteral;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.CDI;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.CacheControl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -158,10 +149,10 @@ public class ServerUtil {
         });
     }
 
-    public static UmaPermission convert(ResourceSetPermission p_permission, ScopeService p_umaScopeService) {
+    public static org.xdi.oxauth.model.uma.UmaPermission convert(UmaPermission p_permission, ScopeService p_umaScopeService) {
         if (p_permission != null) {
-            final UmaPermission result = new UmaPermission();
-            result.setResourceSetId(p_permission.getResourceSetId());
+            final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
+            result.setResourceSetId(p_permission.getResourceId());
             result.setScopes(p_umaScopeService.getScopeUrlsByDns(p_permission.getScopeDns()));
             result.setExpiresAt(p_permission.getExpirationDate());
             return result;

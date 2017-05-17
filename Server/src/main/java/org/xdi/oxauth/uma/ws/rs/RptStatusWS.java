@@ -13,8 +13,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.ScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
@@ -105,7 +104,7 @@ public class RptStatusWS {
                         build();
             }
 
-            final List<UmaPermission> permissions = buildStatusResponsePermissions(rpt);
+            final List<org.xdi.oxauth.model.uma.UmaPermission> permissions = buildStatusResponsePermissions(rpt);
 
             // active status
             final RptIntrospectionResponse statusResponse = new RptIntrospectionResponse();
@@ -137,7 +136,7 @@ public class RptStatusWS {
         return false;
     }
 
-    private boolean isValid(ResourceSetPermission resourceSetPermission) {
+    private boolean isValid(UmaPermission resourceSetPermission) {
         if (resourceSetPermission != null) {
             resourceSetPermission.checkExpired();
             return resourceSetPermission.isValid();
@@ -145,14 +144,14 @@ public class RptStatusWS {
         return false;
     }
 
-    private List<UmaPermission> buildStatusResponsePermissions(UmaRPT p_rpt) {
-        final List<UmaPermission> result = new ArrayList<UmaPermission>();
+    private List<org.xdi.oxauth.model.uma.UmaPermission> buildStatusResponsePermissions(UmaRPT p_rpt) {
+        final List<org.xdi.oxauth.model.uma.UmaPermission> result = new ArrayList<org.xdi.oxauth.model.uma.UmaPermission>();
         if (p_rpt != null) {
-            final List<ResourceSetPermission> rptPermissions = rptManager.getRptPermissions(p_rpt);
+            final List<UmaPermission> rptPermissions = rptManager.getRptPermissions(p_rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {
-                for (ResourceSetPermission permission : rptPermissions) {
+                for (UmaPermission permission : rptPermissions) {
                     if (isValid(permission)) {
-                        final UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
+                        final org.xdi.oxauth.model.uma.UmaPermission toAdd = ServerUtil.convert(permission, umaScopeService);
                         if (toAdd != null) {
                             result.add(toAdd);
                         }

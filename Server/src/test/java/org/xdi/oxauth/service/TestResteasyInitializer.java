@@ -48,7 +48,7 @@ public class TestResteasyInitializer extends Application {
 
         classes.add(CreateRptWS.class);
         classes.add(PermissionRegistrationWS.class);
-        classes.add(ResourceSetRegistrationWS.class);
+        classes.add(ResourceRegistrationWS.class);
         classes.add(RptPermissionAuthorizationWS.class);
         classes.add(RptStatusWS.class);
         classes.add(ScopeWS.class);

@@ -6,25 +6,23 @@
 
 package org.xdi.oxauth.model.uma.persistence;
 
-import java.util.Date;
-import java.util.List;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.oxauth.model.uma.UmaPermission;
+
+import java.util.Date;
+import java.util.List;
 
 /**
- * Registered at the AM resource set permission
- * 
- * @author Yuriy Movchan
+ * UMA permission
+ *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, date: 10/18/2012
+ * @version 2.0, date: 17/05/2017
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthUmaResourceSetPermission"})
-public class ResourceSetPermission {
+public class UmaPermission {
 
     @LdapDN
     private String dn;
@@ -41,18 +39,18 @@ public class ResourceSetPermission {
 
     // resource set permission request
     @LdapAttribute(name = "oxResourceSetId")
-    private String resourceSetId;
+    private String resourceId;
     @LdapAttribute(name = "oxAuthUmaScope")
     private List<String> scopeDns;
 
     private boolean expired;
 
-    public ResourceSetPermission() {
+    public UmaPermission() {
     }
 
-    public ResourceSetPermission(String p_resourceSetId, List<String> p_scopes, String amHost, String host, String ticket,
-			String configurationCode, Date expirationDate) {
-		this.resourceSetId = p_resourceSetId;
+    public UmaPermission(String p_resourceSetId, List<String> p_scopes, String amHost, String host, String ticket,
+                         String configurationCode, Date expirationDate) {
+		this.resourceId = p_resourceSetId;
         this.scopeDns = p_scopes;
 		this.amHost = amHost;
 		this.host = host;
@@ -85,8 +83,8 @@ public class ResourceSetPermission {
 		return !expired;
 	}
 
-	public UmaPermission getResourceSetPermissionRequest() {
-		return new UmaPermission(this.resourceSetId, this.scopeDns);
+	public org.xdi.oxauth.model.uma.UmaPermission getResourceSetPermissionRequest() {
+		return new org.xdi.oxauth.model.uma.UmaPermission(this.resourceId, this.scopeDns);
 	}
 
 	public String getAmHost() {
@@ -129,12 +127,12 @@ public class ResourceSetPermission {
 		this.expirationDate = expirationDate;
 	}
 
-    public String getResourceSetId() {
-        return resourceSetId;
+    public String getResourceId() {
+        return resourceId;
     }
 
-    public void setResourceSetId(String p_resourceSetId) {
-        resourceSetId = p_resourceSetId;
+    public void setResourceId(String p_resourceSetId) {
+        resourceId = p_resourceSetId;
     }
 
     public List<String> getScopeDns() {
@@ -150,7 +148,7 @@ public class ResourceSetPermission {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ResourceSetPermission that = (ResourceSetPermission) o;
+        UmaPermission that = (UmaPermission) o;
 
         return !(ticket != null ? !ticket.equals(that.ticket) : that.ticket != null);
 
@@ -171,7 +169,7 @@ public class ResourceSetPermission {
         sb.append(", configurationCode='").append(configurationCode).append('\'');
         sb.append(", expirationDate=").append(expirationDate);
         sb.append(", expired=").append(expired);
-        sb.append(", resourceSetId='").append(resourceSetId).append('\'');
+        sb.append(", resourceId='").append(resourceId).append('\'');
         sb.append(", scopes=").append(scopeDns);
         sb.append('}');
         return sb.toString();

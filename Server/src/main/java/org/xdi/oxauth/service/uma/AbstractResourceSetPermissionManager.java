@@ -11,8 +11,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.util.INumGenerator;
 
 /**
@@ -25,10 +24,10 @@ public abstract class AbstractResourceSetPermissionManager implements IResourceS
 	@Inject
 	private ScopeService scopeService;
 
-    public ResourceSetPermission createResourceSetPermission(String amHost, UmaPermission p_request, Date expirationDate) {
+    public UmaPermission createResourceSetPermission(String amHost, org.xdi.oxauth.model.uma.UmaPermission p_request, Date expirationDate) {
         final String ticket = UUID.randomUUID().toString();
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
-        return new ResourceSetPermission(p_request.getResourceSetId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(p_request.getScopes()),
+        return new UmaPermission(p_request.getResourceSetId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(p_request.getScopes()),
                 amHost, "", ticket, configurationCode, expirationDate);
     }
 
