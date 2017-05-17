@@ -6,29 +6,27 @@
 
 package org.xdi.oxauth.service.uma.resourceserver;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.ResourceSet;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -58,9 +56,9 @@ public class PermissionService {
     @Inject
     private ClientService clientService;
 
-    public Pair<Boolean, Response> hasEnoughPermissionsWithTicketRegistration(UmaRPT p_rpt, List<ResourceSetPermission> p_rptPermissions, RsResourceType p_resourceType, List<RsScopeType> p_scopes) {
+    public Pair<Boolean, Response> hasEnoughPermissionsWithTicketRegistration(UmaRPT p_rpt, List<UmaPermission> p_rptPermissions, RsResourceType p_resourceType, List<RsScopeType> p_scopes) {
         final Pair<Boolean, Response> result = new Pair<Boolean, Response>(false, null);
-        final ResourceSet resource = umaRsResourceService.getResource(p_resourceType);
+        final UmaResource resource = umaRsResourceService.getResource(p_resourceType);
         if (resource == null || StringUtils.isBlank(resource.getId())) {
             result.setFirst(false);
             result.setSecond(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build());
@@ -97,10 +95,10 @@ public class PermissionService {
 
     }
 
-    private boolean hasEnoughPermissions(UmaRPT p_rpt, List<ResourceSetPermission> p_rptPermissions, ResourceSet p_resource, List<RsScopeType> p_scopes) {
+    private boolean hasEnoughPermissions(UmaRPT p_rpt, List<UmaPermission> p_rptPermissions, UmaResource p_resource, List<RsScopeType> p_scopes) {
         if (p_rptPermissions != null && !p_rptPermissions.isEmpty()) {
             final List<String> scopeDns = umaRsResourceService.getScopeDns(p_scopes);
-            for (ResourceSetPermission p : p_rptPermissions) {
+            for (UmaPermission p : p_rptPermissions) {
                 if (hasAny(p, scopeDns)) {
                     return true;
                 }
@@ -109,7 +107,7 @@ public class PermissionService {
         return false;
     }
 
-    private boolean hasAny(ResourceSetPermission p_p, List<String> p_scopeDns) {
+    private boolean hasAny(UmaPermission p_p, List<String> p_scopeDns) {
         final List<String> scopeDns = p_p.getScopeDns();
         if (scopeDns != null && !scopeDns.isEmpty() && p_scopeDns != null && !p_scopeDns.isEmpty()) {
             for (String scopeDn : scopeDns) {
@@ -132,15 +130,15 @@ public class PermissionService {
         return calendar.getTime();
     }
 
-    private String registerPermission(UmaRPT p_rpt, ResourceSet p_resource, List<RsScopeType> p_scopes) {
+    private String registerPermission(UmaRPT p_rpt, UmaResource p_resource, List<RsScopeType> p_scopes) {
         final Date expirationDate = rptExpirationDate();
 
-        final UmaPermission r = new UmaPermission();
+        final org.xdi.oxauth.model.uma.UmaPermission r = new org.xdi.oxauth.model.uma.UmaPermission();
         r.setResourceSetId(p_resource.getId());
         r.setExpiresAt(expirationDate);
 
         final String host = appConfiguration.getIssuer();
-        final ResourceSetPermission permission = resourceSetPermissionManager.createResourceSetPermission(
+        final UmaPermission permission = resourceSetPermissionManager.createResourceSetPermission(
                 host, r, expirationDate);
         // IMPORTANT : set scope dns before persistence
         permission.setScopeDns(umaRsResourceService.getScopeDns(p_scopes));

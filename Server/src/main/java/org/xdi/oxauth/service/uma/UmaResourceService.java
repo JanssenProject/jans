@@ -6,24 +6,22 @@
 
 package org.xdi.oxauth.service.uma;
 
-import java.util.Collections;
-import java.util.List;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.base.Preconditions;
+import com.unboundid.ldap.sdk.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.persistence.ResourceSet;
+import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.util.StringHelper;
 
-import com.google.common.base.Preconditions;
-import com.unboundid.ldap.sdk.Filter;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Provides operations with resource set descriptions
@@ -34,7 +32,7 @@ import com.unboundid.ldap.sdk.Filter;
  */
 @Stateless
 @Named
-public class ResourceSetService {
+public class UmaResourceService {
 
     @Inject
     private Logger log;
@@ -50,49 +48,49 @@ public class ResourceSetService {
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
-        branch.setOrganizationalUnitName("uma_resource_sets");
+        branch.setOrganizationalUnitName("uma_resource");
         branch.setDn(getDnForResourceSet(null));
 
         ldapEntryManager.persist(branch);
     }
 
     /**
-     * Add new resource set description entry
+     * Add new resource description entry
      *
-     * @param resourceSet resourceSet
+     * @param resource resource
      */
-    public void addResourceSet(ResourceSet resourceSet) {
-        validate(resourceSet);
-        ldapEntryManager.persist(resourceSet);
+    public void addResource(UmaResource resource) {
+        validate(resource);
+        ldapEntryManager.persist(resource);
     }
 
-    public void validate(ResourceSet resourceSet) {
+    public void validate(UmaResource resourceSet) {
         Preconditions.checkArgument(StringUtils.isNotBlank(resourceSet.getName()), "Name is required for resource set.");
         Preconditions.checkArgument(resourceSet.getScopes() != null && !resourceSet.getScopes().isEmpty(), "Scope must be specified for resource set.");
-        prepareResourceSetsBranch();
+        prepareResourcesBranch();
     }
 
     /**
-     * Update resource set description entry
+     * Update resource description entry
      *
-     * @param resourceSet resourceSet
+     * @param resource resource
      */
-    public void updateResourceSet(ResourceSet resourceSet) {
-        validate(resourceSet);
-        ldapEntryManager.merge(resourceSet);
+    public void updateResourceSet(UmaResource resource) {
+        validate(resource);
+        ldapEntryManager.merge(resource);
     }
 
     /**
-     * Remove resource set description entry
+     * Remove resource description entry
      *
-     * @param resourceSet resourceSet
+     * @param resource resource
      */
-    public void remove(ResourceSet resourceSet) {
-        ldapEntryManager.remove(resourceSet);
+    public void remove(UmaResource resource) {
+        ldapEntryManager.remove(resource);
     }
 
     /**
-     * Remove resource set description entry by ID.
+     * Remove resource description entry by ID.
      *
      * @param rsid resourceSet ID
      */
@@ -100,8 +98,8 @@ public class ResourceSetService {
         ldapEntryManager.remove(getResourceSetById(rsid));
     }
 
-    public void remove(List<ResourceSet> resourceSet) {
-        for (ResourceSet resource : resourceSet) {
+    public void remove(List<UmaResource> resourceSet) {
+        for (UmaResource resource : resourceSet) {
             remove(resource);
         }
     }
@@ -111,22 +109,22 @@ public class ResourceSetService {
      *
      * @return List of resource set descriptions
      */
-    public List<ResourceSet> getAllResourceSets(String... ldapReturnAttributes) {
-        return ldapEntryManager.findEntries(getBaseDnForResourceSet(), ResourceSet.class, ldapReturnAttributes, null);
+    public List<UmaResource> getAllResourceSets(String... ldapReturnAttributes) {
+        return ldapEntryManager.findEntries(getBaseDnForResourceSet(), UmaResource.class, ldapReturnAttributes, null);
     }
 
     /**
-     * Get all resource set descriptions
+     * Get all resource descriptions
      *
-     * @return List of resource set descriptions
+     * @return List of resource descriptions
      */
-    public List<ResourceSet> getResourceSetsByAssociatedClient(String p_associatedClientDn) {
+    public List<UmaResource> getResourcesByAssociatedClient(String associatedClientDn) {
         try {
-            prepareResourceSetsBranch();
+            prepareResourcesBranch();
 
-            if (StringUtils.isNotBlank(p_associatedClientDn)) {
-                final Filter filter = Filter.create(String.format("&(oxAssociatedClient=%s)", p_associatedClientDn));
-                return ldapEntryManager.findEntries(getBaseDnForResourceSet(), ResourceSet.class, filter);
+            if (StringUtils.isNotBlank(associatedClientDn)) {
+                final Filter filter = Filter.create(String.format("&(oxAssociatedClient=%s)", associatedClientDn));
+                return ldapEntryManager.findEntries(getBaseDnForResourceSet(), UmaResource.class, filter);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -135,13 +133,13 @@ public class ResourceSetService {
     }
 
     /**
-     * Get resource set descriptions by example
+     * Get resource descriptions by example
      *
-     * @param resourceSet ResourceSet
+     * @param resource ResourceSet
      * @return ResourceSet which conform example
      */
-    public List<ResourceSet> findResourceSets(ResourceSet resourceSet) {
-        return ldapEntryManager.findEntries(resourceSet);
+    public List<UmaResource> findResourceSets(UmaResource resource) {
+        return ldapEntryManager.findEntries(resource);
     }
 
     public boolean containsBranch() {
@@ -153,19 +151,19 @@ public class ResourceSetService {
      *
      * @return True if resource set description with specified attributes exist
      */
-    public boolean containsResourceSet(ResourceSet resourceSet) {
+    public boolean containsResourceSet(UmaResource resourceSet) {
         return ldapEntryManager.contains(resourceSet);
     }
 
-    public ResourceSet getResourceSetById(String id) {
+    public UmaResource getResourceSetById(String id) {
 
-        prepareResourceSetsBranch();
+        prepareResourcesBranch();
 
-        ResourceSet ldapResourceSet = new ResourceSet();
+        UmaResource ldapResourceSet = new UmaResource();
         ldapResourceSet.setDn(getBaseDnForResourceSet());
         ldapResourceSet.setId(id);
 
-        final List<ResourceSet> result = findResourceSets(ldapResourceSet);
+        final List<UmaResource> result = findResourceSets(ldapResourceSet);
         if (result.size() == 0) {
             log.error("Failed to find resource set with id: " + id);
             errorResponseFactory.throwUmaNotFoundException();
@@ -176,21 +174,21 @@ public class ResourceSetService {
         return result.get(0);
     }
 
-    private void prepareResourceSetsBranch() {
-        // Create resource set description branch if needed
+    private void prepareResourcesBranch() {
+        // Create resource description branch if needed
         if (!containsBranch()) {
             addBranch();
         }
     }
 
     /**
-     * Get resource set description by DN
+     * Get resource description by DN
      *
-     * @param dn Resource set description DN
-     * @return Resource set description
+     * @param dn Resource description DN
+     * @return Resource description
      */
-    public ResourceSet getResourceSetByDn(String dn) {
-        return ldapEntryManager.find(ResourceSet.class, dn);
+    public UmaResource getResourceByDn(String dn) {
+        return ldapEntryManager.find(UmaResource.class, dn);
     }
 
     /**

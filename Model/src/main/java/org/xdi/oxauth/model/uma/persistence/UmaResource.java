@@ -15,13 +15,13 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * Resource set description LDAP model
+ * Resource description.
  *
- * @author Yuriy Movchan Date: 10/03/2012
+ * @author Yuriy Zabrovarnyy Date: 10/03/2012
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthUmaResourceSet"})
-public class ResourceSet {
+public class UmaResource {
 
     @LdapDN
     private String dn;

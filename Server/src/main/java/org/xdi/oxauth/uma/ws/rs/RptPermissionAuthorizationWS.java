@@ -16,7 +16,7 @@ import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.ResourceSetPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
@@ -111,7 +111,7 @@ public class RptPermissionAuthorizationWS {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
 
-        final ResourceSetPermission resourceSetPermission = resourceSetPermissionManager.getResourceSetPermissionByTicket(rptAuthorizationRequest.getTicket());
+        final UmaPermission resourceSetPermission = resourceSetPermissionManager.getResourceSetPermissionByTicket(rptAuthorizationRequest.getTicket());
 
         // Validate resource set permission
         umaValidationService.validateResourceSetPermission(resourceSetPermission);
@@ -128,7 +128,7 @@ public class RptPermissionAuthorizationWS {
                 .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
     }
 
-    private void invalidateTicket(ResourceSetPermission resourceSetPermission) {
+    private void invalidateTicket(UmaPermission resourceSetPermission) {
         try {
             resourceSetPermission.setAmHost("invalidated"); // invalidate ticket and persist
             ldapEntryManager.merge(resourceSetPermission);
