@@ -2,9 +2,9 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.service.ClientFactory;
 import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -68,6 +68,7 @@ public class ValidationService {
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
         final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
         final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
+        final HttpService httpService = ServerLauncher.getInjector().getInstance(HttpService.class);
 
         final Rp rp = rpService.getRp(params.getOxdId());
         if (StringUtils.isBlank(rp.getSetupOxdId())) {
@@ -81,7 +82,8 @@ public class ValidationService {
             throw new ErrorResponseException(ErrorResponseCode.NO_SETUP_CLIENT_FOR_OXD_ID);
         }
 
-        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(discoveryService.getConnectDiscoveryResponseByOxdId(params.getOxdId()).getIntrospectionEndpoint());
+        final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(params.getOxdId()).getIntrospectionEndpoint();
+        final IntrospectionService introspectionService = ProxyFactory.create(IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
         final IntrospectionResponse introspectionResponse = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(params.getOxdId()).getToken(), accessToken);
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + setupRp.getClientId());
         if (introspectionResponse.getClientId().equals(setupRp.getClientId())) {
