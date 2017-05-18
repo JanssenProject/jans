@@ -24,7 +24,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.ResourceSetResponse;
+import org.xdi.oxauth.model.uma.UmaResourceResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -43,7 +43,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 	private URI url;
 
 	private static Token pat;
-	private static ResourceSetResponse resourceSet;
+	private static UmaResourceResponse resourceSet;
 	private static String umaRegisterResourcePath;
 	private static String umaPermissionPath;
 
@@ -63,7 +63,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 
 	@Test(dependsOnMethods = { "init_" })
 	public void init() {
-		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
+		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
 		UmaTestUtil.assert_(resourceSet);
 	}
 
@@ -71,7 +71,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 	@Parameters({ "umaAmHost", "umaHost" })
 	public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
 		final UmaPermission r = new UmaPermission();
-		r.setResourceSetId(resourceSet.getId());
+		r.setResourceId(resourceSet.getId());
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
 		final PermissionTicket ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
@@ -91,7 +91,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 			String json = null;
 			try {
 				final UmaPermission r = new UmaPermission();
-				r.setResourceSetId(resourceSet.getId() + "x");
+				r.setResourceId(resourceSet.getId() + "x");
 
 				json = ServerUtil.createJsonMapper().writeValueAsString(r);
 			} catch (IOException e) {

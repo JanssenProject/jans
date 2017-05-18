@@ -16,10 +16,9 @@ import javax.ws.rs.Produces;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 22/04/2013
  */
 
-public interface ScopeService {
+public interface UmaScopeService {
 
     @GET
     @Path("{id}")

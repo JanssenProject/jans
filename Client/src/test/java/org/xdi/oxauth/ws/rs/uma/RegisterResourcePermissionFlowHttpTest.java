@@ -12,11 +12,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.PermissionRegistrationService;
+import org.xdi.oxauth.client.uma.UmaPermissionService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
@@ -31,17 +30,17 @@ import static org.testng.Assert.*;
  *
  * @author Yuriy Movchan Date: 10/19/2012
  */
-public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
+public class RegisterResourcePermissionFlowHttpTest extends BaseTest {
 
     protected UmaConfiguration metadataConfiguration;
 
-    protected RegisterResourceSetFlowHttpTest umaRegisterResourceSetFlowHttpTest;
+    protected RegisterResourceFlowHttpTest umaRegisterResourceSetFlowHttpTest;
     protected String ticketForFullAccess;
 
-    public RegisterResourceSetPermissionFlowHttpTest() {
+    public RegisterResourcePermissionFlowHttpTest() {
     }
 
-    public RegisterResourceSetPermissionFlowHttpTest(UmaConfiguration metadataConfiguration) {
+    public RegisterResourcePermissionFlowHttpTest(UmaConfiguration metadataConfiguration) {
         this.metadataConfiguration = metadataConfiguration;
     }
 
@@ -54,7 +53,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
             UmaTestUtil.assert_(this.metadataConfiguration);
         }
 
-        this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceSetFlowHttpTest(this.metadataConfiguration);
+        this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
         this.umaRegisterResourceSetFlowHttpTest.setAuthorizationEndpoint(authorizationEndpoint);
         this.umaRegisterResourceSetFlowHttpTest.setTokenEndpoint(tokenEndpoint);
         this.umaRegisterResourceSetFlowHttpTest.init(umaMetaDataUrl, umaPatClientId, umaPatClientSecret);
@@ -78,17 +77,17 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     }
 
     public String registerResourceSetPermission(final String umaAmHost, String resourceSetId, List<String> scopes) throws Exception {
-        PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().
-                createResourceSetPermissionRegistrationService(this.metadataConfiguration);
+        UmaPermissionService resourceSetPermissionRegistrationService = UmaClientFactory.instance().
+                createPermissionService(this.metadataConfiguration);
 
         // Register permissions for resource set
         UmaPermission resourceSetPermissionRequest = new UmaPermission();
-        resourceSetPermissionRequest.setResourceSetId(resourceSetId);
+        resourceSetPermissionRequest.setResourceId(resourceSetId);
         resourceSetPermissionRequest.setScopes(scopes);
 
         PermissionTicket t = null;
         try {
-            t = resourceSetPermissionRegistrationService.registerResourceSetPermission(
+            t = resourceSetPermissionRegistrationService.registerPermission(
                     "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, resourceSetPermissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
@@ -108,17 +107,17 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     public void testRegisterResourceSetPermissionForInvalidResource(final String umaAmHost) throws Exception {
         showTitle("testRegisterResourceSetPermissionForInvalidResource");
 
-        PermissionRegistrationService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createResourceSetPermissionRegistrationService(this.metadataConfiguration);
+        UmaPermissionService resourceSetPermissionRegistrationService = UmaClientFactory.instance().createPermissionService(this.metadataConfiguration);
 
         // Register permissions for resource set
         UmaPermission resourceSetPermissionRequest = new UmaPermission();
-        resourceSetPermissionRequest.setResourceSetId(this.umaRegisterResourceSetFlowHttpTest.resourceSetId + "1");
+        resourceSetPermissionRequest.setResourceId(this.umaRegisterResourceSetFlowHttpTest.resourceSetId + "1");
         resourceSetPermissionRequest.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
 
         PermissionTicket resourceSetPermissionTiket = null;
         try {
-            resourceSetPermissionTiket = resourceSetPermissionRegistrationService.registerResourceSetPermission(
+            resourceSetPermissionTiket = resourceSetPermissionRegistrationService.registerPermission(
                     "Bearer " + this.umaRegisterResourceSetFlowHttpTest.m_pat.getAccessToken(), umaAmHost, resourceSetPermissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
@@ -142,7 +141,7 @@ public class RegisterResourceSetPermissionFlowHttpTest extends BaseTest {
     	ResourceSetPermissionTiket resourceSetPermissionTiket = null;
 		try {
 			resourceSetPermissionTiket = resourceSetPermissionRegistrationService.getResourceSetPermission(
-					"Bearer " + this.umaRegisterResourceSetFlowHttpTest.umaPatTokenAwareHttpTest.patToken, umaAmHost, "photoz.example.com", "5287.8C53.4BAB.5992.439D.7818.D36D.44CC.1350670758102");
+					"Bearer " + this.umaRegisterResourceFlowHttpTest.umaPatTokenAwareHttpTest.patToken, umaAmHost, "photoz.example.com", "5287.8C53.4BAB.5992.439D.7818.D36D.44CC.1350670758102");
 		} catch (ClientResponseFailure ex) {
 			System.err.println(ex.getResponse().getEntity(String.class));
 			throw ex;

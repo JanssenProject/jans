@@ -40,7 +40,7 @@ public class UmaPermission implements Serializable {
 
     @ApiModelProperty(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered."
             , required = true)
-    private String resourceSetId;
+    private String resourceId;
     @ApiModelProperty(value = "An array referencing one or more identifiers of scopes to which access is needed for this resource set. Each scope identifier MUST correspond to a scope that was registered by this resource server for the referenced resource set."
             , required = true)
     private List<String> scopes;
@@ -51,19 +51,19 @@ public class UmaPermission implements Serializable {
     public UmaPermission() {
     }
 
-    public UmaPermission(String p_resourceSetId, List<String> p_scopes) {
-        resourceSetId = p_resourceSetId;
-        scopes = p_scopes;
+    public UmaPermission(String resourceId, List<String> scopes) {
+        this.resourceId = resourceId;
+        this.scopes = scopes;
     }
 
-    @JsonProperty(value = "resource_set_id")
-    @XmlElement(name = "resource_set_id")
-    public String getResourceSetId() {
-        return resourceSetId;
+    @JsonProperty(value = "resource_id")
+    @XmlElement(name = "resource_id")
+    public String getResourceId() {
+        return resourceId;
     }
 
-    public void setResourceSetId(String resourceSetId) {
-        this.resourceSetId = resourceSetId;
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
     }
 
     @JsonProperty(value = "nbf")
@@ -109,8 +109,8 @@ public class UmaPermission implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("ResourceSetPermissionRequest");
-        sb.append("{resourceSetId='").append(resourceSetId).append('\'');
+        sb.append("UmaPermission");
+        sb.append("{resourceId='").append(resourceId).append('\'');
         sb.append(", scopes=").append(scopes);
         sb.append(", expiresAt=").append(expiresAt);
         sb.append(", issuedAt=").append(issuedAt);

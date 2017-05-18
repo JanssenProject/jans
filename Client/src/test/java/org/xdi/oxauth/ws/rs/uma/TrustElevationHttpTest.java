@@ -3,8 +3,8 @@ package org.xdi.oxauth.ws.rs.uma;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
-import org.xdi.oxauth.client.uma.RptStatusService;
+import org.xdi.oxauth.client.uma.UmaRptAuthorizationService;
+import org.xdi.oxauth.client.uma.UmaRptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.UmaConfiguration;
@@ -23,11 +23,11 @@ public class TrustElevationHttpTest extends BaseTest {
 
     protected UmaConfiguration metadataConfiguration;
 
-    protected RegisterResourceSetFlowHttpTest umaRegisterResourceSetFlowHttpTest;
-    protected RegisterResourceSetPermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
+    protected RegisterResourceFlowHttpTest umaRegisterResourceSetFlowHttpTest;
+    protected RegisterResourcePermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
 
-    protected RptStatusService rptStatusService;
-    protected RptAuthorizationRequestService rptPermissionAuthorizationService;
+    protected UmaRptStatusService rptStatusService;
+    protected UmaRptAuthorizationService rptPermissionAuthorizationService;
 
     protected Token m_aat;
     protected Token m_pat;
@@ -44,8 +44,8 @@ public class TrustElevationHttpTest extends BaseTest {
         this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
         UmaTestUtil.assert_(this.metadataConfiguration);
 
-        this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceSetFlowHttpTest(this.metadataConfiguration);
-        this.umaRegisterResourceSetPermissionFlowHttpTest = new RegisterResourceSetPermissionFlowHttpTest(this.metadataConfiguration);
+        this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
+        this.umaRegisterResourceSetPermissionFlowHttpTest = new RegisterResourcePermissionFlowHttpTest(this.metadataConfiguration);
 
         this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadataConfiguration);
         this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadataConfiguration);
@@ -68,7 +68,7 @@ public class TrustElevationHttpTest extends BaseTest {
         RptIntrospectionResponse rptStatus = this.rptStatusService.requestRptStatus("Bearer " + m_pat.getAccessToken(),
                 this.umaObtainRptTokenFlowHttpTest.rptToken, "");
 
-        RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess);
+        RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourcePermissionFlowHttpTest.ticketForFullAccess);
 
         try {
             RptAuthorizationResponse authorizationResponse = this.rptPermissionAuthorizationService.requestRptPermissionAuthorization(

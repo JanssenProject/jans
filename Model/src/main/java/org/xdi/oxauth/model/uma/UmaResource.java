@@ -18,22 +18,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
- * Resource set that needs protection by registering a resource set description
- * at the AM.
+ * Resource that needs protection by registering a resource description at the AS.
  *
- * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
- *         Date: 10/03/2012
+ *         Date: 17/05/2017
  */
 
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({"name", "uri", "type", "scopes", "icon_uri"})
 @JsonIgnoreProperties(value = {"type"})
-//@JsonRootName(value = "resourceSet")
 @XmlRootElement
 @ApiModel(value = "The resource server defines a resource set that the authorization server needs to be aware of by registering a resource set description at the authorization server. This registration process results in a unique identifier for the resource set that the resource server can later use for managing its description.")
-public class ResourceSet {
+public class UmaResource {
 
     @ApiModelProperty(value = " A human-readable string describing a set of one or more resources. This name MAY be used by the authorization server in its resource owner user interface for the resource owner."
               , required = true)
@@ -61,7 +58,7 @@ public class ResourceSet {
         return uri;
     }
 
-    public ResourceSet setUri(String uri) {
+    public UmaResource setUri(String uri) {
         this.uri = uri;
         return this;
     }
@@ -72,7 +69,7 @@ public class ResourceSet {
         return type;
     }
 
-    public ResourceSet setType(String p_type) {
+    public UmaResource setType(String p_type) {
         type = p_type;
         return this;
     }
@@ -83,7 +80,7 @@ public class ResourceSet {
         return name;
     }
 
-    public ResourceSet setName(String name) {
+    public UmaResource setName(String name) {
         this.name = name;
         return this;
     }
@@ -94,7 +91,7 @@ public class ResourceSet {
         return iconUri;
     }
 
-    public ResourceSet setIconUri(String iconUri) {
+    public UmaResource setIconUri(String iconUri) {
         this.iconUri = iconUri;
         return this;
     }
@@ -105,21 +102,19 @@ public class ResourceSet {
         return scopes;
     }
 
-    public ResourceSet setScopes(List<String> scopes) {
+    public UmaResource setScopes(List<String> scopes) {
         this.scopes = scopes;
         return this;
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("ResourceSet");
-        sb.append("{name='").append(name).append('\'');
-        sb.append(", uri='").append(uri).append('\'');
-        sb.append(", type='").append(type).append('\'');
-        sb.append(", scopes=").append(scopes);
-        sb.append(", iconUri='").append(iconUri).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "UmaResource{" +
+                "name='" + name + '\'' +
+                ", uri='" + uri + '\'' +
+                ", iconUri='" + iconUri + '\'' +
+                ", scopes=" + scopes +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

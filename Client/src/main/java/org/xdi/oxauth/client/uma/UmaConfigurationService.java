@@ -14,15 +14,13 @@ import javax.ws.rs.Produces;
 
 /**
  * The endpoint at which the requester can obtain UMA metadata configuration.
- * 
- * @author Yuriy Movchan
- * @author Yuriy Zabrovarnyy
  *
+ * @author Yuriy Zabrovarnyy
  */
 public interface UmaConfigurationService {
 
 	@GET
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public UmaConfiguration getMetadataConfiguration();
+	UmaConfiguration getMetadataConfiguration();
 
 }

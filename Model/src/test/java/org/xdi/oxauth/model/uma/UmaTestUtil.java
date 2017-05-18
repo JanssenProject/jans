@@ -55,22 +55,22 @@ public class UmaTestUtil {
         //assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
     }
 
-    public static void assert_(ResourceSetResponse p_status) {
-        assertNotNull(p_status, "Resource set status is null");
-        assertNotNull(p_status.getId(), "Resource set description id is null");
+    public static void assert_(UmaResourceResponse status) {
+        assertNotNull(status, "Resource set status is null");
+        assertNotNull(status.getId(), "Resource set description id is null");
     }
 
-    public static ResourceSet createResourceSet() {
-        final ResourceSet resourceSet = new ResourceSet();
-        resourceSet.setName("Server Photo Album");
-        resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-        resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
-        return resourceSet;
+    public static UmaResource createResource() {
+        final UmaResource resource = new UmaResource();
+        resource.setName("Server Photo Album");
+        resource.setIconUri("http://www.example.com/icons/flower.png");
+        resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+        return resource;
     }
 
-    public static void assert_(PermissionTicket p_t) {
-        assertNotNull(p_t, "Ticket is null");
-        assertTrue(StringUtils.isNotBlank(p_t.getTicket()), "Ticket is empty");
+    public static void assert_(PermissionTicket ticket) {
+        assertNotNull(ticket, "Ticket is null");
+        assertTrue(StringUtils.isNotBlank(ticket.getTicket()), "Ticket is empty");
     }
 
     public static void assert_(RPTResponse p_response) {
