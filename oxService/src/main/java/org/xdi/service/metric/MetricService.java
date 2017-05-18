@@ -69,7 +69,7 @@ public abstract class MetricService implements Serializable {
 	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-    public void init(int metricInterval) {
+    public void initTimer(int metricInterval) {
     	this.metricRegistry = new MetricRegistry();
     	this.registeredMetricTypes = new HashSet<MetricType>();
 

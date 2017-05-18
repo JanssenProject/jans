@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.event.Event;
-import javax.enterprise.event.ObservesAsync;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.ServletContext;
@@ -41,8 +41,11 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.PythonService;
+import org.xdi.service.cdi.event.Scheduled;
+import org.xdi.service.cdi.event.UpdateScriptEvent;
 import org.xdi.service.custom.inject.ReloadScript;
-import org.xdi.service.custom.inject.UpdateScript;
+import org.xdi.service.timer.event.TimerEvent;
+import org.xdi.service.timer.schedule.TimerSchedule;
 import org.xdi.util.StringHelper;
 
 /**
@@ -65,12 +68,15 @@ public class CustomScriptManager implements Serializable {
 	protected Logger log;
 
 	@Inject
+	private Event<TimerEvent> timerEvent;
+
+	@Inject
 	private PythonService pythonService;
 	
 	@Inject
 	protected AbstractCustomScriptService customScriptService;
 
-	@Inject
+	@Inject @ReloadScript
 	private Event<String> event;
 
 	protected List<CustomScriptType> supportedCustomScriptTypes;
@@ -81,19 +87,21 @@ public class CustomScriptManager implements Serializable {
 
 	private Map<CustomScriptType, List<CustomScriptConfiguration>> customScriptConfigurationsByScriptType;
 
-    public void init(List<CustomScriptType> supportedCustomScriptTypes) {
+    public void initTimer(List<CustomScriptType> supportedCustomScriptTypes) {
 		this.supportedCustomScriptTypes = supportedCustomScriptTypes;
 
 		this.isActive = new AtomicBoolean(false);
 		this.lastFinishedTime = System.currentTimeMillis();
 
+		final int delay = 30;
+		final int interval = DEFAULT_INTERVAL;
+
 		reload();
 
-// TODO: CDI
-//		Events.instance().raiseTimedEvent(EVENT_TYPE, new TimerSchedule(1 * 60 * 1000L, DEFAULT_INTERVAL * 1000L));
+		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new UpdateScriptEvent(), Scheduled.Literal.INSTANCE));
     }
 
-	public void reloadTimerEvent(@ObservesAsync @UpdateScript String event) {
+	public void reloadTimerEvent(@Observes @Scheduled UpdateScriptEvent updateScriptEvent) {
 		if (this.isActive.get()) {
 			return;
 		}
@@ -129,7 +137,7 @@ public class CustomScriptManager implements Serializable {
 		boolean modified = reloadImpl();
 		
 		if (modified) {
-			event.select(ReloadScript.Literal.INSTANCE).fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
+			event.fire(CUSTOM_SCRIPT_MODIFIED_EVENT_TYPE);
 		}
 	}
 

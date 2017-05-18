@@ -162,6 +162,15 @@ public class AppConfiguration implements Configuration, Serializable {
     
     private String loggingLevel;
 
+	private String shibbolethVersion;
+	private String shibboleth3IdpRootDir;
+	private String shibboleth3SpConfDir;
+	private String organizationName;
+	private String idp3SigningCert;
+	private String idp3EncryptionCert;
+
+	private int metricReporterInterval;
+
 	public boolean isOxIncommonFlag() {
 		return oxIncommonFlag;
 	}
@@ -169,13 +178,6 @@ public class AppConfiguration implements Configuration, Serializable {
 	public void setOxIncommonFlag(boolean oxIncommonFlag) {
 		this.oxIncommonFlag = oxIncommonFlag;
 	}
-
-	private String shibbolethVersion;
-	private String shibboleth3IdpRootDir;
-	private String shibboleth3SpConfDir;
-	private String organizationName;
-	private String idp3SigningCert;
-	private String idp3EncryptionCert;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -891,6 +893,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setLoggingLevel(String loggingLevel) {
 		this.loggingLevel = loggingLevel;
+	}
+
+	public int getMetricReporterInterval() {
+		return metricReporterInterval;
+	}
+
+	public void setMetricReporterInterval(int metricReporterInterval) {
+		this.metricReporterInterval = metricReporterInterval;
 	}
 
 }
