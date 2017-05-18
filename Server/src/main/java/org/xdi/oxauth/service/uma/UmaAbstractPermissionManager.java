@@ -19,15 +19,15 @@ import org.xdi.util.INumGenerator;
  * @version 0.9, 11/02/2013
  */
 
-public abstract class AbstractResourceSetPermissionManager implements IResourceSetPermissionManager {
+public abstract class UmaAbstractPermissionManager implements IPermissionManager {
 	
 	@Inject
 	private ScopeService scopeService;
 
-    public UmaPermission createResourceSetPermission(String amHost, org.xdi.oxauth.model.uma.UmaPermission p_request, Date expirationDate) {
+    public UmaPermission createPermission(String amHost, org.xdi.oxauth.model.uma.UmaPermission permissionRequest, Date expirationDate) {
         final String ticket = UUID.randomUUID().toString();
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
-        return new UmaPermission(p_request.getResourceSetId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(p_request.getScopes()),
+        return new UmaPermission(permissionRequest.getResourceId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(permissionRequest.getScopes()),
                 amHost, "", ticket, configurationCode, expirationDate);
     }
 

@@ -16,16 +16,17 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 
 /**
- * The endpoint at which the requester asks for authorizationto have a new permission.
+ * The endpoint at which the requester asks for RPT authorization.
  * 
- * @author Yuriy Movchan Date: 10/25/2012
+ * @author Yuriy Zabrovarnyy
  */
-public interface RptAuthorizationRequestService {
+public interface UmaRptAuthorizationService {
 
 	@POST
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public RptAuthorizationResponse requestRptPermissionAuthorization(@HeaderParam("Authorization") String authorization,
-			@HeaderParam("Host") String amHost, RptAuthorizationRequest rptAuthorizationRequest);
+	RptAuthorizationResponse requestRptAuthorization(@HeaderParam("Authorization") String authorization,
+													 @HeaderParam("Host") String amHost,
+													 RptAuthorizationRequest rptAuthorizationRequest);
 
 }

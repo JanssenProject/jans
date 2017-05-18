@@ -7,9 +7,8 @@
 package org.xdi.oxauth.client.uma;
 
 import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
+import org.xdi.oxauth.model.uma.UmaPermission;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
@@ -28,13 +27,13 @@ import javax.ws.rs.Produces;
  * requester in its response.
  * 
  */
-public interface PermissionRegistrationService {
+public interface UmaPermissionService {
 
 	@POST
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	public PermissionTicket registerResourceSetPermission(
-            @HeaderParam("Authorization") String authorization,
-            @HeaderParam("Host") String amHost,
-			UmaPermission resourceSetPermissionRequest);
+	PermissionTicket registerPermission(
+			@HeaderParam("Authorization") String authorization,
+			@HeaderParam("Host") String amHost,
+			UmaPermission permission);
 }

@@ -33,9 +33,9 @@ import java.util.List;
  */
 @Stateless
 @Named
-public class ResourceSetPermissionManager extends AbstractResourceSetPermissionManager {
+public class UmaPermissionManager extends UmaAbstractPermissionManager {
 
-    private static final String ORGUNIT_OF_RESOURCE_SET_PERMISSION = "uma_resource_set_permission";
+    private static final String ORGUNIT_OF_RESOURCE_PERMISSION = "uma_resource_set_permission";
 
     @Inject
     private Logger log;
@@ -51,25 +51,25 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     }
 
     public static String getBranchDn(String clientDn) {
-        return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_SET_PERMISSION, clientDn);
+        return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_PERMISSION, clientDn);
     }
 
     @Override
-    public void addResourceSetPermission(UmaPermission resourceSetPermission, String clientDn) {
+    public void addPermission(UmaPermission permission, String clientDn) {
         try {
             addBranchIfNeeded(clientDn);
-            resourceSetPermission.setDn(getDn(clientDn, resourceSetPermission.getTicket()));
-            ldapEntryManager.persist(resourceSetPermission);
+            permission.setDn(getDn(clientDn, permission.getTicket()));
+            ldapEntryManager.persist(permission);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
     }
 
     @Override
-    public UmaPermission getResourceSetPermissionByTicket(String p_ticket) {
+    public UmaPermission getPermissionByTicket(String ticket) {
         try {
             final String baseDn = staticConfiguration.getBaseDn().getClients();
-            final Filter filter = Filter.create(String.format("&(oxTicket=%s)", p_ticket));
+            final Filter filter = Filter.create(String.format("&(oxTicket=%s)", ticket));
             final List<UmaPermission> entries = ldapEntryManager.findEntries(baseDn, UmaPermission.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
@@ -81,7 +81,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     }
 
     @Override
-    public String getResourceSetPermissionTicketByConfigurationCode(String configurationCode, String clientDn) {
+    public String getPermissionTicketByConfigurationCode(String configurationCode, String clientDn) {
         final UmaPermission permission = getResourceSetPermissionByConfigurationCode(configurationCode, clientDn);
         if (permission != null) {
             return permission.getTicket();
@@ -103,9 +103,9 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     }
 
     @Override
-    public void deleteResourceSetPermission(String p_ticket) {
+    public void deletePermission(String p_ticket) {
         try {
-            final UmaPermission permission = getResourceSetPermissionByTicket(p_ticket);
+            final UmaPermission permission = getPermissionByTicket(p_ticket);
             if (permission != null) {
                 ldapEntryManager.remove(permission);
             }
@@ -115,7 +115,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
     }
 
     @Override
-    public void cleanupResourceSetPermissions(final Date now) {
+    public void cleanupPermissions(final Date now) {
         BatchOperation<UmaPermission> resourceSetPermissionBatchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
             @Override
             protected List<UmaPermission> getChunkOrNull(int chunkSize) {
@@ -147,7 +147,7 @@ public class ResourceSetPermissionManager extends AbstractResourceSetPermissionM
 
     public void addBranch(String clientDn) {
         final SimpleBranch branch = new SimpleBranch();
-        branch.setOrganizationalUnitName(ORGUNIT_OF_RESOURCE_SET_PERMISSION);
+        branch.setOrganizationalUnitName(ORGUNIT_OF_RESOURCE_PERMISSION);
         branch.setDn(getBranchDn(clientDn));
         ldapEntryManager.persist(branch);
     }

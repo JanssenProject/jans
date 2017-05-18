@@ -16,8 +16,8 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.ResourceSet;
-import org.xdi.oxauth.model.uma.ResourceSetResponse;
+import org.xdi.oxauth.model.uma.UmaResource;
+import org.xdi.oxauth.model.uma.UmaResourceResponse;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
@@ -33,7 +33,7 @@ public class RegisterResourceSetWSTest extends BaseTest {
 	private URI url;
 
 	private static Token pat;
-	private static ResourceSetResponse resourceSetStatus;
+	private static UmaResourceResponse resourceSetStatus;
 	private static String umaRegisterResourcePath;
 
 	@Test
@@ -49,19 +49,19 @@ public class RegisterResourceSetWSTest extends BaseTest {
 	@Test(dependsOnMethods = { "init" })
 	public void testRegisterResourceSet() throws Exception {
 		resourceSetStatus = TUma.registerResourceSet(url, pat, umaRegisterResourcePath,
-				UmaTestUtil.createResourceSet());
+				UmaTestUtil.createResource());
 		UmaTestUtil.assert_(resourceSetStatus);
 	}
 
 	@Test(dependsOnMethods = { "testRegisterResourceSet" })
 	public void testModifyResourceSet() throws Exception {
-		final ResourceSet resourceSet = new ResourceSet();
+		final UmaResource resourceSet = new UmaResource();
 		resourceSet.setName("Server Photo Album 2");
 		resourceSet.setIconUri("http://www.example.com/icons/flower.png");
 		resourceSet.setScopes(
 				Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-		final ResourceSetResponse status = TUma.modifyResourceSet(url, pat, umaRegisterResourcePath,
+		final UmaResourceResponse status = TUma.modifyResourceSet(url, pat, umaRegisterResourcePath,
 				resourceSetStatus.getId(), resourceSet);
 		UmaTestUtil.assert_(status);
 	}

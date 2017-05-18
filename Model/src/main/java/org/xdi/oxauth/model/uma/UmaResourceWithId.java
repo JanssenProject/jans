@@ -14,17 +14,16 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Resource set that needs protection by registering a resource set description
- * at the AM.
- * 
- * @author Yuriy Movchan
+ * Resource that needs protection by registering a resource description
+ * at the AS.
+ *
  * @author Yuriy Zabrovarnyy
- * Date: 10/04/2012
+ * Date: 17/05/2017
  */
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({ "_id", "_rev", "name", "iconUri", "scopes" })
 @XmlRootElement
-public class ResourceSetWithId extends ResourceSet {
+public class UmaResourceWithId extends UmaResource {
 
 	private String id;
 
@@ -40,7 +39,7 @@ public class ResourceSetWithId extends ResourceSet {
 
 	@Override
 	public String toString() {
-		return "ResourceSetWithId [id=" + id
+		return "UmaResourceWithId [id=" + id
 				+ ", toString()=" + super.toString() + "]";
 	}
 

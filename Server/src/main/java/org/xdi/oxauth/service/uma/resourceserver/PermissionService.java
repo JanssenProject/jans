@@ -16,7 +16,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
+import org.xdi.oxauth.service.uma.UmaPermissionManager;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 
@@ -48,7 +48,7 @@ public class PermissionService {
     private TokenService tokenService;
 
     @Inject
-    private ResourceSetPermissionManager resourceSetPermissionManager;
+    private UmaPermissionManager resourceSetPermissionManager;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -134,16 +134,16 @@ public class PermissionService {
         final Date expirationDate = rptExpirationDate();
 
         final org.xdi.oxauth.model.uma.UmaPermission r = new org.xdi.oxauth.model.uma.UmaPermission();
-        r.setResourceSetId(p_resource.getId());
+        r.setResourceId(p_resource.getId());
         r.setExpiresAt(expirationDate);
 
         final String host = appConfiguration.getIssuer();
-        final UmaPermission permission = resourceSetPermissionManager.createResourceSetPermission(
+        final UmaPermission permission = resourceSetPermissionManager.createPermission(
                 host, r, expirationDate);
         // IMPORTANT : set scope dns before persistence
         permission.setScopeDns(umaRsResourceService.getScopeDns(p_scopes));
         final Client client = clientService.getClient(p_rpt.getClientId());
-        resourceSetPermissionManager.addResourceSetPermission(permission, client.getDn());
+        resourceSetPermissionManager.addPermission(permission, client.getDn());
         return permission.getTicket();
     }
 }
