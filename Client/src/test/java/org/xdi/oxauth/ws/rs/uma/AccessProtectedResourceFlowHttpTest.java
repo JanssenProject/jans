@@ -11,8 +11,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
-import org.xdi.oxauth.client.uma.RptStatusService;
+import org.xdi.oxauth.client.uma.UmaRptAuthorizationService;
+import org.xdi.oxauth.client.uma.UmaRptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
@@ -35,11 +35,11 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
     //protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
 
-    protected RegisterResourceSetFlowHttpTest umaRegisterResourceSetFlowHttpTest;
-    protected RegisterResourceSetPermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
+    protected RegisterResourceFlowHttpTest umaRegisterResourceFlowHttpTest;
+    protected RegisterResourcePermissionFlowHttpTest umaRegisterResourcePermissionFlowHttpTest;
 
-    protected RptStatusService rptStatusService;
-    protected RptAuthorizationRequestService rptPermissionAuthorizationService;
+    protected UmaRptStatusService rptStatusService;
+    protected UmaRptAuthorizationService rptPermissionAuthorizationService;
 
     protected Token m_aat;
     protected Token m_pat;
@@ -51,8 +51,8 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         UmaTestUtil.assert_(this.metadataConfiguration);
 
         //this.umaObtainRptTokenFlowHttpTest = new ObtainRptTokenFlowHttpTest(this.metadataConfiguration);
-        this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceSetFlowHttpTest(this.metadataConfiguration);
-        this.umaRegisterResourceSetPermissionFlowHttpTest = new RegisterResourceSetPermissionFlowHttpTest(this.metadataConfiguration);
+        this.umaRegisterResourceFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
+        this.umaRegisterResourcePermissionFlowHttpTest = new RegisterResourcePermissionFlowHttpTest(this.metadataConfiguration);
 
         this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadataConfiguration);
         this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadataConfiguration);
@@ -71,10 +71,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         UmaTestUtil.assert_(m_pat);
 
         // Init UmaPatTokenAwareHttpTest test
-        this.umaRegisterResourceSetFlowHttpTest.m_pat = this.m_pat;
+        this.umaRegisterResourceFlowHttpTest.m_pat = this.m_pat;
 
         // Init UmaRegisterResourceSetPermissionFlowHttpTest test
-        this.umaRegisterResourceSetPermissionFlowHttpTest.umaRegisterResourceSetFlowHttpTest = this.umaRegisterResourceSetFlowHttpTest;
+        this.umaRegisterResourcePermissionFlowHttpTest.umaRegisterResourceSetFlowHttpTest = this.umaRegisterResourceFlowHttpTest;
     }
 
     /**
@@ -83,7 +83,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Test(dependsOnMethods = {"testHostObtainPat"})
     public void testHostRegisterResourceSet() throws Exception {
         showTitle("testHostRegisterResourceSet");
-        this.umaRegisterResourceSetFlowHttpTest.testRegisterResourceSet();
+        this.umaRegisterResourceFlowHttpTest.testRegisterResourceSet();
     }
 
     //** 2 ******************************************************************************
@@ -132,7 +132,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     public void testHostDetermineRptStatus1(final String umaAmHost) throws Exception {
         showTitle("testHostDetermineRptStatus1");
 
-        String resourceSetId = umaRegisterResourceSetFlowHttpTest.resourceSetId;
+        String resourceSetId = umaRegisterResourceFlowHttpTest.resourceSetId;
 
         // Determine RPT token to status
         RptIntrospectionResponse tokenStatusResponse = null;
@@ -159,7 +159,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Parameters({"umaAmHost"})
     public void testHostRegisterPermissions(final String umaAmHost) throws Exception {
         showTitle("testHostRegisterPermissions");
-        umaRegisterResourceSetPermissionFlowHttpTest.testRegisterResourceSetPermission(umaAmHost);
+        umaRegisterResourcePermissionFlowHttpTest.testRegisterResourceSetPermission(umaAmHost);
     }
 
     /**
@@ -168,7 +168,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Test(dependsOnMethods = {"testHostRegisterPermissions"})
     public void testHostReturnTicketToRequester() throws Exception {
         showTitle("testHostReturnTicketToRequester");
-        // Return umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess in format specified in 3.1.2
+        // Return umaRegisterResourcePermissionFlowHttpTest.ticketForFullAccess in format specified in 3.1.2
     }
 
     //** 4 ******************************************************************************
@@ -184,9 +184,9 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         // Authorize RPT token to access permission ticket
         RptAuthorizationResponse authorizationResponse = null;
         try {
-            RptAuthorizationRequest rptAuthorizationRequest = null;// new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourceSetPermissionFlowHttpTest.ticketForFullAccess);
+            RptAuthorizationRequest rptAuthorizationRequest = null;// new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourcePermissionFlowHttpTest.ticketForFullAccess);
 
-            authorizationResponse = this.rptPermissionAuthorizationService.requestRptPermissionAuthorization(
+            authorizationResponse = this.rptPermissionAuthorizationService.requestRptAuthorization(
                     "Bearer " + m_aat.getAccessToken(),
                     umaAmHost,
                     rptAuthorizationRequest);

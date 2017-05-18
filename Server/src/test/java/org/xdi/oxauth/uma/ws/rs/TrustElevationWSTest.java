@@ -13,7 +13,7 @@ import org.xdi.oxauth.model.uma.ClaimToken;
 import org.xdi.oxauth.model.uma.ClaimTokenList;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.RPTResponse;
-import org.xdi.oxauth.model.uma.ResourceSetResponse;
+import org.xdi.oxauth.model.uma.UmaResourceResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.TUma;
@@ -34,7 +34,7 @@ public class TrustElevationWSTest extends BaseTest {
 	private static Token pat;
 	private static Token aat;
 	private static RPTResponse rpt;
-	private static ResourceSetResponse resourceSet;
+	private static UmaResourceResponse resourceSet;
 	private static PermissionTicket ticket;
 
 	@Test
@@ -55,7 +55,7 @@ public class TrustElevationWSTest extends BaseTest {
 		UmaTestUtil.assert_(aat);
 		UmaTestUtil.assert_(rpt);
 
-		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
+		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
 		UmaTestUtil.assert_(resourceSet);
 	}
 
@@ -64,7 +64,7 @@ public class TrustElevationWSTest extends BaseTest {
 	public void registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath)
 			throws Exception {
 		final UmaPermission r = new UmaPermission();
-		r.setResourceSetId(resourceSet.getId());
+		r.setResourceId(resourceSet.getId());
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
 		ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);

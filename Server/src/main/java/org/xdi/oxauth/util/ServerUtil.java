@@ -152,7 +152,7 @@ public class ServerUtil {
     public static org.xdi.oxauth.model.uma.UmaPermission convert(UmaPermission p_permission, ScopeService p_umaScopeService) {
         if (p_permission != null) {
             final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
-            result.setResourceSetId(p_permission.getResourceId());
+            result.setResourceId(p_permission.getResourceId());
             result.setScopes(p_umaScopeService.getScopeUrlsByDns(p_permission.getScopeDns()));
             result.setExpiresAt(p_permission.getExpirationDate());
             return result;

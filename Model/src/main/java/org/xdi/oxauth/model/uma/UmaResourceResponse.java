@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Resource set status description.
+ * Resource description.
  * 
  * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
@@ -24,9 +24,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({ "_id", "user_access_policy_uri" })
 @JsonIgnoreProperties(ignoreUnknown = true)
-//@JsonRootName(value = "resourceSetStatus")
 @XmlRootElement
-public class ResourceSetResponse {
+public class UmaResourceResponse {
 
 	private String id;
 	private String userAccessPolicyUri;
@@ -53,7 +52,7 @@ public class ResourceSetResponse {
 
 	@Override
 	public String toString() {
-		return "ResourceSetStatus [id=" + id + ", user_access_policy_uri=" + userAccessPolicyUri + "]";
+		return "UmaResourceResponse [id=" + id + ", user_access_policy_uri=" + userAccessPolicyUri + "]";
 	}
 
 }
