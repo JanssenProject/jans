@@ -225,14 +225,4 @@ public class Identity implements Serializable {
 		return false;
 	}
 
-	public boolean hasPermission(String name, String action, Object... arg) {
-		// TODO: CDI Use custom script
-		return false;
-	}
-
-	public boolean hasPermission(String name, String action) {
-		// TODO: CDI Use custom script
-		return false;
-	}
-
 }
