@@ -52,26 +52,26 @@ public class TUma {
 		return c.getConfiguration(configurationPath);
 	}
 
-	public static ResourceSetResponse registerResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
-			ResourceSet p_resourceSet) {
+	public static UmaResourceResponse registerResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
+			UmaResource p_resourceSet) {
 		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
 		return s.registerResourceSet(p_pat, p_umaRegisterResourcePath, p_resourceSet);
 	}
 
-	public static ResourceSetResponse modifyResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
-			final String p_rsid, ResourceSet p_resourceSet) {
+	public static UmaResourceResponse modifyResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
+			final String p_rsid, UmaResource p_resourceSet) {
 		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
-		return s.modifyResourceSet(p_pat, p_umaRegisterResourcePath, p_rsid, p_resourceSet);
+		return s.modifyResource(p_pat, p_umaRegisterResourcePath, p_rsid, p_resourceSet);
 	}
 
 	public static List<String> getResourceSetList(URI baseUri, Token p_pat, String p_umaRegisterResourcePath) {
 		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
-		return s.getResourceSetList(p_pat, p_umaRegisterResourcePath);
+		return s.getResourceList(p_pat, p_umaRegisterResourcePath);
 	}
 
 	public static void deleteResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath, String p_id) {
 		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
-		s.deleteResourceSet(p_pat, p_umaRegisterResourcePath, p_id);
+		s.deleteResource(p_pat, p_umaRegisterResourcePath, p_id);
 	}
 
 	public static PermissionTicket registerPermission(URI baseUri, Token p_pat, String p_umaAmHost, String p_umaHost,

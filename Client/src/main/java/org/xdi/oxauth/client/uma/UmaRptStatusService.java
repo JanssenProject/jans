@@ -19,11 +19,11 @@ import javax.ws.rs.Produces;
  * The endpoint is RPT introspection profile implementation defined here:
  * http://docs.kantarainitiative.org/uma/draft-uma-core.html#uma-bearer-token-profile
  */
-public interface RptStatusService {
+public interface UmaRptStatusService {
 
     @POST
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    public RptIntrospectionResponse requestRptStatus(@HeaderParam("Authorization") String authorization,
+    RptIntrospectionResponse requestRptStatus(@HeaderParam("Authorization") String authorization,
                                               @FormParam("token") String rptAsString,
                                               @FormParam("token_type_hint") String tokenTypeHint);
 

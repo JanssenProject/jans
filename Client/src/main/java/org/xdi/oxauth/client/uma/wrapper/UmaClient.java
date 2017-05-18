@@ -6,17 +6,7 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.AuthorizeClient;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.uma.exception.UmaException;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -29,19 +19,16 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.util.StringHelper;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 /**
  * @author Yuriy Zabrovarnyy
- * @author Yuriy Movchan
- * @version June 19, 2015
  */
 
 public class UmaClient {
-
-	public static Token requestAat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
-        TokenRequest tokenRequest = TokenRequest.builder().aat().grantType(GrantType.CLIENT_CREDENTIALS).build();
-
-        return request(tokenUrl, clientKeyStoreFile, clientKeyStorePassword, clientId, keyId, tokenRequest);
-	}
 
 	public static Token requestPat(final String tokenUrl, final String clientKeyStoreFile, final String clientKeyStorePassword, final String clientId, final String keyId) throws UmaException {
         TokenRequest tokenRequest = TokenRequest.builder().pat().grantType(GrantType.CLIENT_CREDENTIALS).build();

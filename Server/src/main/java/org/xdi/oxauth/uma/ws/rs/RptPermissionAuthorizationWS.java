@@ -19,7 +19,7 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
+import org.xdi.oxauth.service.uma.UmaPermissionManager;
 import org.xdi.oxauth.service.uma.RptManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
@@ -48,7 +48,7 @@ public class RptPermissionAuthorizationWS {
     private RptManager rptManager;
 
     @Inject
-    private ResourceSetPermissionManager resourceSetPermissionManager;
+    private UmaPermissionManager resourceSetPermissionManager;
 
     @Inject
     private UmaValidationService umaValidationService;
@@ -111,7 +111,7 @@ public class RptPermissionAuthorizationWS {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
 
-        final UmaPermission resourceSetPermission = resourceSetPermissionManager.getResourceSetPermissionByTicket(rptAuthorizationRequest.getTicket());
+        final UmaPermission resourceSetPermission = resourceSetPermissionManager.getPermissionByTicket(rptAuthorizationRequest.getTicket());
 
         // Validate resource set permission
         umaValidationService.validateResourceSetPermission(resourceSetPermission);

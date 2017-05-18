@@ -95,7 +95,7 @@ public class UmaResourceService {
      * @param rsid resourceSet ID
      */
     public void remove(String rsid) {
-        ldapEntryManager.remove(getResourceSetById(rsid));
+        ldapEntryManager.remove(getResourceById(rsid));
     }
 
     public void remove(List<UmaResource> resourceSet) {
@@ -155,7 +155,7 @@ public class UmaResourceService {
         return ldapEntryManager.contains(resourceSet);
     }
 
-    public UmaResource getResourceSetById(String id) {
+    public UmaResource getResourceById(String id) {
 
         prepareResourcesBranch();
 

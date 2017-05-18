@@ -193,7 +193,7 @@ public class UmaValidationService {
    	}
 
     public void validateResourceSet(org.xdi.oxauth.model.uma.UmaPermission resourceSetPermissionRequest) {
-   		String resourceSetId = resourceSetPermissionRequest.getResourceSetId();
+   		String resourceSetId = resourceSetPermissionRequest.getResourceId();
    		if (StringHelper.isEmpty(resourceSetId)) {
    			log.error("Resource set id is empty");
    			throw new WebApplicationException(Response.status(BAD_REQUEST)

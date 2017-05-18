@@ -95,7 +95,7 @@ public class RsResourceService {
         s.setDn(resourceSetService.getDnForResourceSet(rsid));
         s.setScopes(getScopeDns(p_type.getScopeTypes()));
 
-//            final Boolean addClient = appConfiguration.getUmaKeepClientDuringResourceSetRegistration();
+//            final Boolean addClient = appConfiguration.getUmaKeepClientDuringResourceRegistration();
 //            if (addClient != null ? addClient : true) {
 //                s.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
 //            }

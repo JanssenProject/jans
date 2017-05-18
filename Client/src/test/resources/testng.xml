@@ -221,7 +221,7 @@
     <!-- Register UMA resource set description test -->
     <test name="Register UMA resource set test (HTTP)" enabled="false">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceSetFlowHttpTest"/>
+            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceFlowHttpTest"/>
         </classes>
     </test>
 
@@ -248,7 +248,7 @@
     <!-- Register UMA resource set description permissions test -->
     <test name="Register UMA resource set description permissions test (HTTP)" enabled="false">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceSetPermissionFlowHttpTest"/>
+            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourcePermissionFlowHttpTest"/>
         </classes>
     </test>
 

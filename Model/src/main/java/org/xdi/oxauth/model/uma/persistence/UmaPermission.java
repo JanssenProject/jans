@@ -48,10 +48,10 @@ public class UmaPermission {
     public UmaPermission() {
     }
 
-    public UmaPermission(String p_resourceSetId, List<String> p_scopes, String amHost, String host, String ticket,
+    public UmaPermission(String resourceId, List<String> scopes, String amHost, String host, String ticket,
                          String configurationCode, Date expirationDate) {
-		this.resourceId = p_resourceSetId;
-        this.scopeDns = p_scopes;
+		this.resourceId = resourceId;
+        this.scopeDns = scopes;
 		this.amHost = amHost;
 		this.host = host;
 		this.ticket = ticket;
@@ -81,10 +81,6 @@ public class UmaPermission {
 
 	public boolean isValid() {
 		return !expired;
-	}
-
-	public org.xdi.oxauth.model.uma.UmaPermission getResourceSetPermissionRequest() {
-		return new org.xdi.oxauth.model.uma.UmaPermission(this.resourceId, this.scopeDns);
 	}
 
 	public String getAmHost() {
@@ -131,8 +127,8 @@ public class UmaPermission {
         return resourceId;
     }
 
-    public void setResourceId(String p_resourceSetId) {
-        resourceId = p_resourceSetId;
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
     }
 
     public List<String> getScopeDns() {
