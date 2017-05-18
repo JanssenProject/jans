@@ -167,17 +167,16 @@ public class AppInitializer {
 		// Initialize script manager
         List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
 				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
-        customScriptManager.init(supportedCustomScriptTypes);
-
-        metricService.init();
 
         // Start timer
         quartzSchedulerManager.start();
-    	
-    	// Schedule timer tasks
+
+        // Schedule timer tasks
+        metricService.initTimer();
+        configurationFactory.initTimer();
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();
-        configurationFactory.initTimer();
+        customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
 	}
