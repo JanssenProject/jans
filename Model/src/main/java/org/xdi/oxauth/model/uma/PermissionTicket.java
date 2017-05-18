@@ -22,7 +22,6 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @IgnoreMediaTypes("application/*+json") // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({ "ticket" })
-//@JsonRootName(value = "resourceSetPermissionTicket")
 @XmlRootElement
 public class PermissionTicket {
 
@@ -68,9 +67,7 @@ public class PermissionTicket {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("ResourceSetPermissionTiket [ticket=").append(ticket).append("]");
-		return builder.toString();
+		return "PermissionTiket [ticket=" + ticket + "]";
 	}
 
 }

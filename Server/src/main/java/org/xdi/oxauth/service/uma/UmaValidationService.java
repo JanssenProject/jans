@@ -55,7 +55,7 @@ public class UmaValidationService {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-   	private UmaResourceService resourceSetService;
+   	private UmaResourceService resourceService;
 
     @Inject
     private ScopeService umaScopeService;
@@ -179,47 +179,47 @@ public class UmaValidationService {
    		}
    	}
 
-    public void validateResourceSetPermission(UmaPermission resourceSetPermission) {
-   		if (resourceSetPermission == null || "invalidated".equalsIgnoreCase(resourceSetPermission.getAmHost())) {
+    public void validatePermission(UmaPermission permission) {
+   		if (permission == null || "invalidated".equalsIgnoreCase(permission.getAmHost())) {
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
    		}
 
-   		resourceSetPermission.checkExpired();
-   		if (!resourceSetPermission.isValid()) {
+   		permission.checkExpired();
+   		if (!permission.isValid()) {
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.EXPIRED_TICKET)).build());
    		}
    	}
 
-    public void validateResourceSet(org.xdi.oxauth.model.uma.UmaPermission resourceSetPermissionRequest) {
-   		String resourceSetId = resourceSetPermissionRequest.getResourceId();
-   		if (StringHelper.isEmpty(resourceSetId)) {
-   			log.error("Resource set id is empty");
+    public void validateResource(org.xdi.oxauth.model.uma.UmaPermission permissionRequest) {
+   		String resourceId = permissionRequest.getResourceId();
+   		if (StringHelper.isEmpty(resourceId)) {
+   			log.error("Resource id is empty");
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
    		}
 
-   		UmaResource resourceSet;
+   		UmaResource resource;
    		try {
-   			UmaResource exampleResourceSet = new UmaResource();
-   			exampleResourceSet.setDn(resourceSetService.getBaseDnForResourceSet());
-   			exampleResourceSet.setId(resourceSetId);
-            List<UmaResource> resourceSets = resourceSetService.findResourceSets(exampleResourceSet);
-            if (resourceSets.size() != 1) {
-       			log.error("Resource set isn't registered or there are two resource set with same Id");
+   			UmaResource exampleResource = new UmaResource();
+   			exampleResource.setDn(resourceService.getBaseDnForResource());
+   			exampleResource.setId(resourceId);
+            List<UmaResource> resources = resourceService.findResources(exampleResource);
+            if (resources.size() != 1) {
+       			log.error("Resource isn't registered or there are two resources with same Id");
        			throw new WebApplicationException(Response.status(BAD_REQUEST)
        					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
             }
-            resourceSet = resourceSets.get(0);
+            resource = resources.get(0);
    		} catch (EntryPersistenceException ex) {
-   			log.error("Resource set isn't registered");
+   			log.error("Resource isn't registered");
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
    		}
 
-        final List<String> scopeUrls = umaScopeService.getScopeUrlsByDns(resourceSet.getScopes());
-        if (!scopeUrls.containsAll(resourceSetPermissionRequest.getScopes())) {
+        final List<String> scopeUrls = umaScopeService.getScopeUrlsByDns(resource.getScopes());
+        if (!scopeUrls.containsAll(permissionRequest.getScopes())) {
    			log.error("At least one of the scope isn't registered");
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_SCOPE)).build());

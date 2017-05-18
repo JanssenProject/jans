@@ -6,34 +6,34 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertTrue;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.model.uma.TUma;
+import org.xdi.oxauth.model.uma.UmaResource;
+import org.xdi.oxauth.model.uma.UmaResourceResponse;
+import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.model.uma.wrapper.Token;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.testng.annotations.Parameters;
-import org.testng.annotations.Test;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.UmaResource;
-import org.xdi.oxauth.model.uma.UmaResourceResponse;
-import org.xdi.oxauth.model.uma.TUma;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
-import org.xdi.oxauth.model.uma.wrapper.Token;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 15/03/2013
  */
 
-public class RegisterResourceSetWSTest extends BaseTest {
+public class UmaRegisterResourceWSTest extends BaseTest {
 
 	@ArquillianResource
 	private URI url;
 
 	private static Token pat;
-	private static UmaResourceResponse resourceSetStatus;
+	private static UmaResourceResponse resourceStatus;
 	private static String umaRegisterResourcePath;
 
 	@Test
@@ -47,41 +47,41 @@ public class RegisterResourceSetWSTest extends BaseTest {
 	}
 
 	@Test(dependsOnMethods = { "init" })
-	public void testRegisterResourceSet() throws Exception {
-		resourceSetStatus = TUma.registerResourceSet(url, pat, umaRegisterResourcePath,
+	public void testRegisterResource() throws Exception {
+		resourceStatus = TUma.registerResource(url, pat, umaRegisterResourcePath,
 				UmaTestUtil.createResource());
-		UmaTestUtil.assert_(resourceSetStatus);
+		UmaTestUtil.assert_(resourceStatus);
 	}
 
-	@Test(dependsOnMethods = { "testRegisterResourceSet" })
-	public void testModifyResourceSet() throws Exception {
-		final UmaResource resourceSet = new UmaResource();
-		resourceSet.setName("Server Photo Album 2");
-		resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-		resourceSet.setScopes(
+	@Test(dependsOnMethods = {"testRegisterResource"})
+	public void testModifyResource() throws Exception {
+		final UmaResource resource = new UmaResource();
+		resource.setName("Server Photo Album 2");
+		resource.setIconUri("http://www.example.com/icons/flower.png");
+		resource.setScopes(
 				Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-		final UmaResourceResponse status = TUma.modifyResourceSet(url, pat, umaRegisterResourcePath,
-				resourceSetStatus.getId(), resourceSet);
+		final UmaResourceResponse status = TUma.modifyResource(url, pat, umaRegisterResourcePath,
+				resourceStatus.getId(), resource);
 		UmaTestUtil.assert_(status);
 	}
 
 	/**
-	 * Test for getting UMA resource set descriptions
+	 * Test for getting UMA resource descriptions
 	 */
-	@Test(dependsOnMethods = { "testModifyResourceSet" })
-	public void testGetResourceSets() throws Exception {
-		final List<String> list = TUma.getResourceSetList(url, pat, umaRegisterResourcePath);
+	@Test(dependsOnMethods = {"testModifyResource"})
+	public void testGetResources() throws Exception {
+		final List<String> list = TUma.getResourceList(url, pat, umaRegisterResourcePath);
 
-		assertTrue(list != null && !list.isEmpty() && list.contains(resourceSetStatus.getId()),
-				"Resource set list is empty");
+		assertTrue(list != null && !list.isEmpty() && list.contains(resourceStatus.getId()),
+				"Resource list is empty");
 	}
 
 	/**
-	 * Test for deleting UMA resource set descriptions
+	 * Test for deleting UMA resource descriptions
 	 */
-	@Test(dependsOnMethods = { "testGetResourceSets" })
-	public void testDeleteResourceSet() throws Exception {
-		TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSetStatus.getId());
+	@Test(dependsOnMethods = {"testGetResources"})
+	public void testDeleteResource() throws Exception {
+		TUma.deleteResource(url, pat, umaRegisterResourcePath, resourceStatus.getId());
 	}
 }

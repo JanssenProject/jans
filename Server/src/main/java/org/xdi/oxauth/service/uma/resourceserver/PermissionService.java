@@ -48,7 +48,7 @@ public class PermissionService {
     private TokenService tokenService;
 
     @Inject
-    private UmaPermissionManager resourceSetPermissionManager;
+    private UmaPermissionManager permissionManager;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -138,12 +138,12 @@ public class PermissionService {
         r.setExpiresAt(expirationDate);
 
         final String host = appConfiguration.getIssuer();
-        final UmaPermission permission = resourceSetPermissionManager.createPermission(
+        final UmaPermission permission = permissionManager.createPermission(
                 host, r, expirationDate);
         // IMPORTANT : set scope dns before persistence
         permission.setScopeDns(umaRsResourceService.getScopeDns(p_scopes));
         final Client client = clientService.getClient(p_rpt.getClientId());
-        resourceSetPermissionManager.addPermission(permission, client.getDn());
+        permissionManager.addPermission(permission, client.getDn());
         return permission.getTicket();
     }
 }

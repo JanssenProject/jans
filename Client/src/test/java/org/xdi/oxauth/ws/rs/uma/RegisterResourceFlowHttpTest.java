@@ -37,7 +37,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     protected UmaConfiguration metadataConfiguration;
     protected Token m_pat;
 
-    protected String resourceSetId;
+    protected String resourceId;
 
     public RegisterResourceFlowHttpTest() {
     }
@@ -59,173 +59,173 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     }
 
     /**
-     * Test for the registering UMA resource set description
+     * Test for the registering UMA resource description
      */
     @Test
-    public void testRegisterResourceSet() throws Exception {
-        showTitle("testRegisterResourceSet");
-        registerResourceSet(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+    public void testRegisterResource() throws Exception {
+        showTitle("testRegisterResource");
+        registerResource(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
     }
 
-    public String registerResourceSet(List<String> scopes) throws Exception {
-        UmaResourceService resourceSetRegistrationService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+    public String registerResource(List<String> scopes) throws Exception {
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
 
-        // Add resource set description
-        UmaResourceResponse resourceSetStatus = null;
+        // Add resource description
+        UmaResourceResponse resourceStatus = null;
         try {
-            UmaResource resourceSet = new UmaResource();
-            resourceSet.setName("Photo Album");
-            resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-            resourceSet.setScopes(scopes);
+            UmaResource resource = new UmaResource();
+            resource.setName("Photo Album");
+            resource.setIconUri("http://www.example.com/icons/flower.png");
+            resource.setScopes(scopes);
 
-            resourceSetStatus = resourceSetRegistrationService.addResource("Bearer " + m_pat.getAccessToken(), resourceSet);
+            resourceStatus = resourceService.addResource("Bearer " + m_pat.getAccessToken(), resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
-        UmaTestUtil.assert_(resourceSetStatus);
+        UmaTestUtil.assert_(resourceStatus);
 
-        this.resourceSetId = resourceSetStatus.getId();
-        return this.resourceSetId;
+        this.resourceId = resourceStatus.getId();
+        return this.resourceId;
     }
 
     /**
-     * Test UMA resource set description modification
+     * Test UMA resource description modification
      */
-    @Test(dependsOnMethods = {"testRegisterResourceSet"})
-    public void testModifyResourceSet() throws Exception {
-        showTitle("testModifyResourceSet");
+    @Test(dependsOnMethods = {"testRegisterResource"})
+    public void testModifyResource() throws Exception {
+        showTitle("testModifyResource");
 
-        UmaResourceService resourceSetRegistrationService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
 
-        // Modify resource set description
-        UmaResourceResponse resourceSetStatus = null;
+        // Modify resource description
+        UmaResourceResponse resourceStatus = null;
         try {
-            UmaResource resourceSet = new UmaResource();
-            resourceSet.setName("Photo Album 2");
-            resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-            resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+            UmaResource resource = new UmaResource();
+            resource.setName("Photo Album 2");
+            resource.setIconUri("http://www.example.com/icons/flower.png");
+            resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceSetStatus = resourceSetRegistrationService.updateResource("Bearer " + m_pat.getAccessToken(), this.resourceSetId, resourceSet);
+            resourceStatus = resourceService.updateResource("Bearer " + m_pat.getAccessToken(), this.resourceId, resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
-        assertNotNull(resourceSetStatus, "Resource set status is null");
-        this.resourceSetId = resourceSetStatus.getId();
-        assertNotNull(this.resourceSetId, "Resource set description id is null");
+        assertNotNull(resourceStatus, "Resource status is null");
+        this.resourceId = resourceStatus.getId();
+        assertNotNull(this.resourceId, "Resource description id is null");
     }
 
     /**
-     * Test non existing UMA resource set description modification
+     * Test non existing UMA resource description modification
      */
-    @Test(dependsOnMethods = {"testModifyResourceSet"})
-    public void testModifyNotExistingResourceSet() throws Exception {
-        showTitle("testModifyNotExistingResourceSet");
+    @Test(dependsOnMethods = {"testModifyResource"})
+    public void testModifyNotExistingResource() throws Exception {
+        showTitle("testModifyNotExistingResource");
 
-        UmaResourceService resourceSetRegistrationService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
 
-        // Modify resource set description with non existing Id
-        UmaResourceResponse resourceSetStatus = null;
+        // Modify resource description with non existing Id
+        UmaResourceResponse resourceStatus = null;
         try {
-            UmaResource resourceSet = new UmaResource();
-            resourceSet.setName("Photo Album 3");
-            resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-            resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+            UmaResource resource = new UmaResource();
+            resource.setName("Photo Album 3");
+            resource.setIconUri("http://www.example.com/icons/flower.png");
+            resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceSetStatus = resourceSetRegistrationService.updateResource("Bearer " + m_pat.getAccessToken(), this.resourceSetId, resourceSet);
+            resourceStatus = resourceService.updateResource("Bearer " + m_pat.getAccessToken(), this.resourceId, resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.NOT_FOUND.getStatusCode(), "Unexpected response status");
         }
 
-        assertNull(resourceSetStatus, "Resource set status is not null");
+        assertNull(resourceStatus, "Resource status is not null");
     }
 
     /**
-     * Test UMA resource set description modification with invalid PAT
+     * Test UMA resource description modification with invalid PAT
      */
-    @Test(dependsOnMethods = {"testModifyResourceSet"})
-    public void testModifyResourceSetWithInvalidPat() throws Exception {
-        showTitle("testModifyResourceSetWithInvalidPat");
+    @Test(dependsOnMethods = {"testModifyResource"})
+    public void testModifyResourceWithInvalidPat() throws Exception {
+        showTitle("testModifyResourceWithInvalidPat");
 
-        UmaResourceService resourceSetRegistrationService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
 
-        // Modify resource set description with invalid PAT
-        UmaResourceResponse resourceSetStatus = null;
+        // Modify resource description with invalid PAT
+        UmaResourceResponse resourceStatus = null;
         try {
-            UmaResource resourceSet = new UmaResource();
-            resourceSet.setName("Photo Album 4");
-            resourceSet.setIconUri("http://www.example.com/icons/flower.png");
-            resourceSet.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+            UmaResource resource = new UmaResource();
+            resource.setName("Photo Album 4");
+            resource.setIconUri("http://www.example.com/icons/flower.png");
+            resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceSetStatus = resourceSetRegistrationService.updateResource("Bearer " + m_pat.getAccessToken() + "_invalid", this.resourceSetId + "_invalid", resourceSet);
+            resourceStatus = resourceService.updateResource("Bearer " + m_pat.getAccessToken() + "_invalid", this.resourceId + "_invalid", resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.UNAUTHORIZED.getStatusCode(), "Unexpected response status");
         }
 
-        assertNull(resourceSetStatus, "Resource set status is not null");
+        assertNull(resourceStatus, "Resource status is not null");
     }
 
     /**
      * Test for getting UMA resource set descriptions
      */
-    @Test(dependsOnMethods = {"testModifyResourceSet"})
-    public void testGetOneResourceSet() throws Exception {
-        showTitle("testGetResourceSets");
+    @Test(dependsOnMethods = {"testModifyResource"})
+    public void testGetOneResource() throws Exception {
+        showTitle("testGetOneResource");
 
-        UmaResourceService resourceSetRegistrationService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
 
         // Get list of resource set descriptions
-        UmaResourceWithId resourceSets = null;
+        UmaResourceWithId resources = null;
         try {
-            resourceSets = resourceSetRegistrationService.getResource("Bearer " + m_pat.getAccessToken(), this.resourceSetId);
+            resources = resourceService.getResource("Bearer " + m_pat.getAccessToken(), this.resourceId);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
-        assertNotNull(resourceSets, "Resource set descriptions is null");
+        assertNotNull(resources, "Resource descriptions is null");
     }
 
     /**
-     * Test for getting UMA resource set description
+     * Test for getting UMA resource description
      */
-    @Test(dependsOnMethods = {"testGetOneResourceSet"})
-    public void testGetResourceSets() throws Exception {
-        showTitle("testGetResourceSets");
+    @Test(dependsOnMethods = {"testGetOneResource"})
+    public void testGetResources() throws Exception {
+        showTitle("testGetResources");
 
-        UmaResourceService resourceSetRegistrationService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
 
         // Get list of resource set descriptions
-        List<String> resourceSets = null;
+        List<String> resources = null;
         try {
-            resourceSets = resourceSetRegistrationService.getResourceList("Bearer " + m_pat.getAccessToken(), "");
+            resources = resourceService.getResourceList("Bearer " + m_pat.getAccessToken(), "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
-        assertNotNull(resourceSets, "Resource set descriptions is null");
-        assertTrue(resourceSets.contains(this.resourceSetId), "Resource set descriptions list doesn't contain added resource set description");
+        assertNotNull(resources, "Resource descriptions is null");
+        assertTrue(resources.contains(this.resourceId), "Resource list doesn't contain added resource");
     }
 
     /**
      * Test for deleting UMA resource set descriptions
      */
-    @Test(dependsOnMethods = {"testGetResourceSets"})
-    public void testDeleteResourceSet() throws Exception {
-        showTitle("testDeleteResourceSet");
+    @Test(dependsOnMethods = {"testGetResources"})
+    public void testDeleteResource() throws Exception {
+        showTitle("testDeleteResource");
 
-        UmaResourceService resourceSetRegistrationService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
 
         // Delete resource set description
         boolean deleted = false;
         try {
-            resourceSetRegistrationService.deleteResource("Bearer " + m_pat.getAccessToken(), this.resourceSetId);
+            resourceService.deleteResource("Bearer " + m_pat.getAccessToken(), this.resourceId);
             deleted = true;
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));

@@ -79,9 +79,9 @@ public class RptManager extends AbstractRPTManager {
     }
 
     @Override
-    public UmaRPT getRPTByCode(String p_code) {
+    public UmaRPT getRPTByCode(String rptCode) {
         try {
-            final Filter filter = Filter.create(String.format("&(oxAuthTokenCode=%s)", p_code));
+            final Filter filter = Filter.create(String.format("&(oxAuthTokenCode=%s)", rptCode));
             final String baseDn = staticConfiguration.getBaseDn().getClients();
             final List<UmaRPT> entries = ldapEntryManager.findEntries(baseDn, UmaRPT.class, filter);
             if (entries != null && !entries.isEmpty()) {
@@ -183,13 +183,13 @@ public class RptManager extends AbstractRPTManager {
     }
 
     @Override
-    public UmaPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId) {
+    public UmaPermission getPermissionFromRPTByResourceId(UmaRPT p_rpt, String resourceId) {
         try {
-            if (p_rpt != null && p_rpt.getPermissions() != null && Util.allNotBlank(p_resourceSetId)) {
+            if (p_rpt != null && p_rpt.getPermissions() != null && Util.allNotBlank(resourceId)) {
                 final List<String> permissionDns = p_rpt.getPermissions();
                 for (String permissionDn : permissionDns) {
                     final UmaPermission permissionObject = ldapEntryManager.find(UmaPermission.class, permissionDn);
-                    if (permissionObject != null && p_resourceSetId.equals(permissionObject.getResourceId())) {
+                    if (permissionObject != null && resourceId.equals(permissionObject.getResourceId())) {
                         return permissionObject;
                     }
                 }

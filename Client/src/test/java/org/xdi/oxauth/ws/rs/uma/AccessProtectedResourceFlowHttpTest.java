@@ -36,7 +36,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     //protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
 
     protected RegisterResourceFlowHttpTest umaRegisterResourceFlowHttpTest;
-    protected RegisterResourcePermissionFlowHttpTest umaRegisterResourcePermissionFlowHttpTest;
+    protected UmaRegisterPermissionFlowHttpTest permissionFlowHttpTest;
 
     protected UmaRptStatusService rptStatusService;
     protected UmaRptAuthorizationService rptPermissionAuthorizationService;
@@ -52,7 +52,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
         //this.umaObtainRptTokenFlowHttpTest = new ObtainRptTokenFlowHttpTest(this.metadataConfiguration);
         this.umaRegisterResourceFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
-        this.umaRegisterResourcePermissionFlowHttpTest = new RegisterResourcePermissionFlowHttpTest(this.metadataConfiguration);
+        this.permissionFlowHttpTest = new UmaRegisterPermissionFlowHttpTest(this.metadataConfiguration);
 
         this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadataConfiguration);
         this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadataConfiguration);
@@ -73,17 +73,17 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         // Init UmaPatTokenAwareHttpTest test
         this.umaRegisterResourceFlowHttpTest.m_pat = this.m_pat;
 
-        // Init UmaRegisterResourceSetPermissionFlowHttpTest test
-        this.umaRegisterResourcePermissionFlowHttpTest.umaRegisterResourceSetFlowHttpTest = this.umaRegisterResourceFlowHttpTest;
+        // Init UmaRegisterResourcePermissionFlowHttpTest test
+        this.permissionFlowHttpTest.registerResourceTest = this.umaRegisterResourceFlowHttpTest;
     }
 
     /**
      * Host registers resource set description
      */
     @Test(dependsOnMethods = {"testHostObtainPat"})
-    public void testHostRegisterResourceSet() throws Exception {
-        showTitle("testHostRegisterResourceSet");
-        this.umaRegisterResourceFlowHttpTest.testRegisterResourceSet();
+    public void testHostRegisterResource() throws Exception {
+        showTitle("testHostRegisterResource");
+        this.umaRegisterResourceFlowHttpTest.testRegisterResource();
     }
 
     //** 2 ******************************************************************************
@@ -91,7 +91,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     /**
      * Requester obtains AAT token
      */
-    @Test(dependsOnMethods = {"testHostRegisterResourceSet"})
+    @Test(dependsOnMethods = {"testHostRegisterResource"})
     @Parameters({"umaAatClientId", "umaAatClientSecret"})
     public void testRequesterObtainAat(final String umaAatClientId, final String umaAatClientSecret) throws Exception {
         showTitle("testRequesterObtainAat");
@@ -132,7 +132,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     public void testHostDetermineRptStatus1(final String umaAmHost) throws Exception {
         showTitle("testHostDetermineRptStatus1");
 
-        String resourceSetId = umaRegisterResourceFlowHttpTest.resourceSetId;
+        String resourceId = umaRegisterResourceFlowHttpTest.resourceId;
 
         // Determine RPT token to status
         RptIntrospectionResponse tokenStatusResponse = null;
@@ -159,7 +159,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Parameters({"umaAmHost"})
     public void testHostRegisterPermissions(final String umaAmHost) throws Exception {
         showTitle("testHostRegisterPermissions");
-        umaRegisterResourcePermissionFlowHttpTest.testRegisterResourceSetPermission(umaAmHost);
+        permissionFlowHttpTest.testRegisterPermission(umaAmHost);
     }
 
     /**
@@ -168,7 +168,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Test(dependsOnMethods = {"testHostRegisterPermissions"})
     public void testHostReturnTicketToRequester() throws Exception {
         showTitle("testHostReturnTicketToRequester");
-        // Return umaRegisterResourcePermissionFlowHttpTest.ticketForFullAccess in format specified in 3.1.2
+        // Return permissionFlowHttpTest.ticketForFullAccess in format specified in 3.1.2
     }
 
     //** 4 ******************************************************************************
@@ -184,7 +184,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         // Authorize RPT token to access permission ticket
         RptAuthorizationResponse authorizationResponse = null;
         try {
-            RptAuthorizationRequest rptAuthorizationRequest = null;// new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourcePermissionFlowHttpTest.ticketForFullAccess);
+            RptAuthorizationRequest rptAuthorizationRequest = null;// new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, permissionFlowHttpTest.ticketForFullAccess);
 
             authorizationResponse = this.rptPermissionAuthorizationService.requestRptAuthorization(
                     "Bearer " + m_aat.getAccessToken(),

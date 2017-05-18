@@ -20,9 +20,9 @@ import java.util.List;
 
 public interface IRPTManager {
 
-    void addRPT(UmaRPT requesterPermissionToken, String clientDn);
+    void addRPT(UmaRPT rpt, String clientDn);
 
-    UmaRPT getRPTByCode(String requesterPermissionTokenCode);
+    UmaRPT getRPTByCode(String rptCode);
 
     UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat);
 
@@ -32,7 +32,7 @@ public interface IRPTManager {
 
     void addPermissionToRPT(UmaRPT p_rpt, UmaPermission p_permission);
 
-    UmaPermission getPermissionFromRPTByResourceSetId(UmaRPT p_rpt, String p_resourceSetId);
+    UmaPermission getPermissionFromRPTByResourceId(UmaRPT p_rpt, String resourceId);
 
     List<UmaPermission> getRptPermissions(UmaRPT p_rpt);
 
