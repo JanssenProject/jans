@@ -48,7 +48,7 @@ public class RptPermissionAuthorizationWS {
     private RptManager rptManager;
 
     @Inject
-    private UmaPermissionManager resourceSetPermissionManager;
+    private UmaPermissionManager permissionManager;
 
     @Inject
     private UmaValidationService umaValidationService;
@@ -111,15 +111,14 @@ public class RptPermissionAuthorizationWS {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
 
-        final UmaPermission resourceSetPermission = resourceSetPermissionManager.getPermissionByTicket(rptAuthorizationRequest.getTicket());
+        final UmaPermission permission = permissionManager.getPermissionByTicket(rptAuthorizationRequest.getTicket());
 
-        // Validate resource set permission
-        umaValidationService.validateResourceSetPermission(resourceSetPermission);
+        umaValidationService.validatePermission(permission);
 
         // Add permission to RPT
-        if (umaAuthorizationService.allowToAddPermission(grant, rpt, resourceSetPermission, httpRequest, rptAuthorizationRequest.getClaims())) {
-            rptManager.addPermissionToRPT(rpt, resourceSetPermission);
-            invalidateTicket(resourceSetPermission);
+        if (umaAuthorizationService.allowToAddPermission(grant, rpt, permission, httpRequest, rptAuthorizationRequest.getClaims())) {
+            rptManager.addPermissionToRPT(rpt, permission);
+            invalidateTicket(permission);
             return rpt;
         }
 
@@ -128,12 +127,12 @@ public class RptPermissionAuthorizationWS {
                 .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
     }
 
-    private void invalidateTicket(UmaPermission resourceSetPermission) {
+    private void invalidateTicket(UmaPermission permission) {
         try {
-            resourceSetPermission.setAmHost("invalidated"); // invalidate ticket and persist
-            ldapEntryManager.merge(resourceSetPermission);
+            permission.setAmHost("invalidated"); // invalidate ticket and persist
+            ldapEntryManager.merge(permission);
         } catch (Exception e) {
-            log.error("Failed to invalidate ticket: " + resourceSetPermission.getTicket() + ". " + e.getMessage(), e);
+            log.error("Failed to invalidate ticket: " + permission.getTicket() + ". " + e.getMessage(), e);
         }
     }
 }

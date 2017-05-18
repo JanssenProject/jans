@@ -53,7 +53,7 @@ public class PermissionRegistrationWS {
     private TokenService tokenService;
 
     @Inject
-    private UmaPermissionManager resourceSetPermissionManager;
+    private UmaPermissionManager permissionManager;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -78,21 +78,21 @@ public class PermissionRegistrationWS {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 400, message = "Bad Request")
     })
-    public Response registerResourceSetPermission(@Context HttpServletRequest request,
-                                                  @HeaderParam("Authorization") String authorization,
-                                                  @HeaderParam("Host") String amHost,
-                                                  @ApiParam(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
-                                                      org.xdi.oxauth.model.uma.UmaPermission resourceSetPermissionRequest) {
+    public Response registerPermission(@Context HttpServletRequest request,
+                                       @HeaderParam("Authorization") String authorization,
+                                       @HeaderParam("Host") String amHost,
+                                       @ApiParam(value = "The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
+                                           org.xdi.oxauth.model.uma.UmaPermission permissionRequest) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
-            umaValidationService.validateResourceSet(resourceSetPermissionRequest);
+            umaValidationService.validateResource(permissionRequest);
 
-            final UmaPermission resourceSetPermissions = resourceSetPermissionManager.createPermission(validatedAmHost, resourceSetPermissionRequest, umaRsPermissionService.rptExpirationDate());
-            resourceSetPermissionManager.addPermission(resourceSetPermissions, tokenService.getClientDn(authorization));
+            final UmaPermission permission = permissionManager.createPermission(validatedAmHost, permissionRequest, umaRsPermissionService.rptExpirationDate());
+            permissionManager.addPermission(permission, tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
-                            entity(new PermissionTicket(resourceSetPermissions.getTicket())).
+                            entity(new PermissionTicket(permission.getTicket())).
                             build();
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {

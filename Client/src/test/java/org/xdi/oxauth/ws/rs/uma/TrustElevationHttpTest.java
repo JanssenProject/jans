@@ -23,8 +23,8 @@ public class TrustElevationHttpTest extends BaseTest {
 
     protected UmaConfiguration metadataConfiguration;
 
-    protected RegisterResourceFlowHttpTest umaRegisterResourceSetFlowHttpTest;
-    protected RegisterResourcePermissionFlowHttpTest umaRegisterResourceSetPermissionFlowHttpTest;
+    protected RegisterResourceFlowHttpTest registerResourceTest;
+    protected UmaRegisterPermissionFlowHttpTest registerPermissionTest;
 
     protected UmaRptStatusService rptStatusService;
     protected UmaRptAuthorizationService rptPermissionAuthorizationService;
@@ -44,8 +44,8 @@ public class TrustElevationHttpTest extends BaseTest {
         this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
         UmaTestUtil.assert_(this.metadataConfiguration);
 
-        this.umaRegisterResourceSetFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
-        this.umaRegisterResourceSetPermissionFlowHttpTest = new RegisterResourcePermissionFlowHttpTest(this.metadataConfiguration);
+        this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
+        this.registerPermissionTest = new UmaRegisterPermissionFlowHttpTest(this.metadataConfiguration);
 
         this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadataConfiguration);
         this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadataConfiguration);
@@ -58,17 +58,17 @@ public class TrustElevationHttpTest extends BaseTest {
 
         final List<String> rsScopes = Arrays.asList("http://gluu.example.com/dev/scopes/view", "http://gluu.example.com/dev/scopes/all");
 
-        this.umaRegisterResourceSetFlowHttpTest.m_pat = m_pat;
-        final String resourceId = this.umaRegisterResourceSetFlowHttpTest.registerResourceSet(rsScopes);
+        this.registerResourceTest.m_pat = m_pat;
+        final String resourceId = this.registerResourceTest.registerResource(rsScopes);
 
-        this.umaRegisterResourceSetPermissionFlowHttpTest.umaRegisterResourceSetFlowHttpTest = umaRegisterResourceSetFlowHttpTest;
-        this.umaRegisterResourceSetPermissionFlowHttpTest.registerResourceSetPermission(umaAmHost, resourceId, rsScopes);
+        this.registerPermissionTest.registerResourceTest = registerResourceTest;
+        this.registerPermissionTest.registerResourcePermission(umaAmHost, resourceId, rsScopes);
 
         /**
         RptIntrospectionResponse rptStatus = this.rptStatusService.requestRptStatus("Bearer " + m_pat.getAccessToken(),
                 this.umaObtainRptTokenFlowHttpTest.rptToken, "");
 
-        RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, umaRegisterResourcePermissionFlowHttpTest.ticketForFullAccess);
+        RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, permissionFlowHttpTest.ticketForFullAccess);
 
         try {
             RptAuthorizationResponse authorizationResponse = this.rptPermissionAuthorizationService.requestRptPermissionAuthorization(
