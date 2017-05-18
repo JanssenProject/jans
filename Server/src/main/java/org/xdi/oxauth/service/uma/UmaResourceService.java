@@ -49,7 +49,7 @@ public class UmaResourceService {
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
         branch.setOrganizationalUnitName("uma_resource");
-        branch.setDn(getDnForResourceSet(null));
+        branch.setDn(getDnForResource(null));
 
         ldapEntryManager.persist(branch);
     }
@@ -64,9 +64,9 @@ public class UmaResourceService {
         ldapEntryManager.persist(resource);
     }
 
-    public void validate(UmaResource resourceSet) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(resourceSet.getName()), "Name is required for resource set.");
-        Preconditions.checkArgument(resourceSet.getScopes() != null && !resourceSet.getScopes().isEmpty(), "Scope must be specified for resource set.");
+    public void validate(UmaResource resource) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(resource.getName()), "Name is required for resource.");
+        Preconditions.checkArgument(resource.getScopes() != null && !resource.getScopes().isEmpty(), "Scope must be specified for resource.");
         prepareResourcesBranch();
     }
 
@@ -75,7 +75,7 @@ public class UmaResourceService {
      *
      * @param resource resource
      */
-    public void updateResourceSet(UmaResource resource) {
+    public void updateResource(UmaResource resource) {
         validate(resource);
         ldapEntryManager.merge(resource);
     }
@@ -92,25 +92,25 @@ public class UmaResourceService {
     /**
      * Remove resource description entry by ID.
      *
-     * @param rsid resourceSet ID
+     * @param rsid resource ID
      */
     public void remove(String rsid) {
         ldapEntryManager.remove(getResourceById(rsid));
     }
 
-    public void remove(List<UmaResource> resourceSet) {
-        for (UmaResource resource : resourceSet) {
+    public void remove(List<UmaResource> resources) {
+        for (UmaResource resource : resources) {
             remove(resource);
         }
     }
 
     /**
-     * Get all resource set descriptions
+     * Get all resource descriptions
      *
-     * @return List of resource set descriptions
+     * @return List of resource descriptions
      */
-    public List<UmaResource> getAllResourceSets(String... ldapReturnAttributes) {
-        return ldapEntryManager.findEntries(getBaseDnForResourceSet(), UmaResource.class, ldapReturnAttributes, null);
+    public List<UmaResource> getAllResources(String... ldapReturnAttributes) {
+        return ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, ldapReturnAttributes, null);
     }
 
     /**
@@ -124,7 +124,7 @@ public class UmaResourceService {
 
             if (StringUtils.isNotBlank(associatedClientDn)) {
                 final Filter filter = Filter.create(String.format("&(oxAssociatedClient=%s)", associatedClientDn));
-                return ldapEntryManager.findEntries(getBaseDnForResourceSet(), UmaResource.class, filter);
+                return ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, filter);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -135,35 +135,35 @@ public class UmaResourceService {
     /**
      * Get resource descriptions by example
      *
-     * @param resource ResourceSet
-     * @return ResourceSet which conform example
+     * @param resource Resource
+     * @return Resource which conform example
      */
-    public List<UmaResource> findResourceSets(UmaResource resource) {
+    public List<UmaResource> findResources(UmaResource resource) {
         return ldapEntryManager.findEntries(resource);
     }
 
     public boolean containsBranch() {
-        return ldapEntryManager.contains(SimpleBranch.class, getDnForResourceSet(null));
+        return ldapEntryManager.contains(SimpleBranch.class, getDnForResource(null));
     }
 
     /**
-     * Check if LDAP server contains resource set description with specified attributes
+     * Check if LDAP server contains resource description with specified attributes
      *
-     * @return True if resource set description with specified attributes exist
+     * @return True if resource description with specified attributes exist
      */
-    public boolean containsResourceSet(UmaResource resourceSet) {
-        return ldapEntryManager.contains(resourceSet);
+    public boolean containsResource(UmaResource resource) {
+        return ldapEntryManager.contains(resource);
     }
 
     public UmaResource getResourceById(String id) {
 
         prepareResourcesBranch();
 
-        UmaResource ldapResourceSet = new UmaResource();
-        ldapResourceSet.setDn(getBaseDnForResourceSet());
-        ldapResourceSet.setId(id);
+        UmaResource ldapResource = new UmaResource();
+        ldapResource.setDn(getBaseDnForResource());
+        ldapResource.setId(id);
 
-        final List<UmaResource> result = findResourceSets(ldapResourceSet);
+        final List<UmaResource> result = findResources(ldapResource);
         if (result.size() == 0) {
             log.error("Failed to find resource set with id: " + id);
             errorResponseFactory.throwUmaNotFoundException();
@@ -192,16 +192,16 @@ public class UmaResourceService {
     }
 
     /**
-     * Build DN string for resource set description
+     * Build DN string for resource description
      */
-    public String getDnForResourceSet(String oxId) {
+    public String getDnForResource(String oxId) {
         if (StringHelper.isEmpty(oxId)) {
-            return getBaseDnForResourceSet();
+            return getBaseDnForResource();
         }
-        return String.format("oxId=%s,%s", oxId, getBaseDnForResourceSet());
+        return String.format("oxId=%s,%s", oxId, getBaseDnForResource());
     }
 
-    public String getBaseDnForResourceSet() {
+    public String getBaseDnForResource() {
         final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
         return String.format("ou=resource_sets,%s", umaBaseDn);
     }

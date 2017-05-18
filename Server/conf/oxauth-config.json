@@ -162,7 +162,7 @@
     "longLivedAccessTokenLifetime":31536000,
     "umaRequesterPermissionTokenLifetime":${config.uma.requester-permission-token-lifetime},
     "umaAddScopesAutomatically":false,
-    "umaKeepClientDuringResourceSetRegistration":true,
+    "umaKeepClientDuringResourceRegistration":true,
     "cleanServiceInterval":${config.client.clean-service-interval},
     "keyRegenerationEnabled":false,
     "keyRegenerationInterval":48,

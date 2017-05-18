@@ -136,18 +136,18 @@ public class RptStatusWS {
         return false;
     }
 
-    private boolean isValid(UmaPermission resourceSetPermission) {
-        if (resourceSetPermission != null) {
-            resourceSetPermission.checkExpired();
-            return resourceSetPermission.isValid();
+    private boolean isValid(UmaPermission permission) {
+        if (permission != null) {
+            permission.checkExpired();
+            return permission.isValid();
         }
         return false;
     }
 
-    private List<org.xdi.oxauth.model.uma.UmaPermission> buildStatusResponsePermissions(UmaRPT p_rpt) {
+    private List<org.xdi.oxauth.model.uma.UmaPermission> buildStatusResponsePermissions(UmaRPT rpt) {
         final List<org.xdi.oxauth.model.uma.UmaPermission> result = new ArrayList<org.xdi.oxauth.model.uma.UmaPermission>();
-        if (p_rpt != null) {
-            final List<UmaPermission> rptPermissions = rptManager.getRptPermissions(p_rpt);
+        if (rpt != null) {
+            final List<UmaPermission> rptPermissions = rptManager.getRptPermissions(rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {
                 for (UmaPermission permission : rptPermissions) {
                     if (isValid(permission)) {
@@ -157,7 +157,7 @@ public class RptStatusWS {
                         }
                     } else {
                         log.debug("Ignore permission, skip it in response because permission is not valid. Permission dn: {}, rpt dn: {}",
-                                permission.getDn(), p_rpt.getDn());
+                                permission.getDn(), rpt.getDn());
                     }
                 }
             }

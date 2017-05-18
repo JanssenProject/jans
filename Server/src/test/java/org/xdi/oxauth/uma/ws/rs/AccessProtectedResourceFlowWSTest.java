@@ -6,28 +6,18 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertNotNull;
-
-import java.net.URI;
-import java.util.Arrays;
-
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.ClaimToken;
-import org.xdi.oxauth.model.uma.ClaimTokenList;
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.RPTResponse;
-import org.xdi.oxauth.model.uma.UmaResourceResponse;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
-import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
-import org.xdi.oxauth.model.uma.TUma;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.model.uma.*;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import java.net.URI;
+import java.util.Arrays;
+
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -42,7 +32,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	private static Token pat;
 	private static Token aat;
 	private static RPTResponse rpt;
-	private static UmaResourceResponse resourceSet;
+	private static UmaResourceResponse resource;
 	private static PermissionTicket ticket;
 
 	@Test
@@ -88,9 +78,9 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	 */
 	@Test(dependsOnMethods = { "init" })
 	@Parameters({ "umaRegisterResourcePath" })
-	public void _1_registerResourceSet(String umaRegisterResourcePath) throws Exception {
-		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
-		UmaTestUtil.assert_(resourceSet);
+	public void _1_registerResource(String umaRegisterResourcePath) throws Exception {
+		resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
+		UmaTestUtil.assert_(resource);
 	}
 
 	/*
@@ -98,7 +88,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	 * Requesting party access protected resource at host via requester RPT has
 	 * no permissions to access protected resource here...
 	 */
-	@Test(dependsOnMethods = { "_1_registerResourceSet" })
+	@Test(dependsOnMethods = {"_1_registerResource"})
 	public void _2_requesterAccessProtectedResourceWithNotEnoughPermissionsRpt() throws Exception {
 		showTitle("_2_requesterAccessProtectedResourceWithNotEnoughPermissionsRpt");
 		// do nothing, call must be made from host
@@ -127,7 +117,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	public void _4_registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath)
 			throws Exception {
 		final UmaPermission r = new UmaPermission();
-		r.setResourceId(resourceSet.getId());
+		r.setResourceId(resource.getId());
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
 		ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
@@ -177,8 +167,8 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	@Test(dependsOnMethods = { "_7_requesterAccessProtectedResourceWithEnoughPermissionsRpt" })
 	@Parameters({ "umaRegisterResourcePath" })
 	public void cleanUp(String umaRegisterResourcePath) {
-		if (resourceSet != null) {
-			TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSet.getId());
+		if (resource != null) {
+			TUma.deleteResource(url, pat, umaRegisterResourcePath, resource.getId());
 		}
 	}
 

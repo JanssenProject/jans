@@ -25,7 +25,7 @@ public interface IPermissionManager {
 
     UmaPermission createPermission(String amHost, org.xdi.oxauth.model.uma.UmaPermission permissionRequest, Date expirationDate);
 
-    void deletePermission(String resourceSetPermissionTicket);
+    void deletePermission(String ticket);
 
     void cleanupPermissions(Date now);
 }

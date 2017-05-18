@@ -31,30 +31,30 @@ public class RsResourceService {
     private Logger log;
 
     @Inject
-    private UmaResourceService resourceSetService;
+    private UmaResourceService resourceService;
 
     @Inject
     private ScopeService umaScopeService;
 
     public UmaResource getResource(RsResourceType p_type) {
         final UmaResource criteria = new UmaResource();
-        criteria.setDn(resourceSetService.getBaseDnForResourceSet());
+        criteria.setDn(resourceService.getBaseDnForResource());
         criteria.setName(p_type.getValue());
 
-        final List<UmaResource> ldapResourceSets = resourceSetService
-                .findResourceSets(criteria);
-        if (ldapResourceSets == null || ldapResourceSets.isEmpty()) {
+        final List<UmaResource> ldapResources = resourceService
+                .findResources(criteria);
+        if (ldapResources == null || ldapResources.isEmpty()) {
             log.trace("No resource set for type: {}", p_type);
-            return createResourceSet(p_type);
+            return createResource(p_type);
         } else {
-            final int size = ldapResourceSets.size();
-            final UmaResource first = ldapResourceSets.get(0);
+            final int size = ldapResources.size();
+            final UmaResource first = ldapResources.get(0);
             if (size > 1) {
                 // it's allowed to keep only one internal resource set for id generation : remove rest of resources
 
                 // skip first element
                 for (int i = 1; i < size; i++) {
-                    resourceSetService.remove(ldapResourceSets.get(i));
+                    resourceService.remove(ldapResources.get(i));
                 }
             }
             return first;
@@ -78,11 +78,11 @@ public class RsResourceService {
         return result;
     }
 
-    private UmaResource createResourceSet(RsResourceType p_type) {
-        log.trace("Creating new internal resource set, type: {} ...", p_type);
+    private UmaResource createResource(RsResourceType p_type) {
+        log.trace("Creating new internal resource, type: {} ...", p_type);
         // Create resource set description branch if needed
-        if (!resourceSetService.containsBranch()) {
-            resourceSetService.addBranch();
+        if (!resourceService.containsBranch()) {
+            resourceService.addBranch();
         }
 
         final String rsid = String.valueOf(System.currentTimeMillis());
@@ -92,7 +92,7 @@ public class RsResourceService {
         s.setId(rsid);
         s.setRev("1");
         s.setName(p_type.getValue());
-        s.setDn(resourceSetService.getDnForResourceSet(rsid));
+        s.setDn(resourceService.getDnForResource(rsid));
         s.setScopes(getScopeDns(p_type.getScopeTypes()));
 
 //            final Boolean addClient = appConfiguration.getUmaKeepClientDuringResourceRegistration();
@@ -100,7 +100,7 @@ public class RsResourceService {
 //                s.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
 //            }
 
-        resourceSetService.addResource(s);
+        resourceService.addResource(s);
         log.trace("New internal resource set created, type: {}.", p_type);
         return s;
     }
