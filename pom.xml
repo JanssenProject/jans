@@ -16,14 +16,14 @@
         <jackson.version>1.9.9</jackson.version>
         <slf4j.version>1.7.11</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>3.1.0_beta</oxauth.version>
+        <oxauth.version>3.1.0-SNAPSHOT</oxauth.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
         <guava.version>13.0.1</guava.version>
         <gwt.version>2.6.0</gwt.version>
         <gxt.version>3.1.0</gxt.version>
-        <oxlicense.version>3.1.0_beta</oxlicense.version>
+        <oxlicense.version>3.1.0-SNAPSHOT</oxlicense.version>
     </properties>
 
     <prerequisites>
@@ -73,7 +73,7 @@
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>uma-rs-resteasy</artifactId>
-                <version>3.1.0_beta</version>
+                <version>3.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sencha.gxt</groupId>
