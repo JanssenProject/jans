@@ -157,17 +157,16 @@ public class UmaPermission {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("ResourceSetPermission");
-        sb.append("{amHost='").append(amHost).append('\'');
-        sb.append(", host='").append(host).append('\'');
-        sb.append(", ticket='").append(ticket).append('\'');
-        sb.append(", configurationCode='").append(configurationCode).append('\'');
-        sb.append(", expirationDate=").append(expirationDate);
-        sb.append(", expired=").append(expired);
-        sb.append(", resourceId='").append(resourceId).append('\'');
-        sb.append(", scopes=").append(scopeDns);
-        sb.append('}');
-        return sb.toString();
+        return "UmaPermission{" +
+                "dn='" + dn + '\'' +
+                ", amHost='" + amHost + '\'' +
+                ", host='" + host + '\'' +
+                ", ticket='" + ticket + '\'' +
+                ", configurationCode='" + configurationCode + '\'' +
+                ", expirationDate=" + expirationDate +
+                ", resourceId='" + resourceId + '\'' +
+                ", scopeDns=" + scopeDns +
+                ", expired=" + expired +
+                '}';
     }
 }

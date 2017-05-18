@@ -213,7 +213,7 @@
 	</test>
 	<test name="UMA. Register resource set test" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.RegisterResourceSetWSTest" />
+			<class name="org.xdi.oxauth.uma.ws.rs.UmaRegisterResourceWSTest" />
 		</classes>
 	</test>
 	<test name="UMA. Register permission test" enabled="true">

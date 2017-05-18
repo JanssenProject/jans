@@ -82,14 +82,14 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
 
     @Override
     public String getPermissionTicketByConfigurationCode(String configurationCode, String clientDn) {
-        final UmaPermission permission = getResourceSetPermissionByConfigurationCode(configurationCode, clientDn);
+        final UmaPermission permission = getPermissionByConfigurationCode(configurationCode, clientDn);
         if (permission != null) {
             return permission.getTicket();
         }
         return null;
     }
 
-    public UmaPermission getResourceSetPermissionByConfigurationCode(String p_configurationCode, String clientDn) {
+    public UmaPermission getPermissionByConfigurationCode(String p_configurationCode, String clientDn) {
         try {
             final Filter filter = Filter.create(String.format("&(oxConfigurationCode=%s)", p_configurationCode));
             final List<UmaPermission> entries = ldapEntryManager.findEntries(clientDn, UmaPermission.class, filter);
@@ -103,9 +103,9 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
     }
 
     @Override
-    public void deletePermission(String p_ticket) {
+    public void deletePermission(String ticket) {
         try {
-            final UmaPermission permission = getPermissionByTicket(p_ticket);
+            final UmaPermission permission = getPermissionByTicket(ticket);
             if (permission != null) {
                 ldapEntryManager.remove(permission);
             }
@@ -116,7 +116,7 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
 
     @Override
     public void cleanupPermissions(final Date now) {
-        BatchOperation<UmaPermission> resourceSetPermissionBatchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
+        BatchOperation<UmaPermission> permissionBatchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
             @Override
             protected List<UmaPermission> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
@@ -142,7 +142,7 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
                 }
             }
         };
-        resourceSetPermissionBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
+        permissionBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     public void addBranch(String clientDn) {

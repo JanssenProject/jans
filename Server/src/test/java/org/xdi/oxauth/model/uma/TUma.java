@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.uma;
 
+import org.xdi.oxauth.model.uma.wrapper.Token;
+import org.xdi.oxauth.util.ServerUtil;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.util.ServerUtil;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -52,25 +52,25 @@ public class TUma {
 		return c.getConfiguration(configurationPath);
 	}
 
-	public static UmaResourceResponse registerResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
-			UmaResource p_resourceSet) {
-		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
-		return s.registerResourceSet(p_pat, p_umaRegisterResourcePath, p_resourceSet);
+	public static UmaResourceResponse registerResource(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
+													   UmaResource resource) {
+		final TRegisterResource s = new TRegisterResource(baseUri);
+		return s.registerResource(p_pat, p_umaRegisterResourcePath, resource);
 	}
 
-	public static UmaResourceResponse modifyResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
-			final String p_rsid, UmaResource p_resourceSet) {
-		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
-		return s.modifyResource(p_pat, p_umaRegisterResourcePath, p_rsid, p_resourceSet);
+	public static UmaResourceResponse modifyResource(URI baseUri, Token p_pat, String p_umaRegisterResourcePath,
+													 final String p_rsid, UmaResource resource) {
+		final TRegisterResource s = new TRegisterResource(baseUri);
+		return s.modifyResource(p_pat, p_umaRegisterResourcePath, p_rsid, resource);
 	}
 
-	public static List<String> getResourceSetList(URI baseUri, Token p_pat, String p_umaRegisterResourcePath) {
-		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
+	public static List<String> getResourceList(URI baseUri, Token p_pat, String p_umaRegisterResourcePath) {
+		final TRegisterResource s = new TRegisterResource(baseUri);
 		return s.getResourceList(p_pat, p_umaRegisterResourcePath);
 	}
 
-	public static void deleteResourceSet(URI baseUri, Token p_pat, String p_umaRegisterResourcePath, String p_id) {
-		final TRegisterResourceSet s = new TRegisterResourceSet(baseUri);
+	public static void deleteResource(URI baseUri, Token p_pat, String p_umaRegisterResourcePath, String p_id) {
+		final TRegisterResource s = new TRegisterResource(baseUri);
 		s.deleteResource(p_pat, p_umaRegisterResourcePath, p_id);
 	}
 

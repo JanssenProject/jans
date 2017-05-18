@@ -26,14 +26,12 @@ import java.util.List;
  *
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- *         Date: 24/12/2015
  */
 
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
 @JsonPropertyOrder({"resource_set_id", "scopes", "exp", "iat", "nbf"})
 @JsonIgnoreProperties(ignoreUnknown = true)
-//@JsonRootName(value = "resourceSetPermissionRequest")
 @XmlRootElement
 @ApiModel(value = "Register permission request.")
 public class UmaPermission implements Serializable {

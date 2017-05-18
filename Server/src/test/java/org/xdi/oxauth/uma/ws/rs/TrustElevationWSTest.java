@@ -1,25 +1,16 @@
 package org.xdi.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertNotNull;
-
-import java.net.URI;
-import java.util.Arrays;
-
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.ClaimToken;
-import org.xdi.oxauth.model.uma.ClaimTokenList;
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.RPTResponse;
-import org.xdi.oxauth.model.uma.UmaResourceResponse;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
-import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
-import org.xdi.oxauth.model.uma.TUma;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.model.uma.*;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+
+import java.net.URI;
+import java.util.Arrays;
+
+import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -34,7 +25,7 @@ public class TrustElevationWSTest extends BaseTest {
 	private static Token pat;
 	private static Token aat;
 	private static RPTResponse rpt;
-	private static UmaResourceResponse resourceSet;
+	private static UmaResourceResponse resource;
 	private static PermissionTicket ticket;
 
 	@Test
@@ -55,8 +46,8 @@ public class TrustElevationWSTest extends BaseTest {
 		UmaTestUtil.assert_(aat);
 		UmaTestUtil.assert_(rpt);
 
-		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
-		UmaTestUtil.assert_(resourceSet);
+		resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
+		UmaTestUtil.assert_(resource);
 	}
 
 	@Test(dependsOnMethods = { "init" })
@@ -64,7 +55,7 @@ public class TrustElevationWSTest extends BaseTest {
 	public void registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath)
 			throws Exception {
 		final UmaPermission r = new UmaPermission();
-		r.setResourceId(resourceSet.getId());
+		r.setResourceId(resource.getId());
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
 		ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
@@ -94,8 +85,8 @@ public class TrustElevationWSTest extends BaseTest {
 	@Test(dependsOnMethods = { "authorizePermission" })
 	@Parameters({ "umaRegisterResourcePath" })
 	public void cleanUp(String umaRegisterResourcePath) {
-		if (resourceSet != null) {
-			TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSet.getId());
+		if (resource != null) {
+			TUma.deleteResource(url, pat, umaRegisterResourcePath, resource.getId());
 		}
 	}
 
