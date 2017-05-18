@@ -1,11 +1,15 @@
 package org.xdi.service.cache;
 
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author yuriyz on 02/21/2017.
@@ -13,14 +17,21 @@ import java.util.concurrent.TimeUnit;
 
 public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
-    private static final Log log = Logging.getLog(InMemoryCacheProvider.class);
+	@Inject
+    private Logger log;
+
+    @Inject
+    private CacheConfiguration cacheConfiguration;
 
     private ExpiringMap<String, Object> map = ExpiringMap.builder().build();
 
-    private InMemoryConfiguration configuration = new InMemoryConfiguration();
+    private InMemoryConfiguration inMemoryConfiguration;
 
-    public InMemoryCacheProvider(InMemoryConfiguration configuration) {
-        this.configuration = configuration;
+    public InMemoryCacheProvider() {}
+
+    @PostConstruct
+    public void init() {
+    	this.inMemoryConfiguration = cacheConfiguration.getInMemoryConfiguration();
     }
 
     public void create() {
@@ -37,6 +48,7 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
         }
     }
 
+    @PreDestroy
     public void destroy() {
         log.debug("Destroying InMemoryCacheProvider");
 
@@ -64,7 +76,7 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
         try {
             return Integer.parseInt(expirationInSeconds);
         } catch (Exception e) {
-            return configuration.getDefaultPutExpiration();
+            return inMemoryConfiguration.getDefaultPutExpiration();
         }
     }
 

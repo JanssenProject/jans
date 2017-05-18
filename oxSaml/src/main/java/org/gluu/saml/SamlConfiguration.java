@@ -10,7 +10,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang.exception.CloneFailedException;
+import org.gluu.saml.exception.CloneFailedException;
 import org.xdi.util.security.CertificateHelper;
 
 /**
@@ -80,7 +80,7 @@ public class SamlConfiguration {
 	}
 
 	@Override
-	public Object clone() throws CloneNotSupportedException {
+	public Object clone() throws CloneFailedException {
 		try {
 			return BeanUtils.cloneBean(this);
 		} catch (Exception ex) {

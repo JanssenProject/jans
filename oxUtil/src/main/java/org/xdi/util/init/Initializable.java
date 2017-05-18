@@ -37,5 +37,10 @@ public abstract class Initializable {
 		this.initialized = true;
 	}
 
+	public boolean isInitialized() {
+		return initialized;
+	}
+
 	protected abstract void initInternal();
+
 }

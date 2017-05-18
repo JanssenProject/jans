@@ -4,23 +4,16 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.service;
 
-import org.apache.commons.io.IOUtils;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.xdi.model.GluuImage;
-import org.xdi.model.TrustContact;
-import org.xdi.util.StringHelper;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 
+import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -33,29 +26,35 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.xdi.model.GluuImage;
+import org.xdi.model.TrustContact;
+import org.xdi.util.StringHelper;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Service class to work with images in photo repository
  *
  * @author Yuriy Movchan Date: 01.11.2011
  */
-@Name("xmlService")
-@Scope(ScopeType.APPLICATION)
-@AutoCreate
-public class XmlService {
+@Stateless
+@Named
+public class XmlService implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = -4805285557592935972L;
+
+	@Inject
+    private Logger log;
 
     private JAXBContext jaxbContext;
     private Marshaller jaxbMarshaller;
     private Unmarshaller jaxbUnmarshaller;
 
-    @Create
+    @PostConstruct
     public void init() {
         try {
             this.jaxbContext = JAXBContext.newInstance(GluuImage.class, TrustContact.class);
@@ -244,14 +243,5 @@ public class XmlService {
 
 		return attributeNode.getNodeValue();
 	}
-
-    /**
-     * Get xmlService instance
-     *
-     * @return XmlService instance
-     */
-    public static XmlService instance() {
-        return (XmlService) Component.getInstance(XmlService.class);
-    }
 
 }

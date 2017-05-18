@@ -3,6 +3,7 @@ package org.gluu.oxserver.filters;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 
+import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -10,7 +11,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CORS wrapper to support both Tomcat and Jetty
@@ -18,14 +20,15 @@ import org.apache.log4j.Logger;
  * @author Yuriy Movchan
  * @version September 07, 2016
  */
-public class CorsFilter implements Filter {
+public class AbstractCorsFilter implements Filter {
 
-	private static final Logger LOG = Logger.getLogger(CorsFilter.class);
+	@Inject
+	private Logger log;
 
 	private static final String CORS_FILTERS[] = { "org.apache.catalina.filters.CorsFilter",
 			"org.eclipse.jetty.servlets.CrossOriginFilter" };
 	
-	Filter filter;
+	protected Filter filter;
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
@@ -62,13 +65,14 @@ public class CorsFilter implements Filter {
 		        resultFilter = (Filter) cons.newInstance();
 				break;
 			} catch (Exception ex) {
+                log.trace(ex.getMessage(), ex);
 			}
 		}
 		
 		if (resultFilter == null) {
-			LOG.error("Failed to prepare CORS filter");
+			log.error("Failed to prepare CORS filter");
 		} else {
-			LOG.debug("Prepared CORS filter: " + resultFilter);
+			log.debug("Prepared CORS filter: " + resultFilter);
 		}
 
 		return resultFilter;

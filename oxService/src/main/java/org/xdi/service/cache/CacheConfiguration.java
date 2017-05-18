@@ -2,12 +2,15 @@ package org.xdi.service.cache;
 
 import java.io.Serializable;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * @author yuriyz on 02/21/2017.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Vetoed
 public class CacheConfiguration implements Serializable {
 
 	private static final long serialVersionUID = 5047285980342633402L;

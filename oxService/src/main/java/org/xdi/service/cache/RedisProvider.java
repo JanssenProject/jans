@@ -1,29 +1,37 @@
 package org.xdi.service.cache;
 
+import java.io.Serializable;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.apache.commons.lang.SerializationUtils;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-
-import java.io.Serializable;
 
 /**
  * @author yuriyz on 02/23/2017.
  */
 public class RedisProvider extends AbstractCacheProvider<JedisPool> {
 
-    private static final Log log = Logging.getLog(InMemoryCacheProvider.class);
+	@Inject
+    private Logger log;
+
+    @Inject
+    private CacheConfiguration cacheConfiguration;
 
     private JedisPool pool;
+    private RedisConfiguration redisConfiguration;
 
-    private RedisConfiguration configuration = new RedisConfiguration();
+    public RedisProvider() {}
 
-    public RedisProvider(RedisConfiguration configuration) {
-        if (configuration != null) {
-            this.configuration = configuration;
-        }
+    @PostConstruct
+    public void init() {
+    	this.redisConfiguration = cacheConfiguration.getRedisConfiguration();
     }
 
     public void create() {
@@ -34,7 +42,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
             poolConfig.setMaxTotal(1000);
             poolConfig.setMinIdle(2);
 
-            pool = new JedisPool(poolConfig, configuration.getHost(), configuration.getPort());
+            pool = new JedisPool(poolConfig, redisConfiguration.getHost(), redisConfiguration.getPort());
 
             testConnection();
             log.debug("RedisProvider started.");
@@ -46,10 +54,11 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
     private void testConnection() {
         put("testKey", "testValue");
         if (!"testValue".equals(get("testKey"))) {
-            throw new RuntimeException("Failed to connect to redis server. Configuration: " + configuration);
+            throw new RuntimeException("Failed to connect to redis server. Configuration: " + redisConfiguration);
         }
     }
 
+    @PreDestroy
     public void destroy() {
         log.debug("Destroying RedisProvider");
 
@@ -95,7 +104,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
         try {
             return Integer.parseInt(expirationInSeconds);
         } catch (Exception e) {
-            return configuration.getDefaultPutExpiration();
+            return redisConfiguration.getDefaultPutExpiration();
         }
     }
 

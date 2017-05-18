@@ -13,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ImportPersonConfig implements Serializable {
+public class ImportPersonConfig implements Configuration, Serializable {
 	
 	private static final long serialVersionUID = 2686538577505167695L;
 
@@ -26,4 +26,5 @@ public class ImportPersonConfig implements Serializable {
 	public void setMappings(List<ImportPerson> mappings) {
 		this.mappings = mappings;
 	}
+
 }

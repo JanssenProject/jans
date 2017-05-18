@@ -6,7 +6,6 @@
 
 package org.xdi.service.metric;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,13 +16,6 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.jboss.seam.Component;
-import org.jboss.seam.contexts.Contexts;
-import org.jboss.seam.contexts.Lifecycle;
-import org.jboss.seam.servlet.ContextualHttpServletRequest;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.counter.CounterMetricData;
@@ -49,14 +41,19 @@ import com.codahale.metrics.Timer;
  * @author Yuriy Movchan Date: 08/03/2015
  */
 public class LdapEntryReporter extends ScheduledReporter {
-    /**
+
+    private final Clock clock;
+	private final MetricService metricService;
+	private Date startTime;
+
+	/**
      * Returns a new {@link Builder} for {@link LdapEntryReporter}.
      *
      * @param registry the registry to report
      * @return a {@link Builder} instance for a {@link LdapEntryReporter}
      */
-    public static Builder forRegistry(MetricRegistry registry, String metricServiceComponentName) {
-        return new Builder(registry, metricServiceComponentName);
+    public static Builder forRegistry(MetricRegistry registry, MetricService metricService) {
+        return new Builder(registry, metricService);
     }
 
     /**
@@ -71,16 +68,16 @@ public class LdapEntryReporter extends ScheduledReporter {
         private TimeUnit rateUnit;
         private TimeUnit durationUnit;
         private MetricFilter filter;
-		private String metricServiceComponentName;
+		private MetricService metricService;
 
-        private Builder(MetricRegistry registry, String metricServiceComponentName) {
+        private Builder(MetricRegistry registry, MetricService metricService) {
             this.registry = registry;
             this.clock = Clock.defaultClock();
             this.timeZone = TimeZone.getDefault();
             this.rateUnit = TimeUnit.SECONDS;
             this.durationUnit = TimeUnit.MILLISECONDS;
             this.filter = MetricFilter.ALL;
-            this.metricServiceComponentName = metricServiceComponentName;
+            this.metricService = metricService;
         }
 
         /**
@@ -138,23 +135,19 @@ public class LdapEntryReporter extends ScheduledReporter {
                                        timeZone,
                                        rateUnit,
                                        durationUnit,
-                                       filter, metricServiceComponentName);
+                                       filter, metricService);
         }
     }
-
-    private final Clock clock;
-	private final String metricServiceComponentName;
-	private Date startTime;
 
     private LdapEntryReporter(MetricRegistry registry,
                             Clock clock,
                             TimeZone timeZone,
                             TimeUnit rateUnit,
                             TimeUnit durationUnit,
-                            MetricFilter filter, String metricServiceComponentName) {
+                            MetricFilter filter, MetricService metricService) {
         super(registry, "ldap-reporter", filter, rateUnit, durationUnit);
         this.clock = clock;
-        this.metricServiceComponentName = metricServiceComponentName;
+        this.metricService = metricService;
         this.startTime = new Date();
     }
 
@@ -165,18 +158,11 @@ public class LdapEntryReporter extends ScheduledReporter {
                        SortedMap<String, Histogram> histograms,
                        SortedMap<String, Meter> meters,
                        SortedMap<String, Timer> timers) {
-        Lifecycle.beginCall();
-        try {
-            reportImpl(counters, timers);
-        } finally {
-			Lifecycle.endCall();
-		}
-
+        reportImpl(counters, timers);
     }
 
 	private void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
         final Date currentRunTime = new Date(clock.getTime());
-		final MetricService metricService = (MetricService) Component.getInstance(metricServiceComponentName);
 
         List<MetricEntry> metricEntries = new ArrayList<MetricEntry>();
         if (counters != null && !counters.isEmpty()) {
