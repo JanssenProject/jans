@@ -25,16 +25,18 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  *
  * @author Yuriy Movchan Date: 05/22/2015
  */
+@ApplicationScoped
+@Named
 public class ApplicationFactory {
+
+    @Inject
+    private Logger log;
     
     @Inject
     private ApplianceService applianceService;
     
     @Inject
     private EncryptionService encryptionService;
-
-    @Inject
-    private Logger log;
 
     @Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
