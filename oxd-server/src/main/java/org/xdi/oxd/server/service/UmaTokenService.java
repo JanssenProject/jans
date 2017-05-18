@@ -4,10 +4,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.*;
-import org.xdi.oxauth.client.service.ClientFactory;
 import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.client.uma.CreateGatService;
 import org.xdi.oxauth.client.uma.CreateRptService;
@@ -336,7 +336,9 @@ public class UmaTokenService {
     }
 
     public void putAat(String aat, String oxdId) {
-        final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint());
+        final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint();
+        final IntrospectionService introspectionService = ProxyFactory.create(IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
+
         final IntrospectionResponse response = introspectionService.introspectToken("Bearer " + getPat(oxdId).getToken(), aat);
         LOG.trace("Introspection for RP provided AAT: " + response);
 
