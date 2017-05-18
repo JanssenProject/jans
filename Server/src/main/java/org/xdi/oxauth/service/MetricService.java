@@ -41,8 +41,8 @@ public class MetricService extends org.xdi.service.metric.MetricService {
 	@Inject
     private StaticConfiguration staticConfiguration;
 
-    public void init() {
-    	init(this.appConfiguration.getMetricReporterInterval());
+    public void initTimer() {
+    	initTimer(this.appConfiguration.getMetricReporterInterval());
     }
 
 	@Override

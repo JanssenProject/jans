@@ -63,7 +63,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version April 28, 2017
+ * @version May 12, 2017
  */
 @Path("/oxauth")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -134,6 +134,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 if (authorizationGrant == null) {
                     builder = Response.status(400);
                     builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INVALID_TOKEN));
+                } else if (authorizationGrant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
+                    builder = Response.status(403);
+                    builder.entity(errorResponseFactory.getErrorAsJson(UserInfoErrorResponseType.INSUFFICIENT_SCOPE));
                 } else if (!authorizationGrant.getScopes().contains(DefaultScope.OPEN_ID.toString())
                         && !authorizationGrant.getScopes().contains(DefaultScope.PROFILE.toString())) {
                     builder = Response.status(403);
