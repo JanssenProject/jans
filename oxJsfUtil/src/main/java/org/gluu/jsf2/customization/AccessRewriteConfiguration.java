@@ -5,8 +5,10 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
+import org.ocpsoft.rewrite.param.ParameterizedPatternSyntaxException;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
+import org.python.jline.internal.Log;
 
 import javax.servlet.ServletContext;
 import java.io.File;
@@ -34,7 +36,11 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
         for (File files : xhtmlFiles) {
             String xhtmlPath = files.getAbsolutePath();
             String xhtmlUri = xhtmlPath.substring(path.length(), xhtmlPath.lastIndexOf(".xhtml"));
-            builder.addRule(Join.path(xhtmlUri).to(xhtmlUri + ".htm"));
+            try {
+				builder.addRule(Join.path(xhtmlUri).to(xhtmlUri + ".htm"));
+			} catch (ParameterizedPatternSyntaxException ex) {
+				Log.error("Failed to add rule for {}", xhtmlUri, ex);
+			}
         }
     }
 
