@@ -342,7 +342,7 @@ public class UmaTokenService {
         final IntrospectionResponse response = introspectionService.introspectToken("Bearer " + getPat(oxdId).getToken(), aat);
         LOG.trace("Introspection for RP provided AAT: " + response);
 
-        if (response.isActive()) {
+        if (!response.isActive()) {
             LOG.debug("AAT is not active.");
             throw new ErrorResponseException(ErrorResponseCode.PROVIDED_AAT_IS_INACTIVE);
         }
