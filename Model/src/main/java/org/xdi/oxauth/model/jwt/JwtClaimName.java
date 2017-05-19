@@ -8,7 +8,7 @@ package org.xdi.oxauth.model.jwt;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 November 12, 2014
+ * @version May 19, 2017
  */
 public final class JwtClaimName {
 
@@ -46,7 +46,7 @@ public final class JwtClaimName {
 
     /**
      * Authentication Methods References.
-     *
+     * <p>
      * JSON array of strings that are identifiers for authentication methods used in the authentication.
      * For instance, values might indicate that both password and OTP authentication methods were used.
      * The definition of particular values to be used in the amr Claim is beyond the scope of this specification.
@@ -214,7 +214,6 @@ public final class JwtClaimName {
     public static final String ADDRESS_COUNTRY = "country";
 
     // Custom attributes
-    public static final String OX_VALIDATION_URI = "oxValidationURI";
     public static final String OX_OPENID_CONNECT_VERSION = "oxOpenIDConnectVersion";
 
     /**
