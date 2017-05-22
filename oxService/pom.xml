@@ -76,6 +76,12 @@
             <scope>provided</scope>
         </dependency>
 
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>el-impl</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<!-- Jython -->
 		<dependency>
 			<groupId>org.python</groupId>
