@@ -73,6 +73,11 @@ public class SecurityExtension implements Extension, Serializable {
 			}
 
 			@Override
+			public <T extends Annotation> Set<T> getAnnotations(Class<T> annotationType) {
+				return (Set<T>) at.getAnnotations();
+			}
+
+			@Override
 			public Set<Annotation> getAnnotations() {
 				return at.getAnnotations();
 			}
