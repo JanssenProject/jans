@@ -19,6 +19,7 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>**/*.xml</include>
+					<include>**/services/*</include>
 					<include>**/*.properties</include>
 				</includes>
 			</resource>

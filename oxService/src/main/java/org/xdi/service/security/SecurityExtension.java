@@ -3,20 +3,18 @@ package org.xdi.service.security;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.configurator.AnnotatedMethodConfigurator;
+import javax.enterprise.inject.spi.configurator.AnnotatedTypeConfigurator;
 import javax.enterprise.util.AnnotationLiteral;
 
 /**
@@ -27,20 +25,23 @@ import javax.enterprise.util.AnnotationLiteral;
 public class SecurityExtension implements Extension, Serializable {
 	
 	private static final long serialVersionUID = 8135226493110893567L;
+	
+	private Map<Method, InterceptSecure> interceptSecureForMethods = new HashMap<Method, InterceptSecure>();;
 
     public <X> void processAnnotatedType(@Observes ProcessAnnotatedType<X> pat) {
 		// Wrap this to override the annotations of the class
 		final AnnotatedType<X> at = pat.getAnnotatedType();
+		final AnnotatedTypeConfigurator<X> cat = pat.configureAnnotatedType();
 		
 		// Collect Secure annotation from the type
         List<Secure> typeSecureAnnotations = new ArrayList<Secure>();
         for (Annotation annotation : pat.getAnnotatedType().getAnnotations()) {
             collectAnnotations(Secure.class, annotation, typeSecureAnnotations);
         }
-
+        
         // Collect the Secure annotations from the methods
-    	Map<Method, InterceptSecure> interceptSecureForMethods = new HashMap<Method, InterceptSecure>();
-        for (AnnotatedMethod<?> method : pat.getAnnotatedType().getMethods()) {
+        for (AnnotatedMethodConfigurator<? super X> methodConfiguration : cat.methods()) {
+        	AnnotatedMethod<?> method = methodConfiguration.getAnnotated();
             final List<Secure> methodAnnotations = new ArrayList<Secure>(typeSecureAnnotations);
 
             collectAnnotations(Secure.class, method, methodAnnotations);
@@ -48,73 +49,14 @@ public class SecurityExtension implements Extension, Serializable {
             // Store in the map if we find Secure annotations
             if (methodAnnotations.size() > 0) {
                 InterceptSecure is = new InterceptSecureImpl(methodAnnotations.toArray(new Secure[methodAnnotations.size()]));
+                System.out.println("InterceptSecure: " + is + "; is.size: " + is.value().length);
                 
                 // Add InterceptSecure annotation
-                method.getAnnotations().add(is);
+                methodConfiguration.add(is);
 
                 interceptSecureForMethods.put(method.getJavaMember(), is);
             }
         }
-
-        AnnotatedType<X> wrapped = new AnnotatedType<X>() {
-        	@Override
-			public Type getBaseType() {
-				return at.getBaseType();
-			}
-
-			@Override
-			public Set<Type> getTypeClosure() {
-				return at.getTypeClosure();
-			}
-
-			@Override
-			public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-				return at.getAnnotation(annotationType);
-			}
-
-			@Override
-			public <T extends Annotation> Set<T> getAnnotations(Class<T> annotationType) {
-				return (Set<T>) at.getAnnotations();
-			}
-
-			@Override
-			public Set<Annotation> getAnnotations() {
-				return at.getAnnotations();
-			}
-
-			@Override
-			public boolean isAnnotationPresent(Class<? extends Annotation> annotationType) {
-				if (InterceptSecure.class.equals(annotationType)) {
-					return true;
-				}
-
-				return at.isAnnotationPresent(annotationType);
-			}
-
-			@Override
-			public Class<X> getJavaClass() {
-				return at.getJavaClass();
-			}
-
-			@Override
-			public Set<AnnotatedConstructor<X>> getConstructors() {
-				return at.getConstructors();
-			}
-
-			@Override
-			public Set<AnnotatedMethod<? super X>> getMethods() {
-				return at.getMethods();
-			}
-
-			@Override
-			public Set<AnnotatedField<? super X>> getFields() {
-				return at.getFields();
-			}
-		};
-		
-		if (interceptSecureForMethods.size() > 0) {
-			pat.setAnnotatedType(wrapped);
-		}
     }
 
     private <T> void collectAnnotations(Class<T> annotationType, AnnotatedMethod method, List<T> values) {
@@ -129,7 +71,11 @@ public class SecurityExtension implements Extension, Serializable {
         }
     }
 
-    private static class InterceptSecureImpl extends AnnotationLiteral<InterceptSecure> implements InterceptSecure {
+    public InterceptSecure getInterceptSecure(Method method) {
+		return interceptSecureForMethods.get(method);
+	}
+
+	private static class InterceptSecureImpl extends AnnotationLiteral<InterceptSecure> implements InterceptSecure {
 
     	private final Secure[] values;
 

@@ -1,5 +1,7 @@
 package org.xdi.service.el;
 
+import java.io.Serializable;
+
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.enterprise.inject.Instance;
@@ -8,7 +10,9 @@ import javax.inject.Inject;
 /**
  * @author Yuriy Movchan Date: 05/22/2017
  */
-public class ExpressionEvaluator {
+public class ExpressionEvaluator implements Serializable {
+
+	private static final long serialVersionUID = -16629423172996440L;
 
 	@Inject
 	private Instance<ELContext> elContext;

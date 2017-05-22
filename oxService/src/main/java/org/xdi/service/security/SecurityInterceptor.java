@@ -1,16 +1,16 @@
 package org.xdi.service.security;
 
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 import org.xdi.service.el.ExpressionEvaluator;
-
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Yuriy Movchan Date: 05/22/2017
@@ -19,12 +19,17 @@ import java.util.Map;
 @InterceptSecure({})
 public class SecurityInterceptor implements Serializable {
 
+	private static final String KEY = "org.jboss.weld.interceptor.bindings";
+	
+	@Inject
+	private SecurityExtension securityExtension;
+    
     @Inject
     private ExpressionEvaluator expressionEvaluator;
 
     @AroundInvoke
     public Object invoke(InvocationContext ctx) throws Exception {
-        InterceptSecure is = ctx.getMethod().getAnnotation(InterceptSecure.class);
+    	InterceptSecure is = securityExtension.getInterceptSecure(ctx.getMethod());
 
         // SecurityChecking  restrictions
         Secure[] constraints = (is == null) ? new Secure[0] : is.value();
