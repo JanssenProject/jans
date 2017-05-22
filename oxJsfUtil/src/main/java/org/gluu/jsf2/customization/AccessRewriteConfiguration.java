@@ -5,10 +5,14 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.ocpsoft.rewrite.config.Configuration;
 import org.ocpsoft.rewrite.config.ConfigurationBuilder;
+import org.ocpsoft.rewrite.param.ParameterizedPatternSyntaxException;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+
+import org.python.jline.internal.Log;
 
 import javax.servlet.ServletContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -53,11 +57,16 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
             String xhtmlPath = file.getAbsolutePath();
             String xhtmlUri = xhtmlPath.substring(path.length(), xhtmlPath.lastIndexOf(".xhtml"));
 
-            String rewriteKey = file.getName().split("\\.")[0];
+        try {
+          String rewriteKey = file.getName().split("\\.")[0];
             if(rewriteMap.containsKey(rewriteKey))
                 builder.addRule(Join.path(rewriteMap.get(rewriteKey)).to(xhtmlUri + ".htm"));
             else
                 builder.addRule(Join.path(xhtmlUri).to(xhtmlUri + ".htm"));
+			  } catch (ParameterizedPatternSyntaxException ex) {
+				    Log.error("Failed to add rule for {}", xhtmlUri, ex);
+			  }
+            
         }
     }
 
