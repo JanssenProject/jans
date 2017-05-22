@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
 
-		<oxcore.version>3.1.0.weld-SNAPSHOT</oxcore.version>
+		<oxcore.version>3.1.0-SNAPSHOT</oxcore.version>
 		<oxeleven.version>3.1.0-SNAPSHOT</oxeleven.version>
 
 		<jackson.version>1.9.11</jackson.version>
