@@ -11,8 +11,10 @@ import java.lang.annotation.Target;
 @Target({ ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SecureVariable {
+
 	/**
 	 * @return Name of the variable
 	 */
 	String value();
+
 }

@@ -38,13 +38,12 @@ public class SecurityInterceptor implements Serializable {
         Map<String, Object> secureVars = computeParameterValues(ctx);
 
         for (Secure constraint : constraints) {
-            Boolean expressionValue = expressionEvaluator.evaluateValueExpression(constraint.value(), Boolean.class/*, secureVars*/);
+            Boolean expressionValue = expressionEvaluator.evaluateValueExpression(constraint.value(), Boolean.class, secureVars);
 
             if ((expressionValue == null) || !expressionValue) {
                 throw new SecurityEvaluationException();
             }
         }
-
 
         return ctx.proceed();
     }

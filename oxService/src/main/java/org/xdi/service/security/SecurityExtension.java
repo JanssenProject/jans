@@ -49,7 +49,6 @@ public class SecurityExtension implements Extension, Serializable {
             // Store in the map if we find Secure annotations
             if (methodAnnotations.size() > 0) {
                 InterceptSecure is = new InterceptSecureImpl(methodAnnotations.toArray(new Secure[methodAnnotations.size()]));
-                System.out.println("InterceptSecure: " + is + "; is.size: " + is.value().length);
                 
                 // Add InterceptSecure annotation
                 methodConfiguration.add(is);

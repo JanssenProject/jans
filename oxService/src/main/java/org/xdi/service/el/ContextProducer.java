@@ -10,6 +10,7 @@ import javax.el.ListELResolver;
 import javax.el.MapELResolver;
 import javax.el.ResourceBundleELResolver;
 import javax.el.VariableMapper;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.BeanManager;
 
@@ -21,13 +22,20 @@ import com.sun.el.lang.VariableMapperImpl;
  */
 public class ContextProducer {
 
-	@Produces
+	@Produces @RequestScoped
 	public  ELContext createELContext(BeanManager beanManager) {
-		return createELContext(createELResolver(beanManager), new FunctionMapperImpl(), new VariableMapperImpl());
+		// Create default resovler
+		CompositeELResolver resolver = createELResolver(beanManager);
+		
+		// Add constant resolver
+		ConstantResolver constantResolver = new ConstantResolver();
+        resolver.add(constantResolver);
+
+		return createELContext(resolver, new FunctionMapperImpl(), new VariableMapperImpl(), constantResolver);
 	}
 
-	private ELResolver createELResolver(BeanManager beanManager) {
-		CompositeELResolver resolver = new CompositeELResolver();
+	private CompositeELResolver createELResolver(BeanManager beanManager) {
+        CompositeELResolver resolver = new CompositeELResolver();
 		resolver.add(beanManager.getELResolver());
 		resolver.add(new MapELResolver());
 		resolver.add(new ListELResolver());
@@ -38,9 +46,9 @@ public class ContextProducer {
 		return resolver;
 	}
 
-	private ELContext createELContext(final ELResolver resolver, final FunctionMapper functionMapper,
-			final VariableMapper variableMapper) {
-		return new ELContext() {
+	private ExtendedELContext createELContext(final ELResolver resolver, final FunctionMapper functionMapper,
+			final VariableMapper variableMapper, final ConstantResolver constantResolver) {
+		return new ExtendedELContext() {
 			@Override
 			public ELResolver getELResolver() {
 				return resolver;
@@ -55,6 +63,12 @@ public class ContextProducer {
 			public VariableMapper getVariableMapper() {
 				return variableMapper;
 			}
+
+			@Override
+			public ConstantResolver getConstantResolver() {
+				return constantResolver;
+			}
 		};
 	}
+
 }
