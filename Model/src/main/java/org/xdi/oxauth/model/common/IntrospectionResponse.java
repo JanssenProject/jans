@@ -77,7 +77,7 @@ public class IntrospectionResponse {
     }
 
     public void setScopes(Collection<String> scopes) {
-        this.scopes = new ArrayList<String>(scopes);
+        this.scopes = scopes != null ? new ArrayList<String>(scopes) : new ArrayList<String>();
     }
 
     public Date getExpiresAt() {
