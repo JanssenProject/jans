@@ -82,7 +82,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                 if(StringUtils.isNotEmpty(value))
                     xhtmlNameToRewriteRule.put(navigationName.split("\\.")[0], value);
             } catch (Exception e) {
-                //
+                FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Failed to retreive rewrite rules", e);
             }
         }
         return xhtmlNameToRewriteRule;
