@@ -1,11 +1,11 @@
 package org.gluu.jsf2.service;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.faces.application.ViewHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Yuriy Movchan
@@ -14,13 +14,13 @@ import javax.servlet.http.HttpServletRequest;
 public class FacesResources {
 
 	@Produces
-	@Dependent
+	@RequestScoped
 	public FacesContext getFacesContext() {
 		return FacesContext.getCurrentInstance();
 	}
 
 	@Produces
-	@Dependent
+	@RequestScoped
 	public ExternalContext getExternalContext() {
 		FacesContext facesContext = getFacesContext();
 		if (facesContext != null) {
