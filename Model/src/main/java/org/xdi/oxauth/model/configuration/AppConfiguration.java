@@ -146,6 +146,12 @@ public class AppConfiguration implements Configuration {
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
 
+    /**
+     * Cookie will be expired after sessionCookieExpiration seconds
+     */
+    private Integer sessionCookieExpiration;
+
+
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
     }
@@ -1164,4 +1170,11 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
+    public Integer getSessionCookieExpiration() {
+        return sessionCookieExpiration;
+    }
+
+    public void setSessionCookieExpiration(Integer sessionCookieExpiration) {
+        this.sessionCookieExpiration = sessionCookieExpiration;
+    }
 }
