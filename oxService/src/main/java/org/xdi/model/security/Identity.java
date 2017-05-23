@@ -16,6 +16,7 @@ import javax.security.auth.login.LoginException;
 
 import org.slf4j.Logger;
 import org.xdi.model.security.event.Authenticated;
+import org.xdi.service.security.Secure;
 
 @RequestScoped
 @Named
@@ -223,6 +224,11 @@ public class Identity implements Serializable {
 			}
 		}
 		return false;
+	}
+
+	@Secure("#{identity.loggedIn}")
+	public boolean checkLoggedIn() {
+		return isLoggedIn();
 	}
 
 }
