@@ -6,24 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
@@ -49,8 +33,19 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -251,6 +246,14 @@ public class SessionStateService  {
 
         if (appConfiguration.getSessionStateHttpOnly()) {
             header += "; HttpOnly";
+        }
+
+        Integer sessionExpiration = appConfiguration.getSessionCookieExpiration();
+        if(sessionExpiration != null) {
+            DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
+            Calendar expirationDate = Calendar.getInstance();
+            expirationDate.add(Calendar.SECOND, sessionExpiration);
+            header += "; Expires="+formatter.format(expirationDate.getTime())+";";
         }
 
         httpResponse.addHeader("Set-Cookie", header);
