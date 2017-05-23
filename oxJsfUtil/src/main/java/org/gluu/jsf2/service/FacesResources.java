@@ -1,7 +1,6 @@
 package org.gluu.jsf2.service;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.faces.application.ViewHandler;
 import javax.faces.context.ExternalContext;
@@ -14,13 +13,13 @@ import javax.faces.context.FacesContext;
 public class FacesResources {
 
 	@Produces
-	@RequestScoped
+	@Dependent
 	public FacesContext getFacesContext() {
 		return FacesContext.getCurrentInstance();
 	}
 
 	@Produces
-	@RequestScoped
+	@Dependent
 	public ExternalContext getExternalContext() {
 		FacesContext facesContext = getFacesContext();
 		if (facesContext != null) {
