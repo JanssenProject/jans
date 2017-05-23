@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>org.xdi</groupId>
 		<artifactId>oxcore</artifactId>
-		<version>3.1.0.weld-SNAPSHOT</version>
+		<version>3.1.0-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -75,6 +75,12 @@
             <artifactId>jboss-ejb-api_3.2_spec</artifactId>
             <scope>provided</scope>
         </dependency>
+
+		<dependency>
+			<groupId>org.glassfish.web</groupId>
+			<artifactId>el-impl</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<!-- Jython -->
 		<dependency>
