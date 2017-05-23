@@ -10,6 +10,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
+import org.slf4j.Logger;
 import org.xdi.service.el.ExpressionEvaluator;
 
 /**
@@ -20,6 +21,9 @@ import org.xdi.service.el.ExpressionEvaluator;
 public class SecurityInterceptor implements Serializable {
 
 	private static final String KEY = "org.jboss.weld.interceptor.bindings";
+
+	@Inject
+	private Logger log;
 	
 	@Inject
 	private SecurityExtension securityExtension;
@@ -41,6 +45,7 @@ public class SecurityInterceptor implements Serializable {
             Boolean expressionValue = expressionEvaluator.evaluateValueExpression(constraint.value(), Boolean.class, secureVars);
 
             if ((expressionValue == null) || !expressionValue) {
+            	log.debug("Method: '{}' constrain '{}' evaluation is null or false!", ctx.getMethod(), constraint);
                 throw new SecurityEvaluationException();
             }
         }
