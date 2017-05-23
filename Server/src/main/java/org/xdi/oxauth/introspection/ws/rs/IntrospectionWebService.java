@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -81,7 +82,7 @@ public class IntrospectionWebService {
                             response.setExpiresAt(tokenToIntrospect.getExpirationDate());
                             response.setIssuedAt(tokenToIntrospect.getCreationDate());
                             response.setAcrValues(tokenToIntrospect.getAuthMode());
-                            response.setScopes(grantOfIntrospectionToken.getScopes()); // #433
+                            response.setScopes(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
                             response.setClientId(grantOfIntrospectionToken.getClientId());
                             response.setUsername(grantOfIntrospectionToken.getUserId());
                             response.setIssuer(appConfiguration.getIssuer());

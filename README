@@ -135,7 +135,6 @@ jwtToken.getIssuer();
 jwtToken.getUserId();
 jwtToken.getAudience();
 jwtToken.getOxInum();
-jwtToken.getOxValidationUri();
 jwtToken.getOxOpenIdConnectVersion();
 
 jwtToken.validateSignature(credentials));
