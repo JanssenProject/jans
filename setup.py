@@ -39,6 +39,10 @@ import getopt
 import hashlib
 import re
 import glob
+import base64
+
+from pyDes import *
+
 
 class Setup(object):
     def __init__(self, install_dir=None):
@@ -281,8 +285,6 @@ class Setup(object):
 
         self.apache_start_script = '/etc/init.d/httpd'
 
-        self.ldapEncodePWCommand = '%s/bin/encode-password' % self.ldapBaseFolder
-        self.oxEncodePWCommand = '%s/bin/encode.py' % self.gluuOptFolder
         self.defaultTrustStoreFN = '%s/jre/lib/security/cacerts' % self.jre_home
         self.defaultTrustStorePW = 'changeit'
 
@@ -851,6 +853,12 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
         return None
 
+    def obscure(self, data=""):
+        engine = triple_des(self.encode_salt, ECB, pad=None, padmode=PAD_PKCS5)
+        data = data.encode('ascii')
+        en_data = engine.encrypt(data)
+        return base64.b64encode(en_data)
+
     # ================================================================================
 
     def configure_httpd(self):
@@ -1198,14 +1206,10 @@ class Setup(object):
         self.logIt("Encoding passwords")
         try:
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
-
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.shibJksPass)
-            self.encoded_shib_jks_pw = os.popen(cmd, 'r').read().strip()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.ldapPass)
-            self.encoded_ox_ldap_pw = os.popen(cmd, 'r').read().strip()
+            self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
+            self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
             self.oxauthClient_pw = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.oxauthClient_pw)
-            self.oxauthClient_encoded_pw = os.popen(cmd, 'r').read().strip()
+            self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
         except:
             self.logIt("Error encoding passwords", True)
             self.logIt(traceback.format_exc(), True)
@@ -1214,16 +1218,13 @@ class Setup(object):
         self.logIt("Encoding test passwords")
         try:
             self.templateRenderingDict['oxauthClient_2_pw'] = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.templateRenderingDict['oxauthClient_2_pw'])
-            self.templateRenderingDict['oxauthClient_2_encoded_pw'] = os.popen(cmd, 'r').read().strip()
+            self.templateRenderingDict['oxauthClient_2_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_2_pw'])
 
             self.templateRenderingDict['oxauthClient_3_pw'] = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.templateRenderingDict['oxauthClient_3_pw'])
-            self.templateRenderingDict['oxauthClient_3_encoded_pw'] = os.popen(cmd, 'r').read().strip()
+            self.templateRenderingDict['oxauthClient_3_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_3_pw'])
 
             self.templateRenderingDict['oxauthClient_4_pw'] = self.getPW()
-            cmd = "%s %s" % (self.oxEncodePWCommand, self.templateRenderingDict['oxauthClient_4_pw'])
-            self.templateRenderingDict['oxauthClient_4_encoded_pw'] = os.popen(cmd, 'r').read().strip()
+            self.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(self.templateRenderingDict['oxauthClient_4_pw'])
         except:
             self.logIt("Error encoding test passwords", True)
             self.logIt(traceback.format_exc(), True)
@@ -1502,8 +1503,7 @@ class Setup(object):
     def generate_scim_configuration(self):
         self.scim_rs_client_jks_pass = self.getPW()
 
-        cmd = "%s %s" % (self.oxEncodePWCommand, self.scim_rs_client_jks_pass)
-        self.scim_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
+        self.scim_rs_client_jks_pass_encoded = self.obscure(self.scim_rs_client_jks_pass)
 
         self.scim_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.scim_rs_client_jks_fn, self.scim_rs_client_jks_pass)
         self.templateRenderingDict['scim_rs_client_base64_jwks'] = self.generate_base64_string(self.scim_rs_client_jwks, 1)
@@ -1514,8 +1514,7 @@ class Setup(object):
     def generate_passport_configuration(self):
         self.passport_rs_client_jks_pass = self.getPW()
 
-        cmd = "%s %s" % (self.oxEncodePWCommand, self.passport_rs_client_jks_pass)
-        self.passport_rs_client_jks_pass_encoded = os.popen(cmd, 'r').read().strip()
+        self.passport_rs_client_jks_pass_encoded = self.obscure(self.passport_rs_client_jks_pass)
 
         self.passport_rs_client_jwks = self.gen_openid_jwks_jks_keys(self.passport_rs_client_jks_fn, self.passport_rs_client_jks_pass)
         self.templateRenderingDict['passport_rs_client_base64_jwks'] = self.generate_base64_string(self.passport_rs_client_jwks, 1)
