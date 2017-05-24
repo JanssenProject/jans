@@ -30,6 +30,8 @@ public class UmaScopeDescription {
     @NotNull(message = "Display name should be not empty")
     @LdapAttribute(name = "displayName")
     private String displayName;
+    @LdapAttribute(name = "description")
+    private String description;
     @LdapAttribute(name = "owner")
     private String owner;
     @LdapAttribute(name = "oxFaviconImage")
@@ -55,6 +57,14 @@ public class UmaScopeDescription {
     private List<String> authorizationPolicies;
 
     public UmaScopeDescription() {
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public InternalExternal getType() {
@@ -159,6 +169,7 @@ public class UmaScopeDescription {
                 "dn='" + dn + '\'' +
                 ", inum='" + inum + '\'' +
                 ", displayName='" + displayName + '\'' +
+                ", description='" + description + '\'' +
                 ", owner='" + owner + '\'' +
                 ", faviconImageAsXml='" + faviconImageAsXml + '\'' +
                 ", id='" + id + '\'' +
