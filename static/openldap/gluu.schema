@@ -2636,11 +2636,11 @@ objectclass ( oxObjectClass:22 NAME 'oxApplicationConfiguration'
 	MAY ( ou $ oxConfApplication $ oxRevision )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( oxObjectClass:23 NAME 'oxAuthUmaResourceSet'
+objectclass ( oxObjectClass:23 NAME 'oxUmaResource'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxUrl )
+	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ description )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:24 NAME 'oxAuthUmaScopeDescription'
@@ -2650,7 +2650,7 @@ objectclass ( oxObjectClass:24 NAME 'oxAuthUmaScopeDescription'
 	MAY ( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyRule $ oxPolicyScriptDn $ oxRevision $ oxType $ oxUrl )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( oxObjectClass:25 NAME 'oxAuthUmaResourceSetPermission'
+objectclass ( oxObjectClass:25 NAME 'oxUmaResourcePermission'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
