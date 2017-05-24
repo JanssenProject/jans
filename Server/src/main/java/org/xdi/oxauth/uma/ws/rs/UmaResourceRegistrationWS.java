@@ -170,7 +170,7 @@ public class UmaResourceRegistrationWS {
 
             response.setId(ldapResource.getId());
             response.setName(ldapResource.getName());
-            response.setUri(ldapResource.getUrl());
+            response.setDescription(ldapResource.getDescription());
             response.setIconUri(ldapResource.getIconUri());
             response.setScopes(umaScopeService.getScopeUrlsByDns(ldapResource.getScopes()));
 
@@ -322,7 +322,7 @@ public class UmaResourceRegistrationWS {
         BeanUtils.copyProperties(ldapResource, resource);
 
         ldapResource.setName(resource.getName());
-        ldapResource.setUrl(resource.getUri());
+        ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
         ldapResource.setId(rsid);
         ldapResource.setRev("1");
@@ -359,7 +359,7 @@ public class UmaResourceRegistrationWS {
         ldapResource = ldapResources.get(0);
 
         ldapResource.setName(resource.getName());
-        ldapResource.setUrl(resource.getUri());
+        ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
         ldapResource.setScopes(umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resource.getScopes()));
         ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
