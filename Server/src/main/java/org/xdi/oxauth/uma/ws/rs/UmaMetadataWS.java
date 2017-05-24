@@ -28,11 +28,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 /**
- * The endpoint at which the requester can obtain UMA2 metadata configuration.
+ * The endpoint at which the requester can obtain UMA2 metadata.
  */
 @Path("/oxauth/uma2-configuration")
 @Api(value = "/.well-known/uma2-configuration", description = "The authorization server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/uma2-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the authorization server. ")
-public class UmaConfigurationWS {
+public class UmaMetadataWS {
 
     public static final String UMA_SCOPES_SUFFIX = "/uma/scopes";
 
