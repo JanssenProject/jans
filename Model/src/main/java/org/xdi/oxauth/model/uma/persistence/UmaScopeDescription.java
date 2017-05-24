@@ -6,25 +6,22 @@
 
 package org.xdi.oxauth.model.uma.persistence;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.util.List;
+
 /**
  * @author Yuriy Zabrovarnyy
- * @author Yuriy Movchan
- * @version 0.9, 22/04/2013
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthUmaScopeDescription"})
-public class ScopeDescription {
+public class UmaScopeDescription {
 
     @LdapDN
     private String dn;
@@ -57,7 +54,7 @@ public class ScopeDescription {
     @LdapAttribute(name = "oxPolicyScriptDn")
     private List<String> authorizationPolicies;
 
-    public ScopeDescription() {
+    public UmaScopeDescription() {
     }
 
     public InternalExternal getType() {
@@ -157,13 +154,20 @@ public class ScopeDescription {
 	}
 
     @Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("ScopeDescription [dn=").append(dn).append(", inum=").append(inum).append(", displayName=").append(displayName)
-				.append(", owner=").append(owner).append(", faviconImageAsXml=").append(faviconImageAsXml).append(", id=").append(id)
-				.append(", policyRule=").append(policyRule).append(", revision=").append(revision).append(", iconUrl=").append(iconUrl)
-				.append(", url=").append(url).append(", type=").append(type).append(", authorizationPolicies=")
-				.append(authorizationPolicies).append("]");
-		return builder.toString();
-	}
+    public String toString() {
+        return "UmaScopeDescription{" +
+                "dn='" + dn + '\'' +
+                ", inum='" + inum + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", owner='" + owner + '\'' +
+                ", faviconImageAsXml='" + faviconImageAsXml + '\'' +
+                ", id='" + id + '\'' +
+                ", policyRule='" + policyRule + '\'' +
+                ", revision='" + revision + '\'' +
+                ", iconUrl='" + iconUrl + '\'' +
+                ", url='" + url + '\'' +
+                ", type=" + type +
+                ", authorizationPolicies=" + authorizationPolicies +
+                '}';
+    }
 }

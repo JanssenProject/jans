@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement()
 @ApiModel(value = "A scope description is a JSON document")
-public class ScopeDescription {
+public class UmaScopeDescription {
 
     @ApiModelProperty(value = "A human-readable string describing some scope (extent) of access. This name MAY be used by the authorization server in any user interface it presents to the resource owner."
                  , required = true)

@@ -26,7 +26,7 @@ public class UmaTestUtil {
     private UmaTestUtil() {
     }
 
-    public static void assert_(ScopeDescription p_scopeDescription) {
+    public static void assert_(UmaScopeDescription p_scopeDescription) {
         assertNotNull(p_scopeDescription, "Scope description is null");
         assertTrue(StringUtils.isNotBlank(p_scopeDescription.getName()), "Scope name is empty");
     }
