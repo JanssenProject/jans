@@ -21,7 +21,7 @@ import java.util.List;
  * @version 2.0, date: 17/05/2017
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthUmaResourceSetPermission"})
+@LdapObjectClass(values = {"top", "oxUmaResourcePermission"})
 public class UmaPermission {
 
     @LdapDN

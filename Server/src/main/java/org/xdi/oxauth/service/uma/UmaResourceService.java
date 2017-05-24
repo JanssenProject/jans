@@ -203,7 +203,7 @@ public class UmaResourceService {
 
     public String getBaseDnForResource() {
         final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
-        return String.format("ou=resource_sets,%s", umaBaseDn);
+        return String.format("ou=resources,%s", umaBaseDn);
     }
 
 }
