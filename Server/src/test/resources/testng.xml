@@ -236,11 +236,6 @@
 			<class name="org.xdi.oxauth.comp.InumGeneratorTest" />
 		</classes>
 	</test>
-	<test name="ID Gen Service test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.comp.IdGenServiceTest" />
-		</classes>
-	</test>
 	<test name="Introspection endpoint test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.ws.rs.IntrospectionWebServiceEmbeddedTest" />
