@@ -96,8 +96,8 @@ public class UmaResource {
         return this;
     }
 
-    @JsonProperty(value = "scopes")
-    @XmlElement(name = "scopes")
+    @JsonProperty(value = "resource_scopes")
+    @XmlElement(name = "resource_scopes")
     public List<String> getScopes() {
         return scopes;
     }
