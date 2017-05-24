@@ -34,7 +34,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version January 11, 2017
+ * @version May 19, 2017
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
@@ -100,8 +100,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -174,8 +173,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -246,8 +244,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         // 4. Request access token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -371,8 +368,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -609,8 +605,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
