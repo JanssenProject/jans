@@ -297,26 +297,6 @@ oxRevision: 0
 oxType: external
 oxUrl: http://photoz.example.com/dev/scopes/all
 
-dn: inum=%(inumOrg)s!EBD9.5EDC,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
-objectClass: oxAuthUmaScopeDescription
-objectClass: top
-displayName: generate_id
-inum: %(inumOrg)s!EBD9.5EDC
-owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
-oxId: generate_id
-oxRevision: 0
-oxType: internal
-
-dn: inum=%(inumOrg)s!F366.715A,ou=resource_sets,ou=uma,o=%(inumOrg)s,o=gluu
-objectClass: oxAuthUmaResourceSet
-objectClass: top
-displayName: internal_generate_id
-inum: %(inumOrg)s!F366.715A
-owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
-oxFaviconImage: http://example.com/generate_id_icon.png
-oxId: 1428339837931
-oxRevision: 1
-
 ######################################
 # Sector Identifier
 ######################################

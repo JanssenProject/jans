@@ -4689,13 +4689,13 @@
                 "oxResource",
                 "oxRevision",
                 "oxType",
-                "oxUrl"
+                "description"
             ],
             "must": [
                 "objectclass"
             ],
             "names": [
-                "oxAuthUmaResourceSet"
+                "oxUmaResource"
             ],
             "oid": "oxObjectClass:23",
             "sup": [
@@ -4745,7 +4745,7 @@
                 "objectclass"
             ],
             "names": [
-                "oxAuthUmaResourceSetPermission"
+                "oxUmaResourcePermission"
             ],
             "oid": "oxObjectClass:25",
             "sup": [
