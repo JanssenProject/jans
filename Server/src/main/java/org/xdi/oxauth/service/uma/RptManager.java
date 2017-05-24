@@ -14,6 +14,7 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
+import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
@@ -22,6 +23,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.token.TokenService;
+import org.xdi.util.INumGenerator;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -38,9 +40,9 @@ import java.util.UUID;
  */
 @Stateless
 @Named
-public class RptManager extends AbstractRPTManager {
+public class RptManager {
 
-    private static final String ORGUNIT_OF_RPT = "uma_requester_permission_token";
+    private static final String ORGUNIT_OF_RPT = "uma_rpt";
 
     @Inject
     private Logger log;
@@ -65,7 +67,6 @@ public class RptManager extends AbstractRPTManager {
         return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
     }
 
-    @Override
     public void addRPT(UmaRPT p_rpt, String p_clientDn) {
         try {
             addBranchIfNeeded(p_clientDn);
@@ -78,7 +79,6 @@ public class RptManager extends AbstractRPTManager {
         }
     }
 
-    @Override
     public UmaRPT getRPTByCode(String rptCode) {
         try {
             final Filter filter = Filter.create(String.format("&(oxAuthTokenCode=%s)", rptCode));
@@ -93,7 +93,6 @@ public class RptManager extends AbstractRPTManager {
         return null;
     }
 
-    @Override
     public void deleteRPT(String rptCode) {
         try {
             final UmaRPT t = getRPTByCode(rptCode);
@@ -105,7 +104,6 @@ public class RptManager extends AbstractRPTManager {
         }
     }
 
-    @Override
     public void cleanupRPTs(final Date now) {
         BatchOperation<UmaRPT> rptBatchService = new BatchOperation<UmaRPT>(ldapEntryManager) {
             @Override
@@ -136,7 +134,6 @@ public class RptManager extends AbstractRPTManager {
         rptBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
-    @Override
     public void addPermissionToRPT(UmaRPT p_rpt, UmaPermission p_permission) {
         final List<String> permissions = new ArrayList<String>();
         if (p_rpt.getPermissions() != null) {
@@ -152,7 +149,6 @@ public class RptManager extends AbstractRPTManager {
         }
     }
 
-    @Override
     public List<UmaPermission> getRptPermissions(UmaRPT p_rpt) {
         final List<UmaPermission> result = new ArrayList<UmaPermission>();
         try {
@@ -171,7 +167,6 @@ public class RptManager extends AbstractRPTManager {
         return result;
     }
 
-    @Override
     public UmaRPT createRPT(String authorization, String amHost) {
         String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
         IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
@@ -182,7 +177,18 @@ public class RptManager extends AbstractRPTManager {
         return rpt;
     }
 
-    @Override
+    public UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat) {
+        final AccessToken accessToken = (AccessToken) grant.getAccessToken(aat);
+
+        try {
+            String code = UUID.randomUUID().toString() + "/" + INumGenerator.generate(8);
+            return new UmaRPT(code, new Date(), accessToken.getExpirationDate(), grant.getUserId(), grant.getClientId(), amHost);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            throw new RuntimeException("Failed to generate RPT, aat: " + aat, e);
+        }
+    }
+
     public UmaPermission getPermissionFromRPTByResourceId(UmaRPT p_rpt, String resourceId) {
         try {
             if (p_rpt != null && p_rpt.getPermissions() != null && Util.allNotBlank(resourceId)) {
