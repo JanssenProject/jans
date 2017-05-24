@@ -58,7 +58,7 @@ public class UmaValidationService {
    	private UmaResourceService resourceService;
 
     @Inject
-    private ScopeService umaScopeService;
+    private UmaScopeService umaScopeService;
 
     @Inject
     private AppConfiguration appConfiguration;

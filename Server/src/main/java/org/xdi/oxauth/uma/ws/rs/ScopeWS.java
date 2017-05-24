@@ -6,24 +6,19 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
-import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
+import org.xdi.oxauth.service.uma.UmaScopeService;
 import org.xdi.oxauth.util.ServerUtil;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -40,7 +35,7 @@ public class ScopeWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private ScopeService umaScopeService;
+    private UmaScopeService umaScopeService;
 
     @GET
     @Path("{id}")
@@ -49,9 +44,9 @@ public class ScopeWS {
         log.trace("UMA - get scope description: id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
-                final ScopeDescription scope = umaScopeService.getInternalScope(id);
+                final UmaScopeDescription scope = umaScopeService.getInternalScope(id);
                 if (scope != null) {
-                    final org.xdi.oxauth.model.uma.ScopeDescription jsonScope = new org.xdi.oxauth.model.uma.ScopeDescription();
+                    final org.xdi.oxauth.model.uma.UmaScopeDescription jsonScope = new org.xdi.oxauth.model.uma.UmaScopeDescription();
                     jsonScope.setIconUri(scope.getIconUrl());
                     jsonScope.setName(scope.getDisplayName());
                     return Response.status(Response.Status.OK).entity(ServerUtil.asJson(jsonScope)).build();

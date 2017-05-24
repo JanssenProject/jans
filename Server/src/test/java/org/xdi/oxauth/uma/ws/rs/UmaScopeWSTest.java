@@ -18,7 +18,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.ScopeDescription;
+import org.xdi.oxauth.model.uma.UmaScopeDescription;
 import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -57,7 +57,7 @@ public class UmaScopeWSTest extends BaseTest {
 
 		assertEquals(response.getStatus(), Response.Status.OK.getStatusCode(), "Unexpected response code.");
 
-		final ScopeDescription scope = TUma.readJsonValue(entity, ScopeDescription.class);
+		final UmaScopeDescription scope = TUma.readJsonValue(entity, UmaScopeDescription.class);
 
 		UmaTestUtil.assert_(scope);
 	}

@@ -14,8 +14,8 @@ import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.service.uma.RptManager;
-import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.service.uma.UmaRptManager;
+import org.xdi.oxauth.service.uma.UmaScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -44,13 +44,13 @@ public class RptStatusWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private RptManager rptManager;
+    private UmaRptManager rptManager;
 
     @Inject
     private UmaValidationService umaValidationService;
 
     @Inject
-    private ScopeService umaScopeService;
+    private UmaScopeService umaScopeService;
 
     @POST
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
