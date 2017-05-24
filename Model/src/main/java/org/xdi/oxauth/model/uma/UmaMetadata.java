@@ -18,14 +18,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Arrays;
 
 /**
- * UMA2 metadata configuration
+ * UMA2 metadata
  */
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @XmlRootElement
-@ApiModel(value = "UMA2 Configuration")
+@ApiModel(value = "UMA2 Metadata")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UmaConfiguration extends OAuth2Discovery {
+public class UmaMetadata extends OAuth2Discovery {
 
     @ApiModelProperty(required = false, value = "Static endpoint URI at which the authorization server declares that it interacts with end-user requesting parties to gather claims. If the authorization server also provides a claims interaction endpoint URI as part of its redirect_user hint in a need_info response to a client on authorization failure (see Section 3.3.6), that value overrides this metadata value. Providing the static endpoint URI is useful for enabling interactive claims gathering prior to any pushed-claims flows taking place, so that, for example, it is possible to gather requesting party authorization interactively for collecting all other claims in a \"silent\" fashion.")
     @JsonProperty(value = "claims_interaction_endpoint")

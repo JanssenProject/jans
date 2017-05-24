@@ -18,7 +18,7 @@ import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
 import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
@@ -31,7 +31,7 @@ import static org.testng.Assert.*;
  */
 public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
-    protected UmaConfiguration metadataConfiguration;
+    protected UmaMetadata metadata;
 
     //protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
 
@@ -46,15 +46,15 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @BeforeClass
     @Parameters({"umaMetaDataUrl"})
     public void init(final String umaMetaDataUrl) throws Exception {
-        this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
-        UmaTestUtil.assert_(this.metadataConfiguration);
+        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
+        UmaTestUtil.assert_(this.metadata);
 
-        //this.umaObtainRptTokenFlowHttpTest = new ObtainRptTokenFlowHttpTest(this.metadataConfiguration);
-        this.umaRegisterResourceFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
-        this.permissionFlowHttpTest = new UmaRegisterPermissionFlowHttpTest(this.metadataConfiguration);
+        //this.umaObtainRptTokenFlowHttpTest = new ObtainRptTokenFlowHttpTest(this.metadata);
+        this.umaRegisterResourceFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadata);
+        this.permissionFlowHttpTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
 
-        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadataConfiguration);
-        this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadataConfiguration);
+        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata);
+        this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadata);
     }
 
     //** 1 ******************************************************************************
@@ -70,7 +70,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         UmaTestUtil.assert_(m_pat);
 
         // Init UmaPatTokenAwareHttpTest test
-        this.umaRegisterResourceFlowHttpTest.m_pat = this.m_pat;
+        this.umaRegisterResourceFlowHttpTest.pat = this.m_pat;
 
         // Init UmaRegisterResourcePermissionFlowHttpTest test
         this.permissionFlowHttpTest.registerResourceTest = this.umaRegisterResourceFlowHttpTest;
@@ -121,7 +121,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         RptIntrospectionResponse tokenStatusResponse = null;
         try {
             //tokenStatusResponse = this.rptStatusService.requestRptStatus(
-            //        "Bearer " + m_pat.getAccessToken(),
+            //        "Bearer " + pat.getAccessToken(),
             //        this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
@@ -204,7 +204,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         RptIntrospectionResponse tokenStatusResponse = null;
         try {
             //tokenStatusResponse = this.rptStatusService.requestRptStatus(
-            //        "Bearer " + m_pat.getAccessToken(),
+            //        "Bearer " + pat.getAccessToken(),
             //        this.umaObtainRptTokenFlowHttpTest.rptToken, "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
