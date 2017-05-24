@@ -265,12 +265,6 @@
         </classes>
     </test>
 
-    <test name="ID Generation test (HTTP)" enabled="false">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.IdGenWsHttpTest"/>
-        </classes>
-    </test>
-
     <test name="Introspection test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWsHttpTest"/>
