@@ -40,7 +40,7 @@ public class TUma {
 		return r.requestRpt(p_rptPath, umaAmHost);
 	}
 
-	public static UmaConfiguration requestConfiguration(URI baseUri, final String configurationPath) {
+	public static UmaMetadata requestConfiguration(URI baseUri, final String configurationPath) {
 		final TConfiguration c = new TConfiguration(baseUri);
 		return c.getConfiguration(configurationPath);
 	}
