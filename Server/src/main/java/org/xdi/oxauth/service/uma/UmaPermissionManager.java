@@ -47,7 +47,7 @@ public class UmaPermissionManager {
     private StaticConfiguration staticConfiguration;
 
     @Inject
-    private ScopeService scopeService;
+    private UmaScopeService scopeService;
 
     public static String getDn(String clientDn, String ticket) {
         return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));

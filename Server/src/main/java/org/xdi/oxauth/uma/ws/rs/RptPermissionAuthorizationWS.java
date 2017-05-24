@@ -20,7 +20,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.uma.UmaPermissionManager;
-import org.xdi.oxauth.service.uma.RptManager;
+import org.xdi.oxauth.service.uma.UmaRptManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -45,7 +45,7 @@ public class RptPermissionAuthorizationWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private RptManager rptManager;
+    private UmaRptManager rptManager;
 
     @Inject
     private UmaPermissionManager permissionManager;

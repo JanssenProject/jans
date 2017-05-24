@@ -13,10 +13,10 @@ import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.ClaimTokenList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
+import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
-import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.service.uma.UmaScopeService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -40,7 +40,7 @@ public class AuthorizationService {
     private Logger log;
 
     @Inject
-    private ScopeService umaScopeService;
+    private UmaScopeService umaScopeService;
 
     @Inject
     private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
@@ -50,11 +50,11 @@ public class AuthorizationService {
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, UmaPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
         log.trace("Check policies for permission, id: '{}'", permission.getDn());
-        List<ScopeDescription> scopes = umaScopeService.getScopesByDns(permission.getScopeDns());
+        List<UmaScopeDescription> scopes = umaScopeService.getScopesByDns(permission.getScopeDns());
         return allowToAddPermission(grant, rpt, scopes, permission, httpRequest, claims);
     }
 
-    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<ScopeDescription> scopes,
+    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<UmaScopeDescription> scopes,
                                         UmaPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
         log.trace("Check policies for scopes: '{}'", scopes);
 
@@ -79,10 +79,10 @@ public class AuthorizationService {
         }
     }
 
-    private Set<String> getAuthorizationPolicies(List<ScopeDescription> scopes) {
+    private Set<String> getAuthorizationPolicies(List<UmaScopeDescription> scopes) {
         HashSet<String> result = new HashSet<String>();
 
-        for (ScopeDescription scope : scopes) {
+        for (UmaScopeDescription scope : scopes) {
             List<String> authorizationPolicies = scope.getAuthorizationPolicies();
             if (authorizationPolicies != null) {
                 result.addAll(authorizationPolicies);

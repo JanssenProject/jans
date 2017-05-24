@@ -25,7 +25,7 @@ import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.RptManager;
+import org.xdi.oxauth.service.uma.UmaRptManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -51,7 +51,7 @@ public class CreateRptWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private RptManager rptManager;
+    private UmaRptManager rptManager;
 
     @Inject
     private UmaValidationService umaValidationService;

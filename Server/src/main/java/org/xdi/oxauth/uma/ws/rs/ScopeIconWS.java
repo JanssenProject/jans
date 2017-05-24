@@ -21,8 +21,8 @@ import org.xdi.model.GluuImage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
-import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
+import org.xdi.oxauth.service.uma.UmaScopeService;
 import org.xdi.service.XmlService;
 
 import com.wordnik.swagger.annotations.Api;
@@ -43,7 +43,7 @@ public class ScopeIconWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private ScopeService umaScopeService;
+    private UmaScopeService umaScopeService;
 
     @Inject
     private XmlService xmlService;
@@ -55,7 +55,7 @@ public class ScopeIconWS {
         log.trace("UMA - get scope's icon : id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
-                final ScopeDescription scope = umaScopeService.getInternalScope(id);
+                final UmaScopeDescription scope = umaScopeService.getInternalScope(id);
                 if (scope != null && StringUtils.isNotBlank(scope.getFaviconImageAsXml())) {
                     final GluuImage gluuImage = xmlService.getGluuImageFromXML(scope.getFaviconImageAsXml());
 

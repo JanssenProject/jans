@@ -40,7 +40,7 @@ import java.util.UUID;
  */
 @Stateless
 @Named
-public class RptManager {
+public class UmaRptManager {
 
     private static final String ORGUNIT_OF_RPT = "uma_rpt";
 
