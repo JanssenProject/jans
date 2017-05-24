@@ -17,25 +17,25 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
+import org.xdi.util.INumGenerator;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
- * Holds resource set permission tokens and permissions
+ * Holds permission tokens and permissions
  *
- * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 11/02/2013
  */
 @Stateless
 @Named
-public class UmaPermissionManager extends UmaAbstractPermissionManager {
+public class UmaPermissionManager {
 
-    private static final String ORGUNIT_OF_RESOURCE_PERMISSION = "uma_resource_set_permission";
+    private static final String ORGUNIT_OF_RESOURCE_PERMISSION = "uma_permission";
 
     @Inject
     private Logger log;
@@ -46,6 +46,9 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private ScopeService scopeService;
+
     public static String getDn(String clientDn, String ticket) {
         return String.format("oxTicket=%s,%s", ticket, getBranchDn(clientDn));
     }
@@ -54,7 +57,13 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
         return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_PERMISSION, clientDn);
     }
 
-    @Override
+    public UmaPermission createPermission(String amHost, org.xdi.oxauth.model.uma.UmaPermission permissionRequest, Date expirationDate) {
+        final String ticket = UUID.randomUUID().toString();
+        final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
+        return new UmaPermission(permissionRequest.getResourceId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(permissionRequest.getScopes()),
+                amHost, "", ticket, configurationCode, expirationDate);
+    }
+
     public void addPermission(UmaPermission permission, String clientDn) {
         try {
             addBranchIfNeeded(clientDn);
@@ -65,7 +74,6 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
         }
     }
 
-    @Override
     public UmaPermission getPermissionByTicket(String ticket) {
         try {
             final String baseDn = staticConfiguration.getBaseDn().getClients();
@@ -80,7 +88,6 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
         return null;
     }
 
-    @Override
     public String getPermissionTicketByConfigurationCode(String configurationCode, String clientDn) {
         final UmaPermission permission = getPermissionByConfigurationCode(configurationCode, clientDn);
         if (permission != null) {
@@ -102,7 +109,6 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
         return null;
     }
 
-    @Override
     public void deletePermission(String ticket) {
         try {
             final UmaPermission permission = getPermissionByTicket(ticket);
@@ -114,7 +120,6 @@ public class UmaPermissionManager extends UmaAbstractPermissionManager {
         }
     }
 
-    @Override
     public void cleanupPermissions(final Date now) {
         BatchOperation<UmaPermission> permissionBatchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
             @Override
