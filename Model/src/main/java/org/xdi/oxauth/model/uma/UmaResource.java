@@ -32,35 +32,34 @@ import java.util.List;
 @ApiModel(value = "The resource server defines a resource set that the authorization server needs to be aware of by registering a resource set description at the authorization server. This registration process results in a unique identifier for the resource set that the resource server can later use for managing its description.")
 public class UmaResource {
 
-    @ApiModelProperty(value = " A human-readable string describing a set of one or more resources. This name MAY be used by the authorization server in its resource owner user interface for the resource owner."
-              , required = true)
-    private String name;
+    @ApiModelProperty(value = "An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions."
+            , required = true)
+    private List<String> scopes;
 
-    @ApiModelProperty(value = "A URI that provides the network location for the resource set being registered. For example, if the resource set corresponds to a digital photo, the value of this property could be an HTTP-based URI identifying the location of the photo on the web. The authorization server can use this information in various ways to inform clients about a resource set's location."
-              , required = false)
-    private String uri;
+    @ApiModelProperty(value = "A human-readable string describing the resource at length. The authorization server MAY use this description in any user interface it presents to a resource owner, for example, for resource protection monitoring or policy setting."
+            , required = false)
+    private String description;
 
     @ApiModelProperty(value = "A URI for a graphic icon representing the resource set. The referenced icon MAY be used by the authorization server in its resource owner user interface for the resource owner."
-              , required = false)
+            , required = false)
     private String iconUri;
 
-    @ApiModelProperty(value = "An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions."
+    @ApiModelProperty(value = " A human-readable string describing a set of one or more resources. This name MAY be used by the authorization server in its resource owner user interface for the resource owner."
               , required = false)
-    private List<String> scopes;
+    private String name;
 
     @ApiModelProperty(value = " A string uniquely identifying the semantics of the resource set. For example, if the resource set consists of a single resource that is an identity claim that leverages standardized claim semantics for \"verified email address\", the value of this property could be an identifying URI for this claim."
                   , required = false)
     private String type;
 
-    @JsonProperty(value = "uri")
-    @XmlElement(name = "uri")
-    public String getUri() {
-        return uri;
+    @JsonProperty(value = "description")
+    @XmlElement(name = "description")
+    public String getDescription() {
+        return description;
     }
 
-    public UmaResource setUri(String uri) {
-        this.uri = uri;
-        return this;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @JsonProperty(value = "type")
@@ -111,9 +110,9 @@ public class UmaResource {
     public String toString() {
         return "UmaResource{" +
                 "name='" + name + '\'' +
-                ", uri='" + uri + '\'' +
-                ", iconUri='" + iconUri + '\'' +
                 ", scopes=" + scopes +
+                ", description='" + description + '\'' +
+                ", iconUri='" + iconUri + '\'' +
                 ", type='" + type + '\'' +
                 '}';
     }
