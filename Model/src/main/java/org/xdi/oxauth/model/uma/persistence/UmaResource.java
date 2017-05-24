@@ -58,7 +58,7 @@ public class UmaResource {
     private String description;
 
     @LdapAttribute(name = "oxType")
-    private InternalExternal type;
+    private String type;
 
     public String getDn() {
         return dn;
@@ -100,12 +100,12 @@ public class UmaResource {
         clients = p_clients;
     }
 
-    public InternalExternal getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(InternalExternal p_type) {
-        type = p_type;
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getName() {

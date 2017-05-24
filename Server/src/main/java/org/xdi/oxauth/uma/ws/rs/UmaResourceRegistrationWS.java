@@ -8,17 +8,16 @@ package org.xdi.oxauth.uma.ws.rs;
 
 import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.*;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaResource;
 import org.xdi.oxauth.model.uma.UmaResourceResponse;
 import org.xdi.oxauth.model.uma.UmaResourceWithId;
-import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.UmaResourceService;
 import org.xdi.oxauth.service.uma.UmaScopeService;
@@ -32,8 +31,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * The API available at the resource registration endpoint enables the resource server to put resources under
@@ -82,8 +82,8 @@ public class UmaResourceRegistrationWS {
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    @ApiOperation(value = "Adds a new resource set description using the POST method",
-            notes = "Adds a new resource set description using the POST method. If the request is successful, the authorization server MUST respond with a status message that includes an _id property.")
+    @ApiOperation(value = "Adds a new resource description using the POST method",
+            notes = "Adds a new resource description using the POST method. If the request is successful, the authorization server MUST respond with a status message that includes an _id property.")
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "Unauthorized")
     })
@@ -93,7 +93,7 @@ public class UmaResourceRegistrationWS {
             @ApiParam(value = "Resource description", required = true)
             UmaResource resource) {
         try {
-            String id = generatedId();
+            String id = UUID.randomUUID().toString();
             log.trace("Try to create resource, id: {}", id);
 
             umaValidationService.assertHasProtectionScope(authorization);
@@ -139,11 +139,6 @@ public class UmaResourceRegistrationWS {
         }
     }
 
-    // it's almost impossible to get simultaneous calls at the very same millisecond but lets anyway synchronize it.
-    private synchronized String generatedId() {
-        return String.valueOf(System.currentTimeMillis());
-    }
-
     @GET
     @Path("{rsid}")
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
@@ -173,6 +168,7 @@ public class UmaResourceRegistrationWS {
             response.setDescription(ldapResource.getDescription());
             response.setIconUri(ldapResource.getIconUri());
             response.setScopes(umaScopeService.getScopeUrlsByDns(ldapResource.getScopes()));
+            response.setType(ldapResource.getType());
 
             final ResponseBuilder builder = Response.ok();
             builder.entity(ServerUtil.asJson(response)); // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
@@ -319,7 +315,6 @@ public class UmaResourceRegistrationWS {
         final List<String> scopeDNs = umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resource.getScopes());
 
         final org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = new org.xdi.oxauth.model.uma.persistence.UmaResource();
-        BeanUtils.copyProperties(ldapResource, resource);
 
         ldapResource.setName(resource.getName());
         ldapResource.setDescription(resource.getDescription());
@@ -329,11 +324,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setCreator(userDn);
         ldapResource.setDn(resourceDn);
         ldapResource.setScopes(scopeDNs);
-
-        final Boolean addClient = appConfiguration.getUmaKeepClientDuringResourceRegistration();
-        if (addClient != null ? addClient : true) {
-            ldapResource.setClients(new ArrayList<String>(Arrays.asList(clientDn)));
-        }
+        ldapResource.setClients(new ArrayList<String>(Collections.singletonList(clientDn)));
 
         resourceService.addResource(ldapResource);
 
@@ -363,6 +354,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setIconUri(resource.getIconUri());
         ldapResource.setScopes(umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resource.getScopes()));
         ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
+        ldapResource.setType(resource.getType());
 
         resourceService.updateResource(ldapResource);
 
