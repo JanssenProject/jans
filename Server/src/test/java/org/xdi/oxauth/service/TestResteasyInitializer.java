@@ -9,7 +9,6 @@ package org.xdi.oxauth.service;
 import org.xdi.oxauth.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import org.xdi.oxauth.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
 import org.xdi.oxauth.gluu.ws.rs.GluuConfigurationWS;
-import org.xdi.oxauth.idgen.ws.rs.IdGenRestWebService;
 import org.xdi.oxauth.introspection.ws.rs.IntrospectionWebService;
 import org.xdi.oxauth.jwk.ws.rs.JwkRestWebServiceImpl;
 import org.xdi.oxauth.register.ws.rs.RegisterRestWebServiceImpl;
@@ -44,7 +43,6 @@ public class TestResteasyInitializer extends Application {
         classes.add(ClientInfoRestWebServiceImpl.class);
         classes.add(JwkRestWebServiceImpl.class);
         classes.add(EndSessionRestWebServiceImpl.class);
-        classes.add(IdGenRestWebService.class);
 
         classes.add(CreateRptWS.class);
         classes.add(PermissionRegistrationWS.class);
