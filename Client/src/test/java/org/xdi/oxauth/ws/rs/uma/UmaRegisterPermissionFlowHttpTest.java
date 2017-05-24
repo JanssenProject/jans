@@ -16,7 +16,7 @@ import org.xdi.oxauth.client.uma.UmaPermissionService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 import javax.ws.rs.core.Response;
@@ -32,7 +32,7 @@ import static org.testng.Assert.*;
  */
 public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
-    protected UmaConfiguration metadataConfiguration;
+    protected UmaMetadata metadata;
 
     protected RegisterResourceFlowHttpTest registerResourceTest;
     protected String ticketForFullAccess;
@@ -40,20 +40,20 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     public UmaRegisterPermissionFlowHttpTest() {
     }
 
-    public UmaRegisterPermissionFlowHttpTest(UmaConfiguration metadataConfiguration) {
-        this.metadataConfiguration = metadataConfiguration;
+    public UmaRegisterPermissionFlowHttpTest(UmaMetadata metadataConfiguration) {
+        this.metadata = metadataConfiguration;
     }
 
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret,
                      final String umaPatClientId, final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
-        if (this.metadataConfiguration == null) {
-            this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
-            UmaTestUtil.assert_(this.metadataConfiguration);
+        if (this.metadata == null) {
+            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
+            UmaTestUtil.assert_(this.metadata);
         }
 
-        this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadataConfiguration);
+        this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.setAuthorizationEndpoint(authorizationEndpoint);
         this.registerResourceTest.setTokenEndpoint(tokenEndpoint);
         this.registerResourceTest.init(umaMetaDataUrl, umaPatClientId, umaPatClientSecret);
@@ -78,7 +78,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
     public String registerResourcePermission(final String umaAmHost, String resourceId, List<String> scopes) throws Exception {
         UmaPermissionService permissionService = UmaClientFactory.instance().
-                createPermissionService(this.metadataConfiguration);
+                createPermissionService(this.metadata);
 
         // Register permissions for resource
         UmaPermission permissionRequest = new UmaPermission();
@@ -88,7 +88,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         PermissionTicket t = null;
         try {
             t = permissionService.registerPermission(
-                    "Bearer " + this.registerResourceTest.m_pat.getAccessToken(), umaAmHost, permissionRequest);
+                    "Bearer " + this.registerResourceTest.pat.getAccessToken(), umaAmHost, permissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -107,7 +107,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     public void testRegisterPermissionForInvalidResource(final String umaAmHost) throws Exception {
         showTitle("testRegisterPermissionForInvalidResource");
 
-        UmaPermissionService permissionService = UmaClientFactory.instance().createPermissionService(this.metadataConfiguration);
+        UmaPermissionService permissionService = UmaClientFactory.instance().createPermissionService(this.metadata);
 
         // Register permissions for resource
         UmaPermission permissionRequest = new UmaPermission();
@@ -118,7 +118,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         PermissionTicket permissionTicket = null;
         try {
             permissionTicket = permissionService.registerPermission(
-                    "Bearer " + this.registerResourceTest.m_pat.getAccessToken(), umaAmHost, permissionRequest);
+                    "Bearer " + this.registerResourceTest.pat.getAccessToken(), umaAmHost, permissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");

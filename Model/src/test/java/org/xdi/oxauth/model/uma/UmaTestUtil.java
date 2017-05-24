@@ -39,7 +39,7 @@ public class UmaTestUtil {
         assertNotNull(p_rptStatus.getExpiresAt(), "Expiration date is null");
     }
 
-    public static void assert_(UmaConfiguration configuration) {
+    public static void assert_(UmaMetadata configuration) {
         assertNotNull(configuration, "Meta data configuration is null");
         assertNotNull(configuration.getIssuer(), "Issuer isn't correct");
         assertNotNull(configuration.getTokenEndpoint(), "Token endpoint isn't correct");

@@ -6,21 +6,21 @@
 
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
 
 /**
- * The endpoint at which the requester can obtain UMA metadata configuration.
+ * The endpoint at which the requester can obtain UMA metadata.
  *
  * @author Yuriy Zabrovarnyy
  */
-public interface UmaConfigurationService {
+public interface UmaMetadataService {
 
 	@GET
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
-	UmaConfiguration getMetadataConfiguration();
+	UmaMetadata getMetadata();
 
 }

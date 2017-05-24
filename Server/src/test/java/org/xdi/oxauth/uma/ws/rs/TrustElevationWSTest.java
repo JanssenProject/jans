@@ -72,7 +72,7 @@ public class TrustElevationWSTest extends BaseTest {
 //		assertNotNull(response, "Token response status is null");
 
 		// final RptIntrospectionResponse status = TUma.requestRptStatus(this,
-		// umaRptStatusPath, umaAmHost, m_pat, m_rpt.getRpt());
+		// umaRptStatusPath, umaAmHost, pat, m_rpt.getRpt());
 		// UmaTestUtil.assert_(status);
 	}
 

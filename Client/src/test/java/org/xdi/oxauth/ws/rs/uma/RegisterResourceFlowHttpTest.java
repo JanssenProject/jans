@@ -15,7 +15,7 @@ import org.xdi.oxauth.client.uma.UmaResourceService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.UmaResourceResponse;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaResource;
 import org.xdi.oxauth.model.uma.UmaResourceWithId;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -34,28 +34,28 @@ import static org.testng.Assert.*;
  */
 public class RegisterResourceFlowHttpTest extends BaseTest {
 
-    protected UmaConfiguration metadataConfiguration;
-    protected Token m_pat;
+    protected UmaMetadata metadata;
+    protected Token pat;
 
     protected String resourceId;
 
     public RegisterResourceFlowHttpTest() {
     }
 
-    public RegisterResourceFlowHttpTest(UmaConfiguration metadataConfiguration) {
-        this.metadataConfiguration = metadataConfiguration;
+    public RegisterResourceFlowHttpTest(UmaMetadata metadataConfiguration) {
+        this.metadata = metadataConfiguration;
     }
 
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        if (this.metadataConfiguration == null) {
-            this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
-            UmaTestUtil.assert_(this.metadataConfiguration);
+        if (this.metadata == null) {
+            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
+            UmaTestUtil.assert_(this.metadata);
         }
 
-        m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
-        UmaTestUtil.assert_(m_pat);
+        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
+        UmaTestUtil.assert_(pat);
     }
 
     /**
@@ -68,7 +68,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     }
 
     public String registerResource(List<String> scopes) throws Exception {
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadata);
 
         // Add resource description
         UmaResourceResponse resourceStatus = null;
@@ -78,7 +78,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(scopes);
 
-            resourceStatus = resourceService.addResource("Bearer " + m_pat.getAccessToken(), resource);
+            resourceStatus = resourceService.addResource("Bearer " + pat.getAccessToken(), resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -97,7 +97,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void testModifyResource() throws Exception {
         showTitle("testModifyResource");
 
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadata);
 
         // Modify resource description
         UmaResourceResponse resourceStatus = null;
@@ -107,7 +107,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceStatus = resourceService.updateResource("Bearer " + m_pat.getAccessToken(), this.resourceId, resource);
+            resourceStatus = resourceService.updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -125,7 +125,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void testModifyNotExistingResource() throws Exception {
         showTitle("testModifyNotExistingResource");
 
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadata);
 
         // Modify resource description with non existing Id
         UmaResourceResponse resourceStatus = null;
@@ -135,7 +135,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceStatus = resourceService.updateResource("Bearer " + m_pat.getAccessToken(), this.resourceId, resource);
+            resourceStatus = resourceService.updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.NOT_FOUND.getStatusCode(), "Unexpected response status");
@@ -151,7 +151,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void testModifyResourceWithInvalidPat() throws Exception {
         showTitle("testModifyResourceWithInvalidPat");
 
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadata);
 
         // Modify resource description with invalid PAT
         UmaResourceResponse resourceStatus = null;
@@ -161,7 +161,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceStatus = resourceService.updateResource("Bearer " + m_pat.getAccessToken() + "_invalid", this.resourceId + "_invalid", resource);
+            resourceStatus = resourceService.updateResource("Bearer " + pat.getAccessToken() + "_invalid", this.resourceId + "_invalid", resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.UNAUTHORIZED.getStatusCode(), "Unexpected response status");
@@ -177,12 +177,12 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void testGetOneResource() throws Exception {
         showTitle("testGetOneResource");
 
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadata);
 
         // Get list of resource set descriptions
         UmaResourceWithId resources = null;
         try {
-            resources = resourceService.getResource("Bearer " + m_pat.getAccessToken(), this.resourceId);
+            resources = resourceService.getResource("Bearer " + pat.getAccessToken(), this.resourceId);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -198,12 +198,12 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void testGetResources() throws Exception {
         showTitle("testGetResources");
 
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadata);
 
         // Get list of resource set descriptions
         List<String> resources = null;
         try {
-            resources = resourceService.getResourceList("Bearer " + m_pat.getAccessToken(), "");
+            resources = resourceService.getResourceList("Bearer " + pat.getAccessToken(), "");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -220,12 +220,12 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void testDeleteResource() throws Exception {
         showTitle("testDeleteResource");
 
-        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadataConfiguration);
+        UmaResourceService resourceService = UmaClientFactory.instance().createResourceService(this.metadata);
 
         // Delete resource set description
         boolean deleted = false;
         try {
-            resourceService.deleteResource("Bearer " + m_pat.getAccessToken(), this.resourceId);
+            resourceService.deleteResource("Bearer " + pat.getAccessToken(), this.resourceId);
             deleted = true;
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));

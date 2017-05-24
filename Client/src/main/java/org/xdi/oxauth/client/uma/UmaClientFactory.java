@@ -8,7 +8,7 @@ package org.xdi.oxauth.client.uma;
 
 import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ProxyFactory;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 
 /**
  * Helper class which creates proxied UMA services
@@ -27,44 +27,44 @@ public class UmaClientFactory {
         return instance;
     }
 
-    public UmaResourceService createResourceService(UmaConfiguration metadataConfiguration) {
+    public UmaResourceService createResourceService(UmaMetadata metadataConfiguration) {
         return ProxyFactory.create(UmaResourceService.class, metadataConfiguration.getResourceRegistrationEndpoint());
     }
 
-    public UmaResourceService createResourceService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+    public UmaResourceService createResourceService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
         return ProxyFactory.create(UmaResourceService.class, metadataConfiguration.getResourceRegistrationEndpoint(), clientExecutor);
     }
 
-    public UmaPermissionService createPermissionService(UmaConfiguration metadataConfiguration) {
+    public UmaPermissionService createPermissionService(UmaMetadata metadataConfiguration) {
         return ProxyFactory.create(UmaPermissionService.class, metadataConfiguration.getPermissionEndpoint());
     }
 
-    public UmaPermissionService createPermissionService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+    public UmaPermissionService createPermissionService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
         return ProxyFactory.create(UmaPermissionService.class, metadataConfiguration.getPermissionEndpoint(), clientExecutor);
     }
 
-    public UmaRptStatusService createRptStatusService(UmaConfiguration metadataConfiguration) {
+    public UmaRptStatusService createRptStatusService(UmaMetadata metadataConfiguration) {
         return ProxyFactory.create(UmaRptStatusService.class, metadataConfiguration.getIntrospectionEndpoint());
     }
 
-    public UmaRptStatusService createRptStatusService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+    public UmaRptStatusService createRptStatusService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
         return ProxyFactory.create(UmaRptStatusService.class, metadataConfiguration.getIntrospectionEndpoint(), clientExecutor);
     }
 
-    public UmaRptAuthorizationService createAuthorizationRequestService(UmaConfiguration metadataConfiguration) {
+    public UmaRptAuthorizationService createAuthorizationRequestService(UmaMetadata metadataConfiguration) {
         return ProxyFactory.create(UmaRptAuthorizationService.class, metadataConfiguration.getAuthorizationEndpoint());
     }
 
-    public UmaRptAuthorizationService createAuthorizationRequestService(UmaConfiguration metadataConfiguration, ClientExecutor clientExecutor) {
+    public UmaRptAuthorizationService createAuthorizationRequestService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
         return ProxyFactory.create(UmaRptAuthorizationService.class, metadataConfiguration.getAuthorizationEndpoint(), clientExecutor);
     }
 
-    public UmaConfigurationService createMetaDataConfigurationService(String umaMetaDataUri) {
-        return ProxyFactory.create(UmaConfigurationService.class, umaMetaDataUri);
+    public UmaMetadataService createMetadataService(String umaMetadataUri) {
+        return ProxyFactory.create(UmaMetadataService.class, umaMetadataUri);
     }
 
-    public UmaConfigurationService createMetaDataConfigurationService(String umaMetaDataUri, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(UmaConfigurationService.class, umaMetaDataUri, clientExecutor);
+    public UmaMetadataService createMetadataService(String umaMetadataUri, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(UmaMetadataService.class, umaMetadataUri, clientExecutor);
     }
 
     public UmaScopeService createScopeService(String scopeEndpointUri) {

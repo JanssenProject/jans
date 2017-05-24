@@ -15,7 +15,7 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.util.ServerUtil;
@@ -49,7 +49,7 @@ public class UmaConfigurationWS {
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     @ApiOperation(
             value = "Provides configuration data as json document. It contains options and endpoints supported by the authorization server.",
-            response = UmaConfiguration.class
+            response = UmaMetadata.class
     )
     @ApiResponses(value = {
             @ApiResponse(code = 500, message = "Failed to build Uma configuration json object.")
@@ -58,14 +58,14 @@ public class UmaConfigurationWS {
         try {
             final String baseEndpointUri = appConfiguration.getBaseEndpoint();
 
-            final UmaConfiguration c = new UmaConfiguration();
+            final UmaMetadata c = new UmaMetadata();
             c.setIssuer(appConfiguration.getIssuer());
             c.setGrantTypesSupported(new String[]{
                     GrantType.AUTHORIZATION_CODE.getValue(),
                     GrantType.IMPLICIT.getValue(),
                     GrantType.CLIENT_CREDENTIALS.getValue()
             });
-            c.setResponseTypesSupported(new String[] {
+            c.setResponseTypesSupported(new String[]{
                     ResponseType.CODE.getValue(), ResponseType.ID_TOKEN.getValue(), ResponseType.TOKEN.getValue()
             });
 
