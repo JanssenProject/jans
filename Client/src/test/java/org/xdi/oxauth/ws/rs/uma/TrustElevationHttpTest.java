@@ -29,18 +29,14 @@ public class TrustElevationHttpTest extends BaseTest {
     protected UmaRptStatusService rptStatusService;
     protected UmaRptAuthorizationService rptPermissionAuthorizationService;
 
-    protected Token m_aat;
     protected Token m_pat;
 
     @Test
     @Parameters({"umaMetaDataUrl", "umaAmHost",
-            "umaPatClientId", "umaPatClientSecret",
-            "umaAatClientId", "umaAatClientSecret"
+            "umaPatClientId", "umaPatClientSecret"
     })
     public void trustElevation(final String umaMetaDataUrl, final String umaAmHost,
-                     final String umaPatClientId, final String umaPatClientSecret,
-                     final String umaAatClientId, final String umaAatClientSecret
-    ) throws Exception {
+                     final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         this.metadataConfiguration = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
         UmaTestUtil.assert_(this.metadataConfiguration);
 
@@ -51,10 +47,8 @@ public class TrustElevationHttpTest extends BaseTest {
         this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadataConfiguration);
 
         m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
-        m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
 
         UmaTestUtil.assert_(m_pat);
-        UmaTestUtil.assert_(m_aat);
 
         final List<String> rsScopes = Arrays.asList("http://gluu.example.com/dev/scopes/view", "http://gluu.example.com/dev/scopes/all");
 
