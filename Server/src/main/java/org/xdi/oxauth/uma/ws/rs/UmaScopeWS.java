@@ -6,35 +6,27 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.ArrayUtils;
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
-import org.xdi.model.GluuImage;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.uma.UmaScopeService;
-import org.xdi.service.XmlService;
+import org.xdi.oxauth.util.ServerUtil;
 
-import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 02/05/2013
+ * @version 0.9, 22/04/2013
  */
-
-@Path("/uma/scopes/icons")
-@Api(value= "/uma/scopes/icons", description = "UMA Scope Icon endpoint provides scope icon by scope id.")
-public class ScopeIconWS {
+@Path("/uma/scopes")
+@Api(value="/uma/scopes", description = "UMA Scope Endpoint provides scope description (json document) by scope id.")
+public class UmaScopeWS {
 
     @Inject
     private Logger log;
@@ -45,28 +37,19 @@ public class ScopeIconWS {
     @Inject
     private UmaScopeService umaScopeService;
 
-    @Inject
-    private XmlService xmlService;
-
     @GET
     @Path("{id}")
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response getScopeDescription(@PathParam("id") String id) {
-        log.trace("UMA - get scope's icon : id: {}", id);
+        log.trace("UMA - get scope description: id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
                 final UmaScopeDescription scope = umaScopeService.getInternalScope(id);
-                if (scope != null && StringUtils.isNotBlank(scope.getFaviconImageAsXml())) {
-                    final GluuImage gluuImage = xmlService.getGluuImageFromXML(scope.getFaviconImageAsXml());
-
-                    if (gluuImage != null && ArrayUtils.isNotEmpty(gluuImage.getData())) {
-                        // todo yuriyz : it must be clarified how exactly content of image must be shared between oxTrust and oxAuth
-                        // currently oxTrust save content on disk however oxAuth expects it in ldap as we must support clustering!
-
-                        // send non-streamed image as it's anyway picked up in memory (i know it's not nice...)
-
-                        return Response.status(Response.Status.OK).entity(gluuImage.getData()).build();
-                    }
+                if (scope != null) {
+                    final org.xdi.oxauth.model.uma.UmaScopeDescription jsonScope = new org.xdi.oxauth.model.uma.UmaScopeDescription();
+                    jsonScope.setIconUri(scope.getIconUrl());
+                    jsonScope.setName(scope.getDisplayName());
+                    return Response.status(Response.Status.OK).entity(ServerUtil.asJson(jsonScope)).build();
                 }
             }
         } catch (Exception e) {

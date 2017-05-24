@@ -19,7 +19,7 @@ import org.xdi.oxauth.model.uma.persistence.InternalExternal;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeType;
 import org.xdi.oxauth.service.InumService;
-import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
+import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -278,7 +278,7 @@ public class UmaScopeService {
     }
 
     private String getScopeEndpoint() {
-        return appConfiguration.getBaseEndpoint() + UmaConfigurationWS.UMA_SCOPES_SUFFIX;
+        return appConfiguration.getBaseEndpoint() + UmaMetadataWS.UMA_SCOPES_SUFFIX;
     }
 
     private Filter createAnyFilterByUrls(List<String> p_scopeUrls) {

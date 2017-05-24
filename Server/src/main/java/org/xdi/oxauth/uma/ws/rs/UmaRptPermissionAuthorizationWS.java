@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response;
  */
 @Path("/requester/perm")
 @Api(value = "/requester/perm", description = "RPT authorization endpoint. RPT is authorized with new permission(s).")
-public class RptPermissionAuthorizationWS {
+public class UmaRptPermissionAuthorizationWS {
 
     @Inject
     private Logger log;
