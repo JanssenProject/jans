@@ -2647,7 +2647,7 @@ objectclass ( oxObjectClass:24 NAME 'oxAuthUmaScopeDescription'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyRule $ oxPolicyScriptDn $ oxRevision $ oxType $ oxUrl )
+	MAY ( displayName $ inum $ description $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyRule $ oxPolicyScriptDn $ oxRevision $ oxType $ oxUrl )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:25 NAME 'oxUmaResourcePermission'

@@ -4716,6 +4716,7 @@
                 "oxPolicyScriptDn",
                 "oxRevision",
                 "oxType",
+                "description",
                 "oxUrl"
             ],
             "must": [
