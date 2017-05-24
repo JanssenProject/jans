@@ -17,13 +17,14 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.UmaPermissionManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
-import org.xdi.oxauth.service.uma.resourceserver.PermissionService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -46,6 +47,8 @@ import javax.ws.rs.core.Response;
         "The resource server uses the POST method at the endpoint. The body of the HTTP request message contains a JSON object providing the requested permission, using a format derived from the scope description format specified in [OAuth-resource-reg], as follows. The object has the following properties:")
 public class UmaPermissionRegistrationWS {
 
+    public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
+
     @Inject
     private Logger log;
 
@@ -60,9 +63,6 @@ public class UmaPermissionRegistrationWS {
 
     @Inject
     private UmaValidationService umaValidationService;
-    
-    @Inject
-    private PermissionService umaRsPermissionService;
 
     @Inject
 	private AppConfiguration appConfiguration;
@@ -88,7 +88,7 @@ public class UmaPermissionRegistrationWS {
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
             umaValidationService.validateResource(permissionRequest);
 
-            final UmaPermission permission = permissionManager.createPermission(validatedAmHost, permissionRequest, umaRsPermissionService.rptExpirationDate());
+            final UmaPermission permission = permissionManager.createPermission(validatedAmHost, permissionRequest, rptExpirationDate());
             permissionManager.addPermission(permission, tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
@@ -103,5 +103,16 @@ public class UmaPermissionRegistrationWS {
             throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
+    }
+
+    public Date rptExpirationDate() {
+        int lifeTime = appConfiguration.getUmaRequesterPermissionTokenLifetime();
+        if (lifeTime <= 0) {
+            lifeTime = DEFAULT_PERMISSION_LIFETIME;
+        }
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, lifeTime);
+        return calendar.getTime();
     }
 }

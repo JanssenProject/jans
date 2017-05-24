@@ -20,7 +20,7 @@ import java.util.List;
  * @author Yuriy Zabrovarnyy Date: 10/03/2012
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthUmaResourceSet"})
+@LdapObjectClass(values = {"top", "oxUmaResource"})
 public class UmaResource {
 
     @LdapDN
