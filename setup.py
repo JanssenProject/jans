@@ -92,7 +92,6 @@ class Setup(object):
         self.installOxAuth = True
         self.installOxTrust = True
         self.installLdap = True
-        self.installHttpd = True
         self.installSaml = False
         self.installAsimba = False
         self.installCas = False
@@ -189,7 +188,7 @@ class Setup(object):
 
         self.app_custom_changes = {
             'jetty' : {
-                'name' : 'jetty', 
+                'name' : 'jetty',
                 'files' : [{
                        'path' : '%s/etc/webdefault.xml' % self.jetty_home,
                        'replace' : [
@@ -344,7 +343,7 @@ class Setup(object):
         self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.network = "/etc/sysconfig/network"
         self.system_profile_update = '%s/system_profile' % self.outputFolder
-        
+
         self.asimba_conf_folder = '%s/asimba' % self.configFolder
         self.asimba_configuration_xml = '%s/asimba.xml' % self.asimba_conf_folder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -479,7 +478,6 @@ class Setup(object):
                 + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
                 + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
                 + 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n" \
-                + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
                 + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
                 + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
                 + 'Install CAS'.ljust(30) + repr(self.installCas).rjust(35) + "\n" \
@@ -507,7 +505,7 @@ class Setup(object):
         # Set right permissions
         self.run([self.cmd_chmod, '-R', '440', realCertFolder])
         self.run([self.cmd_chmod, 'a+X', realCertFolder])
-        
+
         # Set write permission for Asimba's keystore (oxTrust can change it)
         self.run([self.cmd_chmod, 'u+w', realAsimbaJks])
 
@@ -705,7 +703,7 @@ class Setup(object):
         lines = []
         for textLine in textLines:
             lines.append('#%s' % textLine)
-    
+
         return "\n".join(lines)
 
     def replaceInText(self, text, pattern, update):
@@ -724,7 +722,7 @@ class Setup(object):
 
             for replace in change['replace']:
                 text = self.replaceInText(text, replace['pattern'], replace['update'])
-            
+
             self.writeFile(file, text)
             self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
 
@@ -983,7 +981,7 @@ class Setup(object):
         self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
         jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
-        
+
 	try:
             self.logIt("Extracting %s into /opt/" % jreArchive)
             self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
@@ -1085,7 +1083,7 @@ class Setup(object):
         self.logIt("Preparing %s service base folders" % serviceName)
         self.run([self.cmd_mkdir, '-p', jettyServiceBase])
 
-        # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module 
+        # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module
         if "ext" in jettyModulesList:
             self.run([self.cmd_mkdir, '-p', "%s/lib/ext" % jettyServiceBase])
 
@@ -1194,7 +1192,7 @@ class Setup(object):
         if self.installJce and not os.path.exists(jceArchivePath):
             print "Downloading JCE 1.8 zip file..."
             self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', jceArchivePath])
-            
+
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
@@ -1258,7 +1256,7 @@ class Setup(object):
         certCn = cn
         if certCn == None:
             certCn = self.hostname
-             
+
         self.run([self.opensslCommand,
                   'req',
                   '-new',
@@ -1683,7 +1681,7 @@ class Setup(object):
 
             self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName])
             self.copyFile('%s/idp.war' % self.distGluuFolder, jettyIdpServiceWebapps)
-            
+
             # Prepare libraries needed to for command line IDP3 utilities
             self.install_saml_libraries()
 
@@ -1716,7 +1714,7 @@ class Setup(object):
     def install_asimba(self):
         asimbaWar = 'asimba.war'
         distAsimbaPath = '%s/%s' % (self.distGluuFolder, asimbaWar)
-        
+
         self.logIt("Configuring Asimba...")
         self.copyFile(self.asimba_configuration, self.asimba_configuration_xml)
         self.copyFile(self.asimba_selector_configuration, self.asimba_selector_configuration_xml)
@@ -1724,7 +1722,7 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', 'ug+w', self.asimba_conf_folder])
         self.run([self.cmd_chmod, '-R', 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.asimba_conf_folder+'/metadata'])
-        
+
         self.logIt("Copying asimba.war into jetty webapps folder...")
         jettyServiceName = 'asimba'
         self.installJettyService(self.jetty_app_configuration[jettyServiceName])
@@ -1817,13 +1815,13 @@ class Setup(object):
         self.logIt("Preparing Passport OpenID RP certificate...")
         passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
         for jwks_key in passport_rp_client_jwks_json["keys"]:
-            if jwks_key["alg"]  == self.passport_rp_client_cert_alg: 
+            if jwks_key["alg"]  == self.passport_rp_client_cert_alg:
                 self.passport_rp_client_cert_alias = jwks_key["kid"]
                 break
 
         self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
         self.renderTemplateInOut(self.passport_config, self.templateFolder, self.configFolder)
-        
+
         # Install passport system service script
         self.installNodeService('passport')
 
@@ -1894,7 +1892,7 @@ class Setup(object):
         self.createUser('node', self.node_user_home)
 
         self.createGroup('gluu')
-        
+
         self.addUserToGroup('gluu', 'ldap')
         self.addUserToGroup('gluu', 'jetty')
         self.addUserToGroup('gluu', 'node')
@@ -1941,14 +1939,14 @@ class Setup(object):
             if self.installLdap:
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/main_db'])
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
-                
+
             if self.installAsimba:
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder])
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata'])
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/idp'])
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/sp'])
                 self.run([self.cmd_chown, '-R', 'jetty:jetty', self.asimba_conf_folder+'/metadata'])
-                
+
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -1958,14 +1956,14 @@ class Setup(object):
         if self.os_initdaemon == 'init':
             self.renderTemplate(self.system_profile_update)
             renderedSystemProfile = self.readFile(self.system_profile_update)
-    
+
             # Read source file
             currentSystemProfile = self.readFile(self.sysemProfile)
-    
+
             # Write merged file
             resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
             self.writeFile(self.sysemProfile, resultSystemProfile)
-    
+
             # Fix new file permissions
             self.run([self.cmd_chmod, '644', self.sysemProfile])
 
@@ -1991,8 +1989,7 @@ class Setup(object):
 
     def promptForProperties(self):
         # IP address needed only for Apache2 and hosts file update
-        if self.installHttpd:
-            self.ip = self.get_ip()
+        self.ip = self.get_ip()
 
         detectedHostname = None
         try:
@@ -2046,12 +2043,6 @@ class Setup(object):
         else:
             self.installLdap = False
 
-        promptForHTTPD = self.getPrompt("Install Apache HTTPD Server", "Yes")[0].lower()
-        if promptForHTTPD == 'y':
-            self.installHttpd = True
-        else:
-            self.installHttpd = False
-
         promptForShibIDP = self.getPrompt("Install Shibboleth SAML IDP?", "No")[0].lower()
         if promptForShibIDP == 'y':
             self.shibboleth_version = 'v3'
@@ -2076,7 +2067,7 @@ class Setup(object):
             self.installPassport = True
         else:
             self.installPassport = False
-            
+
         if self.allowDeprecatedApplications:
             promptForCAS = self.getPrompt("Install CAS? [WARNING: Deprecated Application]", "No")[0].lower()
             if promptForCAS == 'y':
@@ -2594,7 +2585,6 @@ def print_help():
     print "    -f   specify setup.properties file"
     print "    -h   Help"
     print "    -n   No interactive prompt before install starts. Run with -f"
-    print "    -N   No apache httpd server"
     print "    -s   Install the Shibboleth IDP"
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
@@ -2604,7 +2594,7 @@ def print_help():
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwre", ['allow_pre_released_applications', 'allow_deprecated_applications'])
+        opts, args = getopt.getopt(argv, "adp:f:hnsuwre", ['allow_pre_released_applications', 'allow_deprecated_applications'])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -2680,7 +2670,6 @@ if __name__ == '__main__':
     installObject.installOxAuth = setupOptions['installOxAuth']
     installObject.installOxTrust = setupOptions['installOxTrust']
     installObject.installLdap = setupOptions['installLDAP']
-    installObject.installHttpd = setupOptions['installHTTPD']
     installObject.installSaml = setupOptions['installSaml']
     installObject.installAsimba = setupOptions['installAsimba']
     installObject.installCas = setupOptions['installCas']
