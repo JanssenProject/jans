@@ -83,7 +83,8 @@ public class UmaCreateRptWS {
     public Response getRpt(@HeaderParam("Authorization") String authorization,
                            @HeaderParam("Host") String amHost) {
         try {
-            umaValidationService.assertHasAuthorizationScope(authorization);
+            // todo uma2 schedule for remove !
+            //umaValidationService.assertHasAuthorizationScope(authorization);
             String validatedAmHost = umaValidationService.validateAmHost(amHost);
 
             UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost);

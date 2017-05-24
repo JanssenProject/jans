@@ -54,8 +54,8 @@ public class UmaResource {
     @LdapAttribute(name = "owner")
     private String creator;
 
-    @LdapAttribute(name = "oxUrl")
-    private String url;
+    @LdapAttribute(name = "description")
+    private String description;
 
     @LdapAttribute(name = "oxType")
     private InternalExternal type;
@@ -68,12 +68,12 @@ public class UmaResource {
         this.dn = dn;
     }
 
-    public String getUrl() {
-        return url;
+    public String getDescription() {
+        return description;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getInum() {

@@ -71,7 +71,8 @@ public class UmaRptPermissionAuthorizationWS {
             RptAuthorizationRequest rptAuthorizationRequest,
             @Context HttpServletRequest httpRequest) {
         try {
-            final AuthorizationGrant grant = umaValidationService.assertHasAuthorizationScope(authorization);
+            // todo uma2 schedule for remove ?
+            final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
 
             final String validatedAmHost = umaValidationService.validateAmHost(amHost);
             final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant, validatedAmHost);
