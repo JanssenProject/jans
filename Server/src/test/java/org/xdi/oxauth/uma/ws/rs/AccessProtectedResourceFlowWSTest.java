@@ -30,7 +30,6 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	private URI url;
 
 	private static Token pat;
-	private static Token aat;
 	private static RPTResponse rpt;
 	private static UmaResourceResponse resource;
 	private static PermissionTicket ticket;
@@ -50,9 +49,6 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 			"umaRedirectUri" })
 	public void init_1(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-		aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
-				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(aat);
 	}
 
 	@Test(dependsOnMethods = "init_1")
@@ -60,15 +56,13 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 			"umaRedirectUri" })
 	public void init_2(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
 			String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-		aat = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
-				umaAatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(aat);
+        // todo uma2
 	}
 
 	@Test(dependsOnMethods = { "init_2" })
 	@Parameters({ "umaRptPath", "umaAmHost" })
 	public void init(String umaRptPath, String umaAmHost) {
-		rpt = TUma.requestRpt(url, aat, umaRptPath, umaAmHost);
+		rpt = TUma.requestRpt(url, umaRptPath, umaAmHost);
 		UmaTestUtil.assert_(rpt);
 	}
 
@@ -101,8 +95,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	@Test(dependsOnMethods = { "_2_requesterAccessProtectedResourceWithNotEnoughPermissionsRpt" })
 	@Parameters({ "umaRptStatusPath", "umaAmHost" })
 	public void _3_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
-		final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, umaAmHost, pat,
-				rpt.getRpt());
+		final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, umaAmHost, rpt.getRpt());
 		Assert.assertTrue(status.getActive(), "Token response status is not active");
 		Assert.assertTrue(status.getPermissions() == null || status.getPermissions().isEmpty(),
 				"Permissions list is not empty.");
@@ -133,7 +126,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 		request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
 
 		final RptAuthorizationResponse response = TUma.requestAuthorization(url, umaPermissionAuthorizationPath,
-				umaAmHost, aat, request);
+				umaAmHost, request);
 		assertNotNull(response, "Token response status is null");
 	}
 
@@ -144,7 +137,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	@Test(dependsOnMethods = { "_5_authorizePermission" })
 	@Parameters({ "umaRptStatusPath", "umaAmHost" })
 	public void _6_hostDeterminesRptStatus(String umaRptStatusPath, String umaAmHost) throws Exception {
-		final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, umaAmHost, pat,
+		final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, umaAmHost,
 				rpt.getRpt());
 		UmaTestUtil.assert_(status);
 

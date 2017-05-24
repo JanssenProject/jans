@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
-
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -27,6 +16,14 @@ import org.xdi.oxauth.model.uma.TUma;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -39,7 +36,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 	private URI url;
 
 	private static Token m_authorization;
-	private static Token m_tokenToIntrospect;
+	private static Token tokenToIntrospect;
 
 	@Test
 	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
@@ -56,9 +53,9 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 			"umaRedirectUri" })
 	public void requestTokenToIntrospect(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
 			String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-		m_tokenToIntrospect = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
+		tokenToIntrospect = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
 				umaAatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(m_tokenToIntrospect);
+		UmaTestUtil.assert_(tokenToIntrospect);
 	}
 
 	@Test(dependsOnMethods = "requestTokenToIntrospect")
@@ -68,7 +65,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 
 		request.header("Accept", "application/json");
 		request.header("Authorization", "Bearer " + m_authorization.getAccessToken());
-		Response response = request.post(Entity.form(new Form("token", m_tokenToIntrospect.getAccessToken())));
+		Response response = request.post(Entity.form(new Form("token", tokenToIntrospect.getAccessToken())));
 
 		String entity = response.readEntity(String.class);
 		showResponse("introspection", response, entity);
