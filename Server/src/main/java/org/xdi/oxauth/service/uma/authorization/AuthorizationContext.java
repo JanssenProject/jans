@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service.uma.authorization;
 
 import org.apache.commons.lang.StringUtils;
+import org.xdi.ldap.model.CustomEntry;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
@@ -92,6 +93,14 @@ public class AuthorizationContext extends ExternalScriptContext {
 
     public String getUserClaimByLdapName(String p_ldapName) {
         return getEntryAttributeValue(getGrant().getUserDn(), p_ldapName);
+    }
+
+    public CustomEntry getUserClaimEntryByLdapName(String ldapName) {
+        return getEntryByDn(getGrant().getUserDn(), ldapName);
+    }
+
+    public CustomEntry getClientClaimEntry(String ldapName) {
+        return getEntryByDn(getGrant().getClientDn(), ldapName);
     }
 
     public UmaRPT getRpt() {
