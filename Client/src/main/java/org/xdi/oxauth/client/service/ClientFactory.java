@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.client.service;
 
+import org.jboss.resteasy.client.ClientExecutor;
 import org.jboss.resteasy.client.ProxyFactory;
 
 /**
@@ -24,11 +25,11 @@ public class ClientFactory {
         return INSTANCE;
     }
 
-    public IdGenerationService createIdGenerationService(String p_url) {
-        return ProxyFactory.create(IdGenerationService.class, p_url);
-    }
-
     public IntrospectionService createIntrospectionService(String p_url) {
         return ProxyFactory.create(IntrospectionService.class, p_url);
+    }
+
+    public IntrospectionService createIntrospectionService(String p_url, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(IntrospectionService.class, p_url, clientExecutor);
     }
 }
