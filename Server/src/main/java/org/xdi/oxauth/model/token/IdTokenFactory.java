@@ -6,20 +6,7 @@
 
 package org.xdi.oxauth.model.token;
 
-import java.io.UnsupportedEncodingException;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
@@ -28,11 +15,7 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.common.AccessToken;
-import org.xdi.oxauth.model.common.AuthorizationCode;
-import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.common.SubjectType;
-import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.AbstractCryptoProvider;
@@ -62,7 +45,12 @@ import org.xdi.oxauth.service.external.ExternalDynamicScopeService;
 import org.xdi.oxauth.service.external.context.DynamicScopeExternalContext;
 import org.xdi.util.security.StringEncrypter;
 
-import com.google.common.collect.Lists;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+import java.util.*;
 
 /**
  * JSON Web Token (JWT) is a compact token format intended for space constrained
@@ -74,7 +62,7 @@ import com.google.common.collect.Lists;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 20, 2016
+ * @version May 19, 2017
  */
 @Stateless
 @Named
@@ -138,8 +126,7 @@ public class IdTokenFactory {
             String accessTokenHash = accessToken.getHash(jwtSigner.getSignatureAlgorithm());
             jwt.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
-        jwt.getClaims().setClaim("oxValidationURI", appConfiguration.getCheckSessionIFrame());
-        jwt.getClaims().setClaim("oxOpenIDConnectVersion", appConfiguration.getOxOpenIdConnectVersion());
+        jwt.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
         List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
         if (includeIdTokenClaims) {
@@ -334,8 +321,7 @@ public class IdTokenFactory {
             String accessTokenHash = accessToken.getHash(null);
             jwe.getClaims().setClaim(JwtClaimName.ACCESS_TOKEN_HASH, accessTokenHash);
         }
-        jwe.getClaims().setClaim("oxValidationURI", appConfiguration.getCheckSessionIFrame());
-        jwe.getClaims().setClaim("oxOpenIDConnectVersion", appConfiguration.getOxOpenIdConnectVersion());
+        jwe.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
         List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
         if (includeIdTokenClaims) {
