@@ -49,6 +49,7 @@ public class UmaScopeWS {
                     final org.xdi.oxauth.model.uma.UmaScopeDescription jsonScope = new org.xdi.oxauth.model.uma.UmaScopeDescription();
                     jsonScope.setIconUri(scope.getIconUrl());
                     jsonScope.setName(scope.getDisplayName());
+                    jsonScope.setDescription(scope.getDescription());
                     return Response.status(Response.Status.OK).entity(ServerUtil.asJson(jsonScope)).build();
                 }
             }

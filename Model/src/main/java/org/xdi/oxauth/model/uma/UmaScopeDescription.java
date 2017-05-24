@@ -31,15 +31,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 @ApiModel(value = "A scope description is a JSON document")
 public class UmaScopeDescription {
 
+	@ApiModelProperty(value = "A human-readable string describing the resource at length. The authorization server MAY use this description in any user interface it presents to a resource owner, for example, for resource protection monitoring or policy setting."
+			, required = false)
+	private String description;
+
+	@ApiModelProperty(value = "A URI for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner."
+			, required = false)
+	private String iconUri;
+
     @ApiModelProperty(value = "A human-readable string describing some scope (extent) of access. This name MAY be used by the authorization server in any user interface it presents to the resource owner."
                  , required = true)
 	private String name;
 
-    @ApiModelProperty(value = "A URI for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server in any user interface it presents to the resource owner."
-                 , required = false)
-	private String iconUri;
+	@JsonProperty(value = "description")
+	@XmlElement(name = "description")
+	public String getDescription() {
+		return description;
+	}
 
-    @JsonProperty(value = "name")
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	@JsonProperty(value = "name")
 	@XmlElement(name = "name")
 	public String getName() {
 		return name;
