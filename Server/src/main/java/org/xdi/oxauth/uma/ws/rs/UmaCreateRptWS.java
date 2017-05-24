@@ -42,7 +42,7 @@ import java.util.List;
  */
 @Path("/requester")
 @Api(value = "/requester/rpt", description = "The endpoint at which the requester asks the AM to issue an RPT")
-public class CreateRptWS {
+public class UmaCreateRptWS {
 
     @Inject
     private Logger log;
