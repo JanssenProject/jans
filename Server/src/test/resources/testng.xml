@@ -236,19 +236,9 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.TrustElevationWSTest" />
 		</classes>
 	</test>
-	<test name="ID Generation test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.ws.rs.IdGenRestWSEmbeddedTest" />
-		</classes>
-	</test>
 	<test name="Inum Generation test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.comp.InumGeneratorTest" />
-		</classes>
-	</test>
-	<test name="ID Gen Service test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.comp.IdGenServiceTest" />
 		</classes>
 	</test>
 	<test name="Introspection endpoint test" enabled="true">
