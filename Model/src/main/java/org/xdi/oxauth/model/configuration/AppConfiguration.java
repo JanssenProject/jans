@@ -47,7 +47,6 @@ public class AppConfiguration implements Configuration {
     private Boolean umaRptAsJwt = false;
     private int umaRequesterPermissionTokenLifetime;
     private Boolean umaAddScopesAutomatically;
-    private Boolean umaKeepClientDuringResourceRegistration;
 
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
@@ -184,14 +183,6 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionAsJwt(Boolean sessionAsJwt) {
         this.sessionAsJwt = sessionAsJwt;
-    }
-
-    public Boolean getUmaKeepClientDuringResourceRegistration() {
-        return umaKeepClientDuringResourceRegistration;
-    }
-
-    public void setUmaKeepClientDuringResourceRegistration(Boolean umaKeepClientDuringResourceRegistration) {
-        this.umaKeepClientDuringResourceRegistration = umaKeepClientDuringResourceRegistration;
     }
 
     public Boolean getUmaAddScopesAutomatically() {
