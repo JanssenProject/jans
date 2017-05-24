@@ -29,22 +29,15 @@ public class TUma {
 		return r.pat(authorizePath, tokenPath, userId, userSecret, umaClientId, umaClientSecret, umaRedirectUri);
 	}
 
-	public static Token requestAat(URI baseUri, final String authorizePath, final String tokenPath, final String userId,
-			final String userSecret, final String umaClientId, final String umaClientSecret,
-			final String umaRedirectUri) {
-		final TTokenRequest r = new TTokenRequest(baseUri);
-		return r.aat(authorizePath, tokenPath, userId, userSecret, umaClientId, umaClientSecret, umaRedirectUri);
-	}
-
 	public static Token newTokenByRefreshToken(URI baseUri, final String tokenPath, final Token p_oldToken,
 			final String umaClientId, final String umaClientSecret) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
 		return r.newTokenByRefreshToken(tokenPath, p_oldToken, umaClientId, umaClientSecret);
 	}
 
-	public static RPTResponse requestRpt(URI baseUri, Token p_aat, String p_rptPath, String umaAmHost) {
+	public static RPTResponse requestRpt(URI baseUri, String p_rptPath, String umaAmHost) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
-		return r.requestRpt(p_aat, p_rptPath, umaAmHost);
+		return r.requestRpt(p_rptPath, umaAmHost);
 	}
 
 	public static UmaConfiguration requestConfiguration(URI baseUri, final String configurationPath) {
@@ -81,15 +74,15 @@ public class TUma {
 	}
 
 	public static RptIntrospectionResponse requestRptStatus(URI baseUri, String p_umaRptStatusPath, String p_umaAmHost,
-			Token p_aat, String rpt) {
+			String rpt) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
-		return r.requestRptStatus(p_umaRptStatusPath, p_umaAmHost, p_aat, rpt);
+		return r.requestRptStatus(p_umaRptStatusPath, rpt);
 	}
 
 	public static RptAuthorizationResponse requestAuthorization(URI baseUri, String p_umaPermissionAuthorizationPath,
-			String p_umaAmHost, Token p_aat, RptAuthorizationRequest p_request) {
+			String p_umaAmHost, RptAuthorizationRequest p_request) {
 		final TAuthorization t = new TAuthorization(baseUri);
-		return t.requestAuthorization(p_umaPermissionAuthorizationPath, p_umaAmHost, p_aat, p_request);
+		return t.requestAuthorization(p_umaPermissionAuthorizationPath, p_umaAmHost, p_request);
 	}
 
 	public static <T> T readJsonValue(String p_json, Class<T> p_clazz) {

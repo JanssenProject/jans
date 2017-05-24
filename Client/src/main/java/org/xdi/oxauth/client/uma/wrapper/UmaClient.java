@@ -37,18 +37,6 @@ public class UmaClient {
 	}
 
     @Deprecated
-    public static Token requestAat(final String authorizeUrl, final String tokenUrl,
-                                   final String umaUserId, final String umaUserSecret,
-                                   final String umaClientId, final String umaClientSecret,
-                                   final String umaRedirectUri) throws Exception {
-        return request(authorizeUrl, tokenUrl, umaUserId, umaUserSecret, umaClientId, umaClientSecret, umaRedirectUri, UmaScopeType.AUTHORIZATION);
-    }
-
-    public static Token requestAat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) throws Exception {
-        return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.AUTHORIZATION, scopeArray);
-    }
-
-    @Deprecated
     public static Token requestPat(final String authorizeUrl, final String tokenUrl,
                                    final String umaUserId, final String umaUserSecret,
                                    final String umaClientId, final String umaClientSecret,

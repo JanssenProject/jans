@@ -38,7 +38,7 @@ class TAuthorization {
 	}
 
 	public RptAuthorizationResponse requestAuthorization(String p_umaPermissionAuthorizationPath,
-			final String p_umaAmHost, final Token p_aat, final RptAuthorizationRequest p_request) {
+			final String p_umaAmHost, final RptAuthorizationRequest p_request) {
 		final Holder<RptAuthorizationResponse> h = new Holder<RptAuthorizationResponse>();
 
 		try {
@@ -46,7 +46,7 @@ class TAuthorization {
 					.target(baseUri.toString() + p_umaPermissionAuthorizationPath).request();
 
 			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-			request.header("Authorization", "Bearer " + p_aat.getAccessToken());
+			// todo uma2 request.header("Authorization", "Bearer " + p_aat.getAccessToken());
 			request.header("Host", p_umaAmHost);
 
 			final String json = ServerUtil.createJsonMapper().writeValueAsString(p_request);

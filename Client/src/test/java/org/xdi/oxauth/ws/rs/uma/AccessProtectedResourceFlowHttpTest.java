@@ -41,7 +41,6 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     protected UmaRptStatusService rptStatusService;
     protected UmaRptAuthorizationService rptPermissionAuthorizationService;
 
-    protected Token m_aat;
     protected Token m_pat;
 
     @BeforeClass
@@ -86,26 +85,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         this.umaRegisterResourceFlowHttpTest.testRegisterResource();
     }
 
-    //** 2 ******************************************************************************
-
-    /**
-     * Requester obtains AAT token
-     */
-    @Test(dependsOnMethods = {"testHostRegisterResource"})
-    @Parameters({"umaAatClientId", "umaAatClientSecret"})
-    public void testRequesterObtainAat(final String umaAatClientId, final String umaAatClientSecret) throws Exception {
-        showTitle("testRequesterObtainAat");
-        m_aat = UmaClient.requestAat(tokenEndpoint, umaAatClientId, umaAatClientSecret);
-        UmaTestUtil.assert_(m_aat);
-
-        // Init UmaPatTokenAwareHttpTest test
-        //this.umaObtainRptTokenFlowHttpTest.m_aat = this.m_aat;
-    }
-
     /**
      * Requester obtains RPT token
      */
-    @Test(dependsOnMethods = {"testRequesterObtainAat"})
+    @Test(dependsOnMethods = {"testHostRegisterResource"})
     @Parameters({"umaAmHost"})
     public void testRequesterObtainsRpt(final String umaAmHost) throws Exception {
         showTitle("testRequesterObtainsRpt");
@@ -186,16 +169,16 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         try {
             RptAuthorizationRequest rptAuthorizationRequest = null;// new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, permissionFlowHttpTest.ticketForFullAccess);
 
-            authorizationResponse = this.rptPermissionAuthorizationService.requestRptAuthorization(
-                    "Bearer " + m_aat.getAccessToken(),
-                    umaAmHost,
-                    rptAuthorizationRequest);
+//            authorizationResponse = this.rptPermissionAuthorizationService.requestRptAuthorization(
+//                    "Bearer " + m_aat.getAccessToken(),
+//                    umaAmHost,
+//                    rptAuthorizationRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
 
-        UmaTestUtil.assertAuthorizationRequest(authorizationResponse);
+//        UmaTestUtil.assertAuthorizationRequest(authorizationResponse);
     }
 
     //** 5 ******************************************************************************
