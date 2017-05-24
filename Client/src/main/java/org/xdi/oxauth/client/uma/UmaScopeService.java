@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.client.uma;
 
-import org.xdi.oxauth.model.uma.ScopeDescription;
+import org.xdi.oxauth.model.uma.UmaScopeDescription;
 import org.xdi.oxauth.model.uma.UmaConstants;
 
 import javax.ws.rs.GET;
@@ -23,5 +23,5 @@ public interface UmaScopeService {
     @GET
     @Path("{id}")
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    ScopeDescription getScope(@PathParam("id") String id);
+    UmaScopeDescription getScope(@PathParam("id") String id);
 }

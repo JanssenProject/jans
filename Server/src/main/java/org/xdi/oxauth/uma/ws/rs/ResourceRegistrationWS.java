@@ -21,7 +21,7 @@ import org.xdi.oxauth.model.uma.UmaResourceWithId;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.UmaResourceService;
-import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.service.uma.UmaScopeService;
 import org.xdi.oxauth.service.uma.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -73,7 +73,7 @@ public class ResourceRegistrationWS {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-    private ScopeService umaScopeService;
+    private UmaScopeService umaScopeService;
 
     @Inject
     private AppConfiguration appConfiguration;

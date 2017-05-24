@@ -7,9 +7,9 @@
 package org.xdi.oxauth.service.uma.resourceserver;
 
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
+import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
-import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.service.uma.UmaScopeService;
 import org.xdi.oxauth.service.uma.UmaResourceService;
 
 import javax.ejb.Stateless;
@@ -34,7 +34,7 @@ public class RsResourceService {
     private UmaResourceService resourceService;
 
     @Inject
-    private ScopeService umaScopeService;
+    private UmaScopeService umaScopeService;
 
     public UmaResource getResource(RsResourceType p_type) {
         final UmaResource criteria = new UmaResource();
@@ -44,7 +44,7 @@ public class RsResourceService {
         final List<UmaResource> ldapResources = resourceService
                 .findResources(criteria);
         if (ldapResources == null || ldapResources.isEmpty()) {
-            log.trace("No resource set for type: {}", p_type);
+            log.trace("No resource for type: {}", p_type);
             return createResource(p_type);
         } else {
             final int size = ldapResources.size();
@@ -69,7 +69,7 @@ public class RsResourceService {
         final List<String> result = new ArrayList<String>();
         if (p_types != null) {
             for (RsScopeType t : p_types) {
-                final ScopeDescription generateIdScope = umaScopeService.getInternalScope(t.getValue());
+                final UmaScopeDescription generateIdScope = umaScopeService.getInternalScope(t.getValue());
                 if (generateIdScope != null) {
                     result.add(generateIdScope.getDn());
                 }

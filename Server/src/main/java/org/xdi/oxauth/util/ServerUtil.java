@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.uma.ScopeService;
+import org.xdi.oxauth.service.uma.UmaScopeService;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;
@@ -149,7 +149,7 @@ public class ServerUtil {
         });
     }
 
-    public static org.xdi.oxauth.model.uma.UmaPermission convert(UmaPermission p_permission, ScopeService p_umaScopeService) {
+    public static org.xdi.oxauth.model.uma.UmaPermission convert(UmaPermission p_permission, UmaScopeService p_umaScopeService) {
         if (p_permission != null) {
             final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
             result.setResourceId(p_permission.getResourceId());

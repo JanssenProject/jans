@@ -16,7 +16,7 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.InternalExternal;
-import org.xdi.oxauth.model.uma.persistence.ScopeDescription;
+import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeType;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.ws.rs.UmaConfigurationWS;
@@ -37,7 +37,7 @@ import java.util.List;
  */
 @Stateless
 @Named("umaScopeService")
-public class ScopeService {
+public class UmaScopeService {
 
     @Inject
     private Logger log;
@@ -57,20 +57,20 @@ public class ScopeService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-    public List<ScopeDescription> getAllScopes() {
+    public List<UmaScopeDescription> getAllScopes() {
         try {
-            return ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, Filter.createPresenceFilter("inum"));
+            return ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, Filter.createPresenceFilter("inum"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return Collections.emptyList();
     }
 
-    public List<ScopeDescription> getScopes(UmaScopeType p_type) {
+    public List<UmaScopeDescription> getScopes(UmaScopeType p_type) {
         try {
             if (p_type != null) {
                 final Filter filter = Filter.create(String.format("&(oxType=%s)", p_type.getValue()));
-                return ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
+                return ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, filter);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -78,16 +78,16 @@ public class ScopeService {
         return Collections.emptyList();
     }
 
-    public ScopeDescription getInternalScope(String p_scopeId) {
+    public UmaScopeDescription getInternalScope(String p_scopeId) {
         try {
             final Filter filter = Filter.create(String.format("&(oxType=%s)(oxId=%s)", UmaScopeType.INTERNAL.getValue(), p_scopeId));
-            final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
+            final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, filter);
             if (entries != null && !entries.isEmpty()) {
 
                 // if more then one scope then it's problem, non-deterministic behavior, id must be unique
                 if (entries.size() > 1) {
                     log.error("Found more then one internal uma scope by input id: {}" + p_scopeId);
-                    for (ScopeDescription s : entries) {
+                    for (UmaScopeDescription s : entries) {
                         log.error("Scope, Id: {}, dn: {}", s.getId(), s.getDn());
                     }
                 }
@@ -99,7 +99,7 @@ public class ScopeService {
         return null;
     }
 
-    public boolean persist(ScopeDescription p_scopeDescription) {
+    public boolean persist(UmaScopeDescription p_scopeDescription) {
         try {
             if (StringUtils.isBlank(p_scopeDescription.getDn())) {
                 p_scopeDescription.setDn(String.format("inum=%s,%s", p_scopeDescription.getInum(), baseDn()));
@@ -134,10 +134,10 @@ public class ScopeService {
     	List<String> notProcessedScopeUrls = new ArrayList<String>(p_scopeUrls);
         try {
             final Filter filter = Filter.create(String.format("&(oxType=%s)", InternalExternal.INTERNAL.getValue()));
-            final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
+            final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 for (String scopeUrl : p_scopeUrls) {
-                    for (ScopeDescription scopeDescription : entries) {
+                    for (UmaScopeDescription scopeDescription : entries) {
                         final String internalScopeUrl = getInternalScopeUrl(scopeDescription);
                         if (internalScopeUrl.equals(scopeUrl) && !result.contains(internalScopeUrl)) {
                             result.add(scopeDescription.getDn());
@@ -156,7 +156,7 @@ public class ScopeService {
     private void handleExternalScopes(List<String> scopeUrls, List<String> result) throws LDAPException {
         for (String scopeUrl : scopeUrls) {
             final Filter filter = Filter.create(String.format("&(oxUrl=%s)", scopeUrl));
-            final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
+            final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 result.add(entries.get(0).getDn());
             } else { // scope is not in ldap, add it dynamically
@@ -165,7 +165,7 @@ public class ScopeService {
 
                 if (addAutomatically != null && addAutomatically) {
                     final String inum = inumService.generateInum();
-                    final ScopeDescription newScope = new ScopeDescription();
+                    final UmaScopeDescription newScope = new UmaScopeDescription();
                     newScope.setInum(inum);
                     newScope.setUrl(scopeUrl);
                     newScope.setDisplayName(scopeUrl); // temp solution : need extract info from scope description on resource server
@@ -184,13 +184,13 @@ public class ScopeService {
         }
     }
 
-    public List<ScopeDescription> getScopesByUrls(List<String> p_scopeUrls) {
-        List<ScopeDescription> scopes = new ArrayList<ScopeDescription>();
+    public List<UmaScopeDescription> getScopesByUrls(List<String> p_scopeUrls) {
+        List<UmaScopeDescription> scopes = new ArrayList<UmaScopeDescription>();
         try {
             // external scopes
             Filter filter = createAnyFilterByUrls(p_scopeUrls);
             if (filter != null) {
-                final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
+                final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, filter);
                 if (entries != null) {
                     scopes.addAll(entries);
                 }
@@ -198,10 +198,10 @@ public class ScopeService {
 
             // internal scopes
             filter = Filter.create(String.format("&(oxType=%s)", InternalExternal.INTERNAL.getValue()));
-            final List<ScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), ScopeDescription.class, filter);
+            final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 for (String scopeUrl : p_scopeUrls) {
-                    for (ScopeDescription scopeDescription : entries) {
+                    for (UmaScopeDescription scopeDescription : entries) {
                         final String internalScopeUrl = getInternalScopeUrl(scopeDescription);
                         if (internalScopeUrl.equals(scopeUrl) && !scopes.contains(internalScopeUrl)) {
                             scopes.add(scopeDescription);
@@ -216,12 +216,12 @@ public class ScopeService {
     }
 
     // TODO: Optimize scopes loading. It's possible to loads all scope in one request.
-    public List<ScopeDescription> getScopesByDns(List<String> p_scopeDns) {
-        final List<ScopeDescription> result = new ArrayList<ScopeDescription>();
+    public List<UmaScopeDescription> getScopesByDns(List<String> p_scopeDns) {
+        final List<UmaScopeDescription> result = new ArrayList<UmaScopeDescription>();
         try {
             if (p_scopeDns != null && !p_scopeDns.isEmpty()) {
                 for (String dn : p_scopeDns) {
-                    final ScopeDescription scopeDescription = ldapEntryManager.find(ScopeDescription.class, dn);
+                    final UmaScopeDescription scopeDescription = ldapEntryManager.find(UmaScopeDescription.class, dn);
                     if (scopeDescription != null) {
                         result.add(scopeDescription);
                     }
@@ -237,20 +237,20 @@ public class ScopeService {
         return getScopeUrls(getScopesByDns(p_scopeDns));
     }
 
-    public static List<String> getScopeDNs(List<ScopeDescription> p_scopes) {
+    public static List<String> getScopeDNs(List<UmaScopeDescription> p_scopes) {
         final List<String> result = new ArrayList<String>();
         if (p_scopes != null && !p_scopes.isEmpty()) {
-            for (ScopeDescription s : p_scopes) {
+            for (UmaScopeDescription s : p_scopes) {
                 result.add(s.getDn());
             }
         }
         return result;
     }
 
-    public List<String> getScopeUrls(List<ScopeDescription> p_scopes) {
+    public List<String> getScopeUrls(List<UmaScopeDescription> p_scopes) {
         final List<String> result = new ArrayList<String>();
         if (p_scopes != null && !p_scopes.isEmpty()) {
-            for (ScopeDescription s : p_scopes) {
+            for (UmaScopeDescription s : p_scopes) {
                 final InternalExternal type = s.getType();
                 if (type != null) {
                     switch (type) {
@@ -270,7 +270,7 @@ public class ScopeService {
         return result;
     }
 
-    private String getInternalScopeUrl(ScopeDescription internalScope) {
+    private String getInternalScopeUrl(UmaScopeDescription internalScope) {
         if (internalScope != null && internalScope.getType() == InternalExternal.INTERNAL) {
             return getScopeEndpoint() + "/" + internalScope.getId();
         }
