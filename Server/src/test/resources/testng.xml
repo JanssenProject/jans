@@ -196,11 +196,6 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Obtain AAT test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.ObtainAatWSTest" />
-		</classes>
-	</test>
 	<test name="UMA. Obtain PAT test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.ObtainPatWSTest" />
@@ -234,11 +229,6 @@
 	<test name="UMA. Trust elevation test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.TrustElevationWSTest" />
-		</classes>
-	</test>
-	<test name="ID Generation test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.ws.rs.IdGenRestWSEmbeddedTest" />
 		</classes>
 	</test>
 	<test name="Inum Generation test" enabled="true">
