@@ -11,7 +11,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RegisterSiteParams implements IParams {
+public class RegisterSiteParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "op_host")
     private String opHost;
@@ -21,6 +21,8 @@ public class RegisterSiteParams implements IParams {
     private String authorizationRedirectUri;
     @JsonProperty(value = "post_logout_redirect_uri")
     private String postLogoutRedirectUri;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     @JsonProperty(value = "redirect_uris")
     private List<String> redirectUris;
@@ -60,6 +62,14 @@ public class RegisterSiteParams implements IParams {
     private Boolean trustedClient = false;
 
     public RegisterSiteParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public Boolean getTrustedClient() {
@@ -251,6 +261,11 @@ public class RegisterSiteParams implements IParams {
         sb.append(", contacts=").append(contacts);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public String getOxdId() {
+        throw new UnsupportedOperationException();
     }
 }
 

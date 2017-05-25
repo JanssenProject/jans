@@ -84,7 +84,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
             site.getUmaProtectedResources().add(resource);
         }
 
-        getSiteService().update(site);
+        getRpService().update(site);
     }
 
     private void validate(RsProtectParams params) {
