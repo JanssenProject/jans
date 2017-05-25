@@ -12,6 +12,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.HasProtectionAccessTokenParams;
 import org.xdi.oxd.common.params.IParams;
+import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.ServerLauncher;
 
@@ -61,36 +62,49 @@ public class ValidationService {
         }
 
         final String accessToken = params.getProtectionAccessToken();
+
         if (StringUtils.isBlank(accessToken)) {
             throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
+        if (params instanceof RegisterSiteParams) {
+            return; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
+        }
 
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
-        final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
-        final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
-        final HttpService httpService = ServerLauncher.getInjector().getInstance(HttpService.class);
 
         final Rp rp = rpService.getRp(params.getOxdId());
-        if (StringUtils.isBlank(rp.getSetupOxdId())) {
+        if (StringUtils.isBlank(rp.getSetupClientId())) {
             throw new ErrorResponseException(ErrorResponseCode.NO_SETUP_CLIENT_FOR_OXD_ID);
         }
 
-        final Rp setupRp = rpService.getRp(rp.getSetupOxdId());
-        LOG.trace("SetupRP: " + setupRp);
+        final IntrospectionResponse introspectionResponse = introspect(accessToken, params.getOxdId());
 
-        if (setupRp == null || StringUtils.isBlank(setupRp.getClientId())) {
-            throw new ErrorResponseException(ErrorResponseCode.NO_SETUP_CLIENT_FOR_OXD_ID);
-        }
+        LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + rp.getSetupClientId());
 
-        final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(params.getOxdId()).getIntrospectionEndpoint();
-        final IntrospectionService introspectionService = ProxyFactory.create(IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
-        final IntrospectionResponse introspectionResponse = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(params.getOxdId()).getToken(), accessToken);
-        LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + setupRp.getClientId());
-        if (introspectionResponse.getClientId().equals(setupRp.getClientId())) {
+        if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
             return;
         }
 
         throw new ErrorResponseException(ErrorResponseCode.INVALID_PROTECTION_ACCESS_TOKEN);
+    }
+
+    public IntrospectionResponse introspect(String accessToken, String oxdId) {
+        if (StringUtils.isBlank(accessToken)) {
+            throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
+        }
+
+        final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
+        final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint();
+        final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
+        final HttpService httpService = ServerLauncher.getInjector().getInstance(HttpService.class);
+        final IntrospectionService introspectionService = ProxyFactory.create(IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
+        final IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+
+        if (!response.isActive()) {
+            LOG.debug("access_token is not active.");
+            throw new ErrorResponseException(ErrorResponseCode.INACTIVE_PROTECTION_ACCESS_TOKEN);
+        }
+        return response;
     }
 
     public void validate(HasOxdIdParams params) {
