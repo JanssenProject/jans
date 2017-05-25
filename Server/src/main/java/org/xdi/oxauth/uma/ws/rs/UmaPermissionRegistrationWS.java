@@ -7,22 +7,26 @@
 package org.xdi.oxauth.uma.ws.rs;
 
 import com.wordnik.swagger.annotations.*;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.service.uma.UmaPermissionManager;
 import org.xdi.oxauth.service.uma.UmaValidationService;
+import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -81,16 +85,18 @@ public class UmaPermissionRegistrationWS {
     public Response registerPermission(@Context HttpServletRequest request,
                                        @HeaderParam("Authorization") String authorization,
                                        @ApiParam(value = "The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
-                                           org.xdi.oxauth.model.uma.UmaPermission permissionRequest) {
+                                           String requestAsString) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
-            umaValidationService.validateResource(permissionRequest);
 
-            final UmaPermission permission = permissionManager.createPermission(permissionRequest, rptExpirationDate());
-            permissionManager.addPermission(permission, tokenService.getClientDn(authorization));
+            // UMA2 spec defined to possible requests, single permission or list of permission. So here we parse manually
+            UmaPermissionList permissionList = parseRequest(requestAsString);
+            umaValidationService.validatePermissions(permissionList);
+
+            String ticket = permissionManager.addPermission(permissionList, rptExpirationDate(), tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
-                            entity(new PermissionTicket(permission.getTicket())).
+                            entity(new PermissionTicket(ticket)).
                             build();
         } catch (Exception ex) {
             if (ex instanceof WebApplicationException) {
@@ -102,6 +108,34 @@ public class UmaPermissionRegistrationWS {
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
     }
+
+    /**
+     * UMA2 spec (edit 4) defined to possible requests, single permission or list of permission. So here we parse manually
+     * @param requestAsString request as string
+     * @return uma permission list
+     */
+    private UmaPermissionList parseRequest(String requestAsString) {
+        final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        try {
+            org.xdi.oxauth.model.uma.UmaPermission permission = mapper.readValue(requestAsString, org.xdi.oxauth.model.uma.UmaPermission.class);
+            return new UmaPermissionList().addPermission(permission);
+        } catch (IOException e) {
+            // ignore
+        }
+
+        try {
+            UmaPermissionList permissions = mapper.readValue(requestAsString, org.xdi.oxauth.model.uma.UmaPermissionList.class);
+            if (!permissions.isEmpty()) {
+                return permissions;
+            }
+            log.error("Permission list is empty.");
+        } catch (IOException e) {
+            log.error("Failed to parse uma permission request" + requestAsString, e);
+        }
+        return errorResponseFactory.throwUmaWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_PERMISSION_REQUEST);
+    }
+
+
 
     public Date rptExpirationDate() {
         int lifeTime = appConfiguration.getUmaRequesterPermissionTokenLifetime();

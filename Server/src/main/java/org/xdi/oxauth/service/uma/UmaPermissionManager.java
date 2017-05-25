@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.util.INumGenerator;
@@ -22,6 +23,7 @@ import org.xdi.util.INumGenerator;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -57,11 +59,30 @@ public class UmaPermissionManager {
         return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_PERMISSION, clientDn);
     }
 
-    public UmaPermission createPermission(org.xdi.oxauth.model.uma.UmaPermission permissionRequest, Date expirationDate) {
+    private List<UmaPermission> createPermissions(UmaPermissionList permissions, Date expirationDate) {
         final String ticket = UUID.randomUUID().toString();
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
-        return new UmaPermission(permissionRequest.getResourceId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(permissionRequest.getScopes()),
-                ticket, configurationCode, expirationDate);
+
+        List<UmaPermission> result = new ArrayList<UmaPermission>();
+        for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
+            result.add(new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(permission.getScopes()),
+                    ticket, configurationCode, expirationDate));
+        }
+
+        return result;
+    }
+
+    public String addPermission(UmaPermissionList permissionList, Date expirationDate, String clientDn) throws Exception {
+        try {
+            List<UmaPermission> created = createPermissions(permissionList, expirationDate);
+            for (UmaPermission permission : created) {
+                addPermission(permission, clientDn);
+            }
+            return created.get(0).getTicket();
+        } catch (Exception e) {
+            log.trace(e.getMessage(), e);
+            throw e;
+        }
     }
 
     public void addPermission(UmaPermission permission, String clientDn) {
@@ -74,14 +95,11 @@ public class UmaPermissionManager {
         }
     }
 
-    public UmaPermission getPermissionByTicket(String ticket) {
+    public List<UmaPermission> getPermissionByTicket(String ticket) {
         try {
             final String baseDn = staticConfiguration.getBaseDn().getClients();
             final Filter filter = Filter.create(String.format("&(oxTicket=%s)", ticket));
-            final List<UmaPermission> entries = ldapEntryManager.findEntries(baseDn, UmaPermission.class, filter);
-            if (entries != null && !entries.isEmpty()) {
-                return entries.get(0);
-            }
+            return ldapEntryManager.findEntries(baseDn, UmaPermission.class, filter);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -111,9 +129,9 @@ public class UmaPermissionManager {
 
     public void deletePermission(String ticket) {
         try {
-            final UmaPermission permission = getPermissionByTicket(ticket);
-            if (permission != null) {
-                ldapEntryManager.remove(permission);
+            final List<UmaPermission> permissions = getPermissionByTicket(ticket);
+            for (UmaPermission p : permissions) {
+                ldapEntryManager.remove(p);
             }
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
