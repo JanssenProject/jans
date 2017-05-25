@@ -82,17 +82,17 @@ public enum UmaErrorResponseType implements IErrorType {
 	INVALID_TOKEN("invalid_token"),	
 
 	/**
-	 * The provided resource set identifier was not found at the AM.
+	 * The provided resource id was not found at the AS.
 	 */
-	INVALID_RESOURCE_SET_ID("invalid_resource_set_id"),
+	INVALID_RESOURCE_ID("invalid_resource_id"),
 
 	/**
-	 * The provided resource set identifier was not found at the AM.
+	 * At least one of the scopes included in the request was not registered previously by this host.
 	 */
-	INVALID_RESOURCE_SET_SCOPE("invalid_scope"),
+	INVALID_RESOURCE_SCOPE("invalid_scope"),
 	
 	/**
-	 * The provided ticket was not found at the AM.
+	 * The provided ticket was not found at the AS.
 	 */
 	INVALID_TICKET("invalid_ticket"),
 	

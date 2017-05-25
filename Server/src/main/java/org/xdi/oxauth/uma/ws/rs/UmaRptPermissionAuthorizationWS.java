@@ -74,8 +74,7 @@ public class UmaRptPermissionAuthorizationWS {
             // todo uma2 schedule for remove ?
             final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
 
-            final String validatedAmHost = umaValidationService.validateAmHost(amHost);
-            final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant, validatedAmHost);
+            final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant);
 
             // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
             return Response.ok(ServerUtil.asJson(new RptAuthorizationResponse(rpt.getCode()))).build();
@@ -93,11 +92,10 @@ public class UmaRptPermissionAuthorizationWS {
     private UmaRPT authorizeRptPermission(String authorization,
                                           RptAuthorizationRequest rptAuthorizationRequest,
                                           HttpServletRequest httpRequest,
-                                          AuthorizationGrant grant,
-                                          String amHost) {
+                                          AuthorizationGrant grant) {
         UmaRPT rpt;
         if (Util.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
-            rpt = rptManager.createRPT(authorization, amHost);
+            rpt = rptManager.createRPT(authorization);
         } else {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
@@ -130,7 +128,7 @@ public class UmaRptPermissionAuthorizationWS {
 
     private void invalidateTicket(UmaPermission permission) {
         try {
-            permission.setAmHost("invalidated"); // invalidate ticket and persist
+            permission.setStatus("invalidated"); // invalidate ticket and persist
             ldapEntryManager.merge(permission);
         } catch (Exception e) {
             log.error("Failed to invalidate ticket: " + permission.getTicket() + ". " + e.getMessage(), e);

@@ -57,11 +57,11 @@ public class UmaPermissionManager {
         return String.format("ou=%s,%s", ORGUNIT_OF_RESOURCE_PERMISSION, clientDn);
     }
 
-    public UmaPermission createPermission(String amHost, org.xdi.oxauth.model.uma.UmaPermission permissionRequest, Date expirationDate) {
+    public UmaPermission createPermission(org.xdi.oxauth.model.uma.UmaPermission permissionRequest, Date expirationDate) {
         final String ticket = UUID.randomUUID().toString();
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
         return new UmaPermission(permissionRequest.getResourceId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(permissionRequest.getScopes()),
-                amHost, "", ticket, configurationCode, expirationDate);
+                ticket, configurationCode, expirationDate);
     }
 
     public void addPermission(UmaPermission permission, String clientDn) {

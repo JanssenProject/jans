@@ -80,15 +80,13 @@ public class UmaPermissionRegistrationWS {
     })
     public Response registerPermission(@Context HttpServletRequest request,
                                        @HeaderParam("Authorization") String authorization,
-                                       @HeaderParam("Host") String amHost,
                                        @ApiParam(value = "The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered.", required = true)
                                            org.xdi.oxauth.model.uma.UmaPermission permissionRequest) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
-            String validatedAmHost = umaValidationService.validateAmHost(amHost);
             umaValidationService.validateResource(permissionRequest);
 
-            final UmaPermission permission = permissionManager.createPermission(validatedAmHost, permissionRequest, rptExpirationDate());
+            final UmaPermission permission = permissionManager.createPermission(permissionRequest, rptExpirationDate());
             permissionManager.addPermission(permission, tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
