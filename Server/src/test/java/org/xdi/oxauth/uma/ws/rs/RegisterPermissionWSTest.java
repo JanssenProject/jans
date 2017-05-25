@@ -62,25 +62,22 @@ public class RegisterPermissionWSTest extends BaseTest {
 	}
 
 	@Test(dependsOnMethods = { "init" })
-	@Parameters({ "umaAmHost", "umaHost" })
-	public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
+	public void testRegisterPermission() throws Exception {
 		final UmaPermission r = new UmaPermission();
 		r.setResourceId(resource.getId());
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-		final PermissionTicket ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
+		final PermissionTicket ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
 		UmaTestUtil.assert_(ticket);
 	}
 
 	@Test(dependsOnMethods = { "testRegisterPermission" })
-	@Parameters({ "umaAmHost", "umaHost" })
-	public void testRegisterPermissionWithInvalidResource(final String umaAmHost, String umaHost) {
+	public void testRegisterPermissionWithInvalidResource() {
 		final String path = umaPermissionPath;
 		try {
 			Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
 			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
 			request.header("Authorization", "Bearer " + pat.getAccessToken());
-			request.header("Host", umaAmHost);
 
 			String json = null;
 			try {

@@ -301,8 +301,6 @@
 	<parameter name="umaRptPath" value="seam/resource/restv1/requester/rpt" />
 	<parameter name="umaGatPath" value="seam/resource/restv1/requester/gat" />
 	<parameter name="umaRptStatusPath" value="seam/resource/restv1/rpt/status" />
-	<parameter name="umaAmHost" value="localhost" />
-	<parameter name="umaHost" value="photoz.example.com" />
 	<parameter name="umaUserId" value="${uma.user.uid}" />
 	<parameter name="umaUserSecret" value="${uma.user.password}" />
 	<parameter name="umaPatClientId" value="${uma.pat.client.id}" />
