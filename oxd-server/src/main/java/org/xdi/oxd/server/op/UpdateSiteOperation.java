@@ -54,7 +54,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         try {
             updateRegisteredClient(site, params);
-            getSiteService().update(site);
+            getRpService().update(site);
 
             LOG.info("Site configuration updated: " + site);
         } catch (IOException e) {

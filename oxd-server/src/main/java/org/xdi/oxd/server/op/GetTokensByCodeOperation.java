@@ -85,7 +85,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             // persist tokens
             site.setIdToken(response.getIdToken());
             site.setAccessToken(response.getAccessToken());
-            getSiteService().update(site);
+            getRpService().update(site);
             getStateService().invalidateState(params.getState());
 
             LOG.trace("Scope: " + response.getScope());

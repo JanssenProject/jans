@@ -13,6 +13,7 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxd.common.Command;
@@ -38,7 +39,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
-    private Rp siteConfiguration;
+    private Rp rp;
 
     /**
      * Base constructor
@@ -52,17 +53,27 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     public RegisterSiteResponse execute_(RegisterSiteParams params) {
         validateParametersAndFallbackIfNeeded(params);
 
-        String siteId = UUID.randomUUID().toString();
+        String oxdId = UUID.randomUUID().toString();
 
         LOG.info("Creating site configuration ...");
-        persistSiteConfiguration(siteId, params);
+        persistRp(oxdId, params);
+        validateAccessToken(oxdId, params);
 
-        LOG.info("Site configuration created: " + siteConfiguration);
+        LOG.info("Site configuration created: " + rp);
 
         RegisterSiteResponse opResponse = new RegisterSiteResponse();
-        opResponse.setOxdId(siteId);
+        opResponse.setOxdId(oxdId);
         opResponse.setOpHost(params.getOpHost());
         return opResponse;
+    }
+
+    private void validateAccessToken(String oxdId, RegisterSiteParams params) {
+        final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), params.getOxdId());
+        LOG.trace("introspection: " + response + ", setupClientId: " + rp.getSetupClientId());
+
+        rp.setSetupClientId(response.getClientId());
+        rp.setSetupOxdId(oxdId);
+        getRpService().updateSilently(rp);
     }
 
     @Override
@@ -78,7 +89,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
-        Rp fallback = getSiteService().defaultRp();
+        Rp fallback = getRpService().defaultRp();
 
         // op_host
         if (Strings.isNullOrEmpty(params.getOpHost())) {
@@ -179,22 +190,22 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
     }
 
-    private void persistSiteConfiguration(String siteId, RegisterSiteParams params) {
+    private void persistRp(String siteId, RegisterSiteParams params) {
 
         try {
-            siteConfiguration = createSiteConfiguration(siteId, params);
+            rp = createRp(siteId, params);
 
             if (!hasClient(params)) {
                 final RegisterResponse registerResponse = registerClient(params);
-                siteConfiguration.setClientId(registerResponse.getClientId());
-                siteConfiguration.setClientSecret(registerResponse.getClientSecret());
-                siteConfiguration.setClientRegistrationAccessToken(registerResponse.getRegistrationAccessToken());
-                siteConfiguration.setClientRegistrationClientUri(registerResponse.getRegistrationClientUri());
-                siteConfiguration.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
-                siteConfiguration.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
+                rp.setClientId(registerResponse.getClientId());
+                rp.setClientSecret(registerResponse.getClientSecret());
+                rp.setClientRegistrationAccessToken(registerResponse.getRegistrationAccessToken());
+                rp.setClientRegistrationClientUri(registerResponse.getRegistrationClientUri());
+                rp.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
+                rp.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
             }
 
-            getSiteService().create(siteConfiguration);
+            getRpService().create(rp);
         } catch (IOException e) {
             LOG.error("Failed to persist site configuration, params: " + params, e);
             throw new RuntimeException(e);
@@ -240,7 +251,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             responseTypes.add(ResponseType.fromString(type));
         }
 
-        String clientName = "oxD client for site: " + siteConfiguration.getOxdId();
+        String clientName = "oxD client for site: " + rp.getOxdId();
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
         }
@@ -282,18 +293,18 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
-        siteConfiguration.setResponseTypes(params.getResponseTypes());
-        siteConfiguration.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
-        siteConfiguration.setContacts(params.getContacts());
-        siteConfiguration.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
+        rp.setResponseTypes(params.getResponseTypes());
+        rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+        rp.setContacts(params.getContacts());
+        rp.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
         return request;
     }
 
-    private Rp createSiteConfiguration(String siteId, RegisterSiteParams params) {
+    private Rp createRp(String siteId, RegisterSiteParams params) {
 
         Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
 
-        final Rp rp = new Rp(getSiteService().defaultRp());
+        final Rp rp = new Rp(getRpService().defaultRp());
         rp.setOxdId(siteId);
         rp.setOpHost(params.getOpHost());
         rp.setOpDiscoveryPath(params.getOpDiscoveryPath());

@@ -156,11 +156,11 @@ public class RpService {
         persistenceService.update(rp);
     }
 
-    public void updateSilently(Rp siteConfiguration) {
+    public void updateSilently(Rp rp) {
         try {
-            update(siteConfiguration);
+            update(rp);
         } catch (IOException e) {
-            LOG.error("Failed to update site configuration: " + siteConfiguration, e);
+            LOG.error("Failed to update site configuration: " + rp, e);
         }
     }
 
