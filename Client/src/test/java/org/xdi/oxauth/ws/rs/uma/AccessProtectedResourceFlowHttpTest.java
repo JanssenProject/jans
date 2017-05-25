@@ -89,10 +89,9 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * Requester obtains RPT token
      */
     @Test(dependsOnMethods = {"testHostRegisterResource"})
-    @Parameters({"umaAmHost"})
-    public void testRequesterObtainsRpt(final String umaAmHost) throws Exception {
+    public void testRequesterObtainsRpt() throws Exception {
         showTitle("testRequesterObtainsRpt");
-        //this.umaObtainRptTokenFlowHttpTest.testObtainRptTokenFlow(umaAmHost);
+        //this.umaObtainRptTokenFlowHttpTest.testObtainRptTokenFlow();
     }
 
     //** 3 ******************************************************************************
@@ -111,8 +110,8 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * Host determines RPT status
      */
     @Test(dependsOnMethods = {"testRequesterAccessProtectedResourceWithNotEnoughPermissionsRpt"})
-    @Parameters({"umaAmHost"})
-    public void testHostDetermineRptStatus1(final String umaAmHost) throws Exception {
+    @Parameters()
+    public void testHostDetermineRptStatus1() throws Exception {
         showTitle("testHostDetermineRptStatus1");
 
         String resourceId = umaRegisterResourceFlowHttpTest.resourceId;
@@ -139,10 +138,9 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * Scenario for case when there is valid RPT but it has not enough permissions.
      */
     @Test(dependsOnMethods = {"testHostDetermineRptStatus1"})
-    @Parameters({"umaAmHost"})
-    public void testHostRegisterPermissions(final String umaAmHost) throws Exception {
+    public void testHostRegisterPermissions() throws Exception {
         showTitle("testHostRegisterPermissions");
-        permissionFlowHttpTest.testRegisterPermission(umaAmHost);
+        permissionFlowHttpTest.testRegisterPermission();
     }
 
     /**
@@ -160,8 +158,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * Authorize requester to access resource set
      */
     @Test(dependsOnMethods = {"testHostReturnTicketToRequester"})
-    @Parameters({"umaAmHost"})
-    public void testRequesterAsksForAuthorization(final String umaAmHost) throws Exception {
+    public void testRequesterAsksForAuthorization() throws Exception {
         showTitle("testRequesterAsksForAuthorization");
 
         // Authorize RPT token to access permission ticket
@@ -171,7 +168,6 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
 //            authorizationResponse = this.rptPermissionAuthorizationService.requestRptAuthorization(
 //                    "Bearer " + m_aat.getAccessToken(),
-//                    umaAmHost,
 //                    rptAuthorizationRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
@@ -196,8 +192,8 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * Host determines RPT status
      */
     @Test(dependsOnMethods = {"testRequesterAccessProtectedResourceWithEnoughPermissionsRpt"})
-    @Parameters({"umaAmHost"})
-    public void testHostDetermineRptStatus2(final String umaAmHost) throws Exception {
+    @Parameters()
+    public void testHostDetermineRptStatus2() throws Exception {
         showTitle("testHostDetermineRptStatus2");
 
         // Determine RPT token to status

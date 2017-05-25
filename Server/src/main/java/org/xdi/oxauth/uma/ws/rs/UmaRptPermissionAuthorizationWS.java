@@ -67,7 +67,6 @@ public class UmaRptPermissionAuthorizationWS {
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response requestRptPermissionAuthorization(
             @HeaderParam("Authorization") String authorization,
-            @HeaderParam("Host") String amHost,
             RptAuthorizationRequest rptAuthorizationRequest,
             @Context HttpServletRequest httpRequest) {
         try {

@@ -32,10 +32,10 @@ public class ObtainRptWSTest extends BaseTest {
 	}
 
 	@Test(dependsOnMethods = "init")
-	@Parameters({ "umaRptPath", "umaAmHost" })
-	public void obtainRpt(String umaRptPath, String umaAmHost) {
+	@Parameters({ "umaRptPath"})
+	public void obtainRpt(String umaRptPath) {
 		// todo uma2
-//		final RPTResponse r = TUma.requestRpt(url, aat, umaRptPath, umaAmHost);
+//		final RPTResponse r = TUma.requestRpt(url, aat, umaRptPath);
 //		UmaTestUtil.assert_(r);
 	}
 }

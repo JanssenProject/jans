@@ -6,22 +6,18 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.model.common.Holder;
+import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
 
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.common.Holder;
-import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.util.ServerUtil;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -38,7 +34,7 @@ class TAuthorization {
 	}
 
 	public RptAuthorizationResponse requestAuthorization(String p_umaPermissionAuthorizationPath,
-			final String p_umaAmHost, final RptAuthorizationRequest p_request) {
+			final RptAuthorizationRequest p_request) {
 		final Holder<RptAuthorizationResponse> h = new Holder<RptAuthorizationResponse>();
 
 		try {
@@ -47,7 +43,6 @@ class TAuthorization {
 
 			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
 			// todo uma2 request.header("Authorization", "Bearer " + p_aat.getAccessToken());
-			request.header("Host", p_umaAmHost);
 
 			final String json = ServerUtil.createJsonMapper().writeValueAsString(p_request);
 			Response response = request.post(Entity.json(json));

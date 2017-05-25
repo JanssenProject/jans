@@ -32,10 +32,8 @@ public class TrustElevationHttpTest extends BaseTest {
     protected Token m_pat;
 
     @Test
-    @Parameters({"umaMetaDataUrl", "umaAmHost",
-            "umaPatClientId", "umaPatClientSecret"
-    })
-    public void trustElevation(final String umaMetaDataUrl, final String umaAmHost,
+    @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
+    public void trustElevation(final String umaMetaDataUrl,
                      final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
         UmaTestUtil.assert_(this.metadata);
@@ -56,7 +54,7 @@ public class TrustElevationHttpTest extends BaseTest {
         final String resourceId = this.registerResourceTest.registerResource(rsScopes);
 
         this.registerPermissionTest.registerResourceTest = registerResourceTest;
-        this.registerPermissionTest.registerResourcePermission(umaAmHost, resourceId, rsScopes);
+        this.registerPermissionTest.registerResourcePermission(resourceId, rsScopes);
 
         /**
         RptIntrospectionResponse rptStatus = this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(),
@@ -66,7 +64,7 @@ public class TrustElevationHttpTest extends BaseTest {
 
         try {
             RptAuthorizationResponse authorizationResponse = this.rptPermissionAuthorizationService.requestRptPermissionAuthorization(
-                    "Bearer " + m_aat.getAccessToken(), umaAmHost, rptAuthorizationRequest);
+                    "Bearer " + m_aat.getAccessToken(), rptAuthorizationRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;

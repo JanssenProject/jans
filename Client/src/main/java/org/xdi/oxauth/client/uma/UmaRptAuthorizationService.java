@@ -26,7 +26,6 @@ public interface UmaRptAuthorizationService {
 	@Consumes({ UmaConstants.JSON_MEDIA_TYPE })
 	@Produces({ UmaConstants.JSON_MEDIA_TYPE })
 	RptAuthorizationResponse requestRptAuthorization(@HeaderParam("Authorization") String authorization,
-													 @HeaderParam("Host") String amHost,
 													 RptAuthorizationRequest rptAuthorizationRequest);
 
 }
