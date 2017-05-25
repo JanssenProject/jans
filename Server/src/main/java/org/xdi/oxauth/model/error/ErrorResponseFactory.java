@@ -107,7 +107,7 @@ public class ErrorResponseFactory implements Configuration {
         throwUmaWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, UmaErrorResponseType.SERVER_ERROR);
     }
 
-    public void throwUmaWebApplicationException(Response.Status status, IErrorType type) throws WebApplicationException {
+    public <T> T throwUmaWebApplicationException(Response.Status status, IErrorType type) throws WebApplicationException {
         final Response response = Response.status(status).entity(getUmaJsonErrorResponse(type)).build();
         throw new WebApplicationException(response);
     }
