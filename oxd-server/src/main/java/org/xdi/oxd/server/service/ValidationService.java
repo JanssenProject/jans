@@ -13,6 +13,7 @@ import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.HasProtectionAccessTokenParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.ServerLauncher;
 
@@ -54,6 +55,10 @@ public class ValidationService {
     }
 
     private void validate(HasProtectionAccessTokenParams params) {
+        if (params instanceof SetupClientParams) {
+            return;
+        }
+
         final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
             if (StringUtils.isBlank(params.getProtectionAccessToken())) {
