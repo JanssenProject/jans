@@ -21,6 +21,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.service.Rp;
@@ -75,8 +76,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
                 return; // skip validation since protectCommandsWithAccessToken=false
             } // otherwise if token is not blank then let it validate it
         }
+        if (params instanceof SetupClientParams) {
+            return;
+        }
 
-        final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), params.getOxdId());
+        final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), oxdId);
         LOG.trace("introspection: " + response + ", setupClientId: " + rp.getSetupClientId());
 
         rp.setSetupClientId(response.getClientId());

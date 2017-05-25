@@ -9,6 +9,7 @@ import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.params.UpdateSiteParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.common.response.SetupClientResponse;
 import org.xdi.oxd.common.response.UpdateSiteResponse;
 
 import java.io.IOException;
@@ -35,13 +36,16 @@ public class RegisterSiteTest {
         try {
             client = new CommandClient(host, port);
 
-            RegisterSiteResponse resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
-            assertNotNull(resp);
+            final SetupClientResponse setupClient = SetupClientTest.setupClient(client, opHost, redirectUrl);
 
-            notEmpty(resp.getOxdId());
+//            RegisterSiteResponse resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
+//            assertNotNull(resp);
+//
+//            notEmpty(resp.getOxdId());
 
             // more specific site registration
             final RegisterSiteParams commandParams = new RegisterSiteParams();
+            commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
             commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
@@ -55,7 +59,7 @@ public class RegisterSiteTest {
             final Command command = new Command(CommandType.REGISTER_SITE);
             command.setParamsObject(commandParams);
 
-            resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
+            RegisterSiteResponse resp = client.send(command).dataAsResponse(RegisterSiteResponse.class);
             assertNotNull(resp);
             assertNotNull(resp.getOxdId());
             oxdId = resp.getOxdId();
