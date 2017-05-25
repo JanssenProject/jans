@@ -1,5 +1,6 @@
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -263,6 +264,7 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         return sb.toString();
     }
 
+    @JsonIgnore
     @Override
     public String getOxdId() {
         throw new UnsupportedOperationException();
