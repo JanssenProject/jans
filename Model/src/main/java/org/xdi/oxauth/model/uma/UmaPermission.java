@@ -16,7 +16,6 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,21 +29,18 @@ import java.util.List;
 
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @IgnoreMediaTypes("application/*+json")
-@JsonPropertyOrder({"resource_set_id", "scopes", "exp", "iat", "nbf"})
+@JsonPropertyOrder({"resource_id", "resource_scopes"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 @ApiModel(value = "Register permission request.")
 public class UmaPermission implements Serializable {
 
-    @ApiModelProperty(value = "The identifier for a resource set to which this client is seeking access. The identifier MUST correspond to a resource set that was previously registered."
+    @ApiModelProperty(value = "The identifier for a resource to which this client is seeking access. The identifier MUST correspond to a resource that was previously registered."
             , required = true)
     private String resourceId;
-    @ApiModelProperty(value = "An array referencing one or more identifiers of scopes to which access is needed for this resource set. Each scope identifier MUST correspond to a scope that was registered by this resource server for the referenced resource set."
+    @ApiModelProperty(value = "An array referencing one or more identifiers of scopes to which access is needed for this resource. Each scope identifier MUST correspond to a scope that was registered by RS for the referenced resource."
             , required = true)
     private List<String> scopes;
-    private Date expiresAt;
-    private Date issuedAt;
-    private Date nbf;
 
     public UmaPermission() {
     }
@@ -64,28 +60,8 @@ public class UmaPermission implements Serializable {
         this.resourceId = resourceId;
     }
 
-    @JsonProperty(value = "nbf")
-    @XmlElement(name = "nbf")
-    public Date getNbf() {
-        return nbf;
-    }
-
-    public void setNbf(Date nbf) {
-        this.nbf = nbf;
-    }
-
-    @JsonProperty(value = "iat")
-    @XmlElement(name = "iat")
-    public Date getIssuedAt() {
-        return issuedAt;
-    }
-
-    public void setIssuedAt(Date issuedAt) {
-        this.issuedAt = issuedAt;
-    }
-
-    @JsonProperty(value = "scopes")
-    @XmlElement(name = "scopes")
+    @JsonProperty(value = "resource_scopes")
+    @XmlElement(name = "resource_scopes")
     public List<String> getScopes() {
         return scopes;
     }
@@ -94,26 +70,11 @@ public class UmaPermission implements Serializable {
         this.scopes = scopes;
     }
 
-    @JsonProperty(value = "exp")
-    @XmlElement(name = "exp")
-    public Date getExpiresAt() {
-        return expiresAt != null ? new Date(expiresAt.getTime()) : null;
-    }
-
-    public void setExpiresAt(Date p_expiresAt) {
-        expiresAt = p_expiresAt != null ? new Date(p_expiresAt.getTime()) : null;
-    }
-
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("UmaPermission");
-        sb.append("{resourceId='").append(resourceId).append('\'');
-        sb.append(", scopes=").append(scopes);
-        sb.append(", expiresAt=").append(expiresAt);
-        sb.append(", issuedAt=").append(issuedAt);
-        sb.append(", nbf=").append(nbf);
-        sb.append('}');
-        return sb.toString();
+        return "UmaPermission{" +
+                "resourceId='" + resourceId + '\'' +
+                ", scopes=" + scopes +
+                '}';
     }
 }

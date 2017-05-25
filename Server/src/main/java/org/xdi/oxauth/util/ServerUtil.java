@@ -149,12 +149,11 @@ public class ServerUtil {
         });
     }
 
-    public static org.xdi.oxauth.model.uma.UmaPermission convert(UmaPermission p_permission, UmaScopeService p_umaScopeService) {
-        if (p_permission != null) {
+    public static org.xdi.oxauth.model.uma.UmaPermission convert(UmaPermission permission, UmaScopeService umaScopeService) {
+        if (permission != null) {
             final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
-            result.setResourceId(p_permission.getResourceId());
-            result.setScopes(p_umaScopeService.getScopeUrlsByDns(p_permission.getScopeDns()));
-            result.setExpiresAt(p_permission.getExpirationDate());
+            result.setResourceId(permission.getResourceId());
+            result.setScopes(umaScopeService.getScopeUrlsByDns(permission.getScopeDns()));
             return result;
         }
         return null;

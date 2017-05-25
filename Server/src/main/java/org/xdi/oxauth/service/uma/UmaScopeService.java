@@ -178,7 +178,7 @@ public class UmaScopeService {
                     }
                 } else {
                     throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                            .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_SCOPE)).build());
+                            .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
                 }
             }
         }

@@ -25,8 +25,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
@@ -62,68 +60,6 @@ public class UmaValidationService {
 
     @Inject
     private AppConfiguration appConfiguration;
-
-    public String validateAmHost(String host) {
-        if (StringHelper.isEmpty(host)) {
-            log.error("AM host is invalid");
-            throw new WebApplicationException(Response.status(BAD_REQUEST)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-        }
-
-        String hostUri;
-        try {
-        	int index = host.indexOf("://");
-        	if (index != -1) {
-        		hostUri = (new URI(host)).getHost();
-        	} else {
-        		hostUri = (new URI("https://" + host)).getHost();
-        	}
-        } catch (URISyntaxException ex) {
-            log.error("Failed to parse AM host: '{}'", ex, host);
-            throw new WebApplicationException(Response.status(BAD_REQUEST)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-        }
-
-        try {
-            URI umaBaseEndpoint = new URI(appConfiguration.getBaseEndpoint());
-            if (!StringHelper.equalsIgnoreCase(hostUri, umaBaseEndpoint.getHost())) {
-                log.error("Get request for another AM: '{}'. Expected: '{}'", hostUri, umaBaseEndpoint.getHost());
-                throw new WebApplicationException(Response.status(BAD_REQUEST)
-                        .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-            }
-        } catch (URISyntaxException ex) {
-            log.error("Failed to parse AM host: '{}'", ex, hostUri);
-            throw new WebApplicationException(Response.status(BAD_REQUEST)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-        }
-
-        return StringHelper.toLowerCase(hostUri).trim();
-    }
-
-//    public String validateHost(String host) {
-//   		if (StringHelper.isEmpty(host)) {
-//   			log.error("Host is invalid");
-//   			throw new WebApplicationException(Response.status(BAD_REQUEST)
-//   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-//   		}
-//
-//        String hostUri;
-//   		try {
-//        	int index = host.indexOf("://");
-//        	if (index != -1) {
-//        		hostUri = (new URI(host)).getHost();
-//        	} else {
-//        		hostUri = (new URI("https://" + host)).getHost();
-//        	}
-//   		} catch (URISyntaxException ex) {
-//   			log.error("Failed to parse host: '{}'", ex, host);
-//   			throw new WebApplicationException(Response.status(BAD_REQUEST)
-//   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_REQUEST)).build());
-//   		}
-//
-//   		return StringHelper.toLowerCase(hostUri).trim();
-//   	}
-
 
     public AuthorizationGrant assertHasProtectionScope(String authorization) {
         return validateAuthorization(authorization, UmaScopeType.PROTECTION);
@@ -176,7 +112,7 @@ public class UmaValidationService {
    	}
 
     public void validatePermission(UmaPermission permission) {
-   		if (permission == null || "invalidated".equalsIgnoreCase(permission.getAmHost())) {
+   		if (permission == null || "invalidated".equalsIgnoreCase(permission.getStatus())) {
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
    					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
    		}
@@ -193,7 +129,7 @@ public class UmaValidationService {
    		if (StringHelper.isEmpty(resourceId)) {
    			log.error("Resource id is empty");
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
+   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_ID)).build());
    		}
 
    		UmaResource resource;
@@ -205,20 +141,20 @@ public class UmaValidationService {
             if (resources.size() != 1) {
        			log.error("Resource isn't registered or there are two resources with same Id");
        			throw new WebApplicationException(Response.status(BAD_REQUEST)
-       					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
+       					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_ID)).build());
             }
             resource = resources.get(0);
    		} catch (EntryPersistenceException ex) {
    			log.error("Resource isn't registered");
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_ID)).build());
+   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_ID)).build());
    		}
 
         final List<String> scopeUrls = umaScopeService.getScopeUrlsByDns(resource.getScopes());
         if (!scopeUrls.containsAll(permissionRequest.getScopes())) {
    			log.error("At least one of the scope isn't registered");
    			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SET_SCOPE)).build());
+   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
    		}
    	}
 }

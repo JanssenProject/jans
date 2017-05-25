@@ -26,10 +26,8 @@ public class UmaPermission {
 
     @LdapDN
     private String dn;
-    @LdapAttribute(name = "oxAmHost")
-	private String amHost;
-    @LdapAttribute(name = "oxHost")
-	private String host;
+    @LdapAttribute(name = "oxStatus")
+	private String status;
     @LdapAttribute(name = "oxTicket")
 	private String ticket;
     @LdapAttribute(name = "oxConfigurationCode")
@@ -48,12 +46,10 @@ public class UmaPermission {
     public UmaPermission() {
     }
 
-    public UmaPermission(String resourceId, List<String> scopes, String amHost, String host, String ticket,
+    public UmaPermission(String resourceId, List<String> scopes, String ticket,
                          String configurationCode, Date expirationDate) {
 		this.resourceId = resourceId;
         this.scopeDns = scopes;
-		this.amHost = amHost;
-		this.host = host;
 		this.ticket = ticket;
 		this.configurationCode = configurationCode;
 		this.expirationDate = expirationDate;
@@ -83,23 +79,15 @@ public class UmaPermission {
 		return !expired;
 	}
 
-	public String getAmHost() {
-		return amHost;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public void setAmHost(String amHost) {
-		this.amHost = amHost;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-	public String getHost() {
-		return host;
-	}
-
-	public void setHost(String host) {
-		this.host = host;
-	}
-
-	public String getConfigurationCode() {
+    public String getConfigurationCode() {
 		return configurationCode;
 	}
 
@@ -159,8 +147,7 @@ public class UmaPermission {
     public String toString() {
         return "UmaPermission{" +
                 "dn='" + dn + '\'' +
-                ", amHost='" + amHost + '\'' +
-                ", host='" + host + '\'' +
+                ", status='" + status + '\'' +
                 ", ticket='" + ticket + '\'' +
                 ", configurationCode='" + configurationCode + '\'' +
                 ", expirationDate=" + expirationDate +
