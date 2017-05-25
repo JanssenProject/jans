@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * The endpoint at which the requester asks for authorization to have a new permission.
@@ -109,14 +110,23 @@ public class UmaRptPermissionAuthorizationWS {
             rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
         }
 
-        final UmaPermission permission = permissionManager.getPermissionByTicket(rptAuthorizationRequest.getTicket());
+        final List<UmaPermission> permissions = permissionManager.getPermissionByTicket(rptAuthorizationRequest.getTicket());
 
-        umaValidationService.validatePermission(permission);
+        umaValidationService.validatePermissions(permissions);
 
-        // Add permission to RPT
-        if (umaAuthorizationService.allowToAddPermission(grant, rpt, permission, httpRequest, rptAuthorizationRequest.getClaims())) {
-            rptManager.addPermissionToRPT(rpt, permission);
-            invalidateTicket(permission);
+        boolean allowToAdd = true;
+        for (UmaPermission permission : permissions) {
+            if (!umaAuthorizationService.allowToAddPermission(grant, rpt, permission, httpRequest, rptAuthorizationRequest.getClaims())) {
+                allowToAdd = false;
+                break;
+            }
+        }
+
+        if (allowToAdd) {
+            for (UmaPermission permission : permissions) {
+                rptManager.addPermissionToRPT(rpt, permission);
+                invalidateTicket(permission);
+            }
             return rpt;
         }
 

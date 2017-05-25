@@ -79,7 +79,12 @@ public enum UmaErrorResponseType implements IErrorType {
 	/**
 	 * The access token expired.
 	 */
-	INVALID_TOKEN("invalid_token"),	
+	INVALID_TOKEN("invalid_token"),
+
+	/**
+	 * Invalid permission request.
+	 */
+	INVALID_PERMISSION_REQUEST("invalid_permission_request"),
 
 	/**
 	 * The provided resource id was not found at the AS.
