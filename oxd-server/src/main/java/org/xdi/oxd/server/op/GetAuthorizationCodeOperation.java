@@ -40,7 +40,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
 
     @Override
     public CommandResponse execute(GetAuthorizationCodeParams params) {
-        final Rp site = getSite();
+        final Rp site = getRp();
 
         String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
         String state = Strings.isNullOrEmpty(params.getState()) ? UUID.randomUUID().toString() : params.getState();

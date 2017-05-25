@@ -46,7 +46,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
         validate(params);
 
-        final Rp site = getSite();
+        final Rp site = getRp();
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);

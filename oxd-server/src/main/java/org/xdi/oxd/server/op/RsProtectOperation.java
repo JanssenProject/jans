@@ -40,7 +40,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     public CommandResponse execute(final RsProtectParams params) throws Exception {
         validate(params);
 
-        Rp site = getSite();
+        Rp site = getRp();
 
         PatProvider patProvider = new PatProvider() {
             @Override

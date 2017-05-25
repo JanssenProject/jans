@@ -52,7 +52,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
     public CommandResponse execute(final RsCheckAccessParams params) throws Exception {
         validate(params);
 
-        Rp site = getSite();
+        Rp site = getRp();
         UmaResource resource = site.umaResource(params.getPath(), params.getHttpMethod());
         if (resource == null) {
             final ErrorResponse error = new ErrorResponse("invalid_request");
