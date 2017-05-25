@@ -15,6 +15,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +24,9 @@ import org.ocpsoft.rewrite.config.ConfigurationBuilder;
 import org.ocpsoft.rewrite.param.ParameterizedPatternSyntaxException;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
+import org.python.apache.commons.compress.compressors.FileNameUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -36,6 +40,8 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
     private static String REWRITE = "rewrite";
     private static final String DEFAULT_NAVIGATION_PATH = "META-INF/navigation";
     private static final String WEB_INF_PATH = "/WEB-INF";
+    
+    private Logger log = LoggerFactory.getLogger(AccessRewriteConfiguration.class);
 
     @Override
     public Configuration getConfiguration(final ServletContext context) {
@@ -75,17 +81,16 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                 String rewriteKey = file.getName().split("\\.")[0];
                 if (rewriteMap.containsKey(rewriteKey)) {
                     builder.addRule(Join.path(rewriteMap.get(rewriteKey)).to(xhtmlUri + ".htm"));
-                    System.out.println(rewriteMap.get(rewriteKey) + "-->" + xhtmlUri + ".htm");
+                    log.debug("Added rule from navigation.xml {}", rewriteMap.get(rewriteKey), xhtmlUri + ".htm");
                 } else {
                 	if (!xhtmlUri.startsWith(WEB_INF_PATH)) {
                 		builder.addRule(Join.path(xhtmlUri).to(xhtmlUri + ".htm"));
-                    	System.out.println(xhtmlUri + "-->" + xhtmlUri + ".htm");
+                        log.debug("Added rule {}", xhtmlUri, xhtmlUri + ".htm");
                 	}
                 }
             } catch (ParameterizedPatternSyntaxException ex) {
                 FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Failed to add rule for " + xhtmlPath, ex);
             }
-
         }
     }
 
@@ -93,7 +98,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
         Map<String, String> xhtmlNameToRewriteRule = new HashMap<String, String>();
         for (File file : navigationFiles) {
             String path = file.getAbsolutePath();
-            String navigationName = path.split("/")[path.split("/").length - 1];
+            String navigationName = file.getName();
 
             try {
                 String value = getRewritePattern(documentBuilder.parse(file));
