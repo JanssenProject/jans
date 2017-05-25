@@ -40,25 +40,25 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
     @Override
     public CommandResponse execute(UpdateSiteParams params) {
-        final Rp site = getSite();
+        final Rp rp = getRp();
 
-        LOG.info("Updating site configuration ...");
-        persistSiteConfiguration(site, params);
+        LOG.info("Updating rp ...");
+        persistRp(rp, params);
 
         UpdateSiteResponse response = new UpdateSiteResponse();
-        response.setOxdId(site.getOxdId());
+        response.setOxdId(rp.getOxdId());
         return okResponse(response);
     }
 
-    private void persistSiteConfiguration(Rp site, UpdateSiteParams params) {
+    private void persistRp(Rp rp, UpdateSiteParams params) {
 
         try {
-            updateRegisteredClient(site, params);
-            getRpService().update(site);
+            updateRegisteredClient(rp, params);
+            getRpService().update(rp);
 
-            LOG.info("Site configuration updated: " + site);
+            LOG.info("RP updated: " + rp);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to persist site configuration, params: " + params, e);
+            throw new RuntimeException("Failed to persist RP, params: " + params, e);
         }
     }
 

@@ -35,7 +35,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
     @Override
     public CommandResponse execute(GetAuthorizationUrlParams params) throws Exception {
-        final Rp site = getSite();
+        final Rp site = getRp();
 
         String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint();
 
