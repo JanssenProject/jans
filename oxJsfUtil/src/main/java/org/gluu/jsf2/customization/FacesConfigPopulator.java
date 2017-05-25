@@ -5,6 +5,8 @@ import com.sun.faces.util.FacesLogger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -39,14 +41,15 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
     private static final String FACES_CONFIG_PATTERN = ".*\\.navigation\\.xml$";
     private static final String DEFAULT_NAVIGATION_PATH = "META-INF/navigation";
 
+    private Logger log = LoggerFactory.getLogger(FacesConfigPopulator.class);
+
     @Override
     public void populateApplicationConfiguration(Document toPopulate) {
-
         if (!Utils.isCustomPagesDirExists())
             return;
         try {
             findAndUpdateNavigationRules(toPopulate, Utils.getCustomPagesPath());
-        } catch (Exception e) {
+        } catch (Exception ex) {
             FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't add customized navigation rules");
         }
 
@@ -56,8 +59,8 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
                 URL url = urlEnumeration.nextElement();
                 findAndUpdateNavigationRules(toPopulate, url.getPath());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+        	log.error("Failed to populate application configuraton", ex);
         }
     }
 
@@ -93,8 +96,13 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
     private void updateDocument(Document toPopulate, DocumentBuilder docBuilder, String faceConfig) {
         try {
             InputStream xml = new FileInputStream(faceConfig);
-            if (!isValidFacesConfig(xml))
-                return;
+//            try {
+//            	if (!isValidFacesConfig(xml)) {
+//            		return;
+//            	}
+//            } finally {
+//            	xml.close();
+//            }
             Document document = docBuilder.parse(new File(faceConfig));
             Element root = toPopulate.getDocumentElement();
             NodeList navigationRules = getNavigationRules(document);
@@ -102,7 +110,8 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
                 Node importedNode = toPopulate.importNode(navigationRules.item(i), true);
                 root.appendChild(importedNode);
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
+        	log.error("Failed to update navigation rules", ex);
         }
     }
 
