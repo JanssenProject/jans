@@ -6,22 +6,19 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.model.common.Holder;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -37,13 +34,11 @@ class TRegisterPermission {
 		this.baseUri = baseUri;
 	}
 
-	public PermissionTicket registerPermission(final Token p_pat, final String p_umaAmHost, String p_umaHost,
-			final UmaPermission p_request, String path) {
+	public PermissionTicket registerPermission(final Token p_pat, final UmaPermission p_request, String path) {
 		final Holder<PermissionTicket> ticketH = new Holder<PermissionTicket>();
 		Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + path).request();
 		request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
 		request.header("Authorization", "Bearer " + p_pat.getAccessToken());
-		request.header("Host", p_umaAmHost);
 
 		String json = null;
 		try {

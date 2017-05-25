@@ -74,23 +74,10 @@ public class UmaRptStatusWS {
     })
     public Response requestRptStatus(@HeaderParam("Authorization") String authorization,
                                      @FormParam("token")
-                                     @ApiParam(value = "The string value of the token.  For access tokens,\n" +
-                                             "      this is the \"access_token\" value returned from the token endpoint\n" +
-                                             "      defined in OAuth 2.0 [RFC6749] section 5.1.  For refresh tokens,\n" +
-                                             "      this is the \"refresh_token\" value returned from the token endpoint\n" +
-                                             "      as defined in OAuth 2.0 [RFC6749] section 5.1.  Other token types\n" +
-                                             "      are outside the scope of this specification.", required = true)
+                                     @ApiParam(value = "The string value of the token.  For access tokens, this is the \"access_token\" value returned from the token endpoint defined in OAuth 2.0 [RFC6749] section 5.1.  For refresh tokens, this is the \"refresh_token\" value returned from the token endpoint as defined in OAuth 2.0 [RFC6749] section 5.1.  Other token types are outside the scope of this specification.", required = true)
                                      String rptAsString,
                                      @FormParam("token_type_hint")
-                                     @ApiParam(value = "A hint about the type of the token\n" +
-                                             "      submitted for introspection.  The protected resource re MAY pass\n" +
-                                             "      this parameter in order to help the authorization server to\n" +
-                                             "      optimize the token lookup.  If the server is unable to locate the\n" +
-                                             "      token using the given hint, it MUST extend its search across all\n" +
-                                             "      of its supported token types.  An authorization server MAY ignore\n" +
-                                             "      this parameter, particularly if it is able to detect the token\n" +
-                                             "      type automatically.  Values for this field are defined in OAuth\n" +
-                                             "      Token Revocation [RFC7009].", required = false)
+                                     @ApiParam(value = "A hint about the type of the token submitted for introspection.  The protected resource re MAY pass this parameter in order to help the authorization server to optimize the token lookup.  If the server is unable to locate the token using the given hint, it MUST extend its search across all of its supported token types.  An authorization server MAY ignore this parameter, particularly if it is able to detect the token type automatically.  Values for this field are defined in OAuth Token Revocation [RFC7009].", required = false)
                                      String tokenTypeHint) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);

@@ -67,16 +67,15 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     }
 
     /**
-     * Test for registering permissions for resource set
+     * Test for registering permissions for resource
      */
     @Test
-    @Parameters({"umaAmHost"})
-    public void testRegisterPermission(final String umaAmHost) throws Exception {
+    public void testRegisterPermission() throws Exception {
         showTitle("testRegisterPermission");
-        registerResourcePermission(umaAmHost, this.registerResourceTest.resourceId, Arrays.asList("http://photoz.example.com/dev/scopes/view"));
+        registerResourcePermission(this.registerResourceTest.resourceId, Arrays.asList("http://photoz.example.com/dev/scopes/view"));
     }
 
-    public String registerResourcePermission(final String umaAmHost, String resourceId, List<String> scopes) throws Exception {
+    public String registerResourcePermission(String resourceId, List<String> scopes) throws Exception {
         UmaPermissionService permissionService = UmaClientFactory.instance().
                 createPermissionService(this.metadata);
 
@@ -87,8 +86,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
         PermissionTicket t = null;
         try {
-            t = permissionService.registerPermission(
-                    "Bearer " + this.registerResourceTest.pat.getAccessToken(), umaAmHost, permissionRequest);
+            t = permissionService.registerPermission("Bearer " + this.registerResourceTest.pat.getAccessToken(), permissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -103,8 +101,8 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
      * Test for registering permissions for resource
      */
     @Test
-    @Parameters({"umaAmHost"})
-    public void testRegisterPermissionForInvalidResource(final String umaAmHost) throws Exception {
+    @Parameters()
+    public void testRegisterPermissionForInvalidResource() throws Exception {
         showTitle("testRegisterPermissionForInvalidResource");
 
         UmaPermissionService permissionService = UmaClientFactory.instance().createPermissionService(this.metadata);
@@ -118,7 +116,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         PermissionTicket permissionTicket = null;
         try {
             permissionTicket = permissionService.registerPermission(
-                    "Bearer " + this.registerResourceTest.pat.getAccessToken(), umaAmHost, permissionRequest);
+                    "Bearer " + this.registerResourceTest.pat.getAccessToken(), permissionRequest);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");

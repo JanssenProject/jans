@@ -240,14 +240,13 @@ public class TTokenRequest {
 	}
 
 	// todo UMA2
-	public RPTResponse requestRpt(final String p_rptPath, final String p_umaAmHost) {
+	public RPTResponse requestRpt(final String p_rptPath) {
 		final Holder<RPTResponse> h = new Holder<RPTResponse>();
 
 		try {
 			Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + p_rptPath).request();
 			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
 			//request.header("Authorization", "Bearer " + p_aat.getAccessToken());
-			request.header("Host", p_umaAmHost);
 			Response response = request.post(Entity.form(new Form()));
 			String entity = response.readEntity(String.class);
 
@@ -291,8 +290,6 @@ public class TTokenRequest {
 //			request.header("Authorization", "Bearer " + p_aat.getAccessToken());
 			Response response = request.post(Entity.form(new Form("token", rpt)));
 			String entity = response.readEntity(String.class);
-
-			// request.addHeader("Host", p_umaAmHost);
 
 			// try {
 			// final String json =

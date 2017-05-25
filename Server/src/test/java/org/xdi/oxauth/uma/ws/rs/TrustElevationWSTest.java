@@ -10,8 +10,6 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 import java.net.URI;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertNotNull;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 14/04/2015
@@ -29,15 +27,14 @@ public class TrustElevationWSTest extends BaseTest {
 
 	@Test
 	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
-			"umaRedirectUri", "umaRptPath", "umaAmHost",
-			"umaRegisterResourcePath" })
+			"umaRedirectUri", "umaRptPath", "umaRegisterResourcePath" })
 	public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
 			String umaPatClientId, String umaPatClientSecret,
-			String umaRedirectUri, String umaRptPath, String umaAmHost, String umaRegisterResourcePath) {
+			String umaRedirectUri, String umaRptPath, String umaRegisterResourcePath) {
 		pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
 
-		rpt = TUma.requestRpt(url, umaRptPath, umaAmHost);
+		rpt = TUma.requestRpt(url, umaRptPath);
 
 		UmaTestUtil.assert_(pat);
 		UmaTestUtil.assert_(rpt);
@@ -47,20 +44,20 @@ public class TrustElevationWSTest extends BaseTest {
 	}
 
 	@Test(dependsOnMethods = { "init" })
-	@Parameters({ "umaAmHost", "umaHost", "umaPermissionPath" })
-	public void registerPermissionForRpt(final String umaAmHost, String umaHost, String umaPermissionPath)
+	@Parameters({"umaPermissionPath"})
+	public void registerPermissionForRpt(String umaPermissionPath)
 			throws Exception {
 		final UmaPermission r = new UmaPermission();
 		r.setResourceId(resource.getId());
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-		ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
+		ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
 		UmaTestUtil.assert_(ticket);
 	}
 
 	@Test(dependsOnMethods = { "registerPermissionForRpt" })
-	@Parameters({ "umaPermissionAuthorizationPath", "umaAmHost" })
-	public void authorizePermission(String umaPermissionAuthorizationPath, String umaAmHost) {
+	@Parameters({ "umaPermissionAuthorizationPath"})
+	public void authorizePermission(String umaPermissionAuthorizationPath) {
 		final RptAuthorizationRequest request = new RptAuthorizationRequest();
 		request.setRpt(rpt.getRpt());
 		request.setTicket(ticket.getTicket());
@@ -68,11 +65,11 @@ public class TrustElevationWSTest extends BaseTest {
 
 		// todo uma2
 //		final RptAuthorizationResponse response = TUma.requestAuthorization(url, umaPermissionAuthorizationPath,
-//				umaAmHost, aat, request);
+//				aat, request);
 //		assertNotNull(response, "Token response status is null");
 
 		// final RptIntrospectionResponse status = TUma.requestRptStatus(this,
-		// umaRptStatusPath, umaAmHost, pat, m_rpt.getRpt());
+		// umaRptStatusPath, pat, m_rpt.getRpt());
 		// UmaTestUtil.assert_(status);
 	}
 
