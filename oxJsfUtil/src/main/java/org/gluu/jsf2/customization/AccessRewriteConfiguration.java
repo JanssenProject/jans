@@ -55,6 +55,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
         Map<String, String> rewriteMap = getRewriteMap(documentBuilder, navigationFiles);
         for (File file : xhtmlFiles) {
             String xhtmlPath = file.getAbsolutePath();
+            xhtmlPath = xhtmlPath.replace("\\", "/");
             String xhtmlUri = xhtmlPath.substring(path.length(), xhtmlPath.lastIndexOf(".xhtml"));
 
             try {
@@ -64,12 +65,11 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                 else
                     builder.addRule(Join.path(xhtmlUri).to(xhtmlUri + ".htm"));
             } catch (ParameterizedPatternSyntaxException ex) {
-                FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Failed to add rule for " + xhtmlUri, ex);
+                FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Failed to add rule for " + xhtmlPath, ex);
             }
 
         }
     }
-
 
     private Map<String, String> getRewriteMap(DocumentBuilder documentBuilder, Collection<File> navigationFiles) {
         Map<String, String> xhtmlNameToRewriteRule = new HashMap<String, String>();
@@ -104,4 +104,5 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
     public int priority() {
         return 10;
     }
+
 }
