@@ -35,9 +35,9 @@ public class TUma {
 		return r.newTokenByRefreshToken(tokenPath, p_oldToken, umaClientId, umaClientSecret);
 	}
 
-	public static RPTResponse requestRpt(URI baseUri, String p_rptPath, String umaAmHost) {
+	public static RPTResponse requestRpt(URI baseUri, String p_rptPath) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
-		return r.requestRpt(p_rptPath, umaAmHost);
+		return r.requestRpt(p_rptPath);
 	}
 
 	public static UmaMetadata requestConfiguration(URI baseUri, final String configurationPath) {
@@ -67,22 +67,20 @@ public class TUma {
 		s.deleteResource(p_pat, p_umaRegisterResourcePath, p_id);
 	}
 
-	public static PermissionTicket registerPermission(URI baseUri, Token p_pat, String p_umaAmHost, String p_umaHost,
-			UmaPermission p_request, String p_umaPermissionPath) {
+	public static PermissionTicket registerPermission(URI baseUri, Token p_pat, UmaPermission p_request, String p_umaPermissionPath) {
 		final TRegisterPermission p = new TRegisterPermission(baseUri);
-		return p.registerPermission(p_pat, p_umaAmHost, p_umaHost, p_request, p_umaPermissionPath);
+		return p.registerPermission(p_pat, p_request, p_umaPermissionPath);
 	}
 
-	public static RptIntrospectionResponse requestRptStatus(URI baseUri, String p_umaRptStatusPath, String p_umaAmHost,
-			String rpt) {
+	public static RptIntrospectionResponse requestRptStatus(URI baseUri, String p_umaRptStatusPath,	String rpt) {
 		final TTokenRequest r = new TTokenRequest(baseUri);
 		return r.requestRptStatus(p_umaRptStatusPath, rpt);
 	}
 
 	public static RptAuthorizationResponse requestAuthorization(URI baseUri, String p_umaPermissionAuthorizationPath,
-			String p_umaAmHost, RptAuthorizationRequest p_request) {
+			RptAuthorizationRequest p_request) {
 		final TAuthorization t = new TAuthorization(baseUri);
-		return t.requestAuthorization(p_umaPermissionAuthorizationPath, p_umaAmHost, p_request);
+		return t.requestAuthorization(p_umaPermissionAuthorizationPath, p_request);
 	}
 
 	public static <T> T readJsonValue(String p_json, Class<T> p_clazz) {
