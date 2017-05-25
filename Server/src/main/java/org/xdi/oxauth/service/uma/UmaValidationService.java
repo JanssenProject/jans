@@ -13,7 +13,7 @@ import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
@@ -23,7 +23,6 @@ import org.xdi.util.StringHelper;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
@@ -68,93 +67,97 @@ public class UmaValidationService {
     private AuthorizationGrant validateAuthorization(String authorization, UmaScopeType umaScopeType) {
         log.trace("Validate authorization: {}", authorization);
         if (StringHelper.isEmpty(authorization)) {
-            throw new WebApplicationException(Response.status(UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UNAUTHORIZED_CLIENT)).build());
+            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT);
         }
 
         String token = tokenService.getTokenFromAuthorizationParameter(authorization);
         if (StringHelper.isEmpty(token)) {
             log.debug("Token is invalid");
-            throw new WebApplicationException(Response.status(UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UNAUTHORIZED_CLIENT)).build());
+            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, UNAUTHORIZED_CLIENT);
         }
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         if (authorizationGrant == null) {
-            throw new WebApplicationException(Response.status(UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(ACCESS_DENIED)).build());
+            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, ACCESS_DENIED);
         }
 
         if (!authorizationGrant.isValid()) {
-            throw new WebApplicationException(Response.status(UNAUTHORIZED)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(INVALID_TOKEN)).build());
+            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, INVALID_TOKEN);
         }
 
         Set<String> scopes = authorizationGrant.getScopes();
         if (!scopes.contains(umaScopeType.getValue())) {
-            throw new WebApplicationException(Response.status(Response.Status.NOT_ACCEPTABLE)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_CLIENT_SCOPE)).build());
+            errorResponseFactory.throwUmaWebApplicationException(Response.Status.NOT_ACCEPTABLE, INVALID_CLIENT_SCOPE);
         }
         return authorizationGrant;
     }
 
     public void validateRPT(UmaRPT rpt) {
    		if (rpt == null) {
-   			throw new WebApplicationException(Response.status(UNAUTHORIZED)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
+            log.error("RPT is null.");
+            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, NOT_AUTHORIZED_PERMISSION);
    		}
 
    		rpt.checkExpired();
    		if (!rpt.isValid()) {
-   			throw new WebApplicationException(Response.status(UNAUTHORIZED)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
+            log.error("RPT is not valid. Revoked: " + rpt.isRevoked() + ", Expired: " + rpt.isExpired());
+            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, NOT_AUTHORIZED_PERMISSION);
    		}
    	}
 
+    public void validatePermissions(List<UmaPermission> permissions) {
+        for (UmaPermission permission : permissions) {
+            validatePermission(permission);
+        }
+    }
+
     public void validatePermission(UmaPermission permission) {
    		if (permission == null || "invalidated".equalsIgnoreCase(permission.getStatus())) {
-   			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_TICKET)).build());
+            log.error("Permission is null or otherwise invalidated. Status: " + (permission != null ? permission.getStatus() : ""));
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
    		}
 
    		permission.checkExpired();
    		if (!permission.isValid()) {
-   			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.EXPIRED_TICKET)).build());
+            log.error("Permission is not valid.");
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, EXPIRED_TICKET);
    		}
    	}
 
-    public void validateResource(org.xdi.oxauth.model.uma.UmaPermission permissionRequest) {
-   		String resourceId = permissionRequest.getResourceId();
-   		if (StringHelper.isEmpty(resourceId)) {
-   			log.error("Resource id is empty");
-   			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_ID)).build());
-   		}
+    public void validatePermissions(UmaPermissionList permissions) {
+   		for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
+            validatePermission(permission);
+        }
+   	}
 
-   		UmaResource resource;
-   		try {
-   			UmaResource exampleResource = new UmaResource();
-   			exampleResource.setDn(resourceService.getBaseDnForResource());
-   			exampleResource.setId(resourceId);
+    public void validatePermission(org.xdi.oxauth.model.uma.UmaPermission permission) {
+        String resourceId = permission.getResourceId();
+        if (StringHelper.isEmpty(resourceId)) {
+            log.error("Resource id is empty");
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+        }
+
+        try {
+            UmaResource exampleResource = new UmaResource();
+            exampleResource.setDn(resourceService.getBaseDnForResource());
+            exampleResource.setId(resourceId);
             List<UmaResource> resources = resourceService.findResources(exampleResource);
             if (resources.size() != 1) {
-       			log.error("Resource isn't registered or there are two resources with same Id");
-       			throw new WebApplicationException(Response.status(BAD_REQUEST)
-       					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_ID)).build());
+                log.error("Resource isn't registered or there are two resources with same Id");
+                errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
             }
-            resource = resources.get(0);
-   		} catch (EntryPersistenceException ex) {
-   			log.error("Resource isn't registered");
-   			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_ID)).build());
-   		}
+            UmaResource resource = resources.get(0);
 
-        final List<String> scopeUrls = umaScopeService.getScopeUrlsByDns(resource.getScopes());
-        if (!scopeUrls.containsAll(permissionRequest.getScopes())) {
-   			log.error("At least one of the scope isn't registered");
-   			throw new WebApplicationException(Response.status(BAD_REQUEST)
-   					.entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
-   		}
-   	}
+            final List<String> scopeUrls = umaScopeService.getScopeUrlsByDns(resource.getScopes());
+            if (!scopeUrls.containsAll(permission.getScopes())) {
+                log.error("At least one of the scope isn't registered");
+                errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_SCOPE);
+            }
+        } catch (EntryPersistenceException ex) {
+            log.error(ex.getMessage(), ex);
+        }
+
+        log.error("Resource isn't registered");
+        errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+    }
 }
