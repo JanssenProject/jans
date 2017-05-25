@@ -6,14 +6,14 @@
 
 package org.xdi.oxauth.model.common.uma;
 
-import java.util.Date;
-import java.util.List;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.model.common.AbstractToken;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Requesting Party Token.
@@ -32,8 +32,6 @@ public class UmaRPT extends AbstractToken {
     private String userId;
     @LdapAttribute(name = "oxAuthClientId")
     private String clientId;
-    @LdapAttribute(name = "oxAmHost")
-    private String amHost;
     @LdapAttribute(name = "oxUmaPermission")
     private List<String> permissions;
 
@@ -41,11 +39,10 @@ public class UmaRPT extends AbstractToken {
         super(1);
     }
 
-    public UmaRPT(String code, Date creationDate, Date expirationDate, String userId, String clientId, String amHost) {
+    public UmaRPT(String code, Date creationDate, Date expirationDate, String userId, String clientId) {
         super(code, creationDate, expirationDate);
         this.userId = userId;
         this.clientId = clientId;
-        this.amHost = amHost;
     }
 
     public String getDn() {
@@ -70,14 +67,6 @@ public class UmaRPT extends AbstractToken {
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
-    }
-
-    public String getAmHost() {
-        return amHost;
-    }
-
-    public void setAmHost(String amHost) {
-        this.amHost = amHost;
     }
 
     public String getId() {

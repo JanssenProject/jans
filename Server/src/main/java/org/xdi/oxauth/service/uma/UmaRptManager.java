@@ -167,22 +167,22 @@ public class UmaRptManager {
         return result;
     }
 
-    public UmaRPT createRPT(String authorization, String amHost) {
+    public UmaRPT createRPT(String authorization) {
         String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
         IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
 
-        UmaRPT rpt = createRPT(authorizationGrant, amHost, aatToken);
+        UmaRPT rpt = createRPT(authorizationGrant, aatToken);
 
         addRPT(rpt, authorizationGrant.getClientDn());
         return rpt;
     }
 
-    public UmaRPT createRPT(IAuthorizationGrant grant, String amHost, String aat) {
+    public UmaRPT createRPT(IAuthorizationGrant grant, String aat) {
         final AccessToken accessToken = (AccessToken) grant.getAccessToken(aat);
 
         try {
             String code = UUID.randomUUID().toString() + "/" + INumGenerator.generate(8);
-            return new UmaRPT(code, new Date(), accessToken.getExpirationDate(), grant.getUserId(), grant.getClientId(), amHost);
+            return new UmaRPT(code, new Date(), accessToken.getExpirationDate(), grant.getUserId(), grant.getClientId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Failed to generate RPT, aat: " + aat, e);

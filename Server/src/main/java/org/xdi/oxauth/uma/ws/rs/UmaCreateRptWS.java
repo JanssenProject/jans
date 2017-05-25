@@ -85,9 +85,8 @@ public class UmaCreateRptWS {
         try {
             // todo uma2 schedule for remove !
             //umaValidationService.assertHasAuthorizationScope(authorization);
-            String validatedAmHost = umaValidationService.validateAmHost(amHost);
 
-            UmaRPT rpt = rptManager.createRPT(authorization, validatedAmHost);
+            UmaRPT rpt = rptManager.createRPT(authorization);
 
             String rptResponse = rpt.getCode();
             final Boolean umaRptAsJwt = appConfiguration.getUmaRptAsJwt();
