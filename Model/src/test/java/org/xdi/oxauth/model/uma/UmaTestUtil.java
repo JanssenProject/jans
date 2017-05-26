@@ -39,25 +39,25 @@ public class UmaTestUtil {
         assertNotNull(p_rptStatus.getExpiresAt(), "Expiration date is null");
     }
 
-    public static void assert_(UmaMetadata configuration) {
-        assertNotNull(configuration, "Meta data configuration is null");
-        assertNotNull(configuration.getIssuer(), "Issuer isn't correct");
-        assertNotNull(configuration.getTokenEndpoint(), "Token endpoint isn't correct");
-        assertNotNull(configuration.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
-        assertNotNull(configuration.getResourceRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
-        assertNotNull(configuration.getPermissionEndpoint(), "Permission registration endpoint isn't correct");
-        assertNotNull(configuration.getAuthorizationEndpoint(), "Authorization request endpoint isn't correct");
+    public static void assert_(UmaMetadata metadata) {
+        assertNotNull(metadata, "Metadata is null");
+        assertNotNull(metadata.getIssuer(), "Issuer isn't correct");
+        assertNotNull(metadata.getTokenEndpoint(), "Token endpoint isn't correct");
+        assertNotNull(metadata.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
+        assertNotNull(metadata.getResourceRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
+        assertNotNull(metadata.getPermissionEndpoint(), "Permission registration endpoint isn't correct");
+        assertNotNull(metadata.getAuthorizationEndpoint(), "Authorization request endpoint isn't correct");
     }
 
-    public static void assert_(Token p_token) {
-        assertNotNull(p_token, "The token object is null");
-        assertNotNull(p_token.getAccessToken(), "The access token is null");
+    public static void assert_(Token token) {
+        assertNotNull(token, "The token object is null");
+        assertNotNull(token.getAccessToken(), "The access token is null");
         //assertNotNull(p_token.getRefreshToken(), "The refresh token is null");
     }
 
-    public static void assert_(UmaResourceResponse status) {
-        assertNotNull(status, "Resource set status is null");
-        assertNotNull(status.getId(), "Resource set description id is null");
+    public static void assert_(UmaResourceResponse resourceResponse) {
+        assertNotNull(resourceResponse, "Resource status is null");
+        assertNotNull(resourceResponse.getId(), "Resource description id is null");
     }
 
     public static UmaResource createResource() {
@@ -73,19 +73,14 @@ public class UmaTestUtil {
         assertTrue(StringUtils.isNotBlank(ticket.getTicket()), "Ticket is empty");
     }
 
-    public static void assert_(RPTResponse p_response) {
-        assertNotNull(p_response, "Requester permission token response is null");
-        assertNotNull(p_response.getRpt(), "Requester permission token is null");
+    public static void assert_(RPTResponse response) {
+        assertNotNull(response, "RPT response is null");
+        assertNotNull(response.getRpt(), "RPT is null");
     }
 
     public static void assert_(ClientResponse p_response) {
         assertNotNull(p_response, "Response is null");
         assertTrue(p_response.getStatus() == Response.Status.OK.getStatusCode(), "Response http code is not OK.");
-    }
-
-    public static void assertAuthorizationRequest(RptAuthorizationResponse p_response) {
-        assertNotNull(p_response, "Response is null");
-        assertNotNull(p_response.getRpt(), "Rpt is null");
     }
 
     public static void assert_(Id p_id) {

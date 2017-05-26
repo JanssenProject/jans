@@ -3,9 +3,8 @@ package org.xdi.oxauth.ws.rs.uma;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.UmaRptAuthorizationService;
-import org.xdi.oxauth.client.uma.UmaRptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
+import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
@@ -26,8 +25,7 @@ public class TrustElevationHttpTest extends BaseTest {
     protected RegisterResourceFlowHttpTest registerResourceTest;
     protected UmaRegisterPermissionFlowHttpTest registerPermissionTest;
 
-    protected UmaRptStatusService rptStatusService;
-    protected UmaRptAuthorizationService rptPermissionAuthorizationService;
+    protected UmaRptIntrospectionService rptStatusService;
 
     protected Token m_pat;
 
@@ -42,7 +40,6 @@ public class TrustElevationHttpTest extends BaseTest {
         this.registerPermissionTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
 
         this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata);
-        this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadata);
 
         m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
 

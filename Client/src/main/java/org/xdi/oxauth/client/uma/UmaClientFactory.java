@@ -43,20 +43,12 @@ public class UmaClientFactory {
         return ProxyFactory.create(UmaPermissionService.class, metadataConfiguration.getPermissionEndpoint(), clientExecutor);
     }
 
-    public UmaRptStatusService createRptStatusService(UmaMetadata metadataConfiguration) {
-        return ProxyFactory.create(UmaRptStatusService.class, metadataConfiguration.getIntrospectionEndpoint());
+    public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadataConfiguration) {
+        return ProxyFactory.create(UmaRptIntrospectionService.class, metadataConfiguration.getIntrospectionEndpoint());
     }
 
-    public UmaRptStatusService createRptStatusService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(UmaRptStatusService.class, metadataConfiguration.getIntrospectionEndpoint(), clientExecutor);
-    }
-
-    public UmaRptAuthorizationService createAuthorizationRequestService(UmaMetadata metadataConfiguration) {
-        return ProxyFactory.create(UmaRptAuthorizationService.class, metadataConfiguration.getAuthorizationEndpoint());
-    }
-
-    public UmaRptAuthorizationService createAuthorizationRequestService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(UmaRptAuthorizationService.class, metadataConfiguration.getAuthorizationEndpoint(), clientExecutor);
+    public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(UmaRptIntrospectionService.class, metadataConfiguration.getIntrospectionEndpoint(), clientExecutor);
     }
 
     public UmaMetadataService createMetadataService(String umaMetadataUri) {

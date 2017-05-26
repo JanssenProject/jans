@@ -17,8 +17,6 @@ import org.xdi.oxauth.model.uma.wrapper.Token;
 import java.net.URI;
 import java.util.Arrays;
 
-import static org.testng.Assert.assertNotNull;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 18/03/2013
@@ -120,14 +118,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 	@Test(dependsOnMethods = { "_4_registerPermissionForRpt" })
 	@Parameters({ "umaPermissionAuthorizationPath", })
 	public void _5_authorizePermission(String umaPermissionAuthorizationPath) {
-		final RptAuthorizationRequest request = new RptAuthorizationRequest();
-		request.setRpt(rpt.getRpt());
-		request.setTicket(ticket.getTicket());
-		request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
-
-		final RptAuthorizationResponse response = TUma.requestAuthorization(url, umaPermissionAuthorizationPath,
-				request);
-		assertNotNull(response, "Token response status is null");
+		// todo
 	}
 
 	/*
