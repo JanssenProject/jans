@@ -82,6 +82,11 @@ public enum UmaErrorResponseType implements IErrorType {
 	INVALID_TOKEN("invalid_token"),
 
 	/**
+	 * Grant type is not urn:ietf:params:oauth:grant-type:uma-ticket (required for UMA 2).
+	 */
+	INVALID_GRANT_TYPE("invalid_grant_type"),
+
+	/**
 	 * Invalid permission request.
 	 */
 	INVALID_PERMISSION_REQUEST("invalid_permission_request"),

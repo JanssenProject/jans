@@ -95,7 +95,7 @@ public class UmaPermissionManager {
         }
     }
 
-    public List<UmaPermission> getPermissionByTicket(String ticket) {
+    public List<UmaPermission> getPermissionsByTicket(String ticket) {
         try {
             final String baseDn = staticConfiguration.getBaseDn().getClients();
             final Filter filter = Filter.create(String.format("&(oxTicket=%s)", ticket));
@@ -129,7 +129,7 @@ public class UmaPermissionManager {
 
     public void deletePermission(String ticket) {
         try {
-            final List<UmaPermission> permissions = getPermissionByTicket(ticket);
+            final List<UmaPermission> permissions = getPermissionsByTicket(ticket);
             for (UmaPermission p : permissions) {
                 ldapEntryManager.remove(p);
             }

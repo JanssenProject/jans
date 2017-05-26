@@ -82,8 +82,25 @@ public class UmaTokenWS {
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response requestRptPermissionAuthorization(
+            @FormParam("grant_type")
+            String grantType,
+            @FormParam("ticket")
+            String ticket,
+            @FormParam("claim_token")
+            String claimToken,
+            @FormParam("claim_token_format")
+            String claimTokenFormat,
+            @FormParam("pct")
+            String pct,
+            @FormParam("rpt")
+            String rpt,
+            @FormParam("scope")
+            String scope,
             @Context HttpServletRequest httpRequest) {
         try {
+            umaValidationService.validateGrantType(grantType);
+            List<UmaPermission> permissions = umaValidationService.validateTicket(ticket);
+
             // todo uma2 schedule for remove ?
             final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
 
