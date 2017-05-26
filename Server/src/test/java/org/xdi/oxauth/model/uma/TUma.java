@@ -77,12 +77,6 @@ public class TUma {
 		return r.requestRptStatus(p_umaRptStatusPath, rpt);
 	}
 
-	public static RptAuthorizationResponse requestAuthorization(URI baseUri, String p_umaPermissionAuthorizationPath,
-			RptAuthorizationRequest p_request) {
-		final TAuthorization t = new TAuthorization(baseUri);
-		return t.requestAuthorization(p_umaPermissionAuthorizationPath, p_request);
-	}
-
 	public static <T> T readJsonValue(String p_json, Class<T> p_clazz) {
 		try {
 			return ServerUtil.createJsonMapper().readValue(p_json, p_clazz);
