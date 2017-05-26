@@ -58,10 +58,6 @@ public class TrustElevationWSTest extends BaseTest {
 	@Test(dependsOnMethods = { "registerPermissionForRpt" })
 	@Parameters({ "umaPermissionAuthorizationPath"})
 	public void authorizePermission(String umaPermissionAuthorizationPath) {
-		final RptAuthorizationRequest request = new RptAuthorizationRequest();
-		request.setRpt(rpt.getRpt());
-		request.setTicket(ticket.getTicket());
-		request.setClaims(new ClaimTokenList().addToken(new ClaimToken("clientClaim", "clientValue")));
 
 		// todo uma2
 //		final RptAuthorizationResponse response = TUma.requestAuthorization(url, umaPermissionAuthorizationPath,
