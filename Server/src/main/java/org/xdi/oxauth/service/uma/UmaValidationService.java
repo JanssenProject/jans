@@ -6,10 +6,12 @@
 
 package org.xdi.oxauth.service.uma;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -59,6 +61,9 @@ public class UmaValidationService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private UmaPermissionManager permissionManager;
 
     public AuthorizationGrant assertHasProtectionScope(String authorization) {
         return validateAuthorization(authorization, UmaScopeType.PROTECTION);
@@ -159,5 +164,27 @@ public class UmaValidationService {
 
         log.error("Resource isn't registered");
         errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+    }
+
+    public void validateGrantType(String grantType) {
+        log.trace("Validate grantType: {}", grantType);
+
+        if (!GrantType.OXAUTH_UMA_TICKET.getValue().equals(grantType)) {
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+        }
+    }
+
+    public List<UmaPermission> validateTicket(String ticket) {
+        if (StringUtils.isBlank(ticket)) {
+            log.error("Ticket is null or blank.");
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
+        }
+
+        List<UmaPermission> permissions = permissionManager.getPermissionsByTicket(ticket);
+        if (permissions == null || permissions.isEmpty()) {
+            log.error("Unable to find permissions registered for given ticket.");
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
+        }
+        return permissions;
     }
 }
