@@ -6,7 +6,10 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.wordnik.swagger.annotations.*;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -21,6 +24,7 @@ import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,37 +56,27 @@ public class UmaRptStatusWS {
     @Inject
     private UmaScopeService umaScopeService;
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response introspectGet(@HeaderParam("Authorization") String authorization,
+                                  @QueryParam("token") String token,
+                                  @QueryParam("token_type_hint") String tokenTypeHint) {
+        return introspect(authorization, token, tokenTypeHint);
+    }
+
     @POST
-    @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    @ApiOperation(value = "The resource server MUST determine a received RPT's status, including both whether it is active and, if so, its associated authorization data, before giving or refusing access to the client. An RPT is associated with a set of authorization data that governs whether the client is authorized for access. The token's nature and format are dictated by its profile; the profile might allow it to be self-contained, such that the resource server is able to determine its status locally, or might require or allow the resource server to make a run-time introspection request of the authorization server that issued the token.",
-            produces = UmaConstants.JSON_MEDIA_TYPE,
-            notes = "The endpoint MAY allow other parameters to provide further context to\n" +
-                    "   the query.  For instance, an authorization service may need to know\n" +
-                    "   the IP address of the client accessing the protected resource in\n" +
-                    "   order to determine the appropriateness of the token being presented.\n" +
-                    "\n" +
-                    "   To prevent unauthorized token scanning attacks, the endpoint MUST\n" +
-                    "   also require some form of authorization to access this endpoint, such\n" +
-                    "   as client authentication as described in OAuth 2.0 [RFC6749] or a\n" +
-                    "   separate OAuth 2.0 access token such as the bearer token described in\n" +
-                    "   OAuth 2.0 Bearer Token Usage [RFC6750].  The methods of managing and\n" +
-                    "   validating these authentication credentials are out of scope of this\n" +
-                    "   specification.\n"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 401, message = "Unauthorized")
-    })
-    public Response requestRptStatus(@HeaderParam("Authorization") String authorization,
-                                     @FormParam("token")
-                                     @ApiParam(value = "The string value of the token.  For access tokens, this is the \"access_token\" value returned from the token endpoint defined in OAuth 2.0 [RFC6749] section 5.1.  For refresh tokens, this is the \"refresh_token\" value returned from the token endpoint as defined in OAuth 2.0 [RFC6749] section 5.1.  Other token types are outside the scope of this specification.", required = true)
-                                     String rptAsString,
-                                     @FormParam("token_type_hint")
-                                     @ApiParam(value = "A hint about the type of the token submitted for introspection.  The protected resource re MAY pass this parameter in order to help the authorization server to optimize the token lookup.  If the server is unable to locate the token using the given hint, it MUST extend its search across all of its supported token types.  An authorization server MAY ignore this parameter, particularly if it is able to detect the token type automatically.  Values for this field are defined in OAuth Token Revocation [RFC7009].", required = false)
-                                     String tokenTypeHint) {
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response introspectPost(@HeaderParam("Authorization") String authorization,
+                                   @FormParam("token") String token,
+                                   @FormParam("token_type_hint") String tokenTypeHint) {
+        return introspect(authorization, token, tokenTypeHint);
+    }
+
+    private Response introspect(String authorization, String token, String tokenTypeHint) {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
 
-            final UmaRPT rpt = rptManager.getRPTByCode(rptAsString);
+            final UmaRPT rpt = rptManager.getRPTByCode(token);
 
             if (!isValid(rpt)) {
                 return Response.status(Response.Status.OK).
