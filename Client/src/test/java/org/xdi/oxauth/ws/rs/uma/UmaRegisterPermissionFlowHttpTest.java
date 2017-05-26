@@ -12,23 +12,22 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.UmaPermissionService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.UmaMetadata;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.client.uma.UmaPermissionService;
+import org.xdi.oxauth.model.uma.*;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 /**
- * Test cases for the registering UMA resource set description permissions flow (HTTP)
+ * Test cases for the registering UMA permissions flow (HTTP)
  *
- * @author Yuriy Movchan Date: 10/19/2012
+ * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  */
 public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
@@ -79,49 +78,40 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         UmaPermissionService permissionService = UmaClientFactory.instance().
                 createPermissionService(this.metadata);
 
-        // Register permissions for resource
-        UmaPermission permissionRequest = new UmaPermission();
-        permissionRequest.setResourceId(resourceId);
-        permissionRequest.setScopes(scopes);
+        UmaPermission permission = new UmaPermission();
+        permission.setResourceId(resourceId);
+        permission.setScopes(scopes);
 
-        PermissionTicket t = null;
-        try {
-            t = permissionService.registerPermission("Bearer " + this.registerResourceTest.pat.getAccessToken(), permissionRequest);
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
-            throw ex;
-        }
-
-        UmaTestUtil.assert_(t);
-        this.ticketForFullAccess = t.getTicket();
-        return t.getTicket();
+        PermissionTicket ticket = permissionService.registerPermission(
+                "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
+        UmaTestUtil.assert_(ticket);
+        this.ticketForFullAccess = ticket.getTicket();
+        return ticket.getTicket();
     }
 
     /**
      * Test for registering permissions for resource
      */
     @Test
-    @Parameters()
     public void testRegisterPermissionForInvalidResource() throws Exception {
         showTitle("testRegisterPermissionForInvalidResource");
 
         UmaPermissionService permissionService = UmaClientFactory.instance().createPermissionService(this.metadata);
 
-        // Register permissions for resource
-        UmaPermission permissionRequest = new UmaPermission();
-        permissionRequest.setResourceId(this.registerResourceTest.resourceId + "1");
-        permissionRequest.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+        UmaPermission permission = new UmaPermission();
+        permission.setResourceId(this.registerResourceTest.resourceId + "1");
+        permission.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
 
-        PermissionTicket permissionTicket = null;
+        PermissionTicket ticket = null;
         try {
-            permissionTicket = permissionService.registerPermission(
-                    "Bearer " + this.registerResourceTest.pat.getAccessToken(), permissionRequest);
+            ticket = permissionService.registerPermission(
+                    "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
         }
 
-        assertNull(permissionTicket, "Resource set permission is not null");
+        assertNull(ticket, "Resource permission is not null");
     }
 }
