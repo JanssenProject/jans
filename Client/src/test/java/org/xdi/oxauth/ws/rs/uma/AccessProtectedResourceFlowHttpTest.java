@@ -11,18 +11,16 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.UmaRptAuthorizationService;
-import org.xdi.oxauth.client.uma.UmaRptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
+import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
-import org.xdi.oxauth.model.uma.RptAuthorizationResponse;
-import org.xdi.oxauth.model.uma.RptAuthorizationRequest;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
@@ -38,8 +36,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     protected RegisterResourceFlowHttpTest umaRegisterResourceFlowHttpTest;
     protected UmaRegisterPermissionFlowHttpTest permissionFlowHttpTest;
 
-    protected UmaRptStatusService rptStatusService;
-    protected UmaRptAuthorizationService rptPermissionAuthorizationService;
+    protected UmaRptIntrospectionService rptStatusService;
 
     protected Token m_pat;
 
@@ -54,7 +51,6 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         this.permissionFlowHttpTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
 
         this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata);
-        this.rptPermissionAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(metadata);
     }
 
     //** 1 ******************************************************************************
@@ -162,17 +158,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         showTitle("testRequesterAsksForAuthorization");
 
         // Authorize RPT token to access permission ticket
-        RptAuthorizationResponse authorizationResponse = null;
-        try {
-            RptAuthorizationRequest rptAuthorizationRequest = null;// new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, permissionFlowHttpTest.ticketForFullAccess);
 
-//            authorizationResponse = this.rptPermissionAuthorizationService.requestRptAuthorization(
-//                    "Bearer " + m_aat.getAccessToken(),
-//                    rptAuthorizationRequest);
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
-            throw ex;
-        }
 
 //        UmaTestUtil.assertAuthorizationRequest(authorizationResponse);
     }

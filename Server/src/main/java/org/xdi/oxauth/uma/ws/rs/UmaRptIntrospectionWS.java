@@ -39,7 +39,7 @@ import java.util.List;
 @Path("/rpt/status")
 @Api(value = "/rpt/status", description = "The endpoint at which the host requests the status of an RPT presented to it by a requester." +
         " The endpoint is RPT introspection profile implementation defined by UMA specification")
-public class UmaRptStatusWS {
+public class UmaRptIntrospectionWS {
 
     @Inject
     private Logger log;

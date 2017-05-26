@@ -44,11 +44,10 @@ public class TestResteasyInitializer extends Application {
         classes.add(JwkRestWebServiceImpl.class);
         classes.add(EndSessionRestWebServiceImpl.class);
 
-        classes.add(UmaCreateRptWS.class);
         classes.add(UmaPermissionRegistrationWS.class);
         classes.add(UmaResourceRegistrationWS.class);
-        classes.add(UmaRptPermissionAuthorizationWS.class);
-        classes.add(UmaRptStatusWS.class);
+        classes.add(UmaTokenWS.class);
+        classes.add(UmaRptIntrospectionWS.class);
         classes.add(UmaScopeWS.class);
         classes.add(UmaMetadataWS.class);
 
