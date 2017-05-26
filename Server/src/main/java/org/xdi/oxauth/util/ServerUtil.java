@@ -154,6 +154,7 @@ public class ServerUtil {
             final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
             result.setResourceId(permission.getResourceId());
             result.setScopes(umaScopeService.getScopeUrlsByDns(permission.getScopeDns()));
+            result.setExpiresAt(permission.getExpirationDate());
             return result;
         }
         return null;
