@@ -19,7 +19,6 @@ public class ConversationService implements Serializable {
 
 	public void initConversation() {
 		if (!FacesContext.getCurrentInstance().isPostback() && conversation.isTransient()) {
-
 			conversation.begin();
 		}
 	}
