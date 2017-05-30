@@ -4,15 +4,16 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.model.custom.script.type.uma;
 
-import java.util.Map;
-
 import org.xdi.model.SimpleCustomProperty;
+
+import java.util.Map;
 
 /**
  * Dummy implementation of interface AuthorizationPolicyType
  *
  * @author Yuriy Movchan Date:01/13/2015
  */
+@Deprecated // remove after full UMA2 move
 public class DummyAuthorizationPolicyType implements AuthorizationPolicyType {
 
 	@Override
