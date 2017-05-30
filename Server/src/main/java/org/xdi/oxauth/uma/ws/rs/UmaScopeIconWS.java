@@ -15,7 +15,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
-import org.xdi.oxauth.service.uma.UmaScopeService;
+import org.xdi.oxauth.uma.service.UmaScopeService;
 import org.xdi.service.XmlService;
 
 import javax.inject.Inject;

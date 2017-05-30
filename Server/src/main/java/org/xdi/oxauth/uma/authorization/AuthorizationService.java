@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.service.uma.authorization;
+package org.xdi.oxauth.uma.authorization;
 
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
@@ -16,7 +16,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
-import org.xdi.oxauth.service.uma.UmaScopeService;
+import org.xdi.oxauth.uma.service.UmaScopeService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
