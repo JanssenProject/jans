@@ -10,13 +10,16 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.FacesConverter;
+import javax.inject.Inject;
 
-import org.jboss.seam.Component;
 import org.xdi.model.GluuAttribute;
 import org.xdi.service.AttributeService;
 
-@FacesConverter("AttributeNameConverter")
+@FacesConverter("org.gluu.jsf2.converter.AttributeNameConverter")
 public class AttributeNameConverter implements Converter {
+	
+	@Inject
+	private AttributeService attributeService;
 
 	@Override
 	public Object getAsObject(FacesContext context, UIComponent component, String value) {
@@ -24,7 +27,6 @@ public class AttributeNameConverter implements Converter {
 			return null;
 		}
 
-		AttributeService attributeService = (AttributeService) Component.getInstance("attributeService");
 		GluuAttribute attribute = attributeService.getAttributeByName(value);
 
 		return attribute;

@@ -13,18 +13,16 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.util.ReflectHelper;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Destroy;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
 import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
+import org.slf4j.Logger;
 import org.xdi.exception.PythonException;
 import org.xdi.util.StringHelper;
 
@@ -33,15 +31,14 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 08.21.2012
  */
-@Scope(ScopeType.APPLICATION)
-@Name("pythonService")
-@AutoCreate
+@ApplicationScoped
+@Named
 public class PythonService implements Serializable {
 
 	private static final long serialVersionUID = 3398422090669045605L;
 
-	@Logger
-	private Log log;
+    @Inject
+	private Logger log;
 
 	private PythonInterpreter pythonInterpreter;
 	private boolean interpereterReady;
@@ -77,7 +74,7 @@ public class PythonService implements Serializable {
 	/**
 	 * When application undeploy we need clean up pythonInterpreter
 	 */
-	@Destroy
+	@PreDestroy
 	public void destroy() {
 		log.debug("Destroying pythonInterpreter component");
 		if (this.pythonInterpreter != null) {
@@ -182,22 +179,14 @@ public class PythonService implements Serializable {
 
         return (T) scriptJavaClass;
 	}
-
-	/**
-	 * Get pythonService instance
-	 * @return PythonService instance
-	 */
-	public static PythonService instance() {
-		return (PythonService) Component.getInstance(PythonService.class);
-	}
 	
 	class PythonLoggerOutputStream extends OutputStream {
 
 		private boolean error;
-		private Log log;
+		private Logger log;
 		private StringBuffer buffer;
 
-		private PythonLoggerOutputStream(Log log, boolean error) {
+		private PythonLoggerOutputStream(Logger log, boolean error) {
 			this.error = error;
 			this.log = log;
 			this.buffer = new StringBuffer();

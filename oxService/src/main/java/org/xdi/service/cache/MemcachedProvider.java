@@ -1,22 +1,37 @@
 package org.xdi.service.cache;
 
-import net.spy.memcached.*;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+
+import net.spy.memcached.AddrUtil;
+import net.spy.memcached.BinaryConnectionFactory;
+import net.spy.memcached.ConnectionFactory;
+import net.spy.memcached.DefaultConnectionFactory;
+import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
 import net.spy.memcached.ops.OperationStatus;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
 
 /**
  * @author yuriyz on 02/02/2017.
  */
 public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
-    private static final Log log = Logging.getLog(MemcachedProvider.class);
+	@Inject
+    private Logger log;
 
-    private MemcachedConfiguration memcachedConfiguration;
+    @Inject
+    private CacheConfiguration cacheConfiguration;
 
-    public MemcachedProvider(MemcachedConfiguration memcachedConfiguration) {
-        this.memcachedConfiguration = memcachedConfiguration;
+	private MemcachedConfiguration memcachedConfiguration;
+
+    public MemcachedProvider() {}
+
+    @PostConstruct
+    public void init() {
+    	this.memcachedConfiguration = cacheConfiguration.getMemcachedConfiguration();
     }
 
     private MemcachedClient client;
@@ -46,6 +61,7 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
         }
     }
 
+    @PreDestroy
     public void destroy() {
         log.debug("Destroying MemcachedProvider");
 

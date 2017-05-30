@@ -20,19 +20,21 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.ejb.Asynchronous;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Observer;
-import org.jboss.seam.annotations.async.Asynchronous;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.metric.ldap.MetricEntry;
+import org.xdi.model.metric.ldap.MetricReport;
+import org.xdi.service.metric.inject.ReportMetric;
 import org.xdi.util.StringHelper;
 
 import com.codahale.metrics.Counter;
@@ -61,17 +63,17 @@ public abstract class MetricService implements Serializable {
 
 	private Set<MetricType> registeredMetricTypes;
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In
+	@Inject
 	private LdapEntryManager ldapEntryManager;
 
-    public void init(int metricInterval) {
+    public void initTimer(int metricInterval) {
     	this.metricRegistry = new MetricRegistry();
     	this.registeredMetricTypes = new HashSet<MetricType>();
 
-    	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getComponentName()).build();
+    	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
 
     	int metricReporterInterval = metricInterval;
     	if (metricReporterInterval <= 0) {
@@ -80,10 +82,8 @@ public abstract class MetricService implements Serializable {
     	ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
     }
 
-	@Observer(EVENT_TYPE)
-	@Asynchronous
-	public void writeMetricEntries(List<MetricEntry> metricEntries, Date creationTime) {
-    	add(metricEntries, creationTime);
+	public void writeMetricEntries(@Observes @ReportMetric MetricReport metricReport) {
+    	add(metricReport.getMetricEntries(), metricReport.getCreationTime());
     }
 
 	public void addBranch(String branchDn, String ou) {
@@ -378,6 +378,6 @@ public abstract class MetricService implements Serializable {
 	// Should return appliance Inum
 	public abstract String applianceInum();
 
-	public abstract String getComponentName();
+	public abstract MetricService getMetricServiceInstance();
 
 }

@@ -7,6 +7,8 @@
 import java.io.Serializable;
 import java.util.List;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -16,8 +18,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Yuriy Movchan
  * @version 0.1, 05/15/2013
  */
+@Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class ApplicationConfiguration implements Serializable {
+public class AppConfiguration implements Configuration, Serializable {
 
 	private static final long serialVersionUID = -8991383390239617013L;
 
@@ -159,6 +162,15 @@ public final class ApplicationConfiguration implements Serializable {
     
     private String loggingLevel;
 
+	private String shibbolethVersion;
+	private String shibboleth3IdpRootDir;
+	private String shibboleth3SpConfDir;
+	private String organizationName;
+	private String idp3SigningCert;
+	private String idp3EncryptionCert;
+
+	private int metricReporterInterval;
+
 	public boolean isOxIncommonFlag() {
 		return oxIncommonFlag;
 	}
@@ -166,13 +178,6 @@ public final class ApplicationConfiguration implements Serializable {
 	public void setOxIncommonFlag(boolean oxIncommonFlag) {
 		this.oxIncommonFlag = oxIncommonFlag;
 	}
-
-	private String shibbolethVersion;
-	private String shibboleth3IdpRootDir;
-	private String shibboleth3SpConfDir;
-	private String organizationName;
-	private String idp3SigningCert;
-	private String idp3EncryptionCert;
 
 	public String getBaseDN() {
 		return baseDN;
@@ -888,6 +893,14 @@ public final class ApplicationConfiguration implements Serializable {
 
 	public void setLoggingLevel(String loggingLevel) {
 		this.loggingLevel = loggingLevel;
+	}
+
+	public int getMetricReporterInterval() {
+		return metricReporterInterval;
+	}
+
+	public void setMetricReporterInterval(int metricReporterInterval) {
+		this.metricReporterInterval = metricReporterInterval;
 	}
 
 }

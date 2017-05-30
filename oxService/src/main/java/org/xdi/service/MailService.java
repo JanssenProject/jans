@@ -7,6 +7,9 @@
 import java.util.Date;
 import java.util.Properties;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
@@ -15,14 +18,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
 import org.xdi.util.StringHelper;
 
@@ -31,15 +27,14 @@ import org.xdi.util.StringHelper;
  * 
  * @author Yuriy Movchan Date: 20/04/2014
  */
-@Scope(ScopeType.APPLICATION)
-@Name("mailService")
-@AutoCreate
+@ApplicationScoped
+@Named
 public class MailService {
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
-	@In(required = false)
+	@Inject
 	private SmtpConfiguration smtpConfiguration;
 
 	private long connectionTimeout = 5000;
@@ -119,12 +114,4 @@ public class MailService {
 		this.connectionTimeout = connectionTimeout;
 	}
 
-	/**
-	 * Get mailService instance
-	 * 
-	 * @return MailService instance
-	 */
-	public static MailService instance() {
-		return (MailService) Component.getInstance(MailService.class);
-	}
 }

@@ -1,14 +1,11 @@
 package org.xdi.service.util;
 
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.ejb.Stateless;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -16,9 +13,8 @@ import javax.servlet.http.HttpServletRequest;
  * 
  * @author Yuriy Movchan
  */
-@Name("pageService")
-@Scope(ScopeType.STATELESS)
-@AutoCreate
+@Stateless
+@Named
 public class PageService {
 
 	private static final DateFormat currentDateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");

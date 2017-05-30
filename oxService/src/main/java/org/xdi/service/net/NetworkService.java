@@ -6,16 +6,13 @@
 
 import java.io.Serializable;
 
+import javax.ejb.Stateless;
 import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.util.StringHelper;
 
 /**
@@ -23,15 +20,14 @@ import org.xdi.util.StringHelper;
  *
  * @author Yuriy Movchan Date: 04/28/2016
  */
-@Scope(ScopeType.STATELESS)
-@Name("networkService")
-@AutoCreate
+@Stateless
+@Named
 public class NetworkService implements Serializable {
 
 	private static final long serialVersionUID = -1393318600428448743L;
 
-	@Logger
-	private Log log;
+	@Inject
+	private Logger log;
 
     public String getRemoteIp() {
     	String remoteIp = "";
@@ -55,14 +51,5 @@ public class NetworkService implements Serializable {
         
         return remoteIp;
     }
-
-	/**
-	 * Get NetworkService instance
-	 *
-	 * @return NetworkService instance
-	 */
-	public static NetworkService instance() {
-		return (NetworkService) Component.getInstance(NetworkService.class);
-	}
 
 }
