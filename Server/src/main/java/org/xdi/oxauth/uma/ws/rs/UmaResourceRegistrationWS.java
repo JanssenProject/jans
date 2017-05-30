@@ -19,9 +19,9 @@ import org.xdi.oxauth.model.uma.UmaResource;
 import org.xdi.oxauth.model.uma.UmaResourceResponse;
 import org.xdi.oxauth.model.uma.UmaResourceWithId;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.UmaResourceService;
-import org.xdi.oxauth.service.uma.UmaScopeService;
-import org.xdi.oxauth.service.uma.UmaValidationService;
+import org.xdi.oxauth.uma.service.UmaResourceService;
+import org.xdi.oxauth.uma.service.UmaScopeService;
+import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;
