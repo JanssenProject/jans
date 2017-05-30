@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.service.uma;
+package org.xdi.oxauth.uma.service;
 
 import com.google.common.base.Preconditions;
 import com.unboundid.ldap.sdk.Filter;

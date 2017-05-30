@@ -23,10 +23,10 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.UmaPermissionManager;
-import org.xdi.oxauth.service.uma.UmaRptManager;
-import org.xdi.oxauth.service.uma.UmaValidationService;
-import org.xdi.oxauth.service.uma.authorization.AuthorizationService;
+import org.xdi.oxauth.uma.service.UmaPermissionManager;
+import org.xdi.oxauth.uma.service.UmaRptManager;
+import org.xdi.oxauth.uma.service.UmaValidationService;
+import org.xdi.oxauth.uma.authorization.AuthorizationService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;

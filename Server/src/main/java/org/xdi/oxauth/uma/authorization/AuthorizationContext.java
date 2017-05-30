@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.service.uma.authorization;
+package org.xdi.oxauth.uma.authorization;
 
 import org.apache.commons.lang.StringUtils;
 import org.xdi.ldap.model.CustomEntry;

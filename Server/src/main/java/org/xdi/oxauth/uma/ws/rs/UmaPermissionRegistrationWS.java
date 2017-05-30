@@ -17,8 +17,8 @@ import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.service.uma.UmaPermissionManager;
-import org.xdi.oxauth.service.uma.UmaValidationService;
+import org.xdi.oxauth.uma.service.UmaPermissionManager;
+import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;

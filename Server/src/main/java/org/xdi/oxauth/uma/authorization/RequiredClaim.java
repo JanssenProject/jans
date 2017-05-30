@@ -1,4 +1,4 @@
-package org.xdi.oxauth.service.uma.authorization;
+package org.xdi.oxauth.uma.authorization;
 
 import java.io.Serializable;
 
