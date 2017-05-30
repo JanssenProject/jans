@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AppInitializer;
-import org.xdi.oxauth.service.uma.UmaScopeService;
+import org.xdi.oxauth.uma.service.UmaScopeService;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.Util;

@@ -19,7 +19,7 @@ import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.uma.AuthorizationPolicyType;
-import org.xdi.oxauth.service.uma.authorization.AuthorizationContext;
+import org.xdi.oxauth.uma.authorization.AuthorizationContext;
 import org.xdi.service.LookupService;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.StringHelper;

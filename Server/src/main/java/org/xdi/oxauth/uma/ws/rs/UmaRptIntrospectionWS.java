@@ -17,9 +17,9 @@ import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.service.uma.UmaRptManager;
-import org.xdi.oxauth.service.uma.UmaScopeService;
-import org.xdi.oxauth.service.uma.UmaValidationService;
+import org.xdi.oxauth.uma.service.UmaRptManager;
+import org.xdi.oxauth.uma.service.UmaScopeService;
+import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;
