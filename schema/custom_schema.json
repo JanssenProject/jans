@@ -26,7 +26,25 @@
             "kind": "AUXILIARY", 
             "may": [
                 "telephoneNumber", 
-                "mobile"
+                "mobile",
+                "carLicense",
+                "facsimileTelephoneNumber",
+                "departmentNumber",
+                "employeeType",
+                "cn",
+                "st",
+                "manager",
+                "street",
+                "postOfficeBox",
+                "employeeNumber",
+                "preferredDeliveryMethod",
+                "roomNumber",
+                "secretary",
+                "homePostalAddress",
+                "l",
+                "postalCode",
+                "description",
+                "title"
             ], 
             "names": [
                 "gluuCustomPerson"
