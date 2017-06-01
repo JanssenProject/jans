@@ -10,7 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.ClaimToken;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AttributeService;

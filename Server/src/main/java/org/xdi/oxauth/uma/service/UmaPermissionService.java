@@ -35,7 +35,7 @@ import java.util.UUID;
  */
 @Stateless
 @Named
-public class UmaPermissionManager {
+public class UmaPermissionService {
 
     private static final String ORGUNIT_OF_RESOURCE_PERMISSION = "uma_permission";
 
@@ -138,8 +138,8 @@ public class UmaPermissionManager {
         }
     }
 
-    public void cleanupPermissions(final Date now) {
-        BatchOperation<UmaPermission> permissionBatchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
+    public void cleanup(final Date now) {
+        BatchOperation<UmaPermission> batchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
             @Override
             protected List<UmaPermission> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
@@ -165,7 +165,7 @@ public class UmaPermissionManager {
                 }
             }
         };
-        permissionBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
+        batchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
     public void addBranch(String clientDn) {

@@ -48,7 +48,7 @@ public class UmaResourceService {
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
-        branch.setOrganizationalUnitName("uma_resource");
+        branch.setOrganizationalUnitName("resources");
         branch.setDn(getDnForResource(null));
 
         ldapEntryManager.persist(branch);
@@ -67,7 +67,7 @@ public class UmaResourceService {
     public void validate(UmaResource resource) {
         Preconditions.checkArgument(StringUtils.isNotBlank(resource.getName()), "Name is required for resource.");
         Preconditions.checkArgument(resource.getScopes() != null && !resource.getScopes().isEmpty(), "Scope must be specified for resource.");
-        prepareResourcesBranch();
+        prepareBranch();
     }
 
     /**
@@ -120,7 +120,7 @@ public class UmaResourceService {
      */
     public List<UmaResource> getResourcesByAssociatedClient(String associatedClientDn) {
         try {
-            prepareResourcesBranch();
+            prepareBranch();
 
             if (StringUtils.isNotBlank(associatedClientDn)) {
                 final Filter filter = Filter.create(String.format("&(oxAssociatedClient=%s)", associatedClientDn));
@@ -142,10 +142,6 @@ public class UmaResourceService {
         return ldapEntryManager.findEntries(resource);
     }
 
-    public boolean containsBranch() {
-        return ldapEntryManager.contains(SimpleBranch.class, getDnForResource(null));
-    }
-
     /**
      * Check if LDAP server contains resource description with specified attributes
      *
@@ -157,7 +153,7 @@ public class UmaResourceService {
 
     public UmaResource getResourceById(String id) {
 
-        prepareResourcesBranch();
+        prepareBranch();
 
         UmaResource ldapResource = new UmaResource();
         ldapResource.setDn(getBaseDnForResource());
@@ -174,9 +170,9 @@ public class UmaResourceService {
         return result.get(0);
     }
 
-    private void prepareResourcesBranch() {
+    private void prepareBranch() {
         // Create resource description branch if needed
-        if (!containsBranch()) {
+        if (!ldapEntryManager.contains(SimpleBranch.class, getDnForResource(null))) {
             addBranch();
         }
     }

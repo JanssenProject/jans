@@ -11,13 +11,13 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.uma.UmaRPT;
+import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.uma.service.UmaRptManager;
+import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.oxauth.uma.service.UmaScopeService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -48,7 +48,7 @@ public class UmaRptIntrospectionWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private UmaRptManager rptManager;
+    private UmaRptService rptService;
 
     @Inject
     private UmaValidationService umaValidationService;
@@ -76,7 +76,7 @@ public class UmaRptIntrospectionWS {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
 
-            final UmaRPT rpt = rptManager.getRPTByCode(token);
+            final UmaRPT rpt = rptService.getRPTByCode(token);
 
             if (!isValid(rpt)) {
                 return Response.status(Response.Status.OK).
@@ -128,7 +128,7 @@ public class UmaRptIntrospectionWS {
     private List<org.xdi.oxauth.model.uma.UmaPermission> buildStatusResponsePermissions(UmaRPT rpt) {
         final List<org.xdi.oxauth.model.uma.UmaPermission> result = new ArrayList<org.xdi.oxauth.model.uma.UmaPermission>();
         if (rpt != null) {
-            final List<UmaPermission> rptPermissions = rptManager.getRptPermissions(rpt);
+            final List<UmaPermission> rptPermissions = rptService.getRptPermissions(rpt);
             if (rptPermissions != null && !rptPermissions.isEmpty()) {
                 for (UmaPermission permission : rptPermissions) {
                     if (isValid(permission)) {
