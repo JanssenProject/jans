@@ -216,8 +216,38 @@
             "uri":null
         },
         {
-            "id":"invalid_resource_set_id",
-            "description":"The provided resource set identifier was not found at the AM.",
+            "id":"invalid_resource_id",
+            "description":"The provided resource id was not found at the AS.",
+            "uri":null
+        },
+        {
+            "id":"invalid_permission_request",
+            "description":"The provided permission request is not valid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_claim_token_format",
+            "description":"The claim token format is blank or otherwise not supported (supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken).",
+            "uri":null
+        },
+        {
+            "id":"invalid_claim_token",
+            "description":"The claim token is not valid or unsupported. (If format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken then claim token has to be ID Token).",
+            "uri":null
+        },
+        {
+            "id":"invalid_pct",
+            "description":"PCT is invalid (revoked, expired or does not exist anymore on AS)",
+            "uri":null
+        },
+        {
+            "id":"invalid_rpt",
+            "description":"RPT is invalid (revoked, expired or does not exist anymore on AS)",
+            "uri":null
+        },
+        {
+            "id":"invalid_grant_type",
+            "description":"The provided grant_type valid does not equal to urn:ietf:params:oauth:grant-type:uma-ticket value which is required by UMA 2.",
             "uri":null
         },
         {

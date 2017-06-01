@@ -2482,6 +2482,13 @@ attributetype ( oxAttribute:362 NAME 'oxCacheConfiguration'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
+attributetype ( oxAttribute:363 NAME 'oxClaimValues'
+	DESC 'Memcached configuration'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu created attribute' )
+
 objectclass ( oxObjectClass:1 NAME 'pairwiseIdentifier'
 	SUP ( top )
 	STRUCTURAL
@@ -2654,7 +2661,7 @@ objectclass ( oxObjectClass:25 NAME 'oxUmaResourcePermission'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAmHost $ oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxHost $ oxResourceSetId $ oxTicket )
+	MAY ( oxStatus $ oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxResourceSetId $ oxTicket )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:26 NAME 'oxAuthGrant'
@@ -2675,7 +2682,7 @@ objectclass ( oxObjectClass:28 NAME 'oxAuthUmaRPT'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAmHost $ oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
+	MAY ( oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:29 NAME 'oxLiteralNode'
@@ -2823,4 +2830,11 @@ objectclass ( oxObjectClass:49 NAME 'oxShibbolethCASProtocolConfiguration'
 	STRUCTURAL
 	MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxConfApplication $ oxRevision )
+	X-ORIGIN 'Gluu created objectclass' )
+
+objectclass ( oxObjectClass:50 NAME 'oxAuthUmaPCT'
+	SUP ( top )
+	STRUCTURAL
+	MUST ( objectclass )
+	MAY ( oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxClaimValues )
 	X-ORIGIN 'Gluu created objectclass' )
