@@ -105,12 +105,32 @@ public enum UmaErrorResponseType implements IErrorType {
 	 * The provided ticket was not found at the AS.
 	 */
 	INVALID_TICKET("invalid_ticket"),
-	
+
 	/**
 	 * The provided ticket has expired.
 	 */
 	EXPIRED_TICKET("expired_ticket"),
-	
+
+	/**
+	 * The claim token format is blank or otherwise not supported (supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken).
+	 */
+	INVALID_CLAIM_TOKEN_FORMAT("invalid_claim_token_format"),
+
+	/**
+	 * The claim token is not valid or unsupported. (If format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken then claim token has to be ID Token).
+	 */
+	INVALID_CLAIM_TOKEN("invalid_claim_token"),
+
+	/**
+	 * PCT is invalid (revoked, expired or does not exist anymore on AS)
+	 */
+	INVALID_PCT("invalid_pct"),
+
+	/**
+	 * RPT is invalid (revoked, expired or does not exist anymore on AS)
+	 */
+	INVALID_RPT("invalid_rpt"),
+
 	/**
 	 * The requester is definitively not authorized for this permission according to user policy.
 	 */

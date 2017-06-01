@@ -17,7 +17,7 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.common.uma.UmaRPT;
+import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
@@ -40,7 +40,7 @@ import java.util.UUID;
  */
 @Stateless
 @Named
-public class UmaRptManager {
+public class UmaRptService {
 
     private static final String ORGUNIT_OF_RPT = "uma_rpt";
 
@@ -104,7 +104,7 @@ public class UmaRptManager {
         }
     }
 
-    public void cleanupRPTs(final Date now) {
+    public void cleanup(final Date now) {
         BatchOperation<UmaRPT> rptBatchService = new BatchOperation<UmaRPT>(ldapEntryManager) {
             @Override
             protected List<UmaRPT> getChunkOrNull(int chunkSize) {

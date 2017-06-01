@@ -10,7 +10,6 @@ import com.wordnik.swagger.annotations.Api;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -23,10 +22,12 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.uma.service.UmaPermissionManager;
-import org.xdi.oxauth.uma.service.UmaRptManager;
-import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.uma.authorization.AuthorizationService;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
+import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
+import org.xdi.oxauth.uma.service.UmaRptService;
+import org.xdi.oxauth.uma.service.UmaValidationService;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -52,10 +53,10 @@ public class UmaTokenWS {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
-    private UmaRptManager rptManager;
+    private UmaRptService rptService;
 
     @Inject
-    private UmaPermissionManager permissionManager;
+    private UmaPermissionService permissionService;
 
     @Inject
     private UmaValidationService umaValidationService;
@@ -81,7 +82,7 @@ public class UmaTokenWS {
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    public Response requestRptPermissionAuthorization(
+    public Response requestRpt(
             @FormParam("grant_type")
             String grantType,
             @FormParam("ticket")
@@ -91,16 +92,21 @@ public class UmaTokenWS {
             @FormParam("claim_token_format")
             String claimTokenFormat,
             @FormParam("pct")
-            String pct,
+            String pctCode,
             @FormParam("rpt")
-            String rpt,
+            String rptCode,
             @FormParam("scope")
             String scope,
             @Context HttpServletRequest httpRequest) {
         try {
+            log.trace("requestRpt grant_type: {}, ticket: {}, claim_token: {}, claim_token_format: {}, pct: {}, rpt: {}, scope: {}"
+                    , grantType, ticket, claimToken, claimTokenFormat, pctCode, rptCode, scope);
+
             umaValidationService.validateGrantType(grantType);
             List<UmaPermission> permissions = umaValidationService.validateTicket(ticket);
-
+            Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
+            UmaPCT pct = umaValidationService.validatePct(pctCode);
+            UmaRPT rpt = umaValidationService.validateRPT(rptCode);
             // todo uma2 schedule for remove ?
             final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
 
@@ -125,9 +131,9 @@ public class UmaTokenWS {
                                           AuthorizationGrant grant) {
 //        UmaRPT rpt;
 //        if (Util.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
-//            rpt = rptManager.createRPT(authorization);
+//            rpt = rptService.createRPT(authorization);
 //        } else {
-//            rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
+//            rpt = rptService.getRPTByCode(rptAuthorizationRequest.getRpt());
 //        }
 //
 //        // Validate RPT
@@ -137,10 +143,10 @@ public class UmaTokenWS {
 //            // according to latest UMA spec ( dated 2015-02-23 https://docs.kantarainitiative.org/uma/draft-uma-core.html)
 //            // it's up to implementation whether to create new RPT for each request or pass back requests RPT.
 //            // Here we decided to pass back new RPT if request's RPT in invalid.
-//            rpt = rptManager.getRPTByCode(rptAuthorizationRequest.getRpt());
+//            rpt = rptService.getRPTByCode(rptAuthorizationRequest.getRpt());
 //        }
 
-//        final List<UmaPermission> permissions = permissionManager.getPermissionByTicket(rptAuthorizationRequest.getTicket());
+//        final List<UmaPermission> permissions = permissionService.getPermissionByTicket(rptAuthorizationRequest.getTicket());
 //
 //        umaValidationService.validatePermissions(permissions);
 //
@@ -154,7 +160,7 @@ public class UmaTokenWS {
 //
 //        if (allowToAdd) {
 //            for (UmaPermission permission : permissions) {
-//                rptManager.addPermissionToRPT(rpt, permission);
+//                rptService.addPermissionToRPT(rpt, permission);
 //                invalidateTicket(permission);
 //            }
 //            return rpt;
@@ -190,7 +196,7 @@ public class UmaTokenWS {
         return jwtSigner.sign();
     }
 
-//    UmaRPT rpt = rptManager.createRPT(authorization);
+//    UmaRPT rpt = rptService.createRPT(authorization);
 //
 //    String rptResponse = rpt.getCode();
 //    final Boolean umaRptAsJwt = appConfiguration.getUmaRptAsJwt();
