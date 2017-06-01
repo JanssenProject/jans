@@ -19,8 +19,9 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.cdi.event.CleanerEvent;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.uma.service.UmaPermissionManager;
-import org.xdi.oxauth.uma.service.UmaRptManager;
+import org.xdi.oxauth.uma.service.UmaPctService;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
+import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
@@ -64,10 +65,13 @@ public class CleanerTimer {
     private GrantService grantService;
 
     @Inject
-    private UmaRptManager rptManager;
+    private UmaRptService umaRptService;
 
     @Inject
-    private UmaPermissionManager permissionManager;
+    private UmaPctService umaPctService;
+
+    @Inject
+    private UmaPermissionService umaPermissionService;
 
     @Inject
     private SessionStateService sessionStateService;
@@ -116,8 +120,9 @@ public class CleanerTimer {
             processRegisteredClients();
 
             Date now = new Date();
-            this.rptManager.cleanupRPTs(now);
-            this.permissionManager.cleanupPermissions(now);
+            this.umaRptService.cleanup(now);
+            this.umaPermissionService.cleanup(now);
+            this.umaPctService.cleanup(now);
 
             processU2fRequests();
             processU2fDeviceRegistrations();
