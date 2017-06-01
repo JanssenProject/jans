@@ -45,6 +45,8 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
 
     @Override
     public void populateApplicationConfiguration(Document toPopulate) {
+        log.debug("Starting configuration populator");
+
         if (!Utils.isCustomPagesDirExists())
             return;
         try {
@@ -75,6 +77,7 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
         File file = new File(path);
         RegexFileFilter regexFileFilter = new RegexFileFilter(FACES_CONFIG_PATTERN);
         Collection<File> facesConfigFiles = FileUtils.listFiles(file, regexFileFilter, DirectoryFileFilter.DIRECTORY);
+        log.debug("Found '{}' navigation files", facesConfigFiles.size());
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -83,6 +86,7 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
         for (File files : facesConfigFiles) {
             String faceConfig = files.getAbsolutePath();
             updateDocument(toPopulate, builder, faceConfig);
+            log.debug("Added navigation rules from {}", faceConfig);
         }
     }
 
