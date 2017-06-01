@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
-import org.xdi.oxauth.model.common.uma.UmaRPT;
 import org.xdi.oxauth.model.uma.ClaimTokenList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;

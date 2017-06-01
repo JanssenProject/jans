@@ -17,7 +17,7 @@ import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.uma.service.UmaPermissionManager;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -60,7 +60,7 @@ public class UmaPermissionRegistrationWS {
     private TokenService tokenService;
 
     @Inject
-    private UmaPermissionManager permissionManager;
+    private UmaPermissionService permissionService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -93,7 +93,7 @@ public class UmaPermissionRegistrationWS {
             UmaPermissionList permissionList = parseRequest(requestAsString);
             umaValidationService.validatePermissions(permissionList);
 
-            String ticket = permissionManager.addPermission(permissionList, rptExpirationDate(), tokenService.getClientDn(authorization));
+            String ticket = permissionService.addPermission(permissionList, rptExpirationDate(), tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
                             entity(new PermissionTicket(ticket)).

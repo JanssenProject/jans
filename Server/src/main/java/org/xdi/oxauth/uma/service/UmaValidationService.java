@@ -12,20 +12,31 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
 import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.uma.UmaRPT;
+import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.signature.RSAPublicKey;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.jwk.JSONWebKey;
+import org.xdi.oxauth.model.jws.RSASigner;
+import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaimName;
+import org.xdi.oxauth.model.jwt.JwtHeaderName;
+import org.xdi.oxauth.model.uma.ClaimTokenFormatType;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.token.TokenService;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
+import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.util.StringHelper;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -54,7 +65,7 @@ public class UmaValidationService {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
-   	private UmaResourceService resourceService;
+    private UmaResourceService resourceService;
 
     @Inject
     private UmaScopeService umaScopeService;
@@ -63,7 +74,16 @@ public class UmaValidationService {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private UmaPermissionManager permissionManager;
+    private UmaPermissionService permissionService;
+
+    @Inject
+    private UmaPctService pctService;
+
+    @Inject
+    private UmaRptService rptService;
+
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
 
     public AuthorizationGrant assertHasProtectionScope(String authorization) {
         return validateAuthorization(authorization, UmaScopeType.PROTECTION);
@@ -97,18 +117,24 @@ public class UmaValidationService {
         return authorizationGrant;
     }
 
-    public void validateRPT(UmaRPT rpt) {
-   		if (rpt == null) {
-            log.error("RPT is null.");
-            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, NOT_AUTHORIZED_PERMISSION);
-   		}
+    public UmaRPT validateRPT(String rptCode) {
+        if (StringUtils.isNotBlank(rptCode)) {
+            UmaRPT rpt = rptService.getRPTByCode(rptCode);
+            if (rpt != null) {
+                rpt.checkExpired();
+                if (rpt.isValid()) {
+                    return rpt;
+                } else {
+                    log.error("RPT is not valid. Revoked: " + rpt.isRevoked() + ", Expired: " + rpt.isExpired() + ", rptCode: " + rptCode);
+                }
+            } else {
+                log.error("RPT is null, rptCode: " + rptCode);
+            }
 
-   		rpt.checkExpired();
-   		if (!rpt.isValid()) {
-            log.error("RPT is not valid. Revoked: " + rpt.isRevoked() + ", Expired: " + rpt.isExpired());
-            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, NOT_AUTHORIZED_PERMISSION);
-   		}
-   	}
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RPT);
+        }
+        return null;
+    }
 
     public void validatePermissions(List<UmaPermission> permissions) {
         for (UmaPermission permission : permissions) {
@@ -117,23 +143,23 @@ public class UmaValidationService {
     }
 
     public void validatePermission(UmaPermission permission) {
-   		if (permission == null || "invalidated".equalsIgnoreCase(permission.getStatus())) {
+        if (permission == null || "invalidated".equalsIgnoreCase(permission.getStatus())) {
             log.error("Permission is null or otherwise invalidated. Status: " + (permission != null ? permission.getStatus() : ""));
             errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
-   		}
+        }
 
-   		permission.checkExpired();
-   		if (!permission.isValid()) {
+        permission.checkExpired();
+        if (!permission.isValid()) {
             log.error("Permission is not valid.");
             errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, EXPIRED_TICKET);
-   		}
-   	}
+        }
+    }
 
     public void validatePermissions(UmaPermissionList permissions) {
-   		for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
+        for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
             validatePermission(permission);
         }
-   	}
+    }
 
     public void validatePermission(org.xdi.oxauth.model.uma.UmaPermission permission) {
         String resourceId = permission.getResourceId();
@@ -180,11 +206,108 @@ public class UmaValidationService {
             errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
         }
 
-        List<UmaPermission> permissions = permissionManager.getPermissionsByTicket(ticket);
+        List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
         if (permissions == null || permissions.isEmpty()) {
             log.error("Unable to find permissions registered for given ticket.");
             errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
         }
         return permissions;
+    }
+
+    public Jwt validateClaimToken(String claimToken, String claimTokenFormat) {
+        if (StringUtils.isNotBlank(claimToken)) {
+            if (!ClaimTokenFormatType.isValueValid(claimTokenFormat)) {
+                log.error("claim_token_format is unsupported. Supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
+                errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN_FORMAT);
+            }
+
+            try {
+                final Jwt idToken = Jwt.parse(claimToken);
+                if (idToken != null && isIdTokenValid(idToken)) {
+                    return idToken;
+                }
+            } catch (Exception e) {
+                log.error("Failed to parse claim_token as valid id_token.", e);
+            }
+
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN);
+        } else if (StringUtils.isNotBlank(claimTokenFormat)) {
+            log.error("claim_token is blank but claim_token_format is not blank. Both must be blank or both must be not blank");
+            errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN);
+        }
+        return null;
+    }
+
+    public boolean isIdTokenValid(Jwt idToken) {
+        try {
+            final String issuer = idToken.getClaims().getClaimAsString(JwtClaimName.ISSUER);
+            final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
+            final String audienceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.AUDIENCE);
+
+            final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            final Date now = new Date();
+            if (now.after(expiresAt)) {
+                log.error("ID Token is expired. (It is after " + now + ").");
+                return false;
+            }
+
+            // 1. validate issuer
+            if (!issuer.equals(appConfiguration.getIssuer())) {
+                log.error("ID Token issuer is invalid. Token issuer: " + issuer + ", server issuer: " + appConfiguration.getIssuer());
+                return false;
+            }
+
+            // 2. validate signature
+            final String kid = idToken.getHeader().getClaimAsString(JwtHeaderName.KEY_ID);
+            final String algorithm = idToken.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM);
+            RSAPublicKey publicKey = getPublicKey(kid);
+            if (publicKey != null) {
+                RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.fromString(algorithm), publicKey);
+                boolean signature = rsaSigner.validate(idToken);
+                if (signature) {
+                    return true;
+                }
+                log.error("ID Token signature is invalid.");
+            } else {
+                log.error("Failed to get RSA public key.");
+            }
+            return false;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private RSAPublicKey getPublicKey(String kid) {
+        JSONWebKey key = webKeysConfiguration.getKey(kid);
+        if (key != null) {
+            switch (key.getKty()) {
+                case RSA:
+                    return new RSAPublicKey(
+                            key.getN(),
+                            key.getE());
+            }
+        }
+        return null;
+    }
+
+    public UmaPCT validatePct(String pctCode) {
+        if (StringUtils.isNotBlank(pctCode)) {
+            UmaPCT pct = pctService.getByCode(pctCode);
+
+            if (pct != null) {
+                pct.checkExpired();
+                if (pct.isValid()) {
+                    return pct;
+                } else {
+                    log.error("PCT is not valid. Revoked: " + pct.isRevoked() + ", Expired: " + pct.isExpired() + ", pctCode: " + pctCode);
+                }
+            } else {
+                log.error("Failed to find PCT with pctCode: " + pctCode);
+            }
+
+            errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, INVALID_PCT);
+        }
+        return null;
     }
 }
