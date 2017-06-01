@@ -248,11 +248,11 @@ public class SessionStateService  {
             header += "; HttpOnly";
         }
 
-        Integer sessionExpiration = appConfiguration.getSessionCookieExpiration();
-        if(sessionExpiration != null) {
+        Integer sessionStateLifetime = appConfiguration.getSessionStateLifetime();
+        if(sessionStateLifetime != null) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
             Calendar expirationDate = Calendar.getInstance();
-            expirationDate.add(Calendar.SECOND, sessionExpiration);
+            expirationDate.add(Calendar.SECOND, sessionStateLifetime);
             header += "; Expires="+formatter.format(expirationDate.getTime())+";";
         }
 
@@ -474,12 +474,21 @@ public class SessionStateService  {
             		update = true;
             		sessionState.setPersisted(true);
             	}
+
+                if (sessionState.getAuthenticationTime() != null) {
+                    final long currentLifetimeInSeconds = (System.currentTimeMillis() - sessionState.getAuthenticationTime().getTime()) / 1000;
+                    if (currentLifetimeInSeconds > appConfiguration.getSessionStateLifetime()) {
+                        log.debug("Session state expired: {}, remove it.", sessionState.getId());
+                        remove(sessionState); // expired
+                        update = false;
+                    }
+                }
             	
             	if (update) {
             		try {
 						mergeWithRetry(sessionState, 3);
 					} catch (EmptyEntryPersistenceException ex) {
-						log.warn("Faield to update session entry '{}': '{}'", sessionState.getId(), ex.getMessage());
+						log.warn("Failed to update session entry '{}': '{}'", sessionState.getId(), ex.getMessage());
 					}
             	}
             }
@@ -494,7 +503,7 @@ public class SessionStateService  {
     private void putInCache(SessionState sessionState) {
         int expirationInSeconds = sessionState.getState() == SessionIdState.UNAUTHENTICATED ?
                 appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() :
-                appConfiguration.getSessionIdUnusedLifetime();
+                appConfiguration.getSessionStateLifetime();
         cacheService.put(Integer.toString(expirationInSeconds), sessionState.getId(), sessionState); // first parameter is expiration instead of region for memcached
     }
 
