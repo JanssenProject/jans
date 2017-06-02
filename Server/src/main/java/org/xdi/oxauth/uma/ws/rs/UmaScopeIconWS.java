@@ -50,7 +50,7 @@ public class UmaScopeIconWS {
         log.trace("UMA - get scope's icon : id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
-                final UmaScopeDescription scope = umaScopeService.getInternalScope(id);
+                final UmaScopeDescription scope = umaScopeService.getScope(id);
                 if (scope != null && StringUtils.isNotBlank(scope.getFaviconImageAsXml())) {
                     final GluuImage gluuImage = xmlService.getGluuImageFromXML(scope.getFaviconImageAsXml());
 

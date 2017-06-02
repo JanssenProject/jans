@@ -44,7 +44,7 @@ public class UmaScopeWS {
         log.trace("UMA - get scope description: id: {}", id);
         try {
             if (StringUtils.isNotBlank(id)) {
-                final UmaScopeDescription scope = umaScopeService.getInternalScope(id);
+                final UmaScopeDescription scope = umaScopeService.getScope(id);
                 if (scope != null) {
                     final org.xdi.oxauth.model.uma.UmaScopeDescription jsonScope = new org.xdi.oxauth.model.uma.UmaScopeDescription();
                     jsonScope.setIconUri(scope.getIconUrl());
