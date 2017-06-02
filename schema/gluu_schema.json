@@ -4723,12 +4723,9 @@
                 "oxFaviconImage",
                 "oxIconUrl",
                 "oxId",
-                "oxPolicyRule",
                 "oxPolicyScriptDn",
                 "oxRevision",
-                "oxType",
-                "description",
-                "oxUrl"
+                "description"
             ],
             "must": [
                 "objectclass"
