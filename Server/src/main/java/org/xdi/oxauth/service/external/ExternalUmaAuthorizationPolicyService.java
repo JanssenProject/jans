@@ -6,23 +6,24 @@
 
 package org.xdi.oxauth.service.external;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.custom.script.CustomScriptType;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.custom.script.type.uma.UmaAuthorizationPolicyType;
+import org.xdi.model.uma.ClaimDefinition;
+import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
+import org.xdi.service.LookupService;
+import org.xdi.service.custom.script.ExternalScriptService;
+import org.xdi.util.StringHelper;
 
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import org.xdi.model.SimpleCustomProperty;
-import org.xdi.model.custom.script.CustomScriptType;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.uma.AuthorizationPolicyType;
-import org.xdi.oxauth.uma.authorization.AuthorizationContext;
-import org.xdi.service.LookupService;
-import org.xdi.service.custom.script.ExternalScriptService;
-import org.xdi.util.StringHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides factory methods needed to create external UMA authorization policies extension
@@ -74,17 +75,28 @@ public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService
 		return this.customScriptConfigurationsInumMap.get(inum);
 	}
 
-	public boolean executeExternalAuthorizeMethod(CustomScriptConfiguration customScriptConfiguration, AuthorizationContext authorizationContext) {
+	public boolean authorize(CustomScriptConfiguration script, UmaAuthorizationContext authorizationContext) {
 		try {
 			log.debug("Executing python 'authorize' method");
-			AuthorizationPolicyType externalType = (AuthorizationPolicyType) customScriptConfiguration.getExternalType();
-			Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
+			UmaAuthorizationPolicyType externalType = (UmaAuthorizationPolicyType) script.getExternalType();
+			Map<String, SimpleCustomProperty> configurationAttributes = script.getConfigurationAttributes();
 			return externalType.authorize(authorizationContext, configurationAttributes);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
-		
 		return false;
 	}
+
+	public List<ClaimDefinition> getRequiredClaims(CustomScriptConfiguration script) {
+		try {
+			log.debug("Executing python 'getRequiredClaims' method");
+			UmaAuthorizationPolicyType externalType = (UmaAuthorizationPolicyType) script.getExternalType();
+			return externalType.getRequiredClaims();
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+		}
+		return new ArrayList<ClaimDefinition>();
+	}
+
 
 }

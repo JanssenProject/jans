@@ -7,6 +7,7 @@
 package org.xdi.oxauth.uma.service;
 
 import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.InumService;
+import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -178,30 +180,44 @@ public class UmaScopeService {
         return result;
     }
 
-//    private String getScopeEndpoint() {
-//        return appConfiguration.getBaseEndpoint() + UmaMetadataWS.UMA_SCOPES_SUFFIX;
-//    }
+    public List<UmaScopeDescription> getScopesByIds(List<String> scopeIds) {
+        try {
+            if (scopeIds != null && !scopeIds.isEmpty()) {
+                final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, createAnyFilterByIds(scopeIds));
+                if (entries != null) {
+                    return entries;
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return Collections.emptyList();
+    }
 
-//    private Filter createAnyFilterByIds(List<String> scopeIds) {
-//        try {
-//            if (scopeIds != null && !scopeIds.isEmpty()) {
-//                final StringBuilder sb = new StringBuilder("(|");
-//                for (String url : scopeIds) {
-//                    sb.append("(");
-//                    sb.append("oxId=");
-//                    sb.append(url);
-//                    sb.append(")");
-//                }
-//                sb.append(")");
-//                final String filterAsString = sb.toString();
-//                log.trace("Uma scope ids: " + scopeIds + ", ldapFilter: " + filterAsString);
-//                return Filter.create(filterAsString);
-//            }
-//        } catch (LDAPException e) {
-//            log.error(e.getMessage(), e);
-//        }
-//        return null;
-//    }
+    public String getScopeEndpoint() {
+        return appConfiguration.getBaseEndpoint() + UmaMetadataWS.UMA_SCOPES_SUFFIX;
+    }
+
+    private Filter createAnyFilterByIds(List<String> scopeIds) {
+        try {
+            if (scopeIds != null && !scopeIds.isEmpty()) {
+                final StringBuilder sb = new StringBuilder("(|");
+                for (String url : scopeIds) {
+                    sb.append("(");
+                    sb.append("oxId=");
+                    sb.append(url);
+                    sb.append(")");
+                }
+                sb.append(")");
+                final String filterAsString = sb.toString();
+                log.trace("Uma scope ids: " + scopeIds + ", ldapFilter: " + filterAsString);
+                return Filter.create(filterAsString);
+            }
+        } catch (LDAPException e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
+    }
 
     public String baseDn() {
         return String.format("ou=scopes,%s", staticConfiguration.getBaseDn().getUmaBase());
