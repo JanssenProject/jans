@@ -23,19 +23,19 @@ import javax.servlet.http.HttpServletRequest;
  * @version 0.9 February 12, 2015
  */
 
-public class AuthorizationContext extends ExternalScriptContext {
+public class UmaAuthorizationContext extends ExternalScriptContext {
 
     private final UmaRPT rpt;
     private final UmaPermission permission;
     private final IAuthorizationGrant grant;
     private final Claims claims;
     private NeedInfoAuthenticationContext needInfoAuthenticationContext;
-    private NeedInfoRequestingPartyClaims needInfoRequestingPartyClaims;
+    private NeedInfoError needInfoRequestingPartyClaims;
 
     private AttributeService attributeService;
 
-    public AuthorizationContext(AttributeService attributeService, UmaRPT p_rpt, UmaPermission p_permission, IAuthorizationGrant p_grant,
-                                HttpServletRequest p_httpRequest, Claims claims) {
+    public UmaAuthorizationContext(AttributeService attributeService, UmaRPT p_rpt, UmaPermission p_permission, IAuthorizationGrant p_grant,
+                                   HttpServletRequest p_httpRequest, Claims claims) {
     	super(p_httpRequest);
 
     	this.attributeService = attributeService;
@@ -103,11 +103,11 @@ public class AuthorizationContext extends ExternalScriptContext {
         this.needInfoAuthenticationContext = needInfoAuthenticationContext;
     }
 
-    public NeedInfoRequestingPartyClaims getNeedInfoRequestingPartyClaims() {
+    public NeedInfoError getNeedInfoRequestingPartyClaims() {
         return needInfoRequestingPartyClaims;
     }
 
-    public void setNeedInfoRequestingPartyClaims(NeedInfoRequestingPartyClaims needInfoRequestingPartyClaims) {
+    public void setNeedInfoRequestingPartyClaims(NeedInfoError needInfoRequestingPartyClaims) {
         this.needInfoRequestingPartyClaims = needInfoRequestingPartyClaims;
     }
 }

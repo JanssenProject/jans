@@ -1,25 +1,26 @@
 package org.xdi.oxauth.uma.authorization;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.xdi.model.uma.ClaimDefinition;
+
 import java.io.Serializable;
 import java.util.List;
-
-import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 14/04/2015
  */
 
-public class NeedInfoRequestingPartyClaims implements Serializable {
+public class NeedInfoError implements Serializable {
 
     @JsonProperty(value = "required_claims")
-    private List<RequiredClaim> requiredClaims;
+    private List<ClaimDefinition> requiredClaims;
     @JsonProperty(value = "redirect_user")
     private boolean redirectUser;
     @JsonProperty(value = "ticket")
     private String ticket;
 
-    public NeedInfoRequestingPartyClaims() {
+    public NeedInfoError() {
     }
 
     public boolean isRedirectUser() {
@@ -30,11 +31,11 @@ public class NeedInfoRequestingPartyClaims implements Serializable {
         this.redirectUser = redirectUser;
     }
 
-    public List<RequiredClaim> getRequiredClaims() {
+    public List<ClaimDefinition> getRequiredClaims() {
         return requiredClaims;
     }
 
-    public void setRequiredClaims(List<RequiredClaim> requiredClaims) {
+    public void setRequiredClaims(List<ClaimDefinition> requiredClaims) {
         this.requiredClaims = requiredClaims;
     }
 

@@ -19,14 +19,18 @@ public class Claims {
         this.pct = pct;
     }
 
-    public Object get(String claimName) {
-        if (claims.containsKey(claimName)) {
-            return claims.get(claimName);
-        } else if (claimsToken != null && claimsToken.getClaims() != null && claimsToken.getClaims().hasClaim(claimName)) {
-            return claimsToken.getClaims().getClaim(claimName);
-        } else if (pct != null && pct.getClaims() != null && pct.getClaims().hasClaim(claimName)) {
-            return claimsToken.getClaims().getClaim(claimName);
+    public Object get(String key) {
+        if (claims.containsKey(key)) {
+            return claims.get(key);
+        } else if (claimsToken != null && claimsToken.getClaims() != null && claimsToken.getClaims().hasClaim(key)) {
+            return claimsToken.getClaims().getClaim(key);
+        } else if (pct != null && pct.getClaims() != null && pct.getClaims().hasClaim(key)) {
+            return claimsToken.getClaims().getClaim(key);
         }
         return null;
+    }
+
+    public boolean has(String key) {
+        return get(key) != null;
     }
 }

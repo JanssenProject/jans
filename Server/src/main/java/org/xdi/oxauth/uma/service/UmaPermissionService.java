@@ -60,16 +60,19 @@ public class UmaPermissionService {
     }
 
     private List<UmaPermission> createPermissions(UmaPermissionList permissions, Date expirationDate) {
-        final String ticket = UUID.randomUUID().toString();
         final String configurationCode = INumGenerator.generate(8) + "." + System.currentTimeMillis();
 
         List<UmaPermission> result = new ArrayList<UmaPermission>();
         for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
             result.add(new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()),
-                    ticket, configurationCode, expirationDate));
+                    generateTicket(), configurationCode, expirationDate));
         }
 
         return result;
+    }
+
+    public String generateTicket() {
+       return UUID.randomUUID().toString();
     }
 
     public String addPermission(UmaPermissionList permissionList, Date expirationDate, String clientDn) throws Exception {
@@ -183,5 +186,10 @@ public class UmaPermissionService {
 
     public boolean containsBranch(String clientDn) {
         return ldapEntryManager.contains(SimpleBranch.class, getBranchDn(clientDn));
+    }
+
+    public String changeTicket(List<UmaPermission> permissions) {
+        // todo uma2
+        return null;
     }
 }
