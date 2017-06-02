@@ -45,15 +45,20 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
 
     @Override
     public void populateApplicationConfiguration(Document toPopulate) {
-        if (!Utils.isCustomPagesDirExists())
-            return;
-        try {
-            findAndUpdateNavigationRules(toPopulate, Utils.getCustomPagesPath());
-        } catch (Exception ex) {
-            FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't add customized navigation rules");
+        log.debug("Starting configuration populator");
+
+        if (Utils.isCustomPagesDirExists()) {
+        	String customPath = Utils.getCustomPagesPath();
+            log.debug("Adding navigation rules from custom dir folder: {}", customPath);
+	        try {
+	            findAndUpdateNavigationRules(toPopulate, customPath);
+	        } catch (Exception ex) {
+	            FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't add customized navigation rules");
+	        }
         }
 
         try {
+            log.debug("Adding navigation rules from application resurces");
             Enumeration<URL> urlEnumeration = getClass().getClassLoader().getResources(DEFAULT_NAVIGATION_PATH);
             if (urlEnumeration.hasMoreElements()) {
                 URL url = urlEnumeration.nextElement();
@@ -75,6 +80,7 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
         File file = new File(path);
         RegexFileFilter regexFileFilter = new RegexFileFilter(FACES_CONFIG_PATTERN);
         Collection<File> facesConfigFiles = FileUtils.listFiles(file, regexFileFilter, DirectoryFileFilter.DIRECTORY);
+        log.debug("Found '{}' navigation rules files", facesConfigFiles.size());
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -83,6 +89,7 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
         for (File files : facesConfigFiles) {
             String faceConfig = files.getAbsolutePath();
             updateDocument(toPopulate, builder, faceConfig);
+            log.debug("Added navigation rules from {}", faceConfig);
         }
     }
 
