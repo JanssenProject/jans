@@ -43,6 +43,10 @@ public abstract class JwtClaimSet {
         return claims.get(key);
     }
 
+    public boolean hasClaim(String key) {
+        return getClaim(key) != null;
+    }
+
     public String getClaimAsString(String key) {
         Object claim = getClaim(key);
 

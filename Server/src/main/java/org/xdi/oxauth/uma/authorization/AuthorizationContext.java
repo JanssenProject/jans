@@ -10,13 +10,11 @@ import org.apache.commons.lang.StringUtils;
 import org.xdi.ldap.model.CustomEntry;
 import org.xdi.model.GluuAttribute;
 import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.model.uma.ClaimToken;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -30,41 +28,28 @@ public class AuthorizationContext extends ExternalScriptContext {
     private final UmaRPT rpt;
     private final UmaPermission permission;
     private final IAuthorizationGrant grant;
-    private final Map<String, List<String>> claims;
+    private final Claims claims;
     private NeedInfoAuthenticationContext needInfoAuthenticationContext;
     private NeedInfoRequestingPartyClaims needInfoRequestingPartyClaims;
 
     private AttributeService attributeService;
 
     public AuthorizationContext(AttributeService attributeService, UmaRPT p_rpt, UmaPermission p_permission, IAuthorizationGrant p_grant,
-                                HttpServletRequest p_httpRequest, List<ClaimToken> claims) {
+                                HttpServletRequest p_httpRequest, Claims claims) {
     	super(p_httpRequest);
 
     	this.attributeService = attributeService;
         this.rpt = p_rpt;
         this.permission = p_permission;
         this.grant = p_grant;
-        this.claims = new HashMap<String, List<String>>();
-        if (claims != null) {
-            for (ClaimToken claim : claims) {
-                List<String> strings = this.claims.get(claim.getFormat());
-                if (strings == null) {
-                    strings = new ArrayList<String>();
-                }
-                strings.add(claim.getToken());
-                this.claims.put(claim.getFormat(), strings);
-            }
-        }
+        this.claims = claims;
     }
 
-    public List<String> getRequestClaim(String p_claimName) {
-        if (StringUtils.isNotBlank(p_claimName) && claims != null) {
-            final List<String> value = claims.get(p_claimName);
-            if (value != null) {
-                return Collections.unmodifiableList(value);
-            }
+    public Object getRequestClaim(String claimName) {
+        if (StringUtils.isNotBlank(claimName) && claims != null) {
+            return claims.get(claimName);
         }
-        return Collections.emptyList();
+        return null;
     }
 
     public IAuthorizationGrant getGrant() {
