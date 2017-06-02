@@ -179,7 +179,7 @@ public class UmaValidationService {
             }
             UmaResource resource = resources.get(0);
 
-            final List<String> scopeUrls = umaScopeService.getScopeUrlsByDns(resource.getScopes());
+            final List<String> scopeUrls = umaScopeService.getScopeIdsByDns(resource.getScopes());
             if (!scopeUrls.containsAll(permission.getScopes())) {
                 log.error("At least one of the scope isn't registered");
                 errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_SCOPE);

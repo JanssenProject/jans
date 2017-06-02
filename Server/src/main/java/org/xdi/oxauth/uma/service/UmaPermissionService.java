@@ -65,7 +65,7 @@ public class UmaPermissionService {
 
         List<UmaPermission> result = new ArrayList<UmaPermission>();
         for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
-            result.add(new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(permission.getScopes()),
+            result.add(new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()),
                     ticket, configurationCode, expirationDate));
         }
 

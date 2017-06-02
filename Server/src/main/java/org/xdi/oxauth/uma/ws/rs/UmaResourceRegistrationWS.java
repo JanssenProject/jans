@@ -167,7 +167,7 @@ public class UmaResourceRegistrationWS {
             response.setName(ldapResource.getName());
             response.setDescription(ldapResource.getDescription());
             response.setIconUri(ldapResource.getIconUri());
-            response.setScopes(umaScopeService.getScopeUrlsByDns(ldapResource.getScopes()));
+            response.setScopes(umaScopeService.getScopeIdsByDns(ldapResource.getScopes()));
             response.setType(ldapResource.getType());
 
             final ResponseBuilder builder = Response.ok();
@@ -225,7 +225,7 @@ public class UmaResourceRegistrationWS {
 
                 // if scope parameter is not null then filter by it, otherwise just add to result
                 if (StringUtils.isNotBlank(scope)) {
-                    final List<String> scopeUrlsByDns = umaScopeService.getScopeUrlsByDns(ldapResource.getScopes());
+                    final List<String> scopeUrlsByDns = umaScopeService.getScopeIdsByDns(ldapResource.getScopes());
                     if (scopeUrlsByDns != null && scopeUrlsByDns.contains(scope)) {
                         result.add(ldapResource.getId());
                     }
@@ -312,7 +312,7 @@ public class UmaResourceRegistrationWS {
         log.debug("Adding new resource set description: '{}'", rsid);
 
         final String resourceDn = resourceService.getDnForResource(rsid);
-        final List<String> scopeDNs = umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resource.getScopes());
+        final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
 
         final org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = new org.xdi.oxauth.model.uma.persistence.UmaResource();
 
@@ -352,7 +352,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setName(resource.getName());
         ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
-        ldapResource.setScopes(umaScopeService.getScopeDNsByUrlsAndAddToLdapIfNeeded(resource.getScopes()));
+        ldapResource.setScopes(umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes()));
         ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
         ldapResource.setType(resource.getType());
 
