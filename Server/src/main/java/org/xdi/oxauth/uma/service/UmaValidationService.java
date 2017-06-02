@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.uma.service;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
@@ -27,18 +28,18 @@ import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
+import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.core.Response;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
@@ -309,5 +310,14 @@ public class UmaValidationService {
             errorResponseFactory.throwUmaWebApplicationException(UNAUTHORIZED, INVALID_PCT);
         }
         return null;
+    }
+
+    public List<UmaScopeDescription> validateScopes(String scope) {
+        scope = ServerUtil.urlDecode(scope);
+        final String[] scopesRequested = scope.split(" ");
+        if (ArrayUtils.isNotEmpty(scopesRequested)) {
+            return umaScopeService.getScopesByIds(Arrays.asList(scopesRequested));
+        }
+        return new ArrayList<UmaScopeDescription>();
     }
 }

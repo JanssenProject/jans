@@ -18,7 +18,7 @@ public class NeedInfoResponseBuilder {
     }
 
     public static String entityForResponse(NeedInfoAuthenticationContext authenticationContext,
-                                           NeedInfoRequestingPartyClaims requestingPartyClaims) {
+                                           NeedInfoError requestingPartyClaims) {
 
         JSONObject result = new JSONObject();
         JSONObject errorDetails = new JSONObject();

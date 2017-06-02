@@ -41,7 +41,7 @@ public class UmaAuthorizationService {
     private UmaScopeService umaScopeService;
 
     @Inject
-    private ExternalUmaAuthorizationPolicyService externalUmaAuthorizationPolicyService;
+    private ExternalUmaAuthorizationPolicyService policyService;
 
     @Inject
 	private AttributeService attributeService;
@@ -56,18 +56,18 @@ public class UmaAuthorizationService {
                                         UmaPermission permission, HttpServletRequest httpRequest, Claims claims) {
         log.trace("Check policies for scopes: '{}'", scopes);
 
-        Set<String> authorizationPolicies = getAuthorizationPolicies(scopes);
+        Set<String> authorizationPolicyDNs = getAuthorizationPolicyDNs(scopes);
 
-        if (authorizationPolicies == null || authorizationPolicies.isEmpty()) {
+        if (authorizationPolicyDNs == null || authorizationPolicyDNs.isEmpty()) {
             log.trace("No policies protection, allowed to grant permission.");
             return true;
         } else {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(grant);
-            final AuthorizationContext context = new AuthorizationContext(attributeService, rpt, permission, unmodifiableAuthorizationGrant, httpRequest, claims);
-            for (String authorizationPolicy : authorizationPolicies) {
+            final UmaAuthorizationContext context = new UmaAuthorizationContext(attributeService, rpt, permission, unmodifiableAuthorizationGrant, httpRequest, claims);
+            for (String authorizationPolicyDn : authorizationPolicyDNs) {
                 // if at least one policy returns false then whole result is false
-                if (!applyPolicy(authorizationPolicy, context)) {
-                    log.trace("Reject access. Policy dn: '{}'", authorizationPolicy);
+                if (!applyPolicy(authorizationPolicyDn, context)) {
+                    log.trace("Reject access. Policy dn: '{}'", authorizationPolicyDn);
                     return false;
                 }
             }
@@ -77,7 +77,11 @@ public class UmaAuthorizationService {
         }
     }
 
-    private Set<String> getAuthorizationPolicies(List<UmaScopeDescription> scopes) {
+    public Set<String> getAuthorizationPolicyDNsByScopeIds(List<String> scopeIds) {
+        return getAuthorizationPolicyDNs(umaScopeService.getScopesByIds(scopeIds));
+    }
+
+    public Set<String> getAuthorizationPolicyDNs(List<UmaScopeDescription> scopes) {
         HashSet<String> result = new HashSet<String>();
 
         for (UmaScopeDescription scope : scopes) {
@@ -90,12 +94,12 @@ public class UmaAuthorizationService {
         return result;
     }
 
-    private boolean applyPolicy(String authorizationPolicyDn, AuthorizationContext authorizationContext) {
+    private boolean applyPolicy(String authorizationPolicyDn, UmaAuthorizationContext authorizationContext) {
         log.trace("Apply policy dn: '{}' ...", authorizationPolicyDn);
 
-        final CustomScriptConfiguration customScriptConfiguration = externalUmaAuthorizationPolicyService.getAuthorizationPolicyByDn(authorizationPolicyDn);
+        final CustomScriptConfiguration customScriptConfiguration = policyService.getAuthorizationPolicyByDn(authorizationPolicyDn);
         if (customScriptConfiguration != null) {
-            final boolean result = externalUmaAuthorizationPolicyService.executeExternalAuthorizeMethod(customScriptConfiguration, authorizationContext);
+            final boolean result = policyService.authorize(customScriptConfiguration, authorizationContext);
             log.trace("Policy '{}' result: {}", authorizationPolicyDn, result);
 
             // if false check whether "need_info" objects are set, if yes then throw WebApplicationException directly here
