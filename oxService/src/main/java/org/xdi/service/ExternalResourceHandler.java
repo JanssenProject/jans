@@ -40,7 +40,7 @@ public class ExternalResourceHandler extends ResourceResolver {
         this.parent = parent;
         this.pagesUpdateByViewId = Collections.synchronizedMap(new HashMap<String, Boolean>());
 
-        String externalResourceBase = System.getProperty("catalina.base");
+        String externalResourceBase = System.getProperty("server.base");
         if (StringHelper.isNotEmpty(externalResourceBase)) {
             externalResourceBase += "/custom/pages";
             File folder = new File(externalResourceBase);
@@ -48,7 +48,7 @@ public class ExternalResourceHandler extends ResourceResolver {
                 this.externalResourceBaseFolder = folder;
                 this.useExternalResourceBase = true;
             } else {
-                log.error("Specified path '" + externalResourceBase + "' in 'catalina.base' not exists or not a folder!");
+                log.error("Specified path '" + externalResourceBase + "' in 'server.base' not exists or not a folder!");
             }
         }
     }
