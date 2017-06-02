@@ -274,8 +274,7 @@ displayName: View
 inum: %(inumOrg)s!5214.40D1
 owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxRevision: 0
-oxType: external
-oxUrl: http://photoz.example.com/dev/scopes/view
+oxId: http://photoz.example.com/dev/scopes/view
 
 dn: inum=%(inumOrg)s!B6EA.B301,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthUmaScopeDescription
@@ -285,7 +284,6 @@ inum: %(inumOrg)s!B6EA.B301
 owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxId: modify
 oxRevision: 0
-oxType: internal
 
 dn: inum=%(inumOrg)s!03F8.EDD7,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthUmaScopeDescription
@@ -294,8 +292,7 @@ displayName: All
 inum: %(inumOrg)s!03F8.EDD7
 owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxRevision: 0
-oxType: external
-oxUrl: http://photoz.example.com/dev/scopes/all
+oxId: http://photoz.example.com/dev/scopes/all
 
 ######################################
 # Sector Identifier
