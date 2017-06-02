@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.UnmodifiableAuthorizationGrant;
-import org.xdi.oxauth.model.uma.ClaimTokenList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
@@ -47,14 +46,14 @@ public class UmaAuthorizationService {
     @Inject
 	private AttributeService attributeService;
 
-    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, UmaPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
+    public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, UmaPermission permission, HttpServletRequest httpRequest, Claims claims) {
         log.trace("Check policies for permission, id: '{}'", permission.getDn());
         List<UmaScopeDescription> scopes = umaScopeService.getScopesByDns(permission.getScopeDns());
         return allowToAddPermission(grant, rpt, scopes, permission, httpRequest, claims);
     }
 
     public boolean allowToAddPermission(AuthorizationGrant grant, UmaRPT rpt, List<UmaScopeDescription> scopes,
-                                        UmaPermission permission, HttpServletRequest httpRequest, ClaimTokenList claims) {
+                                        UmaPermission permission, HttpServletRequest httpRequest, Claims claims) {
         log.trace("Check policies for scopes: '{}'", scopes);
 
         Set<String> authorizationPolicies = getAuthorizationPolicies(scopes);
