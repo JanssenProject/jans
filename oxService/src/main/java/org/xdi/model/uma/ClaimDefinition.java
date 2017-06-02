@@ -3,6 +3,8 @@ package org.xdi.model.uma;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.xml.bind.annotation.XmlElement;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,7 +18,7 @@ public class ClaimDefinition {
 
     @JsonProperty(value = "claim_type")
     @XmlElement(name = "claim_type")
-    private List<String> claimType;
+    private String claimType;
 
     @JsonProperty(value = "friendly_name")
     @XmlElement(name = "friendly_name")
@@ -30,6 +32,23 @@ public class ClaimDefinition {
     @XmlElement(name = "name")
     private String name;
 
+    public ClaimDefinition() {
+    }
+
+    public ClaimDefinition(String claimType, String friendlyName, String issuer, String name) {
+        this(claimType, friendlyName, new ArrayList<String>(Collections.singletonList(issuer)), name);
+    }
+
+    public ClaimDefinition(String claimType, String friendlyName, List<String> issuer, String name) {
+        this.claimType = claimType;
+        this.friendlyName = friendlyName;
+        this.issuer = issuer;
+        this.name = name;
+
+        this.claimTokenFormat = new ArrayList<String>();
+        this.claimTokenFormat.add("http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
+    }
+
     public List<String> getClaimTokenFormat() {
         return claimTokenFormat;
     }
@@ -38,11 +57,11 @@ public class ClaimDefinition {
         this.claimTokenFormat = claimTokenFormat;
     }
 
-    public List<String> getClaimType() {
+    public String getClaimType() {
         return claimType;
     }
 
-    public void setClaimType(List<String> claimType) {
+    public void setClaimType(String claimType) {
         this.claimType = claimType;
     }
 
