@@ -22,7 +22,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.uma.authorization.AuthorizationService;
+import org.xdi.oxauth.uma.authorization.UmaAuthorizationService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
@@ -62,7 +62,7 @@ public class UmaTokenWS {
     private UmaValidationService umaValidationService;
 
     @Inject
-    private AuthorizationService umaAuthorizationService;
+    private UmaAuthorizationService umaAuthorizationService;
 
     @Inject
     private ClientService clientService;
@@ -107,6 +107,7 @@ public class UmaTokenWS {
             Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
+
             // todo uma2 schedule for remove ?
             final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
 

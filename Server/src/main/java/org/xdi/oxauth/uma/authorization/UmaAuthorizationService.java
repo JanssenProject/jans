@@ -33,7 +33,7 @@ import java.util.Set;
  */
 @Stateless
 @Named("umaAuthorizationService")
-public class AuthorizationService {
+public class UmaAuthorizationService {
 
     @Inject
     private Logger log;
