@@ -9,6 +9,8 @@ package org.xdi.oxauth.uma.ws.rs;
 import com.wordnik.swagger.annotations.Api;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -19,8 +21,10 @@ import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.Claims;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationService;
@@ -35,7 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The endpoint at which the RP asks for token.
@@ -80,6 +86,9 @@ public class UmaTokenWS {
     @Inject
     private LdapEntryManager ldapEntryManager;
 
+    @Inject
+    private ExternalUmaAuthorizationPolicyService policyService;
+
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
@@ -108,8 +117,11 @@ public class UmaTokenWS {
             Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
+            List<UmaScopeDescription> scopes = umaValidationService.validateScopes(scope);
 
             Claims claims = new Claims(idToken, pct);
+
+            List<CustomScriptConfiguration> scripts = checkNeedsInfo(claims, scopes, permissions);
 
             // todo uma2 schedule for remove ?
             final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
@@ -128,6 +140,51 @@ public class UmaTokenWS {
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
         return null;
+    }
+
+    private List<CustomScriptConfiguration> checkNeedsInfo(Claims claims, List<UmaScopeDescription> requestedScopes, List<UmaPermission> permissions) {
+        Set<String> authorizationPolicyDNs = umaAuthorizationService.getAuthorizationPolicyDNs(requestedScopes);
+
+        List<CustomScriptConfiguration> scripts = new ArrayList<CustomScriptConfiguration>();
+
+        List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
+
+        for (String scriptDN : authorizationPolicyDNs) {
+            CustomScriptConfiguration script = policyService.getAuthorizationPolicyByDn(scriptDN);
+
+            // todo check spec : requested scopes and ticket scopes
+
+            if (script != null) {
+                List<ClaimDefinition> requiredClaims = policyService.getRequiredClaims(script);
+                if (requiredClaims != null && !requiredClaims.isEmpty()) {
+                    for (ClaimDefinition definition : requiredClaims) {
+                        if (!claims.has(definition.getName())) {
+                            missedClaims.add(definition);
+                        }
+                    }
+                }
+            }  else {
+                log.error("Unable to load UMA script dn: '{}'", scriptDN);
+            }
+        }
+
+        if (!missedClaims.isEmpty()) {
+            String newTicket = generateNewTicket(permissions);
+
+            // todo uma2
+
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
+
+        return scripts;
+    }
+
+    private String generateNewTicket(List<UmaPermission> permissions) {
+        if (permissions.isEmpty()) {
+            return permissionService.generateTicket();
+        } else {
+            return permissionService.changeTicket(permissions);
+        }
     }
 
     private UmaRPT authorizeRptPermission(String authorization,

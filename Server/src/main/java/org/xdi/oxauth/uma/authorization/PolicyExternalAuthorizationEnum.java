@@ -21,7 +21,7 @@ public enum PolicyExternalAuthorizationEnum implements IPolicyExternalAuthorizat
     }
 
     @Override
-    public boolean authorize(AuthorizationContext p_authorizationContext) {
+    public boolean authorize(UmaAuthorizationContext p_authorizationContext) {
         return m_result;
     }
 }

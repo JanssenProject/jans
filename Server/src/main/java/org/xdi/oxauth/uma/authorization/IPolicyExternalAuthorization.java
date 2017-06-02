@@ -13,5 +13,5 @@ package org.xdi.oxauth.uma.authorization;
 
 public interface IPolicyExternalAuthorization {
 
-    public boolean authorize(AuthorizationContext authorizationContext);
+    public boolean authorize(UmaAuthorizationContext authorizationContext);
 }
