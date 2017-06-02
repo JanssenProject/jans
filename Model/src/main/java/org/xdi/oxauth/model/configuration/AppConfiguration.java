@@ -159,7 +159,7 @@ public class AppConfiguration implements Configuration {
     /**
      * SessionState will be expired after sessionStateLifetime seconds
      */
-    private Integer sessionStateLifetime;
+    private Integer sessionStateLifetime = 86400;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;

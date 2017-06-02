@@ -477,10 +477,14 @@ public class SessionStateService  {
 
                 if (sessionState.getAuthenticationTime() != null) {
                     final long currentLifetimeInSeconds = (System.currentTimeMillis() - sessionState.getAuthenticationTime().getTime()) / 1000;
-                    if (currentLifetimeInSeconds > appConfiguration.getSessionStateLifetime()) {
-                        log.debug("Session state expired: {}, remove it.", sessionState.getId());
-                        remove(sessionState); // expired
-                        update = false;
+                    if (appConfiguration.getSessionStateLifetime() != null) {
+                        if (currentLifetimeInSeconds > appConfiguration.getSessionStateLifetime()) {
+                            log.debug("Session state expired: {}, remove it.", sessionState.getId());
+                            remove(sessionState); // expired
+                            update = false;
+                        }
+                    } else {
+                        log.error("Session state lifetime configuration is null.");
                     }
                 }
             	
