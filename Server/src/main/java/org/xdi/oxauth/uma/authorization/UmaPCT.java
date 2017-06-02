@@ -1,12 +1,13 @@
 package org.xdi.oxauth.uma.authorization;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.AbstractToken;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
@@ -19,6 +20,8 @@ import java.util.Date;
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthUmaPCT"})
 public class UmaPCT extends AbstractToken {
+
+    private final static Logger log = LoggerFactory.getLogger(UmaPCT.class);
 
     @LdapDN
     private String dn;
@@ -59,8 +62,13 @@ public class UmaPCT extends AbstractToken {
         this.claimValuesAsJson = claimValuesAsJson;
     }
 
-    public JwtClaims getClaims() throws JSONException {
-        return StringUtils.isNotBlank(claimValuesAsJson) ? new JwtClaims(new JSONObject(claimValuesAsJson)) : new JwtClaims();
+    public JwtClaims getClaims() {
+        try {
+            return StringUtils.isNotBlank(claimValuesAsJson) ? new JwtClaims(new JSONObject(claimValuesAsJson)) : new JwtClaims();
+        } catch (Exception e) {
+            log.error("Failed to parse PCT claims. " + e.getMessage(), e);
+            return null;
+        }
     }
 
     public void setClaims(JwtClaims claims) throws InvalidJwtException {
