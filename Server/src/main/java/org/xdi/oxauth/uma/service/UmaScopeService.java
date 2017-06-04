@@ -99,40 +99,9 @@ public class UmaScopeService {
     }
 
     public List<String> getScopeDNsByIdsAndAddToLdapIfNeeded(List<String> scopeIds) {
-        final List<String> result = new ArrayList<String>();
-        if (scopeIds != null && !scopeIds.isEmpty()) {
-            try {
-                final Boolean addAutomatically = appConfiguration.getUmaAddScopesAutomatically();
-
-                for (String scopeId : scopeIds) {
-                    UmaScopeDescription scope = getScope(scopeId);
-                    if (scope != null) {
-                        result.add(scope.getDn());
-                    } else {
-                        if (addAutomatically != null && addAutomatically) {
-                            final String inum = inumService.generateInum();
-                            final UmaScopeDescription newScope = new UmaScopeDescription();
-                            newScope.setInum(inum);
-                            newScope.setDisplayName(scopeId);
-                            newScope.setId(scopeId);
-
-                            final boolean persisted = persist(newScope);
-                            if (persisted) {
-                                result.add(newScope.getDn());
-                            } else {
-                                log.error("Failed to persist scope, id:{}" + scopeId);
-                            }
-                        } else {
-                            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
-                        }
-                    }
-                }
-            } catch (WebApplicationException e) {
-                throw e;
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
+        List<String> result = new ArrayList<String>();
+        for (UmaScopeDescription scope : getScopesByIds(scopeIds)) {
+            result.add(scope.getDn());
         }
         return result;
     }
@@ -160,16 +129,6 @@ public class UmaScopeService {
         return getScopeIds(getScopesByDns(scopeDns));
     }
 
-    public static List<String> getScopeDNs(List<UmaScopeDescription> scopes) {
-        final List<String> result = new ArrayList<String>();
-        if (scopes != null && !scopes.isEmpty()) {
-            for (UmaScopeDescription s : scopes) {
-                result.add(s.getDn());
-            }
-        }
-        return result;
-    }
-
     public List<String> getScopeIds(List<UmaScopeDescription> scopes) {
         final List<String> result = new ArrayList<String>();
         if (scopes != null && !scopes.isEmpty()) {
@@ -181,17 +140,47 @@ public class UmaScopeService {
     }
 
     public List<UmaScopeDescription> getScopesByIds(List<String> scopeIds) {
-        try {
-            if (scopeIds != null && !scopeIds.isEmpty()) {
-                final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, createAnyFilterByIds(scopeIds));
-                if (entries != null) {
-                    return entries;
+        List<UmaScopeDescription> result = new ArrayList<UmaScopeDescription>();
+        if (scopeIds != null && !scopeIds.isEmpty()) {
+            List<String> notInLdap = new ArrayList<String>(scopeIds);
+
+            final List<UmaScopeDescription> entries = ldapEntryManager.findEntries(baseDn(), UmaScopeDescription.class, createAnyFilterByIds(scopeIds));
+            if (entries != null) {
+                result.addAll(entries);
+                for (UmaScopeDescription scope : entries) {
+                    notInLdap.remove(scope.getId());
                 }
             }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
+
+            if (!notInLdap.isEmpty()) {
+                for (String scopeId : notInLdap) {
+                    result.add(addScope(scopeId));
+                }
+            }
         }
-        return Collections.emptyList();
+        return result;
+    }
+
+    public UmaScopeDescription addScope(String scopeId) {
+        final Boolean addAutomatically = appConfiguration.getUmaAddScopesAutomatically();
+        if (addAutomatically != null && addAutomatically) {
+            final String inum = inumService.generateInum();
+            final UmaScopeDescription newScope = new UmaScopeDescription();
+            newScope.setInum(inum);
+            newScope.setDisplayName(scopeId);
+            newScope.setId(scopeId);
+
+            final boolean persisted = persist(newScope);
+            if (persisted) {
+                return newScope;
+            } else {
+                log.error("Failed to persist scope, id:{}" + scopeId);
+            }
+        }
+
+        throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
+
     }
 
     public String getScopeEndpoint() {
