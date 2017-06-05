@@ -11,23 +11,33 @@ import java.util.List;
  * @version 0.9, 14/04/2015
  */
 
-public class NeedInfoError implements Serializable {
+public class UmaNeedInfoResponse implements Serializable {
 
+    @JsonProperty(value = "error")
+    private String error;
     @JsonProperty(value = "required_claims")
     private List<ClaimDefinition> requiredClaims;
     @JsonProperty(value = "redirect_user")
-    private boolean redirectUser;
+    private String redirectUser;
     @JsonProperty(value = "ticket")
     private String ticket;
 
-    public NeedInfoError() {
+    public UmaNeedInfoResponse() {
     }
 
-    public boolean isRedirectUser() {
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public String isRedirectUser() {
         return redirectUser;
     }
 
-    public void setRedirectUser(boolean redirectUser) {
+    public void setRedirectUser(String redirectUser) {
         this.redirectUser = redirectUser;
     }
 

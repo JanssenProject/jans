@@ -20,19 +20,19 @@ import org.xdi.oxauth.model.token.JsonWebResponse;
 import org.xdi.oxauth.model.token.JwtSigner;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.security.Identity;
+import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
-import org.xdi.oxauth.uma.authorization.Claims;
-import org.xdi.oxauth.uma.authorization.UmaAuthorizationService;
-import org.xdi.oxauth.uma.authorization.UmaPCT;
-import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.uma.authorization.*;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
+import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -89,6 +89,9 @@ public class UmaTokenWS {
     @Inject
     private ExternalUmaAuthorizationPolicyService policyService;
 
+    @Inject
+    private AttributeService attributeService;
+
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
@@ -117,29 +120,41 @@ public class UmaTokenWS {
             Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
-            List<UmaScopeDescription> scopes = umaValidationService.validateScopes(scope);
+            List<UmaScopeDescription> scopes = umaValidationService.validateScopes(scope, permissions);
 
             Claims claims = new Claims(idToken, pct);
 
             List<CustomScriptConfiguration> scripts = checkNeedsInfo(claims, scopes, permissions);
 
+            boolean granted = false;
+
+            if (scripts.isEmpty()) {
+                granted = true;
+            } else {
+                for (CustomScriptConfiguration script : scripts) {
+                    UmaAuthorizationContext context = new UmaAuthorizationContext(attributeService, );
+                    final boolean result = policyService.authorize(script, context);
+                    log.trace("Policy script inum: '{}' result: '{}'", script.getInum(), result);
+                }
+            }
             // todo uma2 schedule for remove ?
             final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
 
 //            final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant);
-//
-//            // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
-//            return Response.ok(ServerUtil.asJson(new RptAuthorizationResponse(rpt.getCode()))).build();
+
+            UmaTokenResponse response = new UmaTokenResponse();
+
+            return Response.ok(ServerUtil.asJson(response)).build();
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
                 throw (WebApplicationException) ex;
             }
-
-            throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
         }
-        return null;
+
+        log.error("Failed to handle request to UMA Token Endpoint.");
+        throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
     }
 
     private List<CustomScriptConfiguration> checkNeedsInfo(Claims claims, List<UmaScopeDescription> requestedScopes, List<UmaPermission> permissions) {
@@ -152,8 +167,6 @@ public class UmaTokenWS {
         for (String scriptDN : authorizationPolicyDNs) {
             CustomScriptConfiguration script = policyService.getAuthorizationPolicyByDn(scriptDN);
 
-            // todo check spec : requested scopes and ticket scopes
-
             if (script != null) {
                 List<ClaimDefinition> requiredClaims = policyService.getRequiredClaims(script);
                 if (requiredClaims != null && !requiredClaims.isEmpty()) {
@@ -163,7 +176,7 @@ public class UmaTokenWS {
                         }
                     }
                 }
-            }  else {
+            } else {
                 log.error("Unable to load UMA script dn: '{}'", scriptDN);
             }
         }
@@ -171,9 +184,13 @@ public class UmaTokenWS {
         if (!missedClaims.isEmpty()) {
             String newTicket = generateNewTicket(permissions);
 
-            // todo uma2
+            UmaNeedInfoResponse needInfoResponse = new UmaNeedInfoResponse();
+            needInfoResponse.setTicket(newTicket);
+            needInfoResponse.setError("need_info");
+            needInfoResponse.setRedirectUser(appConfiguration.getBaseEndpoint() + "/uma/gather_claims");
+            needInfoResponse.setRequiredClaims(missedClaims);
 
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
+            throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).entity(ServerUtil.asJsonSilently(needInfoResponse)).build());
         }
 
         return scripts;
@@ -181,7 +198,7 @@ public class UmaTokenWS {
 
     private String generateNewTicket(List<UmaPermission> permissions) {
         if (permissions.isEmpty()) {
-            return permissionService.generateTicket();
+            return permissionService.generateNewTicket();
         } else {
             return permissionService.changeTicket(permissions);
         }
