@@ -50,6 +50,7 @@ public class TestResteasyInitializer extends Application {
         classes.add(UmaRptIntrospectionWS.class);
         classes.add(UmaScopeWS.class);
         classes.add(UmaMetadataWS.class);
+        classes.add(UmaGatheringWS.class);
 
         classes.add(GluuConfigurationWS.class);
         return classes;
