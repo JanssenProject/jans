@@ -6,9 +6,12 @@
 
 package org.xdi.oxauth.uma.service;
 
+import com.google.common.base.Joiner;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
+import org.python.google.common.base.Function;
+import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
@@ -24,6 +27,7 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.uma.ClaimTokenFormatType;
+import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
@@ -38,6 +42,7 @@ import org.xdi.util.StringHelper;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
@@ -312,12 +317,30 @@ public class UmaValidationService {
         return null;
     }
 
-    public List<UmaScopeDescription> validateScopes(String scope) {
+    public List<UmaScopeDescription> validateScopes(String scope, List<UmaPermission> permissions) {
         scope = ServerUtil.urlDecode(scope);
         final String[] scopesRequested = scope.split(" ");
+
+        final Set<UmaScopeDescription> result = new HashSet<UmaScopeDescription>();
+
         if (ArrayUtils.isNotEmpty(scopesRequested)) {
-            return umaScopeService.getScopesByIds(Arrays.asList(scopesRequested));
+             result.addAll(umaScopeService.getScopesByIds(Arrays.asList(scopesRequested)));
         }
-        return new ArrayList<UmaScopeDescription>();
+        for (UmaPermission permission : permissions) {
+            result.addAll(umaScopeService.getScopesByDns(permission.getScopeDns()));
+        }
+        if (result.isEmpty()) {
+            log.error("There are no any scopes requested in give request.");
+            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
+
+        }
+        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result, new Function<UmaScopeDescription, String>() {
+            @Override
+            public String apply(UmaScopeDescription umaScopeDescription) {
+                return umaScopeDescription.getId();
+            }
+        })));
+        return new ArrayList<UmaScopeDescription>(result);
     }
 }
