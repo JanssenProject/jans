@@ -5,36 +5,36 @@
  */package org.xdi.service;
 
 import java.io.IOException;
+import java.io.Serializable;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 
 /**
  * Service class to work with JSON strings
  *
  * @author Yuriy Movchan Date: 05/14/2013
  */
-@Name("jsonService")
-@Scope(ScopeType.APPLICATION)
-@AutoCreate
-public class JsonService {
+@Stateless
+@Named
+public class JsonService implements Serializable {
 
-    @Logger
-    private Log log;
+	private static final long serialVersionUID = -1595376054267897007L;
+
+	@Inject
+    private Logger log;
 
     private ObjectMapper mapper;
 
-    @Create
+    @PostConstruct
     public void init() {
     	this.mapper = new ObjectMapper();
     }
@@ -50,14 +50,5 @@ public class JsonService {
 	public <T> String objectToPerttyJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
 		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
 	}
-
-    /**
-     * Get jsonService instance
-     *
-     * @return JsonService instance
-     */
-    public static JsonService instance() {
-        return (JsonService) Component.getInstance(JsonService.class);
-    }
 
 }

@@ -6,9 +6,6 @@
 
 package org.xdi.model.custom.script;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
@@ -25,14 +22,12 @@ import org.xdi.model.custom.script.type.scope.DummyDynamicScopeType;
 import org.xdi.model.custom.script.type.scope.DynamicScopeType;
 import org.xdi.model.custom.script.type.session.ApplicationSessionType;
 import org.xdi.model.custom.script.type.session.DummyApplicationSessionType;
-import org.xdi.model.custom.script.type.uma.AuthorizationPolicyType;
-import org.xdi.model.custom.script.type.uma.DummyAuthorizationPolicyType;
-import org.xdi.model.custom.script.type.user.CacheRefreshType;
-import org.xdi.model.custom.script.type.user.DummyCacheRefreshType;
-import org.xdi.model.custom.script.type.user.DummyUpdateUserType;
-import org.xdi.model.custom.script.type.user.DummyUserRegistrationType;
-import org.xdi.model.custom.script.type.user.UpdateUserType;
-import org.xdi.model.custom.script.type.user.UserRegistrationType;
+import org.xdi.model.custom.script.type.uma.UmaAuthorizationPolicyType;
+import org.xdi.model.custom.script.type.uma.UmaDummyAuthorizationPolicyType;
+import org.xdi.model.custom.script.type.user.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * List of supported custom scripts
@@ -48,7 +43,7 @@ public enum CustomScriptType implements LdapEnum {
 	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
 	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration", new DummyClientRegistrationType()),
 	ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator", new DummyIdGeneratorType()),
-	UMA_AUTHORIZATION_POLICY("uma_authorization_policy", "UMA Authorization Policies", AuthorizationPolicyType.class, CustomScript.class, "AuthorizationPolicy", new DummyAuthorizationPolicyType()),
+	UMA_AUTHORIZATION_POLICY("uma_authorization_policy", "UMA Authorization Policies", UmaAuthorizationPolicyType.class, CustomScript.class, "AuthorizationPolicy", new UmaDummyAuthorizationPolicyType()),
 	DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope", new DummyDynamicScopeType()),
 	SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
 

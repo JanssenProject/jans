@@ -148,6 +148,7 @@ public class LDAPConnectionProvider {
 		this.supportsSubtreeDeleteRequestControl = supportsSubtreeDeleteRequestControl();
 		this.creationResultCode = ResultCode.SUCCESS;
 	}
+
 	private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
 			int maxConnections, SSLUtil sslUtil) throws LDAPException {		
 		String connectionPoolMaxWaitTime = props.getProperty("connection-pool-max-wait-time");

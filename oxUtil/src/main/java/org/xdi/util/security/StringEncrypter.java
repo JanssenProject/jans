@@ -47,6 +47,8 @@ public class StringEncrypter {
 		}
 	}
 
+	public StringEncrypter() {}
+
 	public static StringEncrypter defaultInstance() throws EncryptionException {
 		return Holder.instance;
 	}

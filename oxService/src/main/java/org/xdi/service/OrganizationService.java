@@ -9,10 +9,10 @@ package org.xdi.service;
 
 import java.io.Serializable;
 
+import javax.inject.Inject;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 
 /**
  * @author "Oleksiy Tataryn"
@@ -22,10 +22,10 @@ public abstract class OrganizationService implements Serializable {
 
 	private static final long serialVersionUID = -6601700282123372943L;
 
-	@Logger
-	protected Log log;
+    @Inject
+	protected Logger log;
 
-	@In
+    @Inject
 	protected LdapEntryManager ldapEntryManager;
 	
 	public String getDnForOrganization(String inum, String baseDn) {

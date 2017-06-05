@@ -14,17 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.jboss.seam.Component;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.AutoCreate;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.log.Log;
+import org.slf4j.Logger;
 import org.xdi.model.SchemaEntry;
-import org.xdi.util.OxConstants;
 import org.xdi.util.StringHelper;
 import org.xdi.util.exception.InvalidSchemaUpdateException;
 
@@ -32,22 +28,19 @@ import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 import com.unboundid.ldap.sdk.schema.ObjectClassDefinition;
 
 /**
- * Provides operations with DS schema
+ * Provides operations with LDAP schema
  * 
  * @author Yuriy Movchan Date: 10.14.2010
  */
-@Scope(ScopeType.STATELESS)
-@Name("schemaService")
-@AutoCreate
+@ApplicationScoped
+@Named
 public class SchemaService {
 
-	@Logger
-	private Log log;
+    @Inject
+	private Logger log;
 
-	@In
+    @Inject
 	private LdapEntryManager ldapEntryManager;
-
-
 
 	/**
 	 * Load schema from DS
@@ -498,15 +491,6 @@ public class SchemaService {
 	 */
 	public String getDnForSchema() {
 		return ldapEntryManager.getLdapOperationService().getSubschemaSubentry();
-	}
-
-	/**
-	 * Get schemaService instance
-	 * 
-	 * @return SchemaService instance
-	 */
-	public static SchemaService instance() {
-		return (SchemaService) Component.getInstance(SchemaService.class);
 	}
 
 }

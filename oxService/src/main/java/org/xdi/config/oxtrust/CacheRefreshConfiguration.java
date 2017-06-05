@@ -8,6 +8,8 @@ package org.xdi.config.oxtrust;
 
 import java.util.List;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 
@@ -16,8 +18,9 @@ import org.xdi.model.ldap.GluuLdapConfiguration;
  * 
  * @author Yuriy Movchan Date: 07.13.2011
  */
+@Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CacheRefreshConfiguration {
+public class CacheRefreshConfiguration implements Configuration {
 
 	private List<GluuLdapConfiguration> sourceConfigs;
 	private GluuLdapConfiguration inumConfig;
