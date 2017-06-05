@@ -9,6 +9,7 @@ package org.xdi.oxauth.uma.service;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
@@ -65,13 +66,13 @@ public class UmaPermissionService {
         List<UmaPermission> result = new ArrayList<UmaPermission>();
         for (org.xdi.oxauth.model.uma.UmaPermission permission : permissions) {
             result.add(new UmaPermission(permission.getResourceId(), scopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(permission.getScopes()),
-                    generateTicket(), configurationCode, expirationDate));
+                    generateNewTicket(), configurationCode, expirationDate));
         }
 
         return result;
     }
 
-    public String generateTicket() {
+    public String generateNewTicket() {
        return UUID.randomUUID().toString();
     }
 
@@ -189,7 +190,19 @@ public class UmaPermissionService {
     }
 
     public String changeTicket(List<UmaPermission> permissions) {
-        // todo uma2
-        return null;
+        String newTicket = generateNewTicket();
+        if (permissions == null || !permissions.isEmpty()) {
+            return newTicket;
+        }
+
+        for (UmaPermission permission : permissions) {
+            ldapEntryManager.remove(permission);
+
+            String dn = String.format("oxTicket=%s,%s", newTicket, StringUtils.substringAfter(permission.getDn(), ","));
+            permission.setTicket(newTicket);
+            permission.setDn(dn);
+            ldapEntryManager.persist(permission);
+        }
+        return newTicket;
     }
 }
