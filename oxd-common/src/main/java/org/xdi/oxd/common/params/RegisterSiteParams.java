@@ -265,7 +265,7 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
 
     @Override
     public String getOxdId() {
-        throw new UnsupportedOperationException();
+        return "";
     }
 }
 
