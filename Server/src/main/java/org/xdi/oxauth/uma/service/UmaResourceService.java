@@ -15,13 +15,16 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
+import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides operations with resource set descriptions
@@ -34,6 +37,8 @@ import java.util.List;
 @Named
 public class UmaResourceService {
 
+    private static final int RESOURCE_CACHE_EXPIRATION_IN_SECONDS = 120;
+
     @Inject
     private Logger log;
 
@@ -45,6 +50,9 @@ public class UmaResourceService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private CacheService cacheService;
 
     public void addBranch() {
         SimpleBranch branch = new SimpleBranch();
@@ -62,6 +70,7 @@ public class UmaResourceService {
     public void addResource(UmaResource resource) {
         validate(resource);
         ldapEntryManager.persist(resource);
+        putInCache(resource);
     }
 
     public void validate(UmaResource resource) {
@@ -109,15 +118,6 @@ public class UmaResourceService {
      *
      * @return List of resource descriptions
      */
-    public List<UmaResource> getAllResources(String... ldapReturnAttributes) {
-        return ldapEntryManager.findEntries(getBaseDnForResource(), UmaResource.class, ldapReturnAttributes, null);
-    }
-
-    /**
-     * Get all resource descriptions
-     *
-     * @return List of resource descriptions
-     */
     public List<UmaResource> getResourcesByAssociatedClient(String associatedClientDn) {
         try {
             prepareBranch();
@@ -133,12 +133,14 @@ public class UmaResourceService {
     }
 
     /**
-     * Get resource descriptions by example
+     * Get resource descriptions by example.
+     *
+     * Do not expose it outside because we want to involve cache where possible.
      *
      * @param resource Resource
      * @return Resource which conform example
      */
-    public List<UmaResource> findResources(UmaResource resource) {
+    private List<UmaResource> findResources(UmaResource resource) {
         return ldapEntryManager.findEntries(resource);
     }
 
@@ -151,7 +153,28 @@ public class UmaResourceService {
         return ldapEntryManager.contains(resource);
     }
 
+    public Set<UmaResource> getResources(Set<String> ids) {
+        Set<UmaResource> result = new HashSet<UmaResource>();
+        if (ids != null) {
+            for (String id : ids) {
+                UmaResource resource = getResourceById(id);
+                if (resource != null) {
+                    result.add(resource);
+                } else {
+                    log.error("Failed to find resource by id: " + id);
+                }
+            }
+        }
+        return result;
+    }
+
     public UmaResource getResourceById(String id) {
+
+        UmaResource fromCache = fromCache(getDnForResource(id));
+        if (fromCache != null) {
+            log.trace("UMA Resource from cache, id: " + id);
+            return fromCache;
+        }
 
         prepareBranch();
 
@@ -184,6 +207,10 @@ public class UmaResourceService {
      * @return Resource description
      */
     public UmaResource getResourceByDn(String dn) {
+        UmaResource fromCache = fromCache(dn);
+        if (fromCache != null) {
+            return fromCache;
+        }
         return ldapEntryManager.find(UmaResource.class, dn);
     }
 
@@ -200,6 +227,38 @@ public class UmaResourceService {
     public String getBaseDnForResource() {
         final String umaBaseDn = staticConfiguration.getBaseDn().getUmaBase(); // "ou=uma,o=@!1111,o=gluu"
         return String.format("ou=resources,%s", umaBaseDn);
+    }
+
+    private void putInCache(UmaResource resource) {
+        if (resource == null) {
+            return;
+        }
+
+        try {
+            cacheService.put(Integer.toString(RESOURCE_CACHE_EXPIRATION_IN_SECONDS), resource.getDn(), resource);
+        } catch (Exception e) {
+            log.error("Failed to put client in cache, client:" + resource, e);
+        }
+    }
+
+    private UmaResource fromCache(String dn) {
+        try {
+            return (UmaResource) cacheService.get(null, dn);
+        } catch (Exception e) {
+            log.error("Failed to fetch client from cache, dn: " + dn, e);
+            return null;
+        }
+    }
+
+    public boolean removeFromCache(UmaResource resource) {
+        try {
+            cacheService.remove(null, resource.getDn());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+
+            return false;
+        }
+        return true;
     }
 
 }

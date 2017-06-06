@@ -30,6 +30,7 @@ import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.*;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
+import org.xdi.oxauth.uma.service.UmaResourceService;
 import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
@@ -41,6 +42,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -61,6 +63,9 @@ public class UmaTokenWS {
 
     @Inject
     private UmaRptService rptService;
+
+    @Inject
+    private UmaResourceService resourceService;
 
     @Inject
     private UmaPermissionService permissionService;
@@ -120,20 +125,19 @@ public class UmaTokenWS {
             Jwt idToken = umaValidationService.validateClaimToken(claimToken, claimTokenFormat);
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
-            List<UmaScopeDescription> scopes = umaValidationService.validateScopes(scope, permissions);
+            Map<UmaScopeDescription, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
 
             Claims claims = new Claims(idToken, pct);
 
-            List<CustomScriptConfiguration> scripts = checkNeedsInfo(claims, scopes, permissions);
-
+            List<CustomScriptConfiguration> scripts = checkNeedsInfo(claims, scopes.keySet(), permissions);
+            UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(attributeService, resourceService, permissions, scopes);
             boolean granted = false;
 
             if (scripts.isEmpty()) {
                 granted = true;
             } else {
                 for (CustomScriptConfiguration script : scripts) {
-                    UmaAuthorizationContext context = new UmaAuthorizationContext(attributeService, );
-                    final boolean result = policyService.authorize(script, context);
+                    final boolean result = policyService.authorize(script, contextBuilder.build(script));
                     log.trace("Policy script inum: '{}' result: '{}'", script.getInum(), result);
                 }
             }
@@ -157,8 +161,8 @@ public class UmaTokenWS {
                 .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
     }
 
-    private List<CustomScriptConfiguration> checkNeedsInfo(Claims claims, List<UmaScopeDescription> requestedScopes, List<UmaPermission> permissions) {
-        Set<String> authorizationPolicyDNs = umaAuthorizationService.getAuthorizationPolicyDNs(requestedScopes);
+    private List<CustomScriptConfiguration> checkNeedsInfo(Claims claims, Set<UmaScopeDescription> requestedScopes, List<UmaPermission> permissions) {
+        Set<String> authorizationPolicyDNs = umaAuthorizationService.getAuthorizationPolicyDNs(new ArrayList<UmaScopeDescription>(requestedScopes));
 
         List<CustomScriptConfiguration> scripts = new ArrayList<CustomScriptConfiguration>();
 

@@ -8,10 +8,12 @@ package org.xdi.oxauth.uma.authorization;
 
 import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -22,18 +24,28 @@ import javax.servlet.http.HttpServletRequest;
 
 public class UmaAuthorizationContext extends ExternalScriptContext {
 
-    private final UmaPermission permission;
     private final Claims claims;
+    private final List<String> scopes;
+    private final List<UmaResource> resources;
 
     private AttributeService attributeService;
 
-    public UmaAuthorizationContext(AttributeService attributeService, UmaPermission permission,
-                                   HttpServletRequest httpRequest, Claims claims) {
+    public UmaAuthorizationContext(AttributeService attributeService, List<String> scopes,
+                                   List<UmaResource> resources, Claims claims, HttpServletRequest httpRequest) {
     	super(httpRequest);
 
     	this.attributeService = attributeService;
-        this.permission = permission;
+        this.scopes = scopes;
+        this.resources = resources;
         this.claims = claims;
+    }
+
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public List<UmaResource> getResources() {
+        return resources;
     }
 
     public Object getRequestClaim(String claimName) {
