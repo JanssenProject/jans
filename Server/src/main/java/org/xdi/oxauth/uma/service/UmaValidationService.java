@@ -175,15 +175,12 @@ public class UmaValidationService {
         }
 
         try {
-            UmaResource exampleResource = new UmaResource();
-            exampleResource.setDn(resourceService.getBaseDnForResource());
-            exampleResource.setId(resourceId);
-            List<UmaResource> resources = resourceService.findResources(exampleResource);
-            if (resources.size() != 1) {
+            UmaResource resource = resourceService.getResourceById(resourceId);
+            if (resource == null) {
                 log.error("Resource isn't registered or there are two resources with same Id");
                 errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID);
+                return;
             }
-            UmaResource resource = resources.get(0);
 
             final List<String> scopeUrls = umaScopeService.getScopeIdsByDns(resource.getScopes());
             if (!scopeUrls.containsAll(permission.getScopes())) {
@@ -317,17 +314,26 @@ public class UmaValidationService {
         return null;
     }
 
-    public List<UmaScopeDescription> validateScopes(String scope, List<UmaPermission> permissions) {
+    /**
+     * @param scope scope string from token request
+     * @param permissions permissions
+     * @return map of loaded scope and boolean, true - if client requested scope and false if it is permission ticket scope
+     */
+    public Map<UmaScopeDescription, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
         scope = ServerUtil.urlDecode(scope);
         final String[] scopesRequested = scope.split(" ");
 
-        final Set<UmaScopeDescription> result = new HashSet<UmaScopeDescription>();
+        final Map<UmaScopeDescription, Boolean> result = new HashMap<UmaScopeDescription, Boolean>();
 
         if (ArrayUtils.isNotEmpty(scopesRequested)) {
-             result.addAll(umaScopeService.getScopesByIds(Arrays.asList(scopesRequested)));
+            for (UmaScopeDescription s : umaScopeService.getScopesByIds(Arrays.asList(scopesRequested))) {
+                result.put(s, true);
+            }
         }
         for (UmaPermission permission : permissions) {
-            result.addAll(umaScopeService.getScopesByDns(permission.getScopeDns()));
+            for (UmaScopeDescription s : umaScopeService.getScopesByDns(permission.getScopeDns())) {
+                result.put(s, false);
+            }
         }
         if (result.isEmpty()) {
             log.error("There are no any scopes requested in give request.");
@@ -335,12 +341,12 @@ public class UmaValidationService {
                     .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
 
         }
-        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result, new Function<UmaScopeDescription, String>() {
+        log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<UmaScopeDescription, String>() {
             @Override
             public String apply(UmaScopeDescription umaScopeDescription) {
                 return umaScopeDescription.getId();
             }
         })));
-        return new ArrayList<UmaScopeDescription>(result);
+        return result;
     }
 }

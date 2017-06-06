@@ -334,20 +334,10 @@ public class UmaResourceRegistrationWS {
     private String updateResource(String rsid, UmaResource resource) throws IllegalAccessException, InvocationTargetException {
         log.debug("Updating resource description: '{}'.", rsid);
 
-        org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = new org.xdi.oxauth.model.uma.persistence.UmaResource();
-        ldapResource.setDn(resourceService.getBaseDnForResource());
-        ldapResource.setId(rsid);
-
-        List<org.xdi.oxauth.model.uma.persistence.UmaResource> ldapResources = resourceService
-                .findResources(ldapResource);
-        if (ldapResources.size() == 0) {
-            throwNotFoundException(rsid);
-        } else if (ldapResources.size() > 1) {
-            log.error("There is more than one resource with given id: " + rsid);
-            throwUmaInternalErrorException();
+        org.xdi.oxauth.model.uma.persistence.UmaResource ldapResource = resourceService.getResourceById(rsid);
+        if (ldapResource == null) {
+            return throwNotFoundException(rsid);
         }
-
-        ldapResource = ldapResources.get(0);
 
         ldapResource.setName(resource.getName());
         ldapResource.setDescription(resource.getDescription());
@@ -370,9 +360,10 @@ public class UmaResourceRegistrationWS {
         return 1; // fallback
     }
 
-    private void throwNotFoundException(String rsid) {
+    private <T> T throwNotFoundException(String rsid) {
         log.error("Specified resource set description doesn't exist, id: " + rsid);
         errorResponseFactory.throwUmaNotFoundException();
+        return null;
     }
 
     private Response throwUmaInternalErrorException() {
