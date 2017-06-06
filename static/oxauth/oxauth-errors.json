@@ -221,6 +221,11 @@
             "uri":null
         },
         {
+            "id":"forbidden_by_policy",
+            "description":"Forbidden by policy (policy returned false).",
+            "uri":null
+        },
+        {
             "id":"invalid_permission_request",
             "description":"The provided permission request is not valid.",
             "uri":null
