@@ -1825,6 +1825,12 @@ class Setup(object):
         self.installNodeService('passport')
 
     def install_gluu_components(self):
+        if self.installLdap:
+            self.install_ldap_server()
+ 
+        if self.installHttpd: 
+            self.configure_httpd()
+
         if self.installOxAuth:
             self.install_oxauth()
 
@@ -2540,7 +2546,7 @@ class Setup(object):
         if self.installPassport:
             installedComponents.append(self.jetty_app_configuration['passport'])
 
-        usedRatio = 0.0
+        usedRatio = 0.01
         for installedComponent in installedComponents:
             usedRatio += installedComponent['memory']['ratio']
 
@@ -2745,8 +2751,6 @@ if __name__ == '__main__':
             installObject.render_configuration_template()
             installObject.update_hostname()
             installObject.setUlimits()
-            installObject.configure_httpd()
-            installObject.install_ldap_server()
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.render_jetty_templates()
