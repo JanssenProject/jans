@@ -11,13 +11,11 @@ import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.uma.ClaimDefinition;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwt.Jwt;
-import org.xdi.oxauth.model.token.JsonWebResponse;
-import org.xdi.oxauth.model.token.JwtSigner;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaTokenResponse;
@@ -29,10 +27,7 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.*;
-import org.xdi.oxauth.uma.service.UmaPermissionService;
-import org.xdi.oxauth.uma.service.UmaResourceService;
-import org.xdi.oxauth.uma.service.UmaRptService;
-import org.xdi.oxauth.uma.service.UmaValidationService;
+import org.xdi.oxauth.uma.service.*;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;
@@ -40,10 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The endpoint at which the RP asks for token.
@@ -65,6 +57,9 @@ public class UmaTokenWS {
     private UmaRptService rptService;
 
     @Inject
+    private UmaPctService pctService;
+
+    @Inject
     private UmaResourceService resourceService;
 
     @Inject
@@ -74,7 +69,7 @@ public class UmaTokenWS {
     private UmaValidationService umaValidationService;
 
     @Inject
-    private UmaAuthorizationService umaAuthorizationService;
+    private UmaScriptService umaScriptService;
 
     @Inject
     private ClientService clientService;
@@ -130,23 +125,47 @@ public class UmaTokenWS {
             Claims claims = new Claims(idToken, pct);
 
             List<CustomScriptConfiguration> scripts = checkNeedsInfo(claims, scopes.keySet(), permissions);
-            UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(attributeService, resourceService, permissions, scopes);
-            boolean granted = false;
+            UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(attributeService, resourceService, permissions, scopes, claims, httpRequest);
 
-            if (scripts.isEmpty()) {
-                granted = true;
-            } else {
+            if (!scripts.isEmpty()) {
                 for (CustomScriptConfiguration script : scripts) {
-                    final boolean result = policyService.authorize(script, contextBuilder.build(script));
+                    UmaAuthorizationContext authorizationContext = contextBuilder.build(script);
+                    final boolean result = policyService.authorize(script, authorizationContext);
                     log.trace("Policy script inum: '{}' result: '{}'", script.getInum(), result);
-                }
-            }
-            // todo uma2 schedule for remove ?
-            final AuthorizationGrant grant = null;//umaValidationService.assertHasAuthorizationScope(authorization);
+                    if (!result) {
+                        log.trace("Stop authorization scripts execution, current script returns false, script inum: " + script.getInum());
 
-//            final UmaRPT rpt = authorizeRptPermission(authorization, rptAuthorizationRequest, httpRequest, grant);
+                        throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
+                    }
+                }
+            } else {
+                log.warn("There are no any policies that protects scopes. Scopes: " + UmaScopeService.asString(scopes.keySet()));
+                log.warn("Access granted because there are no any protection. Make sure it is intentional behavior.");
+            }
+
+            log.trace("Access granted.");
+
+            Client client = identity.getSetSessionClient().getClient();
+
+            final boolean upgraded;
+            if (rpt == null) {
+                rpt = rptService.createRPTAndPersist(client.getClientId());
+                upgraded = false;
+            } else {
+                upgraded = true;
+            }
+
+            updatePermissionsWithClientRequestedScope(permissions, scopes);
+
+            rptService.addPermissionToRPT(rpt, permissions);
+
+            pct = pctService.updateClaims(pct, idToken, claims, client.getClientId());
 
             UmaTokenResponse response = new UmaTokenResponse();
+            response.setAccessToken(rpt.getCode());
+            response.setUpgraded(upgraded);
+            response.setTokenType("Bearer");
+            response.setPct(pct.getCode());
 
             return Response.ok(ServerUtil.asJson(response)).build();
         } catch (Exception ex) {
@@ -161,14 +180,28 @@ public class UmaTokenWS {
                 .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
     }
 
+    private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes) {
+        for (UmaPermission permission : permissions) {
+            Set<String> scopeDns = new HashSet<String>(permission.getScopeDns());
+
+            for (Map.Entry<UmaScopeDescription, Boolean> entry : scopes.entrySet()) {
+                if (entry.getValue()) {
+                    scopeDns.add(entry.getKey().getDn());
+                }
+            }
+
+            permission.setScopeDns(new ArrayList<String>(scopeDns));
+        }
+    }
+
     private List<CustomScriptConfiguration> checkNeedsInfo(Claims claims, Set<UmaScopeDescription> requestedScopes, List<UmaPermission> permissions) {
-        Set<String> authorizationPolicyDNs = umaAuthorizationService.getAuthorizationPolicyDNs(new ArrayList<UmaScopeDescription>(requestedScopes));
+        Set<String> scriptDNs = umaScriptService.getScriptDNs(new ArrayList<UmaScopeDescription>(requestedScopes));
 
         List<CustomScriptConfiguration> scripts = new ArrayList<CustomScriptConfiguration>();
 
         List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
 
-        for (String scriptDN : authorizationPolicyDNs) {
+        for (String scriptDN : scriptDNs) {
             CustomScriptConfiguration script = policyService.getAuthorizationPolicyByDn(scriptDN);
 
             if (script != null) {
@@ -207,82 +240,4 @@ public class UmaTokenWS {
             return permissionService.changeTicket(permissions);
         }
     }
-
-    private UmaRPT authorizeRptPermission(String authorization,
-                                          HttpServletRequest httpRequest,
-                                          AuthorizationGrant grant) {
-//        UmaRPT rpt;
-//        if (Util.isNullOrEmpty(rptAuthorizationRequest.getRpt())) {
-//            rpt = rptService.createRPT(authorization);
-//        } else {
-//            rpt = rptService.getRPTByCode(rptAuthorizationRequest.getRpt());
-//        }
-//
-//        // Validate RPT
-//        try {
-//            umaValidationService.validateRPT(rpt);
-//        } catch (WebApplicationException e) {
-//            // according to latest UMA spec ( dated 2015-02-23 https://docs.kantarainitiative.org/uma/draft-uma-core.html)
-//            // it's up to implementation whether to create new RPT for each request or pass back requests RPT.
-//            // Here we decided to pass back new RPT if request's RPT in invalid.
-//            rpt = rptService.getRPTByCode(rptAuthorizationRequest.getRpt());
-//        }
-
-//        final List<UmaPermission> permissions = permissionService.getPermissionByTicket(rptAuthorizationRequest.getTicket());
-//
-//        umaValidationService.validatePermissions(permissions);
-//
-//        boolean allowToAdd = true;
-//        for (UmaPermission permission : permissions) {
-//            if (!umaAuthorizationService.allowToAddPermission(grant, rpt, permission, httpRequest, rptAuthorizationRequest.getClaims())) {
-//                allowToAdd = false;
-//                break;
-//            }
-//        }
-//
-//        if (allowToAdd) {
-//            for (UmaPermission permission : permissions) {
-//                rptService.addPermissionToRPT(rpt, permission);
-//                invalidateTicket(permission);
-//            }
-//            return rpt;
-//        }
-
-        // throw not authorized exception
-        throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN)
-                .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.NOT_AUTHORIZED_PERMISSION)).build());
-    }
-
-    private void invalidateTicket(UmaPermission permission) {
-        try {
-            permission.setStatus("invalidated"); // invalidate ticket and persist
-            ldapEntryManager.merge(permission);
-        } catch (Exception e) {
-            log.error("Failed to invalidate ticket: " + permission.getTicket() + ". " + e.getMessage(), e);
-        }
-    }
-
-    private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws Exception {
-        final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
-
-        JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, grant.getClient());
-        Jwt jwt = jwtSigner.newJwt();
-
-        jwt.getClaims().setExpirationTime(rpt.getExpirationDate());
-        jwt.getClaims().setIssuedAt(rpt.getCreationDate());
-
-        if (!gluuAccessTokenScopes.isEmpty()) {
-            jwt.getClaims().setClaim("scopes", gluuAccessTokenScopes);
-        }
-
-        return jwtSigner.sign();
-    }
-
-//    UmaRPT rpt = rptService.createRPT(authorization);
-//
-//    String rptResponse = rpt.getCode();
-//    final Boolean umaRptAsJwt = appConfiguration.getUmaRptAsJwt();
-//    if (umaRptAsJwt != null && umaRptAsJwt) {
-//        rptResponse = createJwr(rpt, authorization, Lists.<String>newArrayList()).asString();
-//    }
 }

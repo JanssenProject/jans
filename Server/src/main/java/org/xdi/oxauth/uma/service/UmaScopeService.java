@@ -17,14 +17,15 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.InumService;
+import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -178,8 +179,7 @@ public class UmaScopeService {
             }
         }
 
-        throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
+        throw new UmaWebException(Response.Status.BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
 
     }
 
@@ -210,5 +210,13 @@ public class UmaScopeService {
 
     public String baseDn() {
         return String.format("ou=scopes,%s", staticConfiguration.getBaseDn().getUmaBase());
+    }
+
+    public static String asString(Collection<UmaScopeDescription> scopes) {
+        String result = "";
+        for (UmaScopeDescription scope : scopes) {
+            result += scope.getId() + " ";
+        }
+        return result.trim();
     }
 }
