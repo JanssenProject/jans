@@ -10,14 +10,20 @@ import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.jwt.Jwt;
+import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.service.CleanerTimer;
+import org.xdi.oxauth.uma.authorization.Claims;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
+import org.xdi.util.INumGenerator;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author yuriyz on 05/31/2017.
@@ -25,6 +31,8 @@ import java.util.List;
 @Stateless
 @Named
 public class UmaPctService {
+
+    private static final int DEFAULT_PCT_LIFETIME = 3600;
 
     @Inject
     private Logger log;
@@ -35,13 +43,47 @@ public class UmaPctService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
+    public UmaPCT updateClaims(UmaPCT pct, Jwt idToken, Claims claims, String clientId) {
+        try {
+            boolean hasPct = pct != null;
+
+            if (!hasPct) {
+                pct = createPctAndPersist(clientId);
+            }
+
+            JwtClaims pctClaims = pct.getClaims();
+
+            JwtClaims idTokenClaims = idToken.getClaims();
+            for (String key : idTokenClaims.keys()) {
+                pctClaims.setClaimObject(key, idTokenClaims.getClaim(key));
+            }
+
+            for (String key : claims.keys()) {
+                pctClaims.setClaimObject(key, claims.get(key));
+            }
+
+            pct.setClaims(pctClaims);
+            log.trace("PCT code: " + pct.getCode() + ", claims: " + pct.getClaimValuesAsJson());
+
+            persist(pct);
+        } catch (Exception e) {
+            log.error("Failed to update PCT claims. " + e.getMessage(), e);
+        }
+
+        return pct;
+    }
+
     public UmaPCT getByCode(String pctCode) {
         try {
             final Filter filter = Filter.create(String.format("&(oxAuthTokenCode=%s)", pctCode));
-            final String baseDn = staticConfiguration.getBaseDn().getClients();
-            final List<UmaPCT> entries = ldapEntryManager.findEntries(baseDn, UmaPCT.class, filter);
+            final List<UmaPCT> entries = ldapEntryManager.findEntries(branchBaseDn(), UmaPCT.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
+            } else {
+                log.error("Failed to find PCT by code: " + pctCode);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -49,14 +91,38 @@ public class UmaPctService {
         return null;
     }
 
-    public void save(UmaPCT pct) {
+    public UmaPCT createPct(String clientId) {
+        String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
+
+        UmaPCT pct = new UmaPCT(pctLifetime());
+        pct.setCode(code);
+        pct.setDn(dn(pct.getCode()));
+        pct.setClientId(clientId);
+        return pct;
+    }
+
+    public UmaPCT createPctAndPersist(String clientId) {
+        UmaPCT pct = createPct(clientId);
+        persist(pct);
+        return pct;
+    }
+
+    public int pctLifetime() {
+        int lifeTime = appConfiguration.getUmaPctLifetime();
+        if (lifeTime <= 0) {
+            lifeTime = DEFAULT_PCT_LIFETIME;
+        }
+        return lifeTime;
+    }
+
+    public void persist(UmaPCT pct) {
         try {
             prepareBranch();
 
             pct.setDn(dn(pct.getCode()));
             ldapEntryManager.persist(pct);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to persist PCT, code: " + pct.getCode() + ". " + e.getMessage(), e);
         }
     }
 
@@ -121,7 +187,7 @@ public class UmaPctService {
             private Filter getFilter() {
                 try {
                     return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                }catch (LDAPException e) {
+                } catch (LDAPException e) {
                     log.trace(e.getMessage(), e);
                     return Filter.createPresenceFilter("oxAuthExpiration");
                 }

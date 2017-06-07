@@ -45,7 +45,8 @@ public class AppConfiguration implements Configuration {
 
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
-    private int umaRequesterPermissionTokenLifetime;
+    private int umaRptLifetime;
+    private int umaPctLifetime;
     private Boolean umaAddScopesAutomatically;
 
     private String openidSubAttribute;
@@ -721,12 +722,20 @@ public class AppConfiguration implements Configuration {
         this.longLivedAccessTokenLifetime = longLivedAccessTokenLifetime;
     }
 
-    public int getUmaRequesterPermissionTokenLifetime() {
-        return umaRequesterPermissionTokenLifetime;
+    public int getUmaRptLifetime() {
+        return umaRptLifetime;
     }
 
-    public void setUmaRequesterPermissionTokenLifetime(int umaRequesterPermissionTokenLifetime) {
-        this.umaRequesterPermissionTokenLifetime = umaRequesterPermissionTokenLifetime;
+    public void setUmaRptLifetime(int umaRptLifetime) {
+        this.umaRptLifetime = umaRptLifetime;
+    }
+
+    public int getUmaPctLifetime() {
+        return umaPctLifetime;
+    }
+
+    public void setUmaPctLifetime(int umaPctLifetime) {
+        this.umaPctLifetime = umaPctLifetime;
     }
 
     public int getCleanServiceInterval() {

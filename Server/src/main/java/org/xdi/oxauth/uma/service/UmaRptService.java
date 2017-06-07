@@ -6,32 +6,32 @@
 
 package org.xdi.oxauth.uma.service;
 
+import com.google.common.base.Preconditions;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
-import org.xdi.oxauth.model.common.AccessToken;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.IAuthorizationGrant;
-import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.CleanerTimer;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
+import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.util.INumGenerator;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * RPT manager component
@@ -43,6 +43,8 @@ import java.util.UUID;
 public class UmaRptService {
 
     private static final String ORGUNIT_OF_RPT = "uma_rpt";
+
+    public static final int DEFAULT_RPT_LIFETIME = 3600;
 
     @Inject
     private Logger log;
@@ -57,7 +59,13 @@ public class UmaRptService {
     private AuthorizationGrantList authorizationGrantList;
 
     @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private ClientService clientService;
 
     public static String getDn(String clientDn, String uniqueIdentifier) {
         return String.format("uniqueIdentifier=%s,%s", uniqueIdentifier, branchDn(clientDn));
@@ -67,13 +75,17 @@ public class UmaRptService {
         return String.format("ou=%s,%s", ORGUNIT_OF_RPT, clientDn);
     }
 
-    public void addRPT(UmaRPT p_rpt, String p_clientDn) {
+    public void persist(UmaRPT rpt) {
         try {
-            addBranchIfNeeded(p_clientDn);
+            Preconditions.checkNotNull(rpt.getClientId());
+
+            Client client = clientService.getClient(rpt.getClientId());
+
+            addBranchIfNeeded(client.getDn());
             String id = UUID.randomUUID().toString();
-            p_rpt.setId(id);
-            p_rpt.setDn(getDn(p_clientDn, id));
-            ldapEntryManager.persist(p_rpt);
+            rpt.setId(id);
+            rpt.setDn(getDn(client.getDn(), id));
+            ldapEntryManager.persist(rpt);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -86,6 +98,8 @@ public class UmaRptService {
             final List<UmaRPT> entries = ldapEntryManager.findEntries(baseDn, UmaRPT.class, filter);
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
+            } else {
+                log.error("Failed to find RPT by code: " + rptCode);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -93,7 +107,7 @@ public class UmaRptService {
         return null;
     }
 
-    public void deleteRPT(String rptCode) {
+    public void deleteByCode(String rptCode) {
         try {
             final UmaRPT t = getRPTByCode(rptCode);
             if (t != null) {
@@ -134,16 +148,28 @@ public class UmaRptService {
         rptBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
-    public void addPermissionToRPT(UmaRPT p_rpt, UmaPermission p_permission) {
-        final List<String> permissions = new ArrayList<String>();
-        if (p_rpt.getPermissions() != null) {
-            permissions.addAll(p_rpt.getPermissions());
+    public void addPermissionToRPT(UmaRPT rpt, Collection<UmaPermission> permissions) {
+        addPermissionToRPT(rpt, permissions.toArray(new UmaPermission[permissions.size()]));
+    }
+
+    public void addPermissionToRPT(UmaRPT rpt, UmaPermission... permission) {
+        if (ArrayUtils.isEmpty(permission)) {
+            return;
         }
-        permissions.add(p_permission.getDn());
-        p_rpt.setPermissions(permissions);
+
+        final List<String> permissions = new ArrayList<String>();
+        if (rpt.getPermissions() != null) {
+            permissions.addAll(rpt.getPermissions());
+        }
+
+        for (UmaPermission p : permission) {
+            permissions.add(p.getDn());
+        }
+
+        rpt.setPermissions(permissions);
 
         try {
-            ldapEntryManager.merge(p_rpt);
+            ldapEntryManager.merge(rpt);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -167,36 +193,43 @@ public class UmaRptService {
         return result;
     }
 
-    public UmaRPT createRPT(String authorization) {
-        String aatToken = tokenService.getTokenFromAuthorizationParameter(authorization);
-        IAuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(aatToken);
-
-        UmaRPT rpt = createRPT(authorizationGrant, aatToken);
-
-        addRPT(rpt, authorizationGrant.getClientDn());
-        return rpt;
-    }
-
-    public UmaRPT createRPT(IAuthorizationGrant grant, String aat) {
-        final AccessToken accessToken = (AccessToken) grant.getAccessToken(aat);
-
+    public UmaRPT createRPT(String clientId) {
         try {
-            String code = UUID.randomUUID().toString() + "/" + INumGenerator.generate(8);
-            return new UmaRPT(code, new Date(), accessToken.getExpirationDate(), grant.getUserId(), grant.getClientId());
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.SECOND, appConfiguration.getShortLivedAccessTokenLifetime());
+            Date expirationDate = calendar.getTime();
+
+            String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
+            return new UmaRPT(code, new Date(), expirationDate, null, clientId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("Failed to generate RPT, aat: " + aat, e);
+            throw new RuntimeException("Failed to generate RPT, clientId: " + clientId, e);
         }
     }
 
-    public UmaPermission getPermissionFromRPTByResourceId(UmaRPT p_rpt, String resourceId) {
+    public Date rptExpirationDate() {
+        int lifeTime = appConfiguration.getUmaRptLifetime();
+        if (lifeTime <= 0) {
+            lifeTime = DEFAULT_RPT_LIFETIME;
+        }
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, lifeTime);
+        return calendar.getTime();
+    }
+
+    public UmaRPT createRPTAndPersist(String clientId) {
+        UmaRPT rpt = createRPT(clientId);
+        persist(rpt);
+        return rpt;
+    }
+
+    public UmaPermission getPermissionFromRPTByResourceId(UmaRPT rpt, String resourceId) {
         try {
-            if (p_rpt != null && p_rpt.getPermissions() != null && Util.allNotBlank(resourceId)) {
-                final List<String> permissionDns = p_rpt.getPermissions();
-                for (String permissionDn : permissionDns) {
-                    final UmaPermission permissionObject = ldapEntryManager.find(UmaPermission.class, permissionDn);
-                    if (permissionObject != null && resourceId.equals(permissionObject.getResourceId())) {
-                        return permissionObject;
+            if (Util.allNotBlank(resourceId)) {
+                 for (UmaPermission permission : getRptPermissions(rpt)) {
+                    if (resourceId.equals(permission.getResourceId())) {
+                        return permission;
                     }
                 }
             }
@@ -222,5 +255,29 @@ public class UmaRptService {
     public boolean containsBranch(String clientDn) {
         return ldapEntryManager.contains(SimpleBranch.class, branchDn(clientDn));
     }
+
+//    private JsonWebResponse createJwr(UmaRPT rpt, String authorization, List<String> gluuAccessTokenScopes) throws Exception {
+//        final AuthorizationGrant grant = tokenService.getAuthorizationGrant(authorization);
+//
+//        JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, grant.getClient());
+//        Jwt jwt = jwtSigner.newJwt();
+//
+//        jwt.getClaims().setExpirationTime(rpt.getExpirationDate());
+//        jwt.getClaims().setIssuedAt(rpt.getCreationDate());
+//
+//        if (!gluuAccessTokenScopes.isEmpty()) {
+//            jwt.getClaims().setClaim("scopes", gluuAccessTokenScopes);
+//        }
+//
+//        return jwtSigner.sign();
+//    }
+
+//    UmaRPT rpt = rptService.createRPT(authorization);
+//
+//    String rptResponse = rpt.getCode();
+//    final Boolean umaRptAsJwt = appConfiguration.getUmaRptAsJwt();
+//    if (umaRptAsJwt != null && umaRptAsJwt) {
+//        rptResponse = createJwr(rpt, authorization, Lists.<String>newArrayList()).asString();
+//    }
 
 }

@@ -75,6 +75,11 @@ public enum UmaErrorResponseType implements IErrorType {
 	 * The host request used an unsupported HTTP method.
 	 */
 	UNSUPPORTED_METHOD_TYPE("unsupported_method_type"),
+
+	/**
+	 * Forbidden by policy (policy returned false).
+	 */
+	FORBIDDEN_BY_POLICY("forbidden_by_policy"),
 	
 	/**
 	 * The access token expired.
