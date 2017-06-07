@@ -140,8 +140,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
-						-Dgluu.base=${project.build.directory}
+					<argLine>-Dgluu.base=${project.build.directory}
 						-Dserver.base=${project.build.directory}
 						-Dlog.base=${project.build.directory}
 					</argLine>
@@ -249,7 +248,7 @@
 	</build>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- oxAuth -->
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-model</artifactId>
@@ -263,6 +262,15 @@
 			<artifactId>oxauth-static</artifactId>
 		</dependency>
 
+		<!-- Gluu -->
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-util</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-ldap-annotations</artifactId>
@@ -283,18 +291,15 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-jsf-util</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.xdi</groupId>
-			<artifactId>oxcore-util</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxeleven-client</artifactId>
-		</dependency>
+		<!-- oxEleven -->
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxeleven-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxeleven-client</artifactId>
 		</dependency>
 
 		<!-- Weld -->
@@ -350,10 +355,6 @@
 			<artifactId>commons-digester</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
@@ -374,10 +375,6 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.lmax</groupId>
-			<artifactId>disruptor</artifactId>
 		</dependency>
 
 		<!-- Security -->
@@ -619,6 +616,11 @@
 				<dependency>
 					<groupId>org.jboss.weld.module</groupId>
 					<artifactId>weld-jsf</artifactId>
+				</dependency>
+
+				<dependency>
+				    <groupId>org.hibernate</groupId>
+				    <artifactId>hibernate-validator-cdi</artifactId>
 				</dependency>
 
 		        <dependency>
