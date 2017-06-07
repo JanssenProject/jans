@@ -3,6 +3,7 @@ package org.xdi.oxauth.uma.authorization;
 import org.xdi.oxauth.model.jwt.Jwt;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -17,6 +18,10 @@ public class Claims {
     public Claims(Jwt claimsToken, UmaPCT pct) {
         this.claimsToken = claimsToken;
         this.pct = pct;
+    }
+
+    public Set<String> keys() {
+        return claims.keySet();
     }
 
     public Object get(String key) {

@@ -18,6 +18,7 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
+import org.xdi.oxauth.uma.service.UmaRptService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -27,8 +28,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * The endpoint at which the host registers permissions that it anticipates a
@@ -51,8 +50,6 @@ import java.util.Date;
         "The resource server uses the POST method at the endpoint. The body of the HTTP request message contains a JSON object providing the requested permission, using a format derived from the scope description format specified in [OAuth-resource-reg], as follows. The object has the following properties:")
 public class UmaPermissionRegistrationWS {
 
-    public static final int DEFAULT_PERMISSION_LIFETIME = 3600;
-
     @Inject
     private Logger log;
 
@@ -61,6 +58,9 @@ public class UmaPermissionRegistrationWS {
 
     @Inject
     private UmaPermissionService permissionService;
+
+    @Inject
+    private UmaRptService rptService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -93,7 +93,7 @@ public class UmaPermissionRegistrationWS {
             UmaPermissionList permissionList = parseRequest(requestAsString);
             umaValidationService.validatePermissions(permissionList);
 
-            String ticket = permissionService.addPermission(permissionList, rptExpirationDate(), tokenService.getClientDn(authorization));
+            String ticket = permissionService.addPermission(permissionList, rptService.rptExpirationDate(), tokenService.getClientDn(authorization));
 
             return Response.status(Response.Status.CREATED).
                             entity(new PermissionTicket(ticket)).
@@ -133,18 +133,5 @@ public class UmaPermissionRegistrationWS {
             log.error("Failed to parse uma permission request" + requestAsString, e);
         }
         return errorResponseFactory.throwUmaWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_PERMISSION_REQUEST);
-    }
-
-
-
-    public Date rptExpirationDate() {
-        int lifeTime = appConfiguration.getUmaRequesterPermissionTokenLifetime();
-        if (lifeTime <= 0) {
-            lifeTime = DEFAULT_PERMISSION_LIFETIME;
-        }
-
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, lifeTime);
-        return calendar.getTime();
     }
 }
