@@ -64,8 +64,6 @@ public abstract class ConfigurableTest extends Arquillian {
 		}
 
 		// Load test parameters
-		// propertiesFile =
-		// "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
 		FileInputStream conf = new FileInputStream(propertiesFile);
 		Properties prop = new Properties();
 		prop.load(conf);
@@ -81,7 +79,7 @@ public abstract class ConfigurableTest extends Arquillian {
 			parameters.put(key.toString(), value.toString());
 		}
 
-		// Overrided test paramters
+		// Overrided test parameters
 		context.getSuite().getXmlSuite().setParameters(parameters);
 	}
 
