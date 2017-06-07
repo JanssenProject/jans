@@ -187,6 +187,11 @@
 				<artifactId>jsf-impl</artifactId>
 				<version>${jsf.version}</version>
 			</dependency>
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-validator-cdi</artifactId>
+			    <version>5.4.1.Final</version>
+			</dependency>
 
 			<!-- Richfaces -->
 			<dependency>
