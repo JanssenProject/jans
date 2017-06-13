@@ -216,6 +216,7 @@ class Setup(object):
 
         self.idp3Folder = "/opt/shibboleth-idp"
         self.idp3MetadataFolder = "%s/metadata" % self.idp3Folder
+        self.idp3MetadataCredentialsFolder = "%s/credentials" % self.idp3MetadataFolder
         self.idp3LogsFolder = "%s/logs" % self.idp3Folder
         self.idp3LibFolder = "%s/lib" % self.idp3Folder
         self.idp3ConfFolder = "%s/conf" % self.idp3Folder
@@ -1932,6 +1933,7 @@ class Setup(object):
             if self.installSaml:
                 self.run([self.cmd_mkdir, '-p', self.idp3Folder])
                 self.run([self.cmd_mkdir, '-p', self.idp3MetadataFolder])
+                self.run([self.cmd_mkdir, '-p', self.idp3MetadataCredentialsFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3LogsFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3LibFolder])
                 self.run([self.cmd_mkdir, '-p', self.idp3ConfFolder])
