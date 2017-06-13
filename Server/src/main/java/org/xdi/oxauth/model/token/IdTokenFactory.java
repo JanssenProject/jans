@@ -129,7 +129,7 @@ public class IdTokenFactory {
         jwt.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
         List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
-        if (includeIdTokenClaims) {
+        if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
                 org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
                 if ((scope != null) && (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType())) {
@@ -324,7 +324,7 @@ public class IdTokenFactory {
         jwe.getClaims().setClaim(JwtClaimName.OX_OPENID_CONNECT_VERSION, appConfiguration.getOxOpenIdConnectVersion());
 
         List<org.xdi.oxauth.model.common.Scope> dynamicScopes = Lists.newArrayList();
-        if (includeIdTokenClaims) {
+        if (includeIdTokenClaims && authorizationGrant.getClient().isIncludeClaimsInIdToken()) {
             for (String scopeName : scopes) {
                 org.xdi.oxauth.model.common.Scope scope = scopeService.getScopeByDisplayName(scopeName);
                 if (org.xdi.oxauth.model.common.ScopeType.DYNAMIC == scope.getScopeType()) {
