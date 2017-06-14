@@ -9,7 +9,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.ValidateParams;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,12 +31,12 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
     public CommandResponse execute(ValidateParams params) throws Exception {
         validateParams(params);
 
-        SiteConfiguration site = getSite();
+        Rp site = getRp();
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
         final Jwt idToken = Jwt.parse(params.getIdToken());
 
-        final Validator validator = new Validator(idToken, discoveryResponse);
+        final Validator validator = new Validator(idToken, discoveryResponse, getKeyService());
         validator.validateNonce(getStateService());
         validator.validateIdToken(site.getClientId());
         validator.validateAccessToken(params.getAccessToken());

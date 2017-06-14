@@ -9,6 +9,10 @@
     <name>oxD Server</name>
     <url>http://ox.gluu.org</url>
 
+    <properties>
+        <h2.version>1.4.194</h2.version>
+    </properties>
+
     <parent>
         <groupId>org.xdi</groupId>
         <artifactId>oxd</artifactId>
@@ -156,6 +160,11 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>uma-rs-resteasy</artifactId>

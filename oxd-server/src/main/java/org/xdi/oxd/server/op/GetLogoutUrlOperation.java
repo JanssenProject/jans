@@ -12,7 +12,7 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetLogoutUrlParams;
 import org.xdi.oxd.common.response.LogoutResponse;
 import org.xdi.oxd.server.service.ConfigurationService;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.net.URLEncoder;
 
@@ -38,9 +38,9 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     @Override
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
-        final SiteConfiguration site = getSite();
+        final Rp site = getRp();
 
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();
 
         String postLogoutRedirectUrl = params.getPostLogoutRedirectUri();
@@ -57,7 +57,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
                 return okResponse(new LogoutResponse(logoutUrl));
             }
 
-            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site.getOpHost()));
+            LOG.error("Failed to get end_session_endpoint at: " + getDiscoveryService().getConnectDiscoveryUrl(site));
             throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_END_SESSION_ENDPOINT);
         }
 
@@ -76,7 +76,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
         return okResponse(new LogoutResponse(uri));
     }
 
-    private String getIdToken(GetLogoutUrlParams params, SiteConfiguration site) {
+    private String getIdToken(GetLogoutUrlParams params, Rp site) {
         if (!Strings.isNullOrEmpty(params.getIdTokenHint())) {
             return params.getIdTokenHint();
         }

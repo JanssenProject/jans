@@ -16,13 +16,15 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SiteConfiguration implements Serializable {
+public class Rp implements Serializable {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
 
     @JsonProperty(value = "op_host")
     private String opHost;
+    @JsonProperty(value = "op_discovery_path")
+    private String opDiscoveryPath;
 
     @JsonProperty(value = "id_token")
     private String idToken;
@@ -59,6 +61,11 @@ public class SiteConfiguration implements Serializable {
     private String sectorIdentifierUri;
     @JsonProperty(value = "client_jwks_uri")
     private String clientJwksUri;
+
+    @JsonProperty(value = "setup_oxd_id")
+    private String setupOxdId;
+    @JsonProperty(value = "setup_client_id")
+    private String setupClientId;
 
     @JsonProperty(value = "scope")
     private List<String> scope;
@@ -112,13 +119,14 @@ public class SiteConfiguration implements Serializable {
     @JsonProperty(value = "gat_created_at")
     private Date gatCreatedAt;
 
-    public SiteConfiguration() {
+    public Rp() {
     }
 
-    public SiteConfiguration(SiteConfiguration conf) {
+    public Rp(Rp conf) {
         this.oxdId = conf.oxdId;
 
         this.opHost = conf.opHost;
+        this.opDiscoveryPath = conf.opDiscoveryPath;
 
         this.idToken = conf.idToken;
         this.accessToken = conf.accessToken;
@@ -139,6 +147,9 @@ public class SiteConfiguration implements Serializable {
         this.clientName = conf.clientName;
         this.sectorIdentifierUri = conf.sectorIdentifierUri;
         this.clientJwksUri = conf.clientJwksUri;
+
+        this.setupOxdId = conf.setupOxdId;
+        this.setupClientId = conf.setupClientId;
 
         this.scope = conf.scope;
         this.uiLocales = conf.uiLocales;
@@ -418,6 +429,14 @@ public class SiteConfiguration implements Serializable {
         this.opHost = opHost;
     }
 
+    public String getOpDiscoveryPath() {
+        return opDiscoveryPath;
+    }
+
+    public void setOpDiscoveryPath(String opDiscoveryPath) {
+        this.opDiscoveryPath = opDiscoveryPath;
+    }
+
     public List<String> getRedirectUris() {
         return redirectUris;
     }
@@ -522,40 +541,69 @@ public class SiteConfiguration implements Serializable {
         this.gatCreatedAt = gatCreatedAt;
     }
 
+    public String getSetupOxdId() {
+        return setupOxdId;
+    }
+
+    public void setSetupOxdId(String setupOxdId) {
+        this.setupOxdId = setupOxdId;
+    }
+
+    public String getSetupClientId() {
+        return setupClientId;
+    }
+
+    public void setSetupClientId(String setupClientId) {
+        this.setupClientId = setupClientId;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("SiteConfiguration");
-        sb.append("{acrValues=").append(acrValues);
-        sb.append(", oxdId='").append(oxdId).append('\'');
-        sb.append(", opHost='").append(opHost).append('\'');
-        sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
-        sb.append(", applicationType='").append(applicationType).append('\'');
-        sb.append(", sectorIdentifierUri='").append(sectorIdentifierUri).append('\'');
-        sb.append(", redirectUris=").append(redirectUris);
-        sb.append(", responseTypes=").append(responseTypes);
-        sb.append(", clientId='").append(clientId).append('\'');
-        sb.append(", clientSecret='").append(clientSecret).append('\'');
-        sb.append(", clientJwksUri='").append(clientJwksUri).append('\'');
-        sb.append(", scope=").append(scope);
-        sb.append(", uiLocales=").append(uiLocales);
-        sb.append(", claimsLocales=").append(claimsLocales);
-        sb.append(", grantType=").append(grantType);
-        sb.append(", contacts=").append(contacts);
-        sb.append(", aat=").append(aat);
-        sb.append(", aatCreatedAt=").append(aatCreatedAt);
-        sb.append(", aatExpiresIn=").append(aatExpiresIn);
-        sb.append(", pat=").append(pat);
-        sb.append(", patCreatedAt=").append(patCreatedAt);
-        sb.append(", patExpiresIn=").append(patExpiresIn);
-        sb.append(", umaProtectedResources=").append(umaProtectedResources);
-        sb.append(", rpt=").append(rpt);
-        sb.append(", rptCreatedAt=").append(rptCreatedAt);
-        sb.append(", rptExpiresIn=").append(rptExpiresAt);
-        sb.append(", gat=").append(gat);
-        sb.append(", gatCreatedAt=").append(gatCreatedAt);
-        sb.append(", gatExpiresIn=").append(gatExpiresAt);
-        sb.append('}');
-        return sb.toString();
+        return "Rp{" +
+                "oxdId='" + oxdId + '\'' +
+                ", opHost='" + opHost + '\'' +
+                ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
+                ", idToken='" + idToken + '\'' +
+                ", accessToken='" + accessToken + '\'' +
+                ", authorizationRedirectUri='" + authorizationRedirectUri + '\'' +
+                ", postLogoutRedirectUri='" + postLogoutRedirectUri + '\'' +
+                ", applicationType='" + applicationType + '\'' +
+                ", redirectUris=" + redirectUris +
+                ", responseTypes=" + responseTypes +
+                ", clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", clientRegistrationAccessToken='" + clientRegistrationAccessToken + '\'' +
+                ", clientRegistrationClientUri='" + clientRegistrationClientUri + '\'' +
+                ", clientIdIssuedAt=" + clientIdIssuedAt +
+                ", clientSecretExpiresAt=" + clientSecretExpiresAt +
+                ", clientName='" + clientName + '\'' +
+                ", sectorIdentifierUri='" + sectorIdentifierUri + '\'' +
+                ", clientJwksUri='" + clientJwksUri + '\'' +
+                ", setupOxdId='" + setupOxdId + '\'' +
+                ", setupClientId='" + setupClientId + '\'' +
+                ", scope=" + scope +
+                ", uiLocales=" + uiLocales +
+                ", claimsLocales=" + claimsLocales +
+                ", acrValues=" + acrValues +
+                ", grantType=" + grantType +
+                ", contacts=" + contacts +
+                ", userId='" + userId + '\'' +
+                ", userSecret='" + userSecret + '\'' +
+                ", aat='" + aat + '\'' +
+                ", aatExpiresIn=" + aatExpiresIn +
+                ", aatCreatedAt=" + aatCreatedAt +
+                ", aatRefreshToken='" + aatRefreshToken + '\'' +
+                ", pat='" + pat + '\'' +
+                ", patExpiresIn=" + patExpiresIn +
+                ", patCreatedAt=" + patCreatedAt +
+                ", patRefreshToken='" + patRefreshToken + '\'' +
+                ", umaProtectedResources=" + umaProtectedResources +
+                ", rpt='" + rpt + '\'' +
+                ", rptExpiresAt=" + rptExpiresAt +
+                ", rptCreatedAt=" + rptCreatedAt +
+                ", gat='" + gat + '\'' +
+                ", gatExpiresAt=" + gatExpiresAt +
+                ", gatCreatedAt=" + gatCreatedAt +
+                '}';
     }
 }

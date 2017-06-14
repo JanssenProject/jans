@@ -12,7 +12,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CheckIdTokenParams implements HasOxdIdParams {
+public class CheckIdTokenParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -20,8 +20,18 @@ public class CheckIdTokenParams implements HasOxdIdParams {
     private String idToken;
     @JsonProperty(value = "nonce")
     private String nonce;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public CheckIdTokenParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public String getNonce() {
@@ -60,6 +70,7 @@ public class CheckIdTokenParams implements HasOxdIdParams {
         sb.append("{idToken='").append(idToken).append('\'');
         sb.append(", oxdId='").append(oxdId).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
+        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }

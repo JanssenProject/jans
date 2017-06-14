@@ -13,5 +13,7 @@
     "license_password":"",
     "support-google-logout": true,
     "state_expiration_in_minutes":5,
-    "nonce_expiration_in_minutes":5
+    "nonce_expiration_in_minutes":5,
+    "public_op_key_cache_expiration_in_minutes":60,
+    "protect_commands_with_access_token": false
 }

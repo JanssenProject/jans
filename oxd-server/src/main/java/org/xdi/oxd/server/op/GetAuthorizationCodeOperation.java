@@ -15,7 +15,7 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationCodeParams;
 import org.xdi.oxd.common.response.GetAuthorizationCodeResponse;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,7 +40,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
 
     @Override
     public CommandResponse execute(GetAuthorizationCodeParams params) {
-        final SiteConfiguration site = getSite();
+        final Rp site = getRp();
 
         String nonce = Strings.isNullOrEmpty(params.getNonce()) ? UUID.randomUUID().toString() : params.getNonce();
         String state = Strings.isNullOrEmpty(params.getState()) ? UUID.randomUUID().toString() : params.getState();
@@ -56,7 +56,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         getStateService().putNonce(nonce);
         getStateService().putState(state);
 
-        final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint());
+        final AuthorizeClient authorizeClient = new AuthorizeClient(getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint());
         authorizeClient.setRequest(request);
         authorizeClient.setExecutor(getHttpService().getClientExecutor());
         final AuthorizationResponse response = authorizeClient.exec();
@@ -72,7 +72,7 @@ public class GetAuthorizationCodeOperation extends BaseOperation<GetAuthorizatio
         return null;
     }
 
-    private List<String> acrValues(GetAuthorizationCodeParams params, SiteConfiguration site) {
+    private List<String> acrValues(GetAuthorizationCodeParams params, Rp site) {
         List<String> acrs = Lists.newArrayList();
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
             acrs.addAll(params.getAcrValues());

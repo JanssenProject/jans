@@ -7,6 +7,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.license.LicenseService;
+import org.xdi.oxd.server.persistence.H2PersistenceProvider;
+import org.xdi.oxd.server.persistence.PersistenceProvider;
 import org.xdi.oxd.server.service.*;
 
 /**
@@ -21,11 +23,13 @@ public class GuiceModule extends AbstractModule {
         bind(LicenseService.class).in(Singleton.class);
         bind(ConfigurationService.class).in(Singleton.class);
         bind(SocketService.class).in(Singleton.class);
-        bind(SiteConfigurationService.class).in(Singleton.class);
+        bind(PublicOpKeyService.class).in(Singleton.class);
+        bind(RpService.class).in(Singleton.class);
         bind(HttpService.class).in(Singleton.class);
+        bind(PersistenceProvider.class).to(H2PersistenceProvider.class).in(Singleton.class);
+        bind(PersistenceService.class).in(Singleton.class);
         bind(DiscoveryService.class).in(Singleton.class);
         bind(ValidationService.class).in(Singleton.class);
-        bind(SiteStorage.class).in(Singleton.class);
         bind(TimeService.class).in(Singleton.class);
         bind(StateService.class).in(Singleton.class);
 

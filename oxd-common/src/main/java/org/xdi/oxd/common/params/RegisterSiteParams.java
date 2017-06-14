@@ -1,5 +1,6 @@
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -11,14 +12,18 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RegisterSiteParams implements IParams {
+public class RegisterSiteParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "op_host")
     private String opHost;
+    @JsonProperty(value = "op_discovery_path")
+    private String opDiscoveryPath;
     @JsonProperty(value = "authorization_redirect_uri")
     private String authorizationRedirectUri;
     @JsonProperty(value = "post_logout_redirect_uri")
     private String postLogoutRedirectUri;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     @JsonProperty(value = "redirect_uris")
     private List<String> redirectUris;
@@ -60,6 +65,14 @@ public class RegisterSiteParams implements IParams {
     public RegisterSiteParams() {
     }
 
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
+    }
+
     public Boolean getTrustedClient() {
         return trustedClient;
     }
@@ -82,6 +95,14 @@ public class RegisterSiteParams implements IParams {
 
     public void setOpHost(String opHost) {
         this.opHost = opHost;
+    }
+
+    public String getOpDiscoveryPath() {
+        return opDiscoveryPath;
+    }
+
+    public void setOpDiscoveryPath(String opDiscoveryPath) {
+        this.opDiscoveryPath = opDiscoveryPath;
     }
 
     public String getClientSectorIdentifierUri() {
@@ -226,6 +247,7 @@ public class RegisterSiteParams implements IParams {
         sb.append("RegisterSiteParams");
         sb.append("{acrValues=").append(acrValues);
         sb.append(", opHost='").append(opHost).append('\'');
+        sb.append(", opDiscoveryPath='").append(opDiscoveryPath).append('\'');
         sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
         sb.append(", redirectUris=").append(redirectUris);
         sb.append(", responseTypes=").append(responseTypes);
@@ -240,6 +262,12 @@ public class RegisterSiteParams implements IParams {
         sb.append(", contacts=").append(contacts);
         sb.append('}');
         return sb.toString();
+    }
+
+    @JsonIgnore
+    @Override
+    public String getOxdId() {
+        return "no";
     }
 }
 

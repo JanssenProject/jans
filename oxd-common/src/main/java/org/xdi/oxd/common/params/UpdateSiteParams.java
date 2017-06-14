@@ -12,7 +12,7 @@ import java.util.List;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UpdateSiteParams implements HasOxdIdParams {
+public class UpdateSiteParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -55,8 +55,18 @@ public class UpdateSiteParams implements HasOxdIdParams {
     private List<String> grantType;
     @JsonProperty(value = "contacts")
     private List<String> contacts;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public UpdateSiteParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public Date getClientSecretExpiresAt() {
@@ -229,6 +239,7 @@ public class UpdateSiteParams implements HasOxdIdParams {
         sb.append(", grantType=").append(grantType);
         sb.append(", contacts=").append(contacts);
         sb.append(", clientSecretExpiresAt=").append(clientSecretExpiresAt);
+        sb.append(", protectionAccessToken=").append(protectionAccessToken);
         sb.append('}');
         return sb.toString();
     }

@@ -13,7 +13,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthorizationCodeFlowParams implements HasOxdIdParams {
+public class AuthorizationCodeFlowParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -33,6 +33,8 @@ public class AuthorizationCodeFlowParams implements HasOxdIdParams {
     private String nonce;
     @JsonProperty(value = "acr")
     private String acr;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public AuthorizationCodeFlowParams() {
     }
@@ -43,6 +45,14 @@ public class AuthorizationCodeFlowParams implements HasOxdIdParams {
 
     public void setOxdId(String oxdId) {
         this.oxdId = oxdId;
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public String getAcr() {
@@ -126,6 +136,7 @@ public class AuthorizationCodeFlowParams implements HasOxdIdParams {
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
         sb.append(", acr='").append(acr).append('\'');
+        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }

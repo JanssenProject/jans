@@ -49,6 +49,10 @@ public class Configuration {
     private int stateExpirationInMinutes = 5;
     @JsonProperty(value = "nonce_expiration_in_minutes")
     private int nonceExpirationInMinutes = 5;
+    @JsonProperty(value = "public_op_key_cache_expiration_in_minutes")
+    private int publicOpKeyCacheExpirationInMinutes = 60;
+    @JsonProperty(value = "protect_commands_with_access_token")
+    private Boolean protectCommandsWithAccessToken;
 
     public int getStateExpirationInMinutes() {
         return stateExpirationInMinutes;
@@ -56,6 +60,22 @@ public class Configuration {
 
     public void setStateExpirationInMinutes(int stateExpirationInMinutes) {
         this.stateExpirationInMinutes = stateExpirationInMinutes;
+    }
+
+    public Boolean getProtectCommandsWithAccessToken() {
+        return protectCommandsWithAccessToken;
+    }
+
+    public void setProtectCommandsWithAccessToken(Boolean protectCommandsWithAccessToken) {
+        this.protectCommandsWithAccessToken = protectCommandsWithAccessToken;
+    }
+
+    public int getPublicOpKeyCacheExpirationInMinutes() {
+        return publicOpKeyCacheExpirationInMinutes;
+    }
+
+    public void setPublicOpKeyCacheExpirationInMinutes(int publicOpKeyCacheExpirationInMinutes) {
+        this.publicOpKeyCacheExpirationInMinutes = publicOpKeyCacheExpirationInMinutes;
     }
 
     public int getNonceExpirationInMinutes() {
@@ -205,6 +225,8 @@ public class Configuration {
         sb.append(", supportGoogleLogout='").append(supportGoogleLogout).append('\'');
         sb.append(", stateExpirationInMinutes='").append(stateExpirationInMinutes).append('\'');
         sb.append(", nonceExpirationInMinutes='").append(nonceExpirationInMinutes).append('\'');
+        sb.append(", publicOpKeyCacheExpirationInMinutes='").append(publicOpKeyCacheExpirationInMinutes).append('\'');
+        sb.append(", protectCommandsWithAccessToken='").append(protectCommandsWithAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }
