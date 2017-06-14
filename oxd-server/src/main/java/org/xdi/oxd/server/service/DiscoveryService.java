@@ -37,24 +37,28 @@ public class DiscoveryService {
     private final ConcurrentMap<String, UmaConfiguration> m_umaMap = new ConcurrentHashMap<String, UmaConfiguration>();
 
     private final HttpService httpService;
-    private final SiteConfigurationService siteService;
+    private final RpService rpService;
     private final ValidationService validationService;
 
     @Inject
-    public DiscoveryService(HttpService httpService, SiteConfigurationService siteService, ValidationService validationService) {
+    public DiscoveryService(HttpService httpService, RpService rpService, ValidationService validationService) {
         this.httpService = httpService;
-        this.siteService = siteService;
+        this.rpService = rpService;
         this.validationService = validationService;
     }
 
     public OpenIdConfigurationResponse getConnectDiscoveryResponseByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        SiteConfiguration site = siteService.getSite(oxdId);
-        return getConnectDiscoveryResponse(site.getOpHost());
+        Rp site = rpService.getRp(oxdId);
+        return getConnectDiscoveryResponse(site);
     }
 
-    public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opHost) {
+    public OpenIdConfigurationResponse getConnectDiscoveryResponse(Rp rp) {
+        return getConnectDiscoveryResponse(rp.getOpHost(), rp.getOpDiscoveryPath());
+    }
+
+    public OpenIdConfigurationResponse getConnectDiscoveryResponse(String opHost, String opDiscoveryPath) {
         validationService.notBlankOpHost(opHost);
 
         try {
@@ -62,7 +66,7 @@ public class DiscoveryService {
             if (r != null) {
                 return r;
             }
-            final OpenIdConfigurationClient client = new OpenIdConfigurationClient(getConnectDiscoveryUrl(opHost));
+            final OpenIdConfigurationClient client = new OpenIdConfigurationClient(getConnectDiscoveryUrl(opHost, opDiscoveryPath));
             client.setExecutor(httpService.getClientExecutor());
             final OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
             LOG.trace("Discovery response: {} ", response.getEntity());
@@ -82,11 +86,11 @@ public class DiscoveryService {
     public UmaConfiguration getUmaDiscoveryByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
-        SiteConfiguration site = siteService.getSite(oxdId);
-        return getUmaDiscovery(site.getOpHost());
+        Rp site = rpService.getRp(oxdId);
+        return getUmaDiscovery(site.getOpHost(), site.getOpDiscoveryPath());
     }
 
-    public UmaConfiguration getUmaDiscovery(String opHost) {
+    public UmaConfiguration getUmaDiscovery(String opHost, String opDiscoveryPath) {
         validationService.notBlankOpHost(opHost);
 
         try {
@@ -95,7 +99,7 @@ public class DiscoveryService {
                 return r;
             }
             final UmaConfiguration response = UmaClientFactory.instance().createMetaDataConfigurationService(
-                    getUmaDiscoveryUrl(opHost), httpService.getClientExecutor()).getMetadataConfiguration();
+                    getUmaDiscoveryUrl(opHost, opDiscoveryPath), httpService.getClientExecutor()).getMetadataConfiguration();
             LOG.trace("Uma discovery response: {} ", response);
             m_umaMap.put(opHost, response);
             return response;
@@ -107,12 +111,24 @@ public class DiscoveryService {
         throw new ErrorResponseException(ErrorResponseCode.NO_UMA_DISCOVERY_RESPONSE);
     }
 
-    public String getConnectDiscoveryUrl(String opHost) {
-        return baseOpUrl(opHost) + WELL_KNOWN_CONNECT_PATH;
+    public String getConnectDiscoveryUrl(Rp rp) {
+        return getConnectDiscoveryUrl(rp.getOpHost(), rp.getOpDiscoveryPath());
     }
 
-    public String getUmaDiscoveryUrl(String opHost) {
-        return baseOpUrl(opHost) + WELL_KNOWN_UMA_PATH;
+    public String getConnectDiscoveryUrl(String opHost, String opDiscoveryPath) {
+        String result = baseOpUrl(opHost);
+        if (StringUtils.isNotBlank(opDiscoveryPath)) {
+            result += opDiscoveryPath;
+        }
+        return result + WELL_KNOWN_CONNECT_PATH;
+    }
+
+    public String getUmaDiscoveryUrl(String opHost, String opDiscoveryPath) {
+        String result = baseOpUrl(opHost);
+        if (StringUtils.isNotBlank(opDiscoveryPath)) {
+            result += opDiscoveryPath;
+        }
+        return result + WELL_KNOWN_UMA_PATH;
     }
 
     private String baseOpUrl(String opHost) {

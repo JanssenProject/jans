@@ -10,7 +10,7 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
 import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +35,9 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
 
     @Override
     public CommandResponse execute(GetAuthorizationUrlParams params) throws Exception {
-        final SiteConfiguration site = getSite();
+        final Rp site = getRp();
 
-        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost()).getAuthorizationEndpoint();
+        String authorizationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(site).getAuthorizationEndpoint();
 
         List<String> scope = Lists.newArrayList();
         if (params.getScope() != null && !params.getScope().isEmpty()) {
@@ -68,7 +68,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
     }
 
-    private List<String> acrValues(SiteConfiguration site, GetAuthorizationUrlParams params) {
+    private List<String> acrValues(Rp site, GetAuthorizationUrlParams params) {
         List<String> acrList = params.getAcrValues() != null && !params.getAcrValues().isEmpty() ? params.getAcrValues() : site.getAcrValues();
         if (acrList != null) {
             return acrList;

@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpAuthorizeRptParams implements HasOxdIdParams {
+public class RpAuthorizeRptParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -17,7 +17,8 @@ public class RpAuthorizeRptParams implements HasOxdIdParams {
     private String rpt;
     @JsonProperty(value = "ticket")
     private String ticket;
-
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     @Override
     public String getOxdId() {
@@ -44,6 +45,14 @@ public class RpAuthorizeRptParams implements HasOxdIdParams {
         this.ticket = ticket;
     }
 
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -51,6 +60,7 @@ public class RpAuthorizeRptParams implements HasOxdIdParams {
         sb.append("{oxdId='").append(oxdId).append('\'');
         sb.append(", rpt='").append(rpt).append('\'');
         sb.append(", ticket='").append(ticket).append('\'');
+        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }

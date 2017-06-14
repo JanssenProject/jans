@@ -12,7 +12,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ImplicitFlowParams implements HasOxdIdParams {
+public class ImplicitFlowParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -30,8 +30,18 @@ public class ImplicitFlowParams implements HasOxdIdParams {
     private String scope;
     @JsonProperty(value = "nonce")
     private String nonce;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public ImplicitFlowParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     public String getClientSecret() {
@@ -114,6 +124,7 @@ public class ImplicitFlowParams implements HasOxdIdParams {
         sb.append(", userSecret='").append(userSecret).append('\'');
         sb.append(", scope='").append(scope).append('\'');
         sb.append(", nonce='").append(nonce).append('\'');
+        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }

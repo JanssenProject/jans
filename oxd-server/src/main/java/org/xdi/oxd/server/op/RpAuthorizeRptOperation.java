@@ -5,6 +5,7 @@ package org.xdi.oxd.server.op;
 
 import com.google.common.base.Strings;
 import com.google.inject.Injector;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.RptAuthorizationRequestService;
@@ -40,11 +41,18 @@ public class RpAuthorizeRptOperation extends BaseOperation<RpAuthorizeRptParams>
         LOG.debug("Try to authorize RPT with ticket: {}...", params.getTicket());
         final RptAuthorizationRequestService rptAuthorizationService = UmaClientFactory.instance().createAuthorizationRequestService(
                 getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
-        final RptAuthorizationResponse authorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
-                "Bearer " + getUmaTokenService().getAat(params.getOxdId()).getToken(), getSite().opHostWithoutProtocol(), authorizationRequest);
-        if (authorizationResponse != null) {
-            LOG.trace("RPT is authorized. RPT: {} ", params.getRpt());
-            return okResponse(new RpAuthorizeRptResponse(params.getOxdId()));
+
+        try {
+            final RptAuthorizationResponse authorizationResponse = rptAuthorizationService.requestRptPermissionAuthorization(
+                    "Bearer " + getUmaTokenService().getAat(params.getOxdId()).getToken(), getRp().opHostWithoutProtocol(), authorizationRequest);
+            if (authorizationResponse != null) {
+                LOG.trace("RPT is authorized. RPT: {} ", params.getRpt());
+                return okResponse(new RpAuthorizeRptResponse(params.getOxdId()));
+            }
+        } catch (ClientResponseFailure e) {
+            LOG.trace("Forbidden.", e);
+        } catch (Exception e) {
+            LOG.error("Error occured during RPT authorization.", e);
         }
 
         return CommandResponse.createErrorResponse(ErrorResponseCode.RPT_NOT_AUTHORIZED);

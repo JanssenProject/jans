@@ -12,9 +12,9 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.IParams;
-import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
+import org.xdi.oxd.server.service.RpService;
 import org.xdi.oxd.server.service.ValidationService;
 
 import java.io.IOException;
@@ -32,12 +32,10 @@ public class Processor {
      */
     private static final Logger LOG = LoggerFactory.getLogger(Processor.class);
 
-    private final LicenseService licenseService;
     private final ValidationService validationService;
 
     @Inject
-    public Processor(LicenseService licenseService, ValidationService validationService) {
-        this.licenseService = licenseService;
+    public Processor(ValidationService validationService) {
         this.validationService = validationService;
     }
 
