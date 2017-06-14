@@ -169,7 +169,7 @@
         </dependency>
         <dependency>
             <groupId>org.xdi</groupId>
-            <artifactId>oxUtil</artifactId>
+            <artifactId>oxcore-util</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-beanutils</groupId>
