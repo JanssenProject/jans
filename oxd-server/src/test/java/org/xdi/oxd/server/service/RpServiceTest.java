@@ -14,23 +14,27 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 05/10/2015
  */
 @Guice(modules = TestAppModule.class)
-public class SiteConfigurationServiceTest {
+public class RpServiceTest {
 
     private static ExecutorService EXECUTOR_SERVICE;
 
     @Inject
-    SiteConfigurationService service;
+    RpService service;
+    @Inject
+    PersistenceService persistenceService;
 
     @BeforeClass
     public void setUp() {
         Tester.setSystemConfPath();
+        persistenceService.create();
+        service.removeAllRps();
         service.load();
     }
 
@@ -41,49 +45,59 @@ public class SiteConfigurationServiceTest {
 
     @AfterSuite
     public void tearDownSuite() {
+        service.removeAllRps();
         EXECUTOR_SERVICE.shutdown();
     }
 
     @Test
     public void load() throws Exception {
-        assertTrue(service.getSites().size() == 2);
+        assertEquals(service.getRps().size(), 1);
     }
 
     @Test
     public void persist() throws Exception {
-        service.createNewFile(newSiteConfiguration());
-        assertTrue(service.getSites().size() == 3);
+        Rp rp = newRp();
+
+        service.create(rp);
+        assertEquals(service.getRps().size(), 2);
+
+        rp.setClientName("Updated name");
+        service.update(rp);
+
+        assertEquals(service.getRp(rp.getOxdId()).getClientName(), "Updated name");
+        assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
     }
 
     @Test(invocationCount = 10, threadPoolSize = 10)
     public void stressTest() throws IOException {
 
-        final SiteConfiguration siteConfiguration = service.defaultSiteConfiguration();
-        siteConfiguration.setOxdId(UUID.randomUUID().toString());
-        siteConfiguration.setPat(UUID.randomUUID().toString());
+        final Rp rp = service.defaultRp();
+        rp.setOxdId(UUID.randomUUID().toString());
+        rp.setPat(UUID.randomUUID().toString());
 
-        service.createNewFile(siteConfiguration);
+        service.create(rp);
 
         for (int i = 0; i < 11; i++) {
             EXECUTOR_SERVICE.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        siteConfiguration.setPat(UUID.randomUUID().toString());
-                        service.update(siteConfiguration);
-                        System.out.println("Updated PAT: " + siteConfiguration.getPat() + ", for site: " + siteConfiguration.getOxdId());
+                        rp.setPat(UUID.randomUUID().toString());
+                        service.update(rp);
+                        System.out.println("Updated PAT: " + rp.getPat() + ", for site: " + rp.getOxdId());
                     } catch (Throwable e) {
-                        throw new AssertionError("Failed to update configuration: " + siteConfiguration.getOxdId());
+                        throw new AssertionError("Failed to update configuration: " + rp.getOxdId());
                     }
                 }
             });
         }
     }
 
-    public SiteConfiguration newSiteConfiguration() {
-        SiteConfiguration conf = new SiteConfiguration(service.defaultSiteConfiguration());
-        conf.setOxdId(UUID.randomUUID().toString());
-        return conf;
+    public Rp newRp() {
+        Rp rp = new Rp(service.defaultRp());
+        rp.setOxdId(UUID.randomUUID().toString());
+        rp.setOpHost("test.gluu.org");
+        return rp;
     }
 
 }

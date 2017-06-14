@@ -18,7 +18,7 @@ import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
-import org.xdi.oxd.server.service.SiteConfiguration;
+import org.xdi.oxd.server.service.Rp;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,8 +46,8 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
         validate(params);
 
-        final SiteConfiguration site = getSite();
-        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site.getOpHost());
+        final Rp site = getRp();
+        OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(params.getCode());
@@ -77,7 +77,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
 
             final Jwt idToken = Jwt.parse(response.getIdToken());
 
-            final Validator validator = new Validator(idToken, discoveryResponse);
+            final Validator validator = new Validator(idToken, discoveryResponse, getKeyService());
             validator.validateNonce(getStateService());
             validator.validateIdToken(site.getClientId());
             validator.validateAccessToken(response.getAccessToken());
@@ -85,8 +85,10 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
             // persist tokens
             site.setIdToken(response.getIdToken());
             site.setAccessToken(response.getAccessToken());
-            getSiteService().update(site);
+            getRpService().update(site);
             getStateService().invalidateState(params.getState());
+
+            LOG.trace("Scope: " + response.getScope());
 
             final Map<String, List<String>> claims = idToken.getClaims() != null ? idToken.getClaims().toMap() : new HashMap<String, List<String>>();
 

@@ -6,7 +6,8 @@ package org.xdi.oxd.server;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.service.SiteConfigurationService;
+import org.xdi.oxd.server.service.PersistenceService;
+import org.xdi.oxd.server.service.RpService;
 
 /**
  * Main class to set up and tear down suite.
@@ -29,12 +30,13 @@ public class SetUpTest {
         });
         // from one side we should give time to start server, from other we can't start in current
         // thread because it will block suite thread, ugly but works...
-        CoreUtils.sleep(7);
+        CoreUtils.sleep(10);
     }
 
     private static void removeExistingSiteConfigurations() {
-        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).load();
-        ServerLauncher.getInjector().getInstance(SiteConfigurationService.class).removeAllExistingConfigurations();
+        ServerLauncher.getInjector().getInstance(PersistenceService.class).create();
+        ServerLauncher.getInjector().getInstance(RpService.class).removeAllRps();
+        ServerLauncher.getInjector().getInstance(RpService.class).load();
     }
 
     @AfterSuite

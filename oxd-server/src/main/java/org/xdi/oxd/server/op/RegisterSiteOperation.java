@@ -13,6 +13,7 @@ import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxd.common.Command;
@@ -20,9 +21,11 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.server.service.SiteConfiguration;
-import org.xdi.oxd.server.service.SiteConfigurationService;
+import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.service.Rp;
+import org.xdi.oxd.server.service.RpService;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,7 +41,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterSiteOperation.class);
 
-    private SiteConfiguration siteConfiguration;
+    private Rp rp;
 
     /**
      * Base constructor
@@ -52,17 +55,37 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     public RegisterSiteResponse execute_(RegisterSiteParams params) {
         validateParametersAndFallbackIfNeeded(params);
 
-        String siteId = UUID.randomUUID().toString();
+        String oxdId = UUID.randomUUID().toString();
 
         LOG.info("Creating site configuration ...");
-        persistSiteConfiguration(siteId, params);
+        persistRp(oxdId, params);
+        validateAccessToken(oxdId, params);
 
-        LOG.info("Site configuration created: " + siteConfiguration);
+        LOG.info("Site configuration created: " + rp);
 
         RegisterSiteResponse opResponse = new RegisterSiteResponse();
-        opResponse.setOxdId(siteId);
+        opResponse.setOxdId(oxdId);
         opResponse.setOpHost(params.getOpHost());
         return opResponse;
+    }
+
+    private void validateAccessToken(String oxdId, RegisterSiteParams params) {
+        final Configuration conf = getConfigurationService().getConfiguration();
+        if (conf.getProtectCommandsWithAccessToken() != null && !conf.getProtectCommandsWithAccessToken()) {
+            if (StringUtils.isBlank(params.getProtectionAccessToken())) {
+                return; // skip validation since protectCommandsWithAccessToken=false
+            } // otherwise if token is not blank then let it validate it
+        }
+        if (params instanceof SetupClientParams) {
+            return;
+        }
+
+        final IntrospectionResponse response = getValidationService().introspect(params.getProtectionAccessToken(), oxdId);
+        LOG.trace("introspection: " + response + ", setupClientId: " + rp.getSetupClientId());
+
+        rp.setSetupClientId(response.getClientId());
+        rp.setSetupOxdId(oxdId);
+        getRpService().updateSilently(rp);
     }
 
     @Override
@@ -78,16 +101,16 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
-        SiteConfiguration fallback = getSiteService().defaultSiteConfiguration();
+        Rp fallback = getRpService().defaultRp();
 
         // op_host
         if (Strings.isNullOrEmpty(params.getOpHost())) {
-            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
+            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + RpService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
             String fallbackOpHost = fallback.getOpHost();
             if (Strings.isNullOrEmpty(fallbackOpHost)) {
                 throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
             }
-            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + SiteConfigurationService.DEFAULT_SITE_CONFIG_JSON);
+            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + RpService.DEFAULT_SITE_CONFIG_JSON);
             params.setOpHost(fallbackOpHost);
         }
 
@@ -179,22 +202,22 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
     }
 
-    private void persistSiteConfiguration(String siteId, RegisterSiteParams params) {
+    private void persistRp(String siteId, RegisterSiteParams params) {
 
         try {
-            siteConfiguration = createSiteConfiguration(siteId, params);
+            rp = createRp(siteId, params);
 
             if (!hasClient(params)) {
                 final RegisterResponse registerResponse = registerClient(params);
-                siteConfiguration.setClientId(registerResponse.getClientId());
-                siteConfiguration.setClientSecret(registerResponse.getClientSecret());
-                siteConfiguration.setClientRegistrationAccessToken(registerResponse.getRegistrationAccessToken());
-                siteConfiguration.setClientRegistrationClientUri(registerResponse.getRegistrationClientUri());
-                siteConfiguration.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
-                siteConfiguration.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
+                rp.setClientId(registerResponse.getClientId());
+                rp.setClientSecret(registerResponse.getClientSecret());
+                rp.setClientRegistrationAccessToken(registerResponse.getRegistrationAccessToken());
+                rp.setClientRegistrationClientUri(registerResponse.getRegistrationClientUri());
+                rp.setClientIdIssuedAt(registerResponse.getClientIdIssuedAt());
+                rp.setClientSecretExpiresAt(registerResponse.getClientSecretExpiresAt());
             }
 
-            getSiteService().createNewFile(siteConfiguration);
+            getRpService().create(rp);
         } catch (IOException e) {
             LOG.error("Failed to persist site configuration, params: " + params, e);
             throw new RuntimeException(e);
@@ -206,7 +229,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private RegisterResponse registerClient(RegisterSiteParams params) {
-        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost()).getRegistrationEndpoint();
+        final String registrationEndpoint = getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getRegistrationEndpoint();
         if (Strings.isNullOrEmpty(registrationEndpoint)) {
             LOG.error("This OP (" + params.getOpHost() + ") does not provide registration_endpoint. It means that oxd is not able dynamically register client. " +
                     "Therefore it is required to obtain/register client manually on OP site and provide client_id and client_secret to oxd register_site command.");
@@ -240,7 +263,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             responseTypes.add(ResponseType.fromString(type));
         }
 
-        String clientName = "oxD client for site: " + siteConfiguration.getOxdId();
+        String clientName = "oxD client for site: " + rp.getOxdId();
         if (!Strings.isNullOrEmpty(params.getClientName())) {
             clientName = params.getClientName();
         }
@@ -282,56 +305,57 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
             request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
-        siteConfiguration.setResponseTypes(params.getResponseTypes());
-        siteConfiguration.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
-        siteConfiguration.setContacts(params.getContacts());
-        siteConfiguration.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
+        rp.setResponseTypes(params.getResponseTypes());
+        rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+        rp.setContacts(params.getContacts());
+        rp.setRedirectUris(Lists.newArrayList(params.getRedirectUris()));
         return request;
     }
 
-    private SiteConfiguration createSiteConfiguration(String siteId, RegisterSiteParams params) {
+    private Rp createRp(String siteId, RegisterSiteParams params) {
 
         Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
 
-        final SiteConfiguration siteConf = new SiteConfiguration(getSiteService().defaultSiteConfiguration());
-        siteConf.setOxdId(siteId);
-        siteConf.setOpHost(params.getOpHost());
-        siteConf.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
-        siteConf.setRedirectUris(params.getRedirectUris());
-        siteConf.setApplicationType("web");
+        final Rp rp = new Rp(getRpService().defaultRp());
+        rp.setOxdId(siteId);
+        rp.setOpHost(params.getOpHost());
+        rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
+        rp.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
+        rp.setRedirectUris(params.getRedirectUris());
+        rp.setApplicationType("web");
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
-            siteConf.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
+            rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());
         }
 
         if (params.getAcrValues() != null && !params.getAcrValues().isEmpty()) {
-            siteConf.setAcrValues(params.getAcrValues());
+            rp.setAcrValues(params.getAcrValues());
         }
 
         if (params.getClaimsLocales() != null && !params.getClaimsLocales().isEmpty()) {
-            siteConf.setClaimsLocales(params.getClaimsLocales());
+            rp.setClaimsLocales(params.getClaimsLocales());
         }
 
         if (!Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret())) {
-            siteConf.setClientId(params.getClientId());
-            siteConf.setClientSecret(params.getClientSecret());
+            rp.setClientId(params.getClientId());
+            rp.setClientSecret(params.getClientSecret());
         }
 
         if (params.getContacts() != null && !params.getContacts().isEmpty()) {
-            siteConf.setContacts(params.getContacts());
+            rp.setContacts(params.getContacts());
         }
 
-        siteConf.setGrantType(params.getGrantType());
-        siteConf.setResponseTypes(params.getResponseTypes());
+        rp.setGrantType(params.getGrantType());
+        rp.setResponseTypes(params.getResponseTypes());
 
         if (params.getScope() != null && !params.getScope().isEmpty()) {
-            siteConf.setScope(params.getScope());
+            rp.setScope(params.getScope());
         }
 
         if (params.getUiLocales() != null && !params.getUiLocales().isEmpty()) {
-            siteConf.setUiLocales(params.getUiLocales());
+            rp.setUiLocales(params.getUiLocales());
         }
 
-        return siteConf;
+        return rp;
     }
 }

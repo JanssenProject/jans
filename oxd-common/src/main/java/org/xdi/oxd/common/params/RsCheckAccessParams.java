@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RsCheckAccessParams implements HasOxdIdParams {
+public class RsCheckAccessParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -19,6 +19,19 @@ public class RsCheckAccessParams implements HasOxdIdParams {
     private String path;
     @JsonProperty(value = "http_method")
     private String httpMethod;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
+
+    public RsCheckAccessParams() {
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
+    }
 
     public String getOxdId() {
         return oxdId;
@@ -60,6 +73,7 @@ public class RsCheckAccessParams implements HasOxdIdParams {
         sb.append(", rpt='").append(rpt).append('\'');
         sb.append(", path='").append(path).append('\'');
         sb.append(", http_method='").append(httpMethod).append('\'');
+        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }

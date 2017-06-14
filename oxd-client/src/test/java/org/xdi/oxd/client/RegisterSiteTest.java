@@ -35,6 +35,8 @@ public class RegisterSiteTest {
         try {
             client = new CommandClient(host, port);
 
+//            final SetupClientResponse setupClient = SetupClientTest.setupClient(client, opHost, redirectUrl);
+
             RegisterSiteResponse resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
             assertNotNull(resp);
 
@@ -42,6 +44,7 @@ public class RegisterSiteTest {
 
             // more specific site registration
             final RegisterSiteParams commandParams = new RegisterSiteParams();
+            //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
             commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);

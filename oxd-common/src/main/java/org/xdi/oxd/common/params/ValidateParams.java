@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ValidateParams implements HasOxdIdParams {
+public class ValidateParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -25,6 +25,16 @@ public class ValidateParams implements HasOxdIdParams {
     private String nonce;
     @JsonProperty(value = "state")
     private String state;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
+    }
 
     public String getCode() {
         return code;
@@ -84,6 +94,7 @@ public class ValidateParams implements HasOxdIdParams {
                 ", accessToken='" + accessToken + '\'' +
                 ", nonce='" + nonce + '\'' +
                 ", state='" + state + '\'' +
+                ", protectionAccessToken='" + protectionAccessToken + '\'' +
                 '}';
     }
 }

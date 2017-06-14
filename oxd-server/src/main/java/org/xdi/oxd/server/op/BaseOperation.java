@@ -15,13 +15,7 @@ import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.Convertor;
-import org.xdi.oxd.server.service.DiscoveryService;
-import org.xdi.oxd.server.service.HttpService;
-import org.xdi.oxd.server.service.SiteConfiguration;
-import org.xdi.oxd.server.service.SiteConfigurationService;
-import org.xdi.oxd.server.service.StateService;
-import org.xdi.oxd.server.service.UmaTokenService;
-import org.xdi.oxd.server.service.ValidationService;
+import org.xdi.oxd.server.service.*;
 
 /**
  * Base abstract class for all operations.
@@ -76,6 +70,10 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(HttpService.class);
     }
 
+    public PublicOpKeyService getKeyService() {
+        return getInstance(PublicOpKeyService.class);
+    }
+
     public <T> T getInstance(Class<T> type) {
         return injector.getInstance(type);
     }
@@ -92,15 +90,19 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(UmaTokenService.class);
     }
 
-    public SiteConfigurationService getSiteService() {
-        return getInstance(SiteConfigurationService.class);
+    public RpService getRpService() {
+        return getInstance(RpService.class);
     }
 
-    public SiteConfiguration getSite() {
+    public ConfigurationService getConfigurationService() {
+        return getInstance(ConfigurationService.class);
+    }
+
+    public Rp getRp() {
         if (params instanceof HasOxdIdParams) {
             getValidationService().validate((HasOxdIdParams) params);
             HasOxdIdParams hasOxdId = (HasOxdIdParams) params;
-            return getSiteService().getSite(hasOxdId.getOxdId());
+            return getRpService().getRp(hasOxdId.getOxdId());
         }
         throw new ErrorResponseException(ErrorResponseCode.BAD_REQUEST_NO_OXD_ID);
     }

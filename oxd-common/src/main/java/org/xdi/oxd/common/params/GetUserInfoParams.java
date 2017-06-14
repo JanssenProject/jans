@@ -9,12 +9,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GetUserInfoParams implements HasOxdIdParams {
+public class GetUserInfoParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
     @JsonProperty(value = "access_token")
     private String accessToken;
+    @JsonProperty(value = "protection_access_token")
+    private String protectionAccessToken;
 
     public GetUserInfoParams() {
     }
@@ -33,6 +35,14 @@ public class GetUserInfoParams implements HasOxdIdParams {
 
     public void setOxdId(String oxdId) {
         this.oxdId = oxdId;
+    }
+
+    public String getProtectionAccessToken() {
+        return protectionAccessToken;
+    }
+
+    public void setProtectionAccessToken(String protectionAccessToken) {
+        this.protectionAccessToken = protectionAccessToken;
     }
 
     @Override
@@ -60,6 +70,7 @@ public class GetUserInfoParams implements HasOxdIdParams {
         sb.append("GetUserInfoParams");
         sb.append("{accessToken='").append(accessToken).append('\'');
         sb.append(", oxdId='").append(oxdId).append('\'');
+        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
         sb.append('}');
         return sb.toString();
     }

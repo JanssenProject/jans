@@ -1,5 +1,6 @@
 {
     "op_host":"",
+    "op_discovery_path":"",
     "authorization_redirect_uri":"",
     "post_logout_redirect_uri":"",
     "redirect_uris":[""],

@@ -19,8 +19,18 @@ public class GetClientTokenParams implements IParams {
     private String clientSecret;
     @JsonProperty(value = "op_host")
     private String opHost;
+    @JsonProperty(value = "op_discovery_path")
+    private String opDiscoveryPath;
     @JsonProperty(value = "scope")
     private List<String> scope;
+
+    public String getOpDiscoveryPath() {
+        return opDiscoveryPath;
+    }
+
+    public void setOpDiscoveryPath(String opDiscoveryPath) {
+        this.opDiscoveryPath = opDiscoveryPath;
+    }
 
     public String getClientId() {
         return clientId;
@@ -60,6 +70,7 @@ public class GetClientTokenParams implements IParams {
                 "clientId='" + clientId + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
                 ", opHost='" + opHost + '\'' +
+                ", opDiscoveryPath='" + opDiscoveryPath + '\'' +
                 '}';
     }
 }
