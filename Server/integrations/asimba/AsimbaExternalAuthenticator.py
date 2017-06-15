@@ -706,7 +706,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 newUser.setAttribute(localAttribute, localAttributeValue)
             else:
                 # Remove attribute which not exists in Saml response
-                removed_attributes.setAttribute(localAttribute, ArrayList())
+                newUser.setAttribute(localAttribute, ArrayList())
 
         return newUser
 
