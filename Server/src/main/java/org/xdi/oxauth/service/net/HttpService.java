@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -248,6 +249,22 @@ public class HttpService implements Serializable {
 		}
 
 		return new String(responseBytes);
+	}
+
+	public String convertEntityToString(byte[] responseBytes, Charset charset) {
+		if (responseBytes == null) {
+			return null;
+		}
+
+		return new String(responseBytes, charset);
+	}
+
+	public String convertEntityToString(byte[] responseBytes, String charsetName) throws UnsupportedEncodingException {
+		if (responseBytes == null) {
+			return null;
+		}
+
+		return new String(responseBytes, charsetName);
 	}
 
 	public boolean isResponseStastusCodeOk(HttpResponse httpResponse) {
