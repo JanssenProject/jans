@@ -1095,7 +1095,7 @@ objectClass: gluuAttribute
 objectClass: top
 description: gluuPermission
 description: User permission or role
-displayName: User permisison
+displayName: User Permission
 gluuAttributeEditType: admin
 gluuAttributeName: role
 gluuAttributeOrigin: gluuPerson
