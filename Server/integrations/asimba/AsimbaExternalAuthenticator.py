@@ -681,32 +681,34 @@ class PersonAuthentication(PersonAuthenticationType):
         saml_response_normalized_attributes = HashMap()
         for saml_response_attribute_entry in saml_response_attributes.entrySet():
             saml_response_normalized_attributes.put(StringHelper.toLowerCase(saml_response_attribute_entry.getKey()), saml_response_attribute_entry.getValue())
-        
+    
         currentAttributesMapping = self.prepareCurrentAttributesMapping(self.attributesMapping, configurationAttributes, requestParameters)
         print "Asimba. Get mapped user. Using next attributes mapping '%s'" % currentAttributesMapping
-
+    
         newUser = User()
-
+    
         # Set custom object classes
         if self.userObjectClasses != None:
             print "Asimba. Get mapped user. User custom objectClasses to add persons: '%s'" % Util.array2ArrayList(self.userObjectClasses)
             newUser.setCustomObjectClasses(self.userObjectClasses)
-
+    
         for attributesMappingEntry in currentAttributesMapping.entrySet():
             idpAttribute = attributesMappingEntry.getKey()
             localAttribute = attributesMappingEntry.getValue()
-
+    
             if self.debugEnrollment:
                 print "Asimba. Get mapped user. Trying to map '%s' into '%s'" % (idpAttribute, localAttribute)
-
+    
             localAttributeValue = saml_response_normalized_attributes.get(idpAttribute)
             if (localAttributeValue != None):
                 if self.debugEnrollment:
                     print "Asimba. Get mapped user. Setting attribute '%s' value '%s'" % (localAttribute, localAttributeValue)
-
                 newUser.setAttribute(localAttribute, localAttributeValue)
+            else:
+                # Remove attribute which not exists in Saml response
+                newUser.removeAttribute(localAttribute)
 
-        return newUser
+    return newUser
 
     def getMappedAllAttributesUser(self, saml_response_attributes):
         user = User()
