@@ -39,11 +39,10 @@ public class BenchmarkRequestAuthorization extends BaseTest {
 
     private String clientId;
 	private String clientSecret;
-    private String redirectUri;
 
-    @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @BeforeClass
-    public void registerClient(final String userId, final String userSecret, String redirectUris, final String redirectUri, String sectorIdentifierUri) throws Exception {
+    public void registerClient(final String userId, final String userSecret, String redirectUris, String sectorIdentifierUri) throws Exception {
         Reporter.log("Register client", true);
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
@@ -60,25 +59,30 @@ public class BenchmarkRequestAuthorization extends BaseTest {
 
         this.clientId = registerResponse.getClientId();
         this.clientSecret = registerResponse.getClientSecret();
-        this.redirectUri = redirectUri;
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(invocationCount = 1000, threadPoolSize = 10)
-    public void testAuthorization1(final String userId, final String userSecret, final String redirectUri) throws Exception {
-        testAuthorizationImpl(userId, userSecret, this.clientId, this.redirectUri);
-    }
+	@Parameters({ "userId", "userSecret", "redirectUri" })
+	@Test(invocationCount = 1, threadPoolSize = 1)
+	public void testAuthorization1(final String userId, final String userSecret, final String redirectUri) throws Exception {
+		testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
+	}
 
     @Parameters({"userId", "userSecret", "redirectUri"})
     @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = {"testAuthorization1"})
     public void testAuthorization2(final String userId, final String userSecret, final String redirectUri) throws Exception {
-        testAuthorizationImpl(userId, userSecret, this.clientId, this.redirectUri);
+        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = {"testAuthorization2"})
+    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = {"testAuthorization2"})
     public void testAuthorization3(final String userId, final String userSecret, final String redirectUri) throws Exception {
-        testAuthorizationImpl(userId, userSecret, this.clientId, this.redirectUri);
+        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUri"})
+    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = {"testAuthorization3"})
+    public void testAuthorization4(final String userId, final String userSecret, final String redirectUri) throws Exception {
+        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
     }
 
     private void testAuthorizationImpl(final String userId, final String userSecret, final String clientId, final String redirectUri) {
@@ -88,10 +92,8 @@ public class BenchmarkRequestAuthorization extends BaseTest {
 
         AuthorizationResponse response = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce);
 
-        assertEquals(response.getStatus(), 302, "Unexpected response code: " + response.getEntity());
         assertNotNull(response.getLocation(), "The location is null");
         assertNotNull(response.getCode(), "The authorization code is null");
-        assertNotNull(response.getIdToken(), "The id_token is null");
         assertNotNull(response.getState(), "The state is null");
         assertNotNull(response.getScope(), "The scope is null");
     }
