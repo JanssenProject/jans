@@ -1,5 +1,6 @@
 package org.xdi.oxauth.uma.authorization;
 
+import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.jwt.Jwt;
 
 import java.util.Map;
@@ -25,6 +26,10 @@ public class Claims {
     }
 
     public Object get(String key) {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+
         if (claims.containsKey(key)) {
             return claims.get(key);
         } else if (claimsToken != null && claimsToken.getClaims() != null && claimsToken.getClaims().hasClaim(key)) {
@@ -37,5 +42,9 @@ public class Claims {
 
     public boolean has(String key) {
         return get(key) != null;
+    }
+
+    public void put(String key, Object value) {
+        claims.put(key, value);
     }
 }

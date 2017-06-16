@@ -4,12 +4,11 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.service.external;
+package org.xdi.oxauth.uma.service;
 
-import org.xdi.model.SimpleCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.uma.UmaAuthorizationPolicyType;
+import org.xdi.model.custom.script.type.uma.UmaRptPolicyType;
 import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.service.LookupService;
@@ -33,22 +32,22 @@ import java.util.Map;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
-public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService {
+public class ExternalUmaRptPolicyService extends ExternalScriptService {
 
-	private static final long serialVersionUID = -8609727759114795432L;
+	private static final long serialVersionUID = -8609727759114795433L;
 	
 	@Inject
 	private LookupService lookupService;
 
-	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsInumMap;
+	protected Map<String, CustomScriptConfiguration> scriptInumMap;
 
-	public ExternalUmaAuthorizationPolicyService() {
-		super(CustomScriptType.UMA_AUTHORIZATION_POLICY);
+	public ExternalUmaRptPolicyService() {
+		super(CustomScriptType.UMA_RPT_POLICY);
 	}
 
 	@Override
 	protected void reloadExternal() {
-		this.customScriptConfigurationsInumMap = buildExternalConfigurationsInumMap(this.customScriptConfigurations);
+		this.scriptInumMap = buildExternalConfigurationsInumMap(this.customScriptConfigurations);
 	}
 
 	private Map<String, CustomScriptConfiguration> buildExternalConfigurationsInumMap(List<CustomScriptConfiguration> customScriptConfigurations) {
@@ -61,41 +60,51 @@ public class ExternalUmaAuthorizationPolicyService extends ExternalScriptService
 		return reloadedExternalConfigurations;
 	}
 
-	public CustomScriptConfiguration getAuthorizationPolicyByDn(String authorizationPolicyDn) {
-		String authorizationPolicyInum = lookupService.getInumFromDn(authorizationPolicyDn);
+	public CustomScriptConfiguration getScriptByDn(String scriptDn) {
+		String authorizationPolicyInum = lookupService.getInumFromDn(scriptDn);
 		
-		return getCustomScriptConfigurationByInum(authorizationPolicyInum);
+		return getScriptByInum(authorizationPolicyInum);
 	}
 
-	public CustomScriptConfiguration getCustomScriptConfigurationByInum(String inum) {
+	public CustomScriptConfiguration getScriptByInum(String inum) {
 		if (StringHelper.isEmpty(inum)) {
 			return null;
 		}
 
-		return this.customScriptConfigurationsInumMap.get(inum);
+		return this.scriptInumMap.get(inum);
 	}
 
-	public boolean authorize(CustomScriptConfiguration script, UmaAuthorizationContext authorizationContext) {
+	public boolean authorize(CustomScriptConfiguration script, UmaAuthorizationContext context) {
 		try {
-			log.debug("Executing python 'authorize' method");
-			UmaAuthorizationPolicyType externalType = (UmaAuthorizationPolicyType) script.getExternalType();
-			Map<String, SimpleCustomProperty> configurationAttributes = script.getConfigurationAttributes();
-			return externalType.authorize(authorizationContext, configurationAttributes);
+			log.debug("Executing python 'authorize' method, script: " + script.getName());
+			UmaRptPolicyType externalType = (UmaRptPolicyType) script.getExternalType();
+			return externalType.authorize(context);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
 		return false;
 	}
 
-	public List<ClaimDefinition> getRequiredClaims(CustomScriptConfiguration script) {
+	public List<ClaimDefinition> getRequiredClaims(CustomScriptConfiguration script, UmaAuthorizationContext context) {
 		try {
-			log.debug("Executing python 'getRequiredClaims' method");
-			UmaAuthorizationPolicyType externalType = (UmaAuthorizationPolicyType) script.getExternalType();
-			return externalType.getRequiredClaims();
+			log.debug("Executing python 'getRequiredClaims' method, script: " + script.getName());
+			UmaRptPolicyType externalType = (UmaRptPolicyType) script.getExternalType();
+			return externalType.getRequiredClaims(context);
 		} catch (Exception ex) {
 			log.error(ex.getMessage(), ex);
 		}
 		return new ArrayList<ClaimDefinition>();
+	}
+
+	public String getClaimsGatheringScriptName(CustomScriptConfiguration script, UmaAuthorizationContext context) {
+		try {
+			log.debug("Executing python 'getClaimsGatheringScriptName' method, script: " + script.getName());
+			UmaRptPolicyType externalType = (UmaRptPolicyType) script.getExternalType();
+			return externalType.getClaimsGatheringScriptName(context);
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+		}
+		return "";
 	}
 
 
