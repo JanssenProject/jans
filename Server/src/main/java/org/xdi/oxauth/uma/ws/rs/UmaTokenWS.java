@@ -7,10 +7,8 @@
 package org.xdi.oxauth.uma.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -22,9 +20,8 @@ import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.security.Identity;
-import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.external.ExternalUmaAuthorizationPolicyService;
+import org.xdi.oxauth.uma.service.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.*;
 import org.xdi.oxauth.uma.service.*;
@@ -60,16 +57,10 @@ public class UmaTokenWS {
     private UmaPctService pctService;
 
     @Inject
-    private UmaResourceService resourceService;
-
-    @Inject
     private UmaPermissionService permissionService;
 
     @Inject
     private UmaValidationService umaValidationService;
-
-    @Inject
-    private UmaScriptService umaScriptService;
 
     @Inject
     private ClientService clientService;
@@ -84,13 +75,10 @@ public class UmaTokenWS {
     private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
-    private LdapEntryManager ldapEntryManager;
+    private UmaNeedsInfoService umaNeedsInfoService;
 
     @Inject
-    private ExternalUmaAuthorizationPolicyService policyService;
-
-    @Inject
-    private AttributeService attributeService;
+    private ExternalUmaRptPolicyService policyService;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -124,16 +112,14 @@ public class UmaTokenWS {
 
             Claims claims = new Claims(idToken, pct);
 
-            List<CustomScriptConfiguration> scripts = checkNeedsInfo(claims, scopes.keySet(), permissions);
-            UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(attributeService, resourceService, permissions, scopes, claims, httpRequest);
+            Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = umaNeedsInfoService.checkNeedsInfo(claims, scopes, permissions, httpRequest);
 
-            if (!scripts.isEmpty()) {
-                for (CustomScriptConfiguration script : scripts) {
-                    UmaAuthorizationContext authorizationContext = contextBuilder.build(script);
-                    final boolean result = policyService.authorize(script, authorizationContext);
-                    log.trace("Policy script inum: '{}' result: '{}'", script.getInum(), result);
+            if (!scriptMap.isEmpty()) {
+                for (Map.Entry<CustomScriptConfiguration, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
+                    final boolean result = policyService.authorize(entry.getKey(), entry.getValue());
+                    log.trace("Policy script inum: '{}' result: '{}'", entry.getKey().getInum(), result);
                     if (!result) {
-                        log.trace("Stop authorization scripts execution, current script returns false, script inum: " + script.getInum());
+                        log.trace("Stop authorization scriptMap execution, current script returns false, script inum: " + entry.getKey().getInum());
 
                         throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
                     }
@@ -194,50 +180,4 @@ public class UmaTokenWS {
         }
     }
 
-    private List<CustomScriptConfiguration> checkNeedsInfo(Claims claims, Set<UmaScopeDescription> requestedScopes, List<UmaPermission> permissions) {
-        Set<String> scriptDNs = umaScriptService.getScriptDNs(new ArrayList<UmaScopeDescription>(requestedScopes));
-
-        List<CustomScriptConfiguration> scripts = new ArrayList<CustomScriptConfiguration>();
-
-        List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
-
-        for (String scriptDN : scriptDNs) {
-            CustomScriptConfiguration script = policyService.getAuthorizationPolicyByDn(scriptDN);
-
-            if (script != null) {
-                List<ClaimDefinition> requiredClaims = policyService.getRequiredClaims(script);
-                if (requiredClaims != null && !requiredClaims.isEmpty()) {
-                    for (ClaimDefinition definition : requiredClaims) {
-                        if (!claims.has(definition.getName())) {
-                            missedClaims.add(definition);
-                        }
-                    }
-                }
-            } else {
-                log.error("Unable to load UMA script dn: '{}'", scriptDN);
-            }
-        }
-
-        if (!missedClaims.isEmpty()) {
-            String newTicket = generateNewTicket(permissions);
-
-            UmaNeedInfoResponse needInfoResponse = new UmaNeedInfoResponse();
-            needInfoResponse.setTicket(newTicket);
-            needInfoResponse.setError("need_info");
-            needInfoResponse.setRedirectUser(appConfiguration.getBaseEndpoint() + "/uma/gather_claims");
-            needInfoResponse.setRequiredClaims(missedClaims);
-
-            throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).entity(ServerUtil.asJsonSilently(needInfoResponse)).build());
-        }
-
-        return scripts;
-    }
-
-    private String generateNewTicket(List<UmaPermission> permissions) {
-        if (permissions.isEmpty()) {
-            return permissionService.generateNewTicket();
-        } else {
-            return permissionService.changeTicket(permissions);
-        }
-    }
 }
