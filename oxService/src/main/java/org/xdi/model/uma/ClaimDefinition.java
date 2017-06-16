@@ -49,6 +49,14 @@ public class ClaimDefinition {
         this.claimTokenFormat.add("http://openid.net/specs/openid-connect-core-1_0.html#IDToken");
     }
 
+    public ClaimDefinition(List<String> claimTokenFormat, String claimType, String friendlyName, List<String> issuer, String name) {
+        this.claimTokenFormat = claimTokenFormat;
+        this.claimType = claimType;
+        this.friendlyName = friendlyName;
+        this.issuer = issuer;
+        this.name = name;
+    }
+
     public List<String> getClaimTokenFormat() {
         return claimTokenFormat;
     }
