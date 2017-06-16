@@ -63,25 +63,19 @@ public class BenchmarkRequestAccessToken extends BaseTest {
     }
 
 	@Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1, threadPoolSize = 1)
+    @Test(invocationCount = 500, threadPoolSize = 1)
     public void requestAccessTokenPassword1(final String userId, final String userSecret) throws Exception {
     	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = { "requestAccessTokenPassword1" })
+    @Test(invocationCount = 500, threadPoolSize = 10, dependsOnMethods = { "requestAccessTokenPassword1" })
     public void requestAccessTokenPassword2(final String userId, final String userSecret) throws Exception {
     	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = { "requestAccessTokenPassword2" })
-    public void requestAccessTokenPassword3(final String userId, final String userSecret) throws Exception {
-    	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
-    }
-
-    @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = { "requestAccessTokenPassword3" })
+    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = { "requestAccessTokenPassword2" })
     public void requestAccessTokenPassword4(final String userId, final String userSecret) throws Exception {
     	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
