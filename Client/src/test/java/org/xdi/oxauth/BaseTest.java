@@ -287,19 +287,22 @@ public abstract class BaseTest {
         }
 
         String authorizationResponseStr = driver.getCurrentUrl();
+        // Skip authorization form if client has persistent authorization 
+        if (!authorizationResponseStr.contains("#")) {
+	        WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
+	
+	        final String previousURL = driver.getCurrentUrl();
+	        allowButton.click();
+	        WebDriverWait wait = new WebDriverWait(driver, 10);
+	        wait.until(new ExpectedCondition<Boolean>() {
+	            public Boolean apply(WebDriver d) {
+	                return (d.getCurrentUrl() != previousURL);
+	            }
+	        });
 
-        WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
+	        authorizationResponseStr = driver.getCurrentUrl();
+        }
 
-        final String previousURL = driver.getCurrentUrl();
-        allowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return (d.getCurrentUrl() != previousURL);
-            }
-        });
-
-        authorizationResponseStr = driver.getCurrentUrl();
 
         Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
         String sessionState = null;
