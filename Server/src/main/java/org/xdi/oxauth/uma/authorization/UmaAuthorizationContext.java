@@ -6,17 +6,14 @@
 
 package org.xdi.oxauth.uma.authorization;
 
-import org.apache.commons.lang.StringUtils;
+import org.xdi.model.SimpleCustomProperty;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -31,11 +28,14 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     private final Map<UmaScopeDescription, Boolean> scopes; // scope and boolean, true - if client requested scope and false if it is permission ticket scope
     private final Set<UmaResource> resources;
     private final String scriptDn;
+    private final Map<String, Set<String>> redirectUserParam = new HashMap<String, Set<String>>();
+    private final Map<String, SimpleCustomProperty> configurationAttributes;
 
     private AttributeService attributeService;
 
     public UmaAuthorizationContext(AttributeService attributeService, Map<UmaScopeDescription, Boolean> scopes,
-                                   Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest) {
+                                   Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest,
+                                   Map<String, SimpleCustomProperty> configurationAttributes) {
     	super(httpRequest);
 
     	this.attributeService = attributeService;
@@ -43,6 +43,34 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         this.resources = resources;
         this.claims = claims;
         this.scriptDn = scriptDn;
+        this.configurationAttributes = configurationAttributes != null ? configurationAttributes : new HashMap<String, SimpleCustomProperty>();
+    }
+
+    public String getScriptDn() {
+        return scriptDn;
+    }
+
+    public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
+        return configurationAttributes;
+    }
+
+    public void addRedirectUserParam(String paramName, String paramValue) {
+        Set<String> valueSet = redirectUserParam.get(paramName);
+        if (valueSet != null) {
+            valueSet.add(paramValue);
+        } else {
+            Set<String> value = new HashSet<String>();
+            value.add(paramValue);
+            redirectUserParam.put(paramName, value);
+        }
+    }
+
+    public void removeRedirectUserParam(String paramName) {
+        redirectUserParam.remove(paramName);
+    }
+
+    public Map<String, Set<String>> getRedirectUserParam() {
+        return redirectUserParam;
     }
 
     public Set<String> getScopes() {
@@ -82,11 +110,20 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         return result;
     }
 
+    public Claims getClaims() {
+        return claims;
+    }
+
     public Object getClaim(String claimName) {
-        if (StringUtils.isNotBlank(claimName) && claims != null) {
-            return claims.get(claimName);
-        }
-        return null;
+        return claims.get(claimName);
+    }
+
+    public void putClaim(String claimName, Object claimValue) {
+        claims.put(claimName, claimValue);
+    }
+
+    public boolean hasClaim(String claimName) {
+        return claims.has(claimName);
     }
 
 //    public String getClientClaim(String p_claimName) {
