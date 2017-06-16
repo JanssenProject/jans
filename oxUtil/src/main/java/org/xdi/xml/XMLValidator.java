@@ -17,7 +17,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 /**
- *
+ * Validate SAML metadata XML with predefined settings.
+ * 
  * @author Dmitry Ognyannikov
  */
 public class XMLValidator {
@@ -29,7 +30,7 @@ public class XMLValidator {
     * @throws ParserConfigurationException
     * @return GluuErrorHandler
     */
-   public static GluuErrorHandler validateMetadata(InputStream stream, Schema validationSchema) 
+    public static GluuErrorHandler validateMetadata(InputStream stream, Schema validationSchema) 
            throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory newFactory = DocumentBuilderFactory.newInstance();
 
@@ -55,5 +56,5 @@ public class XMLValidator {
         validator.validate(new DOMSource(xmlDoc));
 
         return handler;
-   }
+    }
 }

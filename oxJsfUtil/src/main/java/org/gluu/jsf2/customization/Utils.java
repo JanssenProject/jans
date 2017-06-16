@@ -8,7 +8,7 @@ import java.io.File;
  * Created by eugeniuparvan on 5/1/17.
  */
 public class Utils {
-    private static final String CATALINA_BASE_PATH = "catalina.base";
+    private static final String SERVER_BASE_PATH = "server.base";
     private static final String CUSTOM_PAGES_PATH = "/custom/pages";
 
     public static boolean isCustomPagesDirExists() {
@@ -25,7 +25,7 @@ public class Utils {
     }
 
     public static String getCustomPagesPath() {
-        String externalResourceBase = System.getProperty(CATALINA_BASE_PATH);
+        String externalResourceBase = System.getProperty(SERVER_BASE_PATH);
         if (StringHelper.isNotEmpty(externalResourceBase))
             externalResourceBase += CUSTOM_PAGES_PATH;
         return externalResourceBase;
