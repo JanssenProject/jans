@@ -109,7 +109,7 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                authorizationEndpoint, authorizationRequest, userId, userSecret);
+                authorizationEndpoint, authorizationRequest, userId, userSecret, true, true);
 
         return authorizationResponse;
     }
