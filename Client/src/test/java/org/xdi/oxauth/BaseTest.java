@@ -258,6 +258,15 @@ public abstract class BaseTest {
      * and establishes whether the resource owner grants or denies the client's access request.
      */
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
+    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, cleanupCookies, false);
+    }
+
+    /**
+     * The authorization server authenticates the resource owner (via the user-agent)
+     * and establishes whether the resource owner grants or denies the client's access request.
+     */
+    public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies, boolean useNewDriver) {
     	
 
@@ -337,11 +346,6 @@ public abstract class BaseTest {
         showClientUserAgent(authorizeClient);
 
         return authorizationResponse;
-    }
-
-    public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
-            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
-    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, cleanupCookies, false);
     }
 
     public AuthorizationResponse authenticateResourceOwnerAndDenyAccess(

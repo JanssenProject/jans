@@ -65,35 +65,29 @@ public class BenchmarkRequestAuthorization extends BaseTest {
     }
 
 	@Parameters({ "userId", "userSecret", "redirectUri" })
-	@Test(invocationCount = 1, threadPoolSize = 1)
+	@Test(invocationCount = 500, threadPoolSize = 1)
 	public void testAuthorization1(final String userId, final String userSecret, final String redirectUri) throws Exception {
-		testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
+		testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri, false);
 	}
 
     @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = {"testAuthorization1"})
+    @Test(invocationCount = 500, threadPoolSize = 10, dependsOnMethods = {"testAuthorization1"})
     public void testAuthorization2(final String userId, final String userSecret, final String redirectUri) throws Exception {
-        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
+        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri, true);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = {"testAuthorization2"})
+    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = {"testAuthorization2"})
     public void testAuthorization3(final String userId, final String userSecret, final String redirectUri) throws Exception {
-        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
+        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri, true);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = {"testAuthorization3"})
-    public void testAuthorization4(final String userId, final String userSecret, final String redirectUri) throws Exception {
-        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri);
-    }
-
-    private void testAuthorizationImpl(final String userId, final String userSecret, final String clientId, final String redirectUri) {
+    private void testAuthorizationImpl(final String userId, final String userSecret, final String clientId, final String redirectUri, boolean useNewDriver) {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationResponse response = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce);
+        AuthorizationResponse response = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce, useNewDriver);
 
         assertNotNull(response.getLocation(), "The location is null");
         assertNotNull(response.getCode(), "The authorization code is null");
@@ -102,14 +96,14 @@ public class BenchmarkRequestAuthorization extends BaseTest {
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,
-                                                       List<ResponseType> responseTypes, List<String> scopes, String clientId, String nonce) {
+                                                       List<ResponseType> responseTypes, List<String> scopes, String clientId, String nonce, boolean useNewDriver) {
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                authorizationEndpoint, authorizationRequest, userId, userSecret, true, true);
+                authorizationEndpoint, authorizationRequest, userId, userSecret, true, useNewDriver);
 
         return authorizationResponse;
     }
