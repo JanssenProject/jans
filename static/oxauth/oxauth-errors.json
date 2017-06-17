@@ -107,6 +107,11 @@
             "uri":null
         },
         {
+            "id":"invalid_claims_redirect_uri",
+            "description":"Value of one or more claims_redirect_uris is invalid.",
+            "uri":null
+        },
+        {
             "id":"invalid_client_metadata",
             "description":"The value of one of the Client Metadata fields is invalid and the server has rejected this request. Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter of a Client's Metadata.",
             "uri":null
