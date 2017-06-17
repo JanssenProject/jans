@@ -187,6 +187,11 @@
 				<artifactId>jsf-impl</artifactId>
 				<version>${jsf.version}</version>
 			</dependency>
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-validator-cdi</artifactId>
+			    <version>5.4.1.Final</version>
+			</dependency>
 
 			<!-- Richfaces -->
 			<dependency>
@@ -314,13 +319,6 @@
 				<version>${slf4j.version}</version>
 			</dependency>
 
-			<!-- Enable async loggers -->
-			<dependency>
-			    <groupId>com.lmax</groupId>
-			    <artifactId>disruptor</artifactId>
-			    <version>3.3.6</version>
-			</dependency>
-
 			<!-- Security -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -422,11 +420,6 @@
 
 			<!-- Jackson -->
 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jackson-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-core-asl</artifactId>
 				<version>${jackson.version}</version>
@@ -509,7 +502,7 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.9.10</version>
+				<version>6.11</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -599,13 +592,6 @@
 			    <version>1.1.1</version>
 			    <scope>test</scope>
 			</dependency>
-
-	        <dependency>
-	            <groupId>org.jboss.shrinkwrap.resolver</groupId>
-	            <artifactId>shrinkwrap-resolver-depchain</artifactId>
-	            <type>pom</type>
-                <scope>test</scope>
-	        </dependency>
 
 			<!-- Documentation -->
 			<dependency>

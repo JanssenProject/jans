@@ -6,22 +6,17 @@
 
 package org.xdi.oxauth.model.registration;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.apache.commons.lang.ArrayUtils;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.gluu.site.ldap.persistence.annotation.*;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.util.LdapUtils;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -165,6 +160,9 @@ public class Client implements Serializable {
 
     @LdapAttribute(name = "oxPersistClientAuthorizations")
     private boolean persistClientAuthorizations;
+
+    @LdapAttribute(name = "oxIncludeClaimsInIdToken")
+    private boolean includeClaimsInIdToken;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
@@ -1010,6 +1008,14 @@ public class Client implements Serializable {
 
     public void setPersistClientAuthorizations(boolean persistClientAuthorizations) {
         this.persistClientAuthorizations = persistClientAuthorizations;
+    }
+
+    public boolean isIncludeClaimsInIdToken() {
+        return includeClaimsInIdToken;
+    }
+
+    public void setIncludeClaimsInIdToken(boolean includeClaimsInIdToken) {
+        this.includeClaimsInIdToken = includeClaimsInIdToken;
     }
 
     public List<CustomAttribute> getCustomAttributes() {
