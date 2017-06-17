@@ -29,13 +29,8 @@
 KEEPDAYS1=1   #for compression
 KEEPDAYS2=15  #for deletion
 
-if [ -h /opt/opends ]; then
-        OPENDX="opends"
-else
-        OPENDX="opendj"
-fi
 
-DIRS="/opt/shibboleth-idp/logs/ /opt/tomcat/logs/ /opt/tomcat/temp /opt/$OPENDX/logs/ /opt/vds/vds_server/logs/ /var/log/ /var/log/httpd/ /var/log/puppet/ /var/log/shibboleth/ /var/log/cups/ /var/removedldif/ /opt/$OPENDX/backup_$OPENDX/ /opt/$OPENDX/backup_$OPENDX/userRoot/ /opt/$OPENDX/backup_$OPENDX/schema/ /opt/$OPENDX/backup_$OPENDX/site/ /opt/$OPENDX/backup_$OPENDX/tasks/ /opt/$OPENDX/backup_$OPENDX/config/ /opt/$OPENDX/backup_$OPENDX/ /opt/$OPENDX/config/archived-configs /opt/ds01/backup_opendj /opt/ds02/backup_opendj /home/ldap/backup_opendj"
+DIRS="/opt/shibboleth-idp/logs/ /opt/gluu/jetty/idp/logs/ /opt/gluu/jetty/oxauth/logs /opt/gluu/jetty/identity/logs /var/log/ /var/log/httpd/ /var/log/shibboleth/ /var/log/cups/ /var/removedldif/"
 
 PWD=`pwd`
 PWD1=$PWD
@@ -56,9 +51,6 @@ do
            gzip --best --force $fname >> /opt/gluu/logs/logmanager.log 2>&1
    done
 done
-# To take care of unintentional compression
-gzip -d /opt/$OPENDX/logs/server.out.gz >> /opt/gluu/logs/logmanager.log 2>&1
-gzip -d /opt/$OPENDX/logs/server.pid.gz >> /opt/gluu/logs/logmanager.log 2>&1
 
 # Deletion Section
 echo "$(date) : Starting Deletion">> /opt/gluu/logs/logmanager.log
