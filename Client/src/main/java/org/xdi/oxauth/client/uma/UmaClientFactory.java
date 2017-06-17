@@ -27,28 +27,28 @@ public class UmaClientFactory {
         return instance;
     }
 
-    public UmaResourceService createResourceService(UmaMetadata metadataConfiguration) {
-        return ProxyFactory.create(UmaResourceService.class, metadataConfiguration.getResourceRegistrationEndpoint());
+    public UmaResourceService createResourceService(UmaMetadata metadata) {
+        return ProxyFactory.create(UmaResourceService.class, metadata.getResourceRegistrationEndpoint());
     }
 
-    public UmaResourceService createResourceService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(UmaResourceService.class, metadataConfiguration.getResourceRegistrationEndpoint(), clientExecutor);
+    public UmaResourceService createResourceService(UmaMetadata metadata, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(UmaResourceService.class, metadata.getResourceRegistrationEndpoint(), clientExecutor);
     }
 
-    public UmaPermissionService createPermissionService(UmaMetadata metadataConfiguration) {
-        return ProxyFactory.create(UmaPermissionService.class, metadataConfiguration.getPermissionEndpoint());
+    public UmaPermissionService createPermissionService(UmaMetadata metadata) {
+        return ProxyFactory.create(UmaPermissionService.class, metadata.getPermissionEndpoint());
     }
 
-    public UmaPermissionService createPermissionService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(UmaPermissionService.class, metadataConfiguration.getPermissionEndpoint(), clientExecutor);
+    public UmaPermissionService createPermissionService(UmaMetadata metadata, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(UmaPermissionService.class, metadata.getPermissionEndpoint(), clientExecutor);
     }
 
-    public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadataConfiguration) {
-        return ProxyFactory.create(UmaRptIntrospectionService.class, metadataConfiguration.getIntrospectionEndpoint());
+    public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadata) {
+        return ProxyFactory.create(UmaRptIntrospectionService.class, metadata.getIntrospectionEndpoint());
     }
 
-    public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadataConfiguration, ClientExecutor clientExecutor) {
-        return ProxyFactory.create(UmaRptIntrospectionService.class, metadataConfiguration.getIntrospectionEndpoint(), clientExecutor);
+    public UmaRptIntrospectionService createRptStatusService(UmaMetadata metadata, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(UmaRptIntrospectionService.class, metadata.getIntrospectionEndpoint(), clientExecutor);
     }
 
     public UmaMetadataService createMetadataService(String umaMetadataUri) {
