@@ -37,6 +37,7 @@ public class RegisterRequest extends BaseRequest {
 
     private String registrationAccessToken;
     private List<String> redirectUris;
+    private List<String> claimsRedirectUris;
     private List<ResponseType> responseTypes;
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
@@ -85,6 +86,7 @@ public class RegisterRequest extends BaseRequest {
         setMediaType(MediaType.APPLICATION_JSON);
 
         this.redirectUris = new ArrayList<String>();
+        this.claimsRedirectUris = new ArrayList<String>();
         this.responseTypes = new ArrayList<ResponseType>();
         this.grantTypes = new ArrayList<GrantType>();
         this.contacts = new ArrayList<String>();
@@ -208,6 +210,24 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setRedirectUris(List<String> redirectUris) {
         this.redirectUris = redirectUris;
+    }
+
+    /**
+     * Returns claims redirect URIs.
+     *
+     * @return claims redirect URIs
+     */
+    public List<String> getClaimsRedirectUris() {
+        return claimsRedirectUris;
+    }
+
+    /**
+     * Sets claims redirect URIs.
+     *
+     * @param claimsRedirectUris claims redirect URIs.
+     */
+    public void setClaimsRedirectUris(List<String> claimsRedirectUris) {
+        this.claimsRedirectUris = claimsRedirectUris;
     }
 
     /**
@@ -835,6 +855,9 @@ public class RegisterRequest extends BaseRequest {
         if (redirectUris != null && !redirectUris.isEmpty()) {
             parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris).toString());
         }
+        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
+            parameters.put(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris).toString());
+        }
         if (responseTypes != null && !responseTypes.isEmpty()) {
             parameters.put(RESPONSE_TYPES.toString(), toJSONArray(responseTypes).toString());
         }
@@ -963,6 +986,15 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
+        final List<String> claimRedirectUris = new ArrayList<String>();
+        if (requestObject.has(CLAIMS_REDIRECT_URIS.toString())) {
+            JSONArray jsonArray = requestObject.getJSONArray(CLAIMS_REDIRECT_URIS.toString());
+            for (int i = 0; i < jsonArray.length(); i++) {
+                String uri = jsonArray.getString(i);
+                claimRedirectUris.add(uri);
+            }
+        }
+
         final Set<ResponseType> responseTypes = new HashSet<ResponseType>();
         final Set<GrantType> grantTypes = new HashSet<GrantType>();
         if (requestObject.has(RESPONSE_TYPES.toString())) {
@@ -1077,6 +1109,7 @@ public class RegisterRequest extends BaseRequest {
         result.setJsonObject(requestObject);
         result.setClientSecretExpiresAt(clientSecretExpiresAt);
         result.setRequestUris(requestUris);
+        result.setClaimsRedirectUris(claimRedirectUris);
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
         result.setPostLogoutRedirectUris(postLogoutRedirectUris);
         result.setDefaultAcrValues(defaultAcrValues);
@@ -1133,6 +1166,9 @@ public class RegisterRequest extends BaseRequest {
 
         if (redirectUris != null && !redirectUris.isEmpty()) {
             parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris));
+        }
+        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
+            parameters.put(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris));
         }
         if (responseTypes != null && !responseTypes.isEmpty()) {
             parameters.put(RESPONSE_TYPES.toString(), toJSONArray(responseTypes));
