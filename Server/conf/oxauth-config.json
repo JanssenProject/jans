@@ -16,7 +16,7 @@
     "openIdConfigurationEndpoint":"${config.oxauth.issuer}/.well-known/openid-configuration",
     "idGenerationEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/id",
     "introspectionEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/introspection",
-    "umaConfigurationEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/oxauth/uma-configuration",
+    "umaConfigurationEndpoint":"${config.oxauth.contextPath}/seam/resource/restv1/oxauth/uma2-configuration",
     "sectorIdentifierEndpoint":"${config.oxauth.contextPath}/sectoridentifier",
     "oxElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
     "oxElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
