@@ -231,6 +231,16 @@
             "uri":null
         },
         {
+            "id":"invalid_client_id",
+            "description":"The provided client_id is not valid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_claims_redirect_uri",
+            "description":"The provided claims_redirect_uri is not valid.",
+            "uri":null
+        },
+        {
             "id":"invalid_claim_token_format",
             "description":"The claim token format is blank or otherwise not supported (supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken).",
             "uri":null
