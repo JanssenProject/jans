@@ -60,16 +60,6 @@ public class TokenRequest extends BaseRequest {
             return scope(scope);
         }
 
-        public Builder aat(String... scopeArray) {
-            String scope = UmaScopeType.AUTHORIZATION.getValue();
-            if (scopeArray != null && scopeArray.length > 0) {
-                for (String s : scopeArray) {
-                    scope = scope + " " + s;
-                }
-            }
-            return scope(scope);
-        }
-
         public TokenRequest build() {
             final TokenRequest request = new TokenRequest(grantType);
             request.setScope(scope);

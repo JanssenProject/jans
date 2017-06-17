@@ -8,10 +8,10 @@ package org.xdi.oxauth.ws.rs.uma;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.client.uma.ScopeService;
+import org.xdi.oxauth.client.uma.UmaScopeService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
-import org.xdi.oxauth.model.uma.ScopeDescription;
+import org.xdi.oxauth.model.uma.UmaMetadata;
+import org.xdi.oxauth.model.uma.UmaScopeDescription;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 /**
@@ -24,9 +24,9 @@ public class ScopeHttpTest {
     @Test
     @Parameters({"umaMetaDataUrl"})
     public void scopePresence(final String umaMetaDataUrl) {
-        final UmaConfiguration conf = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl).getMetadataConfiguration();
-        final ScopeService scopeService = UmaClientFactory.instance().createScopeService(conf);
-        final ScopeDescription modifyScope = scopeService.getScope("modify");
+        final UmaMetadata metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
+        final UmaScopeService scopeService = UmaClientFactory.instance().createScopeService(metadata.getScopeEndpoint());
+        final UmaScopeDescription modifyScope = scopeService.getScope("modify");
         UmaTestUtil.assert_(modifyScope);
     }
 }
