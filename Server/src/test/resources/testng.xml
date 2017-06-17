@@ -216,7 +216,7 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.RegisterPermissionWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Workflow test" enabled="true">
+	<test name="UMA. Workflow test" enabled="false">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.AccessProtectedResourceFlowWSTest" />
 		</classes>
@@ -224,11 +224,6 @@
 	<test name="UMA. Scope test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest" />
-		</classes>
-	</test>
-	<test name="UMA. Trust elevation test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.TrustElevationWSTest" />
 		</classes>
 	</test>
 	<test name="Inum Generation test" enabled="true">
