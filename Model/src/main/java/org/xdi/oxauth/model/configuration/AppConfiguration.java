@@ -45,9 +45,9 @@ public class AppConfiguration implements Configuration {
 
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
-    private int umaRequesterPermissionTokenLifetime;
+    private int umaRptLifetime;
+    private int umaPctLifetime;
     private Boolean umaAddScopesAutomatically;
-    private Boolean umaKeepClientDuringResourceSetRegistration;
 
     private String openidSubAttribute;
     private List<String> responseTypesSupported;
@@ -184,14 +184,6 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionAsJwt(Boolean sessionAsJwt) {
         this.sessionAsJwt = sessionAsJwt;
-    }
-
-    public Boolean getUmaKeepClientDuringResourceSetRegistration() {
-        return umaKeepClientDuringResourceSetRegistration;
-    }
-
-    public void setUmaKeepClientDuringResourceSetRegistration(Boolean p_umaKeepClientDuringResourceSetRegistration) {
-        umaKeepClientDuringResourceSetRegistration = p_umaKeepClientDuringResourceSetRegistration;
     }
 
     public Boolean getUmaAddScopesAutomatically() {
@@ -730,12 +722,20 @@ public class AppConfiguration implements Configuration {
         this.longLivedAccessTokenLifetime = longLivedAccessTokenLifetime;
     }
 
-    public int getUmaRequesterPermissionTokenLifetime() {
-        return umaRequesterPermissionTokenLifetime;
+    public int getUmaRptLifetime() {
+        return umaRptLifetime;
     }
 
-    public void setUmaRequesterPermissionTokenLifetime(int umaRequesterPermissionTokenLifetime) {
-        this.umaRequesterPermissionTokenLifetime = umaRequesterPermissionTokenLifetime;
+    public void setUmaRptLifetime(int umaRptLifetime) {
+        this.umaRptLifetime = umaRptLifetime;
+    }
+
+    public int getUmaPctLifetime() {
+        return umaPctLifetime;
+    }
+
+    public void setUmaPctLifetime(int umaPctLifetime) {
+        this.umaPctLifetime = umaPctLifetime;
     }
 
     public int getCleanServiceInterval() {

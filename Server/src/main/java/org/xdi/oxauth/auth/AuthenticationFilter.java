@@ -6,22 +6,6 @@
 
 package org.xdi.oxauth.auth;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -44,6 +28,16 @@ import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionStateService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
+
+import javax.inject.Inject;
+import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
@@ -96,8 +90,8 @@ public class AuthenticationFilter implements Filter {
 		try {
 			final String requestUrl = httpRequest.getRequestURL().toString();
 			log.trace("Get request to: '{}'", requestUrl);
-			if (requestUrl.endsWith("/token")
-					&& ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) {
+			if ((requestUrl.endsWith("/token") && ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) ||
+					requestUrl.endsWith("/uma/token")) {
 				log.debug("Starting token endpoint authentication");
 				if (httpRequest.getParameter("client_assertion") != null
 						&& httpRequest.getParameter("client_assertion_type") != null) {
