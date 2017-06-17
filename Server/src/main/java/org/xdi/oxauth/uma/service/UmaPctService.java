@@ -167,6 +167,7 @@ public class UmaPctService {
     }
 
     public void cleanup(final Date now) {
+        prepareBranch();
         BatchOperation<UmaPCT> batchService = new BatchOperation<UmaPCT>(ldapEntryManager) {
             @Override
             protected List<UmaPCT> getChunkOrNull(int chunkSize) {

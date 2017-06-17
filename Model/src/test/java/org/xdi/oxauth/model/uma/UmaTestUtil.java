@@ -44,7 +44,7 @@ public class UmaTestUtil {
         assertNotNull(metadata.getIssuer(), "Issuer isn't correct");
         assertNotNull(metadata.getTokenEndpoint(), "Token endpoint isn't correct");
         assertNotNull(metadata.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
-        assertNotNull(metadata.getResourceRegistrationEndpoint(), "Resource set registration endpoint isn't correct");
+        assertNotNull(metadata.getResourceRegistrationEndpoint(), "Resource registration endpoint isn't correct");
         assertNotNull(metadata.getPermissionEndpoint(), "Permission registration endpoint isn't correct");
         assertNotNull(metadata.getAuthorizationEndpoint(), "Authorization request endpoint isn't correct");
     }
