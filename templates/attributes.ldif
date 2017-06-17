@@ -531,7 +531,7 @@ description: Organizational Title
 displayName: Title
 gluuAttributeEditType: admin
 gluuAttributeName: title
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -547,7 +547,7 @@ displayName: License Plate
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: carLicense
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -563,7 +563,7 @@ displayName: Fax Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: facsimileTelephoneNumber
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -578,7 +578,7 @@ description: Organizational Department
 displayName: Department
 gluuAttributeEditType: admin
 gluuAttributeName: departmentNumber
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -593,7 +593,7 @@ description: Employee Type
 displayName: Employee Type
 gluuAttributeEditType: admin
 gluuAttributeName: employeeType
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: inactive
@@ -608,7 +608,7 @@ displayName: Name search keywords
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: cn
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -624,7 +624,7 @@ displayName: Mobile Telephone Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: mobile
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -641,7 +641,7 @@ displayName: Home Telephone Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: telephoneNumber
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -658,7 +658,7 @@ displayName: State or Province
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: st
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -674,7 +674,7 @@ description: Manager
 displayName: Manager
 gluuAttributeEditType: admin
 gluuAttributeName: manager
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: inactive
@@ -689,7 +689,7 @@ displayName: Street
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: street
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -706,7 +706,7 @@ displayName: PO Box
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: postOfficeBox
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -721,7 +721,7 @@ description: Employee Number
 displayName: Employee Number
 gluuAttributeEditType: admin
 gluuAttributeName: employeeNumber
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: inactive
@@ -735,7 +735,7 @@ description: Preferred Delivery Method
 displayName: Preferred Delivery Method
 gluuAttributeEditType: admin
 gluuAttributeName: preferredDeliveryMethod
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: inactive
@@ -750,7 +750,7 @@ displayName: Work Telephone Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: telephoneNumber
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -766,7 +766,7 @@ displayName: Room Number
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: roomNumber
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -781,7 +781,7 @@ description: Secretary
 displayName: Secretary
 gluuAttributeEditType: admin
 gluuAttributeName: secretary
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: admin
 gluuStatus: inactive
@@ -811,7 +811,7 @@ displayName: Home Address
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: homePostalAddress
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -828,7 +828,7 @@ displayName: City
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: l
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -845,7 +845,7 @@ displayName: Postal Code
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: postalCode
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -862,7 +862,7 @@ displayName: Description
 gluuAttributeEditType: user
 gluuAttributeEditType: admin
 gluuAttributeName: description
-gluuAttributeOrigin: inetOrgPerson
+gluuAttributeOrigin: gluuCustomPerson
 gluuAttributeType: string
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -1095,7 +1095,7 @@ objectClass: gluuAttribute
 objectClass: top
 description: gluuPermission
 description: User permission or role
-displayName: User permisison
+displayName: User Permission
 gluuAttributeEditType: admin
 gluuAttributeName: role
 gluuAttributeOrigin: gluuPerson
