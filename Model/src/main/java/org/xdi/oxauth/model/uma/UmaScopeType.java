@@ -16,8 +16,7 @@ import java.util.Map;
 
 public enum UmaScopeType {
 
-    PROTECTION("uma_protection"),
-    AUTHORIZATION("uma_authorization");
+    PROTECTION("uma_protection");
 
     private static Map<String, UmaScopeType> lookup = new HashMap<String, UmaScopeType>();
 

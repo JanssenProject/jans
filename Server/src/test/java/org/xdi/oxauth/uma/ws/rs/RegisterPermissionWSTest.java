@@ -6,31 +6,25 @@
 
 package org.xdi.oxauth.uma.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
-
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.ResourceSetResponse;
-import org.xdi.oxauth.model.uma.TUma;
-import org.xdi.oxauth.model.uma.UmaConstants;
-import org.xdi.oxauth.model.uma.UmaPermission;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.model.uma.*;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,7 +37,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 	private URI url;
 
 	private static Token pat;
-	private static ResourceSetResponse resourceSet;
+	private static UmaResourceResponse resource;
 	private static String umaRegisterResourcePath;
 	private static String umaPermissionPath;
 
@@ -63,35 +57,32 @@ public class RegisterPermissionWSTest extends BaseTest {
 
 	@Test(dependsOnMethods = { "init_" })
 	public void init() {
-		resourceSet = TUma.registerResourceSet(url, pat, umaRegisterResourcePath, UmaTestUtil.createResourceSet());
-		UmaTestUtil.assert_(resourceSet);
+		resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
+		UmaTestUtil.assert_(resource);
 	}
 
 	@Test(dependsOnMethods = { "init" })
-	@Parameters({ "umaAmHost", "umaHost" })
-	public void testRegisterPermission(final String umaAmHost, String umaHost) throws Exception {
+	public void testRegisterPermission() throws Exception {
 		final UmaPermission r = new UmaPermission();
-		r.setResourceSetId(resourceSet.getId());
+		r.setResourceId(resource.getId());
 		r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-		final PermissionTicket ticket = TUma.registerPermission(url, pat, umaAmHost, umaHost, r, umaPermissionPath);
+		final PermissionTicket ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
 		UmaTestUtil.assert_(ticket);
 	}
 
 	@Test(dependsOnMethods = { "testRegisterPermission" })
-	@Parameters({ "umaAmHost", "umaHost" })
-	public void testRegisterPermissionWithInvalidResourceSet(final String umaAmHost, String umaHost) {
+	public void testRegisterPermissionWithInvalidResource() {
 		final String path = umaPermissionPath;
 		try {
 			Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
 			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
 			request.header("Authorization", "Bearer " + pat.getAccessToken());
-			request.header("Host", umaAmHost);
 
 			String json = null;
 			try {
 				final UmaPermission r = new UmaPermission();
-				r.setResourceSetId(resourceSet.getId() + "x");
+				r.setResourceId(resource.getId() + "x");
 
 				json = ServerUtil.createJsonMapper().writeValueAsString(r);
 			} catch (IOException e) {
@@ -102,7 +93,7 @@ public class RegisterPermissionWSTest extends BaseTest {
 			Response response = request.post(Entity.json(json));
 			String entity = response.readEntity(String.class);
 
-			BaseTest.showResponse("UMA : RegisterPermissionWSTest.testRegisterPermissionWithInvalidResourceSet() : ",
+			BaseTest.showResponse("UMA : RegisterPermissionWSTest.testRegisterPermissionWithInvalidResource() : ",
 					response, entity);
 
 			assertEquals(response.getStatus(), Response.Status.BAD_REQUEST.getStatusCode(),
@@ -122,10 +113,10 @@ public class RegisterPermissionWSTest extends BaseTest {
 	// use normal test instead of @AfterClass because it will not work with
 	// ResourceRequestEnvironment seam class which is used
 	// behind TUma wrapper.
-	@Test(dependsOnMethods = { "testRegisterPermissionWithInvalidResourceSet" })
+	@Test(dependsOnMethods = {"testRegisterPermissionWithInvalidResource"})
 	public void cleanUp() {
-		if (resourceSet != null) {
-			TUma.deleteResourceSet(url, pat, umaRegisterResourcePath, resourceSet.getId());
+		if (resource != null) {
+			TUma.deleteResource(url, pat, umaRegisterResourcePath, resource.getId());
 		}
 	}
 }

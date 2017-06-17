@@ -196,11 +196,6 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Obtain AAT test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.ObtainAatWSTest" />
-		</classes>
-	</test>
 	<test name="UMA. Obtain PAT test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.ObtainPatWSTest" />
@@ -213,7 +208,7 @@
 	</test>
 	<test name="UMA. Register resource set test" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.RegisterResourceSetWSTest" />
+			<class name="org.xdi.oxauth.uma.ws.rs.UmaRegisterResourceWSTest" />
 		</classes>
 	</test>
 	<test name="UMA. Register permission test" enabled="true">
@@ -306,8 +301,6 @@
 	<parameter name="umaRptPath" value="seam/resource/restv1/requester/rpt" />
 	<parameter name="umaGatPath" value="seam/resource/restv1/requester/gat" />
 	<parameter name="umaRptStatusPath" value="seam/resource/restv1/rpt/status" />
-	<parameter name="umaAmHost" value="localhost" />
-	<parameter name="umaHost" value="photoz.example.com" />
 	<parameter name="umaUserId" value="${uma.user.uid}" />
 	<parameter name="umaUserSecret" value="${uma.user.password}" />
 	<parameter name="umaPatClientId" value="${uma.pat.client.id}" />
