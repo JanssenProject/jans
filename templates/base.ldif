@@ -101,11 +101,11 @@ objectclass: top
 objectclass: organizationalUnit
 ou: scopes
 
-# UMA resource set data - LEVEL 4
-dn: ou=resource_sets,ou=uma,o=%(inumOrg)s,o=gluu
+# UMA resources - LEVEL 4
+dn: ou=resources,ou=uma,o=%(inumOrg)s,o=gluu
 objectclass: top
 objectclass: organizationalUnit
-ou: resource_sets
+ou: resources
 
 ################################
 
