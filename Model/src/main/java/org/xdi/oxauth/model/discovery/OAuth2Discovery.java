@@ -76,10 +76,10 @@ public class OAuth2Discovery {
     @XmlElement(name = "response_types_supported")
     private String[] responseTypesSupported;
 
-    @ApiModelProperty(required = false, value = "JSON array containing a list of the OAuth 2.0 \"response_mode\" values that this authorization server supports, as specified in OAuth 2.0 Multiple Response Type Encoding Practices [OAuth.Responses].  If omitted, the default is \"[\"query\", \"fragment\"]\".  The response mode value \"form_post\" is also defined in OAuth 2.0 Form Post Response Mode [OAuth.Post")
-    @JsonProperty(value = "response_modes_supported")
-    @XmlElement(name = "response_modes_supported")
-    private String[] responseModesSupported;
+//    @ApiModelProperty(required = false, value = "JSON array containing a list of the OAuth 2.0 \"response_mode\" values that this authorization server supports, as specified in OAuth 2.0 Multiple Response Type Encoding Practices [OAuth.Responses].  If omitted, the default is \"[\"query\", \"fragment\"]\".  The response mode value \"form_post\" is also defined in OAuth 2.0 Form Post Response Mode [OAuth.Post")
+//    @JsonProperty(value = "response_modes_supported")
+//    @XmlElement(name = "response_modes_supported")
+//    private String[] responseModesSupported;
 
     @ApiModelProperty(required = false, value = "JSON array containing a list of the OAuth 2.0 grant type values that this authorization server supports.  The array values used are the same as those used with the \"grant_types\" parameter defined by \"OAuth 2.0 Dynamic Client Registration Protocol\" [RFC7591].  If omitted, the default value is \"[\"authorization_code\", \"implicit\"]\"")
     @JsonProperty(value = "grant_types_supported")
@@ -116,35 +116,35 @@ public class OAuth2Discovery {
     @XmlElement(name = "op_tos_uri")
     private String opTosUri;
 
-    @ApiModelProperty(required = false, value = "URL of the authorization server's OAuth 2.0 revocation endpoint [RFC7009]")
-    @JsonProperty(value = "revocation_endpoint")
-    @XmlElement(name = "revocation_endpoint")
-    private String revocationEndpoint;
-
-    @ApiModelProperty(required = false, value = "JSON array containing a list of client authentication methods supported by this revocation endpoint.  The valid client authentication method values are those registered in the IANA \"OAuth Token Endpoint Authentication Methods\" registry [IANA.OAuth.Parameters]")
-    @JsonProperty(value = "revocation_endpoint_auth_methods_supported")
-    @XmlElement(name = "revocation_endpoint_auth_methods_supported")
-    private String[] revocation_endpoint_auth_methods_supported;
-
-    @ApiModelProperty(required = false, value = "JSON array containing a list of the JWS signing algorithms (\"alg\" values) supported by the revocation endpoint for the signature on the JWT [JWT] used to authenticate the client at the revocation endpoint for the \"private_key_jwt\" and \"client_secret_jwt\" authentication methods.  The value \"none\" MUST NOT be used.")
-    @JsonProperty(value = "revocation_endpoint_auth_signing_alg_values_supported")
-    @XmlElement(name = "revocation_endpoint_auth_signing_alg_values_supported")
-    private String[] revocationEndpointAuthSigningAlgValuesSupported;
+//    @ApiModelProperty(required = false, value = "URL of the authorization server's OAuth 2.0 revocation endpoint [RFC7009]")
+//    @JsonProperty(value = "revocation_endpoint")
+//    @XmlElement(name = "revocation_endpoint")
+//    private String revocationEndpoint;
+//
+//    @ApiModelProperty(required = false, value = "JSON array containing a list of client authentication methods supported by this revocation endpoint.  The valid client authentication method values are those registered in the IANA \"OAuth Token Endpoint Authentication Methods\" registry [IANA.OAuth.Parameters]")
+//    @JsonProperty(value = "revocation_endpoint_auth_methods_supported")
+//    @XmlElement(name = "revocation_endpoint_auth_methods_supported")
+//    private String[] revocation_endpoint_auth_methods_supported;
+//
+//    @ApiModelProperty(required = false, value = "JSON array containing a list of the JWS signing algorithms (\"alg\" values) supported by the revocation endpoint for the signature on the JWT [JWT] used to authenticate the client at the revocation endpoint for the \"private_key_jwt\" and \"client_secret_jwt\" authentication methods.  The value \"none\" MUST NOT be used.")
+//    @JsonProperty(value = "revocation_endpoint_auth_signing_alg_values_supported")
+//    @XmlElement(name = "revocation_endpoint_auth_signing_alg_values_supported")
+//    private String[] revocationEndpointAuthSigningAlgValuesSupported;
 
     @ApiModelProperty(required = false, value = "URL of the authorization server's OAuth 2.0 introspection endpoint [RFC7662].")
     @JsonProperty(value = "introspection_endpoint")
     @XmlElement(name = "introspection_endpoint")
     private String introspectionEndpoint;
 
-    @ApiModelProperty(required = false, value = "JSON array containing a list of client authentication methods supported by this introspection endpoint.  The valid client authentication method values are those registered in the IANA \"OAuth Token Endpoint Authentication Methods\" registry [IANA.OAuth.Parameters] or those registered in the IANA \"OAuth Access Token Types\" registry [IANA.OAuth.Parameters].  (These values are and will remain distinct, due to Section 7.2.)")
-    @JsonProperty(value = "introspection_endpoint_auth_methods_supported")
-    @XmlElement(name = "introspection_endpoint_auth_methods_supported")
-    private String[] introspectionEndpointAuthMethodsSupported;
-
-    @ApiModelProperty(required = false, value = " JSON array containing a list of the JWS signing algorithms (\"alg\" values) supported by the introspection endpoint for the signature on the JWT [JWT] used to authenticate the client at the introspection endpoint for the \"private_key_jwt\" and \"client_secret_jwt\" authentication methods.  The value \"none\" MUST NOT be used.")
-    @JsonProperty(value = "introspection_endpoint_auth_signing_alg_values_supported")
-    @XmlElement(name = "introspection_endpoint_auth_signing_alg_values_supported")
-    private String[] introspectionEndpointAuthSigningAlgValuesSupported;
+//    @ApiModelProperty(required = false, value = "JSON array containing a list of client authentication methods supported by this introspection endpoint.  The valid client authentication method values are those registered in the IANA \"OAuth Token Endpoint Authentication Methods\" registry [IANA.OAuth.Parameters] or those registered in the IANA \"OAuth Access Token Types\" registry [IANA.OAuth.Parameters].  (These values are and will remain distinct, due to Section 7.2.)")
+//    @JsonProperty(value = "introspection_endpoint_auth_methods_supported")
+//    @XmlElement(name = "introspection_endpoint_auth_methods_supported")
+//    private String[] introspectionEndpointAuthMethodsSupported;
+//
+//    @ApiModelProperty(required = false, value = " JSON array containing a list of the JWS signing algorithms (\"alg\" values) supported by the introspection endpoint for the signature on the JWT [JWT] used to authenticate the client at the introspection endpoint for the \"private_key_jwt\" and \"client_secret_jwt\" authentication methods.  The value \"none\" MUST NOT be used.")
+//    @JsonProperty(value = "introspection_endpoint_auth_signing_alg_values_supported")
+//    @XmlElement(name = "introspection_endpoint_auth_signing_alg_values_supported")
+//    private String[] introspectionEndpointAuthSigningAlgValuesSupported;
 
     @ApiModelProperty(required = false, value = "JSON array containing a list of PKCE [RFC7636] code challenge methods supported by this authorization server.  Code challenge method values are used in the \"code_challenge_method\" parameter defined in Section 4.3 of [RFC7636].  The valid code challenge method values are those registered in the IANA \"PKCE Code Challenge Methods\" registry [IANA.OAuth.Parameters]")
     @JsonProperty(value = "code_challenge_methods_supported")
@@ -199,13 +199,13 @@ public class OAuth2Discovery {
         this.responseTypesSupported = responseTypesSupported;
     }
 
-    public String[] getResponseModesSupported() {
-        return responseModesSupported;
-    }
-
-    public void setResponseModesSupported(String[] responseModesSupported) {
-        this.responseModesSupported = responseModesSupported;
-    }
+//    public String[] getResponseModesSupported() {
+//        return responseModesSupported;
+//    }
+//
+//    public void setResponseModesSupported(String[] responseModesSupported) {
+//        this.responseModesSupported = responseModesSupported;
+//    }
 
     public String[] getGrantTypesSupported() {
         return grantTypesSupported;
@@ -263,29 +263,29 @@ public class OAuth2Discovery {
         this.opTosUri = opTosUri;
     }
 
-    public String getRevocationEndpoint() {
-        return revocationEndpoint;
-    }
-
-    public void setRevocationEndpoint(String revocationEndpoint) {
-        this.revocationEndpoint = revocationEndpoint;
-    }
-
-    public String[] getRevocation_endpoint_auth_methods_supported() {
-        return revocation_endpoint_auth_methods_supported;
-    }
-
-    public void setRevocation_endpoint_auth_methods_supported(String[] revocation_endpoint_auth_methods_supported) {
-        this.revocation_endpoint_auth_methods_supported = revocation_endpoint_auth_methods_supported;
-    }
-
-    public String[] getRevocationEndpointAuthSigningAlgValuesSupported() {
-        return revocationEndpointAuthSigningAlgValuesSupported;
-    }
-
-    public void setRevocationEndpointAuthSigningAlgValuesSupported(String[] revocationEndpointAuthSigningAlgValuesSupported) {
-        this.revocationEndpointAuthSigningAlgValuesSupported = revocationEndpointAuthSigningAlgValuesSupported;
-    }
+//    public String getRevocationEndpoint() {
+//        return revocationEndpoint;
+//    }
+//
+//    public void setRevocationEndpoint(String revocationEndpoint) {
+//        this.revocationEndpoint = revocationEndpoint;
+//    }
+//
+//    public String[] getRevocation_endpoint_auth_methods_supported() {
+//        return revocation_endpoint_auth_methods_supported;
+//    }
+//
+//    public void setRevocation_endpoint_auth_methods_supported(String[] revocation_endpoint_auth_methods_supported) {
+//        this.revocation_endpoint_auth_methods_supported = revocation_endpoint_auth_methods_supported;
+//    }
+//
+//    public String[] getRevocationEndpointAuthSigningAlgValuesSupported() {
+//        return revocationEndpointAuthSigningAlgValuesSupported;
+//    }
+//
+//    public void setRevocationEndpointAuthSigningAlgValuesSupported(String[] revocationEndpointAuthSigningAlgValuesSupported) {
+//        this.revocationEndpointAuthSigningAlgValuesSupported = revocationEndpointAuthSigningAlgValuesSupported;
+//    }
 
     public String getIntrospectionEndpoint() {
         return introspectionEndpoint;
@@ -295,21 +295,21 @@ public class OAuth2Discovery {
         this.introspectionEndpoint = introspectionEndpoint;
     }
 
-    public String[] getIntrospectionEndpointAuthMethodsSupported() {
-        return introspectionEndpointAuthMethodsSupported;
-    }
-
-    public void setIntrospectionEndpointAuthMethodsSupported(String[] introspectionEndpointAuthMethodsSupported) {
-        this.introspectionEndpointAuthMethodsSupported = introspectionEndpointAuthMethodsSupported;
-    }
-
-    public String[] getIntrospectionEndpointAuthSigningAlgValuesSupported() {
-        return introspectionEndpointAuthSigningAlgValuesSupported;
-    }
-
-    public void setIntrospectionEndpointAuthSigningAlgValuesSupported(String[] introspectionEndpointAuthSigningAlgValuesSupported) {
-        this.introspectionEndpointAuthSigningAlgValuesSupported = introspectionEndpointAuthSigningAlgValuesSupported;
-    }
+//    public String[] getIntrospectionEndpointAuthMethodsSupported() {
+//        return introspectionEndpointAuthMethodsSupported;
+//    }
+//
+//    public void setIntrospectionEndpointAuthMethodsSupported(String[] introspectionEndpointAuthMethodsSupported) {
+//        this.introspectionEndpointAuthMethodsSupported = introspectionEndpointAuthMethodsSupported;
+//    }
+//
+//    public String[] getIntrospectionEndpointAuthSigningAlgValuesSupported() {
+//        return introspectionEndpointAuthSigningAlgValuesSupported;
+//    }
+//
+//    public void setIntrospectionEndpointAuthSigningAlgValuesSupported(String[] introspectionEndpointAuthSigningAlgValuesSupported) {
+//        this.introspectionEndpointAuthSigningAlgValuesSupported = introspectionEndpointAuthSigningAlgValuesSupported;
+//    }
 
     public String[] getCodeChallengeMethodsSupported() {
         return codeChallengeMethodsSupported;
@@ -328,7 +328,7 @@ public class OAuth2Discovery {
                 ", jwksUri='" + jwksUri + '\'' +
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +
                 ", responseTypesSupported=" + Arrays.toString(responseTypesSupported) +
-                ", responseModesSupported=" + Arrays.toString(responseModesSupported) +
+//                ", responseModesSupported=" + Arrays.toString(responseModesSupported) +
                 ", grantTypesSupported=" + Arrays.toString(grantTypesSupported) +
                 ", tokenEndpointAuthMethodsSupported=" + Arrays.toString(tokenEndpointAuthMethodsSupported) +
                 ", tokenEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(tokenEndpointAuthSigningAlgValuesSupported) +
@@ -336,12 +336,12 @@ public class OAuth2Discovery {
                 ", uiLocalesSupported=" + Arrays.toString(uiLocalesSupported) +
                 ", opPolicyUri='" + opPolicyUri + '\'' +
                 ", opTosUri='" + opTosUri + '\'' +
-                ", revocationEndpoint='" + revocationEndpoint + '\'' +
-                ", revocation_endpoint_auth_methods_supported=" + Arrays.toString(revocation_endpoint_auth_methods_supported) +
-                ", revocationEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(revocationEndpointAuthSigningAlgValuesSupported) +
+//                ", revocationEndpoint='" + revocationEndpoint + '\'' +
+//                ", revocation_endpoint_auth_methods_supported=" + Arrays.toString(revocation_endpoint_auth_methods_supported) +
+//                ", revocationEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(revocationEndpointAuthSigningAlgValuesSupported) +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
-                ", introspectionEndpointAuthMethodsSupported=" + Arrays.toString(introspectionEndpointAuthMethodsSupported) +
-                ", introspectionEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(introspectionEndpointAuthSigningAlgValuesSupported) +
+//                ", introspectionEndpointAuthMethodsSupported=" + Arrays.toString(introspectionEndpointAuthMethodsSupported) +
+//                ", introspectionEndpointAuthSigningAlgValuesSupported=" + Arrays.toString(introspectionEndpointAuthSigningAlgValuesSupported) +
                 ", codeChallengeMethodsSupported=" + Arrays.toString(codeChallengeMethodsSupported) +
                 '}';
     }
