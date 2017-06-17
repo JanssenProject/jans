@@ -29,7 +29,7 @@ public class UmaScopeDescription {
     private String inum;
 
     @NotNull
-    @Size(min = 2, max = 500, message = "Length of scope should be between 2 and 500")
+    @Size(min = 2, max = 2083, message = "Length of scope should be between 2 and 500")
 //    @Pattern(regexp = "^[a-zA-Z\\d_]{4,30}$", message = "Invalid Scope Id .Only alphanumeric and underscore are allowed.")
     @LdapAttribute(name = "oxId")
     private String id; // keep scope, id can be url or plain scope (edit, view, delete)

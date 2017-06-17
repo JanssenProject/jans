@@ -157,9 +157,9 @@ public class AppConfiguration implements Configuration {
     private Set<String> httpLoggingExludePaths;
 
     /**
-     * Cookie will be expired after sessionCookieExpiration seconds
+     * SessionState will be expired after sessionStateLifetime seconds
      */
-    private Integer sessionCookieExpiration;
+    private Integer sessionStateLifetime = 86400;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
@@ -1195,11 +1195,11 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
-    public Integer getSessionCookieExpiration() {
-        return sessionCookieExpiration;
+    public Integer getSessionStateLifetime() {
+        return sessionStateLifetime;
     }
 
-    public void setSessionCookieExpiration(Integer sessionCookieExpiration) {
-        this.sessionCookieExpiration = sessionCookieExpiration;
+    public void setSessionStateLifetime(Integer sessionStateLifetime) {
+        this.sessionStateLifetime = sessionStateLifetime;
     }
 }
