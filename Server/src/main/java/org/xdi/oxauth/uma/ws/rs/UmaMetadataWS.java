@@ -68,6 +68,14 @@ public class UmaMetadataWS {
             c.setResponseTypesSupported(new String[]{
                     ResponseType.CODE.getValue(), ResponseType.ID_TOKEN.getValue(), ResponseType.TOKEN.getValue()
             });
+            c.setTokenEndpointAuthMethodsSupported(appConfiguration.getTokenEndpointAuthMethodsSupported().toArray(new String[appConfiguration.getTokenEndpointAuthMethodsSupported().size()]));
+            c.setTokenEndpointAuthSigningAlgValuesSupported(appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported().toArray(new String[appConfiguration.getTokenEndpointAuthSigningAlgValuesSupported().size()]));
+            c.setUiLocalesSupported(appConfiguration.getUiLocalesSupported().toArray(new String[appConfiguration.getUiLocalesSupported().size()]));
+            c.setOpTosUri(appConfiguration.getOpTosUri());
+            c.setOpPolicyUri(appConfiguration.getOpPolicyUri());
+            c.setJwksUri(appConfiguration.getJwksUri());
+            c.setServiceDocumentation(appConfiguration.getServiceDocumentation());
+
 
             c.setUmaProfilesSupported(new String[0]);
             c.setRegistrationEndpoint(baseEndpointUri + "/oxauth/register");
