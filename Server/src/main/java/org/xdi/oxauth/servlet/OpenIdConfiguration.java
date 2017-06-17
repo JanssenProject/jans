@@ -94,11 +94,10 @@ public class OpenIdConfiguration extends HttpServlet {
 
             JSONArray scopesSupported = new JSONArray();
             for (Scope scope : scopeService.getAllScopesList()) {
-                boolean isUmaAuthorization = UmaScopeType.AUTHORIZATION.getValue()
-                        .equals(scope.getDisplayName());
-                boolean isUmaProtection = UmaScopeType.PROTECTION.getValue().equals(scope.getDisplayName());
-                if (!isUmaAuthorization && !isUmaProtection)
-                    scopesSupported.put(scope.getDisplayName());
+                if (UmaScopeType.PROTECTION.getValue().equals(scope.getDisplayName())) {
+                    continue;
+                }
+                scopesSupported.put(scope.getDisplayName());
             }
             if (scopesSupported.length() > 0) {
                 jsonObj.put(SCOPES_SUPPORTED, scopesSupported);
