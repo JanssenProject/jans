@@ -2129,6 +2129,12 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.364 NAME 'oxIncludeClaimsInIdToken'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.365 NAME 'oxClaimValues'
+  DESC 'Claim values'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.1 NAME 'pairwiseIdentifier'
   SUP ( top )
   STRUCTURAL
@@ -2261,23 +2267,23 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.22 NAME 'oxApplicationConfiguration'
   MUST ( objectclass )
   MAY ( ou $ oxConfApplication $ oxRevision )
   X-ORIGIN 'Gluu created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.23 NAME 'oxAuthUmaResourceSet'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.23 NAME 'oxUmaResource'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxUrl )
+  MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ description )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.24 NAME 'oxAuthUmaScopeDescription'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyRule $ oxPolicyScriptDn $ oxRevision $ oxType $ oxUrl )
+  MAY ( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ description $ oxId $ oxPolicyScriptDn $ oxRevision )
   X-ORIGIN 'Gluu created objectclass' )
-objectClasses: ( 1.3.6.1.4.1.48710.1.4.25 NAME 'oxAuthUmaResourceSetPermission'
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.25 NAME 'oxUmaResourcePermission'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxAmHost $ oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxHost $ oxResourceSetId $ oxTicket )
+  MAY ( oxStatus $ oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxResourceSetId $ oxTicket )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.26 NAME 'oxAuthGrant'
   SUP ( top )
@@ -2295,7 +2301,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.28 NAME 'oxAuthUmaRPT'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxAmHost $ oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
+  MAY ( oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.29 NAME 'oxLiteralNode'
   SUP ( top )
@@ -2422,5 +2428,11 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.49 NAME 'oxShibbolethCASProtocolConfigura
   STRUCTURAL
   MUST ( objectclass )
   MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxConfApplication $ oxRevision )
+  X-ORIGIN 'Gluu created objectclass' )
+objectClasses: ( 1.3.6.1.4.1.48710.1.4.50 NAME 'oxAuthUmaPCT'
+  SUP ( top )
+  STRUCTURAL
+  MUST ( objectclass )
+  MAY ( oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxClaimValues )
   X-ORIGIN 'Gluu created objectclass' )
 
