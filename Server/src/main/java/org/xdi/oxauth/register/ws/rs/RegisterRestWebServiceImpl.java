@@ -6,66 +6,6 @@
 
 package org.xdi.oxauth.register.ws.rs;
 
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.TOS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-import static org.xdi.oxauth.model.util.StringUtils.toList;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -100,6 +40,22 @@ import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.net.URI;
+import java.util.*;
+
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+import static org.xdi.oxauth.model.util.StringUtils.toList;
 
 /**
  * Implementation for register REST web services.
@@ -175,6 +131,15 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                 if (r.getIdTokenSignedResponseAlg() == null) {
                     r.setIdTokenSignedResponseAlg(SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm()));
+                }
+
+                if (r.getClaimsRedirectUris() != null && !r.getClaimsRedirectUris().isEmpty()) {
+                    if (!registerParamsValidator.validateRedirectUris(r.getApplicationType(), r.getSubjectType(), r.getClaimsRedirectUris(), r.getSectorIdentifierUri())) {
+                        log.error("Value of one or more claims_redirect_uris is invalid, claims_redirect_uris: " + r.getClaimsRedirectUris());
+                        throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
+                                .entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLAIMS_REDIRECT_URI))
+                                .build());
+                    }
                 }
 
                 if (r.getIdTokenSignedResponseAlg() != SignatureAlgorithm.NONE) {
@@ -293,6 +258,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<String>(new HashSet<String>(redirectUris)); // Remove repeated elements
             p_client.setRedirectUris(redirectUris.toArray(new String[redirectUris.size()]));
+        }
+        List<String> claimsRedirectUris = requestObject.getClaimsRedirectUris();
+        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
+            claimsRedirectUris = new ArrayList<String>(new HashSet<String>(claimsRedirectUris)); // Remove repeated elements
+            p_client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[claimsRedirectUris.size()]));
         }
         if (requestObject.getApplicationType() != null) {
             p_client.setApplicationType(requestObject.getApplicationType().toString());
@@ -560,6 +530,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 client.getClientSecretExpiresAt().getTime() / 1000 : 0);
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS.toString(), client.getRedirectUris());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS_REDIRECT_URIS.toString(), client.getClaimRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RESPONSE_TYPES.toString(), ResponseType.toStringArray(client.getResponseTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), client.getGrantTypes());
         Util.addToJSONObjectIfNotNull(responseJsonObject, APPLICATION_TYPE.toString(), client.getApplicationType());
