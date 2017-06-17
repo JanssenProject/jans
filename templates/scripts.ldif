@@ -670,14 +670,13 @@ programmingLanguage: python
 dn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
-description: Sample UMA Authorization policy
+description: Sample UMA RPT Policy
 displayName: uma_rpt_policy
 gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F995
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
 oxLevel: 100
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-oxRevision: 1
 oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51bWEgaW1wb3J0IEF1dGhvcml6YXRpb25Qb2xpY3lUeXBlDQpmcm9tIG9yZy54ZGkudXRpbCBpbXBvcnQgU3RyaW5nS
  GVscGVyLCBBcnJheUhlbHBlcg0KZnJvbSBqYXZhLnV0aWwgaW1wb3J0IEFycmF5cywgQXJyYXlMaXN0LCBIYXNoU2V0DQpmcm9tIG9yZy54ZGkub3hhdXRoLnNlcnZpY2UudW1hLmF1dGhvcml6YXRp
  b24gaW1wb3J0IEF1dGhvcml6YXRpb25Db250ZXh0DQoNCmltcG9ydCBqYXZhDQoNCmNsYXNzIEF1dGhvcml6YXRpb25Qb2xpY3koQXV0aG9yaXphdGlvblBvbGljeVR5cGUpOg0KICAgIGRlZiBfX2l
@@ -705,6 +704,18 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51bWEgaW1wb3J0IEF1d
  AgaSA9IDANCiAgICAgICAgY291bnQgPSBsZW4oYWxsb3dlZENsaWVudHNMaXN0QXJyYXkpDQogICAgICAgIHdoaWxlIChpIDwgY291bnQpOg0KICAgICAgICAgICAgY2xpZW50ID0gYWxsb3dlZENsa
  WVudHNMaXN0QXJyYXlbaV0NCiAgICAgICAgICAgIGNsaWVudHNTZXQuYWRkKGNsaWVudCkNCiAgICAgICAgICAgIGkgPSBpICsgMQ0KDQogICAgICAgIHJldHVybiBjbGllbnRzU2V0DQo=
 oxScriptType: uma_rpt_policy
+programmingLanguage: python
+
+dn: inum=%(inumOrg)s!0011!2DAF.F996,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Sample UMA Claims Gathering
+displayName: uma_claims_gathering
+gluuStatus: false
+inum: %(inumOrg)s!0011!2DAF.F995
+oxLevel: 1
+oxScript::
+oxScriptType: uma_claims_gathering
 programmingLanguage: python
 
 dn: inum=%(inumOrg)s!0011!4BBE.C6A8,ou=scripts,o=%(inumOrg)s,o=gluu
