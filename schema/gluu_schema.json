@@ -3964,7 +3964,18 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
-        }    
+        },
+        {
+            "desc": "Claim Redirect URI",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxClaimRedirectURI"
+            ],
+            "oid": "oxAttribute:366",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        }
     ],
     "objectClasses": [
         {
@@ -4578,6 +4589,7 @@
                 "oxAuthUserInfoEncryptedResponseAlg",
                 "oxAuthUserInfoEncryptedResponseEnc",
                 "oxAuthExtraConf",
+                "oxClaimRedirectURI",
                 "oxLastAccessTime",
                 "oxLastLogonTime",
                 "oxPersistClientAuthorizations",
