@@ -131,6 +131,11 @@
 										value="#{registrationAction.redirectUris}" size="40" />
 									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
 
+									<h:outputLabel for="claimsRedirectUris">Claims Redirect URIs (space-separated)</h:outputLabel>
+									<h:inputText id="claimsRedirectUris"
+												 value="#{registrationAction.claimsRedirectUris}" size="40" />
+									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/uma/gather_claims</h:outputText>
+
 									<h:outputLabel for="postLogoutRedirectUris">Post Logout Redirect URIs (space-separated)</h:outputLabel>
 									<h:inputText id="postLogoutRedirectUris"
 										value="#{registrationAction.postLogoutRedirectUris}" size="40" />
