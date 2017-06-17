@@ -35,7 +35,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 	@ArquillianResource
 	private URI url;
 
-	private static Token m_authorization;
+	private static Token authorization;
 	private static Token tokenToIntrospect;
 
 	@Test
@@ -43,18 +43,18 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 			"umaRedirectUri" })
 	public void requestAuthorization(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-		m_authorization = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+		authorization = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(m_authorization);
+		UmaTestUtil.assert_(authorization);
 	}
 
 	@Test(dependsOnMethods = "requestAuthorization")
-	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret",
+	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
 			"umaRedirectUri" })
 	public void requestTokenToIntrospect(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-			String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-		tokenToIntrospect = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
-				umaAatClientSecret, umaRedirectUri);
+			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
+		tokenToIntrospect = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+				umaPatClientSecret, umaRedirectUri);
 		UmaTestUtil.assert_(tokenToIntrospect);
 	}
 
@@ -64,7 +64,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + introspectionPath).request();
 
 		request.header("Accept", "application/json");
-		request.header("Authorization", "Bearer " + m_authorization.getAccessToken());
+		request.header("Authorization", "Bearer " + authorization.getAccessToken());
 		Response response = request.post(Entity.form(new Form("token", tokenToIntrospect.getAccessToken())));
 
 		String entity = response.readEntity(String.class);
