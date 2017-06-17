@@ -105,7 +105,17 @@ public enum UmaErrorResponseType implements IErrorType {
 	 * At least one of the scopes included in the request was not registered previously by this host.
 	 */
 	INVALID_RESOURCE_SCOPE("invalid_scope"),
-	
+
+	/**
+	 * The provided client_id is not valid.
+	 */
+	INVALID_CLIENT_ID("invalid_client_id"),
+
+	/**
+	 * The provided invalid_claims_redirect_uri is not valid.
+	 */
+	INVALID_CLAIMS_REDIRECT_URI("invalid_claims_redirect_uri"),
+
 	/**
 	 * The provided ticket was not found at the AS.
 	 */

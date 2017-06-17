@@ -26,6 +26,7 @@ import org.xdi.oxauth.model.jws.RSASigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.ClaimTokenFormatType;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
@@ -33,16 +34,17 @@ import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
+import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
@@ -90,6 +92,9 @@ public class UmaValidationService {
 
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
+
+    @Inject
+    private ClientService clientService;
 
     public AuthorizationGrant assertHasProtectionScope(String authorization) {
         return validateAuthorization(authorization, UmaScopeType.PROTECTION);
@@ -337,9 +342,7 @@ public class UmaValidationService {
         }
         if (result.isEmpty()) {
             log.error("There are no any scopes requested in give request.");
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.INVALID_RESOURCE_SCOPE)).build());
-
+            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
         }
         log.trace("CandidateGrantedScopes: " + Joiner.on(", ").join(Iterables.transform(result.keySet(), new Function<UmaScopeDescription, String>() {
             @Override
@@ -348,5 +351,24 @@ public class UmaValidationService {
             }
         })));
         return result;
+    }
+
+    public Client validateClientWithRedirect(String clientId, String claimsRedirectUri) {
+        if (StringUtils.isBlank(clientId)) {
+            log.error("Invalid clientId: {}", clientId);
+            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLIENT_ID);
+        }
+        Client client = clientService.getClient(clientId);
+        if (client == null) {
+            log.error("Failed to find client with client_id: {}", clientId);
+            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLIENT_ID);
+        }
+
+        if (StringUtils.isBlank(claimsRedirectUri)) {
+            log.error("Invalid claimsRedirectUri: {}", claimsRedirectUri);
+            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI);
+        }
+
+        return client;
     }
 }
