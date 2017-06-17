@@ -101,6 +101,9 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getRedirectUris() != null && !getRequest().getRedirectUris().isEmpty()) {
                     requestBody.put(REDIRECT_URIS.toString(), new JSONArray(getRequest().getRedirectUris()));
                 }
+                if (getRequest().getClaimsRedirectUris() != null && !getRequest().getClaimsRedirectUris().isEmpty()) {
+                    requestBody.put(CLAIMS_REDIRECT_URIS.toString(), new JSONArray(getRequest().getClaimsRedirectUris()));
+                }
                 if (getRequest().getResponseTypes() != null && !getRequest().getResponseTypes().isEmpty()) {
                     requestBody.put(RESPONSE_TYPES.toString(), new JSONArray(getRequest().getResponseTypes()));
                 }

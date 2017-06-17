@@ -20,6 +20,12 @@ public enum RegisterErrorResponseType implements IErrorType {
      * Value of one or more redirect_uris is invalid.
      */
     INVALID_REDIRECT_URI("invalid_redirect_uri"),
+
+    /**
+     * Value of one or more claims_redirect_uris is invalid.
+     */
+    INVALID_CLAIMS_REDIRECT_URI("invalid_claims_redirect_uri"),
+
     /**
      * The value of one of the Client Metadata fields is invalid and the server has rejected this request.
      * Note that an Authorization Server MAY choose to substitute a valid value for any requested parameter

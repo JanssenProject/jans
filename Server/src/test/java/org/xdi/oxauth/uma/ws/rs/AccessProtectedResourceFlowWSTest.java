@@ -49,16 +49,8 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
 	}
 
-	@Test(dependsOnMethods = "init_1")
-	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret",
-			"umaRedirectUri" })
-	public void init_2(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-			String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-        // todo uma2
-	}
-
-	@Test(dependsOnMethods = { "init_2" })
-	@Parameters({ "umaRptPath", })
+	@Test(dependsOnMethods = { "init_1" })
+	@Parameters({ "umaRptPath"})
 	public void init(String umaRptPath) {
 		rpt = TUma.requestRpt(url, umaRptPath);
 		UmaTestUtil.assert_(rpt);
