@@ -162,8 +162,7 @@ public class UmaTokenWS {
         }
 
         log.error("Failed to handle request to UMA Token Endpoint.");
-        throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(errorResponseFactory.getUmaJsonErrorResponse(UmaErrorResponseType.SERVER_ERROR)).build());
+        throw new UmaWebException(Response.Status.INTERNAL_SERVER_ERROR, errorResponseFactory, UmaErrorResponseType.SERVER_ERROR);
     }
 
     private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes) {
