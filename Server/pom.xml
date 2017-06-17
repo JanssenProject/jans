@@ -31,7 +31,7 @@
 				<includes>
 					<include>**/*.xml</include>
 					<include>**/*.properties</include>
-					<include>META-INF/services/*.*</include>
+					<include>META-INF/navigation/*.navigation.xml</include>
 				</includes>
 			</resource>
 		</resources>
@@ -140,9 +140,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<argLine>-Dsun.lang.ClassLoader.allowArraySyntax=true
-						-Dcatalina.base=${project.build.directory}
-						-Dgluu.base=${project.build.directory}
+					<argLine>-Dgluu.base=${project.build.directory}
+						-Dserver.base=${project.build.directory}
+						-Dlog.base=${project.build.directory}
 					</argLine>
 				</configuration>
 			</plugin>
@@ -174,6 +174,7 @@
 							<directory>src/main/webapp</directory>
 							<filtering>false</filtering>
 							<includes>
+								<include>META-INF/navigation/*.navigation.xml</include>
 								<include>**/*.xhtml</include>
 								<include>**/*.jsp</include>
 								<include>**/*.html</include>
@@ -224,30 +225,11 @@
 					<scanIntervalSeconds>3</scanIntervalSeconds>
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>exec-maven-plugin</artifactId>
-				<groupId>org.codehaus.mojo</groupId>
-				<executions>
-					<execution><!-- Run our version calculation script -->
-						<id>native2ascii</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>exec</goal>
-						</goals>
-						<configuration>
-							<executable>${basedir}/src/main/resources/scripts/native2ascii.sh</executable>
-							<arguments>
-								<argument>${basedir}/src/main/resources/messages*.properties</argument>
-							</arguments>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- oxAuth -->
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxauth-model</artifactId>
@@ -261,6 +243,15 @@
 			<artifactId>oxauth-static</artifactId>
 		</dependency>
 
+		<!-- Gluu -->
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-util</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-ldap-annotations</artifactId>
@@ -281,18 +272,15 @@
 			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-jsf-util</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.xdi</groupId>
-			<artifactId>oxcore-util</artifactId>
-		</dependency>
 
-		<dependency>
-			<groupId>org.gluu</groupId>
-			<artifactId>oxeleven-client</artifactId>
-		</dependency>
+		<!-- oxEleven -->
 		<dependency>
 			<groupId>org.gluu</groupId>
 			<artifactId>oxeleven-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxeleven-client</artifactId>
 		</dependency>
 
 		<!-- Weld -->
@@ -348,10 +336,6 @@
 			<artifactId>commons-digester</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
@@ -372,10 +356,6 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.lmax</groupId>
-			<artifactId>disruptor</artifactId>
 		</dependency>
 
 		<!-- Security -->
@@ -619,6 +599,11 @@
 					<artifactId>weld-jsf</artifactId>
 				</dependency>
 
+				<dependency>
+				    <groupId>org.hibernate</groupId>
+				    <artifactId>hibernate-validator-cdi</artifactId>
+				</dependency>
+
 		        <dependency>
 		            <groupId>org.jboss.spec.javax.ejb</groupId>
 		            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
@@ -681,6 +666,7 @@
 									<directory>src/main/webapp</directory>
 									<filtering>false</filtering>
 									<includes>
+										<include>META-INF/navigation/*.navigation.xml</include>
 										<include>**/*.xhtml</include>
 										<include>**/*.jsp</include>
 										<include>**/*.html</include>
@@ -946,6 +932,37 @@
 			</dependencies>
 		</profile>
 
+		<profile>
+			<id>native2ascii</id>
+			<activation>
+				<os>
+					<family>unix</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>exec-maven-plugin</artifactId>
+						<groupId>org.codehaus.mojo</groupId>
+						<executions>
+							<execution><!-- Run our version calculation script -->
+								<id>native2ascii</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>${basedir}/src/main/resources/scripts/native2ascii.sh</executable>
+									<arguments>
+										<argument>${basedir}/src/main/resources/messages*.properties</argument>
+									</arguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 </project>
