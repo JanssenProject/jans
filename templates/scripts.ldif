@@ -671,7 +671,7 @@ dn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA Authorization policy
-displayName: uma_authorization_policy
+displayName: uma_rpt_policy
 gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F995
 oxConfigurationProperty: {"value1":"allowed_clients","value2":"%(scim_rp_client_id)s, %(passport_rp_client_id)s","description":""}
@@ -704,7 +704,7 @@ oxScript:: ZnJvbSBvcmcueGRpLm1vZGVsLmN1c3RvbS5zY3JpcHQudHlwZS51bWEgaW1wb3J0IEF1d
  fY2xpZW50cyBwcm9wZXJ0eSINCiAgICAgICAgICAgIHJldHVybiBjbGllbnRzU2V0DQogICAgICAgIA0KICAgICAgICAjIENvbnZlcnQgdG8gSGFzaFNldCB0byBxdWljayBzZWFyY2gNCiAgICAgIC
  AgaSA9IDANCiAgICAgICAgY291bnQgPSBsZW4oYWxsb3dlZENsaWVudHNMaXN0QXJyYXkpDQogICAgICAgIHdoaWxlIChpIDwgY291bnQpOg0KICAgICAgICAgICAgY2xpZW50ID0gYWxsb3dlZENsa
  WVudHNMaXN0QXJyYXlbaV0NCiAgICAgICAgICAgIGNsaWVudHNTZXQuYWRkKGNsaWVudCkNCiAgICAgICAgICAgIGkgPSBpICsgMQ0KDQogICAgICAgIHJldHVybiBjbGllbnRzU2V0DQo=
-oxScriptType: uma_authorization_policy
+oxScriptType: uma_rpt_policy
 programmingLanguage: python
 
 dn: inum=%(inumOrg)s!0011!4BBE.C6A8,ou=scripts,o=%(inumOrg)s,o=gluu
