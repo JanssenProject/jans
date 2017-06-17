@@ -293,7 +293,7 @@
 	<parameter name="umaConfigurationPath" value="seam/resource/restv1/.well-known/gluu-configuration" />
 
 	<!-- UMA -->
-	<parameter name="umaConfigurationPath" value="seam/resource/restv1/oxauth/uma-configuration" />
+	<parameter name="umaConfigurationPath" value="seam/resource/restv1/oxauth/uma2-configuration" />
 	<parameter name="umaRegisterResourcePath" value="seam/resource/restv1/host/rsrc/resource_set" />
 	<parameter name="umaScopePath" value="seam/resource/restv1/uma/scopes" />
 	<parameter name="umaPermissionPath" value="seam/resource/restv1/host/rsrc_pr" />
