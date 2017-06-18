@@ -5,6 +5,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.service.UmaValidationService;
 
@@ -14,6 +15,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.List;
 
 /**
  * @author yuriyz on 06/04/2017.
@@ -47,7 +49,9 @@ public class UmaGatheringWS {
             log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, queryString: {}"
                     , clientId, ticket, claimRedirectUri, state, httpRequest.getQueryString());
 
-            Client client = umaValidationService.validateClientWithRedirect(clientId, claimRedirectUri);
+            Client client = umaValidationService.validateClientAndClaimsRedirectUri(clientId, claimRedirectUri, state);
+            List<UmaPermission> permissions = umaValidationService.validateTicketWithRedirect(ticket, claimRedirectUri, state);
+
 
             // todo
 
