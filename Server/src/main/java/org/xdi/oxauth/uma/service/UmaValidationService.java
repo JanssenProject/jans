@@ -35,6 +35,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.RedirectionUriService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.uma.authorization.UmaRPT;
@@ -216,8 +217,22 @@ public class UmaValidationService {
 
         List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
         if (permissions == null || permissions.isEmpty()) {
-            log.error("Unable to find permissions registered for given ticket.");
+            log.error("Unable to find permissions registered for given ticket:" + ticket);
             errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_TICKET);
+        }
+        return permissions;
+    }
+
+    public List<UmaPermission> validateTicketWithRedirect(String ticket, String claimsRedirectUri, String state) {
+        if (StringUtils.isBlank(ticket)) {
+            log.error("Ticket is null or blank.");
+            throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_TICKET, state);
+        }
+
+        List<UmaPermission> permissions = permissionService.getPermissionsByTicket(ticket);
+        if (permissions == null || permissions.isEmpty()) {
+            log.error("Unable to find permissions registered for given ticket:" + ticket);
+            throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_TICKET, state);
         }
         return permissions;
     }
@@ -353,7 +368,7 @@ public class UmaValidationService {
         return result;
     }
 
-    public Client validateClientWithRedirect(String clientId, String claimsRedirectUri) {
+    public Client validateClientAndClaimsRedirectUri(String clientId, String claimsRedirectUri, String state) {
         if (StringUtils.isBlank(clientId)) {
             log.error("Invalid clientId: {}", clientId);
             throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLIENT_ID);
@@ -364,11 +379,47 @@ public class UmaValidationService {
             throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLIENT_ID);
         }
 
+        if (StringUtils.isNotBlank(claimsRedirectUri)) {
+            String equalRedirectUri = getEqualRedirectUri(claimsRedirectUri, client.getClaimRedirectUris());
+            if (equalRedirectUri != null) {
+                log.trace("Found match for claims_redirect_uri : " + equalRedirectUri);
+                return client;
+            } else {
+                log.trace("Failed to find match for claims_redirect_uri : " + claimsRedirectUri);
+            }
+        } else {
+            log.trace("claims_redirect_uri is blank");
+            if (client.getClaimRedirectUris() != null && client.getClaimRedirectUris().length == 1) {
+                log.trace("claims_redirect_uri is blank and only one claims_redirect_uri is registered.");
+                return client;
+            }
+        }
+
         if (StringUtils.isBlank(claimsRedirectUri)) {
-            log.error("Invalid claimsRedirectUri: {}", claimsRedirectUri);
+            log.error("claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: " + clientId);
             throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI);
         }
 
-        return client;
+        throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_CLAIMS_REDIRECT_URI, state);
+    }
+
+    private String getEqualRedirectUri(String redirectUri, String[] clientRedirectUris) {
+        final String redirectUriWithoutParams = RedirectionUriService.uriWithoutParams(redirectUri);
+
+        for (String uri : clientRedirectUris) {
+            log.debug("Comparing {} == {}", uri, redirectUri);
+            if (uri.equals(redirectUri)) { // compare complete uri
+                return redirectUri;
+            }
+
+            String uriWithoutParams = RedirectionUriService.uriWithoutParams(uri);
+            final Map<String, String> params = RedirectionUriService.getParams(uri);
+
+            if ((uriWithoutParams.equals(redirectUriWithoutParams) && params.size() == 0 && RedirectionUriService.getParams(redirectUri).size() == 0) ||
+                    uriWithoutParams.equals(redirectUriWithoutParams) && params.size() > 0 && RedirectionUriService.compareParams(redirectUri, uri)) {
+                return redirectUri;
+            }
+        }
+        return null;
     }
 }

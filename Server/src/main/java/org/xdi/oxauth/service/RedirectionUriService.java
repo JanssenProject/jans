@@ -6,15 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.HttpMethod;
-
+import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
 import org.jboss.resteasy.client.ClientRequest;
@@ -27,8 +20,13 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.util.Util;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.HttpMethod;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
@@ -172,7 +170,7 @@ public class RedirectionUriService {
         return null;
 	}
 
-    private Map<String, String> getParams(String uri) {
+    public static Map<String, String> getParams(String uri) {
         Map<String, String> params = new HashMap<String, String>();
 
         if (uri != null) {
@@ -185,7 +183,7 @@ public class RedirectionUriService {
         return params;
     }
 
-    private String uriWithoutParams(String uri) {
+    public static String uriWithoutParams(String uri) {
         if (uri != null) {
             int paramsIndex = uri.indexOf("?");
             if (paramsIndex != -1) {
@@ -195,7 +193,7 @@ public class RedirectionUriService {
         return uri;
     }
 
-    private boolean compareParams(String uri1, String uri2) {
+    public static boolean compareParams(String uri1, String uri2) {
         if (StringUtils.isBlank(uri1) || StringUtils.isBlank(uri2)) {
             return false;
         }
