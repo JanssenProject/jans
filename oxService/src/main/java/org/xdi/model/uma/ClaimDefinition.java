@@ -96,4 +96,15 @@ public class ClaimDefinition {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "ClaimDefinition{" +
+                "claimTokenFormat=" + claimTokenFormat +
+                ", claimType='" + claimType + '\'' +
+                ", friendlyName='" + friendlyName + '\'' +
+                ", issuer=" + issuer +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }
