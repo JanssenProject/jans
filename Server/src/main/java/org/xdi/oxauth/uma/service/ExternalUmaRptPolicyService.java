@@ -27,14 +27,15 @@ import java.util.Map;
 /**
  * Provides factory methods needed to create external UMA authorization policies extension
  *
- * @author Yuriy Movchan Date: 01/14/2015
+ * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  */
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
 public class ExternalUmaRptPolicyService extends ExternalScriptService {
 
-	private static final long serialVersionUID = -8609727759114795433L;
+	private static final long serialVersionUID = -8609727759114795435L;
 	
 	@Inject
 	private LookupService lookupService;
@@ -74,38 +75,43 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 		return this.scriptInumMap.get(inum);
 	}
 
+	private static UmaRptPolicyType policyScript(CustomScriptConfiguration script) {
+		return (UmaRptPolicyType) script.getExternalType();
+	}
+
 	public boolean authorize(CustomScriptConfiguration script, UmaAuthorizationContext context) {
 		try {
 			log.debug("Executing python 'authorize' method, script: " + script.getName());
-			UmaRptPolicyType externalType = (UmaRptPolicyType) script.getExternalType();
-			return externalType.authorize(context);
+			boolean result = policyScript(script).authorize(context);
+			log.debug("python 'authorize' result: " + result);
+			return result;
 		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
+			log.error("Failed to execute python 'authorize' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+			return false;
 		}
-		return false;
 	}
 
 	public List<ClaimDefinition> getRequiredClaims(CustomScriptConfiguration script, UmaAuthorizationContext context) {
 		try {
 			log.debug("Executing python 'getRequiredClaims' method, script: " + script.getName());
-			UmaRptPolicyType externalType = (UmaRptPolicyType) script.getExternalType();
-			return externalType.getRequiredClaims(context);
+			List<ClaimDefinition> result = policyScript(script).getRequiredClaims(context);
+			log.debug("python 'getRequiredClaims' result: " + result);
+			return result;
 		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
+			log.error("Failed to execute python 'getRequiredClaims' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+			return new ArrayList<ClaimDefinition>();
 		}
-		return new ArrayList<ClaimDefinition>();
 	}
 
 	public String getClaimsGatheringScriptName(CustomScriptConfiguration script, UmaAuthorizationContext context) {
 		try {
 			log.debug("Executing python 'getClaimsGatheringScriptName' method, script: " + script.getName());
-			UmaRptPolicyType externalType = (UmaRptPolicyType) script.getExternalType();
-			return externalType.getClaimsGatheringScriptName(context);
+			String result = policyScript(script).getClaimsGatheringScriptName(context);
+			log.debug("python 'getClaimsGatheringScriptName' result: " + result);
+			return result;
 		} catch (Exception ex) {
-			log.error(ex.getMessage(), ex);
+			log.error("Failed to execute python 'getClaimsGatheringScriptName' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+			return "";
 		}
-		return "";
 	}
-
-
 }

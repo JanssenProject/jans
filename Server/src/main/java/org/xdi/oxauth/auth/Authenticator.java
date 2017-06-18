@@ -258,7 +258,7 @@ public class Authenticator {
 				// Reload session state
 				sessionState = sessionStateService.getSessionState();
 
-				// Reset to pecified step
+				// Reset to specified step
 				sessionStateService.resetToStep(sessionState, overridenNextStep);
 
 				this.authStep = overridenNextStep;

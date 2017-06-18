@@ -288,6 +288,7 @@ public class UmaValidationService {
                 RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.fromString(algorithm), publicKey);
                 boolean signature = rsaSigner.validate(idToken);
                 if (signature) {
+                    log.debug("ID Token is successfully validated.");
                     return true;
                 }
                 log.error("ID Token signature is invalid.");
@@ -296,7 +297,7 @@ public class UmaValidationService {
             }
             return false;
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to validate id_token. Message: " + e.getMessage(), e);
             return false;
         }
     }
@@ -321,6 +322,7 @@ public class UmaValidationService {
             if (pct != null) {
                 pct.checkExpired();
                 if (pct.isValid()) {
+                    log.trace("PCT is validated successfully, pct: " + pctCode);
                     return pct;
                 } else {
                     log.error("PCT is not valid. Revoked: " + pct.isRevoked() + ", Expired: " + pct.isExpired() + ", pctCode: " + pctCode);
@@ -385,7 +387,7 @@ public class UmaValidationService {
                 log.trace("Found match for claims_redirect_uri : " + equalRedirectUri);
                 return client;
             } else {
-                log.trace("Failed to find match for claims_redirect_uri : " + claimsRedirectUri);
+                log.trace("Failed to find match for claims_redirect_uri : " + claimsRedirectUri + ", client claimRedirectUris: " + Arrays.toString(client.getClaimRedirectUris()));
             }
         } else {
             log.trace("claims_redirect_uri is blank");
