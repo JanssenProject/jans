@@ -26,8 +26,6 @@ import java.util.*;
 
 public class UmaAuthorizationContext extends ExternalScriptContext {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(UmaAuthorizationContext.class);
-
     private final Claims claims;
     private final Map<UmaScopeDescription, Boolean> scopes; // scope and boolean, true - if client requested scope and false if it is permission ticket scope
     private final Set<UmaResource> resources;
@@ -48,10 +46,6 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         this.claims = claims;
         this.scriptDn = scriptDn;
         this.configurationAttributes = configurationAttributes != null ? configurationAttributes : new HashMap<String, SimpleCustomProperty>();
-    }
-
-    public static Logger getLogger() {
-        return LOGGER;
     }
 
     public String getScriptDn() {
