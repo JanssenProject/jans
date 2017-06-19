@@ -88,10 +88,9 @@
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
 
-
-    <AsyncLogger name="org.xdi.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
-        <AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE"/>
-    </AsyncLogger>
+		<Logger name="org.xdi.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE" />
+		</Logger>
 
 		<Logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />
