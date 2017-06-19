@@ -705,8 +705,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Asimba. Get mapped user. Setting attribute '%s' value '%s'" % (localAttribute, localAttributeValue)
                 newUser.setAttribute(localAttribute, localAttributeValue)
             else:
-                # Remove attribute which not exists in Saml response
-                newUser.setAttribute(localAttribute, ArrayList())
+                if newUser.getAttribute(localAttribute) == None:
+                    newUser.setAttribute(localAttribute, ArrayList())
 
         return newUser
 
