@@ -424,4 +424,14 @@ public class UmaValidationService {
         }
         return null;
     }
+
+    public String[] validatesGatheringScriptNames(String scriptNamesAsString, String claimsRedirectUri, String state) {
+        if (StringUtils.isNotBlank(scriptNamesAsString)) {
+            final String[] scriptNames = scriptNamesAsString.split(" ");
+            if (ArrayUtils.isNotEmpty(scriptNames)) {
+                return scriptNames;
+            }
+        }
+        throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_CLAIMS_GATHERING_SCRIPT_NAME, state);
+    }
 }
