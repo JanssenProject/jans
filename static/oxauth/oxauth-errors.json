@@ -236,6 +236,16 @@
             "uri":null
         },
         {
+            "id":"invalid_claims_gathering_script_name",
+            "description":"The claims-gathering script name is not provided or otherwise failed to load script with this name(s).",
+            "uri":null
+        },
+        {
+            "id":"invalid_ticket",
+            "description":"The provided ticket was not found at the AS.",
+            "uri":null
+        },
+        {
             "id":"invalid_client_id",
             "description":"The provided client_id is not valid.",
             "uri":null
