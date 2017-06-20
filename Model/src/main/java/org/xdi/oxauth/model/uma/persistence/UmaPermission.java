@@ -6,13 +6,13 @@
 
 package org.xdi.oxauth.model.uma.persistence;
 
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import com.google.common.collect.Maps;
+import org.gluu.site.ldap.persistence.annotation.*;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * UMA permission
@@ -23,6 +23,8 @@ import java.util.List;
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxUmaResourcePermission"})
 public class UmaPermission {
+
+    public static final String PCT_DN = "pctDn";
 
     @LdapDN
     private String dn;
@@ -40,6 +42,10 @@ public class UmaPermission {
     private String resourceId;
     @LdapAttribute(name = "oxAuthUmaScope")
     private List<String> scopeDns;
+
+    @LdapJsonObject
+    @LdapAttribute(name = "oxAttributes")
+    private Map<String, String> attributes;
 
     private boolean expired;
 
@@ -125,6 +131,17 @@ public class UmaPermission {
 
     public void setScopeDns(List<String> p_scopeDns) {
         scopeDns = p_scopeDns;
+    }
+
+    public Map<String, String> getAttributes() {
+        if (attributes == null) {
+            attributes = Maps.newHashMap();
+        }
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes != null ? attributes : new HashMap<String, String>();
     }
 
     @Override

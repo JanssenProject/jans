@@ -24,10 +24,7 @@ import org.xdi.util.INumGenerator;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Holds permission tokens and permissions
@@ -189,7 +186,7 @@ public class UmaPermissionService {
         return ldapEntryManager.contains(SimpleBranch.class, getBranchDn(clientDn));
     }
 
-    public String changeTicket(List<UmaPermission> permissions) {
+    public String changeTicket(List<UmaPermission> permissions, Map<String, String> attributes) {
         String newTicket = generateNewTicket();
         if (permissions == null || !permissions.isEmpty()) {
             return newTicket;
@@ -201,6 +198,7 @@ public class UmaPermissionService {
             String dn = String.format("oxTicket=%s,%s", newTicket, StringUtils.substringAfter(permission.getDn(), ","));
             permission.setTicket(newTicket);
             permission.setDn(dn);
+            permission.setAttributes(attributes);
             ldapEntryManager.persist(permission);
         }
         return newTicket;
