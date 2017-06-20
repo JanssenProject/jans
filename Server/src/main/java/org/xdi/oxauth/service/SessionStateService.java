@@ -56,14 +56,15 @@ import java.util.concurrent.TimeUnit;
 
 @Stateless
 @Named
-public class SessionStateService  {
+public class SessionStateService {
 
-	public static final String SESSION_STATE_COOKIE_NAME = "session_state";
+    public static final String SESSION_STATE_COOKIE_NAME = "session_state";
+    public static final String UMA_SESSION_STATE_COOKIE_NAME = "uma_session_state";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
     @Inject
     private Logger log;
-    
+
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
 
@@ -111,7 +112,7 @@ public class SessionStateService  {
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
             String sessionAcr = getAcr(session);
-            
+
             if (StringUtils.isBlank(sessionAcr)) {
                 log.error("Failed to fetch acr from session, attributes: " + sessionAttributes);
                 return session;
@@ -237,10 +238,11 @@ public class SessionStateService  {
         return null;
     }
 
-    public void createSessionStateCookie(String sessionState, HttpServletResponse httpResponse) {
+    public void createSessionStateCookie(String sessionState, HttpServletResponse httpResponse, boolean isUma) {
         // Create the special cookie header with secure flag but not HttpOnly because the session_state
         // needs to be read from the OP iframe using JavaScript
-        String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
+        String cookieName = isUma ? UMA_SESSION_STATE_COOKIE_NAME : SESSION_STATE_COOKIE_NAME;
+        String header = cookieName + "=" + sessionState;
         header += "; Path=/";
         header += "; Secure";
 
@@ -249,36 +251,23 @@ public class SessionStateService  {
         }
 
         Integer sessionStateLifetime = appConfiguration.getSessionStateLifetime();
-        if(sessionStateLifetime != null) {
+        if (sessionStateLifetime != null) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
             Calendar expirationDate = Calendar.getInstance();
             expirationDate.add(Calendar.SECOND, sessionStateLifetime);
-            header += "; Expires="+formatter.format(expirationDate.getTime())+";";
+            header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
         }
 
         httpResponse.addHeader("Set-Cookie", header);
     }
 
-    public void createSessionStateCookie(String sessionState) {
+    public void createSessionStateCookie(String sessionState, boolean isUma) {
         try {
             final Object response = externalContext.getResponse();
             if (response instanceof HttpServletResponse) {
                 final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-                createSessionStateCookie(sessionState, httpResponse);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    public void removeSessionStateCookie() {
-        try {
-            if (facesContext != null && externalContext != null) {
-                final Object response = externalContext.getResponse();
-                if (response instanceof HttpServletResponse) {
-                    removeSessionStateCookie((HttpServletResponse) response);
-                }
+                createSessionStateCookie(sessionState, httpResponse, isUma);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -287,6 +276,13 @@ public class SessionStateService  {
 
     public void removeSessionStateCookie(HttpServletResponse httpResponse) {
         final Cookie cookie = new Cookie(SESSION_STATE_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
+        httpResponse.addCookie(cookie);
+    }
+
+    public void removeUmaSessionStateCookie(HttpServletResponse httpResponse) {
+        final Cookie cookie = new Cookie(UMA_SESSION_STATE_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
         cookie.setPath("/");
         cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
         httpResponse.addCookie(cookie);
@@ -406,7 +402,7 @@ public class SessionStateService  {
 
     public SessionState setSessionStateAuthenticated(SessionState sessionState, String p_userDn) {
         sessionState.setUserDn(p_userDn);
-       	sessionState.setAuthenticationTime(new Date());
+        sessionState.setAuthenticationTime(new Date());
         sessionState.setState(SessionIdState.AUTHENTICATED);
 
         boolean persisted = updateSessionState(sessionState, true, true, true);
@@ -426,7 +422,7 @@ public class SessionStateService  {
         try {
             final int unusedLifetime = appConfiguration.getSessionIdUnusedLifetime();
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
-            	sessionState.setLastUsedAt(new Date());
+                sessionState.setLastUsedAt(new Date());
 
                 sessionState.setPersisted(true);
                 log.trace("sessionStateAttributes: " + sessionState.getPermissionGrantedMap());
@@ -487,7 +483,7 @@ public class SessionStateService  {
                         log.error("Session state lifetime configuration is null.");
                     }
                 }
-            	
+
             	if (update) {
             		try {
 						mergeWithRetry(sessionState, 3);
@@ -532,7 +528,7 @@ public class SessionStateService  {
 						continue;
 					}
 				}
-				
+
 				throw ex;
 			}
 		}
