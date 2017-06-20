@@ -128,7 +128,7 @@ class Exporter(object):
         logging.info('Creating backup of files')
         for folder in self.foldersToBackup:
             try:
-                copy_tree(folder, self.backupDir + self.folder)
+                copy_tree(folder, self.backupDir + folder)
             except:
                 logging.error("Failed to backup %s", folder)
                 logging.debug(traceback.format_exc())
@@ -225,7 +225,7 @@ class Exporter(object):
         props['inumOrgFN'] = self.clean(props['inumOrg'])
         props['baseInum'] = props['inumOrg'][:21]
         props['encode_salt'] = self.getOutput(
-            [self.cat, "%s/opt/tomcat/conf/salt" % self.backupDir]
+            [self.cat, "%s/etc/gluu/conf/salt" % self.backupDir]
             ).split("=")[-1].strip()
 
         props['oxauth_client_id'] = self.getProp('oxauth_client_id')
@@ -256,11 +256,20 @@ class Exporter(object):
 
     def export(self):
         # Call the sequence of functions that would backup the various stuff
+        print("-------------------------------------------------------------")
+        print("            Gluu Server Data Export Tool For v3.x            ")
+        print("-------------------------------------------------------------")
+        print("")
         self.prepareLdapPW()
         self.makeFolders()
         self.backupFiles()
         self.getLdif()
         self.genProperties()
+        print("")
+        print("-------------------------------------------------------------")
+        print("The data has been exported to %s" % self.backupDir)
+        print("-------------------------------------------------------------")
+
 
 
 if __name__ == "__main__":
