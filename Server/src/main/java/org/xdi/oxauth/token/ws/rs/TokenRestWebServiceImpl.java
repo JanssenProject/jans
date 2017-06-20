@@ -60,7 +60,7 @@ import com.google.common.base.Strings;
  * @author Javier Rojas Blum
  * @version October 7, 2016
  */
-@Path("/oxauth")
+@Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
 
     @Inject

@@ -151,7 +151,7 @@
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
             <stringProp name="HTTPSampler.protocol">https</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/oxauth/seam/resource/restv1/oxauth/authorize</stringProp>
+            <stringProp name="HTTPSampler.path">/oxauth/restv1/authorize</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -437,7 +437,7 @@ log.info(&quot;login post processor, code : &quot; + code + &quot;, url:&quot; +
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/oxauth/seam/resource/restv1/oxauth/token</stringProp>
+            <stringProp name="HTTPSampler.path">/oxauth/restv1/token</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -547,7 +547,7 @@ vars.put(&quot;client_header&quot;, clientHeader);</stringProp>
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/oxauth/seam/resource/restv1/oxauth/userinfo</stringProp>
+            <stringProp name="HTTPSampler.path">/oxauth/restv1/userinfo</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -1158,7 +1158,7 @@ vars.put(&quot;client_header&quot;, clientHeader);</stringProp>
           <stringProp name="HTTPSampler.response_timeout"></stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">/oxauth/seam/resource/restv1/oxauth/token</stringProp>
+          <stringProp name="HTTPSampler.path">/oxauth/restv1/token</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
