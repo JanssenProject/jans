@@ -89,7 +89,7 @@ public class UmaPermissionRegistrationWS {
         try {
             umaValidationService.assertHasProtectionScope(authorization);
 
-            // UMA2 spec defined to possible requests, single permission or list of permission. So here we parse manually
+            // UMA2 spec defined 2 possible requests, single permission or list of permission. So here we parse manually
             UmaPermissionList permissionList = parseRequest(requestAsString);
             umaValidationService.validatePermissions(permissionList);
 
