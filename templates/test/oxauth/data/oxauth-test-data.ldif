@@ -221,7 +221,7 @@ oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.seam
 oxAuthRedirectURI: https://client.example.com/cb
 oxAuthRedirectURI: https://client.example.com/cb1
 oxAuthRedirectURI: https://client.example.com/cb2
-oxClaimRedirectURI: https://%(hostname)s/oxauth/seam/resource/restv1/uma/gather_claims
+oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
 oxAuthResponseType: token
 oxAuthResponseType: code
 oxAuthResponseType: id_token
@@ -244,7 +244,7 @@ oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_2_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
 oxAuthRedirectURI: https://client.example.com/cb
-oxClaimRedirectURI: https://%(hostname)s/oxauth/seam/resource/restv1/uma/gather_claims
+oxClaimRedirectURI: https://%(hostname)s/oxauth/restv1/uma/gather_claims
 oxAuthResponseType: code
 oxAuthResponseType: id_token
 oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
