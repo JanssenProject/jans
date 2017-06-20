@@ -20,7 +20,7 @@ import org.xdi.oxauth.model.config.WebKeysConfiguration;
  * @author Javier Rojas Blum
  * @version June 15, 2016
  */
-@Path("/oxauth")
+@Path("/")
 public class JwkRestWebServiceImpl implements JwkRestWebService {
 
     @Inject

@@ -35,7 +35,7 @@ import org.xdi.oxauth.service.ScopeService;
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
-@Path("/oxauth")
+@Path("/")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
 	@Inject

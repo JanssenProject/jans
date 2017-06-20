@@ -25,7 +25,7 @@ import javax.servlet.annotation.WebFilter;
 @WebFilter(
         filterName = "CorsFilter",
         asyncSupported = true,
-        urlPatterns = {"/.well-known/*", "/seam/resource/restv1/oxauth/*", "/opiframe"})
+        urlPatterns = {"/.well-known/*", "/restv1/*", "/opiframe"})
 public class CorsFilter extends AbstractCorsFilter {
 
     @Inject
