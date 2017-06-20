@@ -5,13 +5,11 @@ import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
-import org.xdi.oxauth.uma.authorization.Claims;
-import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
-import org.xdi.oxauth.uma.authorization.UmaAuthorizationContextBuilder;
-import org.xdi.oxauth.uma.authorization.UmaNeedInfoResponse;
+import org.xdi.oxauth.uma.authorization.*;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ejb.Stateless;
@@ -31,7 +29,6 @@ import java.util.*;
 @Named
 public class UmaNeedsInfoService {
 
-    public static final String PARAM_GATHERING_ID = "gathering_id";
     @Inject
     private Logger log;
 
@@ -51,10 +48,11 @@ public class UmaNeedsInfoService {
     private ExternalUmaRptPolicyService policyService;
 
     public Map<CustomScriptConfiguration, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<UmaScopeDescription, Boolean> requestedScopes,
-                                                                                  List<UmaPermission> permissions, HttpServletRequest httpRequest) {
+                                                                                  List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest) {
         Set<String> scriptDNs = getScriptDNs(new ArrayList<UmaScopeDescription>(requestedScopes.keySet()));
 
         Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = new HashMap<CustomScriptConfiguration, UmaAuthorizationContext>();
+        Map<String, String> ticketAttributes = new HashMap<String, String>();
 
         List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
 
@@ -78,7 +76,8 @@ public class UmaNeedsInfoService {
 
                 String claimsGatheringScriptName = policyService.getClaimsGatheringScriptName(script, context);
                 if (StringUtils.isNotBlank(claimsGatheringScriptName)) {
-                    context.addRedirectUserParam(PARAM_GATHERING_ID, claimsGatheringScriptName);
+                    context.addRedirectUserParam(UmaConstants.GATHERING_ID, claimsGatheringScriptName);
+                    ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
                 } else {
                     log.error("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
                 }
@@ -88,7 +87,8 @@ public class UmaNeedsInfoService {
         }
 
         if (!missedClaims.isEmpty()) {
-            String newTicket = generateNewTicket(permissions);
+            ticketAttributes.put(UmaPermission.PCT_DN, pct.getDn());
+            String newTicket = permissionService.changeTicket(permissions, ticketAttributes);
 
             UmaNeedInfoResponse needInfoResponse = new UmaNeedInfoResponse();
             needInfoResponse.setTicket(newTicket);
@@ -100,6 +100,13 @@ public class UmaNeedsInfoService {
         }
 
         return scriptMap;
+    }
+
+    private String constructGatheringValue(String existingValue, String claimsGatheringScriptName) {
+        if (StringUtils.isBlank(existingValue)) {
+            return claimsGatheringScriptName;
+        }
+        return existingValue + " " + claimsGatheringScriptName;
     }
 
     private String buildClaimsGatheringRedirectUri(Collection<UmaAuthorizationContext> contexts) {
@@ -129,14 +136,6 @@ public class UmaNeedsInfoService {
             result += "?" + queryParameters;
         }
         return result;
-    }
-
-    private String generateNewTicket(List<UmaPermission> permissions) {
-        if (permissions.isEmpty()) {
-            return permissionService.generateNewTicket();
-        } else {
-            return permissionService.changeTicket(permissions);
-        }
     }
 
     public static Set<String> getScriptDNs(List<UmaScopeDescription> scopes) {
