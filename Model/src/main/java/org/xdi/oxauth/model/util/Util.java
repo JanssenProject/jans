@@ -174,4 +174,11 @@ public class Util {
         return string == null || string.length() == 0;
     }
 
+    public static int parseIntSilently(String intString) {
+        try {
+            return Integer.parseInt(intString);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 }
