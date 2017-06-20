@@ -3975,6 +3975,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Attributes",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxAttributes"
+            ],
+            "oid": "oxAttribute:367",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4780,19 +4791,18 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxAmHost",
                 "oxAuthExpiration",
                 "oxAuthUmaScope",
                 "oxConfigurationCode",
-                "oxHost",
                 "oxResourceSetId",
+                "oxAttributes",
                 "oxTicket"
             ],
             "must": [
                 "objectclass"
             ],
             "names": [
-                "oxAuthUmaResourceSetPermission"
+                "oxUmaResourcePermission"
             ],
             "oid": "oxObjectClass:25",
             "sup": [
