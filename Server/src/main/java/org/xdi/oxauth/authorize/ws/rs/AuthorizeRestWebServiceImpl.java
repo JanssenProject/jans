@@ -96,7 +96,7 @@ import com.wordnik.swagger.annotations.Api;
  * @author Javier Rojas Blum
  * @version December 26, 2016
  */
-@Path("/oxauth")
+@Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
@@ -666,7 +666,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     /**
      * 1) https://ce-dev.gluu.org/oxauth/authorize -> session created with parameter list 1
-     * 2) https://ce-dev.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize -> with parameter list 2
+     * 2) https://ce-dev.gluu.org/oxauth/restv1/authorize -> with parameter list 2
      * <p/>
      * Second call will try to reuse session data from call 1 (parameter list1). Here we overriding them.
      *

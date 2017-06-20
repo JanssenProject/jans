@@ -50,7 +50,7 @@ import com.google.common.collect.Sets;
  * @author Yuriy Zabrovarnyy
  * @version December 15, 2015
  */
-@Path("/oxauth")
+@Path("/")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject
