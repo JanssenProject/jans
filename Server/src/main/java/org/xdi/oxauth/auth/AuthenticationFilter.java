@@ -44,8 +44,7 @@ import java.util.List;
  * @version March 4, 2016
  */
 @WebFilter(asyncSupported = true, urlPatterns = {
-		"/seam/resource/restv1/oxauth/authorize", "/seam/resource/restv1/oxauth/token",
-		"/seam/resource/restv1/oxauth/userinfo"
+		"/restv1/authorize", "/restv1/token", "/restv1/userinfo"
 		}, displayName = "oxAuth"
 )
 public class AuthenticationFilter implements Filter {
