@@ -21,7 +21,6 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.uma.service.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.*;
 import org.xdi.oxauth.uma.service.*;
@@ -43,40 +42,28 @@ public class UmaTokenWS {
 
     @Inject
     private Logger log;
-
     @Inject
     private Identity identity;
-
     @Inject
     private ErrorResponseFactory errorResponseFactory;
-
     @Inject
     private UmaRptService rptService;
-
     @Inject
     private UmaPctService pctService;
-
     @Inject
     private UmaPermissionService permissionService;
-
     @Inject
     private UmaValidationService umaValidationService;
-
     @Inject
     private ClientService clientService;
-
     @Inject
     private TokenService tokenService;
-
     @Inject
     private AppConfiguration appConfiguration;
-
     @Inject
     private WebKeysConfiguration webKeysConfiguration;
-
     @Inject
     private UmaNeedsInfoService umaNeedsInfoService;
-
     @Inject
     private ExternalUmaRptPolicyService policyService;
 
