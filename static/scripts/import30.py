@@ -103,6 +103,7 @@ class Migration(object):
         self.objclasses = 2000
         self.ldap_type = 'openldap'
         self.gluuSchemaDir = '/opt/gluu/schema/openldap/'
+        self.backupVersion = 0
 
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
@@ -235,7 +236,10 @@ class Migration(object):
 
     def copyCustomFiles(self):
         logging.info("Copying the custom pages and assets of webapps.")
-        bu_custom = os.path.join(self.backupDir, 'var', 'gluu', 'webapps')
+        if self.version < 300:
+            bu_custom = os.path.join(self.backupDir, 'var', 'gluu', 'webapps')
+        if self.version >= 300:
+            bu_custom = os.path.join(self.backupDir, 'opt', 'gluu', 'jetty')
 
         dir_map = {'oxauth': 'oxauth', 'oxtrust': 'identity',
                    'pages': 'custom/pages', 'resources': 'custom/static',
@@ -246,6 +250,8 @@ class Migration(object):
         for app in apps:
             for d in dirs:
                 source = os.path.join(bu_custom, app, d)
+                if self.version >= 300:
+                    source = os.path.join(bu_custom, dir_map[app], dir_map[d])
                 dest = os.path.join(self.jettyDir, dir_map[app], dir_map[d])
                 for f in os.listdir(source):
                     if os.path.isdir(os.path.join(source, f)):
@@ -616,6 +622,12 @@ class Migration(object):
         self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
         self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
 
+    def getProp(self, prop):
+        with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
+            for line in f:
+                if prop in line:
+                    return line.split('=')[-1].strip()
+
     def migrate(self):
         """Main function for the migration of backup data
         """
@@ -623,6 +635,7 @@ class Migration(object):
         print("------------------------------------------------------------")
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
+        self.version = int(self.getProp('version').replace('.', '')[0:3])
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
