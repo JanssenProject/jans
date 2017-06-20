@@ -57,6 +57,7 @@ class Exporter(object):
         self.mkdir = '/bin/mkdir'
         self.cat = '/bin/cat'
         self.grep = '/bin/grep'
+        self.hostname = '/bin/hostname'
 
         self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
                           'cn=directory manager,o=gluu', '-j',
@@ -78,9 +79,9 @@ class Exporter(object):
             p = subprocess.Popen(args, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
             output, error = p.communicate()
-            if error and 'Certificate was added to keystore' not in error:
+            if error:
                 logging.error(error)
-            logging.debug(output)
+                logging.debug(output)
             return output
         except:
             logging.error("Error running command : %s" % " ".join(args))
@@ -130,6 +131,7 @@ class Exporter(object):
                 copy_tree(folder, self.backupDir + self.folder)
             except:
                 logging.error("Failed to backup %s", folder)
+                logging.debug(traceback.format_exc())
 
     def getLdif(self):
         logging.info('Creating backup of LDAP data')
