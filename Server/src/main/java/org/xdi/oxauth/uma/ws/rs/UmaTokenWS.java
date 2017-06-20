@@ -109,10 +109,12 @@ public class UmaTokenWS {
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
             Map<UmaScopeDescription, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
+            Client client = identity.getSetSessionClient().getClient();
 
             Claims claims = new Claims(idToken, pct);
+            pct = pctService.updateClaims(pct, idToken, claims, client.getClientId()); // creates new pct if pct is null in request
 
-            Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = umaNeedsInfoService.checkNeedsInfo(claims, scopes, permissions, httpRequest);
+            Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = umaNeedsInfoService.checkNeedsInfo(claims, scopes, permissions, pct, httpRequest);
 
             if (!scriptMap.isEmpty()) {
                 for (Map.Entry<CustomScriptConfiguration, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
@@ -131,8 +133,6 @@ public class UmaTokenWS {
 
             log.trace("Access granted.");
 
-            Client client = identity.getSetSessionClient().getClient();
-
             final boolean upgraded;
             if (rpt == null) {
                 rpt = rptService.createRPTAndPersist(client.getClientId());
@@ -144,8 +144,6 @@ public class UmaTokenWS {
             updatePermissionsWithClientRequestedScope(permissions, scopes);
 
             rptService.addPermissionToRPT(rpt, permissions);
-
-            pct = pctService.updateClaims(pct, idToken, claims, client.getClientId());
 
             UmaTokenResponse response = new UmaTokenResponse();
             response.setAccessToken(rpt.getCode());

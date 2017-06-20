@@ -12,9 +12,7 @@ import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author yuriyz on 06/18/2017.
@@ -36,6 +34,34 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
     @Override
     protected void reloadExternal() {
         this.scriptInumMap = buildExternalConfigurationsInumMap(this.customScriptConfigurations);
+    }
+
+    public CustomScriptConfiguration determineScript(String[] scriptNames) {
+        log.trace("Trying to determine claims-gathering script, scriptNames: {} ...", Arrays.toString(scriptNames));
+
+        List<CustomScriptConfiguration> scripts = new ArrayList<CustomScriptConfiguration>();
+
+        for (String scriptName : scriptNames) {
+            CustomScriptConfiguration script = getCustomScriptConfigurationByName(scriptName);
+            if (script != null) {
+                scripts.add(script);
+            } else {
+                log.error("Failed to load claims-gathering script with name: {}", scriptName);
+            }
+        }
+
+        if (scripts.isEmpty()) {
+            return null;
+        }
+
+        CustomScriptConfiguration highestPriority = Collections.max(scripts, new Comparator<CustomScriptConfiguration>() {
+            @Override
+            public int compare(CustomScriptConfiguration o1, CustomScriptConfiguration o2) {
+                return Integer.compare(o1.getLevel(), o2.getLevel());
+            }
+        });
+        log.trace("Determined claims-gathering script successfully. Name: {}, inum: {}", highestPriority.getName(), highestPriority.getInum());
+        return highestPriority;
     }
 
     private Map<String, CustomScriptConfiguration> buildExternalConfigurationsInumMap(List<CustomScriptConfiguration> customScriptConfigurations) {
