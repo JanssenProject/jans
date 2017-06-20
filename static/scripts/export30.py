@@ -43,7 +43,7 @@ logging.getLogger('').addHandler(console)
 class Exporter(object):
     def __init__(self):
         self.backupDir = 'backup_30'
-        self.fodlersToBackup = ['/etc/certs',
+        self.foldersToBackup = ['/etc/certs',
                                 '/etc/gluu/conf',
                                 '/opt/shibboleth-idp/conf',
                                 '/opt/shibboleth-idp/metadata',
@@ -59,7 +59,7 @@ class Exporter(object):
         self.grep = '/bin/grep'
 
         self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
-                          '"cn=directory manager,o=gluu"', '-j',
+                          'cn=directory manager,o=gluu', '-j',
                           self.passwordFile]
         self.base_dns = ['ou=people',
                          'ou=groups',
@@ -136,7 +136,7 @@ class Exporter(object):
         orgInum = self.getOrgInum()
         # Backup the data
         for basedn in self.base_dns:
-            args = [self.ldapsearch] + self.ldap_creds + [
+            args = [self.ldapsearch] + self.ldapCreds + [
                 '-b', '%s,o=%s,o=gluu' % (basedn, orgInum), 'objectclass=*']
             output = self.getOutput(args)
             ou = basedn.split("=")[-1]
@@ -145,7 +145,7 @@ class Exporter(object):
             f.close()
 
         # Backup the appliance config
-        args = [self.ldapsearch] + self.ldap_creds + \
+        args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
                 'ou=appliances,o=gluu',
                 '-s',
@@ -157,7 +157,7 @@ class Exporter(object):
         f.close()
 
         # Backup the oxtrust config
-        args = [self.ldapsearch] + self.ldap_creds + \
+        args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
                 'ou=appliances,o=gluu',
                 'objectclass=oxTrustConfiguration']
@@ -167,7 +167,7 @@ class Exporter(object):
         f.close()
 
         # Backup the oxauth config
-        args = [self.ldapsearch] + self.ldap_creds + \
+        args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
                 'ou=appliances,o=gluu',
                 'objectclass=oxAuthConfiguration']
@@ -177,7 +177,7 @@ class Exporter(object):
         f.close()
 
         # Backup the trust relationships
-        args = [self.ldapsearch] + self.ldap_creds + [
+        args = [self.ldapsearch] + self.ldapCreds + [
                 '-b', 'ou=appliances,o=gluu', 'objectclass=gluuSAMLconfig']
         output = self.getOutput(args)
         f = open("%s/ldif/trust_relationships.ldif" % self.backupDir, 'w')
@@ -185,7 +185,7 @@ class Exporter(object):
         f.close()
 
         # Backup the org
-        args = [self.ldapsearch] + self.ldap_creds + [
+        args = [self.ldapsearch] + self.ldapCreds + [
                 '-s', 'base', '-b', 'o=%s,o=gluu' % orgInum, 'objectclass=*']
         output = self.getOutput(args)
         f = open("%s/ldif/organization.ldif" % self.backupDir, 'w')
@@ -193,7 +193,7 @@ class Exporter(object):
         f.close()
 
         # Backup o=site
-        args = [self.ldapsearch] + self.ldap_creds + [
+        args = [self.ldapsearch] + self.ldapCreds + [
                 '-b', 'ou=people,o=site', '-s', 'one', 'objectclass=*']
         output = self.getOutput(args)
         f = open("%s/ldif/site.ldif" % self.backupDir, 'w')
