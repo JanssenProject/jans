@@ -65,7 +65,7 @@ import java.util.*;
  * @author Javier Rojas Blum
  * @version May 12, 2017
  */
-@Path("/oxauth")
+@Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject

@@ -109,7 +109,7 @@ error=access_denied
 
 CODE:
 String credentials = clientIdentifier + ":" + clientSecret;
-String tokenUrl = "http://localhost:8080/oxauth/seam/resource/restv1/oxauth/token";
+String tokenUrl = "http://localhost:8080/oxauth/restv1/token";
 TokenClient tokenClient = new TokenClient(tokenUrl);
 TokenResponse response = tokenClient.execAuthorizationCode(authorizationCode, redirectUri, credentials);
 String accessToken = response.getAccessToken();
@@ -142,7 +142,7 @@ jwtToken.validateSignature(credentials));
 8. To validate your accessToken:
 
 CODE:
-validateUrl = "localhost:8080/oxauth/seam/resource/restv1/oxauth/validate";
+validateUrl = "localhost:8080/oxauth/restv1/validate";
 ValidateTokenClient validateTokenClient = new ValidateTokenClient(validateTokenUrl);
 ValidateTokenResponse response = validateTokenClient.execValidateToken(accessToken);
 
