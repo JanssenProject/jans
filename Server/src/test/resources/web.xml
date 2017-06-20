@@ -17,9 +17,9 @@
 
 	<filter-mapping>
 		<filter-name>Authentication Filter</filter-name>
-		<url-pattern>/seam/resource/restv1/oxauth/authorize</url-pattern>
-		<url-pattern>/seam/resource/restv1/oxauth/token</url-pattern>
-		<url-pattern>/seam/resource/restv1/oxauth/userinfo</url-pattern>
+		<url-pattern>/restv1/authorize</url-pattern>
+		<url-pattern>/restv1/token</url-pattern>
+		<url-pattern>/restv1/userinfo</url-pattern>
 	</filter-mapping>
 
 	<context-param>
@@ -29,7 +29,7 @@
 
 	<context-param>
 		<param-name>resteasy.servlet.mapping.prefix</param-name>
-		<param-value>/seam/resource/restv1</param-value>
+		<param-value>/restv1</param-value>
 	</context-param>
 
 	<servlet>
