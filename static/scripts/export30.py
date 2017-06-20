@@ -48,7 +48,9 @@ class Exporter(object):
                                 '/opt/shibboleth-idp/conf',
                                 '/opt/shibboleth-idp/metadata',
                                 '/opt/gluu/jetty/identity/custom',
+                                '/opt/gluu/jetty/identity/lib',
                                 '/opt/gluu/jetty/oxauth/custom',
+                                '/opt/gluu/jetty/oxauth/lib',
                                 ]
         self.passwordFile = tempfile.mkstemp()[1]
 
@@ -215,8 +217,8 @@ class Exporter(object):
     def genProperties(self):
         logging.info('Creating setup.properties backup file')
         props = {}
-        props['ldapPass'] = self.getOutput([self.cat, self.passwordFile])
-        props['hostname'] = self.getOutput([self.hostname])
+        props['ldapPass'] = self.getOutput([self.cat, self.passwordFile]).strip()
+        props['hostname'] = self.getOutput([self.hostname]).strip()
         props['inumAppliance'] = self.getOutput(
             [self.grep, "^inum", "%s/ldif/appliance.ldif" % self.backupDir]
         ).split("\n")[0].split(":")[-1].strip()
