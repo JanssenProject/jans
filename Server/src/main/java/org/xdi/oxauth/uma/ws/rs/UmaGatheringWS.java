@@ -1,6 +1,5 @@
 package org.xdi.oxauth.uma.ws.rs;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionState;
@@ -9,9 +8,10 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.service.ExternalUmaClaimsGatheringService;
+import org.xdi.oxauth.uma.service.UmaSessionService;
 import org.xdi.oxauth.uma.service.UmaValidationService;
 
 import javax.inject.Inject;
@@ -34,18 +34,14 @@ public class UmaGatheringWS {
 
     @Inject
     private Logger log;
-
     @Inject
     private ErrorResponseFactory errorResponseFactory;
-
     @Inject
     private UmaValidationService umaValidationService;
-
     @Inject
     private ExternalUmaClaimsGatheringService external;
-
     @Inject
-    private SessionStateService sessionStateService;
+    private UmaSessionService umaSessionService;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -75,14 +71,16 @@ public class UmaGatheringWS {
                 throw new UmaWebException(claimRedirectUri, errorResponseFactory, INVALID_CLAIMS_GATHERING_SCRIPT_NAME, state);
             }
 
-            SessionState session = getSession(httpRequest, httpResponse);
-            configureSession(session);
+            SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
+            int step = umaSessionService.getStep(session);
 
-            session.getSessionAttributes().get("step");
+            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService);
 
-            //external.getPageForStep()
+            external.getPageForStep(script, step, context);
 //            external.getNextStep()
             // todo
+
+            umaSessionService.persist(session);
 
             String redirectUri = claimRedirectUri;
             return Response.status(Response.Status.FOUND)
@@ -97,34 +95,6 @@ public class UmaGatheringWS {
 
         log.error("Failed to handle to UMA Claims Gathering Endpoint.");
         throw new UmaWebException(Response.Status.INTERNAL_SERVER_ERROR, errorResponseFactory, UmaErrorResponseType.SERVER_ERROR);
-    }
-
-    private void configureSession(SessionState session) {
-        // todo
-    }
-
-    private SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieSessionId = sessionStateService.getSessionStateFromCookie();
-        log.trace("Cookie - uma_session_state: " + cookieSessionId);
-
-        if (StringUtils.isNotBlank(cookieSessionId)) {
-            SessionState ldapSessionState = sessionStateService.getSessionState(cookieSessionId);
-            if (ldapSessionState != null) {
-                log.trace("Loaded uma_session_state from cookie, session: " + ldapSessionState);
-                return ldapSessionState;
-            } else {
-                log.error("Failed to load uma_session_state from cookie: " + cookieSessionId);
-            }
-        } else {
-            log.error("uma_session_state cookie is not set.");
-        }
-
-        log.trace("Generating new uma_session_state ...");
-        SessionState session = sessionStateService.generateAuthenticatedSessionState("no");
-
-        sessionStateService.createSessionStateCookie(session.getId(), httpResponse, true);
-        log.trace("uma_session_state cookie created.");
-        return session;
     }
 
     private String getScriptNames(List<UmaPermission> permissions) {
