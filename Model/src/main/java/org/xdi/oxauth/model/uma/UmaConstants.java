@@ -21,4 +21,6 @@ public class UmaConstants {
     * to update the specs to remove those last few instances of application/xxx+json.
     */
     public static final String JSON_MEDIA_TYPE = "application/json";
+
+    public static final String GATHERING_ID = "gathering_id";
 }

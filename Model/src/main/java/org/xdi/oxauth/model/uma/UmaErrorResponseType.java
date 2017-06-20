@@ -122,6 +122,11 @@ public enum UmaErrorResponseType implements IErrorType {
 	INVALID_TICKET("invalid_ticket"),
 
 	/**
+	 * The claims-gathering script name is not provided or otherwise failed to load script with this name(s).
+	 */
+	INVALID_CLAIMS_GATHERING_SCRIPT_NAME("invalid_claims_gathering_script_name"),
+
+	/**
 	 * The provided ticket has expired.
 	 */
 	EXPIRED_TICKET("expired_ticket"),
