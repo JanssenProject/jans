@@ -124,17 +124,17 @@
 									<h:outputLabel for="registrationEndpoint">Registration Endpoint</h:outputLabel>
 									<h:inputText id="registrationEndpoint"
 										value="#{registrationAction.registrationEndpoint}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/register</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/register</h:outputText>
 
 									<h:outputLabel for="redirectUris">Redirect URIs (space-separated)</h:outputLabel>
 									<h:inputText id="redirectUris"
 										value="#{registrationAction.redirectUris}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.htm</h:outputText>
 
 									<h:outputLabel for="claimsRedirectUris">Claims Redirect URIs (space-separated)</h:outputLabel>
 									<h:inputText id="claimsRedirectUris"
 												 value="#{registrationAction.claimsRedirectUris}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/uma/gather_claims</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/uma/gather_claims</h:outputText>
 
 									<h:outputLabel for="postLogoutRedirectUris">Post Logout Redirect URIs (space-separated)</h:outputLabel>
 									<h:inputText id="postLogoutRedirectUris"
@@ -440,7 +440,7 @@
 								<h:outputLabel for="authorizationEndpoint">Authorization Endpoint</h:outputLabel>
 								<h:inputText id="authorizationEndpoint"
 									value="#{authorizationAction.authorizationEndpoint}" size="40" />
-								<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/authorize</h:outputText>
+								<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/authorize</h:outputText>
 
 								<h:outputLabel for="responseType">Response Type</h:outputLabel>
 								<h:selectManyListbox id="responseType"
@@ -468,7 +468,7 @@
 								<h:outputLabel for="authorizationRedirectUri">Redirect URI</h:outputLabel>
 								<h:inputText id="authorizationRedirectUri"
 									value="#{authorizationAction.redirectUri}" size="40" />
-								<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+								<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.htm</h:outputText>
 
 								<h:outputLabel for="authorizationState">State</h:outputLabel>
 								<h:inputText id="authorizationState"
@@ -673,7 +673,7 @@
 									<h:outputLabel for="tokenEndpoint">Token Endpoint</h:outputLabel>
 									<h:inputText id="tokenEndpoint"
 										value="#{tokenAction.tokenEndpoint}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/token</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/token</h:outputText>
 
 									<h:outputLabel for="grantType">Grant Type</h:outputLabel>
 									<h:selectOneMenu id="grantType"
@@ -706,7 +706,7 @@
 									<h:outputLabel for="tokenRedirectUri">Redirect URI</h:outputLabel>
 									<h:inputText id="tokenRedirectUri"
 										value="#{tokenAction.redirectUri}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.htm</h:outputText>
 
 									<h:outputLabel for="username">Username</h:outputLabel>
 									<h:inputText id="username" value="#{tokenAction.username}"
@@ -824,7 +824,7 @@
 									<h:outputLabel for="userInfoEndpoint">User Info Endpoint</h:outputLabel>
 									<h:inputText id="userInfoEndpoint"
 										value="#{userInfoAction.userInfoEndpoint}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/userinfo</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/userinfo</h:outputText>
 
 									<h:outputLabel for="userInfoAccessToken">Access Token</h:outputLabel>
 									<h:inputText id="userInfoAccessToken"
@@ -890,7 +890,7 @@
 									<h:outputLabel for="endSessionEndpoint">End Session Endpoint</h:outputLabel>
 									<h:inputText id="endSessionEndpoint"
 										value="#{endSessionAction.endSessionEndpoint}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth/seam/resource/restv1/oxauth/end_session</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth/restv1/end_session</h:outputText>
 
 									<h:outputLabel for="endSessionIdTokenHint">ID Token Hint</h:outputLabel>
 									<h:inputText id="endSessionIdTokenHint"
@@ -900,7 +900,7 @@
 									<h:outputLabel for="endSessionPostLogoutRedirectUri">Post Logout Redirect URI</h:outputLabel>
 									<h:inputText id="endSessionPostLogoutRedirectUri"
 										value="#{endSessionAction.postLogoutRedirectUri}" size="40" />
-									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.seam</h:outputText>
+									<h:outputText>eg: https://seed.gluu.org/oxauth-rp/home.htm</h:outputText>
 
 									<h:outputLabel for="endSessionState">State</h:outputLabel>
 									<h:inputText id="endSessionState"
