@@ -700,11 +700,11 @@ public abstract class BaseTest {
     }
 
     private String determineAuthorizationPageEndpoint(String authorizationEndpoint) {
-        return authorizationEndpoint.replace("/seam/resource/restv1/oxauth/authorize", "/authorize");
+        return authorizationEndpoint.replace("/restv1/authorize", "/authorize");
     }
 
     private String determineGluuConfigurationEndpoint(String host) {
-        return host + "/oxauth/seam/resource/restv1/oxauth/gluu-configuration";
+        return host + "/oxauth/restv1/gluu-configuration";
     }
 
     public void showTitle(String title) {

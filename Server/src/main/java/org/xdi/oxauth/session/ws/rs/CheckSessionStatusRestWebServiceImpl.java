@@ -37,8 +37,8 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author Yuriy Movchan
  * @version 0.1 12/16/2015
  */
-@Path("/oxauth")
-@Api(value = "/oxauth", description = "Check Session Status Endpoint")
+@Path("/")
+@Api(value = "/", description = "Check Session Status Endpoint")
 public class CheckSessionStatusRestWebServiceImpl {
 
 	@Inject
