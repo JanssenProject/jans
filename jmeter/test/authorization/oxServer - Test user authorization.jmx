@@ -167,7 +167,7 @@ vars.put(&quot;CLIENT_AUTH&quot;, encodeBase64(vars.get(&quot;CLIENT_ID&quot;) +
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/oxauth/seam/resource/restv1/oxauth/authorize</stringProp>
+            <stringProp name="HTTPSampler.path">/oxauth/restv1/authorize</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -338,7 +338,7 @@ vars.put(&quot;CLIENT_AUTH&quot;, encodeBase64(vars.get(&quot;CLIENT_ID&quot;) +
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/oxauth/seam/resource/restv1/oxauth/token</stringProp>
+            <stringProp name="HTTPSampler.path">/oxauth/restv1/token</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -496,7 +496,7 @@ vars.put(&quot;CLIENT_AUTH&quot;, encodeBase64(vars.get(&quot;CLIENT_ID&quot;) +
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-            <stringProp name="HTTPSampler.path">/oxauth/seam/resource/restv1/oxauth/end_session</stringProp>
+            <stringProp name="HTTPSampler.path">/oxauth/restv1/end_session</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>

@@ -30,7 +30,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author Javier Rojas Blum Date: 11.29.2011
  */
-@Api(value = "/oxauth", description = "The UserInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the authenticated End-User. To obtain the requested Claims about the End-User, the Client makes a request to the UserInfo Endpoint using an Access Token obtained through OpenID Connect Authentication. These Claims are normally represented by a JSON object that contains a collection of name and value pairs for the Claims. ")
+@Api(value = "/", description = "The UserInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the authenticated End-User. To obtain the requested Claims about the End-User, the Client makes a request to the UserInfo Endpoint using an Access Token obtained through OpenID Connect Authentication. These Claims are normally represented by a JSON object that contains a collection of name and value pairs for the Claims. ")
 public interface UserInfoRestWebService {
 
     @GET
