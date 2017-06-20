@@ -134,7 +134,7 @@ public class LogoutAction {
             sb.append("&"+EndSessionRequestParam.POST_LOGOUT_REDIRECT_URI+"=").append(postLogoutRedirectUri);
         }
         
-        facesService.redirectToExternalURL("seam/resource/restv1/oxauth/end_session?" + sb.toString());
+        facesService.redirectToExternalURL("restv1/end_session?" + sb.toString());
     }
 
 	private boolean validateParameters() {
