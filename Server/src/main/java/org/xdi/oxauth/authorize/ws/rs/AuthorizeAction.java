@@ -249,7 +249,7 @@ public class AuthorizeAction {
             }
 
             this.sessionState = unauthenticatedSession.getId();
-            sessionStateService.createSessionStateCookie(this.sessionState);
+            sessionStateService.createSessionStateCookie(this.sessionState, false);
 
             Map<String, Object> loginParameters = new HashMap<String, Object>();
             if (requestParameterMap.containsKey(AuthorizeRequestParam.LOGIN_HINT)) {
@@ -662,7 +662,7 @@ public class AuthorizeAction {
             sessionStateService.updateSessionState(session);
 
             // OXAUTH-297 - set session_state cookie
-            sessionStateService.createSessionStateCookie(sessionState);
+            sessionStateService.createSessionStateCookie(sessionState, false);
 
             Map<String, String> sessionAttribute = authenticationService.getAllowedParameters(session.getSessionAttributes());
 
