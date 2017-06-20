@@ -65,7 +65,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Yuriy Movchan
  * @version October 31, 2016
  */
-@Path("/oxauth")
+@Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @Inject

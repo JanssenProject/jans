@@ -673,7 +673,7 @@ public class AuthorizeAction {
             }
 
             final String parametersAsString = authenticationService.parametersAsString(sessionAttribute);
-            final String uri = "seam/resource/restv1/oxauth/authorize?" + parametersAsString;
+            final String uri = "restv1/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {}", uri);
 
             facesService.redirectToExternalURL(uri);
