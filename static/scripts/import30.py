@@ -644,7 +644,8 @@ class Migration(object):
         self.copyCertificates()
         self.copyCustomFiles()
         self.copyIDPFiles()
-        self.copyCustomSchema()
+        if self.version < 300 or self.ldap_type == 'opendj':
+            self.copyCustomSchema()
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
