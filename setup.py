@@ -807,7 +807,7 @@ class Setup(object):
         except:
             self.logIt("Error loading file %s" % fileName)
 
-    def setUlimits(self):
+    def set_ulimits(self):
         try:
             if self.os_type in ['centos', 'redhat', 'fedora']:
                 apache_user = 'apache'
@@ -865,6 +865,15 @@ class Setup(object):
     # ================================================================================
 
     def configure_httpd(self):
+        # Detect sevice path and apache service name
+        service_path = '/sbin/service'
+        apache_service_name = 'httpd'
+        if self.os_type in ['debian', 'ubuntu']:
+            service_path = '/usr/sbin/service'
+            apache_service_name = 'apache2'
+
+        self.run([service_path, apache_service_name, 'stop'])
+
         # CentOS 7.* + systemd + apache 2.4
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd' and self.apache_version == "2.4":
             self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
@@ -882,17 +891,11 @@ class Setup(object):
             self.run([self.cmd_ln, '-s', '/etc/apache2/sites-available/https_gluu.conf',
                       '/etc/apache2/sites-enabled/https_gluu.conf'])
 
+        self.run([service_path, apache_service_name, 'start'])
+
     def copy_output(self):
         self.logIt("Copying rendered templates to final destination")
 
-        # Detect sevice path and apache service name
-        service_path = '/sbin/service'
-        apache_service_name = 'httpd'
-        if self.os_type in ['debian', 'ubuntu']:
-            service_path = '/usr/sbin/service'
-            apache_service_name = 'apache2'
-
-        self.run([service_path, apache_service_name, 'stop'])
         for dest_fn in self.ce_templates.keys():
             if self.ce_templates[dest_fn]:
                 fn = os.path.split(dest_fn)[-1]
@@ -907,8 +910,6 @@ class Setup(object):
                 except:
                     self.logIt("Error writing %s to %s" % (output_fn, dest_fn), True)
                     self.logIt(traceback.format_exc(), True)
-
-        self.run([service_path, apache_service_name, 'start'])
 
     def copy_scripts(self):
         self.logIt("Copying script files")
@@ -2763,7 +2764,7 @@ if __name__ == '__main__':
             installObject.generate_base64_configuration()
             installObject.render_configuration_template()
             installObject.update_hostname()
-            installObject.setUlimits()
+            installObject.set_ulimits()
             installObject.copy_output()
             installObject.setup_init_scripts()
             installObject.render_jetty_templates()
