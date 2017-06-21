@@ -49,5 +49,5 @@ owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxAuthUmaScope: inum=%(inumOrg)s!0010!8CAD.B06E,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 oxFaviconImage: http://www.gluu.org/img/passport_logo.png
 oxId: 1447184268440
-oxResource: https://%(hostname)s/identity/seam/resource/restv1/passport/config
+oxResource: https://%(hostname)s/identity/restv1/passport/config
 oxRevision: 1

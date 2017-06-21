@@ -6,7 +6,7 @@
   "keyId": "%(passport_rp_client_cert_alias)s",
   "keyAlg": "%(passport_rp_client_cert_alg)s",
   "umaScope": "https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access",
-  "passportConfigAPI": "https://%(hostname)s/identity/seam/resource/restv1/passport/config",
+  "passportConfigAPI": "https://%(hostname)s/identity/restv1/passport/config",
   "applicationStartpoint": "https://%(hostname)s/oxauth/auth/passport/passportlogin.htm",
   "applicationEndpoint": "https://%(hostname)s/oxauth/auth/passport/passportpostlogin.htm",
   "activeMQConf": {

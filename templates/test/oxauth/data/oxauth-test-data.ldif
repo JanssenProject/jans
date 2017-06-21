@@ -217,7 +217,7 @@ inum: %(inumOrg)s!0008!FF81!2D39
 oxAuthAppType: web
 oxAuthClientSecret: %(oxauthClient_4_encoded_pw)s
 oxAuthIdTokenSignedResponseAlg: RS256
-oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.seam
+oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
 oxAuthRedirectURI: https://client.example.com/cb
 oxAuthRedirectURI: https://client.example.com/cb1
 oxAuthRedirectURI: https://client.example.com/cb2
@@ -304,9 +304,9 @@ inum: %(inumOrg)s!0012!D426.70FD
 objectClass: top
 objectClass: oxSectorIdentifier
 oxAuthRedirectURI: https://www.gluu.org
-oxAuthRedirectURI: http://localhost:80/oxauth-rp/home.seam
-oxAuthRedirectURI: https://localhost:8443/oxauth-rp/home.seam
-oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.seam
+oxAuthRedirectURI: http://localhost:80/oxauth-rp/home.htm
+oxAuthRedirectURI: https://localhost:8443/oxauth-rp/home.htm
+oxAuthRedirectURI: https://%(hostname)s/oxauth-rp/home.htm
 oxAuthRedirectURI: https://client.example.org/callback
 oxAuthRedirectURI: https://client.example.org/callback2
 oxAuthRedirectURI: https://client.other_company.example.net/callback
