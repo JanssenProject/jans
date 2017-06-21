@@ -1,6 +1,6 @@
 package org.xdi.oxauth.uma.ws.rs;
 
-import com.ocpsoft.pretty.faces.util.StringUtils;
+import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionState;
@@ -10,9 +10,7 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
-import org.xdi.oxauth.uma.service.ExternalUmaClaimsGatheringService;
-import org.xdi.oxauth.uma.service.UmaSessionService;
-import org.xdi.oxauth.uma.service.UmaValidationService;
+import org.xdi.oxauth.uma.service.*;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,11 +34,17 @@ public class UmaGatheringWS {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
     @Inject
-    private UmaValidationService umaValidationService;
+    private UmaValidationService validationService;
     @Inject
     private ExternalUmaClaimsGatheringService external;
     @Inject
-    private UmaSessionService umaSessionService;
+    private UmaSessionService sessionService;
+    @Inject
+    private FacesService facesService;
+    @Inject
+    private UmaPermissionService permissionService;
+    @Inject
+    private UmaPctService pctService;
 
     @POST
     @Consumes({UmaConstants.JSON_MEDIA_TYPE})
@@ -60,12 +63,12 @@ public class UmaGatheringWS {
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
         try {
-            log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, queryString: {}"
-                    , clientId, ticket, claimRedirectUri, state, httpRequest.getQueryString());
+            log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, queryString: {}",
+                    clientId, ticket, claimRedirectUri, state, httpRequest.getQueryString());
 
-            umaValidationService.validateClientAndClaimsRedirectUri(clientId, claimRedirectUri, state);
-            List<UmaPermission> permissions = umaValidationService.validateTicketWithRedirect(ticket, claimRedirectUri, state);
-            String[] scriptNames = umaValidationService.validatesGatheringScriptNames(getScriptNames(permissions), claimRedirectUri, state);
+            validationService.validateClientAndClaimsRedirectUri(clientId, claimRedirectUri, state);
+            List<UmaPermission> permissions = validationService.validateTicketWithRedirect(ticket, claimRedirectUri, state);
+            String[] scriptNames = validationService.validatesGatheringScriptNames(getScriptNames(permissions), claimRedirectUri, state);
 
             CustomScriptConfiguration script = external.determineScript(scriptNames);
             if (script == null) {
@@ -73,20 +76,24 @@ public class UmaGatheringWS {
                 throw new UmaWebException(claimRedirectUri, errorResponseFactory, INVALID_CLAIMS_GATHERING_SCRIPT_NAME, state);
             }
 
-            SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
-            umaSessionService.configure(session, reset, script.getName(), permissions, clientId);
+            SessionState session = sessionService.getSession(httpRequest, httpResponse);
+            sessionService.configure(session, script.getName(), reset, permissions, clientId, claimRedirectUri, state);
 
-            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService);
+            UmaGatherContext context = new UmaGatherContext(httpRequest, session, sessionService, permissionService, pctService);
 
-            int step = umaSessionService.getStep(session);
-            String page = external.getPageForStep(script, step, context);
+            int step = sessionService.getStep(session);
             int stepsCount = external.getStepsCount(script, context);
 
-            umaSessionService.persist(session);
+            if (step < stepsCount) {
+                String page = external.getPageForStep(script, step, context);
 
-            return Response.status(Response.Status.FOUND)
-                    .location(URI.create(constructRedirectUri(claimRedirectUri, context)))
-                    .build();
+                context.persist();
+
+                log.trace("Redirecting to page: '{}'", page);
+                facesService.redirect(page);
+            } else {
+                log.error("Step '{}' is more or equal to stepCount: '{}'", stepsCount);
+            }
         } catch (Exception ex) {
             log.error("Exception happened", ex);
             if (ex instanceof WebApplicationException) {
@@ -94,21 +101,8 @@ public class UmaGatheringWS {
             }
         }
 
-        log.error("Failed to handle to UMA Claims Gathering Endpoint.");
+        log.error("Failed to handle call to UMA Claims Gathering Endpoint.");
         throw new UmaWebException(Response.Status.INTERNAL_SERVER_ERROR, errorResponseFactory, UmaErrorResponseType.SERVER_ERROR);
-    }
-
-    private static String constructRedirectUri(String claimRedirectUri, UmaGatherContext context) {
-        String userParameters = context.getRedirectUserParameters().buildQueryString().trim();
-        if (StringUtils.isBlank(userParameters)) {
-            return claimRedirectUri;
-        } else {
-            if (claimRedirectUri.contains("?")) {
-                return claimRedirectUri + "&" + userParameters;
-            } else {
-                return claimRedirectUri + "?" + userParameters;
-            }
-        }
     }
 
     private static String getScriptNames(List<UmaPermission> permissions) {
