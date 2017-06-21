@@ -63,4 +63,12 @@ public class UmaClientFactory {
         return ProxyFactory.create(UmaScopeService.class, scopeEndpointUri);
     }
 
+    public UmaTokenService createTokenService(String umaMetadataUri) {
+        return ProxyFactory.create(UmaTokenService.class, umaMetadataUri);
+    }
+
+    public UmaTokenService createTokenService(String umaMetadataUri, ClientExecutor clientExecutor) {
+        return ProxyFactory.create(UmaTokenService.class, umaMetadataUri, clientExecutor);
+    }
+
 }
