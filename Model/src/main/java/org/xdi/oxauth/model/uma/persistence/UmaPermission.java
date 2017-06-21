@@ -24,7 +24,7 @@ import java.util.Map;
 @LdapObjectClass(values = {"top", "oxUmaResourcePermission"})
 public class UmaPermission {
 
-    public static final String PCT_DN = "pctDn";
+    public static final String PCT = "pct";
 
     @LdapDN
     private String dn;
