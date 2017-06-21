@@ -18,8 +18,6 @@ import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -87,7 +85,7 @@ public class UmaNeedsInfoService {
         }
 
         if (!missedClaims.isEmpty()) {
-            ticketAttributes.put(UmaPermission.PCT_DN, pct.getDn());
+            ticketAttributes.put(UmaPermission.PCT, pct.getCode());
             String newTicket = permissionService.changeTicket(permissions, ticketAttributes);
 
             UmaNeedInfoResponse needInfoResponse = new UmaNeedInfoResponse();
@@ -113,21 +111,7 @@ public class UmaNeedsInfoService {
         String queryParameters = "";
 
         for (UmaAuthorizationContext context : contexts) {
-            Map<String, Set<String>> paramMap = context.getRedirectUserParam();
-            for (Map.Entry<String, Set<String>> param : paramMap.entrySet()) {
-                Set<String> values = param.getValue();
-                if (StringUtils.isNotBlank(param.getKey()) && values != null && !values.isEmpty()) {
-                    for (String value : values) {
-                        if (StringUtils.isNotBlank(value)) {
-                            try {
-                                queryParameters += param.getKey() + "=" + URLEncoder.encode(value, "UTF-8") + "&";
-                            } catch (UnsupportedEncodingException e) {
-                                log.error("Failed to encode value: " + value + ", scriptId: " + context.getScriptDn(), e);
-                            }
-                        }
-                    }
-                }
-            }
+            queryParameters += context.getRedirectUserParameters().buildQueryString() + "&";
         }
         StringUtils.removeEnd(queryParameters, "&");
 

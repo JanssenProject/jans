@@ -1,10 +1,11 @@
 package org.xdi.oxauth.uma.service;
 
-import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.SessionStateService;
 
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author yuriyz on 06/20/2017.
@@ -27,6 +29,8 @@ public class UmaSessionService {
     private ErrorResponseFactory errorResponseFactory;
     @Inject
     private SessionStateService sessionStateService;
+    @Inject
+    private ExternalUmaClaimsGatheringService external;
 
     public SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         String cookieSessionId = sessionStateService.getSessionStateFromCookie();
@@ -52,13 +56,19 @@ public class UmaSessionService {
         return session;
     }
 
-    public void persist(SessionState session) {
-        sessionStateService.persistSessionState(session, true);
+    public boolean persist(SessionState session) {
+        try {
+            if (sessionStateService.persistSessionState(session, true)) {
+                log.trace("Session persisted successfully. Session: " + session);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("Failed to persist session, id: " + session.getId(), e);
+        }
+        return false;
     }
 
     public int getStep(SessionState session) {
-        Preconditions.checkNotNull(session);
-
         String stepString = session.getSessionAttributes().get("step");
         int step = Util.parseIntSilently(stepString);
         if (step == -1) {
@@ -69,8 +79,66 @@ public class UmaSessionService {
     }
 
     public void setStep(int step, SessionState session) {
-        Preconditions.checkNotNull(session);
-
         session.getSessionAttributes().put("step", Integer.toString(step));
+    }
+
+    public CustomScriptConfiguration getScript(SessionState session) {
+        String scriptName = getScriptName(session);
+        if (StringUtils.isNotBlank(scriptName)) {
+            return external.getCustomScriptConfigurationByName(scriptName);
+        }
+        return null;
+    }
+
+    public void configure(SessionState session, Boolean reset, String scriptName, List<UmaPermission> permissions, String clientId) {
+        if (reset != null && reset) {
+            setStep(1, session);
+        }
+
+        if (StringUtils.isBlank(getScriptName(session))) {
+            setScriptName(session, scriptName);
+        }
+
+        if (StringUtils.isBlank(getPct(session))) {
+            String pct = permissions.get(0).getAttributes().get("pct");
+
+            if (StringUtils.isBlank(pct)) {
+                log.error("PCT code is null or blank in permission object.");
+                throw new RuntimeException("PCT code is null or blank in permission object.");
+            }
+
+            setPct(session, pct);
+        }
+
+        if (StringUtils.isBlank(getClientId(session))) {
+            setClientId(session, clientId);
+        }
+
+        getStep(session); // init step
+        persist(session);
+    }
+
+    public String getScriptName(SessionState session) {
+        return session.getSessionAttributes().get("gather_script_name");
+    }
+
+    public void setScriptName(SessionState session, String scriptName) {
+        session.getSessionAttributes().put("gather_script_name", scriptName);
+    }
+
+    public String getPct(SessionState session) {
+        return session.getSessionAttributes().get("pct");
+    }
+
+    public void setPct(SessionState session, String pct) {
+        session.getSessionAttributes().put("pct", pct);
+    }
+
+    public String getClientId(SessionState session) {
+        return session.getSessionAttributes().get("client_id");
+    }
+
+    public void setClientId(SessionState session, String clientId) {
+        session.getSessionAttributes().put("client_id", clientId);
     }
 }
