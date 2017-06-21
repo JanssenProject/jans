@@ -90,10 +90,14 @@ public class UmaSessionService {
         return null;
     }
 
-    public void configure(SessionState session, Boolean reset, String scriptName, List<UmaPermission> permissions, String clientId) {
+    public void configure(SessionState session, String scriptName, Boolean reset, List<UmaPermission> permissions,
+                          String clientId, String claimRedirectUri, String state) {
         if (reset != null && reset) {
             setStep(1, session);
         }
+        setState(session, state);
+        setClaimsRedirectUri(session, claimRedirectUri);
+        setTicket(session, permissions.get(0).getTicket());
 
         if (StringUtils.isBlank(getScriptName(session))) {
             setScriptName(session, scriptName);
@@ -140,5 +144,29 @@ public class UmaSessionService {
 
     public void setClientId(SessionState session, String clientId) {
         session.getSessionAttributes().put("client_id", clientId);
+    }
+
+    public String getClaimsRedirectUri(SessionState session) {
+        return session.getSessionAttributes().get("claims_redirect_uri");
+    }
+
+    public void setClaimsRedirectUri(SessionState session, String claimsRedirectUri) {
+        session.getSessionAttributes().put("claims_redirect_uri", claimsRedirectUri);
+    }
+
+    public String getState(SessionState session) {
+        return session.getSessionAttributes().get("state");
+    }
+
+    public void setState(SessionState session, String state) {
+        session.getSessionAttributes().put("state", state);
+    }
+
+    public String getTicket(SessionState session) {
+        return session.getSessionAttributes().get("ticket");
+    }
+
+    public void setTicket(SessionState session, String ticket) {
+        session.getSessionAttributes().put("ticket", ticket);
     }
 }
