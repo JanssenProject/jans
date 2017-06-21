@@ -6,16 +6,18 @@
 
 package org.xdi.oxauth.uma.authorization;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
+import org.xdi.oxauth.uma.service.RedirectParameters;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -30,8 +32,8 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     private final Map<UmaScopeDescription, Boolean> scopes; // scope and boolean, true - if client requested scope and false if it is permission ticket scope
     private final Set<UmaResource> resources;
     private final String scriptDn;
-    private final Map<String, Set<String>> redirectUserParam = new HashMap<String, Set<String>>();
     private final Map<String, SimpleCustomProperty> configurationAttributes;
+    private final RedirectParameters redirectUserParameters = new RedirectParameters();
 
     private AttributeService attributeService;
 
@@ -54,25 +56,6 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
 
     public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
         return configurationAttributes;
-    }
-
-    public void addRedirectUserParam(String paramName, String paramValue) {
-        Set<String> valueSet = redirectUserParam.get(paramName);
-        if (valueSet != null) {
-            valueSet.add(paramValue);
-        } else {
-            Set<String> value = new HashSet<String>();
-            value.add(paramValue);
-            redirectUserParam.put(paramName, value);
-        }
-    }
-
-    public void removeRedirectUserParam(String paramName) {
-        redirectUserParam.remove(paramName);
-    }
-
-    public Map<String, Set<String>> getRedirectUserParam() {
-        return redirectUserParam;
     }
 
     public Set<String> getScopes() {
@@ -128,6 +111,21 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         return claims.has(claimName);
     }
 
+    public void addRedirectUserParam(String paramName, String paramValue) {
+        redirectUserParameters.add(paramName, paramValue);
+    }
+
+    public void removeRedirectUserParameter(String paramName) {
+        redirectUserParameters.remove(paramName);
+    }
+
+    public RedirectParameters getRedirectUserParameters() {
+        return redirectUserParameters;
+    }
+
+    public Map<String, Set<String>> getRedirectUserParametersMap() {
+        return redirectUserParameters.map();
+    }
 //    public String getClientClaim(String p_claimName) {
 //        return getEntryAttributeValue(getGrant().getClientDn(), p_claimName);
 //    }
