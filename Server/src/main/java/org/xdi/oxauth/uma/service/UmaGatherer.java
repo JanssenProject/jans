@@ -2,6 +2,7 @@ package org.xdi.oxauth.uma.service;
 
 import com.ocpsoft.pretty.faces.util.StringUtils;
 import org.gluu.jsf2.service.FacesService;
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionState;
@@ -10,6 +11,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -25,6 +27,8 @@ import java.util.List;
 @Named(value = "gatherer")
 public class UmaGatherer {
 
+    @Inject
+    private Logger log;
     @Inject
     private ExternalUmaClaimsGatheringService external;
     @Inject
@@ -53,18 +57,53 @@ public class UmaGatherer {
         UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
 
         int step = umaSessionService.getStep(session);
-        int stepsCount = external.getStepsCount(script, context);
+        if (!umaSessionService.isPassedPreviousSteps(session, step)) {
+            log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
+            return false;
+        }
 
         boolean gatheredResult = external.gather(script, step, context);
-        context.persist();
+        log.debug("Claims-gathering result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, gatheredResult);
 
-        if (step == stepsCount) {
-            onSuccess(session, context);
+        int overridenNextStep = external.getNextStep(script, step, context);
+
+        if (!gatheredResult && overridenNextStep == -1) {
+            return false;
         }
 
-        if (gatheredResult) {
+        if (overridenNextStep != -1) {
+            umaSessionService.resetToStep(session, overridenNextStep, step);
+            step = overridenNextStep;
+        }
+
+        int stepsCount = external.getStepsCount(script, context);
+
+        if (step < stepsCount || overridenNextStep != -1) {
+            int nextStep;
+            if (overridenNextStep != -1) {
+                nextStep = overridenNextStep;
+            } else {
+                nextStep = step + 1;
+                umaSessionService.markStep(session, step, true);
+            }
+
+            umaSessionService.setStep(nextStep, session);
+            umaSessionService.persist(session);
+
+            String page = external.getPageForStep(script, nextStep, context);
+
+            log.trace("Redirecting to page: '{}'", page);
+            facesService.redirect(page);
             return true;
         }
+
+        if (step == stepsCount) {
+            context.persist();
+            onSuccess(session, context);
+            return true;
+        }
+
+        log.error("Failed to perform gather() method successfully.");
         return false;
     }
 
@@ -105,4 +144,16 @@ public class UmaGatherer {
         }
         return url;
     }
+
+    private void errorPage(String errorKey) {
+        addMessage(FacesMessage.SEVERITY_ERROR, errorKey);
+        facesService.redirect("/error.xhtml");
+    }
+
+    public void addMessage(FacesMessage.Severity severity, String summary) {
+        String msg = languageBean.getMessage(summary);
+        FacesMessage message = new FacesMessage(severity, msg, null);
+        facesContext.addMessage(null, message);
+    }
+
 }

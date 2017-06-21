@@ -10,9 +10,7 @@ import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaSessionService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author yuriyz on 06/18/2017.
@@ -43,6 +41,18 @@ public class UmaGatherContext extends ExternalScriptContext {
 
     public void setStep(int step) {
         sessionService.setStep(step, session);
+    }
+
+    public void addSessionAttribute(String key, String value) {
+        session.getSessionAttributes().put(key, value);
+    }
+
+    public void removeSessionAttribute(String key) {
+        session.getSessionAttributes().remove(key);
+    }
+
+    public Map<String, String> getSessionAttributes() {
+        return session.getSessionAttributes();
     }
 
     public void addRedirectUserParam(String paramName, String paramValue) {
