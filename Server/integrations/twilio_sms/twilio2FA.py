@@ -135,8 +135,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 print 'TwilioSMs, Message Sid: %s' % (message.getSid())
                 return True
-            except:
+            except Exception, ex:
                 print "TwilioSMS. Error sending message to Twilio"
+                print "TwilioSMS. Unexpected error:", ex
 
             return False
         elif step == 2:
