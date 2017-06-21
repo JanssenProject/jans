@@ -122,6 +122,28 @@ public class UmaSessionService {
         persist(session);
     }
 
+    public boolean isStepPassed(SessionState session, Integer step) {
+        return Boolean.parseBoolean(session.getSessionAttributes().get(String.format("uma_step_passed_%d", step)));
+    }
+
+    public boolean isPassedPreviousSteps(SessionState session, Integer step) {
+        for (int i = 1; i < step; i++) {
+            if (!isStepPassed(session, i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void markStep(SessionState session, Integer step, boolean value) {
+        String key = String.format("uma_step_passed_%d", step);
+        if (value) {
+            session.getSessionAttributes().put(key, Boolean.TRUE.toString());
+        } else {
+            session.getSessionAttributes().remove(key);
+        }
+    }
+
     public String getScriptName(SessionState session) {
         return session.getSessionAttributes().get("gather_script_name");
     }
@@ -168,5 +190,13 @@ public class UmaSessionService {
 
     public void setTicket(SessionState session, String ticket) {
         session.getSessionAttributes().put("ticket", ticket);
+    }
+
+    public void resetToStep(SessionState session, int overridenNextStep, int step) {
+        for (int i = overridenNextStep; i <= step; i++) {
+            markStep(session, i, false);
+        }
+
+        setStep(overridenNextStep, session);
     }
 }
