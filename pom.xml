@@ -136,6 +136,18 @@
 				<version>1.54</version>
 			</dependency>
 
+			<!-- Net -->
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpclient.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>${httpcore.version}</version>
+			</dependency>
+
 			<!-- Google -->
 			<dependency>
 				<groupId>com.google.guava</groupId>

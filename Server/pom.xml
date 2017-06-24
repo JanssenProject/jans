@@ -100,6 +100,16 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 		</dependency>
 
+		<!-- Net -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+		</dependency>
+
 		<!-- Jettison -->
         <dependency>
             <groupId>org.codehaus.jettison</groupId>

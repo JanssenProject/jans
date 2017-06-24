@@ -28,7 +28,7 @@ public abstract class BaseResponse {
             status = clientResponse.getStatus();
             entity = clientResponse.getEntity(String.class);
             headers = clientResponse.getHeaders();
-            if (clientResponse.getLocation() != null) {
+            if (clientResponse.getLocationLink() != null) {
                 location = clientResponse.getLocationLink().getHref();
             }
         }
