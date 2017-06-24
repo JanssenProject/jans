@@ -6,20 +6,37 @@
 
 package org.gluu.oxeleven;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.Arrays;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 import org.apache.http.HttpStatus;
-import org.gluu.oxeleven.client.*;
+import org.gluu.oxeleven.client.BaseClient;
+import org.gluu.oxeleven.client.ClientUtils;
+import org.gluu.oxeleven.client.DeleteKeyClient;
+import org.gluu.oxeleven.client.DeleteKeyRequest;
+import org.gluu.oxeleven.client.DeleteKeyResponse;
+import org.gluu.oxeleven.client.GenerateKeyClient;
+import org.gluu.oxeleven.client.GenerateKeyRequest;
+import org.gluu.oxeleven.client.GenerateKeyResponse;
+import org.gluu.oxeleven.client.SignClient;
+import org.gluu.oxeleven.client.SignRequest;
+import org.gluu.oxeleven.client.SignResponse;
+import org.gluu.oxeleven.client.VerifySignatureClient;
+import org.gluu.oxeleven.client.VerifySignatureRequest;
+import org.gluu.oxeleven.client.VerifySignatureResponse;
 import org.gluu.oxeleven.model.JwksRequestParam;
 import org.gluu.oxeleven.model.KeyRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -1841,4 +1858,5 @@ public class PKCS11RestServiceTest {
     public static void showClient(BaseClient client) {
         ClientUtils.showClient(client);
     }
+ 
 }
