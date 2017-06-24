@@ -181,6 +181,10 @@
 										<include>**/*.jsp</include>
 									</includes>
 								</resource>
+								<resource>
+									<directory>src/main/webapp-jetty</directory>
+									<filtering>true</filtering>
+								</resource>
 							</webResources>
 						</configuration>
 					</plugin>
