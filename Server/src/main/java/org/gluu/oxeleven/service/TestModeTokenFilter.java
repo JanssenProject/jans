@@ -1,43 +1,50 @@
 package org.gluu.oxeleven.service;
 
-import com.google.common.base.Strings;
-import org.apache.log4j.Logger;
-import org.gluu.oxeleven.model.Configuration;
-import org.gluu.oxeleven.util.StringUtils;
-import org.jboss.seam.ScopeType;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.annotations.Scope;
-import org.jboss.seam.annotations.Startup;
-import org.jboss.seam.annotations.intercept.BypassInterceptors;
-import org.jboss.seam.annotations.web.Filter;
-import org.jboss.seam.web.AbstractFilter;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
+
+import org.gluu.oxeleven.model.Configuration;
+import org.gluu.oxeleven.util.StringUtils;
+import org.slf4j.Logger;
+
+import com.google.common.base.Strings;
+
 /**
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version March 20, 2017
  */
-@Startup
-@Filter
-@Name("TestModeTokenFilter")
-@Scope(ScopeType.APPLICATION)
-@BypassInterceptors
-public class TestModeTokenFilter extends AbstractFilter {
+@WebFilter(asyncSupported = true, urlPatterns = {
+		"/rest/generateKey", "/rest/sign", "/rest/verifySignature", "/rest/deleteKey"
+		}, displayName = "oxEleven Test Mode Filter"
+)
+public class TestModeTokenFilter implements Filter {
 
-    private static final Logger LOG = Logger.getLogger(TestModeTokenFilter.class);
-    private static final String oxElevenGenerateKeyEndpoint = "rest/oxeleven/generateKey";
-    private static final String oxElevenSignEndpoint = "rest/oxeleven/sign";
-    private static final String oxElevenVerifySignatureEndpoint = "rest/oxeleven/verifySignature";
-    private static final String oxElevenDeleteKeyEndpoint = "rest/oxeleven/deleteKey";
+	@Inject
+	private Logger log;
+
+	@Inject
+	private Configuration configuration;
+
+	private static final String oxElevenGenerateKeyEndpoint = "rest/generateKey";
+    private static final String oxElevenSignEndpoint = "rest/sign";
+    private static final String oxElevenVerifySignatureEndpoint = "rest/verifySignature";
+    private static final String oxElevenDeleteKeyEndpoint = "rest/deleteKey";
+
+	public void init(FilterConfig filterConfig) throws ServletException {
+	}
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -53,7 +60,6 @@ public class TestModeTokenFilter extends AbstractFilter {
                         String header = httpServletRequest.getHeader("Authorization");
                         if (header.startsWith("Bearer ")) {
                             String accessToken = header.substring(7);
-                            Configuration configuration = ConfigurationService.instance().getConfiguration();
                             String testModeToken = configuration.getTestModeToken();
                             if (!Strings.isNullOrEmpty(accessToken) && !Strings.isNullOrEmpty(testModeToken)
                                     && accessToken.equals(testModeToken)) {
@@ -85,13 +91,17 @@ public class TestModeTokenFilter extends AbstractFilter {
                     "The request is not authorized."
             ));
         } catch (IOException ex) {
-            LOG.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         } catch (Exception ex) {
-            LOG.error(ex.getMessage(), ex);
+            log.error(ex.getMessage(), ex);
         } finally {
             if (out != null) {
                 out.close();
             }
         }
     }
+
+	public void destroy() {
+	}
+
 }

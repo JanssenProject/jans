@@ -16,7 +16,6 @@ import static org.gluu.oxeleven.model.DeleteKeyRequestParam.KEY_ID;
  * @author Javier Rojas Blum
  * @version April 26, 2016
  */
-@Path("/oxeleven")
 public interface DeleteKeyRestService {
 
     @POST

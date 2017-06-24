@@ -6,19 +6,8 @@
 
 package org.gluu.oxeleven.rest;
 
-import com.google.common.base.Strings;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.gluu.oxeleven.model.Configuration;
-import org.gluu.oxeleven.service.ConfigurationService;
-import org.gluu.oxeleven.service.PKCS11Service;
-import org.gluu.oxeleven.util.StringUtils;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
 
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -26,16 +15,32 @@ import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.util.Map;
 
-import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
+import javax.inject.Inject;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.gluu.oxeleven.model.Configuration;
+import org.gluu.oxeleven.service.PKCS11Service;
+import org.gluu.oxeleven.util.StringUtils;
+import org.slf4j.Logger;
+
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum
  * @version March 20, 2017
  */
-@Name("deleteKeyRestService")
+@Path("/")
 public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
 
-    private static final Log LOG = Logging.getLog(DeleteKeyRestServiceImpl.class);
+	@Inject
+	private Logger log;
+	
+	@Inject
+	private Configuration configuration;
 
     public Response sign(String alias) {
         Response.ResponseBuilder builder = Response.ok();
@@ -48,7 +53,6 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
                         "The request asked for an operation that cannot be supported because the alias parameter is mandatory."
                 ));
             } else {
-                Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();
                 Map<String, String> pkcs11Config = configuration.getPkcs11Config();
 
@@ -71,22 +75,22 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
             }
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (KeyStoreException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (IOException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (JSONException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         CacheControl cacheControl = new CacheControl();

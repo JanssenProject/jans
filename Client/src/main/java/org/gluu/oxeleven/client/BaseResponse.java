@@ -21,7 +21,7 @@ public abstract class BaseResponse {
     protected int status;
     protected String location;
     protected String entity;
-    protected MultivaluedMap<String, String> headers;
+    protected MultivaluedMap<String, Object> headers;
 
     public BaseResponse(ClientResponse<String> clientResponse) {
         if (clientResponse != null) {
@@ -29,7 +29,7 @@ public abstract class BaseResponse {
             entity = clientResponse.getEntity(String.class);
             headers = clientResponse.getHeaders();
             if (clientResponse.getLocation() != null) {
-                location = clientResponse.getLocation().getHref();
+                location = clientResponse.getLocationLink().getHref();
             }
         }
     }
@@ -46,7 +46,7 @@ public abstract class BaseResponse {
         return entity;
     }
 
-    public MultivaluedMap<String, String> getHeaders() {
+    public MultivaluedMap<String, Object> getHeaders() {
         return headers;
     }
 

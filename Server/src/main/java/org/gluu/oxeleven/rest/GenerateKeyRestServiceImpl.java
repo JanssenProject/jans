@@ -6,6 +6,36 @@
 
 package org.gluu.oxeleven.rest;
 
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.ALGORITHM;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.CERTIFICATE_CHAIN;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.CURVE;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.EXPIRATION_TIME;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.EXPONENT;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_ID;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_TYPE;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.KEY_USE;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.MODULUS;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.X;
+import static org.gluu.oxeleven.model.GenerateKeyResponseParam.Y;
+
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -13,34 +43,25 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
-import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.gluu.oxeleven.util.Base64Util;
 import org.gluu.oxeleven.util.StringUtils;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+
 import sun.security.rsa.RSAPublicKeyImpl;
-
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.interfaces.ECPublicKey;
-import java.util.Map;
-
-import static org.gluu.oxeleven.model.GenerateKeyResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
  * @version March 20, 2017
  */
-@Name("generateKeyRestService")
+@Path("/")
 public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 
-    private static final Log LOG = Logging.getLog(GenerateKeyRestServiceImpl.class);
+	@Inject
+	private Logger log;
+
+	@Inject
+	private Configuration configuration;
 
     public Response generateKey(String sigAlg, Long expirationTime) {
         Response.ResponseBuilder builder = Response.ok();
@@ -67,7 +88,6 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
                         "The provided signature algorithm parameter is not supported."
                 ));
             } else {
-                Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();
                 Map<String, String> pkcs11Config = configuration.getPkcs11Config();
                 String dnName = configuration.getDnName();
@@ -101,34 +121,34 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
             }
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (KeyStoreException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (IOException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (InvalidKeyException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (InvalidAlgorithmParameterException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (NoSuchProviderException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (SignatureException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (JSONException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         CacheControl cacheControl = new CacheControl();

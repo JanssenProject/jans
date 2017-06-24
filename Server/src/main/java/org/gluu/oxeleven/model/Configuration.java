@@ -9,10 +9,14 @@ package org.gluu.oxeleven.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.enterprise.inject.Vetoed;
+
 /**
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version March 20, 2017
  */
+@Vetoed
 public class Configuration {
 
     private Map<String, String> pkcs11Config;

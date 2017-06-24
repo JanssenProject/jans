@@ -17,7 +17,6 @@ import static org.gluu.oxeleven.model.GenerateKeyRequestParam.SIGNATURE_ALGORITH
  * @author Javier Rojas Blum
  * @version April 27, 2016
  */
-@Path("/oxeleven")
 public interface GenerateKeyRestService {
 
     @POST

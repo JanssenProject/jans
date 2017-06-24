@@ -6,37 +6,46 @@
 
 package org.gluu.oxeleven.rest;
 
-import com.google.common.base.Strings;
+import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.Configuration;
 import org.gluu.oxeleven.model.SignRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
-import org.gluu.oxeleven.service.ConfigurationService;
 import org.gluu.oxeleven.service.PKCS11Service;
 import org.gluu.oxeleven.util.StringUtils;
-import org.jboss.seam.annotations.Name;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
 
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.util.Map;
-
-import static org.gluu.oxeleven.model.SignResponseParam.SIGNATURE;
+import com.google.common.base.Strings;
 
 /**
  * @author Javier Rojas Blum
  * @version March 20, 2017
  */
-@Name("signRestService")
+@Path("/")
 public class SignRestServiceImpl implements SignRestService {
 
-    private static final Log LOG = Logging.getLog(SignRestServiceImpl.class);
+	@Inject
+	private Logger log;
+
+	@Inject
+	private Configuration configuration;
 
     public Response sign(SignRequestParam signRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
@@ -73,7 +82,6 @@ public class SignRestServiceImpl implements SignRestService {
                         "The request asked for an operation that cannot be supported because the alias parameter is mandatory."
                 ));
             } else {
-                Configuration configuration = ConfigurationService.instance().getConfiguration();
                 String pkcs11Pin = configuration.getPkcs11Pin();
                 Map<String, String> pkcs11Config = configuration.getPkcs11Config();
 
@@ -94,28 +102,28 @@ public class SignRestServiceImpl implements SignRestService {
             ));
         } catch (CertificateException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (KeyStoreException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (IOException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (UnrecoverableEntryException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (SignatureException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (JSONException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         } catch (Exception e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
 
         CacheControl cacheControl = new CacheControl();

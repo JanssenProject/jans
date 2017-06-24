@@ -6,7 +6,51 @@
 
 package org.gluu.oxeleven.service;
 
-import com.google.common.base.Strings;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.AlgorithmParameters;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import javax.inject.Inject;
+import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.gluu.oxeleven.model.JwksRequestParam;
@@ -14,29 +58,12 @@ import org.gluu.oxeleven.model.KeyRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.util.Base64Util;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.slf4j.Logger;
+
+import com.google.common.base.Strings;
+
 import sun.security.pkcs11.SunPKCS11;
 import sun.security.rsa.RSAPublicKeyImpl;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.security.spec.*;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author Javier Rojas Blum
@@ -44,7 +71,9 @@ import java.util.UUID;
  */
 public class PKCS11Service {
 
-    private static final Log LOG = Logging.getLog(PKCS11Service.class);
+	@Inject
+	private Logger log;
+
     public static String UTF8_STRING_ENCODING = "UTF-8";
 
     private Provider provider;
@@ -175,16 +204,16 @@ public class PKCS11Service {
                 verifier.update(signingInput.getBytes());
                 verified = verifier.verify(signature);
             } catch (NoSuchAlgorithmException e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 verified = false;
             } catch (SignatureException e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 verified = false;
             } catch (InvalidKeyException e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 verified = false;
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                log.error(e.getMessage(), e);
                 verified = false;
             }
         }

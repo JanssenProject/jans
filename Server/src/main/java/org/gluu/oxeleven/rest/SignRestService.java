@@ -18,7 +18,6 @@ import static org.gluu.oxeleven.model.SignRequestParam.*;
  * @author Javier Rojas Blum
  * @version April 19, 2016
  */
-@Path("/oxeleven")
 public interface SignRestService {
 
     @POST

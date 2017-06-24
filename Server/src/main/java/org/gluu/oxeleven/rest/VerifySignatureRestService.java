@@ -18,7 +18,6 @@ import static org.gluu.oxeleven.model.VerifySignatureRequestParam.*;
  * @author Javier Rojas Blum
  * @version April 18, 2016
  */
-@Path("/oxeleven")
 public interface VerifySignatureRestService {
 
     @POST
