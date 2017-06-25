@@ -30,7 +30,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -62,7 +64,7 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 	@Inject
 	private Configuration configuration;
 
-	@Inject
+	@Inject @Named("pkcs11Service")
 	private PKCS11Service pkcs11Service;
 
     public Response generateKey(String sigAlg, Long expirationTime) {
