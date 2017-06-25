@@ -9,6 +9,7 @@ package org.gluu.oxeleven.service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.AlgorithmParameters;
@@ -48,6 +49,7 @@ import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.enterprise.inject.Vetoed;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -67,29 +69,27 @@ import sun.security.rsa.RSAPublicKeyImpl;
 
 /**
  * @author Javier Rojas Blum
+ * @author Yuriy Movchan
  * @version October 5, 2016
  */
-
-// TODO; We need to reconsider this class recreation on each request. It's should be service for optimal performance 
-public class PKCS11Service {
+@Vetoed
+public class PKCS11Service implements Serializable {
 	
+	private static final long serialVersionUID = -2541585376018724618L;
+
 	private Logger log = LoggerFactory.getLogger(PKCS11Service.class);
 
-    public static String UTF8_STRING_ENCODING = "UTF-8";
+    public static final String UTF8_STRING_ENCODING = "UTF-8";
 
     private Provider provider;
     private KeyStore keyStore;
     private char[] pin;
 
-    public PKCS11Service(String pin, Map<String, String> pkcs11Config)
-            throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    public PKCS11Service() {}
+
+    public void init(String pin, Map<String, String> pkcs11Config) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         this.pin = pin.toCharArray();
-
-        init(pkcs11Config);
-    }
-
-    private void init(Map<String, String> pkcs11Config) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
-        provider = new SunPKCS11(getTokenCfg(pkcs11Config));
+        this.provider = new SunPKCS11(getTokenCfg(pkcs11Config));
 
         Provider installedProvider = Security.getProvider(provider.getName());
         if (installedProvider == null) {

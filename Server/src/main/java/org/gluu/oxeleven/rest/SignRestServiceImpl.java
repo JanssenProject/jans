@@ -14,8 +14,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
@@ -24,7 +22,6 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.gluu.oxeleven.model.Configuration;
 import org.gluu.oxeleven.model.SignRequestParam;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
@@ -45,7 +42,7 @@ public class SignRestServiceImpl implements SignRestService {
 	private Logger log;
 
 	@Inject
-	private Configuration configuration;
+	private PKCS11Service pkcs11Service;
 
     public Response sign(SignRequestParam signRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
@@ -82,11 +79,7 @@ public class SignRestServiceImpl implements SignRestService {
                         "The request asked for an operation that cannot be supported because the alias parameter is mandatory."
                 ));
             } else {
-                String pkcs11Pin = configuration.getPkcs11Pin();
-                Map<String, String> pkcs11Config = configuration.getPkcs11Config();
-
-                PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                String signature = pkcs11.getSignature(signRequestParam.getSigningInput().getBytes(),
+                String signature = pkcs11Service.getSignature(signRequestParam.getSigningInput().getBytes(),
                         signRequestParam.getAlias(), signRequestParam.getSharedSecret(), signatureAlgorithm);
 
                 JSONObject jsonObject = new JSONObject();
@@ -100,9 +93,6 @@ public class SignRestServiceImpl implements SignRestService {
                     "invalid_request",
                     "Invalid key, either the alias or signatureAlgorithm parameter is not valid."
             ));
-        } catch (CertificateException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             log.error(e.getMessage(), e);

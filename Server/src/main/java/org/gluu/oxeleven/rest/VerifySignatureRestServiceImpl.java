@@ -11,8 +11,6 @@ import static org.gluu.oxeleven.model.VerifySignatureResponseParam.VERIFIED;
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
@@ -21,7 +19,6 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.gluu.oxeleven.model.Configuration;
 import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.model.VerifySignatureRequestParam;
@@ -42,7 +39,7 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
 	private Logger log;
 
 	@Inject
-	private Configuration configuration;
+	private PKCS11Service pkcs11Service;
 
     public Response verifySignature(VerifySignatureRequestParam verifySignatureRequestParam) {
         Response.ResponseBuilder builder = Response.ok();
@@ -85,11 +82,7 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
                         "The request asked for an operation that cannot be supported because the alias parameter is mandatory."
                 ));
             } else {
-                String pkcs11Pin = configuration.getPkcs11Pin();
-                Map<String, String> pkcs11Config = configuration.getPkcs11Config();
-
-                PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                boolean verified = pkcs11.verifySignature(
+                boolean verified = pkcs11Service.verifySignature(
                         verifySignatureRequestParam.getSigningInput(), verifySignatureRequestParam.getSignature(),
                         verifySignatureRequestParam.getAlias(),
                         verifySignatureRequestParam.getSharedSecret(),
@@ -101,9 +94,6 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
 
                 builder.entity(jsonObject.toString());
             }
-        } catch (CertificateException e) {
-            builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
-            log.error(e.getMessage(), e);
         } catch (NoSuchAlgorithmException e) {
             builder = Response.status(Response.Status.INTERNAL_SERVER_ERROR);
             log.error(e.getMessage(), e);

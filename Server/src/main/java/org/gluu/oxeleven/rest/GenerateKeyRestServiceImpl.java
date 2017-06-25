@@ -29,7 +29,6 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
@@ -63,6 +62,9 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
 	@Inject
 	private Configuration configuration;
 
+	@Inject
+	private PKCS11Service pkcs11Service;
+
     public Response generateKey(String sigAlg, Long expirationTime) {
         Response.ResponseBuilder builder = Response.ok();
 
@@ -88,14 +90,10 @@ public class GenerateKeyRestServiceImpl implements GenerateKeyRestService {
                         "The provided signature algorithm parameter is not supported."
                 ));
             } else {
-                String pkcs11Pin = configuration.getPkcs11Pin();
-                Map<String, String> pkcs11Config = configuration.getPkcs11Config();
                 String dnName = configuration.getDnName();
-
-                PKCS11Service pkcs11 = new PKCS11Service(pkcs11Pin, pkcs11Config);
-                String alias = pkcs11.generateKey(dnName, signatureAlgorithm, expirationTime);
-                PublicKey publicKey = pkcs11.getPublicKey(alias);
-                Certificate certificate = pkcs11.getCertificate(alias);
+                String alias = pkcs11Service.generateKey(dnName, signatureAlgorithm, expirationTime);
+                PublicKey publicKey = pkcs11Service.getPublicKey(alias);
+                Certificate certificate = pkcs11Service.getCertificate(alias);
 
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(KEY_ID, alias);

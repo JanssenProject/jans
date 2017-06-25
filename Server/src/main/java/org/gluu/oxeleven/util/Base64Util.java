@@ -6,9 +6,9 @@
 
 package org.gluu.oxeleven.util;
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.math.BigInteger;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * @author Javier Rojas Blum
