@@ -30,7 +30,6 @@ public class ConfigurationFactory {
 	@Inject
 	private Logger log;
 
-
 	static {
 		if (System.getProperty("gluu.base") != null) {
 			BASE_DIR = System.getProperty("gluu.base");

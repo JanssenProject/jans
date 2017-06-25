@@ -5,6 +5,8 @@ import java.security.Security;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -26,6 +28,11 @@ public class AppInitializer {
 	@PostConstruct
     public void createApplicationComponents() {
     	installBCProvider();
+    }
+
+	// Don't remove this. It force CDI to create bean at startup
+	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+		log.info("Application initialized");
     }
 
 	private void installBCProvider(boolean silent) {
