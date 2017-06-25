@@ -69,7 +69,7 @@ public class BenchmarkRequestAccessToken extends BaseTest {
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 200, threadPoolSize = 10, dependsOnMethods = { "requestAccessTokenPassword1" })
+    @Test(invocationCount = 200, threadPoolSize = 5, dependsOnMethods = { "requestAccessTokenPassword1" })
     public void requestAccessTokenPassword2(final String userId, final String userSecret) throws Exception {
     	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
