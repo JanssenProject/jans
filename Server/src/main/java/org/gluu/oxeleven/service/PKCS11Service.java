@@ -69,6 +69,8 @@ import sun.security.rsa.RSAPublicKeyImpl;
  * @author Javier Rojas Blum
  * @version October 5, 2016
  */
+
+// TODO; We need to reconsider this class recreation on each request. It's should be service for optimal performance 
 public class PKCS11Service {
 	
 	private Logger log = LoggerFactory.getLogger(PKCS11Service.class);
