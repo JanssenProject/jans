@@ -15,9 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -43,7 +41,7 @@ public class SignRestServiceImpl implements SignRestService {
 	@Inject
 	private Logger log;
 
-	@Inject @Named("pkcs11Service")
+	@Inject
 	private PKCS11Service pkcs11Service;
 
     public Response sign(SignRequestParam signRequestParam) {

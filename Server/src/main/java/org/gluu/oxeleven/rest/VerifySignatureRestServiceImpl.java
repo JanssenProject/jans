@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -40,7 +38,7 @@ public class VerifySignatureRestServiceImpl implements VerifySignatureRestServic
 	@Inject
 	private Logger log;
 
-	@Inject @Named("pkcs11Service")
+	@Inject
 	private PKCS11Service pkcs11Service;
 
     public Response verifySignature(VerifySignatureRequestParam verifySignatureRequestParam) {

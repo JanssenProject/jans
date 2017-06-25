@@ -11,9 +11,7 @@ import static org.gluu.oxeleven.model.DeleteKeyResponseParam.DELETED;
 import java.security.KeyStoreException;
 import java.security.PublicKey;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
@@ -36,7 +34,7 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
 	@Inject
 	private Logger log;
 	
-	@Inject @Named("pkcs11Service")
+	@Inject
 	private PKCS11Service pkcs11Service;
 
     public Response deleteKey(String alias) {
