@@ -46,6 +46,8 @@ public class ExpressionEvaluator implements Serializable {
             for (String parameterName : parameters.keySet()) {
             	constantResolver.removeConstant(parameterName);
             }
+
+            elContext.destroy(ctx);
         }
 	}
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.ViewHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -92,6 +93,15 @@ public class FacesService {
 			builder.setCharAt(url.length(), '?');
 		}
 		return builder.toString();
+	}
+	
+	public void renderView(String viewId) {
+        final FacesContext fc = FacesContext.getCurrentInstance();
+        final ViewHandler viewHandler = fc.getApplication().getViewHandler();
+
+        fc.setViewRoot(viewHandler.createView(fc, viewId));
+        fc.getPartialViewContext().setRenderAll(true);
+        fc.renderResponse();
 	}
 
 	private boolean containsParameter(String url, String parameterName) {
