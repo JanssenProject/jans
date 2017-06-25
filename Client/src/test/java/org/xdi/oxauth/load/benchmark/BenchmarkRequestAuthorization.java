@@ -71,7 +71,7 @@ public class BenchmarkRequestAuthorization extends BaseTest {
 	}
 
     @Parameters({"userId", "userSecret", "redirectUri"})
-    @Test(invocationCount = 200, threadPoolSize = 10, dependsOnMethods = {"testAuthorization1"})
+    @Test(invocationCount = 200, threadPoolSize = 5, dependsOnMethods = {"testAuthorization1"})
     public void testAuthorization2(final String userId, final String userSecret, final String redirectUri) throws Exception {
         testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri, true);
     }
