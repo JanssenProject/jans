@@ -48,7 +48,6 @@ import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.inject.Inject;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -59,6 +58,7 @@ import org.gluu.oxeleven.model.SignatureAlgorithm;
 import org.gluu.oxeleven.model.SignatureAlgorithmFamily;
 import org.gluu.oxeleven.util.Base64Util;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 
@@ -70,9 +70,8 @@ import sun.security.rsa.RSAPublicKeyImpl;
  * @version October 5, 2016
  */
 public class PKCS11Service {
-
-	@Inject
-	private Logger log;
+	
+	private Logger log = LoggerFactory.getLogger(PKCS11Service.class);
 
     public static String UTF8_STRING_ENCODING = "UTF-8";
 

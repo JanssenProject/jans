@@ -42,7 +42,7 @@ public class DeleteKeyRestServiceImpl implements DeleteKeyRestService {
 	@Inject
 	private Configuration configuration;
 
-    public Response sign(String alias) {
+    public Response deleteKey(String alias) {
         Response.ResponseBuilder builder = Response.ok();
 
         try {
