@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
@@ -145,9 +146,57 @@ public class UmaGatherer {
         return url;
     }
 
+    public String prepareForStep() {
+        final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+        final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
+        final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
+
+        if (session == null || session.getSessionAttributes().isEmpty()) {
+            log.error("Invalid session.");
+            return result(Constants.RESULT_EXPIRED);
+        }
+
+        CustomScriptConfiguration script = umaSessionService.getScript(session);
+        UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
+
+        int step = umaSessionService.getStep(session);
+        if (step < 1) {
+            log.error("Invalid step: {}", step);
+            return result(Constants.RESULT_INVALID_STEP);
+        }
+        if (script == null) {
+            log.error("Failed to load script, step: '{}'", step);
+            return result(Constants.RESULT_FAILURE);
+        }
+
+        if (!umaSessionService.isPassedPreviousSteps(session, step)) {
+            log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
+            return result(Constants.RESULT_FAILURE);
+        }
+
+        boolean result = external.prepareForStep(script, step, context);
+        if (result) {
+            context.persist();
+            return result(Constants.RESULT_SUCCESS);
+        } else {
+            return result(Constants.RESULT_FAILURE);
+        }
+    }
+
     private void errorPage(String errorKey) {
         addMessage(FacesMessage.SEVERITY_ERROR, errorKey);
         facesService.redirect("/error.xhtml");
+    }
+
+    public String result(String resultCode) {
+        if (Constants.RESULT_FAILURE.equals(resultCode)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "uma2.gather.failed");
+        } else if (Constants.RESULT_INVALID_STEP.equals(resultCode)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "uma2.invalid.step");
+        } else if (Constants.RESULT_EXPIRED.equals(resultCode)) {
+            addMessage(FacesMessage.SEVERITY_ERROR, "uma2.invalid.session");
+        }
+        return resultCode;
     }
 
     public void addMessage(FacesMessage.Severity severity, String summary) {
