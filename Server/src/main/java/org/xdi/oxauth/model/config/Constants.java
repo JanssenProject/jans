@@ -20,6 +20,7 @@ public final class Constants extends LDAPConstants {
 	public static final String RESULT_DUPLICATE = "duplicate";
 	public static final String RESULT_DISABLED = "disabled";
 	public static final String RESULT_NO_PERMISSIONS = "no_permissions";
+	public static final String RESULT_INVALID_STEP = "invalid_step";
 	public static final String RESULT_VALIDATION_ERROR = "validation_error";
 	public static final String RESULT_LOGOUT = "logout";
 	public static final String RESULT_EXPIRED = "expired";
