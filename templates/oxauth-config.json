@@ -241,5 +241,7 @@
             "corsPreflightMaxAge": 1800,
             "corsRequestDecorate": true
         }
-    ]
+    ],
+    "logClientIdOnClientAuthentication": true,
+    "logClientNameOnClientAuthentication": false
 }
