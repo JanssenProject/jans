@@ -48,13 +48,13 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STAT
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version June 28, 2017
  */
 @Stateless
 @Named
 public class AuthenticationService {
 
-	// use only "acr" instead of "acr_values" #334
+    // use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
             AuthorizeRequestParam.RESPONSE_TYPE,
@@ -87,17 +87,19 @@ public class AuthenticationService {
 
     @Inject
     private Identity identity;
-    
+
     @Inject
     private Credentials credentials;
 
-    @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject
+    @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @Inject @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    @Inject
+    @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
     private List<LdapEntryManager> ldapAuthEntryManagers;
 
     @Inject
@@ -377,13 +379,13 @@ public class AuthenticationService {
     }
 
     private void updateLastLogonUserTime(User user) {
-		if (!appConfiguration.getUpdateUserLastLogonTime()) {
-			return;
-		}
+        if (!appConfiguration.getUpdateUserLastLogonTime()) {
+            return;
+        }
 
-		CustomEntry customEntry = new CustomEntry();
+        CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
-		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
+        customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
 
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
         customEntry.getCustomAttributes().add(customAttribute);
@@ -474,12 +476,13 @@ public class AuthenticationService {
         return null;
     }
 
-    public void configureSessionClient() {
+    public Client configureSessionClient() {
         String clientInum = credentials.getUsername();
         log.debug("ConfigureSessionClient: username: '{}', credentials: '{}'", clientInum, System.identityHashCode(credentials));
 
         Client client = clientService.getClient(clientInum);
         configureSessionClient(client);
+        return client;
     }
 
     public void configureSessionClient(Client client) {

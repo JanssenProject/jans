@@ -19,7 +19,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version April 26, 2017
+ * @version June 28, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -145,6 +145,8 @@ public class AppConfiguration implements Configuration {
     private String loggingLevel;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
+    private Boolean logClientIdOnClientAuthentication;
+    private Boolean logClientNameOnClientAuthentication;
 
     /**
      * Used in ServletLoggingFilter to enable http request/response logging.
@@ -1201,5 +1203,21 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionStateLifetime(Integer sessionStateLifetime) {
         this.sessionStateLifetime = sessionStateLifetime;
+    }
+
+    public Boolean getLogClientIdOnClientAuthentication() {
+        return logClientIdOnClientAuthentication;
+    }
+
+    public void setLogClientIdOnClientAuthentication(Boolean logClientIdOnClientAuthentication) {
+        this.logClientIdOnClientAuthentication = logClientIdOnClientAuthentication;
+    }
+
+    public Boolean getLogClientNameOnClientAuthentication() {
+        return logClientNameOnClientAuthentication;
+    }
+
+    public void setLogClientNameOnClientAuthentication(Boolean logClientNameOnClientAuthentication) {
+        this.logClientNameOnClientAuthentication = logClientNameOnClientAuthentication;
     }
 }
