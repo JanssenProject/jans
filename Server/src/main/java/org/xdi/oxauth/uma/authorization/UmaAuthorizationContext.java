@@ -6,7 +6,9 @@
 
 package org.xdi.oxauth.uma.authorization;
 
+import com.google.common.collect.Maps;
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
@@ -34,20 +36,26 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     private final String scriptDn;
     private final Map<String, SimpleCustomProperty> configurationAttributes;
     private final RedirectParameters redirectUserParameters = new RedirectParameters();
+    private final AppConfiguration configuration;
 
     private AttributeService attributeService;
 
-    public UmaAuthorizationContext(AttributeService attributeService, Map<UmaScopeDescription, Boolean> scopes,
+    public UmaAuthorizationContext(AppConfiguration configuration, AttributeService attributeService, Map<UmaScopeDescription, Boolean> scopes,
                                    Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest,
                                    Map<String, SimpleCustomProperty> configurationAttributes) {
     	super(httpRequest);
 
+        this.configuration = configuration;
     	this.attributeService = attributeService;
         this.scopes = new HashMap<UmaScopeDescription, Boolean>(scopes);
         this.resources = resources;
         this.claims = claims;
         this.scriptDn = scriptDn;
         this.configurationAttributes = configurationAttributes != null ? configurationAttributes : new HashMap<String, SimpleCustomProperty>();
+    }
+
+    public String getIssuer() {
+        return configuration.getIssuer();
     }
 
     public String getScriptDn() {
@@ -80,7 +88,7 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     }
 
     public Map<UmaScopeDescription, Boolean> getScopeMap() {
-        return scopes;
+        return Maps.newHashMap(scopes);
     }
 
     public Set<UmaResource> getResources() {
