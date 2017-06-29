@@ -34,7 +34,8 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     protected UmaMetadata metadata;
 
     protected RegisterResourceFlowHttpTest registerResourceTest;
-    protected String ticketForFullAccess;
+    protected String ticket;
+    protected UmaPermissionService permissionService;
 
     public UmaRegisterPermissionFlowHttpTest() {
     }
@@ -48,21 +49,23 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret,
                      final String umaPatClientId, final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
         if (this.metadata == null) {
-            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
+            this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
             UmaTestUtil.assert_(this.metadata);
         }
+
+        permissionService = UmaClientFactory.instance().createPermissionService(this.metadata, clientExecutor(true));
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.setAuthorizationEndpoint(authorizationEndpoint);
         this.registerResourceTest.setTokenEndpoint(tokenEndpoint);
         this.registerResourceTest.init(umaMetaDataUrl, umaPatClientId, umaPatClientSecret);
 
-        this.registerResourceTest.testRegisterResource();
+        this.registerResourceTest.addResource();
     }
 
     @AfterClass
     public void clean() throws Exception {
-        this.registerResourceTest.testDeleteResource();
+        this.registerResourceTest.deleteResource();
     }
 
     /**
@@ -75,8 +78,6 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     }
 
     public String registerResourcePermission(String resourceId, List<String> scopes) throws Exception {
-        UmaPermissionService permissionService = UmaClientFactory.instance().
-                createPermissionService(this.metadata);
 
         UmaPermission permission = new UmaPermission();
         permission.setResourceId(resourceId);
@@ -85,7 +86,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         PermissionTicket ticket = permissionService.registerPermission(
                 "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         UmaTestUtil.assert_(ticket);
-        this.ticketForFullAccess = ticket.getTicket();
+        this.ticket = ticket.getTicket();
         return ticket.getTicket();
     }
 
@@ -96,12 +97,9 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     public void testRegisterPermissionForInvalidResource() throws Exception {
         showTitle("testRegisterPermissionForInvalidResource");
 
-        UmaPermissionService permissionService = UmaClientFactory.instance().createPermissionService(this.metadata);
-
         UmaPermission permission = new UmaPermission();
         permission.setResourceId(this.registerResourceTest.resourceId + "1");
         permission.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
-
 
         PermissionTicket ticket = null;
         try {

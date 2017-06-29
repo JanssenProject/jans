@@ -6,21 +6,22 @@
 
 package org.xdi.oxauth.model.uma;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponse;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Id;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 14/03/2013
  */
-
 public class UmaTestUtil {
 
     private UmaTestUtil() {
@@ -31,7 +32,6 @@ public class UmaTestUtil {
         assertTrue(StringUtils.isNotBlank(p_scopeDescription.getName()), "Scope name is empty");
     }
 
-
     public static void assert_(RptIntrospectionResponse p_rptStatus) {
         assertNotNull(p_rptStatus, "Token response status is null");
         assertTrue(p_rptStatus.getActive(), "Token is not active");
@@ -41,6 +41,7 @@ public class UmaTestUtil {
 
     public static void assert_(UmaMetadata metadata) {
         assertNotNull(metadata, "Metadata is null");
+        assertTrue(ArrayUtils.contains(metadata.getGrantTypesSupported(), GrantType.OXAUTH_UMA_TICKET.getValue()));
         assertNotNull(metadata.getIssuer(), "Issuer isn't correct");
         assertNotNull(metadata.getTokenEndpoint(), "Token endpoint isn't correct");
         assertNotNull(metadata.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");
