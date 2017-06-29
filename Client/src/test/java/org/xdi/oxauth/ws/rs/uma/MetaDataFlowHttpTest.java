@@ -30,7 +30,7 @@ public class MetaDataFlowHttpTest extends BaseTest {
     public void testGetUmaMetaDataConfiguration(final String umaMetaDataUrl) throws Exception {
         showTitle("testGetUmaMetaDataConfiguration");
 
-        UmaMetadataService metaDataConfigurationService = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl);
+        UmaMetadataService metaDataConfigurationService = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true));
 
         // Get meta data
         UmaMetadata c = null;
