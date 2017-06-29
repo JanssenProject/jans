@@ -1,6 +1,7 @@
 package org.xdi.oxauth.uma.authorization;
 
 import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
@@ -24,6 +25,7 @@ public class UmaGatherContext extends ExternalScriptContext {
     private final SessionState session;
     private final RedirectParameters redirectUserParameters = new RedirectParameters();
     private final UmaPCT pct;
+    private final JwtClaims claims;
 
     public UmaGatherContext(HttpServletRequest httpRequest, SessionState session, UmaSessionService sessionService,
                             UmaPermissionService permissionService, UmaPctService pctService) {
@@ -33,6 +35,11 @@ public class UmaGatherContext extends ExternalScriptContext {
         this.permissionService = permissionService;
         this.pctService = pctService;
         this.pct = pctService.getByCode(sessionService.getPct(session));
+        this.claims = pct.getClaims();
+    }
+
+    public Map<String, String[]> getRequestParameters() {
+        return httpRequest.getParameterMap();
     }
 
     public int getStep() {
@@ -76,13 +83,31 @@ public class UmaGatherContext extends ExternalScriptContext {
     }
 
     public JwtClaims getClaims() {
-        return pct.getClaims();
+        return claims;
+    }
+
+    public Object getClaim(String claimName) {
+        return claims.getClaim(claimName);
+    }
+
+    public void putClaim(String claimName, Object claimValue) {
+        claims.setClaimObject(claimName, claimValue);
+    }
+
+    public boolean hasClaim(String claimName) {
+        return getClaim(claimName) != null;
     }
 
     /**
      * Must not take any parameters
      */
     public void persist() {
+        try {
+            pct.setClaims(claims);
+        } catch (InvalidJwtException e) {
+            getLog().error("Failed to persist claims", e);
+        }
+
         sessionService.persist(session);
         pctService.persist(pct);
     }
