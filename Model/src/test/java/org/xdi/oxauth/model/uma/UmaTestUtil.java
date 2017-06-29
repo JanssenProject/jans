@@ -88,4 +88,10 @@ public class UmaTestUtil {
         assertNotNull(p_id, "ID is null");
         assertTrue(StringUtils.isNotBlank(p_id.getId()), "ID is blank");
     }
+
+    public static void assert_(UmaTokenResponse response) {
+        assertNotNull(response, "UMA Token response is null");
+        assertNotNull(response.getAccessToken(), "RPT is null");
+        assertNotNull(response.getPct(), "PCT is null");
+    }
 }
