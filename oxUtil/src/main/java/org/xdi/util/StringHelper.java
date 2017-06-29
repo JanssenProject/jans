@@ -380,6 +380,10 @@ public final class StringHelper {
 		}
 	}
 
+	public static boolean toBoolean(Boolean value, boolean defaultValue) {
+		return value != null ? value : defaultValue;
+	}
+
 	public static boolean toBoolean(String string, boolean defaultValue) {
 		if (isEmpty(string)) {
 			return defaultValue;
