@@ -89,7 +89,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
-                                       String assertion, String refreshToken, String oxAuthExchangeToken,
+                                       String assertion, String refreshToken,
                                        String clientId, String clientSecret, String codeVerifier,
                                        String ticket, String claimToken, String claimTokenFormat, String pctCode, String rptCode,
                                        HttpServletRequest request, SecurityContext sec) {
