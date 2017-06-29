@@ -53,8 +53,6 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
             UmaTestUtil.assert_(this.metadata);
         }
 
-        permissionService = UmaClientFactory.instance().createPermissionService(this.metadata, clientExecutor(true));
-
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.setAuthorizationEndpoint(authorizationEndpoint);
         this.registerResourceTest.setTokenEndpoint(tokenEndpoint);
@@ -66,6 +64,13 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
     @AfterClass
     public void clean() throws Exception {
         this.registerResourceTest.deleteResource();
+    }
+
+    public UmaPermissionService getPermissionService() throws Exception {
+        if (permissionService == null) {
+            permissionService = UmaClientFactory.instance().createPermissionService(this.metadata, clientExecutor(true));
+        }
+        return permissionService;
     }
 
     /**
@@ -83,7 +88,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
         permission.setResourceId(resourceId);
         permission.setScopes(scopes);
 
-        PermissionTicket ticket = permissionService.registerPermission(
+        PermissionTicket ticket = getPermissionService().registerPermission(
                 "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         UmaTestUtil.assert_(ticket);
         this.ticket = ticket.getTicket();
@@ -103,7 +108,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
         PermissionTicket ticket = null;
         try {
-            ticket = permissionService.registerPermission(
+            ticket = getPermissionService().registerPermission(
                     "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
