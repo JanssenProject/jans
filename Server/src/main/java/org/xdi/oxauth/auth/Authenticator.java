@@ -193,7 +193,8 @@ public class Authenticator {
 
     private void showClientAuthenticationLog(Client client) {
         StringBuilder sb = new StringBuilder("Authentication success for Client");
-        if (appConfiguration.getLogClientIdOnClientAuthentication() || appConfiguration.getLogClientNameOnClientAuthentication()) {
+        if (StringHelper.toBoolean(appConfiguration.getLogClientIdOnClientAuthentication(), false) ||
+        		StringHelper.toBoolean(appConfiguration.getLogClientNameOnClientAuthentication(), false)) {
             sb.append(":");
             if (appConfiguration.getLogClientIdOnClientAuthentication()) {
                 sb.append(" ").append("'").append(client.getClientId()).append("'");
