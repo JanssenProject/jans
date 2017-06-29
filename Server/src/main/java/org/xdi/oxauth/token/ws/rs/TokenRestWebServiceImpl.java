@@ -6,17 +6,8 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
-import java.security.SignatureException;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-
+import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -24,17 +15,7 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.CodeVerifier;
-import org.xdi.oxauth.model.common.AccessToken;
-import org.xdi.oxauth.model.common.AuthorizationCodeGrant;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.ClientCredentialsGrant;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.IdToken;
-import org.xdi.oxauth.model.common.RefreshToken;
-import org.xdi.oxauth.model.common.ResourceOwnerPasswordCredentialsGrant;
-import org.xdi.oxauth.model.common.TokenType;
-import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJweException;
@@ -48,11 +29,20 @@ import org.xdi.oxauth.service.AuthenticationFilterService;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.uma.service.UmaTokenService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
-import com.google.common.base.Strings;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+import java.security.SignatureException;
 
 /**
  * Provides interface for token REST web services
@@ -93,17 +83,26 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private UmaTokenService umaTokenService;
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
                                        String assertion, String refreshToken, String oxAuthExchangeToken,
                                        String clientId, String clientSecret, String codeVerifier,
+                                       String ticket, String claimToken, String claimTokenFormat, String pctCode, String rptCode,
                                        HttpServletRequest request, SecurityContext sec) {
         log.debug(
                 "Attempting to request access token: grantType = {}, code = {}, redirectUri = {}, username = {}, refreshToken = {}, " +
-                        "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}",
+                        "clientId = {}, ExtraParams = {}, isSecure = {}, codeVerifier = {}, ticket = {}",
                 grantType, code, redirectUri, username, refreshToken, clientId, request.getParameterMap(),
-                sec.isSecure(), codeVerifier);
+                sec.isSecure(), codeVerifier, ticket);
+
+        boolean isUma = StringUtils.isNotBlank(ticket);
+        if (isUma) {
+            return umaTokenService.requestRpt(grantType, ticket, claimToken, claimTokenFormat, pctCode, rptCode, scope, request);
+        }
 
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REQUEST);
         oAuth2AuditLog.setClientId(clientId);
