@@ -16,6 +16,18 @@ public class ClaimDefinitionBuilder {
     private ClaimDefinitionBuilder() {
     }
 
+    /**
+     * Parse json. Sample: [ {
+     * "issuer" : [ "https://example.com" ],
+     * "name" : "country",
+     * "claim_token_format" : [ "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
+     * "claim_type" : "string",
+     * "friendly_name" : "country"
+     * } ]
+     *
+     * @param json
+     * @return
+     */
     public static List<ClaimDefinition> build(String json) {
         try {
             return Util.createJsonMapper().readValue(json, ClaimDefinitionList.class);
