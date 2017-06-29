@@ -19,7 +19,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version April 26, 2017
+ * @version June 28, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -80,8 +80,7 @@ public class AppConfiguration implements Configuration {
     private int authorizationCodeLifetime;
     private int refreshTokenLifetime;
     private int idTokenLifetime;
-    private int shortLivedAccessTokenLifetime;
-    private int longLivedAccessTokenLifetime;
+    private int accessTokenLifetime;
 
     private int cleanServiceInterval;
     private Boolean keyRegenerationEnabled;
@@ -145,6 +144,8 @@ public class AppConfiguration implements Configuration {
     private String loggingLevel;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
+    private Boolean logClientIdOnClientAuthentication;
+    private Boolean logClientNameOnClientAuthentication;
 
     /**
      * Used in ServletLoggingFilter to enable http request/response logging.
@@ -706,20 +707,12 @@ public class AppConfiguration implements Configuration {
         this.idTokenLifetime = idTokenLifetime;
     }
 
-    public int getShortLivedAccessTokenLifetime() {
-        return shortLivedAccessTokenLifetime;
+    public int getAccessTokenLifetime() {
+        return accessTokenLifetime;
     }
 
-    public void setShortLivedAccessTokenLifetime(int shortLivedAccessTokenLifetime) {
-        this.shortLivedAccessTokenLifetime = shortLivedAccessTokenLifetime;
-    }
-
-    public int getLongLivedAccessTokenLifetime() {
-        return longLivedAccessTokenLifetime;
-    }
-
-    public void setLongLivedAccessTokenLifetime(int longLivedAccessTokenLifetime) {
-        this.longLivedAccessTokenLifetime = longLivedAccessTokenLifetime;
+    public void setAccessTokenLifetime(int accessTokenLifetime) {
+        this.accessTokenLifetime = accessTokenLifetime;
     }
 
     public int getUmaRptLifetime() {
@@ -1201,5 +1194,21 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionStateLifetime(Integer sessionStateLifetime) {
         this.sessionStateLifetime = sessionStateLifetime;
+    }
+
+    public Boolean getLogClientIdOnClientAuthentication() {
+        return logClientIdOnClientAuthentication;
+    }
+
+    public void setLogClientIdOnClientAuthentication(Boolean logClientIdOnClientAuthentication) {
+        this.logClientIdOnClientAuthentication = logClientIdOnClientAuthentication;
+    }
+
+    public Boolean getLogClientNameOnClientAuthentication() {
+        return logClientNameOnClientAuthentication;
+    }
+
+    public void setLogClientNameOnClientAuthentication(Boolean logClientNameOnClientAuthentication) {
+        this.logClientNameOnClientAuthentication = logClientNameOnClientAuthentication;
     }
 }

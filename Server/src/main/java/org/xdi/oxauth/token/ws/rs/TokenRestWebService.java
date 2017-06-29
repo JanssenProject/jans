@@ -21,7 +21,8 @@ import javax.ws.rs.core.SecurityContext;
 /**
  * Provides interface for token REST web services
  *
- * @author Javier Rojas Blum Date: 09.21.2011
+ * @author Javier Rojas Blum
+ * @author Yuriy Zabrovarnyy
  */
 @Api(value = "/", description = "Token Endpoint is used to obtain an Access Token, an ID Token, and optionally a Refresh Token. The RP (Client) sends a Token Request to the Token Endpoint to obtain a Token Response")
 public interface TokenRestWebService {
