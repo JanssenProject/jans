@@ -36,7 +36,9 @@ import java.util.*;
 /**
  * RPT manager component
  *
- * @author Yuriy Zabrovarnyy Date: 10/16/2012
+ * @author Yuriy Zabrovarnyy
+ * @author Javier Rojas Blum
+ * @version June 28, 2017
  */
 @Stateless
 @Named
@@ -196,7 +198,7 @@ public class UmaRptService {
     public UmaRPT createRPT(String clientId) {
         try {
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, appConfiguration.getShortLivedAccessTokenLifetime());
+            calendar.add(Calendar.SECOND, appConfiguration.getAccessTokenLifetime());
             Date expirationDate = calendar.getTime();
 
             String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);

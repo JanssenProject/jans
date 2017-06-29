@@ -17,7 +17,7 @@ import java.util.Map;
  * parameter grant_type for access token requests.
  *
  * @author Javier Rojas Blum
- * @version December 9, 2015
+ * @version June 28, 2017
  */
 public enum GrantType implements HasParamName, LdapEnum {
 
@@ -77,19 +77,12 @@ public enum GrantType implements HasParamName, LdapEnum {
     EXTENSION,
 
     /**
-     * Grant Type for extending the expiration of existing short-lived access_tokens
-     * by exchanging it for a long-lived access_token.
+     * Representing a requesting party, to use a permission ticket to request
+     * an OAuth 2.0 access token to gain access to a protected resource
+     * asynchronously from the time a resource owner grants access.
      */
-    OXAUTH_EXCHANGE_TOKEN("oxauth_exchange_token"),
+    OXAUTH_UMA_TICKET("urn:ietf:params:oauth:grant-type:uma-ticket");
 
-	/**
-     *  Representing a requesting party, to use a permission ticket to request
-     *  an OAuth 2.0 access token to gain access to a protected resource 
-     *  asynchronously from the time a resource owner grants access.
-     */
-	OXAUTH_UMA_TICKET("urn:ietf:params:oauth:grant-type:uma-ticket");
-	
-	
     private final String value;
     private String uri;
 
