@@ -82,9 +82,6 @@ public interface TokenRestWebService {
             @FormParam("refresh_token")
             @ApiParam(value = "Refresh token", required = false)
             String refreshToken,
-            @FormParam("oxauth_exchange_token")
-            @ApiParam(value = "oxauth_exchange_token", required = false)
-            String oxAuthExchangeToken,
             @FormParam("client_id")
             @ApiParam(value = "OAuth 2.0 Client Identifier valid at the Authorization Server.", required = false)
             String clientId,
