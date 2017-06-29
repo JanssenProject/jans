@@ -6,14 +6,15 @@
 
 package org.xdi.oxauth.model.token;
 
-import java.net.URI;
-
 import org.xdi.oxauth.model.common.GrantType;
+
+import java.net.URI;
 
 /**
  * Validates the parameters received for the token web service.
  *
- * @author Javier Rojas Blum Date: 09.21.2011
+ * @author Javier Rojas Blum
+ * @version June 28, 2017
  */
 public class TokenParamsValidator {
 
@@ -35,7 +36,7 @@ public class TokenParamsValidator {
      */
     public static boolean validateParams(String grantType, String code,
                                          String redirectUri, String username, String password, String scope,
-                                         String assertion, String refreshToken, String oxAuthExchangeToken) {
+                                         String assertion, String refreshToken) {
         boolean result = false;
         if (grantType == null || grantType.isEmpty()) {
             return false;
@@ -58,9 +59,6 @@ public class TokenParamsValidator {
                 break;
             case REFRESH_TOKEN:
                 result = refreshToken != null && !refreshToken.isEmpty();
-                break;
-            case OXAUTH_EXCHANGE_TOKEN:
-                result = oxAuthExchangeToken != null && !oxAuthExchangeToken.isEmpty();
                 break;
         }
 
