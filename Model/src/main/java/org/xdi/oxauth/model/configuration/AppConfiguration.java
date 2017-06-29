@@ -80,8 +80,7 @@ public class AppConfiguration implements Configuration {
     private int authorizationCodeLifetime;
     private int refreshTokenLifetime;
     private int idTokenLifetime;
-    private int shortLivedAccessTokenLifetime;
-    private int longLivedAccessTokenLifetime;
+    private int accessTokenLifetime;
 
     private int cleanServiceInterval;
     private Boolean keyRegenerationEnabled;
@@ -708,20 +707,12 @@ public class AppConfiguration implements Configuration {
         this.idTokenLifetime = idTokenLifetime;
     }
 
-    public int getShortLivedAccessTokenLifetime() {
-        return shortLivedAccessTokenLifetime;
+    public int getAccessTokenLifetime() {
+        return accessTokenLifetime;
     }
 
-    public void setShortLivedAccessTokenLifetime(int shortLivedAccessTokenLifetime) {
-        this.shortLivedAccessTokenLifetime = shortLivedAccessTokenLifetime;
-    }
-
-    public int getLongLivedAccessTokenLifetime() {
-        return longLivedAccessTokenLifetime;
-    }
-
-    public void setLongLivedAccessTokenLifetime(int longLivedAccessTokenLifetime) {
-        this.longLivedAccessTokenLifetime = longLivedAccessTokenLifetime;
+    public void setAccessTokenLifetime(int accessTokenLifetime) {
+        this.accessTokenLifetime = accessTokenLifetime;
     }
 
     public int getUmaRptLifetime() {
