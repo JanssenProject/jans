@@ -15,14 +15,11 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -31,7 +28,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version April 26, 2017
+ * @version June 28, 2017
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -1244,96 +1241,5 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getEntity(), "The entity is null");
         assertNotNull(response.getErrorType(), "The error type is null");
         assertNotNull(response.getErrorDescription(), "The error description is null");
-    }
-
-    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
-    @Test
-    public void requestLongLivedAccessToken(
-            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
-            final String sectorIdentifierUri) throws Exception {
-        showTitle("requestLongLivedAccessToken");
-
-        List<ResponseType> responseTypes = Arrays.asList(
-                ResponseType.TOKEN,
-                ResponseType.ID_TOKEN);
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request authorization and receive the short lived access_token.
-        List<String> scopes = new ArrayList<String>();
-        scopes.add("openid");
-        scopes.add("profile");
-        scopes.add("address");
-        scopes.add("email");
-        String nonce = UUID.randomUUID().toString();
-        String state = UUID.randomUUID().toString();
-
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
-        authorizationRequest.setState(state);
-
-        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
-                authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The access token is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
-        assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope must be null");
-
-        String accessToken = authorizationResponse.getAccessToken();
-
-        // 3. Request long lived access_token
-        TokenRequest tokenRequest = new TokenRequest(GrantType.OXAUTH_EXCHANGE_TOKEN);
-        tokenRequest.setOxAuthExchangeToken(accessToken);
-        tokenRequest.setAuthUsername(clientId);
-        tokenRequest.setAuthPassword(clientSecret);
-        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST);
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        tokenClient.setRequest(tokenRequest);
-        TokenResponse tokenResponse = tokenClient.exec();
-
-        showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-
-        String longLivedAccessToken = tokenResponse.getAccessToken();
-
-        // 4. Request user info
-        UserInfoClient userInfoClient = new UserInfoClient(userInfoEndpoint);
-        UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(longLivedAccessToken);
-
-        showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
     }
 }

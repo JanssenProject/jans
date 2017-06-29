@@ -158,8 +158,7 @@
     "authorizationCodeLifetime":${config.client.authorization-code-lifetime},
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
-    "shortLivedAccessTokenLifetime":3600,
-    "longLivedAccessTokenLifetime":31536000,
+    "accessTokenLifetime":3600,
     "umaRptLifetime":${config.uma.requester-permission-token-lifetime},
     "umaPctLifetime":${config.uma.requester-permission-token-lifetime},
     "umaAddScopesAutomatically":false,
@@ -240,5 +239,7 @@
             "corsPreflightMaxAge": 1800,
             "corsRequestDecorate": true
         }
-    ]
+    ],
+    "logClientIdOnClientAuthentication": true,
+    "logClientNameOnClientAuthentication": false
 }
