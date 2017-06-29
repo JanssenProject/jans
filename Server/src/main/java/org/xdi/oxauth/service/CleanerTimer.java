@@ -102,7 +102,7 @@ public class CleanerTimer {
             interval = DEFAULT_INTERVAL;
         }
 
-        cleanerEvent.fire(new TimerEvent(new TimerSchedule(30, 30), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+        cleanerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
     @Asynchronous
