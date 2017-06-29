@@ -54,7 +54,8 @@ public class UmaNeedsInfoService {
 
         List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
 
-        UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(attributeService, resourceService, permissions, requestedScopes, claims, httpRequest);
+        UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(appConfiguration,
+                attributeService, resourceService, permissions, requestedScopes, claims, httpRequest);
 
         for (String scriptDN : scriptDNs) {
             CustomScriptConfiguration script = policyService.getScriptByDn(scriptDN);
