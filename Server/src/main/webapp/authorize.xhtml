@@ -96,8 +96,9 @@
 					</h:panelGroup>
 
 					<p class="info">
-						<h:outputText
-							value="#{msgs['authorize.requestingPermissionForScopes']}" />
+						<h:outputFormat value="#{msgs['authorize.requestingPermissionForScopes']}">
+							<f:param value="#{empty client.getClientName()? client.getClientId() : client.getClientName()}" />
+						</h:outputFormat>
 					</p>
 
 					<ul>
