@@ -6,12 +6,6 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.security.SignatureException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.exception.InvalidJweException;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -19,12 +13,18 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.util.security.StringEncrypter;
 
+import java.security.SignatureException;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Gives ability to use authorization grant in read-only mode.
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version October 7, 2016
+ * @version June 28, 2017
  */
 
 public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
@@ -67,11 +67,6 @@ public class UnmodifiableAuthorizationGrant implements IAuthorizationGrant {
 
     @Override
     public AccessToken createAccessToken() {
-        throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
-    }
-
-    @Override
-    public AccessToken createLongLivedAccessToken() {
         throw new UnsupportedOperationException("Not allowed for UnmodifiableAuthorizationGrant.");
     }
 
