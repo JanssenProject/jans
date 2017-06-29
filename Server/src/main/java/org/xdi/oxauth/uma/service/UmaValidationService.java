@@ -192,6 +192,8 @@ public class UmaValidationService {
             if (!scopeUrls.containsAll(permission.getScopes())) {
                 log.error("At least one of the scope isn't registered");
                 errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_SCOPE);
+            } else {
+                return;
             }
         } catch (EntryPersistenceException ex) {
             log.error(ex.getMessage(), ex);
