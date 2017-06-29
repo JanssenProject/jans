@@ -19,133 +19,68 @@ import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 /**
  * Test flow for the accessing protected resource (HTTP)
  *
- * @author Yuriy Movchan Date: 10/22/2012
+ * @author Yuriy Zabrovarnyy
+ * @author Yuriy Movchan
  */
 public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
     protected UmaMetadata metadata;
 
-    //protected ObtainRptTokenFlowHttpTest umaObtainRptTokenFlowHttpTest;
-
-    protected RegisterResourceFlowHttpTest umaRegisterResourceFlowHttpTest;
-    protected UmaRegisterPermissionFlowHttpTest permissionFlowHttpTest;
+    protected RegisterResourceFlowHttpTest registerResourceTest;
+    protected UmaRegisterPermissionFlowHttpTest permissionFlowTest;
 
     protected UmaRptIntrospectionService rptStatusService;
 
-    protected Token m_pat;
+    protected Token pat;
 
     @BeforeClass
-    @Parameters({"umaMetaDataUrl"})
-    public void init(final String umaMetaDataUrl) throws Exception {
-        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl).getMetadata();
+    @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
+    public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
+        this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
         UmaTestUtil.assert_(this.metadata);
 
-        //this.umaObtainRptTokenFlowHttpTest = new ObtainRptTokenFlowHttpTest(this.metadata);
-        this.umaRegisterResourceFlowHttpTest = new RegisterResourceFlowHttpTest(this.metadata);
-        this.permissionFlowHttpTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
+        pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
+        UmaTestUtil.assert_(pat);
 
-        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata);
+        this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
+        this.registerResourceTest.pat = this.pat;
+
+        this.permissionFlowTest = new UmaRegisterPermissionFlowHttpTest(this.metadata);
+        this.permissionFlowTest.registerResourceTest = this.registerResourceTest;
+
+        this.rptStatusService = UmaClientFactory.instance().createRptStatusService(metadata, clientExecutor(true));
     }
 
-    //** 1 ******************************************************************************
-
     /**
-     * Host obtains PAT
+     * Register resource
      */
     @Test
-    @Parameters({"umaPatClientId", "umaPatClientSecret"})
-    public void testHostObtainPat(final String umaPatClientId, final String umaPatClientSecret) throws Exception {
-        showTitle("testHostObtainPat");
-        m_pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret);
-        UmaTestUtil.assert_(m_pat);
-
-        // Init UmaPatTokenAwareHttpTest test
-        this.umaRegisterResourceFlowHttpTest.pat = this.m_pat;
-
-        // Init UmaRegisterResourcePermissionFlowHttpTest test
-        this.permissionFlowHttpTest.registerResourceTest = this.umaRegisterResourceFlowHttpTest;
+    public void registerResource() throws Exception {
+        showTitle("registerResource");
+        this.registerResourceTest.addResource();
     }
 
     /**
-     * Host registers resource set description
+     * RS registers permissions for specific resource.
      */
-    @Test(dependsOnMethods = {"testHostObtainPat"})
-    public void testHostRegisterResource() throws Exception {
-        showTitle("testHostRegisterResource");
-        this.umaRegisterResourceFlowHttpTest.testRegisterResource();
+    @Test(dependsOnMethods = {"registerResource"})
+    public void rsRegisterPermissions() throws Exception {
+        showTitle("rsRegisterPermissions");
+        permissionFlowTest.testRegisterPermission();
     }
 
     /**
-     * Requester obtains RPT token
+     * RP requests RPT with ticket
      */
-    @Test(dependsOnMethods = {"testHostRegisterResource"})
-    public void testRequesterObtainsRpt() throws Exception {
-        showTitle("testRequesterObtainsRpt");
-        //this.umaObtainRptTokenFlowHttpTest.testObtainRptTokenFlow();
-    }
-
-    //** 3 ******************************************************************************
-
-    /**
-     * Requesting party access protected resource at host via requester
-     */
-    @Test(dependsOnMethods = {"testRequesterObtainsRpt"})
-    public void testRequesterAccessProtectedResourceWithNotEnoughPermissionsRpt() throws Exception {
-        showTitle("testRequesterAccessProtectedResourceWithNotEnoughPermissionsRpt");
-        // Scenario for case when there is no valid RPT in request or not enough permissions
-        // In this case we have RPT without permissions
-    }
-
-    /**
-     * Host determines RPT status
-     */
-    @Test(dependsOnMethods = {"testRequesterAccessProtectedResourceWithNotEnoughPermissionsRpt"})
-    @Parameters()
-    public void testHostDetermineRptStatus1() throws Exception {
-        showTitle("testHostDetermineRptStatus1");
-
-        String resourceId = umaRegisterResourceFlowHttpTest.resourceId;
-
-        // Determine RPT token to status
-        RptIntrospectionResponse tokenStatusResponse = null;
-        try {
-            //tokenStatusResponse = this.rptStatusService.requestRptStatus(
-            //        "Bearer " + pat.getAccessToken(),
-            //        this.umaObtainRptTokenFlowHttpTest.rptToken, "");
-        } catch (ClientResponseFailure ex) {
-            System.err.println(ex.getResponse().getEntity(String.class));
-//			assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
-            throw ex;
-        }
-
-        assertNotNull(tokenStatusResponse, "Token response status is not invalid");
-        assertTrue(tokenStatusResponse.getActive(), "Token response status is not active");
-        assertTrue(tokenStatusResponse.getPermissions() == null || tokenStatusResponse.getPermissions().isEmpty());
-    }
-
-    /**
-     * As result host register permissions for specific resource set and requester.
-     * Scenario for case when there is valid RPT but it has not enough permissions.
-     */
-    @Test(dependsOnMethods = {"testHostDetermineRptStatus1"})
-    public void testHostRegisterPermissions() throws Exception {
-        showTitle("testHostRegisterPermissions");
-        permissionFlowHttpTest.testRegisterPermission();
-    }
-
-    /**
-     * Host return ticket to requester
-     */
-    @Test(dependsOnMethods = {"testHostRegisterPermissions"})
-    public void testHostReturnTicketToRequester() throws Exception {
-        showTitle("testHostReturnTicketToRequester");
-        // Return permissionFlowHttpTest.ticketForFullAccess in format specified in 3.1.2
+    @Test(dependsOnMethods = {"rsRegisterPermissions"})
+    public void requestRpt() throws Exception {
+        showTitle("requestRpt");
+        String ticket = permissionFlowTest.ticket;
+        System.out.println(ticket);
+        // Return permissionFlowTest.ticket in format specified in 3.1.2
     }
 
     //** 4 ******************************************************************************

@@ -4,9 +4,8 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.uma.ws.rs;
+package org.xdi.oxauth.uma.service;
 
-import com.wordnik.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
@@ -14,7 +13,6 @@ import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
@@ -23,22 +21,22 @@ import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.*;
-import org.xdi.oxauth.uma.service.*;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
 /**
- * The endpoint at which the RP asks for token.
+ * UMA Token Service
  */
-@Path("/uma/token")
-@Api(value = "/uma/token", description = "UMA Token endpoint.")
-public class UmaTokenWS {
+@Named
+@Stateless
+public class UmaTokenService {
 
     @Inject
     private Logger log;
@@ -67,25 +65,15 @@ public class UmaTokenWS {
     @Inject
     private ExternalUmaRptPolicyService policyService;
 
-    @POST
-    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
-    @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response requestRpt(
-            @FormParam("grant_type")
             String grantType,
-            @FormParam("ticket")
             String ticket,
-            @FormParam("claim_token")
             String claimToken,
-            @FormParam("claim_token_format")
             String claimTokenFormat,
-            @FormParam("pct")
             String pctCode,
-            @FormParam("rpt")
             String rptCode,
-            @FormParam("scope")
             String scope,
-            @Context HttpServletRequest httpRequest) {
+            HttpServletRequest httpRequest) {
         try {
             log.trace("requestRpt grant_type: {}, ticket: {}, claim_token: {}, claim_token_format: {}, pct: {}, rpt: {}, scope: {}"
                     , grantType, ticket, claimToken, claimTokenFormat, pctCode, rptCode, scope);

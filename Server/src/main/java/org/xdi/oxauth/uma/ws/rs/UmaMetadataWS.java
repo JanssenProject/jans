@@ -15,9 +15,9 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.inject.Inject;
@@ -63,7 +63,8 @@ public class UmaMetadataWS {
             c.setGrantTypesSupported(new String[]{
                     GrantType.AUTHORIZATION_CODE.getValue(),
                     GrantType.IMPLICIT.getValue(),
-                    GrantType.CLIENT_CREDENTIALS.getValue()
+                    GrantType.CLIENT_CREDENTIALS.getValue(),
+                    GrantType.OXAUTH_UMA_TICKET.getValue()
             });
             c.setResponseTypesSupported(new String[]{
                     ResponseType.CODE.getValue(), ResponseType.ID_TOKEN.getValue(), ResponseType.TOKEN.getValue()
@@ -76,11 +77,10 @@ public class UmaMetadataWS {
             c.setJwksUri(appConfiguration.getJwksUri());
             c.setServiceDocumentation(appConfiguration.getServiceDocumentation());
 
-
             c.setUmaProfilesSupported(new String[0]);
-            c.setRegistrationEndpoint(baseEndpointUri + "/oxauth/register");
-            c.setTokenEndpoint(baseEndpointUri + "/oxauth/token");
-            c.setAuthorizationEndpoint(baseEndpointUri + "/requester/perm");
+            c.setRegistrationEndpoint(appConfiguration.getRegistrationEndpoint());
+            c.setTokenEndpoint(appConfiguration.getTokenEndpoint());
+            c.setAuthorizationEndpoint(appConfiguration.getAuthorizationEndpoint());
             c.setIntrospectionEndpoint(baseEndpointUri + "/rpt/status");
             c.setResourceRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setPermissionEndpoint(baseEndpointUri + "/host/rsrc_pr");
@@ -89,7 +89,7 @@ public class UmaMetadataWS {
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);
-            log.trace("Uma configuration: {}", entity);
+            log.trace("Uma metadata: {}", entity);
 
             return Response.ok(entity).build();
         } catch (Throwable ex) {

@@ -46,7 +46,6 @@ public class TestResteasyInitializer extends Application {
 
         classes.add(UmaPermissionRegistrationWS.class);
         classes.add(UmaResourceRegistrationWS.class);
-        classes.add(UmaTokenWS.class);
         classes.add(UmaRptIntrospectionWS.class);
         classes.add(UmaScopeWS.class);
         classes.add(UmaMetadataWS.class);

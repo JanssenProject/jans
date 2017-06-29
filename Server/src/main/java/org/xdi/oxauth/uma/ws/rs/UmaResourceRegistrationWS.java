@@ -309,7 +309,7 @@ public class UmaResourceRegistrationWS {
 
     private String addResource(String rsid, UmaResource resource, String userDn,
                                String clientDn) throws IllegalAccessException, InvocationTargetException {
-        log.debug("Adding new resource set description: '{}'", rsid);
+        log.debug("Adding new resource: '{}'", rsid);
 
         final String resourceDn = resourceService.getDnForResource(rsid);
         final List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());

@@ -57,7 +57,7 @@ public class TrustElevationHttpTest extends BaseTest {
         RptIntrospectionResponse rptStatus = this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(),
                 this.umaObtainRptTokenFlowHttpTest.rptToken, "");
 
-        RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, permissionFlowHttpTest.ticketForFullAccess);
+        RptAuthorizationRequest rptAuthorizationRequest = new RptAuthorizationRequest(this.umaObtainRptTokenFlowHttpTest.rptToken, permissionFlowTest.ticket);
 
         try {
             RptAuthorizationResponse authorizationResponse = this.rptPermissionAuthorizationService.requestRptPermissionAuthorization(

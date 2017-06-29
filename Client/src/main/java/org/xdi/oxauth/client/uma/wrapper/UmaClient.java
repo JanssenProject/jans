@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.client.uma.wrapper;
 
+import org.jboss.resteasy.client.ClientExecutor;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.uma.exception.UmaException;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
@@ -45,7 +46,11 @@ public class UmaClient {
     }
 
     public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, String... scopeArray) throws Exception {
-        return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, scopeArray);
+        return requestPat(tokenUrl, umaClientId, umaClientSecret, null, scopeArray);
+    }
+
+    public static Token requestPat(final String tokenUrl, final String umaClientId, final String umaClientSecret, ClientExecutor clientExecutor, String... scopeArray) throws Exception {
+        return request(tokenUrl, umaClientId, umaClientSecret, UmaScopeType.PROTECTION, clientExecutor, scopeArray);
     }
 
     @Deprecated
@@ -107,7 +112,8 @@ public class UmaClient {
         return null;
     }
 
-    public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType, String... scopeArray) throws Exception {
+    public static Token request(final String tokenUrl, final String umaClientId, final String umaClientSecret, UmaScopeType scopeType,
+                                ClientExecutor clientExecutor, String... scopeArray) throws Exception {
 
         String scope = scopeType.getValue();
         if (scopeArray != null && scopeArray.length > 0) {
@@ -117,6 +123,9 @@ public class UmaClient {
         }
 
         TokenClient tokenClient = new TokenClient(tokenUrl);
+        if (clientExecutor != null) {
+            tokenClient.setExecutor(clientExecutor);
+        }
         TokenResponse response = tokenClient.execClientCredentialsGrant(scope, umaClientId, umaClientSecret);
 
         if (response.getStatus() == 200) {

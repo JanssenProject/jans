@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
+import com.wordnik.swagger.annotations.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -15,12 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
 
 /**
  * Provides interface for token REST web services
@@ -97,6 +93,16 @@ public interface TokenRestWebService {
             @FormParam("code_verifier")
             @ApiParam(value = "The client's PKCE code verifier.", required = false)
             String codeVerifier,
+            @FormParam("ticket")
+            String ticket,
+            @FormParam("claim_token")
+            String claimToken,
+            @FormParam("claim_token_format")
+            String claimTokenFormat,
+            @FormParam("pct")
+            String pctCode,
+            @FormParam("rpt")
+            String rptCode,
             @Context HttpServletRequest request,
             @Context SecurityContext sec);
 }
