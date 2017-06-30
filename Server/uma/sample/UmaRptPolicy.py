@@ -3,6 +3,16 @@
 #
 # Author: Yuriy Zabrovarnyy
 #
+# Call sequence
+# 1. First is call constructor of the Script __init__
+# 2. Next init() method
+# 3. Next getRequiredClaims() - method returns required claims, so UMA engine checks whether
+#    in request RP provided all claims that are required. Pay attention that there can be
+#    multiple scripts bound to the scopes, means that UMA engine will build set of required claims
+#    from all scripts. If not all claims are provided need_info error is sent to RP.
+#    During need_info construction getClaimsGatheringScriptName() method is called
+# 4. authorize() method is called if all required claims are provided.
+# 5. destroy()
 
 from org.xdi.model.custom.script.type.uma import UmaRptPolicyType
 from org.xdi.model.uma import ClaimDefinitionBuilder
@@ -53,7 +63,7 @@ class UmaRptPolicy(UmaRptPolicyType):
     def authorize(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
         print "RPT Policy. Authorizing ..."
 
-        if (context.getClaim("country") == 'US' and context.getClaim("city") == 'NY'):
+        if context.getClaim("country") == 'US' and context.getClaim("city") == 'NY':
             print "Authorized successfully!"
             return True
 
