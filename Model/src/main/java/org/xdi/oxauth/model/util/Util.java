@@ -7,23 +7,62 @@
 package org.xdi.oxauth.model.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.HasParamName;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 26, 2016
  */
 
 public class Util {
 
+    private static final Logger LOG = Logger.getLogger(Util.class);
+
     public static final String UTF8_STRING_ENCODING = "UTF-8";
+
+    public static ObjectMapper createJsonMapper() {
+        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
+        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
+
+        final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
+
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.getDeserializationConfig().withAnnotationIntrospector(pair);
+        mapper.getSerializationConfig().withAnnotationIntrospector(pair);
+        return mapper;
+    }
+
+    public static String asJsonSilently(Object p_object) {
+        try {
+            return asJson(p_object);
+        } catch (IOException e) {
+            LOG.trace(e.getMessage(), e);
+            return "";
+        }
+    }
+
+    public static String asPrettyJson(Object p_object) throws IOException {
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
+    }
+
+    public static String asJson(Object p_object) throws IOException {
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        return mapper.writeValueAsString(p_object);
+    }
 
     public static byte[] getBytes(String p_str) throws UnsupportedEncodingException {
         return p_str.getBytes(UTF8_STRING_ENCODING);

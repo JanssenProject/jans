@@ -1,4 +1,4 @@
-package org.xdi.oxauth.uma.authorization;
+package org.xdi.oxauth.model.uma;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.model.uma.ClaimDefinition;
@@ -33,7 +33,7 @@ public class UmaNeedInfoResponse implements Serializable {
         this.error = error;
     }
 
-    public String isRedirectUser() {
+    public String getRedirectUser() {
         return redirectUser;
     }
 
