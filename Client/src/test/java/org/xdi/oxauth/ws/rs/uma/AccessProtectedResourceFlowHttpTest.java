@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.ws.rs.uma;
 
+import org.apache.commons.codec.binary.Base64;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.BaseRequest;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.client.uma.UmaTokenService;
@@ -21,8 +21,10 @@ import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.uma.wrapper.Token;
+import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.core.Response;
+import java.io.UnsupportedEncodingException;
 
 import static org.testng.Assert.assertEquals;
 
@@ -92,7 +94,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
         try {
             tokenService.requestRpt(
-                    "Basic " + BaseRequest.encodeCredentials(umaPatClientId, umaPatClientSecret),
+                    "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
                     GrantType.OXAUTH_UMA_TICKET.getValue(),
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
@@ -130,5 +132,9 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     public void rptStatus() throws Exception {
         showTitle("rptStatus");
         UmaTestUtil.assert_(this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, ""));
+    }
+
+    public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {
+        return Base64.encodeBase64String(Util.getBytes(username + ":" + password));
     }
 }
