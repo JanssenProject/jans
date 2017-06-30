@@ -118,18 +118,20 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
 
     @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"})
-    public void claimsGathering() throws Exception {
-        String redirectUser = needInfo.getRedirectUser();
+    @Parameters({"umaPatClientId", "umaClaimsRedirectUri"})
+    public void claimsGathering(String umaPatClientId, String umaClaimsRedirectUri) throws Exception {
+        String gatheringUrl = needInfo.buildClaimsGatheringUrl(umaPatClientId, umaClaimsRedirectUri);
 
+        System.out.println(gatheringUrl);
         try {
-            startSelenium();
-            driver.navigate().to(redirectUser);
+//            startSelenium();
+//            driver.navigate().to(gatheringUrl);
 
             // todo for Gene : claims-gathering method - interaction with Selenium (emulate user behavior)
 //            WebElement elem = driver.findElement(By.xpath(""));
 //            assertNotNull(elem);
         } finally {
-            stopSelenium();
+//            stopSelenium();
         }
     }
 
