@@ -1,10 +1,12 @@
 package org.xdi.oxauth.uma.service;
 
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.uma.UmaClaimsGatheringType;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 import org.xdi.service.LookupService;
+import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.StringHelper;
 
@@ -23,7 +25,11 @@ import java.util.*;
 public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
 
     @Inject
+    private Logger log;
+    @Inject
     private LookupService lookupService;
+    @Inject
+    private CustomScriptManager scriptManager;
 
     protected Map<String, CustomScriptConfiguration> scriptInumMap;
 
@@ -88,8 +94,8 @@ public class ExternalUmaClaimsGatheringService extends ExternalScriptService {
         return this.scriptInumMap.get(inum);
     }
 
-    private static UmaClaimsGatheringType gatherScript(CustomScriptConfiguration script) {
-        return (UmaClaimsGatheringType) script.getExternalType();
+    private UmaClaimsGatheringType gatherScript(CustomScriptConfiguration script) {
+        return ExternalUmaRptPolicyService.HOTSWAP_UMA_SCRIPT ? (UmaClaimsGatheringType) ExternalUmaRptPolicyService.hotswap(scriptManager, script, false) : (UmaClaimsGatheringType) script.getExternalType();
     }
 
     public boolean gather(CustomScriptConfiguration script, int step, UmaGatherContext context) {

@@ -5,11 +5,9 @@
 #
 
 from org.xdi.model.custom.script.type.uma import UmaClaimsGatheringType
-from java.lang import String
 from org.xdi.util import ArrayHelper
 
-
-class SampleClaimsGathering(UmaClaimsGatheringType):
+class UmaClaimsGathering(UmaClaimsGatheringType):
 
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis

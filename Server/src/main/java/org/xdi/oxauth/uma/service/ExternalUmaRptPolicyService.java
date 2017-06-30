@@ -6,12 +6,15 @@
 
 package org.xdi.oxauth.uma.service;
 
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.uma.UmaRptPolicyType;
 import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.service.LookupService;
+import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.StringHelper;
 
@@ -19,6 +22,7 @@ import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +40,15 @@ import java.util.Map;
 public class ExternalUmaRptPolicyService extends ExternalScriptService {
 
 	private static final long serialVersionUID = -8609727759114795435L;
-	
+
+	public static final boolean HOTSWAP_UMA_SCRIPT = Boolean.parseBoolean(System.getProperty("uma.hotswap.script"));
+
+	@Inject
+	private Logger log;
 	@Inject
 	private LookupService lookupService;
+	@Inject
+	private CustomScriptManager scriptManager;
 
 	protected Map<String, CustomScriptConfiguration> scriptInumMap;
 
@@ -63,7 +73,7 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 
 	public CustomScriptConfiguration getScriptByDn(String scriptDn) {
 		String authorizationPolicyInum = lookupService.getInumFromDn(scriptDn);
-		
+
 		return getScriptByInum(authorizationPolicyInum);
 	}
 
@@ -75,8 +85,9 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 		return this.scriptInumMap.get(inum);
 	}
 
-	private static UmaRptPolicyType policyScript(CustomScriptConfiguration script) {
-		return (UmaRptPolicyType) script.getExternalType();
+	private UmaRptPolicyType policyScript(CustomScriptConfiguration script) {
+		return HOTSWAP_UMA_SCRIPT ? (UmaRptPolicyType) hotswap(scriptManager, script, true) :
+				(UmaRptPolicyType) script.getExternalType();
 	}
 
 	public boolean authorize(CustomScriptConfiguration script, UmaAuthorizationContext context) {
@@ -112,6 +123,26 @@ public class ExternalUmaRptPolicyService extends ExternalScriptService {
 		} catch (Exception ex) {
 			log.error("Failed to execute python 'getClaimsGatheringScriptName' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
 			return "";
+		}
+	}
+
+	public static <T> T hotswap(CustomScriptManager scriptManager, CustomScriptConfiguration script, boolean rptPolicyScript) {
+		if (!HOTSWAP_UMA_SCRIPT) {
+			throw new RuntimeException("UMA script hotswap is not allowed");
+		}
+
+		final String scriptPath;
+		if (rptPolicyScript) {
+			scriptPath = System.getProperty("uma.hotswap.rpt_policy_script.path");
+		} else {
+			scriptPath = System.getProperty("uma.hotswap.claims_gathering_script.path");
+		}
+		try {
+			String scriptCode = FileUtils.readFileToString(new File(scriptPath));
+			script.getCustomScript().setScript(scriptCode);
+			return (T) scriptManager.createExternalTypeFromStringWithPythonException(script.getCustomScript(), script.getConfigurationAttributes());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 }
