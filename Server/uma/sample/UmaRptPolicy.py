@@ -8,7 +8,7 @@ from org.xdi.model.custom.script.type.uma import UmaRptPolicyType
 from org.xdi.model.uma import ClaimDefinitionBuilder
 from java.lang import String
 
-class SampleRptPolicy(UmaRptPolicyType):
+class UmaRptPolicy(UmaRptPolicyType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
@@ -30,22 +30,23 @@ class SampleRptPolicy(UmaRptPolicyType):
     # This method must provide definition of all claims that is used in 'authorize' method.
     # Note : name in both places must match.
     def getRequiredClaims(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
-        return ClaimDefinitionBuilder.build(String.format("""[
+        json = """[
         {
-            "issuer" : [ "%s" ],
+            "issuer" : [ "%1$s" ],
             "name" : "country",
             "claim_token_format" : [ "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
             "claim_type" : "string",
             "friendly_name" : "country"
         },
         {
-            "issuer" : [ "%s" ],
+            "issuer" : [ "%1$s" ],
             "name" : "city",
             "claim_token_format" : [ "http://openid.net/specs/openid-connect-core-1_0.html#IDToken" ],
             "claim_type" : "string",
             "friendly_name" : "city"
         }
-        ]""", context.getIssuer()))
+        ]"""
+        return ClaimDefinitionBuilder.build(String.format(json, context.getIssuer()))
 
     # Main authorization method. Must return True or False.
     def authorize(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext

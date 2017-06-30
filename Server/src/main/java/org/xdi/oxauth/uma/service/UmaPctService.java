@@ -32,7 +32,7 @@ import java.util.UUID;
 @Named
 public class UmaPctService {
 
-    private static final int DEFAULT_PCT_LIFETIME = 3600;
+    public static final int DEFAULT_PCT_LIFETIME = 3600;
 
     @Inject
     private Logger log;
