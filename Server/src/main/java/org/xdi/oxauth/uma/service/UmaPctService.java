@@ -197,4 +197,12 @@ public class UmaPctService {
         };
         batchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
+
+    public void merge(UmaPCT pct) {
+        try {
+            ldapEntryManager.merge(pct);
+        } catch (Exception e) {
+            log.error("Failed to merge PCT, code: " + pct.getCode() + ". " + e.getMessage(), e);
+        }
+    }
 }
