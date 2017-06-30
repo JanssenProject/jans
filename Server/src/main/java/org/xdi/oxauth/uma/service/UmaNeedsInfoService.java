@@ -74,7 +74,7 @@ public class UmaNeedsInfoService {
 
                 String claimsGatheringScriptName = policyService.getClaimsGatheringScriptName(script, context);
                 if (StringUtils.isNotBlank(claimsGatheringScriptName)) {
-                    ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
+                    ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringScriptNameValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
                 } else {
                     log.error("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
                 }
@@ -99,7 +99,7 @@ public class UmaNeedsInfoService {
         return scriptMap;
     }
 
-    private String constructGatheringValue(String existingValue, String claimsGatheringScriptName) {
+    private String constructGatheringScriptNameValue(String existingValue, String claimsGatheringScriptName) {
         if (StringUtils.isBlank(existingValue)) {
             return claimsGatheringScriptName;
         }

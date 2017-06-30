@@ -66,8 +66,8 @@ public class UmaNeedInfoResponse implements Serializable {
         String result = redirectUser;
         result += result.contains("?") ? "&" : "?";
         result += "client_id=" + clientId;
-        result += "ticket=" + ticket;
-        result += "claims_redirect_uri=" + claimsRedirectUri;
+        result += "&ticket=" + ticket;
+        result += "&claims_redirect_uri=" + claimsRedirectUri;
         return result;
     }
 }
