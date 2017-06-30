@@ -24,6 +24,8 @@ import java.util.List;
 import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
 
 /**
+ * Claims-Gathering Endpoint.
+ *
  * @author yuriyz on 06/04/2017.
  */
 @Path("/uma/gather_claims")
@@ -46,22 +48,8 @@ public class UmaGatheringWS {
     @Inject
     private UmaPctService pctService;
 
-    @POST
-    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
-    @Produces({UmaConstants.JSON_MEDIA_TYPE})
-    public Response gatherClaims(
-            @FormParam("client_id")
-            String clientId,
-            @FormParam("ticket")
-            String ticket,
-            @FormParam("claims_redirect_uri")
-            String claimRedirectUri,
-            @FormParam("state")
-            String state,
-            @FormParam("reset")
-            Boolean reset,
-            @Context HttpServletRequest httpRequest,
-            @Context HttpServletResponse httpResponse) {
+    public Response gatherClaims(String clientId, String ticket, String claimRedirectUri, String state, Boolean reset,
+                                 HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
             log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, queryString: {}",
                     clientId, ticket, claimRedirectUri, state, httpRequest.getQueryString());
@@ -107,5 +95,42 @@ public class UmaGatheringWS {
 
     private static String getScriptNames(List<UmaPermission> permissions) {
         return permissions.get(0).getAttributes().get(UmaConstants.GATHERING_ID);
+    }
+
+    @GET
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response getGatherClaims(
+            @QueryParam("client_id")
+            String clientId,
+            @QueryParam("ticket")
+            String ticket,
+            @QueryParam("claims_redirect_uri")
+            String claimRedirectUri,
+            @QueryParam("state")
+            String state,
+            @QueryParam("reset")
+            Boolean reset,
+            @Context HttpServletRequest httpRequest,
+            @Context HttpServletResponse httpResponse) {
+        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, httpRequest, httpResponse);
+    }
+
+    @POST
+    @Consumes({UmaConstants.JSON_MEDIA_TYPE})
+    @Produces({UmaConstants.JSON_MEDIA_TYPE})
+    public Response postGatherClaims(
+            @FormParam("client_id")
+            String clientId,
+            @FormParam("ticket")
+            String ticket,
+            @FormParam("claims_redirect_uri")
+            String claimRedirectUri,
+            @FormParam("state")
+            String state,
+            @FormParam("reset")
+            Boolean reset,
+            @Context HttpServletRequest httpRequest,
+            @Context HttpServletResponse httpResponse) {
+        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, httpRequest, httpResponse);
     }
 }
