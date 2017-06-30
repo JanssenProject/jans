@@ -99,8 +99,13 @@ public abstract class BaseRequest {
                 && !authPassword.isEmpty();
     }
 
-    public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {
-        return Base64.encodeBase64String(Util.getBytes(username + ":" + password));
+    /**
+     * Returns the client credentials.
+     *
+     * @return The client credentials.
+     */
+    public String getCredentials() throws UnsupportedEncodingException {
+        return authUsername + ":" + authPassword;
     }
 
     /**
@@ -111,7 +116,7 @@ public abstract class BaseRequest {
     public String getEncodedCredentials() {
         try {
             if (hasCredentials()) {
-                return encodeCredentials(authUsername, authPassword);
+                return Base64.encodeBase64String(Util.getBytes(getCredentials()));
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
