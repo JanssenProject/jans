@@ -11,6 +11,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
+import org.xdi.oxauth.client.BaseRequest;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.client.uma.UmaTokenService;
@@ -85,12 +86,13 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
      * RP requests RPT with ticket and gets needs_info error (not all claims are provided, so redirect to claims-gathering endpoint)
      */
     @Test(dependsOnMethods = {"rsRegisterPermissions"})
-    public void requestRptAndGetNeedsInfo() throws Exception {
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void requestRptAndGetNeedsInfo(String umaPatClientId, String umaPatClientSecret) throws Exception {
         showTitle("requestRptAndGetNeedsInfo");
 
         try {
             tokenService.requestRpt(
-                    "Bearer" + pat.getAccessToken(),
+                    "Basic " + BaseRequest.encodeCredentials(umaPatClientId, umaPatClientSecret),
                     GrantType.OXAUTH_UMA_TICKET.getValue(),
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
