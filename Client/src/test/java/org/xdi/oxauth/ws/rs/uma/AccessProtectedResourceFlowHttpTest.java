@@ -18,7 +18,7 @@ import org.xdi.oxauth.client.uma.UmaTokenService;
 import org.xdi.oxauth.client.uma.wrapper.UmaClient;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.uma.UmaMetadata;
-import org.xdi.oxauth.model.uma.UmaTestUtil;
+import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.model.util.Util;
@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 
 import static org.testng.Assert.assertEquals;
+import static org.xdi.oxauth.model.uma.UmaTestUtil.assert_;
 
 /**
  * Test flow for the accessing protected resource (HTTP)
@@ -46,15 +47,16 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
 
     protected Token pat;
     protected String rpt;
+    protected UmaNeedInfoResponse needInfo;
 
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
     public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
-        UmaTestUtil.assert_(this.metadata);
+        assert_(this.metadata);
 
         pat = UmaClient.requestPat(tokenEndpoint, umaPatClientId, umaPatClientSecret, clientExecutor(true));
-        UmaTestUtil.assert_(pat);
+        assert_(pat);
 
         this.registerResourceTest = new RegisterResourceFlowHttpTest(this.metadata);
         this.registerResourceTest.pat = this.pat;
@@ -99,28 +101,50 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
         } catch (ClientResponseFailure ex) {
-            // expected error : {"error":"need_info","ticket":"c024311b-f451-41db-95aa-cd405f16eed4","required_claims":[{"issuer":["https://localhost:8443"],"name":"country","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"country"},{"issuer":["https://localhost:8443"],"name":"city","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"city"}],"redirect_user":"https://localhost:8443/restv1/uma/gather_claimsgathering_id=sampleClaimsGathering&&?gathering_id=sampleClaimsGathering&&"}
-            System.out.println(ex.getResponse().getEntity(String.class));
-            assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
+            // expected need_info error :
+            // sample:  {"error":"need_info","ticket":"c024311b-f451-41db-95aa-cd405f16eed4","required_claims":[{"issuer":["https://localhost:8443"],"name":"country","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"country"},{"issuer":["https://localhost:8443"],"name":"city","claim_token_format":["http://openid.net/specs/openid-connect-core-1_0.html#IDToken"],"claim_type":"string","friendly_name":"city"}],"redirect_user":"https://localhost:8443/restv1/uma/gather_claimsgathering_id=sampleClaimsGathering&&?gathering_id=sampleClaimsGathering&&"}
+            String entity = (String) ex.getResponse().getEntity(String.class);
+            System.out.println(entity);
 
-            // todo for Gene : parse needs_info
+            assertEquals(ex.getResponse().getStatus(), Response.Status.FORBIDDEN.getStatusCode(), "Unexpected response status");
+
+            needInfo = Util.createJsonMapper().readValue(entity, UmaNeedInfoResponse.class);
+            assert_(needInfo);
+            return;
         }
+
+        throw new AssertionError("need_info error was not returned");
     }
 
-    // todo for Gene : claims-gathering method - interaction with Selenium (emulate user behavior)
+
+    @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"})
+    public void claimsGathering() throws Exception {
+        String redirectUser = needInfo.getRedirectUser();
+
+        try {
+            startSelenium();
+            driver.navigate().to(redirectUser);
+
+            // todo for Gene : claims-gathering method - interaction with Selenium (emulate user behavior)
+//            WebElement elem = driver.findElement(By.xpath(""));
+//            assertNotNull(elem);
+        } finally {
+            stopSelenium();
+        }
+    }
 
     /**
      * Request RPT with all claims provided
      */
-    @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"})
+    @Test(dependsOnMethods = {"claimsGathering"})
     public void successfulRptRequest() throws Exception {
         showTitle("successfulRptRequest");
 
         UmaTokenResponse response = tokenService.requestRpt("Bearer" + pat.getAccessToken(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
-                permissionFlowTest.ticket,
+                needInfo.getTicket(),
                 null, null, null, null, null);
-        UmaTestUtil.assert_(response);
+        assert_(response);
 
         this.rpt = response.getAccessToken();
     }
@@ -132,7 +156,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Parameters()
     public void rptStatus() throws Exception {
         showTitle("rptStatus");
-        UmaTestUtil.assert_(this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, ""));
+        assert_(this.rptStatusService.requestRptStatus("Bearer " + pat.getAccessToken(), rpt, ""));
     }
 
     public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {

@@ -94,4 +94,13 @@ public class UmaTestUtil {
         assertNotNull(response.getAccessToken(), "RPT is null");
         assertNotNull(response.getPct(), "PCT is null");
     }
+
+    public static void assert_(UmaNeedInfoResponse response) {
+        assertNotNull(response, "UMA Need Info response is null");
+        assertTrue(StringUtils.isNotBlank(response.getError()), "need_info error is blank");
+        assertTrue(StringUtils.isNotBlank(response.getTicket()), "need_info ticket is blank");
+        assertTrue(response.getRequiredClaims() != null && !response.getRequiredClaims().isEmpty(), "need_info required claims are empty");
+        assertTrue(StringUtils.isNotBlank(response.getRedirectUser()), "need_info redirect user uri is blank");
+    }
+
 }
