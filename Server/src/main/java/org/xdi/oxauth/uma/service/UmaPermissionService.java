@@ -188,9 +188,6 @@ public class UmaPermissionService {
 
     public String changeTicket(List<UmaPermission> permissions, Map<String, String> attributes) {
         String newTicket = generateNewTicket();
-        if (permissions == null || !permissions.isEmpty()) {
-            return newTicket;
-        }
 
         for (UmaPermission permission : permissions) {
             ldapEntryManager.remove(permission);
