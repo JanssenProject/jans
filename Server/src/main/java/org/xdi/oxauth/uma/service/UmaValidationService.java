@@ -345,7 +345,7 @@ public class UmaValidationService {
      */
     public Map<UmaScopeDescription, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
         scope = ServerUtil.urlDecode(scope);
-        final String[] scopesRequested = scope.split(" ");
+        final String[] scopesRequested = StringUtils.isNotBlank(scope) ? scope.split(" ") : new String[0];
 
         final Map<UmaScopeDescription, Boolean> result = new HashMap<UmaScopeDescription, Boolean>();
 

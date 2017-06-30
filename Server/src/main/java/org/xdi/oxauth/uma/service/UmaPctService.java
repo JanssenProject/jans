@@ -56,9 +56,10 @@ public class UmaPctService {
 
             JwtClaims pctClaims = pct.getClaims();
 
-            JwtClaims idTokenClaims = idToken.getClaims();
-            for (String key : idTokenClaims.keys()) {
-                pctClaims.setClaimObject(key, idTokenClaims.getClaim(key));
+            if (idToken != null && idToken.getClaims() != null) {
+                for (String key : idToken.getClaims().keys()) {
+                    pctClaims.setClaimObject(key, idToken.getClaims().getClaim(key));
+                }
             }
 
             for (String key : claims.keys()) {
