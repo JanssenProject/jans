@@ -32,7 +32,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
     def gather(self, step, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaGatherContext
         print "Claims-Gathering. Gathering ..."
 
-        if (step == 1):
+        if step == 1:
             if (context.getRequestParameters().containsKey("country")):
                 valueArray = context.getRequestParameters().get("country")
 
@@ -45,7 +45,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
 
             return False
 
-        elif (step == 2):
+        elif step == 2:
             if (context.getRequestParameters().containsKey("city")):
                 valueArray = context.getRequestParameters().get("city")
 
@@ -68,8 +68,8 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         return 2
 
     def getPageForStep(self, step, context):
-        if (step == 1):
-            return "/uma2/country.xhtml"
-        elif (step == 2):
-            return "/uma2/city.xhtml"
+        if step == 1:
+            return "/uma2/sample/country.xhtml"
+        elif step == 2:
+            return "/uma2/sample/city.xhtml"
         return ""

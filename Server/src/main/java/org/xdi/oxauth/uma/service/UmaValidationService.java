@@ -384,6 +384,11 @@ public class UmaValidationService {
         }
 
         if (StringUtils.isNotBlank(claimsRedirectUri)) {
+            if (ArrayUtils.isEmpty(client.getClaimRedirectUris())) {
+                log.error("Client does not have claims_redirect_uri specified, clientId: " + clientId);
+                throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI);
+            }
+
             String equalRedirectUri = getEqualRedirectUri(claimsRedirectUri, client.getClaimRedirectUris());
             if (equalRedirectUri != null) {
                 log.trace("Found match for claims_redirect_uri : " + equalRedirectUri);
