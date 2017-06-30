@@ -109,6 +109,6 @@ public class UmaGatherContext extends ExternalScriptContext {
         }
 
         sessionService.persist(session);
-        pctService.persist(pct);
+        pctService.merge(pct);
     }
 }

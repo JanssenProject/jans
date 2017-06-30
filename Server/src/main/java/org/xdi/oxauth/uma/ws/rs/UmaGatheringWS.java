@@ -1,9 +1,10 @@
 package org.xdi.oxauth.uma.ws.rs;
 
-import org.gluu.jsf2.service.FacesService;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
@@ -18,9 +19,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
+import static javax.ws.rs.core.Response.Status.FOUND;
 import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
 
 /**
@@ -42,11 +45,11 @@ public class UmaGatheringWS {
     @Inject
     private UmaSessionService sessionService;
     @Inject
-    private FacesService facesService;
-    @Inject
     private UmaPermissionService permissionService;
     @Inject
     private UmaPctService pctService;
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public Response gatherClaims(String clientId, String ticket, String claimRedirectUri, String state, Boolean reset,
                                  HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
@@ -77,8 +80,9 @@ public class UmaGatheringWS {
 
                 context.persist();
 
-                log.trace("Redirecting to page: '{}'", page);
-                facesService.redirect(page);
+                String fullUri = StringUtils.removeEnd(appConfiguration.getIssuer(), "/") + page;
+                log.trace("Redirecting to page: '{}', fullUri: {}", page, fullUri);
+                return Response.status(FOUND).location(new URI(fullUri)).build();
             } else {
                 log.error("Step '{}' is more or equal to stepCount: '{}'", stepsCount);
             }
