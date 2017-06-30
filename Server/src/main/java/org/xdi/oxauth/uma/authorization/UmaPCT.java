@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.AbstractToken;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
+import org.xdi.oxauth.uma.service.UmaPctService;
 
 import java.util.Date;
 
@@ -29,6 +30,10 @@ public class UmaPCT extends AbstractToken {
     private String clientId;
     @LdapAttribute(name = "oxClaimValues")
     private String claimValuesAsJson;
+
+    public UmaPCT() {
+        super(UmaPctService.DEFAULT_PCT_LIFETIME);
+    }
 
     public UmaPCT(int lifeTime) {
         super(lifeTime);
