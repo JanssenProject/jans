@@ -111,7 +111,7 @@ class Setup(object):
         self.os_type = None
         self.os_initdaemon = None
 
-        self.shibboleth_version = ''
+        self.shibboleth_version = 'v3'
 
         self.distFolder = '/opt/dist'
         self.distAppFolder = '%s/app' % self.distFolder
