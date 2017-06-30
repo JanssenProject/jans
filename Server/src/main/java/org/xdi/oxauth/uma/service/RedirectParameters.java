@@ -58,7 +58,7 @@ public class RedirectParameters {
                 }
             }
         }
-        StringUtils.removeEnd(queryString, "&");
+        queryString = StringUtils.removeEnd(queryString, "&");
         return queryString;
     }
 
