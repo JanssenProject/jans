@@ -56,4 +56,18 @@ public class UmaNeedInfoResponse implements Serializable {
     public void setTicket(String ticket) {
         this.ticket = ticket;
     }
+
+    /**
+     * Builds GET claims-gathering url. Note: it is strictly recommended to use POST http method.
+     *
+     * @return claims-gathering url for GET request.
+     */
+    public String buildClaimsGatheringUrl(String clientId, String claimsRedirectUri) {
+        String result = redirectUser;
+        result += result.contains("?") ? "&" : "?";
+        result += "client_id=" + clientId;
+        result += "ticket=" + ticket;
+        result += "claims_redirect_uri=" + claimsRedirectUri;
+        return result;
+    }
 }

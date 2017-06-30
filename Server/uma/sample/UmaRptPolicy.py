@@ -46,6 +46,7 @@ class UmaRptPolicy(UmaRptPolicyType):
             "friendly_name" : "city"
         }
         ]"""
+        context.addRedirectUserParam("customUserParam1", "value1") # pass some custom parameters to need_info uri. It can be removed if you don't need custom parameters.
         return ClaimDefinitionBuilder.build(String.format(json, context.getIssuer()))
 
     # Main authorization method. Must return True or False.
@@ -60,4 +61,5 @@ class UmaRptPolicy(UmaRptPolicyType):
 
     # Returns name of the Claims-Gathering script which will be invoked if need_info error is returned.
     def getClaimsGatheringScriptName(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
+        context.addRedirectUserParam("customUserParam2", "value2") # pass some custom parameters to need_info uri. It can be removed if you don't need custom parameters.
         return "sampleClaimsGathering"
