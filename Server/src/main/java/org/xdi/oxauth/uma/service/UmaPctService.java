@@ -69,7 +69,7 @@ public class UmaPctService {
             pct.setClaims(pctClaims);
             log.trace("PCT code: " + pct.getCode() + ", claims: " + pct.getClaimValuesAsJson());
 
-            persist(pct);
+            ldapEntryManager.merge(pct);
         } catch (Exception e) {
             log.error("Failed to update PCT claims. " + e.getMessage(), e);
         }
