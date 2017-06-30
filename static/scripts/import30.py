@@ -408,6 +408,20 @@ class Migration(object):
                 dnMap[dn] = fn
         return dnMap
 
+    def convertTimeStamp(self, line):
+        dateString = line.replace('oxAuthAuthenticationTime:', '').strip()
+        try:
+            dateTimestamp = time.mktime(time.strptime(dateString, "%a %b %d %H:%M:%S %Z %Y"))
+            dateString = time.strftime("%Y%m%d%H%M%S", time.gmtime(dateTimestamp))
+            ts = time.time()
+            utc_offset = (datetime.datetime.fromtimestamp(ts) - datetime.datetime.utcfromtimestamp(ts)).total_seconds()
+            dateString = "%s.%03dZ" % (time.strftime("%Y%m%d%H%M%S", time.localtime(dateTimestamp)), int(utc_offset//60))
+        except ValueError:
+            # Data from OpenLDAP would already be in the expected format.
+            # The above parsing would happen only for data from OpenDJ.
+            pass
+        return "%s: %s\n" % ('oxAuthAuthenticationTime', dateString)
+
     def processBackupData(self):
         logging.info('Processing the LDIF data.')
 
@@ -493,14 +507,8 @@ class Migration(object):
                         line = line.replace("cn=directory manager", "cn=directory manager,o=gluu")
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
-		    if 'oxAuthAuthenticationTime' in line:
-                        dateString = line.replace('oxAuthAuthenticationTime:','').strip()
-                        dateTimestamp = time.mktime(time.strptime(dateString, "%a %b %d %H:%M:%S %Z %Y"))
-                        dateString = time.strftime("%Y%m%d%H%M%S", time.gmtime(dateTimestamp))
-                        ts = time.time()
-                        utc_offset = (datetime.datetime.fromtimestamp(ts) - datetime.datetime.utcfromtimestamp(ts)).total_seconds()
-                        dateString = "%s.%03dZ" % (time.strftime("%Y%m%d%H%M%S", time.localtime(dateTimestamp)), int(utc_offset//60))
-                        line = "%s: %s\n" % ('oxAuthAuthenticationTime', dateString)
+                    if 'oxAuthAuthenticationTime' in line:
+                        line = self.convertTimeStamp(line)
                     outfile.write(line)
 
     def importDataIntoOpenldap(self):
