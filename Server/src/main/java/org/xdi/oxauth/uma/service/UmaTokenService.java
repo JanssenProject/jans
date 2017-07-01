@@ -87,7 +87,7 @@ public class UmaTokenService {
             Client client = identity.getSetSessionClient().getClient();
 
             Claims claims = new Claims(idToken, pct);
-            pct = pctService.updateClaims(pct, idToken, claims, client.getClientId()); // creates new pct if pct is null in request
+            pct = pctService.updateClaims(pct, idToken, claims, client.getClientId(), permissions); // creates new pct if pct is null in request
 
             Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = umaNeedsInfoService.checkNeedsInfo(claims, scopes, permissions, pct, httpRequest);
 
