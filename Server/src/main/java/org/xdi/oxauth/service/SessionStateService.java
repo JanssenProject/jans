@@ -206,13 +206,20 @@ public class SessionStateService {
         }
     }
 
-
     public String getSessionStateFromCookie(HttpServletRequest request) {
+        return getSessionStateFromCookie(request, SESSION_STATE_COOKIE_NAME);
+    }
+
+    public String getUmaSessionStateFromCookie(HttpServletRequest request) {
+        return getSessionStateFromCookie(request, UMA_SESSION_STATE_COOKIE_NAME);
+    }
+
+    public String getSessionStateFromCookie(HttpServletRequest request, String cookieName) {
         try {
             final Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(SESSION_STATE_COOKIE_NAME) /*&& cookie.getSecure()*/) {
+                    if (cookie.getName().equals(cookieName) /*&& cookie.getSecure()*/) {
                         log.trace("Found session_state cookie: '{}'", cookie.getValue());
                         return cookie.getValue();
                     }
