@@ -7,7 +7,7 @@
                 template="/WEB-INF/incl/layout/template.xhtml">
 
     <f:metadata>
-        <f:viewAction action="#{gatherer.prepareForStep}"/>
+        <f:viewAction action="#{gatherer.prepareForStep}" onPostback="true"/>
     </f:metadata>
 
     <ui:define name="head">
