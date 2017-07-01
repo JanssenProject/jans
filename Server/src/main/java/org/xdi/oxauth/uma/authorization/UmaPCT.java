@@ -1,6 +1,6 @@
 package org.xdi.oxauth.uma.authorization;
 
-import com.ocpsoft.pretty.faces.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;

@@ -1,6 +1,6 @@
 package org.xdi.oxauth.uma.service;
 
-import com.ocpsoft.pretty.faces.util.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
