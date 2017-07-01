@@ -19,7 +19,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yuriyz on 06/20/2017.
@@ -49,6 +51,8 @@ public class UmaGatherer {
     @Inject
     private UmaPctService umaPctService;
 
+    private final Map<String, String> pageClaims = new HashMap<String, String>();
+
     public boolean gather() {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
@@ -56,7 +60,7 @@ public class UmaGatherer {
             final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
 
             CustomScriptConfiguration script = umaSessionService.getScript(session);
-            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
+            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService, pageClaims);
 
             int step = umaSessionService.getStep(session);
             if (!umaSessionService.isPassedPreviousSteps(session, step)) {
@@ -90,7 +94,7 @@ public class UmaGatherer {
                 }
 
                 umaSessionService.setStep(nextStep, session);
-                umaSessionService.persist(session);
+                context.persist();
 
                 String page = external.getPageForStep(script, nextStep, context);
 
@@ -162,7 +166,7 @@ public class UmaGatherer {
             }
 
             CustomScriptConfiguration script = umaSessionService.getScript(session);
-            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
+            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService, pageClaims);
 
             int step = umaSessionService.getStep(session);
             if (step < 1) {
@@ -212,4 +216,7 @@ public class UmaGatherer {
         facesContext.addMessage(null, message);
     }
 
+    public Map<String, String> getPageClaims() {
+        return pageClaims;
+    }
 }

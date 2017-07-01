@@ -5,7 +5,6 @@
 #
 
 from org.xdi.model.custom.script.type.uma import UmaClaimsGatheringType
-from org.xdi.util import ArrayHelper
 
 class UmaClaimsGathering(UmaClaimsGatheringType):
 
@@ -29,31 +28,28 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
 
     # Main gather method. Must return True (if gathering performed successfully) or False (if fail).
     # Method must set claim into context (via context.putClaim('name', value)) in order to persist it (otherwise it will be lost).
+    # All user entered values can be access via Map<String, String> context.getPageClaims()
     def gather(self, step, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaGatherContext
         print "Claims-Gathering. Gathering ..."
 
         if step == 1:
-            if (context.getRequestParameters().containsKey("country")):
-                valueArray = context.getRequestParameters().get("country")
+            if (context.getPageClaims().containsKey("country")):
+                country = context.getPageClaims().get("country")
+                print "Country: " + country
 
-                if ArrayHelper.isEmpty(valueArray):
-                    print "Claims-Gathering. 'country' is not provided on step 1."
-                    return False
-
-                context.putClaim("country", valueArray[0])
+                context.putClaim("country", country)
                 return True
 
+            print "Claims-Gathering. 'country' is not provided on step 1."
             return False
 
         elif step == 2:
-            if (context.getRequestParameters().containsKey("city")):
-                valueArray = context.getRequestParameters().get("city")
+            if (context.getPageClaims().containsKey("city")):
+                city = context.getPageClaims().get("city")
+                print "City: " + city
 
-                if ArrayHelper.isEmpty(valueArray):
-                    print "Claims-Gathering. 'city' is not provided on step 2."
-                    return False
-
-                context.putClaim("city", valueArray[0])
+                context.putClaim("city", city)
+                print "Claims-Gathering. 'city' is not provided on step 2."
                 return True
 
         return False

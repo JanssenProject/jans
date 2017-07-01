@@ -26,9 +26,10 @@ public class UmaGatherContext extends ExternalScriptContext {
     private final RedirectParameters redirectUserParameters = new RedirectParameters();
     private final UmaPCT pct;
     private final JwtClaims claims;
+    private final Map<String, String> pageClaims;
 
     public UmaGatherContext(HttpServletRequest httpRequest, SessionState session, UmaSessionService sessionService,
-                            UmaPermissionService permissionService, UmaPctService pctService) {
+                            UmaPermissionService permissionService, UmaPctService pctService, Map<String, String> pageClaims) {
         super(httpRequest);
         this.session = session;
         this.sessionService = sessionService;
@@ -36,6 +37,11 @@ public class UmaGatherContext extends ExternalScriptContext {
         this.pctService = pctService;
         this.pct = pctService.getByCode(sessionService.getPct(session));
         this.claims = pct.getClaims();
+        this.pageClaims = pageClaims;
+    }
+
+    public Map<String, String> getPageClaims() {
+        return pageClaims;
     }
 
     public Map<String, String[]> getRequestParameters() {
