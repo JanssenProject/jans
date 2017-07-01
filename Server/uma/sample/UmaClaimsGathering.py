@@ -64,6 +64,8 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
             # Make sure that given client has redirect_uri to Claims-Gathering Endpoint with parameter authentication=true
             # Sample https://sample.com/restv1/uma/gather_claims?authentication=true
             # If redirect to external url is performated, make sure that viewAction has onPostback="true" (otherwise redirect will not work)
+            # After user is authenticated then within the script it's possible to get user attributes as
+            # context.getUser("uid", "sn")
 
             print "User is not authenticated. Redirect for authentication ..."
             clientId = context.getConfigurationAttributes().get("client_id").getValue2()
