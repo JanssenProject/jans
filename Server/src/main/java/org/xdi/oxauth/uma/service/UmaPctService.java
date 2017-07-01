@@ -15,7 +15,6 @@ import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
-import org.xdi.oxauth.uma.authorization.Claims;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.util.INumGenerator;
 
@@ -47,7 +46,7 @@ public class UmaPctService {
     @Inject
     private AppConfiguration appConfiguration;
 
-    public UmaPCT updateClaims(UmaPCT pct, Jwt idToken, Claims claims, String clientId, List<UmaPermission> permissions) {
+    public UmaPCT updateClaims(UmaPCT pct, Jwt idToken, String clientId, List<UmaPermission> permissions) {
         try {
             String ticketPctCode = permissions.get(0).getAttributes().get("pct");
             UmaPCT ticketPct = StringUtils.isNotBlank(ticketPctCode) ? getByCode(ticketPctCode) : null;
@@ -76,10 +75,6 @@ public class UmaPctService {
                 for (String key : idToken.getClaims().keys()) {
                     pctClaims.setClaimObject(key, idToken.getClaims().getClaim(key));
                 }
-            }
-
-            for (String key : claims.keys()) {
-                pctClaims.setClaimObject(key, claims.get(key));
             }
 
             pct.setClaims(pctClaims);
