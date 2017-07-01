@@ -123,6 +123,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         String gatheringUrl = needInfo.buildClaimsGatheringUrl(umaPatClientId, umaClaimsRedirectUri);
 
         System.out.println(gatheringUrl);
+        System.out.println();
         try {
 //            startSelenium();
 //            driver.navigate().to(gatheringUrl);

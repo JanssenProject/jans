@@ -81,6 +81,7 @@ public class UmaGatheringWS {
                 context.persist();
 
                 String fullUri = StringUtils.removeEnd(appConfiguration.getIssuer(), "/") + page;
+                fullUri = StringUtils.removeEnd(fullUri, ".xhtml");
                 log.trace("Redirecting to page: '{}', fullUri: {}", page, fullUri);
                 return Response.status(FOUND).location(new URI(fullUri)).build();
             } else {
