@@ -21,6 +21,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static javax.ws.rs.core.Response.Status.FOUND;
@@ -70,7 +71,7 @@ public class UmaGatheringWS {
             SessionState session = sessionService.getSession(httpRequest, httpResponse);
             sessionService.configure(session, script.getName(), reset, permissions, clientId, claimRedirectUri, state);
 
-            UmaGatherContext context = new UmaGatherContext(httpRequest, session, sessionService, permissionService, pctService);
+            UmaGatherContext context = new UmaGatherContext(httpRequest, session, sessionService, permissionService, pctService, new HashMap<String, String>());
 
             int step = sessionService.getStep(session);
             int stepsCount = external.getStepsCount(script, context);
