@@ -50,58 +50,62 @@ public class UmaGatherer {
     private UmaPctService umaPctService;
 
     public boolean gather() {
-        final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
-        final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
-        final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
+        try {
+            final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+            final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
+            final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
 
-        CustomScriptConfiguration script = umaSessionService.getScript(session);
-        UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
+            CustomScriptConfiguration script = umaSessionService.getScript(session);
+            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
 
-        int step = umaSessionService.getStep(session);
-        if (!umaSessionService.isPassedPreviousSteps(session, step)) {
-            log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
-            return false;
-        }
-
-        boolean gatheredResult = external.gather(script, step, context);
-        log.debug("Claims-gathering result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, gatheredResult);
-
-        int overridenNextStep = external.getNextStep(script, step, context);
-
-        if (!gatheredResult && overridenNextStep == -1) {
-            return false;
-        }
-
-        if (overridenNextStep != -1) {
-            umaSessionService.resetToStep(session, overridenNextStep, step);
-            step = overridenNextStep;
-        }
-
-        int stepsCount = external.getStepsCount(script, context);
-
-        if (step < stepsCount || overridenNextStep != -1) {
-            int nextStep;
-            if (overridenNextStep != -1) {
-                nextStep = overridenNextStep;
-            } else {
-                nextStep = step + 1;
-                umaSessionService.markStep(session, step, true);
+            int step = umaSessionService.getStep(session);
+            if (!umaSessionService.isPassedPreviousSteps(session, step)) {
+                log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
+                return false;
             }
 
-            umaSessionService.setStep(nextStep, session);
-            umaSessionService.persist(session);
+            boolean gatheredResult = external.gather(script, step, context);
+            log.debug("Claims-gathering result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, gatheredResult);
 
-            String page = external.getPageForStep(script, nextStep, context);
+            int overridenNextStep = external.getNextStep(script, step, context);
 
-            log.trace("Redirecting to page: '{}'", page);
-            facesService.redirect(page);
-            return true;
-        }
+            if (!gatheredResult && overridenNextStep == -1) {
+                return false;
+            }
 
-        if (step == stepsCount) {
-            context.persist();
-            onSuccess(session, context);
-            return true;
+            if (overridenNextStep != -1) {
+                umaSessionService.resetToStep(session, overridenNextStep, step);
+                step = overridenNextStep;
+            }
+
+            int stepsCount = external.getStepsCount(script, context);
+
+            if (step < stepsCount || overridenNextStep != -1) {
+                int nextStep;
+                if (overridenNextStep != -1) {
+                    nextStep = overridenNextStep;
+                } else {
+                    nextStep = step + 1;
+                    umaSessionService.markStep(session, step, true);
+                }
+
+                umaSessionService.setStep(nextStep, session);
+                umaSessionService.persist(session);
+
+                String page = external.getPageForStep(script, nextStep, context);
+
+                log.trace("Redirecting to page: '{}'", page);
+                facesService.redirect(page);
+                return true;
+            }
+
+            if (step == stepsCount) {
+                context.persist();
+                onSuccess(session, context);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("Exception during gather() method call.", e);
         }
 
         log.error("Failed to perform gather() method successfully.");
@@ -147,40 +151,43 @@ public class UmaGatherer {
     }
 
     public String prepareForStep() {
-        final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
-        final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
-        final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
+        try {
+            final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+            final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
+            final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
 
-        if (session == null || session.getSessionAttributes().isEmpty()) {
-            log.error("Invalid session.");
-            return result(Constants.RESULT_EXPIRED);
-        }
+            if (session == null || session.getSessionAttributes().isEmpty()) {
+                log.error("Invalid session.");
+                return result(Constants.RESULT_EXPIRED);
+            }
 
-        CustomScriptConfiguration script = umaSessionService.getScript(session);
-        UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
+            CustomScriptConfiguration script = umaSessionService.getScript(session);
+            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService);
 
-        int step = umaSessionService.getStep(session);
-        if (step < 1) {
-            log.error("Invalid step: {}", step);
-            return result(Constants.RESULT_INVALID_STEP);
-        }
-        if (script == null) {
-            log.error("Failed to load script, step: '{}'", step);
-            return result(Constants.RESULT_FAILURE);
-        }
+            int step = umaSessionService.getStep(session);
+            if (step < 1) {
+                log.error("Invalid step: {}", step);
+                return result(Constants.RESULT_INVALID_STEP);
+            }
+            if (script == null) {
+                log.error("Failed to load script, step: '{}'", step);
+                return result(Constants.RESULT_FAILURE);
+            }
 
-        if (!umaSessionService.isPassedPreviousSteps(session, step)) {
-            log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
-            return result(Constants.RESULT_FAILURE);
-        }
+            if (!umaSessionService.isPassedPreviousSteps(session, step)) {
+                log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
+                return result(Constants.RESULT_FAILURE);
+            }
 
-        boolean result = external.prepareForStep(script, step, context);
-        if (result) {
-            context.persist();
-            return result(Constants.RESULT_SUCCESS);
-        } else {
-            return result(Constants.RESULT_FAILURE);
+            boolean result = external.prepareForStep(script, step, context);
+            if (result) {
+                context.persist();
+                return result(Constants.RESULT_SUCCESS);
+            }
+        } catch (Exception e) {
+            log.error("Failed to prepareForStep()", e);
         }
+        return result(Constants.RESULT_FAILURE);
     }
 
     private void errorPage(String errorKey) {

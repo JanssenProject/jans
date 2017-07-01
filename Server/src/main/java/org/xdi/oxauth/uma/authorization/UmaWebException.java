@@ -10,7 +10,7 @@ import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
 import static javax.ws.rs.core.Response.Status.FOUND;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -47,16 +47,16 @@ public class UmaWebException extends WebApplicationException {
             }
 
             redirectUri += "error=" + error.getError();
-            redirectUri += "&error_description=" + error.getErrorDescription();
+            redirectUri += "&error_description=" + URLEncoder.encode(error.getErrorDescription(), "UTF-8");
             if (StringUtils.isNotBlank(error.getErrorUri())) {
-                redirectUri += "&error_uri=" + error.getErrorUri();
+                redirectUri += "&error_uri=" + URLEncoder.encode(error.getErrorUri(), "UTF-8");
             }
             if (StringUtils.isNotBlank(state)) {
                 redirectUri += "&state=" + state;
             }
 
             return new URI(redirectUri);
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to construct uri: " + redirectUri, e);
             throw new UmaWebException(INTERNAL_SERVER_ERROR, factory, UmaErrorResponseType.SERVER_ERROR);
         }
