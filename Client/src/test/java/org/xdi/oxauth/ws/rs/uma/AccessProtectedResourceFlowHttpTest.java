@@ -149,7 +149,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void successfulRptRequest(String umaPatClientId, String umaPatClientSecret) throws Exception {
         showTitle("successfulRptRequest");
-        claimsGatheringTicket = "d8b6ac8f-deb3-44f4-b36d-7238296f9632"; // todo remove this line ! after claims-gathering automation with selenium
+        claimsGatheringTicket = "b58fb0d7-8476-484a-8f45-f75bc13020dd"; // todo remove this line ! after claims-gathering automation with selenium
 
         UmaTokenResponse response = tokenService.requestRpt(
                 "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
