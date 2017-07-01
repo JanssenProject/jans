@@ -201,6 +201,11 @@
             "uri":null
         },
         {
+            "id":"invalid_session",
+            "description":"The provided session is invalid.",
+            "uri":null
+        },
+        {
             "id":"access_denied",
             "description":"The resource owner or AM server denied the request.",
             "uri":null
