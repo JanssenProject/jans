@@ -192,6 +192,13 @@ public class UmaGatherer {
             if (result) {
                 context.persist();
                 return result(Constants.RESULT_SUCCESS);
+            } else {
+                String redirectToExternalUrl = context.getRedirectToExternalUrl();
+                if (StringUtils.isNotBlank(redirectToExternalUrl)) {
+                    log.debug("Redirect to : " + redirectToExternalUrl);
+                    facesService.redirectToExternalURL(redirectToExternalUrl);
+                    return redirectToExternalUrl;
+                }
             }
         } catch (Exception e) {
             log.error("Failed to prepareForStep()", e);
