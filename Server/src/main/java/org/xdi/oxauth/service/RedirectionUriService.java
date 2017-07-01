@@ -134,17 +134,21 @@ public class RedirectionUriService {
         }
 
         if (!isBlank) {
-            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
+            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT);
         }
 
         return null;
     }
 
 	public String validatePostLogoutRedirectUri(SessionState sessionState, String postLogoutRedirectUri) {
-		if (Strings.isNullOrEmpty(postLogoutRedirectUri) || (sessionState == null)) {
-	        errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
-	        return null;
-		}
+        if (sessionState == null) {
+            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.SESSION_NOT_PASSED);
+            return null;
+        }
+        if (Strings.isNullOrEmpty(postLogoutRedirectUri)) {
+            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_PASSED);
+            return null;
+        }
 
 		final Set<Client> clientsByDns = sessionState.getPermissionGrantedMap() != null
 				? clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true)
@@ -166,7 +170,7 @@ public class RedirectionUriService {
 			}
 		}
 
-        errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
+        errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT);
         return null;
 	}
 
