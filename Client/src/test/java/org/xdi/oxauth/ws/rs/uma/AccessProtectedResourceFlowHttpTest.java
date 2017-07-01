@@ -48,6 +48,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     protected Token pat;
     protected String rpt;
     protected UmaNeedInfoResponse needInfo;
+    protected String claimsGatheringTicket;
 
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
@@ -131,6 +132,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
             // todo for Gene : claims-gathering method - interaction with Selenium (emulate user behavior)
 //            WebElement elem = driver.findElement(By.xpath(""));
 //            assertNotNull(elem);
+
+            // Finally after claims-redirect flow user gets redirect with new ticket
+            // Sample: https://client.example.com/cb?ticket=e8e7bc0b-75de-4939-a9b1-2425dab3d5ec
+            // todo set correct value of claimsGatheringTicket after redirect
         } finally {
 //            stopSelenium();
         }
@@ -139,13 +144,17 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     /**
      * Request RPT with all claims provided
      */
-    @Test(dependsOnMethods = {"claimsGathering"})
-    public void successfulRptRequest() throws Exception {
+//    @Test(dependsOnMethods = {"claimsGathering"})
+    @Test
+    @Parameters({"umaPatClientId", "umaPatClientSecret"})
+    public void successfulRptRequest(String umaPatClientId, String umaPatClientSecret) throws Exception {
         showTitle("successfulRptRequest");
+        claimsGatheringTicket = "ec9ba853-91d8-4f1c-a4bd-931bbad7a663"; // todo remove this line ! after claims-gathering automation with selenium
 
-        UmaTokenResponse response = tokenService.requestRpt("Bearer" + pat.getAccessToken(),
+        UmaTokenResponse response = tokenService.requestRpt(
+                "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
-                needInfo.getTicket(),
+                claimsGatheringTicket,
                 null, null, null, null, null);
         assert_(response);
 

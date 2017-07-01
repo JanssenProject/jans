@@ -99,26 +99,26 @@ public class UmaSessionService {
         setClaimsRedirectUri(session, claimRedirectUri);
         setTicket(session, permissions.get(0).getTicket());
 
-        if (StringUtils.isBlank(getScriptName(session))) {
-            setScriptName(session, scriptName);
+//        if (StringUtils.isBlank(getScriptName(session))) {
+        setScriptName(session, scriptName);
+//        }
+
+//        if (StringUtils.isBlank(getPct(session))) {
+        String pct = permissions.get(0).getAttributes().get("pct");
+
+        if (StringUtils.isBlank(pct)) {
+            log.error("PCT code is null or blank in permission object.");
+            throw new RuntimeException("PCT code is null or blank in permission object.");
         }
 
-        if (StringUtils.isBlank(getPct(session))) {
-            String pct = permissions.get(0).getAttributes().get("pct");
+        setPct(session, pct);
+//        }
 
-            if (StringUtils.isBlank(pct)) {
-                log.error("PCT code is null or blank in permission object.");
-                throw new RuntimeException("PCT code is null or blank in permission object.");
-            }
+//        if (StringUtils.isBlank(getClientId(session))) {
+        setClientId(session, clientId);
+//        }
 
-            setPct(session, pct);
-        }
-
-        if (StringUtils.isBlank(getClientId(session))) {
-            setClientId(session, clientId);
-        }
-
-        getStep(session); // init step
+//        getStep(session); // init step
         persist(session);
     }
 

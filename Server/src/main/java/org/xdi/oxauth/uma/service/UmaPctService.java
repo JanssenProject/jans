@@ -13,6 +13,7 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaims;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.uma.authorization.Claims;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
@@ -46,15 +47,30 @@ public class UmaPctService {
     @Inject
     private AppConfiguration appConfiguration;
 
-    public UmaPCT updateClaims(UmaPCT pct, Jwt idToken, Claims claims, String clientId) {
+    public UmaPCT updateClaims(UmaPCT pct, Jwt idToken, Claims claims, String clientId, List<UmaPermission> permissions) {
         try {
+            String ticketPctCode = permissions.get(0).getAttributes().get("pct");
+            UmaPCT ticketPct = StringUtils.isNotBlank(ticketPctCode) ? getByCode(ticketPctCode) : null;
+
             boolean hasPct = pct != null;
 
             if (!hasPct) {
-                pct = createPctAndPersist(clientId);
+                if (ticketPct != null) {
+                    pct = ticketPct;
+                } else {
+                    pct = createPctAndPersist(clientId);
+                }
             }
 
+            // copy claims from pctTicket into normal pct
             JwtClaims pctClaims = pct.getClaims();
+            if (ticketPct != null && hasPct) {
+                JwtClaims ticketClaims = ticketPct.getClaims();
+                for (String key : ticketClaims.keys()) {
+                    pctClaims.setClaimObject(key, ticketClaims.getClaim(key));
+                }
+                pct = ticketPct;
+            }
 
             if (idToken != null && idToken.getClaims() != null) {
                 for (String key : idToken.getClaims().keys()) {
@@ -69,7 +85,7 @@ public class UmaPctService {
             pct.setClaims(pctClaims);
             log.trace("PCT code: " + pct.getCode() + ", claims: " + pct.getClaimValuesAsJson());
 
-            ldapEntryManager.merge(pct);
+            return ldapEntryManager.merge(pct);
         } catch (Exception e) {
             log.error("Failed to update PCT claims. " + e.getMessage(), e);
         }

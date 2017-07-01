@@ -126,9 +126,9 @@ public class UmaGatherer {
     private String constructRedirectUri(SessionState session, UmaGatherContext context, String newTicket) {
         String claimsRedirectUri = umaSessionService.getClaimsRedirectUri(session);
 
-        addQueryParameters(claimsRedirectUri, context.getRedirectUserParameters().buildQueryString().trim());
-        addQueryParameter(claimsRedirectUri, "state", umaSessionService.getState(session));
-        addQueryParameter(claimsRedirectUri, "ticket", newTicket);
+        claimsRedirectUri = addQueryParameters(claimsRedirectUri, context.getRedirectUserParameters().buildQueryString().trim());
+        claimsRedirectUri = addQueryParameter(claimsRedirectUri, "state", umaSessionService.getState(session));
+        claimsRedirectUri = addQueryParameter(claimsRedirectUri, "ticket", newTicket);
         return claimsRedirectUri;
     }
 
