@@ -132,6 +132,11 @@ public enum UmaErrorResponseType implements IErrorType {
 	EXPIRED_TICKET("expired_ticket"),
 
 	/**
+	 * The provided session is invalid.
+	 */
+	INVALID_SESSION("invalid_session"),
+
+	/**
 	 * The claim token format is blank or otherwise not supported (supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken).
 	 */
 	INVALID_CLAIM_TOKEN_FORMAT("invalid_claim_token_format"),

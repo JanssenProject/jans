@@ -32,17 +32,26 @@ public class UmaSessionService {
     @Inject
     private ExternalUmaClaimsGatheringService external;
 
-    public SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieSessionId = sessionStateService.getUmaSessionStateFromCookie(httpRequest);
-        log.trace("Cookie - uma_session_state: " + cookieSessionId);
+    public SessionState getConnectSession(HttpServletRequest httpRequest) {
+        String cookieId = sessionStateService.getSessionStateFromCookie(httpRequest);
+        log.trace("Cookie - session_state: " + cookieId);
+        if (StringUtils.isNotBlank(cookieId)) {
+            return sessionStateService.getSessionState(cookieId);
+        }
+        return null;
+    }
 
-        if (StringUtils.isNotBlank(cookieSessionId)) {
-            SessionState ldapSessionState = sessionStateService.getSessionState(cookieSessionId);
-            if (ldapSessionState != null) {
-                log.trace("Loaded uma_session_state from cookie, session: " + ldapSessionState);
-                return ldapSessionState;
+    public SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        String cookieId = sessionStateService.getUmaSessionStateFromCookie(httpRequest);
+        log.trace("Cookie - uma_session_state: " + cookieId);
+
+        if (StringUtils.isNotBlank(cookieId)) {
+            SessionState sessionState = sessionStateService.getSessionState(cookieId);
+            if (sessionState != null) {
+                log.trace("Loaded uma_session_state from cookie, session: " + sessionState);
+                return sessionState;
             } else {
-                log.error("Failed to load uma_session_state from cookie: " + cookieSessionId);
+                log.error("Failed to load uma_session_state from cookie: " + cookieId);
             }
         } else {
             log.error("uma_session_state cookie is not set.");
