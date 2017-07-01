@@ -58,7 +58,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         return -1
 
     def prepareForStep(self, step, context):
-        if step == 1 and not context.isAuthenticated():
+        if step == 10 and not context.isAuthenticated():
             # user is not authenticated, so we are redirecting user to authorization endpoint
             # client_id is specified via configuration attribute.
             # Make sure that given client has redirect_uri to Claims-Gathering Endpoint with parameter authentication=true
