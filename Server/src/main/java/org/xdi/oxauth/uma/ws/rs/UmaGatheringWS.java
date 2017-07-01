@@ -9,6 +9,7 @@ import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.service.*;
@@ -24,8 +25,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.FOUND;
 import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_CLAIMS_GATHERING_SCRIPT_NAME;
+import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
 
 /**
  * Claims-Gathering Endpoint.
@@ -51,12 +54,30 @@ public class UmaGatheringWS {
     private UmaPctService pctService;
     @Inject
     private AppConfiguration appConfiguration;
+    @Inject
+    private UserService userService;
 
     public Response gatherClaims(String clientId, String ticket, String claimRedirectUri, String state, Boolean reset,
-                                 HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+                                 Boolean authenticationRedirect, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
-            log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, queryString: {}",
-                    clientId, ticket, claimRedirectUri, state, httpRequest.getQueryString());
+            log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, authenticationRedirect: {}, queryString: {}",
+                    clientId, ticket, claimRedirectUri, state, authenticationRedirect, httpRequest.getQueryString());
+
+            SessionState session = sessionService.getSession(httpRequest, httpResponse);
+
+            if (authenticationRedirect != null && authenticationRedirect) { // restore parameters from session
+                log.debug("Authentication redirect, restoring parameters from session ...");
+                if (session == null) {
+                    log.error("Session is null however authorization=true. Wrong workflow! Please correct custom Glaims-Gathering Script.");
+                    throw new UmaWebException(BAD_REQUEST, errorResponseFactory, INVALID_SESSION);
+                }
+                clientId = sessionService.getClientId(session);
+                ticket = sessionService.getTicket(session);
+                claimRedirectUri = sessionService.getClaimsRedirectUri(session);
+                state = sessionService.getState(session);
+                log.debug("Restored parameters from session, clientId: {}, ticket: {}, claims_redirect_uri: {}, state: {}",
+                        clientId, ticket, claimRedirectUri, state);
+            }
 
             validationService.validateClientAndClaimsRedirectUri(clientId, claimRedirectUri, state);
             List<UmaPermission> permissions = validationService.validateTicketWithRedirect(ticket, claimRedirectUri, state);
@@ -68,10 +89,10 @@ public class UmaGatheringWS {
                 throw new UmaWebException(claimRedirectUri, errorResponseFactory, INVALID_CLAIMS_GATHERING_SCRIPT_NAME, state);
             }
 
-            SessionState session = sessionService.getSession(httpRequest, httpResponse);
             sessionService.configure(session, script.getName(), reset, permissions, clientId, claimRedirectUri, state);
 
-            UmaGatherContext context = new UmaGatherContext(httpRequest, session, sessionService, permissionService, pctService, new HashMap<String, String>());
+            UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, sessionService, permissionService,
+                    pctService, new HashMap<String, String>(), userService, null, appConfiguration);
 
             int step = sessionService.getStep(session);
             int stepsCount = external.getStepsCount(script, context);
@@ -116,9 +137,11 @@ public class UmaGatheringWS {
             String state,
             @QueryParam("reset")
             Boolean reset,
+            @QueryParam("authentication")
+            Boolean authenticationRedirect,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
-        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, httpRequest, httpResponse);
+        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, authenticationRedirect, httpRequest, httpResponse);
     }
 
     @POST
@@ -135,8 +158,10 @@ public class UmaGatheringWS {
             String state,
             @FormParam("reset")
             Boolean reset,
+            @FormParam("authentication")
+            Boolean authenticationRedirect,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
-        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, httpRequest, httpResponse);
+        return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, authenticationRedirect, httpRequest, httpResponse);
     }
 }
