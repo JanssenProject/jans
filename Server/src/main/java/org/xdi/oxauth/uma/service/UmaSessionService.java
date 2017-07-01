@@ -33,7 +33,7 @@ public class UmaSessionService {
     private ExternalUmaClaimsGatheringService external;
 
     public SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieSessionId = sessionStateService.getSessionStateFromCookie();
+        String cookieSessionId = sessionStateService.getUmaSessionStateFromCookie(httpRequest);
         log.trace("Cookie - uma_session_state: " + cookieSessionId);
 
         if (StringUtils.isNotBlank(cookieSessionId)) {
