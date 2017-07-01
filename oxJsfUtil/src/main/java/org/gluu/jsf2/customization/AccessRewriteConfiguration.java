@@ -1,21 +1,7 @@
 package org.gluu.jsf2.customization;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-
-import javax.servlet.ServletContext;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.sun.faces.util.FacesLogger;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang.StringUtils;
@@ -24,13 +10,23 @@ import org.ocpsoft.rewrite.config.ConfigurationBuilder;
 import org.ocpsoft.rewrite.param.ParameterizedPatternSyntaxException;
 import org.ocpsoft.rewrite.servlet.config.HttpConfigurationProvider;
 import org.ocpsoft.rewrite.servlet.config.rule.Join;
-import org.python.apache.commons.compress.compressors.FileNameUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import com.sun.faces.util.FacesLogger;
+import javax.servlet.ServletContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * Created by eugeniuparvan on 4/27/17.
@@ -84,14 +80,25 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                     log.debug("Added rule from navigation.xml {}", rewriteMap.get(rewriteKey), xhtmlUri + ".htm");
                 } else {
                 	if (!xhtmlUri.startsWith(WEB_INF_PATH)) {
-                		builder.addRule(Join.path(xhtmlUri).to(xhtmlUri + ".htm"));
-                        log.debug("Added rule {}", xhtmlUri, xhtmlUri + ".htm");
+                        String joinPath = xhtmlUri;
+                        String to = xhtmlUri + ".htm";
+                        if (isTomcat()) {
+                            joinPath = "/" + joinPath;
+                            to = "/" + to;
+                        }
+
+                        builder.addRule(Join.path(joinPath).to(to));
+                        log.debug("Added rule {}", joinPath, to);
                 	}
                 }
             } catch (ParameterizedPatternSyntaxException ex) {
                 FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Failed to add rule for " + xhtmlPath, ex);
             }
         }
+    }
+
+    private boolean isTomcat() {
+        return StringUtils.isNotBlank(System.getProperty("catalina.home"));
     }
 
     private Map<String, String> getRewriteMap(DocumentBuilder documentBuilder, Collection<File> navigationFiles) {
