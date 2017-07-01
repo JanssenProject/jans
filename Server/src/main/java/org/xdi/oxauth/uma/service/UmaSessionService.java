@@ -92,9 +92,9 @@ public class UmaSessionService {
 
     public void configure(SessionState session, String scriptName, Boolean reset, List<UmaPermission> permissions,
                           String clientId, String claimRedirectUri, String state) {
-        if (reset != null && reset) {
-            setStep(1, session);
-        }
+//        if (reset != null && reset) {
+        setStep(1, session);
+//        }
         setState(session, state);
         setClaimsRedirectUri(session, claimRedirectUri);
         setTicket(session, permissions.get(0).getTicket());

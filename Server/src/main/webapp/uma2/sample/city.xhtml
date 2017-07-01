@@ -15,13 +15,13 @@
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">Country</ui:define>
+    <ui:define name="pageTitle">City</ui:define>
 
     <ui:define name="body">
 
         <h:form id="loginForm">
-            <h:outputLabel for="country" value="Country"/><br/>
-            <h:inputText id="country" value="#{gatherer.pageClaims['country']}" autocomplete="off"/>
+            <h:outputLabel for="city" value="City"/><br/>
+            <h:inputText id="city" value="#{gatherer.pageClaims['city']}" autocomplete="off"/>
 
             <div class="actionButtons">
                 <h:commandButton id="gather" value="Submit" action="#{gatherer.gather}"/>
