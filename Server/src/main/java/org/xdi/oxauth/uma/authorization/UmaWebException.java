@@ -47,12 +47,12 @@ public class UmaWebException extends WebApplicationException {
             }
 
             redirectUri += "error=" + error.getError();
-            redirectUri += "error_description=" + error.getErrorDescription();
+            redirectUri += "&error_description=" + error.getErrorDescription();
             if (StringUtils.isNotBlank(error.getErrorUri())) {
-                redirectUri += "error_uri=" + error.getErrorUri();
+                redirectUri += "&error_uri=" + error.getErrorUri();
             }
             if (StringUtils.isNotBlank(state)) {
-                redirectUri += "state=" + state;
+                redirectUri += "&state=" + state;
             }
 
             return new URI(redirectUri);
