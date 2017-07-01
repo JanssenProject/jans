@@ -58,6 +58,17 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         return -1
 
     def prepareForStep(self, step, context):
+        if step == 1 and not context.isAuthenticated():
+            # user is not authenticated, so we are redirecting user to authorization endpoint
+            # client_id is specified via configuration attribute.
+            # Make sure that given client has redirect_uri to Claims-Gathering Endpoint with parameter authentication=true
+            # Sample https://sample.com/restv1/uma/gather_claims?authentication=true
+            clientId = context.getConfigurationAttributes().get("client_id").getValue2()
+            redirectUri = context.getClaimsGatheringEndpoint() + "?authentication=true" # without authentication=true parameter it will not work
+            authorizationUrl = context.getAuthorizationEndpoint() + "?client_id=" + clientId + "&redirect_uri=" + redirectUri + "&scope=openid&response_type=code"
+            context.redirect(authorizationUrl) # redirect to external url
+            return False
+
         return True
 
     def getStepsCount(self, context):

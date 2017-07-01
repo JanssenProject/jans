@@ -9,6 +9,7 @@ import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 
 import javax.enterprise.context.RequestScoped;
@@ -50,6 +51,8 @@ public class UmaGatherer {
     private UmaPermissionService umaPermissionService;
     @Inject
     private UmaPctService umaPctService;
+    @Inject
+    private UserService userService;
 
     private final Map<String, String> pageClaims = new HashMap<String, String>();
 
@@ -60,7 +63,8 @@ public class UmaGatherer {
             final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
 
             CustomScriptConfiguration script = umaSessionService.getScript(session);
-            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService, pageClaims);
+            UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
+                    umaPctService, pageClaims, userService, facesService, appConfiguration);
 
             int step = umaSessionService.getStep(session);
             if (!umaSessionService.isPassedPreviousSteps(session, step)) {
@@ -166,7 +170,8 @@ public class UmaGatherer {
             }
 
             CustomScriptConfiguration script = umaSessionService.getScript(session);
-            UmaGatherContext context = new UmaGatherContext(httpRequest, session, umaSessionService, umaPermissionService, umaPctService, pageClaims);
+            UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
+                    umaPctService, pageClaims, userService, facesService, appConfiguration);
 
             int step = umaSessionService.getStep(session);
             if (step < 1) {
