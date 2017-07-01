@@ -40,6 +40,7 @@ public class UmaGatherContext extends ExternalScriptContext {
     private final UmaPCT pct;
     private final JwtClaims claims;
     private final Map<String, String> pageClaims;
+    private String redirectToExternalUrl = null;
 
     public UmaGatherContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, SessionState session, UmaSessionService sessionService,
                             UmaPermissionService permissionService, UmaPctService pctService, Map<String, String> pageClaims,
@@ -161,8 +162,11 @@ public class UmaGatherContext extends ExternalScriptContext {
     }
 
     public void redirectToExternalUrl(String url) {
-        getLog().debug("Redirect to external url: " + url);
-        facesService.redirectToExternalURL(url);
+        redirectToExternalUrl = url;
+    }
+
+    public String getRedirectToExternalUrl() {
+        return redirectToExternalUrl;
     }
 
     public String getAuthorizationEndpoint() {
