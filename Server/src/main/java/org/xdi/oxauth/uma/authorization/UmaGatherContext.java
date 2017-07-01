@@ -160,7 +160,8 @@ public class UmaGatherContext extends ExternalScriptContext {
         pctService.merge(pct);
     }
 
-    public void redirect(String url) {
+    public void redirectToExternalUrl(String url) {
+        getLog().debug("Redirect to external url: " + url);
         facesService.redirectToExternalURL(url);
     }
 
