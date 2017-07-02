@@ -581,4 +581,21 @@ login-panel {
     width: 39px;
 }
 }
+
+.login_bx_1 {
+    padding: 8px 12px 9px 20px;
+    background: #f9f8f8;
+    border: 1px solid #e2e2e2;
+    max-width: 500px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.col-md-6_1 {
+    width: 100%;
+}
+
+.col-sm-5_1 {
+    width: 80%;
+}
 	
