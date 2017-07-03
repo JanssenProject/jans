@@ -30,7 +30,7 @@ public class DiscoveryService {
 
     public static final String WELL_KNOWN_CONNECT_PATH = "/.well-known/openid-configuration";
 
-    public static final String WELL_KNOWN_UMA_PATH = "/.well-known/uma-configuration";
+    public static final String WELL_KNOWN_UMA_PATH = "/.well-known/uma2-configuration";
 
     private final ConcurrentMap<String, OpenIdConfigurationResponse> map = new ConcurrentHashMap<String, OpenIdConfigurationResponse>();
     private final ConcurrentMap<String, UmaMetadata> umaMap = new ConcurrentHashMap<String, UmaMetadata>();
