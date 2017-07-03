@@ -3,24 +3,24 @@ package org.xdi.oxd.common.params;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.List;
-
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/06/2016
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetGatParams implements HasProtectionAccessTokenParams {
+public class RpGetGetClaimsGatheringUrlParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
-    @JsonProperty(value = "scopes")
-    private List<String> scopes;
+    @JsonProperty(value = "ticket")
+    private String ticket;
+    @JsonProperty(value = "claims_redirect_uri")
+    private String claimsRedirectUri;
     @JsonProperty(value = "protection_access_token")
     private String protectionAccessToken;
 
-    public RpGetGatParams() {
+    public RpGetGetClaimsGatheringUrlParams() {
     }
 
     public String getProtectionAccessToken() {
@@ -39,20 +39,29 @@ public class RpGetGatParams implements HasProtectionAccessTokenParams {
         this.oxdId = oxdId;
     }
 
-    public List<String> getScopes() {
-        return scopes;
+    public String getTicket() {
+        return ticket;
     }
 
-    public void setScopes(List<String> scopes) {
-        this.scopes = scopes;
+    public void setTicket(String ticket) {
+        this.ticket = ticket;
+    }
+
+    public String getClaimsRedirectUri() {
+        return claimsRedirectUri;
+    }
+
+    public void setClaimsRedirectUri(String claimsRedirectUri) {
+        this.claimsRedirectUri = claimsRedirectUri;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("RpGetGatParams");
+        sb.append("RpGetGetClaimsGatheringUrlParams");
         sb.append("{oxdId='").append(oxdId).append('\'');
-        sb.append(", scopes=").append(scopes);
+        sb.append(", ticket=").append(ticket);
+        sb.append(", claimsRedirectUri=").append(claimsRedirectUri);
         sb.append(", protectionAccessToken=").append(protectionAccessToken);
         sb.append('}');
         return sb.toString();
