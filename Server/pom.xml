@@ -702,6 +702,34 @@
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
 							<webResources>
+								<!-- Duplicity for m2e-wtp plugin -->
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+										<include>**/*.properties</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>META-INF/navigation/*.navigation.xml</include>
+										<include>**/*.xhtml</include>
+										<include>**/*.jsp</include>
+										<include>**/*.html</include>
+										<include>**/*.pdf</include>
+										<include>**/*.js</include>
+										<include>**/*.css</include>
+										<include>**/*.xcss</include>
+										<include>**/*.png</include>
+										<include>**/*.jpg</include>
+										<include>**/*.gif</include>
+										<include>**/*.ico</include>
+									</includes>
+								</resource>
+
 								<resource>
 									<directory>src/main/webapp-jetty</directory>
 									<filtering>true</filtering>
@@ -728,6 +756,34 @@
 						<artifactId>maven-war-plugin</artifactId>
 						<configuration>
 							<webResources>
+								<!-- Duplicity for m2e-wtp plugin -->
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+										<include>**/*.properties</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>META-INF/navigation/*.navigation.xml</include>
+										<include>**/*.xhtml</include>
+										<include>**/*.jsp</include>
+										<include>**/*.html</include>
+										<include>**/*.pdf</include>
+										<include>**/*.js</include>
+										<include>**/*.css</include>
+										<include>**/*.xcss</include>
+										<include>**/*.png</include>
+										<include>**/*.jpg</include>
+										<include>**/*.gif</include>
+										<include>**/*.ico</include>
+									</includes>
+								</resource>
+
 								<resource>
 									<directory>src/main/webapp-tomcat</directory>
 									<filtering>true</filtering>
