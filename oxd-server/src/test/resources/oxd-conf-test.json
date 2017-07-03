@@ -3,7 +3,6 @@
     "localhost_only":true,
     "time_out_in_seconds":0,
     "use_client_authentication_for_pat":true,
-    "use_client_authentication_for_aat":true,
     "trust_all_certs":true,
     "trust_store_path":"",
     "trust_store_password":"",
