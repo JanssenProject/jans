@@ -15,7 +15,6 @@ import org.xdi.oxd.common.params.IParams;
  * Convenient static convertor.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 13/08/2013
  */
 
 public class Convertor {

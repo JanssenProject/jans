@@ -9,7 +9,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * oxD configuration.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class Configuration {
 
