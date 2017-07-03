@@ -244,6 +244,7 @@ class Exporter(object):
         # Preferences for installation of optional components
         props['installSaml'] = os.path.isfile(
                 '/opt/shibboleth-idp/conf/idp.properties')
+        props['shibboleth_version'] = 'v3'
         props['installAsimba'] = os.path.isfile(
                 '/opt/gluu/jetty/asimba/webapps/asimba.war')
         props['installOxAuthRP'] = os.path.isfile(
