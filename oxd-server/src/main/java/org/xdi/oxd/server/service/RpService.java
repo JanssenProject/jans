@@ -23,7 +23,6 @@ import java.util.UUID;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 28/09/2015
  */
 
 public class RpService {

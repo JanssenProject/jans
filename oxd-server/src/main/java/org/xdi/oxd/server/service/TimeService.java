@@ -13,7 +13,6 @@ import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 29/08/2016
  */
 
 public class TimeService {

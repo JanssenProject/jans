@@ -16,7 +16,6 @@ import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 16/04/2017
  */
 
 public class PersistenceService {

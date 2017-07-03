@@ -18,7 +18,6 @@ import java.io.File;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 28/05/2014
  */
 
 public class HttpService {

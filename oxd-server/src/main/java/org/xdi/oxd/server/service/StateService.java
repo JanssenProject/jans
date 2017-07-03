@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 12/09/2016
  */
 
 public class StateService {

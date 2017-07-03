@@ -7,8 +7,8 @@ import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.specimpl.BuiltResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
+import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -74,16 +74,16 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         };
 
-        final RptStatusService registrationService = UmaClientFactory.instance().createRptStatusService(getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
+        final UmaRptIntrospectionService introspectionService = UmaClientFactory.instance().createRptStatusService(getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
 
         RptIntrospectionResponse status;
         try {
-            status = registrationService.requestRptStatus("Bearer " + patProvider.getPatToken(), params.getRpt(), "");
+            status = introspectionService.requestRptStatus("Bearer " + patProvider.getPatToken(), params.getRpt(), "");
         } catch (ClientResponseFailure e) {
             int httpStatus = e.getResponse().getStatus();
             if (httpStatus == 401 || httpStatus == 400 || httpStatus == 403) {
                 String freshPat = getUmaTokenService().obtainPat(params.getOxdId()).getToken();
-                status = registrationService.requestRptStatus("Bearer " + freshPat, params.getRpt(), "");
+                status = introspectionService.requestRptStatus("Bearer " + freshPat, params.getRpt(), "");
             } else {
                 throw e;
             }
@@ -104,7 +104,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
                         LOG.debug("GAT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
                         return okResponse(new RsCheckAccessResponse("granted"));
                     }
-                    if ((permission.getResourceSetId() != null && permission.getResourceSetId().equals(resource.getId()))) { // normal UMA
+                    if ((permission.getResourceId() != null && permission.getResourceId().equals(resource.getId()))) { // normal UMA
                         LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
                         return okResponse(new RsCheckAccessResponse("granted"));
                     }
