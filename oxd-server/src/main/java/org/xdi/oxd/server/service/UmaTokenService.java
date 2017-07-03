@@ -1,6 +1,5 @@
 package org.xdi.oxd.server.service;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
@@ -20,12 +19,15 @@ import org.xdi.oxauth.model.uma.UmaTokenResponse;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
+import org.xdi.oxd.common.params.RpGetRptParams;
+import org.xdi.oxd.common.response.RpGetRptResponse;
 import org.xdi.oxd.server.Configuration;
-import org.xdi.oxd.server.model.Aat;
+import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.model.Pat;
 import org.xdi.oxd.server.model.UmaToken;
 import org.xdi.oxd.server.model.UmaTokenFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,7 +35,6 @@ import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 02/06/2016
  */
 
 public class UmaTokenService {
@@ -63,37 +64,61 @@ public class UmaTokenService {
         this.stateService = stateService;
     }
 
-    public String getRpt(String oxdId, boolean forceNew) {
-        Rp site = rpService.getRp(oxdId);
-        UmaMetadata discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
+    public RpGetRptResponse getRpt(RpGetRptParams params) throws UnsupportedEncodingException {
+        Rp rp = rpService.getRp(params.getOxdId());
+        UmaMetadata discovery = discoveryService.getUmaDiscoveryByOxdId(params.getOxdId());
 
-        if (!forceNew && !Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
-            if (!isExpired(site.getRptExpiresAt())) {
-                LOG.debug("RPT from site configuration, RPT: " + site.getRpt() + ", site: " + site);
-                return site.getRpt();
-            }
-        }
+        // disable caching
+//        if (!Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
+//            if (!isExpired(site.getRptExpiresAt())) {
+//                LOG.debug("RPT from site configuration, RPT: " + site.getRpt() + ", site: " + site);
+//
+//                RpGetRptResponse result = new RpGetRptResponse();
+//                result.setRpt(site.getRpt());
+//                result.setTokenType(site.getRptTokenType());
+//                result.setPct(site.getRptPct());
+//                result.setUpdated(site.getRptUpgraded());
+//                return result;
+//            }
+//        }
 
         final org.xdi.oxauth.client.uma.UmaTokenService tokenService = UmaClientFactory.instance().createTokenService(discovery, httpService.getClientExecutor());
-        final UmaTokenResponse tokenResponse = tokenService.requestRpt();
+        final UmaTokenResponse tokenResponse = tokenService.requestRpt(
+                "Basic " + Utils.encodeCredentials(rp.getClientId(), rp.getClientSecret()),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                params.getTicket(),
+                params.getClaimToken(),
+                params.getClaimTokenFormat(),
+                params.getPct(),
+                params.getRpt(),
+                Utils.joinAndUrlEncode(params.getScope())
+        );
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
             UmaRptIntrospectionService introspectionService = UmaClientFactory.instance().createRptStatusService(discovery, httpService.getClientExecutor());
-            RptIntrospectionResponse status = introspectionService.requestRptStatus("Bearer " + getPat(oxdId).getToken(), tokenResponse.getAccessToken(), "");
+            RptIntrospectionResponse status = introspectionService.requestRptStatus("Bearer " + getPat(params.getOxdId()).getToken(), tokenResponse.getAccessToken(), "");
             LOG.debug("RPT " + tokenResponse.getAccessToken() + ", status: " + status);
             if (status.getActive()) {
                 LOG.debug("RPT is successfully obtained from AS. RPT: {}", tokenResponse.getAccessToken());
 
-                site.setRpt(tokenResponse.getAccessToken());
-                site.setRptCreatedAt(status.getIssuedAt());
-                site.setRptExpiresAt(status.getExpiresAt());
-                rpService.updateSilently(site);
+                rp.setRpt(tokenResponse.getAccessToken());
+                rp.setRptTokenType(tokenResponse.getTokenType());
+                rp.setRptPct(tokenResponse.getPct());
+                rp.setRptUpgraded(tokenResponse.getUpgraded());
+                rp.setRptCreatedAt(status.getIssuedAt());
+                rp.setRptExpiresAt(status.getExpiresAt());
+                rpService.updateSilently(rp);
 
-                return tokenResponse.getAccessToken();
+                RpGetRptResponse result = new RpGetRptResponse();
+                result.setRpt(rp.getRpt());
+                result.setTokenType(rp.getRptTokenType());
+                result.setPct(rp.getRptPct());
+                result.setUpdated(rp.getRptUpgraded());
+                return result;
             }
         }
 
-        LOG.error("Failed to get RPT for site: " + site);
+        LOG.error("Failed to get RPT for site: " + rp);
         throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_RPT);
     }
 

@@ -4,13 +4,9 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.RpGetRptParams;
-import org.xdi.oxd.common.response.RpGetRptResponse;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -19,20 +15,14 @@ import org.xdi.oxd.common.response.RpGetRptResponse;
 
 public class RpGetRptOperation extends BaseOperation<RpGetRptParams> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RpGetRptOperation.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(RpGetRptOperation.class);
 
     protected RpGetRptOperation(Command command, final Injector injector) {
         super(command, injector, RpGetRptParams.class);
     }
 
     @Override
-    public CommandResponse execute(RpGetRptParams params) {
-        if (StringUtils.isNotBlank(params.getAat())) {
-            getUmaTokenService().putAat(params.getAat(), params.getOxdId());
-        }
-
-        final RpGetRptResponse r = new RpGetRptResponse();
-        r.setRpt(getUmaTokenService().getRpt(params.getOxdId(), params.isForceNew()));
-        return okResponse(r);
+    public CommandResponse execute(RpGetRptParams params) throws Exception {
+        return okResponse(getUmaTokenService().getRpt(params));
     }
 }

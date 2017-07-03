@@ -12,7 +12,6 @@ import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 28/09/2015
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -98,6 +97,12 @@ public class Rp implements Serializable {
 
     @JsonProperty(value = "rpt")
     private String rpt;
+    @JsonProperty(value = "rpt_token_type")
+    private String rptTokenType;
+    @JsonProperty(value = "rpt_pct")
+    private String rptPct;
+    @JsonProperty(value = "rpt_upgraded")
+    private Boolean rptUpgraded;
     @JsonProperty(value = "rpt_expires_at")
     private Date rptExpiresAt;
     @JsonProperty(value = "rpt_created_at")
@@ -151,6 +156,9 @@ public class Rp implements Serializable {
         this.patRefreshToken = conf.patRefreshToken;
 
         this.rpt = conf.rpt;
+        this.rptTokenType = conf.rptTokenType;
+        this.rptPct = conf.rptPct;
+        this.rptUpgraded = conf.rptUpgraded;
         this.rptExpiresAt = conf.rptExpiresAt;
         this.rptCreatedAt = conf.rptCreatedAt;
 
@@ -439,6 +447,30 @@ public class Rp implements Serializable {
         this.rptExpiresAt = rptExpiresAt;
     }
 
+    public String getRptTokenType() {
+        return rptTokenType;
+    }
+
+    public void setRptTokenType(String rptTokenType) {
+        this.rptTokenType = rptTokenType;
+    }
+
+    public String getRptPct() {
+        return rptPct;
+    }
+
+    public void setRptPct(String rptPct) {
+        this.rptPct = rptPct;
+    }
+
+    public Boolean getRptUpgraded() {
+        return rptUpgraded;
+    }
+
+    public void setRptUpgraded(Boolean rptUpgraded) {
+        this.rptUpgraded = rptUpgraded;
+    }
+
     public Date getRptCreatedAt() {
         return rptCreatedAt;
     }
@@ -514,8 +546,11 @@ public class Rp implements Serializable {
                 ", patRefreshToken='" + patRefreshToken + '\'' +
                 ", umaProtectedResources=" + umaProtectedResources +
                 ", rpt='" + rpt + '\'' +
+                ", rptTokenType='" + rptTokenType + '\'' +
+                ", rptPct='" + rptPct + '\'' +
                 ", rptExpiresAt=" + rptExpiresAt +
                 ", rptCreatedAt=" + rptCreatedAt +
+                ", rptUpgraded=" + rptUpgraded +
                 '}';
     }
 }

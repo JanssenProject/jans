@@ -19,7 +19,6 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 13/08/2013
  */
 
 public class DiscoveryService {
