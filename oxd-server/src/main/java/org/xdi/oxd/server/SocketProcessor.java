@@ -22,7 +22,6 @@ import java.net.Socket;
  * Socket processor.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class SocketProcessor implements Runnable {
 

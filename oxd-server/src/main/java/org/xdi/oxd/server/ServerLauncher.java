@@ -31,7 +31,6 @@ import java.util.Properties;
  * Server launcher.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class ServerLauncher {
 
