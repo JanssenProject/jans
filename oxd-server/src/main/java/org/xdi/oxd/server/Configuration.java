@@ -27,8 +27,6 @@ public class Configuration {
     private Boolean localhostOnly;
     @JsonProperty(value = "use_client_authentication_for_pat")
     private Boolean useClientAuthenticationForPat = true;
-    @JsonProperty(value = "use_client_authentication_for_aat")
-    private Boolean useClientAuthenticationForAat = true;
     @JsonProperty(value = "trust_all_certs")
     private Boolean trustAllCerts;
     @JsonProperty(value = "trust_store_path")
@@ -158,14 +156,6 @@ public class Configuration {
         this.useClientAuthenticationForPat = useClientAuthenticationForPat;
     }
 
-    public Boolean getUseClientAuthenticationForAat() {
-        return useClientAuthenticationForAat;
-    }
-
-    public void setUseClientAuthenticationForAat(Boolean useClientAuthenticationForAat) {
-        this.useClientAuthenticationForAat = useClientAuthenticationForAat;
-    }
-
     public Boolean getLocalhostOnly() {
         return localhostOnly;
     }
@@ -214,7 +204,6 @@ public class Configuration {
         sb.append(", timeOutInSeconds=").append(timeOutInSeconds);
         sb.append(", localhostOnly=").append(localhostOnly);
         sb.append(", useClientAuthenticationForPat=").append(useClientAuthenticationForPat);
-        sb.append(", useClientAuthenticationForAat=").append(useClientAuthenticationForAat);
         sb.append(", trustAllCerts=").append(trustAllCerts);
         sb.append(", keyStorePath='").append(keyStorePath).append('\'');
         sb.append(", keyStorePassword='").append(keyStorePassword).append('\'');

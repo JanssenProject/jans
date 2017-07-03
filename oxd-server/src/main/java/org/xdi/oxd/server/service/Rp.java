@@ -85,15 +85,6 @@ public class Rp implements Serializable {
     @JsonProperty(value = "user_secret")
     private String userSecret;
 
-    @JsonProperty(value = "aat")
-    private String aat;
-    @JsonProperty(value = "aat_expires_in")
-    private int aatExpiresIn;
-    @JsonProperty(value = "aat_created_at")
-    private Date aatCreatedAt;
-    @JsonProperty(value = "aat_refresh_token")
-    private String aatRefreshToken;
-
     @JsonProperty(value = "pat")
     private String pat;
     @JsonProperty(value = "pat_expires_in")
@@ -111,13 +102,6 @@ public class Rp implements Serializable {
     private Date rptExpiresAt;
     @JsonProperty(value = "rpt_created_at")
     private Date rptCreatedAt;
-
-    @JsonProperty(value = "gat")
-    private String gat;
-    @JsonProperty(value = "gat_expires_at")
-    private Date gatExpiresAt;
-    @JsonProperty(value = "gat_created_at")
-    private Date gatCreatedAt;
 
     public Rp() {
     }
@@ -161,11 +145,6 @@ public class Rp implements Serializable {
         this.userId = conf.userId;
         this.userSecret = conf.userSecret;
 
-        this.aat = conf.aat;
-        this.aatExpiresIn = conf.aatExpiresIn;
-        this.aatCreatedAt = conf.aatCreatedAt;
-        this.aatRefreshToken = conf.aatRefreshToken;
-
         this.pat = conf.pat;
         this.patExpiresIn = conf.patExpiresIn;
         this.patCreatedAt = conf.patCreatedAt;
@@ -174,10 +153,6 @@ public class Rp implements Serializable {
         this.rpt = conf.rpt;
         this.rptExpiresAt = conf.rptExpiresAt;
         this.rptCreatedAt = conf.rptCreatedAt;
-
-        this.gat = conf.gat;
-        this.gatExpiresAt = conf.gatExpiresAt;
-        this.gatCreatedAt = conf.gatCreatedAt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
     }
@@ -188,14 +163,6 @@ public class Rp implements Serializable {
 
     public void setClientJwksUri(String clientJwksUri) {
         this.clientJwksUri = clientJwksUri;
-    }
-
-    public String getAatRefreshToken() {
-        return aatRefreshToken;
-    }
-
-    public void setAatRefreshToken(String aatRefreshToken) {
-        this.aatRefreshToken = aatRefreshToken;
     }
 
     public String getPatRefreshToken() {
@@ -220,30 +187,6 @@ public class Rp implements Serializable {
 
     public void setUserSecret(String userSecret) {
         this.userSecret = userSecret;
-    }
-
-    public String getAat() {
-        return aat;
-    }
-
-    public void setAat(String aat) {
-        this.aat = aat;
-    }
-
-    public int getAatExpiresIn() {
-        return aatExpiresIn;
-    }
-
-    public void setAatExpiresIn(int aatExpiresIn) {
-        this.aatExpiresIn = aatExpiresIn;
-    }
-
-    public Date getAatCreatedAt() {
-        return aatCreatedAt;
-    }
-
-    public void setAatCreatedAt(Date aatCreatedAt) {
-        this.aatCreatedAt = aatCreatedAt;
     }
 
     public String getPat() {
@@ -517,30 +460,6 @@ public class Rp implements Serializable {
         return null;
     }
 
-    public String getGat() {
-        return gat;
-    }
-
-    public void setGat(String gat) {
-        this.gat = gat;
-    }
-
-    public Date getGatExpiresAt() {
-        return gatExpiresAt;
-    }
-
-    public void setGatExpiresAt(Date gatExpiresAt) {
-        this.gatExpiresAt = gatExpiresAt;
-    }
-
-    public Date getGatCreatedAt() {
-        return gatCreatedAt;
-    }
-
-    public void setGatCreatedAt(Date gatCreatedAt) {
-        this.gatCreatedAt = gatCreatedAt;
-    }
-
     public String getSetupOxdId() {
         return setupOxdId;
     }
@@ -589,10 +508,6 @@ public class Rp implements Serializable {
                 ", contacts=" + contacts +
                 ", userId='" + userId + '\'' +
                 ", userSecret='" + userSecret + '\'' +
-                ", aat='" + aat + '\'' +
-                ", aatExpiresIn=" + aatExpiresIn +
-                ", aatCreatedAt=" + aatCreatedAt +
-                ", aatRefreshToken='" + aatRefreshToken + '\'' +
                 ", pat='" + pat + '\'' +
                 ", patExpiresIn=" + patExpiresIn +
                 ", patCreatedAt=" + patCreatedAt +
@@ -601,9 +516,6 @@ public class Rp implements Serializable {
                 ", rpt='" + rpt + '\'' +
                 ", rptExpiresAt=" + rptExpiresAt +
                 ", rptCreatedAt=" + rptCreatedAt +
-                ", gat='" + gat + '\'' +
-                ", gatExpiresAt=" + gatExpiresAt +
-                ", gatCreatedAt=" + gatCreatedAt +
                 '}';
     }
 }

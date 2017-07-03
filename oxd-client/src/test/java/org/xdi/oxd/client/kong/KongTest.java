@@ -42,10 +42,10 @@ public class KongTest {
     }
 
     @Parameters({"kongAdminUrl", "kongApiRequestHost", "kongProxyUrl", "protectionDocument",
-            "oxdHost", "oxdPort", "opHost", "gatScope", "redirectUrl"})
+            "oxdHost", "oxdPort", "opHost", "scope", "redirectUrl"})
     @Test
     public void test(String kongAdminUrl, String kongApiRequestHost, String kongProxyUrl, String protectionDocument,
-                     String oxdHost, int oxdPort, String opHost, String gatScope, String redirectUrl) throws IOException {
+                     String oxdHost, int oxdPort, String opHost, String scope, String redirectUrl) throws IOException {
 
         // 1. call without protection
         MockBinService mockBinService = KongClient.createMockBinService(kongProxyUrl);
@@ -65,12 +65,12 @@ public class KongTest {
         assertTrue(mockResponse.getStatus() == Response.Status.UNAUTHORIZED.getStatusCode());
 
         // todo - Upgrade kong. Kong supports UMA 1.0.1 (it does not support UMA 2).
-        // 4. obtain GAT with correct scope (gatScope) -
-        String gat = "";//getGat(oxdHost, oxdPort, opHost, redirectUrl, gatScope);
-//        System.out.println("GAT: " + gat);
+        // 4. obtain token with correct scope
+        String token = "";//getToken(oxdHost, oxdPort, opHost, redirectUrl, scope);
+//        System.out.println("Token: " + token);
 
         // 5. call api (must be unauthorized)
-        mockResponse = mockBinService.status200Hello(kongApiRequestHost, "Bearer " + gat);
+        mockResponse = mockBinService.status200Hello(kongApiRequestHost, "Bearer " + token);
         System.out.println("GET /status/200 status: " + mockResponse.getStatus() + ", entity: " + mockResponse.getEntity());
         assertTrue(mockResponse.getStatus() == Response.Status.OK.getStatusCode());
     }
