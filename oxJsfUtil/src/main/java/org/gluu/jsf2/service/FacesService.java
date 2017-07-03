@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.NavigationHandler;
 import javax.faces.application.ViewHandler;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -94,14 +95,27 @@ public class FacesService {
 		}
 		return builder.toString();
 	}
-	
-	public void renderView(String viewId) {
-        final FacesContext fc = FacesContext.getCurrentInstance();
-        final ViewHandler viewHandler = fc.getApplication().getViewHandler();
 
-        fc.setViewRoot(viewHandler.createView(fc, viewId));
-        fc.getPartialViewContext().setRenderAll(true);
-        fc.renderResponse();
+	public void renderView(String viewId) {
+		final FacesContext fc = FacesContext.getCurrentInstance();
+		final ViewHandler viewHandler = fc.getApplication().getViewHandler();
+
+		fc.setViewRoot(viewHandler.createView(fc, viewId));
+		fc.getPartialViewContext().setRenderAll(true);
+		fc.renderResponse();
+	}
+
+	public void navigateToView(String fromAction, String outcome, Map<String, Object> parameters) {
+		final FacesContext fc = FacesContext.getCurrentInstance();
+
+		Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
+		NavigationHandler nav = fc.getApplication().getNavigationHandler();
+
+		if (parameters != null) {
+			requestMap.putAll(parameters);
+		}
+		nav.handleNavigation(fc, fromAction, outcome);
+		fc.renderResponse();
 	}
 
 	private boolean containsParameter(String url, String parameterName) {
