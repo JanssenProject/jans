@@ -3,19 +3,17 @@ package org.xdi.oxd.client;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxd.common.Command;
-import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
-import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.common.response.RpGetRptResponse;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -41,16 +39,22 @@ public class RpGetRptTest {
             params.setOxdId(site.getOxdId());
             params.setTicket(checkAccess.getTicket());
 
-            final CommandResponse commandResponse = client.send(new Command(CommandType.RP_GET_RPT).setParamsObject(params));
+            final RpGetRptResponse response = client
+                    .send(new Command(CommandType.RP_GET_RPT).setParamsObject(params))
+                    .dataAsResponse(RpGetRptResponse.class);
 
-            ErrorResponse errorResponse = commandResponse.dataAsResponse(ErrorResponse.class);
-            assertNotNull(errorResponse);
+            assertNotNull(response);
+            assertTrue(StringUtils.isNotBlank(response.getRpt()));
+            assertTrue(StringUtils.isNotBlank(response.getPct()));
 
-            // expecting need_info error
-            UmaNeedInfoResponse needInfo = errorResponse.detailsAs(UmaNeedInfoResponse.class);
-            assertNotNull(needInfo);
-            assertTrue(StringUtils.isNotBlank(needInfo.getTicket()));
-            assertTrue(StringUtils.isNotBlank(needInfo.getRedirectUser()));
+//            ErrorResponse errorResponse = commandResponse.dataAsResponse(ErrorResponse.class);
+//            assertNotNull(errorResponse);
+//
+//            // expecting need_info error
+//            UmaNeedInfoResponse needInfo = errorResponse.detailsAs(UmaNeedInfoResponse.class);
+//            assertNotNull(needInfo);
+//            assertTrue(StringUtils.isNotBlank(needInfo.getTicket()));
+//            assertTrue(StringUtils.isNotBlank(needInfo.getRedirectUser()));
         } finally {
             CommandClient.closeQuietly(client);
         }
