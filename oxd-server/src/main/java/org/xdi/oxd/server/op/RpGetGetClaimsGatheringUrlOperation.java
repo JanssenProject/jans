@@ -2,8 +2,6 @@ package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -20,7 +18,7 @@ import org.xdi.oxd.server.service.Rp;
 
 public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetGetClaimsGatheringUrlParams> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RpGetGetClaimsGatheringUrlOperation.class);
+//    private static final Logger LOG = LoggerFactory.getLogger(RpGetGetClaimsGatheringUrlOperation.class);
 
     protected RpGetGetClaimsGatheringUrlOperation(Command command, final Injector injector) {
         super(command, injector, RpGetGetClaimsGatheringUrlParams.class);
