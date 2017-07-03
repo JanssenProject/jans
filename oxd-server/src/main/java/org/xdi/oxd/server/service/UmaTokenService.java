@@ -91,7 +91,7 @@ public class UmaTokenService {
                 params.getClaimTokenFormat(),
                 params.getPct(),
                 params.getRpt(),
-                Utils.joinAndUrlEncode(params.getScope())
+                params.getScope() != null ? Utils.joinAndUrlEncode(params.getScope()) : null
         );
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
