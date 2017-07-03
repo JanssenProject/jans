@@ -50,6 +50,9 @@ public class Utils {
     }
 
     public static String joinAndUrlEncode(Collection<String> list) throws UnsupportedEncodingException {
+        if (list == null || list.isEmpty()) {
+            return "";
+        }
         return URLEncoder.encode(Joiner.on(" ").join(list), "UTF-8");
     }
 
