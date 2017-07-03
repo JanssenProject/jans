@@ -633,7 +633,7 @@ class Migration(object):
     def getProp(self, prop):
         with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
             for line in f:
-                if prop in line:
+                if line.startswith(prop):
                     return line.split('=')[-1].strip()
 
     def migrate(self):
