@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.OpenIdConfigurationClient;
 import org.xdi.oxauth.client.OpenIdConfigurationResponse;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 
@@ -33,8 +33,8 @@ public class DiscoveryService {
 
     public static final String WELL_KNOWN_UMA_PATH = "/.well-known/uma-configuration";
 
-    private final ConcurrentMap<String, OpenIdConfigurationResponse> m_map = new ConcurrentHashMap<String, OpenIdConfigurationResponse>();
-    private final ConcurrentMap<String, UmaConfiguration> m_umaMap = new ConcurrentHashMap<String, UmaConfiguration>();
+    private final ConcurrentMap<String, OpenIdConfigurationResponse> map = new ConcurrentHashMap<String, OpenIdConfigurationResponse>();
+    private final ConcurrentMap<String, UmaMetadata> umaMap = new ConcurrentHashMap<String, UmaMetadata>();
 
     private final HttpService httpService;
     private final RpService rpService;
@@ -62,7 +62,7 @@ public class DiscoveryService {
         validationService.notBlankOpHost(opHost);
 
         try {
-            final OpenIdConfigurationResponse r = m_map.get(opHost);
+            final OpenIdConfigurationResponse r = map.get(opHost);
             if (r != null) {
                 return r;
             }
@@ -71,7 +71,7 @@ public class DiscoveryService {
             final OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
             LOG.trace("Discovery response: {} ", response.getEntity());
             if (StringUtils.isNotBlank(response.getEntity())) {
-                m_map.put(opHost, response);
+                map.put(opHost, response);
                 return response;
             } else {
                 LOG.error("No response from discovery!");
@@ -83,25 +83,25 @@ public class DiscoveryService {
         throw new ErrorResponseException(ErrorResponseCode.NO_CONNECT_DISCOVERY_RESPONSE);
     }
 
-    public UmaConfiguration getUmaDiscoveryByOxdId(String oxdId) {
+    public UmaMetadata getUmaDiscoveryByOxdId(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 
         Rp site = rpService.getRp(oxdId);
         return getUmaDiscovery(site.getOpHost(), site.getOpDiscoveryPath());
     }
 
-    public UmaConfiguration getUmaDiscovery(String opHost, String opDiscoveryPath) {
+    public UmaMetadata getUmaDiscovery(String opHost, String opDiscoveryPath) {
         validationService.notBlankOpHost(opHost);
 
         try {
-            final UmaConfiguration r = m_umaMap.get(opHost);
+            final UmaMetadata r = umaMap.get(opHost);
             if (r != null) {
                 return r;
             }
-            final UmaConfiguration response = UmaClientFactory.instance().createMetaDataConfigurationService(
-                    getUmaDiscoveryUrl(opHost, opDiscoveryPath), httpService.getClientExecutor()).getMetadataConfiguration();
+            final UmaMetadata response = UmaClientFactory.instance().createMetadataService(
+                    getUmaDiscoveryUrl(opHost, opDiscoveryPath), httpService.getClientExecutor()).getMetadata();
             LOG.trace("Uma discovery response: {} ", response);
-            m_umaMap.put(opHost, response);
+            umaMap.put(opHost, response);
             return response;
 
         } catch (Exception e) {

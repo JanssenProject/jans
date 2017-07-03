@@ -1,14 +1,17 @@
 package org.xdi.oxd.server.op;
 
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.RpGetGetClaimsGatheringUrlParams;
-import org.xdi.oxd.common.response.RpGetRptResponse;
+import org.xdi.oxd.common.response.RpGetClaimsGatheringUrlResponse;
+import org.xdi.oxd.server.service.Rp;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -27,14 +30,28 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetGetC
     public CommandResponse execute(RpGetGetClaimsGatheringUrlParams params) {
         validate(params);
 
-        final RpGetRptResponse r = new RpGetRptResponse();
-        r.setRpt(getUmaTokenService().getGat(params.getOxdId(), params.getScopes()));
+        final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
+        final Rp rp = getRp();
+        final String state = getStateService().generateState();
+
+        String url = metadata.getClaimsInteractionEndpoint() +
+                "?client_id" + rp.getClientId() +
+                "&ticket=" + params.getTicket() +
+                "&claims_redirect_uri=" + params.getClaimsRedirectUri() +
+                "&state=" + state;
+
+        final RpGetClaimsGatheringUrlResponse r = new RpGetClaimsGatheringUrlResponse();
+        r.setUrl(url);
+        r.setState(state);
         return okResponse(r);
     }
 
     private void validate(RpGetGetClaimsGatheringUrlParams params) {
-        if (params.getScopes() == null || params.getScopes().isEmpty()) {
-            throw new ErrorResponseException(ErrorResponseCode.INVALID_REQUEST_SCOPES_REQUIRED);
+        if (StringUtils.isBlank(params.getTicket())) {
+            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_TICKET_PARAMETER);
+        }
+        if (StringUtils.isBlank(params.getClaimsRedirectUri())) {
+            throw new ErrorResponseException(ErrorResponseCode.NO_UMA_CLAIMS_REDIRECT_URI_PARAMETER);
         }
     }
 }
