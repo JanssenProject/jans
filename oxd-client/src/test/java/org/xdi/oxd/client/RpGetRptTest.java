@@ -1,17 +1,21 @@
 package org.xdi.oxd.client;
 
-import junit.framework.Assert;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.common.response.RpGetRptResponse;
+import org.xdi.oxd.common.response.RsCheckAccessResponse;
 
 import java.io.IOException;
+
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -20,27 +24,33 @@ import java.io.IOException;
 
 public class RpGetRptTest {
 
-    @Parameters({"host", "port", "opHost", "redirectUrl"})
+    @Parameters({"host", "port", "opHost", "redirectUrl", "rsProtect"})
     @Test
-    public void test(String host, int port, String opHost, String redirectUrl) throws IOException {
+    public void test(String host, int port, String opHost, String redirectUrl, String rsProtect) throws IOException {
         CommandClient client = null;
         try {
             client = new CommandClient(host, port);
 
             RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
+            RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
+
+            final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+
             final RpGetRptParams params = new RpGetRptParams();
             params.setOxdId(site.getOxdId());
+            params.setTicket(checkAccess.getTicket());
 
-            final Command command = new Command(CommandType.RP_GET_RPT);
-            command.setParamsObject(params);
-            final CommandResponse response = client.send(command);
-            Assert.assertNotNull(response);
-            System.out.println(response);
+            final CommandResponse commandResponse = client.send(new Command(CommandType.RP_GET_RPT).setParamsObject(params));
 
-            final RpGetRptResponse rptResponse = response.dataAsResponse(RpGetRptResponse.class);
-            Assert.assertNotNull(rptResponse);
-            Assert.assertTrue(StringUtils.isNotBlank(rptResponse.getRpt()));
+            ErrorResponse errorResponse = commandResponse.dataAsResponse(ErrorResponse.class);
+            assertNotNull(errorResponse);
+
+            // expecting need_info error
+            UmaNeedInfoResponse needInfo = errorResponse.detailsAs(UmaNeedInfoResponse.class);
+            assertNotNull(needInfo);
+            assertTrue(StringUtils.isNotBlank(needInfo.getTicket()));
+            assertTrue(StringUtils.isNotBlank(needInfo.getRedirectUser()));
         } finally {
             CommandClient.closeQuietly(client);
         }
