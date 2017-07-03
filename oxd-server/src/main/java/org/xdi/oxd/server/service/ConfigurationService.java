@@ -16,7 +16,6 @@ import java.io.InputStream;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 29/09/2015
  */
 
 public class ConfigurationService implements Provider<Configuration> {

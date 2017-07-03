@@ -4,6 +4,8 @@
 package org.xdi.oxd.server;
 
 import com.google.common.base.Joiner;
+import org.apache.commons.codec.binary.Base64;
+import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -63,5 +65,9 @@ public class Utils {
 
     public static long date(Date date) {
         return date != null ? date.getTime() / 1000 : 0;
+    }
+
+    public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {
+        return Base64.encodeBase64String(Util.getBytes(username + ":" + password));
     }
 }

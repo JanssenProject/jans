@@ -25,7 +25,6 @@ import java.util.concurrent.Executors;
  * Socket service.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class SocketService {
 
