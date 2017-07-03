@@ -9,19 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.client.service.IntrospectionService;
-import org.xdi.oxauth.client.uma.CreateGatService;
-import org.xdi.oxauth.client.uma.CreateRptService;
-import org.xdi.oxauth.client.uma.RptStatusService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.uma.GatRequest;
 import org.xdi.oxauth.model.uma.RPTResponse;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -71,7 +67,7 @@ public class UmaTokenService {
 
     public String getRpt(String oxdId, boolean forceNew) {
         Rp site = rpService.getRp(oxdId);
-        UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
+        UmaMetadata discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
 
         if (!forceNew && !Strings.isNullOrEmpty(site.getRpt()) && site.getRptExpiresAt() != null) {
             if (!isExpired(site.getRptExpiresAt())) {
