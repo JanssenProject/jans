@@ -2,7 +2,6 @@ package org.xdi.oxd.server;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 30/08/2016
  */
 
 public class ShutdownException extends RuntimeException {

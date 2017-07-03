@@ -16,7 +16,6 @@ import java.util.Date;
  * Utility class with static methods.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class Utils {
 
@@ -47,7 +46,7 @@ public class Utils {
     }
 
     public static String getUmaDiscoveryUrl(String p_amHost) {
-        return String.format("https://%s/.well-known/uma-configuration", p_amHost);
+        return String.format("https://%s/.well-known/uma2-configuration", p_amHost);
     }
 
     public static String joinAndUrlEncode(Collection<String> list) throws UnsupportedEncodingException {
