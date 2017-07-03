@@ -3,13 +3,13 @@
  */
 package org.xdi.oxd.common;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 09/08/2013
  */
 
 public class ErrorResponse implements Serializable {
@@ -18,6 +18,8 @@ public class ErrorResponse implements Serializable {
     private String error;
     @JsonProperty(value = "error_description")
     private String errorDescription;
+    @JsonProperty(value = "details")
+    private JsonNode details;
 
     public ErrorResponse() {
     }
@@ -52,18 +54,20 @@ public class ErrorResponse implements Serializable {
         this.errorDescription = errorDescription;
     }
 
-    /**
-     * Returns string representation of object
-     *
-     * @return string representation of object
-     */
+    public JsonNode getDetails() {
+        return details;
+    }
+
+    public void setDetails(JsonNode details) {
+        this.details = details;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("ResponseError");
-        sb.append("{error=").append(error);
-        sb.append(", errorDescription='").append(errorDescription).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "ErrorResponse{" +
+                "error='" + error + '\'' +
+                ", errorDescription='" + errorDescription + '\'' +
+                ", details=" + details +
+                '}';
     }
 }
