@@ -48,7 +48,7 @@ public class StateService {
         return putNonce(generateSecureString());
     }
 
-    private String generateSecureString() {
+    public String generateSecureString() {
         return new BigInteger(130, random).toString(32);
     }
 
