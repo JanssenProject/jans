@@ -8,12 +8,10 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.ResponseStatus;
-import org.xdi.oxd.common.params.RpAuthorizeRptParams;
 import org.xdi.oxd.common.params.RpGetRptParams;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
-import org.xdi.oxd.common.response.RpAuthorizeRptResponse;
 import org.xdi.oxd.common.response.RpGetRptResponse;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
@@ -61,12 +59,11 @@ public class UmaFullTest {
             accessResponse = checkAccess(rpt, "/ws/phone", "GET");
             assertEquals(accessResponse.getAccess(), "denied");
 
-            authorizeRpt(rpt, ticket);
-
-            accessResponse = checkAccess(rpt, "/ws/phone", "GET");
-            assertEquals(accessResponse.getAccess(), "granted");
-
-            assertNotProtectedError(rpt);
+            // todo UMA 2
+//            accessResponse = checkAccess(rpt, "/ws/phone", "GET");
+//            assertEquals(accessResponse.getAccess(), "granted");
+//
+//            assertNotProtectedError(rpt);
         } finally {
             CommandClient.closeQuietly(this.client);
         }
@@ -82,17 +79,6 @@ public class UmaFullTest {
 
         assertEquals(response.getStatus(), ResponseStatus.ERROR);
         assertEquals(response.getData().get("error").asText(), "invalid_request");
-    }
-
-    private void authorizeRpt(String rpt, String ticket) {
-        final RpAuthorizeRptParams params = new RpAuthorizeRptParams();
-        params.setOxdId(site.getOxdId());
-        params.setRpt(rpt);
-        params.setTicket(ticket);
-
-        final RpAuthorizeRptResponse resp = client.send(new Command(CommandType.RP_AUTHORIZE_RPT, params)).dataAsResponse(RpAuthorizeRptResponse.class);
-        assertNotNull(resp);
-        assertNotNull(resp.getOxdId());
     }
 
     private void protect(String rsProtect) throws IOException {
