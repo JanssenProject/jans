@@ -107,41 +107,6 @@ public class UmaTokenService {
         return expiredAt.before(new Date());
     }
 
-    public String getGat(String oxdId, List<String> scopes) {
-        Rp site = rpService.getRp(oxdId);
-        UmaConfiguration discovery = discoveryService.getUmaDiscoveryByOxdId(oxdId);
-
-        if (!Strings.isNullOrEmpty(site.getGat()) && site.getGatExpiresAt() != null) {
-            if (!isExpired(site.getGatExpiresAt())) {
-                LOG.debug("GAT from site configuration, GAT: " + site.getGat() + ", site: " + site);
-                return site.getGat();
-            }
-        }
-
-        final CreateGatService gatService = UmaClientFactory.instance().createGatService(discovery, httpService.getClientExecutor());
-        final String aat = getAat(oxdId).getToken();
-
-        final RPTResponse response = gatService.createGAT("Bearer " + aat, site.opHostWithoutProtocol(), new GatRequest(scopes));
-        if (response != null && StringUtils.isNotBlank(response.getRpt())) {
-            RptStatusService rptStatusService = UmaClientFactory.instance().createRptStatusService(discovery, httpService.getClientExecutor());
-            RptIntrospectionResponse status = rptStatusService.requestRptStatus("Bearer " + getPat(oxdId).getToken(), response.getRpt(), "");
-            LOG.debug("RPT " + response.getRpt() + ", status: " + status);
-            if (status.getActive()) {
-                LOG.debug("RPT is successfully obtained from AS. RPT: {}", response.getRpt());
-
-                site.setGat(response.getRpt());
-                site.setGatCreatedAt(status.getIssuedAt());
-                site.setGatExpiresAt(status.getExpiresAt());
-                rpService.updateSilently(site);
-
-                return response.getRpt();
-            }
-        }
-
-        LOG.error("Failed to get GAT for site: " + site);
-        throw new ErrorResponseException(ErrorResponseCode.FAILED_TO_GET_GAT);
-    }
-
     public Pat getPat(String oxdId) {
         validationService.notBlankOxdId(oxdId);
 

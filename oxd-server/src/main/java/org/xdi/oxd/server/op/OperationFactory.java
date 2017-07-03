@@ -56,10 +56,8 @@ public class OperationFactory {
                     return new RsCheckAccessOperation(command, injector);
                 case RP_GET_RPT:
                     return new RpGetRptOperation(command, injector);
-                case RP_AUTHORIZE_RPT:
-                    return new RpAuthorizeRptOperation(command, injector);
-                case RP_GET_GAT:
-                    return new RpGetGatOperation(command, injector);
+                case RP_GET_CLAIMS_GATHERING_URL:
+                    return new RpGetGetClaimsGatheringUrlOperation(command, injector);
                 case SETUP_CLIENT:
                     return new SetupClientOperation(command, injector);
                 case GET_CLIENT_TOKEN:
