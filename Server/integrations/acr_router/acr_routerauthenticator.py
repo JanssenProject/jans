@@ -4,7 +4,7 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, SessionStateService
 from org.xdi.util import StringHelper
