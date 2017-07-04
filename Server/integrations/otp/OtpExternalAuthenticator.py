@@ -38,9 +38,9 @@ from com.lochbridge.oath.otp import HOTPValidationResult
 from com.lochbridge.oath.otp import HOTPValidator
 from com.lochbridge.oath.otp import HmacShaAlgorithm
 
-from com.lochbridge.oath.otp.keyprovisioning import OTPAuthURIBuilder;
-from com.lochbridge.oath.otp.keyprovisioning import OTPKey;
-from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType;
+from com.lochbridge.oath.otp.keyprovisioning import OTPAuthURIBuilder
+from com.lochbridge.oath.otp.keyprovisioning import OTPKey
+from com.lochbridge.oath.otp.keyprovisioning.OTPKey import OTPType
 
 import sys
 import java
@@ -515,9 +515,9 @@ credentials = identity.getCredentials()
 
         secretKeyBase32 = self.toBase32(secretKey)
         otpKey = OTPKey(secretKeyBase32, OTPType.HOTP)
-        label = issuer + ":%s" % userDisplayName;
+        label = issuer + ":%s" % userDisplayName
 
-        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).build();
+        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).build()
 
         return otpAuthURI.toUriString()
 
@@ -549,9 +549,9 @@ credentials = identity.getCredentials()
 
         secretKeyBase32 = self.toBase32(secretKey)
         otpKey = OTPKey(secretKeyBase32, OTPType.TOTP)
-        label = issuer + ":%s" % userDisplayName;
+        label = issuer + ":%s" % userDisplayName
 
-        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).build();
+        otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).build()
 
         return otpAuthURI.toUriString()
 
