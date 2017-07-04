@@ -145,7 +145,7 @@ credentials = identity.getCredentials()
                 return False
             
             print "Google+ Authenticate for step 1. Attempting to gets tokens"
-            tokenResponse = self.getTokensByCode(self.clientSecrets, configurationAttributes, gplusAuthCode);
+            tokenResponse = self.getTokensByCode(self.clientSecrets, configurationAttributes, gplusAuthCode)
             if ((tokenResponse == None) or (tokenResponse.getIdToken() == None) or (tokenResponse.getAccessToken() == None)):
                 print "Google+ Authenticate for step 1. Failed to get tokens"
                 return False
@@ -155,7 +155,7 @@ credentials = identity.getCredentials()
             jwt = Jwt.parse(tokenResponse.getIdToken())
             # TODO: Validate ID Token Signature  
 
-            gplusUserUid = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
+            gplusUserUid = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER)
             print "Google+ Authenticate for step 1. Found Google user ID in the ID token: ", gplusUserUid
             
             if (mapUserDeployment):

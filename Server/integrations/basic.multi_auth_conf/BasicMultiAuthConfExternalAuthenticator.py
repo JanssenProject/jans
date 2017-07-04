@@ -96,7 +96,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     print "Basic (multi auth conf). Authenticate for step 1. Using configuration: " + ldapConfiguration.getConfigId()
 
-                    idx = 0;
+                    idx = 0
                     count = len(loginAttributes)
                     while (idx < count):
                         primaryKey = loginAttributes[idx]
@@ -207,7 +207,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         ldapExtendedEntryManagers = []
         for ldapExtendedConfiguration in ldapExtendedConfigurations:
-            ldapEntryManager = appInitializer.createLdapAuthEntryManager(ldapExtendedConfiguration["ldapConfiguration"]);
+            ldapEntryManager = appInitializer.createLdapAuthEntryManager(ldapExtendedConfiguration["ldapConfiguration"])
             ldapExtendedEntryManagers.append({ "ldapConfiguration" : ldapExtendedConfiguration["ldapConfiguration"], "loginAttributes" : ldapExtendedConfiguration["loginAttributes"], "localLoginAttributes" : ldapExtendedConfiguration["localLoginAttributes"], "ldapEntryManager" : ldapEntryManager })
         
         return ldapExtendedEntryManagers

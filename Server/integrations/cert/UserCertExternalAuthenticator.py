@@ -424,11 +424,11 @@ credentials = identity.getCredentials()
             remoteip = request.getRemoteAddr()
         print "Cert. Validate recaptcha response. remoteip: '%s'" % remoteip
 
-        httpService = CdiUtil.bean(HttpService);
+        httpService = CdiUtil.bean(HttpService)
 
-        http_client = httpService.getHttpsClient();
-        http_client_params = http_client.getParams();
-        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000);
+        http_client = httpService.getHttpsClient()
+        http_client_params = http_client.getParams()
+        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000)
         
         recaptcha_validation_url = "https://www.google.com/recaptcha/api/siteverify"
         recaptcha_validation_request = urllib.urlencode({ "secret" : self.recaptcha_creds['secret_key'], "response" : recaptcha_response, "remoteip" : remoteip })
