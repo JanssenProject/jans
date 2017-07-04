@@ -7,19 +7,15 @@
 import sys
 
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Contexts
 from org.xdi.oxauth.security import Identity
 from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
-from org.xdi.oxauth.service import AuthenticationService
+from org.xdi.oxauth.service import AuthenticationService, UserService
 from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper, ArrayHelper
 from org.apache.http.params import CoreConnectionPNames
 from java.util import Arrays
 from java.util import HashMap
-
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -50,11 +46,11 @@ class PersonAuthentication(PersonAuthenticationType):
         cas_validation_pattern = configurationAttributes.get("cas_validation_pattern").getValue2()
         cas_validation_timeout = int(configurationAttributes.get("cas_validation_timeout").getValue2()) * 1000
 
-        httpService = CdiUtil.bean(HttpService);
+        httpService = CdiUtil.bean(HttpService)
 
-        http_client = httpService.getHttpsClient();
-        http_client_params = http_client.getParams();
-        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, cas_validation_timeout);
+        http_client = httpService.getHttpsClient()
+        http_client_params = http_client.getParams()
+        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, cas_validation_timeout)
 
         try:
             http_service_response = httpService.executeGet(http_client, cas_validation_uri)
@@ -86,10 +82,11 @@ class PersonAuthentication(PersonAuthenticationType):
         return cas_alt_auth_mode
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
         authenticationService = CdiUtil.bean(AuthenticationService)
         userService = CdiUtil.bean(UserService)
-        httpService = CdiUtil.bean(HttpService);
+        httpService = CdiUtil.bean(HttpService)
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_map_user = StringHelper.toBoolean(configurationAttributes.get("cas_map_user").getValue2(), False)
@@ -114,7 +111,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             # Validate ticket
-            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+            facesContext = CdiUtil.bean(FacesContext)
+            request = facesContext.getExternalContext().getRequest()
 
             parametersMap = HashMap()
             parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
@@ -128,7 +126,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "CAS2. Authenticate for step 1. cas_service_request_uri: " + cas_service_request_uri
 
-            http_client = httpService.getHttpsClient();
+            http_client = httpService.getHttpsClient()
             http_service_response = httpService.executeGet(http_client, cas_service_request_uri)
             
             try:
@@ -160,20 +158,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (find_user_by_uid == None):
                     print "CAS2. Authenticate for step 1. Failed to find user"
                     print "CAS2. Authenticate for step 1. Setting count steps to 2"
-                    context.set("cas2_count_login_steps", 2)
-                    context.set("cas2_user_uid", cas2_user_uid)
+                    identity.setWorkingParameter("cas2_count_login_steps", 2)
+                    identity.setWorkingParameter("cas2_user_uid", cas2_user_uid)
                     return True
 
                 found_user_name = find_user_by_uid.getUserId()
                 print "CAS2. Authenticate for step 1. found_user_name: " + found_user_name
 
-                identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
                 credentials.setUsername(found_user_name)
                 credentials.setUser(find_user_by_uid)
             
                 print "CAS2. Authenticate for step 1. Setting count steps to 1"
-                context.set("cas2_count_login_steps", 1)
+                identity.setWorkingParameter("cas2_count_login_steps", 1)
 
                 return True
             else:
@@ -188,19 +184,17 @@ credentials = identity.getCredentials()
                 found_user_name = find_user_by_uid.getUserId()
                 print "CAS2. Authenticate for step 1. found_user_name: " + found_user_name
 
-                identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
                 credentials.setUsername(found_user_name)
                 credentials.setUser(find_user_by_uid)
 
                 print "CAS2. Authenticate for step 1. Setting count steps to 1"
-                context.set("cas2_count_login_steps", 1)
+                identity.setWorkingParameter("cas2_count_login_steps", 1)
 
                 return True
         elif (step == 2):
             print "CAS2. Authenticate for step 2"
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("cas2_user_uid"):
                 print "CAS2. Authenticate for step 2. cas2_user_uid is empty"
                 return False
@@ -210,8 +204,6 @@ credentials = identity.getCredentials()
             if (not passed_step1):
                 return False
 
-            identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
@@ -246,9 +238,8 @@ credentials = identity.getCredentials()
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
         authenticationService = CdiUtil.bean(AuthenticationService)
-        httpService = CdiUtil.bean(HttpService);
+        httpService = CdiUtil.bean(HttpService)
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)
@@ -260,7 +251,9 @@ credentials = identity.getCredentials()
         if (step == 1):
             print "CAS2. Prepare for step 1"
 
-            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+            facesContext = CdiUtil.bean(FacesContext)
+            request = facesContext.getExternalContext().getRequest()
+
             parametersMap = HashMap()
             parametersMap.put("service", httpService.constructServerUrl(request) + "/postlogin")
             if (cas_renew_opt):
@@ -272,7 +265,7 @@ credentials = identity.getCredentials()
 
             print "CAS2. Prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
 
-            context.set("cas_service_request_uri", cas_service_request_uri)
+            identity.setWorkingParameter("cas_service_request_uri", cas_service_request_uri)
 
             return True
         elif (step == 2):
@@ -289,9 +282,9 @@ credentials = identity.getCredentials()
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("cas2_count_login_steps")):
-            return context.get("cas2_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if identity.isSetWorkingParameter("cas2_count_login_steps"):
+            return identity.getWorkingParameter("cas2_count_login_steps")
         
         return 2
 

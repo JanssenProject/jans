@@ -134,8 +134,8 @@ credentials = identity.getCredentials()
                 
                 pairing_phrase = pairing_phrase_array[0]
                 try:
-                    pairing_status = self.tapi.pair(pairing_phrase, user_name);
-                    toopher_user_uid = pairing_status.id;
+                    pairing_status = self.tapi.pair(pairing_phrase, user_name)
+                    toopher_user_uid = pairing_status.id
                 except RequestError, err:
                     print "Toopher. Authenticate for step 2. Failed pair with phone: ", err
                     return False
@@ -186,8 +186,8 @@ credentials = identity.getCredentials()
             toopher_terminal_name = configurationAttributes.get("toopher_terminal_name").getValue2()
 
             try:
-                request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name);
-                request_id = request_status.id;
+                request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name)
+                request_id = request_status.id
             except RequestError, err:
                 print "Toopher. Authenticate for step 3. Failed to send authentication request to phone: ", err
                 return False

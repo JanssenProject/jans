@@ -125,7 +125,7 @@ credentials = identity.getCredentials()
 
             print "Wikid. Authenticate for step wikid_register_device. User: " + user_name + ", regcode: " + wikid_regcode 
             
-            register_result = self.wc.registerUsername(user_name, wikid_regcode, wikid_server_code);
+            register_result = self.wc.registerUsername(user_name, wikid_regcode, wikid_server_code)
 
             is_valid = register_result == 0
             if is_valid:
@@ -154,7 +154,7 @@ credentials = identity.getCredentials()
 
             print "Wikid. Authenticate for step wikid_check_passcode. wikid_user: " + user_name
             
-            is_valid = self.wc.CheckCredentials(user_name, wikid_passcode, wikid_server_code);
+            is_valid = self.wc.CheckCredentials(user_name, wikid_passcode, wikid_server_code)
 
             if is_valid:
                 print "Wikid. Authenticate for step wikid_check_passcode. wikid_user: " + user_name + " authenticated successfully"

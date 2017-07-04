@@ -63,7 +63,7 @@ class PersonAuthentication(PersonAuthenticationType):
         authn = OneID(server_flag)
 
         # Set path to credentials file
-        authn.creds_file = creds_file;
+        authn.creds_file = creds_file
 
         if (step == 1):
             print "OneId. Authenticate for step 1"
@@ -83,7 +83,7 @@ class PersonAuthentication(PersonAuthenticationType):
             authn.set_credentials()
 
             # Validate request
-            http_client = httpService.getHttpsClientDefaulTrustStore();
+            http_client = httpService.getHttpsClientDefaulTrustStore()
             auth_data = httpService.encodeBase64(authn.api_id + ":" + authn.api_key)
             http_response = httpService.executePost(http_client, authn.helper_server + "/validate", auth_data, request, ContentType.APPLICATION_JSON)
             validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_response))
@@ -196,7 +196,7 @@ credentials = identity.getCredentials()
         authn = OneID(server_flag)
 
         # Set path to credentials file
-        authn.creds_file = creds_file; 
+        authn.creds_file = creds_file 
 
         if (step == 1):
             print "OneId. Prepare for step 1"
