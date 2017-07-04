@@ -78,7 +78,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (StringHelper.isNotEmptyString(key_value) and StringHelper.isNotEmptyString(user_password)):
                 authenticationService = CdiUtil.bean(AuthenticationService)
 
-                i = 0;
+                i = 0
                 count = len(self.login_attributes_list_array)
                 while (i < count):
                     primary_key = self.login_attributes_list_array[i]

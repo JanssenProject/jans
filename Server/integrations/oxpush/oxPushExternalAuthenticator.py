@@ -96,7 +96,7 @@ credentials = identity.getCredentials()
                 else:
                     # Check deployment status
                     print "oxPush. Authenticate for step 1. oxpush_user_uid: ", oxpush_user_uid
-                    deployment_status = self.oxPushClient.getDeploymentStatus(oxpush_user_uid); 
+                    deployment_status = self.oxPushClient.getDeploymentStatus(oxpush_user_uid) 
                     if (deployment_status.result):
                         print "oxPush. Authenticate for step 1. Deployment status is valid"
                         if ("enabled" == deployment_status.status):
@@ -173,7 +173,7 @@ credentials = identity.getCredentials()
             # Initialize authentication process
             authentication_request = None
             try:
-                authentication_request = self.oxPushClient.authenticate(oxpush_user_uid, user_name);
+                authentication_request = self.oxPushClient.authenticate(oxpush_user_uid, user_name)
             except java.lang.Exception, err:
                 print "oxPush. Authenticate for step 3. Failed to initialize authentication process: ", err
                 return False
@@ -221,7 +221,7 @@ credentials = identity.getCredentials()
                 # Initialize pairing process
                 pairing_process = None
                 try:
-                    pairing_process = self.oxPushClient.pair(oxpush_application_name, user_name);
+                    pairing_process = self.oxPushClient.pair(oxpush_application_name, user_name)
                 except java.lang.Exception, err:
                     print "oxPush. Prepare for step 2. Failed to initialize pairing process: ", err
                     return False
