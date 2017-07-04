@@ -6,9 +6,9 @@
 
 import sys
 
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -50,7 +50,7 @@ class PersonAuthentication(PersonAuthenticationType):
         cas_validation_pattern = configurationAttributes.get("cas_validation_pattern").getValue2()
         cas_validation_timeout = int(configurationAttributes.get("cas_validation_timeout").getValue2()) * 1000
 
-        httpService = Component.getInstance(HttpService);
+        httpService = CdiUtil.bean(HttpService);
 
         http_client = httpService.getHttpsClient();
         http_client_params = http_client.getParams();
@@ -87,9 +87,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
-        userService = Component.getInstance(UserService)
-        httpService = Component.getInstance(HttpService);
+        authenticationService = CdiUtil.bean(AuthenticationService)
+        userService = CdiUtil.bean(UserService)
+        httpService = CdiUtil.bean(HttpService);
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_map_user = StringHelper.toBoolean(configurationAttributes.get("cas_map_user").getValue2(), False)
@@ -167,7 +167,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 found_user_name = find_user_by_uid.getUserId()
                 print "CAS2. Authenticate for step 1. found_user_name: " + found_user_name
 
-                credentials = Identity.instance().getCredentials()
+                identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
                 credentials.setUsername(found_user_name)
                 credentials.setUser(find_user_by_uid)
             
@@ -187,7 +188,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 found_user_name = find_user_by_uid.getUserId()
                 print "CAS2. Authenticate for step 1. found_user_name: " + found_user_name
 
-                credentials = Identity.instance().getCredentials()
+                identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
                 credentials.setUsername(found_user_name)
                 credentials.setUser(find_user_by_uid)
 
@@ -208,7 +210,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
@@ -244,8 +247,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
-        httpService = Component.getInstance(HttpService);
+        authenticationService = CdiUtil.bean(AuthenticationService)
+        httpService = CdiUtil.bean(HttpService);
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
         cas_renew_opt = StringHelper.toBoolean(configurationAttributes.get("cas_renew_opt").getValue2(), False)

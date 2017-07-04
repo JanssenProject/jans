@@ -5,8 +5,8 @@
 #
 
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from javax.faces.context import FacesContext
 from org.apache.http.entity import ContentType 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
@@ -51,9 +51,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
-        userService = Component.getInstance(UserService)
-        httpService = Component.getInstance(HttpService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+        userService = CdiUtil.bean(UserService)
+        httpService = CdiUtil.bean(HttpService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
@@ -118,7 +118,8 @@ class PersonAuthentication(PersonAuthenticationType):
             found_user_name = find_user_by_uid.getUserId()
             print "OneId. Authenticate for step 1. found_user_name: " + found_user_name
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
             credentials.setUsername(found_user_name)
             credentials.setUser(find_user_by_uid)
             
@@ -139,7 +140,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 #
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
 
             user_name = credentials.getUsername()
             passed_step1 = StringHelper.isNotEmptyString(user_name)
@@ -147,7 +149,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 #
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
 
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
@@ -183,7 +186,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
