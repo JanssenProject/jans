@@ -19,8 +19,8 @@ from org.jboss.seam.faces import FacesMessages
 from javax.faces.context import FacesContext
 from org.jboss.seam.international import StatusMessage
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
@@ -106,7 +106,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
@@ -183,7 +184,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         context = Contexts.getEventContext()
         session_attributes = context.get("sessionAttributes")
 
@@ -204,7 +206,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "OTP. Prepare for step 2. otp_auth_method: '%s'" % otp_auth_method
 
             if otp_auth_method == 'enroll':
-                authenticationService = Component.getInstance(AuthenticationService)
+                authenticationService = CdiUtil.bean(AuthenticationService)
                 user = authenticationService.getAuthenticatedUser()
                 if user == None:
                     print "OTP. Prepare for step 2. Failed to load user enty"
@@ -324,7 +326,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
@@ -346,7 +348,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def findEnrollments(self, user_name, skipPrefix = True):
         result = []
 
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
         user = userService.getUser(user_name, "oxExternalUid")
         if user == None:
             print "OTP. Find enrollments. Failed to find user"
@@ -372,7 +374,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return result
 
     def validateSessionState(self, session_attributes):
-        session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
+        session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
         if StringHelper.isEmpty(session_state):
             print "OTP. Validate session state. Failed to determine session_state"
             return False
@@ -388,7 +390,7 @@ class PersonAuthentication(PersonAuthenticationType):
         facesMessages = FacesMessages.instance()
         FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
 
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         otpCode = ServerUtil.getFirstValue(requestParameters, "loginForm:otpCode")
         if StringHelper.isEmpty(otpCode):
