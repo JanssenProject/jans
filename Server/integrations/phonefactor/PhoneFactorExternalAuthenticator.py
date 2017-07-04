@@ -4,9 +4,9 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
@@ -69,7 +69,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
 
         user_name = credentials.getUsername()
         if (step == 1):
@@ -78,7 +79,7 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -95,10 +96,10 @@ class PersonAuthentication(PersonAuthenticationType):
             pf_phone_number_attr = configurationAttributes.get("pf_phone_number_attr").getValue2()
 
             # Get user entry from credentials
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             credentials_user = authenticationService.getAuthenticatedUser()
             
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
             phone_number_with_country_code_attr = userService.getCustomAttribute(credentials_user, pf_phone_number_attr)
             if (phone_number_with_country_code_attr == None):
                 print "PhoneFactor. Authenticate for step 2. There is no phone number: ", user_name
@@ -190,7 +191,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return ""
 
     def isPassedDefaultAuthentication(self):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 

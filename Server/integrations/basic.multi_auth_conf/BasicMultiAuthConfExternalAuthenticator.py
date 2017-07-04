@@ -4,8 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService, AppInitializer
 from org.xdi.util import StringHelper
@@ -79,12 +79,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "Basic (multi auth conf). Authenticate for step 1"
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
+
             keyValue = credentials.getUsername()
             userPassword = credentials.getPassword()
 
             if (StringHelper.isNotEmptyString(keyValue) and StringHelper.isNotEmptyString(userPassword)):
-                authenticationService = Component.getInstance(AuthenticationService)
+                authenticationService = CdiUtil.bean(AuthenticationService)
 
                 for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
                     ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
@@ -201,7 +203,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def createLdapExtendedEntryManagers(self, authConfiguration):
         ldapExtendedConfigurations = self.createLdapExtendedConfigurations(authConfiguration)
         
-        appInitializer = Component.getInstance(AppInitializer)
+        appInitializer = CdiUtil.bean(AppInitializer)
 
         ldapExtendedEntryManagers = []
         for ldapExtendedConfiguration in ldapExtendedConfigurations:

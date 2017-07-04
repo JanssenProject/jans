@@ -1,7 +1,7 @@
 import datetime
 
-from org.jboss.seam import Component
-from org.jboss.seam.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
@@ -74,7 +74,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return datetime.datetime.strptime(startDate, "%y-%m-%d")
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -84,7 +85,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -93,7 +94,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif (step == 2):
 
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
 
             find_user_by_uid = userService.getUser(user_name)
 
