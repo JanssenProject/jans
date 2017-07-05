@@ -9,11 +9,11 @@ import sys
 import base64
 import urllib
 
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.contexts import Contexts
 from javax.faces.context import FacesContext
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
 from org.xdi.oxauth.util import ServerUtil
@@ -103,11 +103,12 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         if step == 1:
             print "Cert. Authenticate for step 1"
@@ -180,7 +181,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 2. foundUserName: " + foundUserName
 
             logged_in = False
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
             logged_in = userService.authenticate(foundUserName)
         
             print "Cert. Authenticate for step 2. Setting count steps to 2"
@@ -195,7 +196,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Cert. Authenticate for step 3. cert_user_external_uid is empty"
                 return False
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
@@ -287,7 +289,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
@@ -422,11 +424,11 @@ class PersonAuthentication(PersonAuthenticationType):
             remoteip = request.getRemoteAddr()
         print "Cert. Validate recaptcha response. remoteip: '%s'" % remoteip
 
-        httpService = Component.getInstance(HttpService);
+        httpService = CdiUtil.bean(HttpService)
 
-        http_client = httpService.getHttpsClient();
-        http_client_params = http_client.getParams();
-        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000);
+        http_client = httpService.getHttpsClient()
+        http_client_params = http_client.getParams()
+        http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000)
         
         recaptcha_validation_url = "https://www.google.com/recaptcha/api/siteverify"
         recaptcha_validation_request = urllib.urlencode({ "secret" : self.recaptcha_creds['secret_key'], "response" : recaptcha_response, "remoteip" : remoteip })

@@ -5,9 +5,9 @@
 #
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
@@ -82,7 +82,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         wikid_server_code = configurationAttributes.get("wikid_server_code").getValue2()
 
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -92,7 +93,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -113,7 +114,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (is_wikid_registration):
             print "Wikid. Authenticate for step wikid_register_device"
 
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
 
             wikid_regcode_array = requestParameters.get("regcode")
             if ArrayHelper.isEmpty(wikid_regcode_array):
@@ -124,7 +125,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Wikid. Authenticate for step wikid_register_device. User: " + user_name + ", regcode: " + wikid_regcode 
             
-            register_result = self.wc.registerUsername(user_name, wikid_regcode, wikid_server_code);
+            register_result = self.wc.registerUsername(user_name, wikid_regcode, wikid_server_code)
 
             is_valid = register_result == 0
             if is_valid:
@@ -153,7 +154,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Wikid. Authenticate for step wikid_check_passcode. wikid_user: " + user_name
             
-            is_valid = self.wc.CheckCredentials(user_name, wikid_passcode, wikid_server_code);
+            is_valid = self.wc.CheckCredentials(user_name, wikid_passcode, wikid_server_code)
 
             if is_valid:
                 print "Wikid. Authenticate for step wikid_check_passcode. wikid_user: " + user_name + " authenticated successfully"

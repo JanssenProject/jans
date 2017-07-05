@@ -172,7 +172,7 @@ public class ServerUtil {
     }
 
     /**
-     * @param httpRequest -interface to provide request information for HTTP servlets.
+     * @param httpRequest interface to provide request information for HTTP servlets.
      * @return IP address of client
      * @see <a href="http://stackoverflow.com/a/21884642/5202500">Getting IP address of client</a>
      */
