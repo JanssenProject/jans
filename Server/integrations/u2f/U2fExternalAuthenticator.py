@@ -10,7 +10,6 @@ from javax.ws.rs.core import Response
 from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.client.fido.u2f import FidoU2fClientFactory
@@ -73,7 +72,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -137,7 +137,7 @@ credentials = identity.getCredentials()
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
 
         if (step == 1):
             return True
@@ -181,8 +181,8 @@ credentials = identity.getCredentials()
                 registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
                 registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_state)
 
-            context.set("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))
-            context.set("fido_u2f_registration_request", ServerUtil.asJson(registrationRequest))
+            identity.setWorkingParameter("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))
+            identity.setWorkingParameter("fido_u2f_registration_request", ServerUtil.asJson(registrationRequest))
 
             return True
         elif (step == 3):

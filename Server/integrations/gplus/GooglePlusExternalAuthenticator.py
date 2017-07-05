@@ -5,9 +5,7 @@
 #
 
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.security import Identity
-from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
 from org.xdi.util import StringHelper, ArrayHelper
@@ -90,7 +88,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
         authenticationService = CdiUtil.bean(AuthenticationService)
         userService = CdiUtil.bean(UserService)
 
@@ -119,10 +116,11 @@ class PersonAuthentication(PersonAuthenticationType):
             if (useBasicAuth):
                 print "Google+ Authenticate for step 1. Basic authentication"
         
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
         
                 identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+                credentials = identity.getCredentials()
+
                 userName = credentials.getUsername()
                 userPassword = credentials.getPassword()
         
@@ -168,8 +166,8 @@ credentials = identity.getCredentials()
                 if (foundUser == None):
                     print "Google+ Authenticate for step 1. Failed to find user"
                     print "Google+ Authenticate for step 1. Setting count steps to 2"
-                    context.set("gplus_count_login_steps", 2)
-                    context.set("gplus_user_uid", gplusUserUid)
+                    identity.setWorkingParameter("gplus_count_login_steps", 2)
+                    identity.setWorkingParameter("gplus_user_uid", gplusUserUid)
                     return True
 
                 foundUserName = foundUser.getUserId()
@@ -181,7 +179,7 @@ credentials = identity.getCredentials()
                     return False
             
                 print "Google+ Authenticate for step 1. Setting count steps to 1"
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
 
                 postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                 print "Google+ Authenticate for step 1. postLoginResult:", postLoginResult
@@ -247,7 +245,7 @@ credentials = identity.getCredentials()
                     return False
 
                 print "Google+ Authenticate for step 1. Setting count steps to 1"
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
 
                 postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                 print "Google+ Authenticate for step 1. postLoginResult:", postLoginResult
@@ -271,7 +269,7 @@ credentials = identity.getCredentials()
                     return False
 
                 print "Google+ Authenticate for step 1. Setting count steps to 1"
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
 
                 postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
                 print "Google+ Authenticate for step 1. postLoginResult:", postLoginResult
@@ -280,7 +278,7 @@ credentials = identity.getCredentials()
         elif (step == 2):
             print "Google+ Authenticate for step 2"
             
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("gplus_user_uid"):
                 print "Google+ Authenticate for step 2. gplus_user_uid is empty"
                 return False
@@ -291,7 +289,8 @@ credentials = identity.getCredentials()
                 return False
 
             identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+            credentials = identity.getCredentials()
+
             userName = credentials.getUsername()
             userPassword = credentials.getPassword()
 
@@ -332,7 +331,7 @@ credentials = identity.getCredentials()
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         if (step == 1):
@@ -343,8 +342,8 @@ credentials = identity.getCredentials()
                 print "Google+ Prepare for step 1. Google+ client configuration is invalid"
                 return False
             
-            context.set("gplus_client_id", currentClientSecrets["web"]["client_id"])
-            context.set("gplus_client_secret", currentClientSecrets["web"]["client_secret"])
+            identity.setWorkingParameter("gplus_client_id", currentClientSecrets["web"]["client_id"])
+            identity.setWorkingParameter("gplus_client_secret", currentClientSecrets["web"]["client_secret"])
 
             return True
         elif (step == 2):
@@ -361,9 +360,9 @@ credentials = identity.getCredentials()
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("gplus_count_login_steps")):
-            return context.get("gplus_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("gplus_count_login_steps")):
+            return identity.getWorkingParameter("gplus_count_login_steps")
         
         return 2
 
@@ -410,9 +409,9 @@ credentials = identity.getCredentials()
 
             # Attempt to determine client_id from event context
             if (clientId == None):
-                eventContext = Contexts.getEventContext()
-                if (eventContext.isSet("sessionAttributes")):
-                    clientId = eventContext.get("sessionAttributes").get("client_id")
+                identity = CdiUtil.bean(Identity)
+                if (identity.isSetWorkingParameter("sessionAttributes")):
+                    clientId = identity.getSessionState().getSessionAttributes().get("client_id")
 
             if (clientId == None):
                 print "Google+ GetClientConfiguration. client_id is empty"
