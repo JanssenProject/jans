@@ -47,4 +47,8 @@ public class Claims {
     public void put(String key, Object value) {
         claims.put(key, value);
     }
+
+    public void removeClaim(String key) {
+        claims.remove(key);
+    }
 }
