@@ -5,9 +5,7 @@
 #
 
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Context, Contexts
 from org.jboss.seam.faces import FacesMessages
-from javax.faces.context import FacesContext
 from org.jboss.seam.international import StatusMessage
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
@@ -104,11 +102,12 @@ class PersonAuthentication(PersonAuthenticationType):
         if (useBasicAuth):
             print "Passport: Basic Authentication"
             identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+            credentials = identity.getCredentials()
+
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
-            logged_in = False
 
+            logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                 userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
@@ -135,7 +134,7 @@ credentials = identity.getCredentials()
 
                     if (StringHelper.isEmptyString(UserEmail)):
                         facesMessages = FacesMessages.instance()
-                        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+                        FacesContext.getCurrentInstance().getExternalContext().getExternalContext().getFlash().setKeepMessages(True)
                         facesMessages.clear()
                         facesMessages.add(StatusMessage.Severity.ERROR, "Please provide your email.")
                         print "Passport: Email was not received so sent error"

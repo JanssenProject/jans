@@ -13,7 +13,6 @@ from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.model.config import ConfigurationFactory
@@ -113,11 +112,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
         if client_redirect_uri == None:
@@ -127,7 +126,7 @@ credentials = identity.getCredentials()
         self.setEventContextParameters(context)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
-        context.set("retry_current_step", False)
+        identity.setWorkingParameter("retry_current_step", False)
         form_auth_result = ServerUtil.getFirstValue(requestParameters, "auth_result")
         if StringHelper.isNotEmpty(form_auth_result):
             print "Super-Gluu. Authenticate for step %s. Get auth_result: '%s'" % (step, form_auth_result)
@@ -137,7 +136,7 @@ credentials = identity.getCredentials()
             if form_auth_result in ['timeout']:
                 if ((step == 1) and self.oneStep) or ((step == 2) and self.twoStep):        
                     print "Super-Gluu. Authenticate for step %s. Reinitializing current step" % step
-                    context.set("retry_current_step", True)
+                    identity.setWorkingParameter("retry_current_step", True)
                     return False
 
         userService = CdiUtil.bean(UserService)
@@ -165,7 +164,7 @@ credentials = identity.getCredentials()
                 if session_device_status['enroll']:
                     return validation_result
 
-                context.set("super_gluu_count_login_steps", 1)
+                identity.setWorkingParameter("super_gluu_count_login_steps", 1)
 
                 user_inum = session_device_status['user_inum']
 
@@ -198,7 +197,7 @@ credentials = identity.getCredentials()
                             self.processAuditGroup(authenticated_user, self.audit_attribute, self.audit_group)
                         super_gluu_count_login_steps = 1
     
-                    context.set("super_gluu_count_login_steps", super_gluu_count_login_steps)
+                    identity.setWorkingParameter("super_gluu_count_login_steps", super_gluu_count_login_steps)
                     
                     if super_gluu_count_login_steps == 1:
                         return True
@@ -217,14 +216,14 @@ credentials = identity.getCredentials()
     
                 print "Super-Gluu. Authenticate for step 1. auth_method: '%s'" % auth_method
                 
-                context.set("super_gluu_auth_method", auth_method)
+                identity.setWorkingParameter("super_gluu_auth_method", auth_method)
 
                 return True
 
             return False
         elif step == 2:
             print "Super-Gluu. Authenticate for step 2"
-            session_attributes = context.get("sessionAttributes")
+            session_attributes = identity.getSessionState().getSessionAttributes()
 
             session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
             if session_device_status == None:
@@ -272,8 +271,8 @@ credentials = identity.getCredentials()
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        identity = CdiUtil.bean(Identity)
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
         if client_redirect_uri == None:
@@ -301,9 +300,9 @@ credentials = identity.getCredentials()
                 super_gluu_request = json.dumps(super_gluu_request_dictionary, separators=(',',':'))
                 print "Super-Gluu. Prepare for step 1. Prepared super_gluu_request:", super_gluu_request
     
-                context.set("super_gluu_request", super_gluu_request)
+                identity.setWorkingParameter("super_gluu_request", super_gluu_request)
 #            elif self.twoStep:
-#                context.set("display_register_action", True)
+#                identity.setWorkingParameter("display_register_action", True)
 
             return True
         elif step == 2:
@@ -348,7 +347,7 @@ credentials = identity.getCredentials()
             super_gluu_request = json.dumps(super_gluu_request_dictionary, separators=(',',':'))
             print "Super-Gluu. Prepare for step 2. Prepared super_gluu_request:", super_gluu_request
 
-            context.set("super_gluu_request", super_gluu_request)
+            identity.setWorkingParameter("super_gluu_request", super_gluu_request)
 
             if auth_method in ['authenticate']:
                 self.sendPushNotification(client_redirect_uri, user, super_gluu_request)
@@ -359,14 +358,13 @@ credentials = identity.getCredentials()
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
         # If user not pass current step change step to previous
-        context = Contexts.getEventContext()
-        retry_current_step = context.get("retry_current_step")
+        identity = CdiUtil.bean(Identity)
+        retry_current_step = identity.getWorkingParameter("retry_current_step")
         if retry_current_step:
             print "Super-Gluu. Get next step. Retrying current step"
 
             # Remove old QR code
-            context = Contexts.getEventContext()
-            context.set("super_gluu_request", "timeout")
+            identity.setWorkingParameter("super_gluu_request", "timeout")
 
             resultStep = step
             return resultStep
@@ -385,9 +383,9 @@ credentials = identity.getCredentials()
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if context.isSet("super_gluu_count_login_steps"):
-            return context.get("super_gluu_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if identity.isSetWorkingParameter("super_gluu_count_login_steps"):
+            return identity.getWorkingParameter("super_gluu_count_login_steps")
         else:
             return 2
 
@@ -635,12 +633,12 @@ credentials = identity.getCredentials()
 
     def setEventContextParameters(self, context):
         if self.registrationUri != None:
-            context.set("external_registration_uri", self.registrationUri)
+            identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
         if self.customLabel != None:
-            context.set("super_gluu_label", self.customLabel)
+            identity.setWorkingParameter("super_gluu_label", self.customLabel)
 
-        context.set("super_gluu_qr_options", self.customQrOptions)
+        identity.setWorkingParameter("super_gluu_qr_options", self.customQrOptions)
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
         if session_attributes.containsKey("remote_ip"):

@@ -6,7 +6,6 @@
 
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
-from javax.faces.context import FacesContext
 from org.gluu.jsf2.message import FacesMessages
 from javax.faces.application import FacesMessage
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
@@ -438,7 +437,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Asimba. Prepare for step 1"
             
             httpService = CdiUtil.bean(HttpService)
-            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+            facesContext = CdiUtil.bean(FacesContext)
+            request = facesContext.getExternalContext().getRequest()
             assertionConsumerServiceUrl = httpService.constructServerUrl(request) + "/postlogin"
             print "Asimba. Prepare for step 1. Prepared assertionConsumerServiceUrl: '%s'" % assertionConsumerServiceUrl
             

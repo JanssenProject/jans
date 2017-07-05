@@ -4,10 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
-from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service.net import HttpService
@@ -73,7 +71,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
         userService = CdiUtil.bean(UserService)
 
         iw_api_uri = configurationAttributes.get("iw_api_uri").getValue2()
@@ -81,10 +79,10 @@ class PersonAuthentication(PersonAuthenticationType):
         iw_helium_enabled = Boolean(configurationAttributes.get("iw_helium_enabled").getValue2()).booleanValue()
 
         if (iw_helium_enabled):
-            context.set("iw_count_login_steps", 1)
+            identity.setWorkingParameter("iw_count_login_steps", 1)
 
-        identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -149,15 +147,15 @@ credentials = identity.getCredentials()
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         if (step == 1):
             print "InWebo. Prepare for step 1"
-            context = Contexts.getEventContext()
+            identity = CdiUtil.bean(Identity)
 
             iw_helium_enabled = Boolean(configurationAttributes.get("iw_helium_enabled").getValue2()).booleanValue()
-            context.set("helium_enabled", iw_helium_enabled)
+            identity.setWorkingParameter("helium_enabled", iw_helium_enabled)
 
             iw_helium_alias = None
             if (iw_helium_enabled):
                 iw_helium_alias = configurationAttributes.get("iw_helium_alias").getValue2()
-                context.set("helium_alias", iw_helium_alias)
+                identity.setWorkingParameter("helium_alias", iw_helium_alias)
 
             print "InWebo. Prepare for step 1. Helium status:", iw_helium_enabled
 
@@ -167,9 +165,9 @@ credentials = identity.getCredentials()
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("iw_count_login_steps")):
-            return context.get("iw_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("iw_count_login_steps")):
+            return identity.getWorkingParameter("iw_count_login_steps")
         
         return 2
 
@@ -183,7 +181,8 @@ credentials = identity.getCredentials()
 
     def isPassedDefaultAuthentication(self):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 
