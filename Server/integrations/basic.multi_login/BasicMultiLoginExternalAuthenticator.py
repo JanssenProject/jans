@@ -4,12 +4,11 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper, ArrayHelper
 
 import java
 
@@ -70,15 +69,16 @@ class PersonAuthentication(PersonAuthenticationType):
         if (step == 1):
             print "Basic (multi login). Authenticate for step 1"
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
             key_value = credentials.getUsername()
             user_password = credentials.getPassword()
 
             logged_in = False
             if (StringHelper.isNotEmptyString(key_value) and StringHelper.isNotEmptyString(user_password)):
-                authenticationService = Component.getInstance(AuthenticationService)
+                authenticationService = CdiUtil.bean(AuthenticationService)
 
-                i = 0;
+                i = 0
                 count = len(self.login_attributes_list_array)
                 while (i < count):
                     primary_key = self.login_attributes_list_array[i]

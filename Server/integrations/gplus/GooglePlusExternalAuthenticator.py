@@ -4,9 +4,9 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
@@ -91,8 +91,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
-        userService = Component.getInstance(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+        userService = CdiUtil.bean(UserService)
 
         mapUserDeployment = False
         enrollUserDeployment = False
@@ -121,13 +121,14 @@ class PersonAuthentication(PersonAuthenticationType):
         
                 context.set("gplus_count_login_steps", 1)
         
-                credentials = Identity.instance().getCredentials()
+                identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
                 userName = credentials.getUsername()
                 userPassword = credentials.getPassword()
         
                 loggedIn = False
                 if (StringHelper.isNotEmptyString(userName) and StringHelper.isNotEmptyString(userPassword)):
-                    userService = Component.getInstance(UserService)
+                    userService = CdiUtil.bean(UserService)
                     loggedIn = userService.authenticate(userName, userPassword)
         
                 if (not loggedIn):
@@ -144,7 +145,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             
             print "Google+ Authenticate for step 1. Attempting to gets tokens"
-            tokenResponse = self.getTokensByCode(self.clientSecrets, configurationAttributes, gplusAuthCode);
+            tokenResponse = self.getTokensByCode(self.clientSecrets, configurationAttributes, gplusAuthCode)
             if ((tokenResponse == None) or (tokenResponse.getIdToken() == None) or (tokenResponse.getAccessToken() == None)):
                 print "Google+ Authenticate for step 1. Failed to get tokens"
                 return False
@@ -154,7 +155,7 @@ class PersonAuthentication(PersonAuthenticationType):
             jwt = Jwt.parse(tokenResponse.getIdToken())
             # TODO: Validate ID Token Signature  
 
-            gplusUserUid = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
+            gplusUserUid = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER)
             print "Google+ Authenticate for step 1. Found Google user ID in the ID token: ", gplusUserUid
             
             if (mapUserDeployment):
@@ -289,7 +290,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
             userName = credentials.getUsername()
             userPassword = credentials.getPassword()
 
@@ -331,7 +333,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         if (step == 1):
             print "Google+ Prepare for step 1"
@@ -416,7 +418,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Google+ GetClientConfiguration. client_id is empty"
                 return None
 
-            clientService = Component.getInstance(ClientService)
+            clientService = CdiUtil.bean(ClientService)
             client = clientService.getClient(clientId)
             if (client == None):
                 print "Google+ GetClientConfiguration. Failed to find client", clientId, " in local LDAP"

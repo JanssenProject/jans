@@ -12,9 +12,9 @@ from com.google.android.gcm.server import Sender, Message
 from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.model.config import ConfigurationFactory
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
@@ -112,7 +112,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
@@ -139,8 +140,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     context.set("retry_current_step", True)
                     return False
 
-        userService = Component.getInstance(UserService)
-        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
+        userService = CdiUtil.bean(UserService)
+        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
         if step == 1:
             print "Super-Gluu. Authenticate for step 1"
             if self.oneStep:
@@ -284,12 +285,12 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
             if self.oneStep:
-                session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
+                session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
                 if StringHelper.isEmpty(session_state):
                     print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
                     return False
             
-                issuer = Component.getInstance(ConfigurationFactory).getConfiguration().getIssuer()
+                issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
                                    'state': session_state,
@@ -310,7 +311,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.oneStep:
                 return True
 
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if user == None:
                 print "Super-Gluu. Prepare for step 2. Failed to determine user name"
@@ -322,7 +323,7 @@ class PersonAuthentication(PersonAuthenticationType):
                    print "Super-Gluu. Prepare for step 2. Request was generated already"
                    return True
             
-            session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
+            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
                 print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
                 return False
@@ -334,7 +335,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Super-Gluu. Prepare for step 2. auth_method: '%s'" % auth_method
             
-            issuer = Component.getInstance(ConfigurationFactory).getConfiguration().getIssuer()
+            issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
             super_gluu_request_dictionary = {'username': user.getUserId(),
                                'app': client_redirect_uri,
                                'issuer': issuer,
@@ -406,7 +407,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
@@ -426,8 +427,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return find_user_by_uid
 
     def validateSessionDeviceStatus(self, client_redirect_uri, session_device_status, user_name = None):
-        userService = Component.getInstance(UserService)
-        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
+        userService = CdiUtil.bean(UserService)
+        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
 
         u2f_device_id = session_device_status['device_id']
 
@@ -568,8 +569,8 @@ class PersonAuthentication(PersonAuthenticationType):
         send_notification = False
         send_notification_result = True
 
-        userService = Component.getInstance(UserService)
-        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
+        userService = CdiUtil.bean(UserService)
+        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
 
         user_inum = userService.getUserInum(user_name)
 
@@ -659,7 +660,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def determineGeolocationData(self, remote_ip):
         print "Super-Gluu. Determine remote location. remote_ip: '%s'" % remote_ip
-        httpService = Component.getInstance(HttpService)
+        httpService = CdiUtil.bean(HttpService)
 
         http_client = httpService.getHttpsClient()
         http_client_params = http_client.getParams()
@@ -718,7 +719,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             # Send e-mail to administrator
             user_id = user.getUserId()
-            mailService = Component.getInstance(MailService)
+            mailService = CdiUtil.bean(MailService)
             subject = "User log in: %s" % user_id
             body = "User log in: %s" % user_id
             mailService.sendMail(self.audit_email, subject, body)

@@ -7,12 +7,11 @@
     	<Valve className="org.xdi.tomcat7.WantSslAuthenticator" />
      -->
 
-  <!-- For Tomcat -->
-  <!--<Context>-->
-    <!--<Resource name="BeanManager"-->
-              <!--auth="Container"-->
-              <!--type="javax.enterprise.inject.spi.BeanManager"-->
-              <!--factory="org.jboss.weld.resources.ManagerObjectFactory"/>-->
-  <!--</Context>-->
+  <Context>
+    <Resource name="BeanManager"
+              auth="Container"
+              type="javax.enterprise.inject.spi.BeanManager"
+              factory="org.jboss.weld.resources.ManagerObjectFactory"/>
+  </Context>
 
 </Context>

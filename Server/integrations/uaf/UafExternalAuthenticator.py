@@ -14,9 +14,9 @@
 #   qr_options: { width: 400, height: 400 }
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
@@ -66,7 +66,7 @@ class PersonAuthentication(PersonAuthenticationType):
             self.customQrOptions = configurationAttributes.get("qr_options").getValue2()
 
         print "UAF. Initializing HTTP client"
-        httpService = Component.getInstance(HttpService)
+        httpService = CdiUtil.bean(HttpService)
         self.http_client = httpService.getHttpsClient()
         http_client_params = self.http_client.getParams()
         http_client_params.setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 15 * 1000)
@@ -91,7 +91,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         context = Contexts.getEventContext()
@@ -126,7 +127,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Authenticate for step 2"
 
-            session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
+            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
                 print "UAF. Prepare for step 2. Failed to determine session_state"
                 return False
@@ -201,7 +202,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "UAF. Authenticate for step 2. There is UAF enrollment for user '%s'. User authenticated successfully" % user_name
                         return True
             else:
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
 
                 # Double check just to make sure. We did checking in previous step
                 # Check if there is user which has uaf_user_external_uid
@@ -221,7 +222,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         context = Contexts.getEventContext()
         session_attributes = context.get("sessionAttributes")
 
@@ -232,12 +234,12 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Prepare for step 2"
 
-            session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
+            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
                 print "UAF. Prepare for step 2. Failed to determine session_state"
                 return False
 
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
                 print "UAF. Prepare for step 2. Failed to determine user name"
@@ -317,7 +319,7 @@ class PersonAuthentication(PersonAuthenticationType):
         context.set("qr_options", self.customQrOptions)
 
     def processBasicAuthentication(self, credentials):
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
@@ -339,7 +341,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def findEnrollments(self, credentials):
         result = []
 
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
         user_name = credentials.getUsername()
         user = userService.getUser(user_name, "oxExternalUid")
         if user == None:
@@ -361,7 +363,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return result
 
     def executePost(self, request_uri, request_data):
-        httpService = Component.getInstance(HttpService)
+        httpService = CdiUtil.bean(HttpService)
 
         request_headers = { "Content-type" : "application/json; charset=UTF-8", "Accept" : "application/json" }
 
