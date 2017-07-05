@@ -9,9 +9,9 @@ import sys
 from javax.ws.rs.core import Response
 from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.client.fido.u2f import FidoU2fClientFactory
 from org.xdi.oxauth.model.config import Constants
@@ -72,7 +72,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -81,7 +82,7 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -101,7 +102,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "U2F. Authenticate for step 2. authMethod is empty"
                 return False
 
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
                 print "U2F. Prepare for step 2. Failed to determine user name"
@@ -143,12 +144,12 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "U2F. Prepare for step 2"
 
-            session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
+            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
             if StringHelper.isEmpty(session_state):
                 print "U2F. Prepare for step 2. Failed to determine session_state"
                 return False
 
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
                 print "U2F. Prepare for step 2. Failed to determine user name"
@@ -157,7 +158,7 @@ class PersonAuthentication(PersonAuthenticationType):
             u2f_application_id = configurationAttributes.get("u2f_application_id").getValue2()
 
             # Check if user have registered devices
-            deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
+            deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
 
             userInum = user.getAttribute("inum")
 

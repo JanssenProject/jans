@@ -6,7 +6,6 @@
 
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
-from org.xdi.model.security import Credentials
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import AuthenticationService
 from org.xdi.util import StringHelper
