@@ -48,7 +48,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Yubicloud. Authenticate for step 1"
 
             identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+            credentials = identity.getCredentials()
+
             username = credentials.getUsername()
             otp = credentials.getPassword()
 

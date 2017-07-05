@@ -4,10 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
-from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.util.security import StringEncrypter 
@@ -70,13 +68,13 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+
         userService = CdiUtil.bean(UserService)
 
         toopher_user_timeout = int(configurationAttributes.get("toopher_user_timeout").getValue2())
 
-        identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -112,7 +110,7 @@ credentials = identity.getCredentials()
                 if (topher_user_uid == None):
                     print "Toopher. Authenticate for step 1. There is no Topher UID for user: ", user_name
                 else:
-                    context.set("toopher_user_uid", topher_user_uid)
+                    identity.setWorkingParameter("toopher_user_uid", topher_user_uid)
 
             return True
         elif (step == 2):
@@ -122,7 +120,7 @@ credentials = identity.getCredentials()
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("toopher_user_uid"):
                 print "Toopher. Authenticate for step 2. toopher_user_uid is empty"
 
@@ -154,7 +152,7 @@ credentials = identity.getCredentials()
                     print "Toopher. Authenticate for step 2. Failed to update current user"
                     return False
 
-                context.set("toopher_user_uid", toopher_user_uid)
+                identity.setWorkingParameter("toopher_user_uid", toopher_user_uid)
             else:
                 toopher_user_uid = sessionAttributes.get("toopher_user_uid")
 
@@ -173,7 +171,7 @@ credentials = identity.getCredentials()
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("toopher_user_uid"):
                 print "Toopher. Authenticate for step 3. toopher_user_uid is empty"
                 return False
@@ -226,7 +224,8 @@ credentials = identity.getCredentials()
 
     def isPassedDefaultAuthentication():
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 

@@ -16,9 +16,7 @@
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.jboss.seam.faces import FacesMessages
-from javax.faces.context import FacesContext
 from org.jboss.seam.international import StatusMessage
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
@@ -107,11 +105,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         self.setEventContextParameters(context)
 
@@ -136,10 +133,10 @@ credentials = identity.getCredentials()
                     
             if otp_auth_method == "enroll":
                 print "OTP. Authenticate for step 1. Setting count steps: '%s'" % 3
-                context.set("otp_count_login_steps", 3)
+                identity.setWorkingParameter("otp_count_login_steps", 3)
 
             print "OTP. Authenticate for step 1. otp_auth_method: '%s'" % otp_auth_method
-            context.set("otp_auth_method", otp_auth_method)
+            identity.setWorkingParameter("otp_auth_method", otp_auth_method)
 
             return True
         elif step == 2:
@@ -185,9 +182,8 @@ credentials = identity.getCredentials()
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        credentials = identity.getCredentials()
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         self.setEventContextParameters(context)
 
@@ -223,8 +219,8 @@ credentials = identity.getCredentials()
                     return False
 
                 print "OTP. Prepare for step 2. Prepared enrollment request for user: '%s'" % user.getUserId()
-                context.set("otp_secret_key", self.toBase64Url(otp_secret_key))
-                context.set("otp_enrollment_request", otp_enrollment_request)
+                identity.setWorkingParameter("otp_secret_key", self.toBase64Url(otp_secret_key))
+                identity.setWorkingParameter("otp_enrollment_request", otp_enrollment_request)
 
             return True
         elif step == 3:
@@ -246,8 +242,8 @@ credentials = identity.getCredentials()
         return Arrays.asList("otp_auth_method", "otp_count_login_steps", "otp_secret_key", "otp_enrollment_request")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        identity = CdiUtil.bean(Identity)
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         if session_attributes.containsKey("otp_count_login_steps"):
             return StringHelper.toInteger(session_attributes.get("otp_count_login_steps"))
@@ -256,8 +252,8 @@ credentials = identity.getCredentials()
 
     def getPageForStep(self, configurationAttributes, step):
         if step == 2:
-            context = Contexts.getEventContext()
-            session_attributes = context.get("sessionAttributes")
+            identity = CdiUtil.bean(Identity)
+            session_attributes = identity.getSessionState().getSessionAttributes()
     
             otp_auth_method = session_attributes.get("otp_auth_method")
             print "OTP. Gep page for step 2. otp_auth_method: '%s'" % otp_auth_method
@@ -276,12 +272,12 @@ credentials = identity.getCredentials()
 
     def setEventContextParameters(self, context):
         if self.registrationUri != None:
-            context.set("external_registration_uri", self.registrationUri)
+            identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
         if self.customLabel != None:
-            context.set("qr_label", self.customLabel)
+            identity.setWorkingParameter("qr_label", self.customLabel)
 
-        context.set("qr_options", self.customQrOptions)
+        identity.setWorkingParameter("qr_options", self.customQrOptions)
 
     def loadOtpConfiguration(self, configurationAttributes):
         print "OTP. Load OTP configuration"
@@ -388,7 +384,7 @@ credentials = identity.getCredentials()
 
     def processOtpAuthentication(self, requestParameters, user_name, session_attributes, otp_auth_method):
         facesMessages = FacesMessages.instance()
-        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+        FacesContext.getCurrentInstance().getExternalContext().getExternalContext().getFlash().setKeepMessages(True)
 
         userService = CdiUtil.bean(UserService)
 

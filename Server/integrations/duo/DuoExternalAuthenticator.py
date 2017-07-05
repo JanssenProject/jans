@@ -6,7 +6,6 @@
 
 import duo_web
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
@@ -88,7 +87,8 @@ class PersonAuthentication(PersonAuthenticationType):
         duo_host = configurationAttributes.get("duo_host").getValue2()
 
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -115,8 +115,7 @@ credentials = identity.getCredentials()
                     self.processAuditGroup(user)
                     duo_count_login_steps = 1
 
-                context = Contexts.getEventContext()
-                context.set("duo_count_login_steps", duo_count_login_steps)
+                identity.setWorkingParameter("duo_count_login_steps", duo_count_login_steps)
 
             return True
         elif (step == 2):
@@ -147,12 +146,10 @@ credentials = identity.getCredentials()
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-
         duo_host = configurationAttributes.get("duo_host").getValue2()
 
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -165,8 +162,8 @@ credentials = identity.getCredentials()
             duo_sig_request = duo_web.sign_request(self.ikey, self.skey, self.akey, user_name)
             print "Duo. Prepare for step 2. duo_sig_request: " + duo_sig_request
             
-            context.set("duo_host", duo_host)
-            context.set("duo_sig_request", duo_sig_request)
+            identity.setWorkingParameter("duo_host", duo_host)
+            identity.setWorkingParameter("duo_sig_request", duo_sig_request)
 
             return True
         else:
@@ -176,9 +173,9 @@ credentials = identity.getCredentials()
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("duo_count_login_steps")):
-            return context.get("duo_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("duo_count_login_steps")):
+            return identity.getWorkingParameter("duo_count_login_steps")
 
         return 2
 
