@@ -4,10 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
-from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
@@ -51,14 +49,14 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+
         userService = CdiUtil.bean(UserService)
 
         oxpush_user_timeout = int(configurationAttributes.get("oxpush_user_timeout").getValue2())
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
 
-        identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -101,7 +99,7 @@ credentials = identity.getCredentials()
                         print "oxPush. Authenticate for step 1. Deployment status is valid"
                         if ("enabled" == deployment_status.status):
                             print "oxPush. Authenticate for step 1. Deployment is enabled"
-                            context.set("oxpush_user_uid", oxpush_user_uid)
+                            identity.setWorkingParameter("oxpush_user_uid", oxpush_user_uid)
                         else:
                             print "oxPush. Authenticate for step 1. Deployment is disabled"
                             return False
@@ -121,7 +119,7 @@ credentials = identity.getCredentials()
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Authenticate for step 2. oxpush_user_uid is empty"
 
@@ -147,8 +145,8 @@ credentials = identity.getCredentials()
                     print "oxPush. Authenticate for step 2. Failed to update current user"
                     return False
 
-                context.set("oxpush_count_login_steps", 2)
-                context.set("oxpush_user_uid", oxpush_user_uid)
+                identity.setWorkingParameter("oxpush_count_login_steps", 2)
+                identity.setWorkingParameter("oxpush_user_uid", oxpush_user_uid)
             else:
                 print "oxPush. Authenticate for step 2. Deployment status is valid"
 
@@ -160,7 +158,7 @@ credentials = identity.getCredentials()
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("oxpush_user_uid")
+            sessionAttributes = identity.getWorkingParameter("oxpush_user_uid")
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Authenticate for step 3. oxpush_user_uid is empty"
                 return False
@@ -195,14 +193,14 @@ credentials = identity.getCredentials()
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
 
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
 
         if (step == 1):
             print "oxPush. Prepare for step 1"
             oxpush_android_download_url = configurationAttributes.get("oxpush_android_download_url").getValue2()
-            context.set("oxpush_android_download_url", oxpush_android_download_url)
+            identity.setWorkingParameter("oxpush_android_download_url", oxpush_android_download_url)
         elif (step == 2):
             print "oxPush. Prepare for step 2"
 
@@ -211,10 +209,11 @@ credentials = identity.getCredentials()
                 return False
 
             identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+            credentials = identity.getCredentials()
+
             user_name = credentials.getUsername()
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Prepare for step 2. oxpush_user_uid is empty"
 
@@ -233,9 +232,9 @@ credentials = identity.getCredentials()
                 pairing_id = pairing_process.pairingId
                 print "oxPush. Prepare for step 2. Pairing Id: ", pairing_id
     
-                context.set("oxpush_pairing_uid", pairing_id)
-                context.set("oxpush_pairing_code", pairing_process.pairingCode)
-                context.set("oxpush_pairing_qr_image", pairing_process.pairingQrImage)
+                identity.setWorkingParameter("oxpush_pairing_uid", pairing_id)
+                identity.setWorkingParameter("oxpush_pairing_code", pairing_process.pairingCode)
+                identity.setWorkingParameter("oxpush_pairing_qr_image", pairing_process.pairingQrImage)
 
         return True
 
@@ -246,9 +245,9 @@ credentials = identity.getCredentials()
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("oxpush_count_login_steps")):
-            return context.get("oxpush_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("oxpush_count_login_steps")):
+            return identity.getWorkingParameter("oxpush_count_login_steps")
 
         return 3
 
@@ -263,7 +262,8 @@ credentials = identity.getCredentials()
 
     def isPassedDefaultAuthentication():
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 

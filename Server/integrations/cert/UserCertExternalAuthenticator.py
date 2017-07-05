@@ -11,7 +11,6 @@ import urllib
 
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.jboss.seam.contexts import Contexts
 from javax.faces.context import FacesContext
 from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService
@@ -104,10 +103,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
-        context = Contexts.getEventContext()
         userService = CdiUtil.bean(UserService)
 
         if step == 1:
@@ -133,12 +132,12 @@ credentials = identity.getCredentials()
             cert_x509 = self.getSessionAttribute("cert_x509")
             if cert_x509 == None:
                 print "Cert. Authenticate for step 2. User not selected any certs"
-                context.set("cert_selected", False)
+                identity.setWorkingParameter("cert_selected", False)
                     
                 # Return True to inform user how to reset workflow
                 return True
             else:
-                context.set("cert_selected", True)
+                identity.setWorkingParameter("cert_selected", True)
                 x509Certificate = self.certFromString(cert_x509)
 
             subjectX500Principal = x509Certificate.getSubjectX500Principal()
@@ -148,16 +147,16 @@ credentials = identity.getCredentials()
             valid = self.validateCertificate(x509Certificate)
             if not valid:
                 print "Cert. Authenticate for step 2. Certificate DN '%s' is not valid" % subjectX500Principal
-                context.set("cert_valid", False)
+                identity.setWorkingParameter("cert_valid", False)
                 
                 # Return True to inform user how to reset workflow
                 return True
 
-            context.set("cert_valid", True)
+            identity.setWorkingParameter("cert_valid", True)
             
             # Calculate certificate fingerprint
             x509CertificateFingerprint = self.calculateCertificateFingerprint(x509Certificate)
-            context.set("cert_x509_fingerprint", x509CertificateFingerprint)
+            identity.setWorkingParameter("cert_x509_fingerprint", x509CertificateFingerprint)
             print "Cert. Authenticate for step 2. Fingerprint is '%s' of certificate with DN '%s'" % (x509CertificateFingerprint, subjectX500Principal)
             
             # Attempt to find user by certificate fingerprint
@@ -170,11 +169,11 @@ credentials = identity.getCredentials()
                 
                 if self.map_user_cert:
                     print "Cert. Authenticate for step 2. Storing cert_user_external_uid for step 3"
-                    context.set("cert_user_external_uid", cert_user_external_uid)
+                    identity.setWorkingParameter("cert_user_external_uid", cert_user_external_uid)
                     return True
                 else:
                     print "Cert. Authenticate for step 2. Mapping cert to user account is not allowed"
-                    context.set("cert_count_login_steps", 2)
+                    identity.setWorkingParameter("cert_count_login_steps", 2)
                     return False
 
             foundUserName = find_user_by_external_uid.getUserId()
@@ -185,7 +184,7 @@ credentials = identity.getCredentials()
             logged_in = userService.authenticate(foundUserName)
         
             print "Cert. Authenticate for step 2. Setting count steps to 2"
-            context.set("cert_count_login_steps", 2)
+            identity.setWorkingParameter("cert_count_login_steps", 2)
 
             return logged_in
         elif step == 3:
@@ -196,9 +195,6 @@ credentials = identity.getCredentials()
                 print "Cert. Authenticate for step 3. cert_user_external_uid is empty"
                 return False
 
-            identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
-            user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
             logged_in = False
@@ -227,28 +223,29 @@ credentials = identity.getCredentials()
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "Cert. Prepare for step %d" % step
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
         
         if step == 1:
             if self.enabled_recaptcha:
-                context.set("recaptcha_site_key", self.recaptcha_creds['site_key'])
+                identity.setWorkingParameter("recaptcha_site_key", self.recaptcha_creds['site_key'])
         elif step == 2:
             # Store certificate in session
-            externalContext = FacesContext.getCurrentInstance().getExternalContext()
-            request = externalContext.getRequest()
+            facesContext = CdiUtil.bean(FacesContext)
+            externalContext = facesContext.getExternalContext()
+            request = externalidentity.getWorkingParameterRequest()
 
             # Try to get certificate from header X-ClientCert
-            clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
+            clientCertificate = externalidentity.getWorkingParameterRequestHeaderMap().get("X-ClientCert")
             if clientCertificate != None:
                 x509Certificate = self.certFromPemString(clientCertificate)
-                context.set("cert_x509",  self.certToString(x509Certificate))
+                identity.setWorkingParameter("cert_x509",  self.certToString(x509Certificate))
                 print "Cert. Prepare for step 2. Storing user certificate obtained from 'X-ClientCert' header"
                 return True
 
             # Try to get certificate from attribute javax.servlet.request.X509Certificate
             x509Certificates = request.getAttribute('javax.servlet.request.X509Certificate')
             if (x509Certificates != None) and (len(x509Certificates) > 0):
-                context.set("cert_x509", self.certToString(x509Certificates[0]))
+                identity.setWorkingParameter("cert_x509", self.certToString(x509Certificates[0]))
                 print "Cert. Prepare for step 2. Storing user certificate obtained from 'javax.servlet.request.X509Certificate' attribute"
                 return True
 
@@ -309,14 +306,14 @@ credentials = identity.getCredentials()
         return find_user_by_uid
 
     def getSessionAttribute(self, attribute_name):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
 
         # Try to get attribute value from Seam event context
-        if context.isSet(attribute_name):
-            return context.get(attribute_name)
+        if identity.isSetWorkingParameter(attribute_name):
+            return identity.getWorkingParameter(attribute_name)
         
         # Try to get attribute from persistent session
-        session_attributes = context.get("sessionAttributes")
+        session_attributes = identity.getSessionState().getSessionAttributes()
         if session_attributes.containsKey(attribute_name):
             return session_attributes.get(attribute_name)
 
@@ -418,10 +415,10 @@ credentials = identity.getCredentials()
     def validateRecaptcha(self, recaptcha_response):
         print "Cert. Validate recaptcha response"
 
-        request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
-        remoteip = request.getHeader("X-FORWARDED-FOR")
-        if remoteip == None:
-            remoteip = request.getRemoteAddr()
+        facesContext = CdiUtil.bean(FacesContext)
+        request = facesContext.getExternalContext().getRequest()
+
+        remoteip = ServerUtil.getIpAddress(request)
         print "Cert. Validate recaptcha response. remoteip: '%s'" % remoteip
 
         httpService = CdiUtil.bean(HttpService)

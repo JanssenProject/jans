@@ -6,7 +6,6 @@
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
@@ -73,17 +72,16 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Wikid. Authentication. Wikid client state is invalid"
             return False
 
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
 
         is_wikid_registration = False
-        sessionAttributes = context.get("sessionAttributes")
+        sessionAttributes = identity.getSessionState().getSessionAttributes()
         if (sessionAttributes != None) and sessionAttributes.containsKey("wikid_registration"):
             is_wikid_registration = java.lang.Boolean.valueOf(sessionAttributes.get("wikid_registration"))
 
         wikid_server_code = configurationAttributes.get("wikid_server_code").getValue2()
 
-        identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -105,10 +103,10 @@ credentials = identity.getCredentials()
             if (wc_user == None):
                 print "Wikid. Authenticate for step 1. There is no associated devices for user: " +  user_name
                 print "Wikid. Authenticate for step 1. Setting count steps to 3"
-                context.set("wikid_count_login_steps", 3)
-                context.set("wikid_registration", True)
+                identity.setWorkingParameter("wikid_count_login_steps", 3)
+                identity.setWorkingParameter("wikid_registration", True)
             else:
-                context.set("wikid_count_login_steps", 2)
+                identity.setWorkingParameter("wikid_count_login_steps", 2)
 
             return True
         elif (is_wikid_registration):
@@ -137,7 +135,7 @@ credentials = identity.getCredentials()
                     print "Wikid. Authenticate for step wikid_register_device. Failed to update user: " + user_name
                     is_valid = False
                 else:
-                    context.set("wikid_registration", False)
+                    identity.setWorkingParameter("wikid_registration", False)
             else:
                 print "Wikid. Authenticate for step wikid_register_device. Failed to register user: " + user_name + " token:" + wikid_regcode + ". Registration result:", register_result
 
@@ -190,20 +188,20 @@ credentials = identity.getCredentials()
             return False
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
         
-        sessionAttributes = context.get("sessionAttributes")
+        sessionAttributes = identity.getSessionState().getSessionAttributes()
         if (sessionAttributes != None) and sessionAttributes.containsKey("wikid_count_login_steps"):
             return java.lang.Integer.valueOf(sessionAttributes.get("wikid_count_login_steps"))
 
         return 2
 
     def getPageForStep(self, configurationAttributes, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
 
         is_wikid_registration = False
-        if (context.isSet("wikid_registration")):
-            is_wikid_registration = context.get("wikid_registration")
+        if (identity.isSetWorkingParameter("wikid_registration")):
+            is_wikid_registration = identity.getWorkingParameter("wikid_registration")
 
         if (step == 2):
             if (is_wikid_registration):

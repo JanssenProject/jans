@@ -15,7 +15,6 @@
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
 from org.xdi.util import StringHelper
@@ -92,11 +91,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         self.setEventContextParameters(context)
 
@@ -121,7 +120,7 @@ credentials = identity.getCredentials()
 
             print "UAF. Authenticate for step 1. uaf_auth_method: '%s'" % uaf_auth_method
             
-            context.set("uaf_auth_method", uaf_auth_method)
+            identity.setWorkingParameter("uaf_auth_method", uaf_auth_method)
 
             return True
         elif (step == 2):
@@ -223,9 +222,9 @@ credentials = identity.getCredentials()
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-credentials = identity.getCredentials()
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        credentials = identity.getCredentials()
+
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         self.setEventContextParameters(context)
 
@@ -288,11 +287,11 @@ credentials = identity.getCredentials()
             uaf_obb_status_request = json.dumps(uaf_obb_status_request_dictionary, separators=(',',':'))
             print "UAF. Prepare for step 2. Prepared STATUS request: '%s' to send to '%s'" % (uaf_obb_status_request, uaf_obb_server_uri)
 
-            context.set("uaf_obb_auth_method", uaf_obb_auth_method)
-            context.set("uaf_obb_server_uri", uaf_obb_server_uri)
-            context.set("uaf_obb_start_response", uaf_obb_start_response)
-            context.set("qr_image", uaf_obb_start_response_json["modeResult"]["qrCode"]["qrImage"])
-            context.set("uaf_obb_status_request", uaf_obb_status_request)
+            identity.setWorkingParameter("uaf_obb_auth_method", uaf_obb_auth_method)
+            identity.setWorkingParameter("uaf_obb_server_uri", uaf_obb_server_uri)
+            identity.setWorkingParameter("uaf_obb_start_response", uaf_obb_start_response)
+            identity.setWorkingParameter("qr_image", uaf_obb_start_response_json["modeResult"]["qrCode"]["qrImage"])
+            identity.setWorkingParameter("uaf_obb_status_request", uaf_obb_status_request)
 
             return True
         else:
@@ -315,8 +314,8 @@ credentials = identity.getCredentials()
 
     def setEventContextParameters(self, context):
         if self.registration_uri != None:
-            context.set("external_registration_uri", self.registration_uri)
-        context.set("qr_options", self.customQrOptions)
+            identity.setWorkingParameter("external_registration_uri", self.registration_uri)
+        identity.setWorkingParameter("qr_options", self.customQrOptions)
 
     def processBasicAuthentication(self, credentials):
         userService = CdiUtil.bean(UserService)
