@@ -5,8 +5,8 @@
 #
 
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -52,12 +52,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         oxpush_user_timeout = int(configurationAttributes.get("oxpush_user_timeout").getValue2())
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
 
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -66,14 +67,14 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
             # Find user by uid
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
                 print "oxPush. Authenticate for step 1. Failed to find user"
@@ -95,7 +96,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     # Check deployment status
                     print "oxPush. Authenticate for step 1. oxpush_user_uid: ", oxpush_user_uid
-                    deployment_status = self.oxPushClient.getDeploymentStatus(oxpush_user_uid); 
+                    deployment_status = self.oxPushClient.getDeploymentStatus(oxpush_user_uid) 
                     if (deployment_status.result):
                         print "oxPush. Authenticate for step 1. Deployment status is valid"
                         if ("enabled" == deployment_status.status):
@@ -172,7 +173,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Initialize authentication process
             authentication_request = None
             try:
-                authentication_request = self.oxPushClient.authenticate(oxpush_user_uid, user_name);
+                authentication_request = self.oxPushClient.authenticate(oxpush_user_uid, user_name)
             except java.lang.Exception, err:
                 print "oxPush. Authenticate for step 3. Failed to initialize authentication process: ", err
                 return False
@@ -209,7 +210,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
             user_name = credentials.getUsername()
 
             sessionAttributes = context.get("sessionAttributes")
@@ -219,7 +221,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 # Initialize pairing process
                 pairing_process = None
                 try:
-                    pairing_process = self.oxPushClient.pair(oxpush_application_name, user_name);
+                    pairing_process = self.oxPushClient.pair(oxpush_application_name, user_name)
                 except java.lang.Exception, err:
                     print "oxPush. Prepare for step 2. Failed to initialize pairing process: ", err
                     return False
@@ -260,7 +262,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return ""
 
     def isPassedDefaultAuthentication():
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 

@@ -5,8 +5,8 @@
 #
 
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -71,11 +71,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         toopher_user_timeout = int(configurationAttributes.get("toopher_user_timeout").getValue2())
 
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -84,14 +85,14 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
             # Find user by uid
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
                 print "Toopher. Authenticate for step 1. Failed to find user"
@@ -133,8 +134,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 pairing_phrase = pairing_phrase_array[0]
                 try:
-                    pairing_status = self.tapi.pair(pairing_phrase, user_name);
-                    toopher_user_uid = pairing_status.id;
+                    pairing_status = self.tapi.pair(pairing_phrase, user_name)
+                    toopher_user_uid = pairing_status.id
                 except RequestError, err:
                     print "Toopher. Authenticate for step 2. Failed pair with phone: ", err
                     return False
@@ -185,8 +186,8 @@ class PersonAuthentication(PersonAuthenticationType):
             toopher_terminal_name = configurationAttributes.get("toopher_terminal_name").getValue2()
 
             try:
-                request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name);
-                request_id = request_status.id;
+                request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name)
+                request_id = request_status.id
             except RequestError, err:
                 print "Toopher. Authenticate for step 3. Failed to send authentication request to phone: ", err
                 return False
@@ -224,7 +225,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return ""
 
     def isPassedDefaultAuthentication():
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 

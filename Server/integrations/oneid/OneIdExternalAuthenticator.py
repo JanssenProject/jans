@@ -5,8 +5,8 @@
 #
 
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from javax.faces.context import FacesContext
 from org.apache.http.entity import ContentType 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
@@ -51,9 +51,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
-        userService = Component.getInstance(UserService)
-        httpService = Component.getInstance(HttpService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+        userService = CdiUtil.bean(UserService)
+        httpService = CdiUtil.bean(HttpService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
@@ -63,7 +63,7 @@ class PersonAuthentication(PersonAuthenticationType):
         authn = OneID(server_flag)
 
         # Set path to credentials file
-        authn.creds_file = creds_file;
+        authn.creds_file = creds_file
 
         if (step == 1):
             print "OneId. Authenticate for step 1"
@@ -83,7 +83,7 @@ class PersonAuthentication(PersonAuthenticationType):
             authn.set_credentials()
 
             # Validate request
-            http_client = httpService.getHttpsClientDefaulTrustStore();
+            http_client = httpService.getHttpsClientDefaulTrustStore()
             auth_data = httpService.encodeBase64(authn.api_id + ":" + authn.api_key)
             http_response = httpService.executePost(http_client, authn.helper_server + "/validate", auth_data, request, ContentType.APPLICATION_JSON)
             validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_response))
@@ -118,7 +118,8 @@ class PersonAuthentication(PersonAuthenticationType):
             found_user_name = find_user_by_uid.getUserId()
             print "OneId. Authenticate for step 1. found_user_name: " + found_user_name
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
             credentials.setUsername(found_user_name)
             credentials.setUser(find_user_by_uid)
             
@@ -139,7 +140,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 #
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
 
             user_name = credentials.getUsername()
             passed_step1 = StringHelper.isNotEmptyString(user_name)
@@ -147,7 +149,8 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 #
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
 
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
@@ -183,7 +186,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
@@ -193,7 +196,7 @@ class PersonAuthentication(PersonAuthenticationType):
         authn = OneID(server_flag)
 
         # Set path to credentials file
-        authn.creds_file = creds_file; 
+        authn.creds_file = creds_file 
 
         if (step == 1):
             print "OneId. Prepare for step 1"

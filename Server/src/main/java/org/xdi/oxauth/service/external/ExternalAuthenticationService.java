@@ -37,8 +37,6 @@ import java.util.Map.Entry;
  * @author Yuriy Movchan Date: 21/08/2012
  */
 @ApplicationScoped
-@DependsOn("appInitializer")
-@Named
 public class ExternalAuthenticationService extends ExternalScriptService {
 
 	public final static String MODIFIED_INTERNAL_TYPES_EVENT_TYPE = "CustomScriptModifiedInternlTypesEvent";

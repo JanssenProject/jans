@@ -5,9 +5,9 @@
 #
 
 import duo_web
-from org.jboss.seam import Component
+from org.xdi.service.cdi.util import CdiUtil
 from org.jboss.seam.contexts import Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.service import MailService
@@ -87,7 +87,8 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         duo_host = configurationAttributes.get("duo_host").getValue2()
 
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -96,13 +97,13 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
+                userService = CdiUtil.bean(UserService)
                 logged_in = userService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (self.use_duo_group):
                 print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
@@ -137,7 +138,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not StringHelper.equals(user_name, authenticated_username)):
                 return False
 
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             self.processAuditGroup(user)
 
@@ -150,7 +151,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         duo_host = configurationAttributes.get("duo_host").getValue2()
 
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -208,7 +210,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 # Send e-mail to administrator
                 user_id = user.getUserId()
-                mailService = Component.getInstance(MailService)
+                mailService = CdiUtil.bean(MailService)
                 subject = "User log in: " + user_id
                 body = "User log in: " + user_id
                 mailService.sendMail(self.audit_email, subject, body)

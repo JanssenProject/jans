@@ -5,8 +5,8 @@
 #
 
 from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
@@ -52,7 +52,7 @@ class PersonAuthentication(PersonAuthenticationType):
         except:
             return False
 
-        httpService = Component.getInstance(HttpService)
+        httpService = CdiUtil.bean(HttpService)
         self.client = httpService.getHttpsClient(None, None, None, iw_cert_store_type, iw_cert_path, iw_cert_password)
         print "InWebo. Initialized successfully"
 
@@ -74,7 +74,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
 
         iw_api_uri = configurationAttributes.get("iw_api_uri").getValue2()
         iw_service_id = configurationAttributes.get("iw_service_id").getValue2()
@@ -83,7 +83,8 @@ class PersonAuthentication(PersonAuthenticationType):
         if (iw_helium_enabled):
             context.set("iw_count_login_steps", 1)
 
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -112,14 +113,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 logged_in = False
                 if (StringHelper.isNotEmptyString(user_name)):
-                    userService = Component.getInstance(UserService)
+                    userService = CdiUtil.bean(UserService)
                     logged_in = userService.authenticate(user_name)
     
                 return logged_in
             else:
                 logged_in = False
                 if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                    userService = Component.getInstance(UserService)
+                    userService = CdiUtil.bean(UserService)
                     logged_in = userService.authenticate(user_name, user_password)
     
                 return logged_in
@@ -181,15 +182,16 @@ class PersonAuthentication(PersonAuthenticationType):
             return ""
 
     def isPassedDefaultAuthentication(self):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+credentials = identity.getCredentials()
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 
         return passed_step1
 
     def validateInweboToken(self, iw_api_uri, iw_service_id, user_name, iw_token):
-        httpService = Component.getInstance(HttpService)
-        xmlService = Component.getInstance(XmlService)
+        httpService = CdiUtil.bean(HttpService)
+        xmlService = CdiUtil.bean(XmlService)
 
         if StringHelper.isEmpty(iw_token):
             print "InWebo. Token verification. iw_token is empty"
