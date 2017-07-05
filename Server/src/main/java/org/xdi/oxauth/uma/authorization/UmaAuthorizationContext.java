@@ -119,6 +119,10 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         return claims.has(claimName);
     }
 
+    public void removeClaim(String claimName) {
+        claims.removeClaim(claimName);
+    }
+
     public void addRedirectUserParam(String paramName, String paramValue) {
         redirectUserParameters.add(paramName, paramValue);
     }

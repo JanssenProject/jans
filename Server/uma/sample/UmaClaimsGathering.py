@@ -66,6 +66,9 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
             # If redirect to external url is performated, make sure that viewAction has onPostback="true" (otherwise redirect will not work)
             # After user is authenticated then within the script it's possible to get user attributes as
             # context.getUser("uid", "sn")
+            # If user is authenticated to current AS (to the same server, not external one) then it's possible to
+            # access Connect session attributes directly (no need to obtain id_token after redirect with 'code').
+            # To fetch attributes please use getConnectSessionAttributes() method.
 
             print "User is not authenticated. Redirect for authentication ..."
             clientId = context.getConfigurationAttributes().get("client_id").getValue2()
@@ -73,6 +76,8 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
             authorizationUrl = context.getAuthorizationEndpoint() + "?client_id=" + clientId + "&redirect_uri=" + redirectUri + "&scope=openid&response_type=code"
             context.redirectToExternalUrl(authorizationUrl) # redirect to external url
             return False
+        if step == 10 and context.isAuthenticated(): # example how to get session attribute if user is authenticated to same AS
+            arc = context.getConnectSessionAttributes().get("acr")
 
         return True
 

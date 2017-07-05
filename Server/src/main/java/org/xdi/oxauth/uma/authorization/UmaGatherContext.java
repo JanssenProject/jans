@@ -18,6 +18,7 @@ import org.xdi.oxauth.uma.service.UmaSessionService;
 import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +70,14 @@ public class UmaGatherContext extends ExternalScriptContext {
             return userService.getUserByDn(userDn, returnAttributes);
         }
         return null;
+    }
+
+    public Map<String, String> getConnectSessionAttributes() {
+        SessionState connectSession = sessionService.getConnectSession(httpRequest);
+        if (connectSession != null) {
+            return new HashMap<String, String>(connectSession.getSessionAttributes());
+        }
+        return new HashMap<String, String>();
     }
 
     public String getUserDn() {
@@ -140,7 +149,11 @@ public class UmaGatherContext extends ExternalScriptContext {
     }
 
     public void putClaim(String claimName, Object claimValue) {
-        claims.setClaimObject(claimName, claimValue);
+        claims.setClaimObject(claimName, claimValue, true);
+    }
+
+    public void removeClaim(String claimName) {
+        claims.removeClaim(claimName);
     }
 
     public boolean hasClaim(String claimName) {

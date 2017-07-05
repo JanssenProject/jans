@@ -126,7 +126,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         System.out.println(gatheringUrl);
         System.out.println();
         try {
-//            startSelenium();
+            startSelenium();
 //            driver.navigate().to(gatheringUrl);
 
             // todo for Gene : claims-gathering method - interaction with Selenium (emulate user behavior)
@@ -137,7 +137,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
             // Sample: https://client.example.com/cb?ticket=e8e7bc0b-75de-4939-a9b1-2425dab3d5ec
             // todo set correct value of claimsGatheringTicket after redirect
         } finally {
-//            stopSelenium();
+            stopSelenium();
         }
     }
 
@@ -149,7 +149,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void successfulRptRequest(String umaPatClientId, String umaPatClientSecret) throws Exception {
         showTitle("successfulRptRequest");
-        claimsGatheringTicket = "b58fb0d7-8476-484a-8f45-f75bc13020dd"; // todo remove this line ! after claims-gathering automation with selenium
+        claimsGatheringTicket = "a60de9ba-872a-42a8-90f7-1b615af22db2"; // todo remove this line ! after claims-gathering automation with selenium
 
         UmaTokenResponse response = tokenService.requestRpt(
                 "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
