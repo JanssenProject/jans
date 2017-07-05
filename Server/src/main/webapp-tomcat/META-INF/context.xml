@@ -7,6 +7,7 @@
     	<Valve className="org.xdi.tomcat7.WantSslAuthenticator" />
      -->
 
+  <!-- For Tomcat -->
   <Context>
     <Resource name="BeanManager"
               auth="Container"
