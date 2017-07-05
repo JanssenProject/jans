@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.jwt;
 
+import com.google.common.collect.Lists;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -169,11 +170,20 @@ public abstract class JwtClaimSet {
         }
     }
 
-    public void setClaimObject(String key, Object value) {
+    public void setClaimObject(String key, Object value, boolean overrideValue) {
         if (value == null) {
             setNullClaim(key);
         } else if (value instanceof String) {
-            setClaim(key, (String) value);
+            if (overrideValue) {
+                setClaim(key, (String) value);
+            } else {
+                Object currentValue = getClaim(key);
+                if (currentValue != null) {
+                    setClaim(key, Lists.newArrayList(currentValue.toString(), (String) value));
+                } else {
+                    setClaim(key, (String) value);
+                }
+            }
         } else if (value instanceof Date) {
             setClaim(key, (Date) value);
         } else if (value instanceof Boolean) {

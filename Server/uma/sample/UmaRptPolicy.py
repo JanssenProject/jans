@@ -39,6 +39,7 @@ class UmaRptPolicy(UmaRptPolicyType):
     # Returns required claims definitions.
     # This method must provide definition of all claims that is used in 'authorize' method.
     # Note : name in both places must match.
+    # %1$s - placeholder for issuer. It uses standard Java Formatter, docs : https://docs.oracle.com/javase/7/docs/api/java/util/Formatter.html
     def getRequiredClaims(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
         json = """[
         {

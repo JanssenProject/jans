@@ -66,14 +66,14 @@ public class UmaPctService {
             if (ticketPct != null && hasPct) {
                 JwtClaims ticketClaims = ticketPct.getClaims();
                 for (String key : ticketClaims.keys()) {
-                    pctClaims.setClaimObject(key, ticketClaims.getClaim(key));
+                    pctClaims.setClaimObject(key, ticketClaims.getClaim(key), false);
                 }
                 pct = ticketPct;
             }
 
             if (idToken != null && idToken.getClaims() != null) {
                 for (String key : idToken.getClaims().keys()) {
-                    pctClaims.setClaimObject(key, idToken.getClaims().getClaim(key));
+                    pctClaims.setClaimObject(key, idToken.getClaims().getClaim(key), false);
                 }
             }
 
