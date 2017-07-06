@@ -10,7 +10,7 @@ from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from javax.faces.context import FacesContext
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import AuthenticationService, UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.util import StringHelper, ArrayHelper
 from org.apache.http.params import CoreConnectionPNames
@@ -84,8 +84,9 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
-        authenticationService = CdiUtil.bean(AuthenticationService)
+
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
         httpService = CdiUtil.bean(HttpService)
 
         cas_host = configurationAttributes.get("cas_host").getValue2()
@@ -209,7 +210,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False

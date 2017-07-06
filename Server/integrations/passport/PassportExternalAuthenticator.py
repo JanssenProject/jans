@@ -86,6 +86,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print("Passport: Exception inside getUserValueFromAuth " + str(err))
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         try:
             UserId = self.getUserValueFromAuth("userid", requestParameters)
         except Exception, err:
@@ -106,7 +108,7 @@ class PersonAuthentication(PersonAuthenticationType):
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                 userService = CdiUtil.bean(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False

@@ -7,7 +7,7 @@
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.service import XmlService
 from org.xdi.oxauth.service import EncryptionService 
@@ -68,8 +68,10 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        identity = CdiUtil.bean(Identity)
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
 
         iw_api_uri = configurationAttributes.get("iw_api_uri").getValue2()
         iw_service_id = configurationAttributes.get("iw_service_id").getValue2()
@@ -109,14 +111,14 @@ class PersonAuthentication(PersonAuthenticationType):
                 logged_in = False
                 if (StringHelper.isNotEmptyString(user_name)):
                     userService = CdiUtil.bean(UserService)
-                    logged_in = userService.authenticate(user_name)
+                    logged_in = authenticationService.authenticate(user_name)
     
                 return logged_in
             else:
                 logged_in = False
                 if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                     userService = CdiUtil.bean(UserService)
-                    logged_in = userService.authenticate(user_name, user_password)
+                    logged_in = authenticationService.authenticate(user_name, user_password)
     
                 return logged_in
             

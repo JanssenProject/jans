@@ -66,6 +66,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         if (step == 1):
             print "Basic (multi login). Authenticate for step 1"
 
@@ -76,8 +78,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(key_value) and StringHelper.isNotEmptyString(user_password)):
-                authenticationService = CdiUtil.bean(AuthenticationService)
-
                 i = 0
                 count = len(self.login_attributes_list_array)
                 while (i < count):
