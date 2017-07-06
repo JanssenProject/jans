@@ -34,7 +34,7 @@ class PersonAuthentication(PersonAuthenticationType):
         metaDataConfigurationService = FidoU2fClientFactory.instance().createMetaDataConfigurationService(u2f_server_metadata_uri)
 
         max_attempts = 10
-        for attempt in range(1, max_attempts):
+        for attempt in range(1, max_attempts + 1):
             try:
                 self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()
                 break
@@ -202,7 +202,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            return "/auth/u2f/login.xhtml"
+            return "/auth/u2f/u2f-login.xhtml"
 
         return ""
 

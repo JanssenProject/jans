@@ -46,9 +46,9 @@
                 helper.onSignInCallback(authResult);
             }
 
-            var request = '${super_gluu_request}';
-            var label = '${super_gluu_label}';
-            var qr_options = ${super_gluu_qr_options};
+            var request = '${identity.getWorkingParameter('super_gluu_request')}';
+            var label = '${identity.getWorkingParameter('super_gluu_label')}';
+            var qr_options = ${identity.getWorkingParameter('super_gluu_qr_options')};
             $(document).ready(function() {
 
                 if (request == '') {
@@ -113,7 +113,7 @@
                                         <h:outputText value="#{msgs['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
-                                        <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
+                                        <ui:param name="client" value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
 
                                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>

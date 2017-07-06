@@ -24,22 +24,6 @@
 	<ui:define name="body">
 		<header class="bs-docs-nav navbar navbar-static-top" id="top"> 
 		<div class="container">
-			<div class="navbar-header"> 
-				<ui:param name="client"
-						value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
-
-					<h:panelGroup layout="block"
-						rendered='#{!empty client.logoUri}'>
-						<h:graphicImage url='#{client.logoUri}' />
-					</h:panelGroup>
-					<h:panelGroup layout="block"
-						rendered='#{empty client.logoUri}'>
-						<a href="http://www.gluu.org/"> <h:graphicImage
-								url="img/logo.png" />
-						</a>
-					</h:panelGroup>
-				<!--<a target="_blank"  target="_blank"  class="navbar-brand"><img src="assets/img/logo.png" alt="logo"/></a> </div>-->
-			</div>
 		</div>
 	</header>
 		<!-- end header-->
@@ -232,7 +216,7 @@
                     userNameField.focus();
                 }
 
-                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                var displayRegister = #{display_register_action or identity.sessionState.sessionAttributes['display_register_action']};
                 if (displayRegister) {
                     var registerButton = document.getElementById("loginForm:registerId");
                     if (registerButton != null) {
