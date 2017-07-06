@@ -90,7 +90,7 @@
 
     <ui:define name="body">
         <form method="post" action="#{request.contextPath}/postlogin" id="u2f_form" onsubmit="return false;">
-            <input type="hidden" name="username" value="${identity.username}"/>
+            <input type="hidden" name="username" value="${credentials.username}"/>
             <input type="hidden" name="authMethod" id="authMethod"/>
             <input type="hidden" name="tokenResponse" id="tokenResponse"/>
         </form>
