@@ -14,11 +14,7 @@ from java.util import Arrays
 from org.xdi.oxpush import OxPushClient
 
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
 

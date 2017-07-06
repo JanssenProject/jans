@@ -10,17 +10,14 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.service import XmlService
-from org.xdi.util.security import StringEncrypter 
+from org.xdi.oxauth.service import EncryptionService 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from java.lang import Boolean
 
 import java
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -45,8 +42,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         iw_cert_password = creds["CERT_PASSWORD"]
         try:
-            stringEncrypter = StringEncrypter.defaultInstance()
-            iw_cert_password = stringEncrypter.decrypt(iw_cert_password)
+            encryptionService = CdiUtil.bean(EncryptionService)
+            iw_cert_password = encryptionService.decrypt(iw_cert_password)
         except:
             return False
 

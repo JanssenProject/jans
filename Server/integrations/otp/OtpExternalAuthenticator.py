@@ -15,8 +15,8 @@
 #   registration_uri: https://ce-dev.gluu.org/identity/register
 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.jboss.seam.faces import FacesMessages
-from org.jboss.seam.international import StatusMessage
+from org.gluu.jsf2.message import FacesMessages
+from javax.faces.application import FacesMessage
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
@@ -44,10 +44,7 @@ import sys
 import java
 import jarray
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -383,14 +380,14 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processOtpAuthentication(self, requestParameters, user_name, session_attributes, otp_auth_method):
-        facesMessages = FacesMessages.instance()
-        FacesContext.getCurrentInstance().getExternalContext().getExternalContext().getFlash().setKeepMessages(True)
+        facesMessages = CdiUtil.bean(FacesMessages)
+        facesMessages.setKeepMessages()
 
         userService = CdiUtil.bean(UserService)
 
         otpCode = ServerUtil.getFirstValue(requestParameters, "loginForm:otpCode")
         if StringHelper.isEmpty(otpCode):
-            facesMessages.add(StatusMessage.Severity.ERROR, "Failed to authenticate. OTP code is empty")
+            facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to authenticate. OTP code is empty")
             print "OTP. Process OTP authentication. otpCode is empty"
 
             return False
@@ -436,7 +433,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if len(user_enrollments) == 0:
                 print "OTP. Process OTP authentication. There is no OTP enrollment for user '%s'" % user_name
-                facesMessages.add(StatusMessage.Severity.ERROR, "There is no valid OTP user enrollments")
+                facesMessages.add(FacesMessage.SEVERITY_ERROR, "There is no valid OTP user enrollments")
                 return False
 
             if self.otpType == "hotp":
@@ -471,7 +468,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "OTP. Process TOTP authentication during authentication. otpCode is valid"
                         return True
 
-        facesMessages.add(StatusMessage.Severity.ERROR, "Failed to authenticate. OTP code is invalid")
+        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to authenticate. OTP code is invalid")
         print "OTP. Process OTP authentication. OTP code is invalid"
 
         return False

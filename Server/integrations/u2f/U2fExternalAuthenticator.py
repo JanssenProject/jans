@@ -4,8 +4,6 @@
 # Author: Yuriy Movchan
 #
 
-import java
-import sys
 from javax.ws.rs.core import Response
 from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
@@ -19,6 +17,8 @@ from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util import StringHelper
 
+import sys
+import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -31,7 +31,7 @@ class PersonAuthentication(PersonAuthenticationType):
         u2f_server_uri = configurationAttributes.get("u2f_server_uri").getValue2()
         u2f_server_metadata_uri = u2f_server_uri + "/.well-known/fido-u2f-configuration"
 
-        metaDataConfigurationService = FidoU2fClientFactory.instance().createMetaDataConfigurationService(u2f_server_metadata_uri)
+        metaDataConfigurationService = CdiUtil.bean(FidoU2fClientFactory).createMetaDataConfigurationService(u2f_server_metadata_uri)
 
         max_attempts = 10
         for attempt in range(1, max_attempts):
@@ -110,7 +110,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if (auth_method == 'authenticate'):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to finish authentication workflow"
-                authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
+                authenticationRequestService = CdiUtil.bean(FidoU2fClientFactory).createAuthenticationRequestService(self.metaDataConfiguration)
                 authenticationStatus = authenticationRequestService.finishAuthentication(user.getUserId(), token_response)
 
                 if (authenticationStatus.getStatus() != Constants.RESULT_SUCCESS):
@@ -120,7 +120,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return True
             elif (auth_method == 'enroll'):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to finish registration workflow"
-                registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
+                registrationRequestService = CdiUtil.bean(FidoU2fClientFactory).createRegistrationRequestService(self.metaDataConfiguration)
                 registrationStatus = registrationRequestService.finishRegistration(user.getUserId(), token_response)
 
                 if (registrationStatus.getStatus() != Constants.RESULT_SUCCESS):
@@ -170,7 +170,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start authentication workflow"
 
                 try:
-                    authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
+                    authenticationRequestService = CdiUtil.bean(FidoU2fClientFactory).createAuthenticationRequestService(self.metaDataConfiguration)
                     authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_state)
                 except ClientResponseFailure, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
@@ -178,7 +178,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         return False
             else:
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start registration workflow"
-                registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
+                registrationRequestService = CdiUtil.bean(FidoU2fClientFactory).createRegistrationRequestService(self.metaDataConfiguration)
                 registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_state)
 
             identity.setWorkingParameter("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))

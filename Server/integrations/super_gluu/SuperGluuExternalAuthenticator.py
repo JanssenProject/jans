@@ -4,10 +4,6 @@
 # Author: Yuriy Movchan
 #
 
-import datetime
-import urllib
-
-import sys
 from com.google.android.gcm.server import Sender, Message
 from com.notnoop.apns import APNS
 from java.util import Arrays
@@ -21,13 +17,14 @@ from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util import StringHelper
-from org.xdi.util.security import StringEncrypter
+from org.xdi.oxauth.service import EncryptionService
 from org.xdi.service import MailService
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import datetime
+import urllib
+
+import sys
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -533,8 +530,8 @@ class PersonAuthentication(PersonAuthenticationType):
             p12_passowrd = ios_creads["p12_password"]
 
             try:
-                stringEncrypter = StringEncrypter.defaultInstance()
-                p12_passowrd = stringEncrypter.decrypt(p12_passowrd)
+                encryptionService = CdiUtil.bean(EncryptionService)
+                p12_passowrd = encryptionService.decrypt(p12_passowrd)
             except:
                 # Ignore exception. Password is not encrypted
                 print "Super-Gluu. Initialize notification services. Assuming that 'p12_passowrd' password in not encrypted"

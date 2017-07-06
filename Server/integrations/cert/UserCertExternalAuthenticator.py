@@ -5,10 +5,6 @@
 # Author: Yuriy Movchan
 #
 
-import sys
-import base64
-import urllib
-
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
@@ -16,7 +12,7 @@ from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper
 from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util.security import StringEncrypter
+from org.xdi.oxauth.service import EncryptionService
 from java.util import Arrays
 from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
 from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
@@ -24,13 +20,13 @@ from org.xdi.oxauth.cert.validation.model import ValidationStatus
 from org.xdi.oxauth.util import CertUtil
 from org.xdi.oxauth.service.net import HttpService
 from org.apache.http.params import CoreConnectionPNames
+
+import sys
+import base64
+import urllib
+
 import java
-
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -385,19 +381,19 @@ class PersonAuthentication(PersonAuthenticationType):
         if recaptcha_creds["enabled"]:
             print "Cert. Initialize recaptcha. Recaptcha is enabled"
 
-            stringEncrypter = StringEncrypter.defaultInstance()
+            encryptionService = CdiUtil.bean(EncryptionService)
 
             site_key = recaptcha_creds["site_key"]
             secret_key = recaptcha_creds["secret_key"]
 
             try:
-                site_key = stringEncrypter.decrypt(site_key)
+                site_key = encryptionService.decrypt(site_key)
             except:
                 # Ignore exception. Value is not encrypted
                 print "Cert. Initialize recaptcha. Assuming that 'site_key' in not encrypted"
 
             try:
-                secret_key = stringEncrypter.decrypt(secret_key)
+                secret_key = encryptionService.decrypt(secret_key)
             except:
                 # Ignore exception. Value is not encrypted
                 print "Cert. Initialize recaptcha. Assuming that 'secret_key' in not encrypted"
