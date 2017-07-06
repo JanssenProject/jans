@@ -47,9 +47,9 @@
 				helper.onSignInCallback(authResult);
 			}
 
-			var request = '${otp_enrollment_request}';
-			var label = '${qr_label}';
-			var qr_options = ${qr_options};
+			var request = '${identity.getWorkingParameter('otp_enrollment_request')}';
+			var label = '${identity.getWorkingParameter('qr_label')}';
+			var qr_options = ${identity.getWorkingParameter('qr_options')};
 			$(document).ready(function() {
 
 				if (request == '') {
@@ -86,7 +86,7 @@
 				<div id="header" class="row-fluid">
 					<div class="logo span2">
 						<ui:param name="client"
-								  value="#{clientService.getClient(sessionAttributes['client_id'])}" />
+								  value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
 
 						<h:panelGroup rendered='#{!empty client.getLogoUri()}'>
 							<h:graphicImage url='#{client.getLogoUri()}' />
