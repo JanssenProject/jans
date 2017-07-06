@@ -5,8 +5,8 @@
 #
 
 from org.xdi.service.cdi.util import CdiUtil
-from org.jboss.seam.faces import FacesMessages
-from org.jboss.seam.international import StatusMessage
+from org.gluu.jsf2.message import FacesMessages
+from javax.faces.application import FacesMessage
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.client import TokenClient, TokenRequest, UserInfoClient
@@ -19,12 +19,8 @@ from org.xdi.oxauth.model.common import User
 from org.xdi.util import StringHelper
 from org.xdi.oxauth.util import ServerUtil
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 import java
-
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -133,10 +129,10 @@ class PersonAuthentication(PersonAuthenticationType):
                         print("Passport: Error in getting user email: " + str(err))
 
                     if (StringHelper.isEmptyString(UserEmail)):
-                        facesMessages = FacesMessages.instance()
-                        FacesContext.getCurrentInstance().getExternalContext().getExternalContext().getFlash().setKeepMessages(True)
+                        facesMessages = CdiUtil.bean(FacesMessages)
+                        facesMessages.setKeepMessages()
                         facesMessages.clear()
-                        facesMessages.add(StatusMessage.Severity.ERROR, "Please provide your email.")
+                        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please provide your email.")
                         print "Passport: Email was not received so sent error"
 
                         return False

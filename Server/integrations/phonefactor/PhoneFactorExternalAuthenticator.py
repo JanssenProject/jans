@@ -10,17 +10,14 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
-from org.xdi.util.security import StringEncrypter 
+from org.xdi.oxauth.service import EncryptionService 
 from net.phonefactor.pfsdk import PFAuth, PFAuthResult, SecurityException, TimeoutException, PFException
 from net.phonefactor.pfsdk import PFAuthResult
 
 import java
 import string
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -43,8 +40,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         certPassword = creds["CERT_PASSWORD"]
         try:
-            stringEncrypter = StringEncrypter.defaultInstance()
-            certPassword = stringEncrypter.decrypt(certPassword)
+            encryptionService = CdiUtil.bean(EncryptionService)
+            certPassword = encryptionService.decrypt(certPassword)
         except:
             return False
 

@@ -14,11 +14,7 @@ from org.xdi.model.ldap import GluuLdapConfiguration
 from java.util import Arrays
 
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
