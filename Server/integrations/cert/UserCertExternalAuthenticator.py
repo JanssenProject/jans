@@ -9,7 +9,7 @@ from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from javax.faces.context import FacesContext
 from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.oxauth.service import EncryptionService
@@ -104,6 +104,7 @@ class PersonAuthentication(PersonAuthenticationType):
         user_name = credentials.getUsername()
 
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         if step == 1:
             print "Cert. Authenticate for step 1"
@@ -177,7 +178,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             userService = CdiUtil.bean(UserService)
-            logged_in = userService.authenticate(foundUserName)
+            logged_in = authenticationService.authenticate(foundUserName)
         
             print "Cert. Authenticate for step 2. Setting count steps to 2"
             identity.setWorkingParameter("cert_count_login_steps", 2)
@@ -195,7 +196,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
@@ -283,13 +284,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def processBasicAuthentication(self, credentials):
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
 
         logged_in = False
         if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-            logged_in = userService.authenticate(user_name, user_password)
+            logged_in = authenticationService.authenticate(user_name, user_password)
 
         if (not logged_in):
             return None

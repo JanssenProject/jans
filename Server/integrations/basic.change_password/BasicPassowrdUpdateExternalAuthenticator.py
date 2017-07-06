@@ -7,7 +7,7 @@
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper, ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
 
@@ -37,6 +37,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
         user_name = credentials.getUsername()
@@ -48,8 +51,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = CdiUtil.bean(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
@@ -57,8 +59,6 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif (step == 2):
             print "Basic (with password update). Authenticate for step 2"
-
-            userService = CdiUtil.bean(UserService)
 
             update_button = ServerUtil.getFirstValue(requestParameters, "loginForm:updateButton")
             if ArrayHelper.isEmpty(update_button):

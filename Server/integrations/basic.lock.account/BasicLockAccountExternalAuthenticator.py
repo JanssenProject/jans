@@ -7,7 +7,7 @@
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
 from org.gluu.site.ldap.persistence.exception import AuthenticationException
 
@@ -51,6 +51,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         if step == 1:
             print "Basic (lock account). Authenticate for step 1"
 
@@ -61,9 +63,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = CdiUtil.bean(UserService)
                 try:
-                    logged_in = userService.authenticate(user_name, user_password)
+                    logged_in = authenticationService.authenticate(user_name, user_password)
                 except AuthenticationException:
                     print "Basic (lock account). Authenticate. Failed to authenticate user '%s'" % user_name
 

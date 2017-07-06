@@ -83,6 +83,8 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         duo_host = configurationAttributes.get("duo_host").getValue2()
 
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
@@ -95,12 +97,11 @@ class PersonAuthentication(PersonAuthenticationType):
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                 userService = CdiUtil.bean(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
-            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (self.use_duo_group):
                 print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
@@ -134,7 +135,6 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not StringHelper.equals(user_name, authenticated_username)):
                 return False
 
-            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             self.processAuditGroup(user)
 

@@ -17,8 +17,7 @@ from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper, ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.oxauth.model.config import Constants
 from javax.ws.rs.core import Response
@@ -216,6 +215,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
@@ -233,7 +234,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "UAF. Prepare for step 2. Failed to determine session_state"
                 return False
 
-            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (user == None):
                 print "UAF. Prepare for step 2. Failed to determine user name"
@@ -314,13 +314,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def processBasicAuthentication(self, credentials):
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
 
         logged_in = False
         if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-            logged_in = userService.authenticate(user_name, user_password)
+            logged_in = authenticationService.authenticate(user_name, user_password)
 
         if not logged_in:
             return None

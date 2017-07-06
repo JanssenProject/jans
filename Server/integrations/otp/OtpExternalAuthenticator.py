@@ -20,8 +20,7 @@ from javax.faces.application import FacesMessage
 from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.util import StringHelper, ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
 from java.util import Arrays
 
@@ -101,6 +100,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
         user_name = credentials.getUsername()
@@ -320,13 +321,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def processBasicAuthentication(self, credentials):
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
 
         logged_in = False
         if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-            logged_in = userService.authenticate(user_name, user_password)
+            logged_in = authenticationService.authenticate(user_name, user_password)
 
         if not logged_in:
             return None
