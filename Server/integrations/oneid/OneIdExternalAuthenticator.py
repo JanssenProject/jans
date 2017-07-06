@@ -17,10 +17,7 @@ from java.util import Arrays
 
 import java
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 from oneid import OneID
 

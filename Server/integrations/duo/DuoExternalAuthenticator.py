@@ -4,7 +4,6 @@
 # Author: Yuriy Movchan
 #
 
-import duo_web
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
@@ -13,10 +12,8 @@ from org.xdi.service import MailService
 from org.xdi.util import ArrayHelper
 from org.xdi.util import StringHelper
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import duo_web
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):

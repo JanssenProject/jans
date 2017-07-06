@@ -20,11 +20,7 @@ from java.lang import String, StringBuilder
 
 from jarray import array
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
