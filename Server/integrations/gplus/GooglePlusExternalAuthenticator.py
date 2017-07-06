@@ -84,8 +84,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        authenticationService = CdiUtil.bean(AuthenticationService)
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         mapUserDeployment = False
         enrollUserDeployment = False
@@ -123,7 +123,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 loggedIn = False
                 if (StringHelper.isNotEmptyString(userName) and StringHelper.isNotEmptyString(userPassword)):
                     userService = CdiUtil.bean(UserService)
-                    loggedIn = userService.authenticate(userName, userPassword)
+                    loggedIn = authenticationService.authenticate(userName, userPassword)
         
                 if (not loggedIn):
                     return False
@@ -292,7 +292,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             loggedIn = False
             if (StringHelper.isNotEmptyString(userName) and StringHelper.isNotEmptyString(userPassword)):
-                loggedIn = userService.authenticate(userName, userPassword)
+                loggedIn = authenticationService.authenticate(userName, userPassword)
 
             if (not loggedIn):
                 return False

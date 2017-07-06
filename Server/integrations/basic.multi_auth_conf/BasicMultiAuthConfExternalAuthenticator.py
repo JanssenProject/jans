@@ -72,6 +72,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         if (step == 1):
             print "Basic (multi auth conf). Authenticate for step 1"
 
@@ -82,8 +84,6 @@ class PersonAuthentication(PersonAuthenticationType):
             userPassword = credentials.getPassword()
 
             if (StringHelper.isNotEmptyString(keyValue) and StringHelper.isNotEmptyString(userPassword)):
-                authenticationService = CdiUtil.bean(AuthenticationService)
-
                 for ldapExtendedEntryManager in self.ldapExtendedEntryManagers:
                     ldapConfiguration = ldapExtendedEntryManager["ldapConfiguration"]
                     ldapEntryManager = ldapExtendedEntryManager["ldapEntryManager"]

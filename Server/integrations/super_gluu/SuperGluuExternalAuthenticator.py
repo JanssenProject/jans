@@ -108,6 +108,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
@@ -170,7 +172,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Super-Gluu. Authenticate for step 1. Failed to load u2f_device '%s'" % u2f_device_id
                     return False
 
-                logged_in = userService.authenticate(user_name)
+                logged_in = authenticationService.authenticate(user_name)
                 if not logged_in:
                     print "Super-Gluu. Authenticate for step 1. Failed to authenticate user '%s'" % user_name
                     return False
@@ -403,13 +405,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def processBasicAuthentication(self, credentials):
         userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
 
         logged_in = False
         if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-            logged_in = userService.authenticate(user_name, user_password)
+            logged_in = authenticationService.authenticate(user_name, user_password)
 
         if not logged_in:
             return None
