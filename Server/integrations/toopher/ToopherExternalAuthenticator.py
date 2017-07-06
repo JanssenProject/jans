@@ -8,7 +8,7 @@ from org.xdi.oxauth.security import Identity
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService
-from org.xdi.util.security import StringEncrypter 
+from org.xdi.oxauth.service import EncryptionService 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from java.util import Arrays
@@ -17,10 +17,7 @@ from com.toopher import RequestError
 
 import java
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
 
@@ -43,8 +40,8 @@ class PersonAuthentication(PersonAuthenticationType):
         consumer_key = creds["CONSUMER_KEY"]
         consumer_secret = creds["CONSUMER_SECRET"]
         try:
-            stringEncrypter = StringEncrypter.defaultInstance()
-            consumer_secret = stringEncrypter.decrypt(consumer_secret)
+            encryptionService = CdiUtil.bean(EncryptionService)
+            consumer_secret = encryptionService.decrypt(consumer_secret)
         except:
             return False
 

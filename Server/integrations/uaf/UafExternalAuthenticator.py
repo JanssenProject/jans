@@ -21,7 +21,6 @@ from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.oxauth.model.config import Constants
-from org.jboss.resteasy.client import ClientResponseFailure
 from javax.ws.rs.core import Response
 from java.util import Arrays
 from org.xdi.oxauth.service.net import HttpService
@@ -29,11 +28,7 @@ from org.apache.http.params import CoreConnectionPNames
 
 import sys
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
