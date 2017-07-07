@@ -31,7 +31,7 @@ import org.xdi.util.StringHelper;
 import org.xdi.util.properties.FileConfiguration;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Asynchronous;
+import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
