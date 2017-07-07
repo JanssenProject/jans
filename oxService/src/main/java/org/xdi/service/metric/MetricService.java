@@ -20,7 +20,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.ejb.Asynchronous;
+import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -82,6 +82,7 @@ public abstract class MetricService implements Serializable {
     	ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
     }
 
+    @Asynchronous
 	public void writeMetricEntries(@Observes @ReportMetric MetricReport metricReport) {
     	add(metricReport.getMetricEntries(), metricReport.getCreationTime());
     }
@@ -131,7 +132,6 @@ public abstract class MetricService implements Serializable {
 		}
 	}
 
-	@Asynchronous
 	public void add(List<MetricEntry> metricEntries, Date creationTime) {
 		prepareBranch(creationTime, ApplicationType.OX_AUTH);
 
