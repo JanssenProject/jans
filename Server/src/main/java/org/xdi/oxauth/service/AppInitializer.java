@@ -44,6 +44,7 @@ import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import javax.annotation.PostConstruct;
+import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.Initialized;
@@ -216,6 +217,7 @@ public class AppInitializer {
         closeLdapAuthEntryManagers(ldapAuthEntryManagers);
     }
     
+    @Asynchronous
     public void reloadConfigurationTimerEvent(@Observes @Scheduled AuthConfigurationEvent authConfigurationEvent) {
 		if (this.isActive.get()) {
 			return;
