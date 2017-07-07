@@ -41,9 +41,11 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.service.PythonService;
+import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.cdi.event.UpdateScriptEvent;
 import org.xdi.service.custom.inject.ReloadScript;
+import org.xdi.service.security.Secure;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 import org.xdi.util.StringHelper;
@@ -87,6 +89,7 @@ public class CustomScriptManager implements Serializable {
 
 	private Map<CustomScriptType, List<CustomScriptConfiguration>> customScriptConfigurationsByScriptType;
 
+    @Asynchronous
     public void initTimer(List<CustomScriptType> supportedCustomScriptTypes) {
 		this.supportedCustomScriptTypes = supportedCustomScriptTypes;
 

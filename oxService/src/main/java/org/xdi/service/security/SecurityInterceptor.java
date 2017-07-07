@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Priority;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
@@ -18,9 +19,10 @@ import org.xdi.service.el.ExpressionEvaluator;
  */
 @Interceptor
 @InterceptSecure({})
+@Priority(Interceptor.Priority.PLATFORM_AFTER)
 public class SecurityInterceptor implements Serializable {
 
-	private static final String KEY = "org.jboss.weld.interceptor.bindings";
+	private static final long serialVersionUID = 8227941471496200128L;
 
 	@Inject
 	private Logger log;

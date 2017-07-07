@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
@@ -18,6 +19,9 @@ public class FacesMessages implements Serializable {
 	@Inject
 	private FacesContext facesContext;
 
+	@Inject
+	private ExternalContext externalContext;
+
 	public void add(Severity severity, String message) {
 		facesContext.addMessage(null, new FacesMessage(severity, message, message));
 	}
@@ -29,6 +33,10 @@ public class FacesMessages implements Serializable {
 	public void add(Severity severity, String message, Object ... params) {
 		// TODO: CDI Review
 		add(severity, message);
+	}
+
+	public void setKeepMessages() {
+		externalContext.getFlash().setKeepMessages(true);
 	}
 
 }
