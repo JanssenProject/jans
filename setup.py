@@ -253,6 +253,9 @@ class Setup(object):
 
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
+
+        self.extensionFolder = '%s/static/extension' % self.install_dir
+
         self.oxauth_error_json = '%s/static/oxauth/oxauth-errors.json' % self.install_dir
 
         self.oxauth_openid_jwks_fn = "%s/oxauth-keys.json" % self.certFolder
@@ -2199,6 +2202,31 @@ class Setup(object):
         nodeTepmplatesFolder = '%s/node/' % self.templateFolder
         self.render_templates_folder(nodeTepmplatesFolder)
 
+    def prepare_base64_extension_scripts(self):
+        try:
+            if not os.path.exists(self.extensionFolder):
+                return None
+
+            for extensionType in os.listdir(self.extensionFolder):
+                extensionTypeFolder = os.path.join(self.extensionFolder, extensionType)
+                if not os.path.isdir(extensionTypeFolder):
+                    continue
+
+                for scriptFile in os.listdir(extensionTypeFolder):
+                    scriptFilePath = os.path.join(extensionTypeFolder, scriptFile)
+                    base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
+                    
+                    # Prepare key for dictionary
+                    extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0]) 
+                    extensionScriptName = extensionScriptName.decode('utf-8').lower()
+
+                    self.templateRenderingDict[extensionScriptName] = base64ScriptFile
+                    self.logIt("Loaded script %s with type %s into %s" % (scriptFile, extensionType, extensionScriptName))
+
+        except:
+            self.logIt("Error loading scripts from %s" % self.extensionFolder, True)
+            self.logIt(traceback.format_exc(), True)
+
     def reindent(self, text, num_spaces):
         text = string.split(text, '\n')
         text = [(num_spaces * ' ') + string.lstrip(line) for line in text]
@@ -2772,6 +2800,7 @@ if __name__ == '__main__':
             installObject.install_gluu_base()
             installObject.encode_passwords()
             installObject.encode_test_passwords()
+            installObject.prepare_base64_extension_scripts()
             installObject.render_templates()
             installObject.generate_crypto()
             installObject.generate_oxauth_openid_keys()
