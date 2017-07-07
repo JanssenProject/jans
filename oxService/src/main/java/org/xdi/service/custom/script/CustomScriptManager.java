@@ -120,7 +120,7 @@ public class CustomScriptManager implements Serializable {
 		} finally {
 			this.isActive.set(false);
 			this.lastFinishedTime = System.currentTimeMillis();
-			log.trace("Last finished time '{0}'", new Date(this.lastFinishedTime));
+			log.trace("Last finished time '{}'", new Date(this.lastFinishedTime));
 		}
 	}
 
@@ -279,7 +279,7 @@ public class CustomScriptManager implements Serializable {
 			
 			return scriptFromFile;
 		} catch (IOException ex) {
-			log.error("Faield to load script from '{0}'", locationPath);
+			log.error("Faield to load script from '{}'", locationPath);
 		}
 
 		return null;
@@ -300,7 +300,7 @@ public class CustomScriptManager implements Serializable {
 
 		boolean result = executeCustomScriptDestroy(customScriptConfiguration);
 		if (!result) {
-			log.error("Failed to destroy custom script '{0}' correctly", customScriptInum);
+			log.error("Failed to destroy custom script '{}' correctly", customScriptInum);
 		}
 		
 		return result;
@@ -330,7 +330,7 @@ public class CustomScriptManager implements Serializable {
 		try {
 			externalType = createExternalTypeFromStringWithPythonException(customScript, configurationAttributes);
 		} catch (PythonException ex) {
-			log.error("Failed to prepare external type '{0}'", ex, customScriptInum);
+			log.error("Failed to prepare external type '{}'", ex, customScriptInum);
 			return null;
 		}
 
@@ -370,7 +370,7 @@ public class CustomScriptManager implements Serializable {
 		try {
 			initialized = externalType.init(configurationAttributes);
 		} catch (Exception ex) {
-            log.error("Failed to initialize custom script: '{0}'", ex, customScript.getName());
+            log.error("Failed to initialize custom script: '{}'", ex, customScript.getName());
 		}
 
 		if (initialized) {

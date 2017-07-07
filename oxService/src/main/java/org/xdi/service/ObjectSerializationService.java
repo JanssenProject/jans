@@ -42,7 +42,7 @@ public class ObjectSerializationService {
 		try {
 			fos = new FileOutputStream(file, append);
 		} catch (FileNotFoundException ex) {
-			log.error("Faield to serialize to file: '{0}'. Error: ", path, ex);
+			log.error("Faield to serialize to file: '{}'. Error: ", path, ex);
 			
 			return false;
 		}
@@ -54,7 +54,7 @@ public class ObjectSerializationService {
 			gos.flush();
 			IOUtils.closeQuietly(gos);
 		} catch (IOException ex) {
-			log.error("Faield to serialize to file: '{0}'. Error: ", path, ex);
+			log.error("Faield to serialize to file: '{}'. Error: ", path, ex);
 			IOUtils.closeQuietly(bos);
 
 			return false;
@@ -70,7 +70,7 @@ public class ObjectSerializationService {
 	public Object loadObject(String path) {
 		File file = new File(path);
 		if (!file.exists()) {
-			log.trace("File '{0}' is not exist", path);
+			log.trace("File '{}' is not exist", path);
 			return null;
 		}
 
@@ -78,7 +78,7 @@ public class ObjectSerializationService {
 		try {
 			fis = new FileInputStream(file);
 		} catch (FileNotFoundException ex) {
-			log.error("Faield to deserialize from file: '{0}'. Error: ", path, ex);
+			log.error("Faield to deserialize from file: '{}'. Error: ", path, ex);
 			
 			return null;
 		}
@@ -90,7 +90,7 @@ public class ObjectSerializationService {
 			obj = SerializationUtils.deserialize(gis);
 			IOUtils.closeQuietly(gis);
 		} catch (IOException ex) {
-			log.error("Faield to deserialize from file: '{0}'. Error: ", path, ex);
+			log.error("Faield to deserialize from file: '{}'. Error: ", path, ex);
 			IOUtils.closeQuietly(bis);
 			
 			return null;

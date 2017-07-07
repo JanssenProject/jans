@@ -75,7 +75,7 @@ public class SchemaService {
 		}
 		schemaEntry.addObjectClass(objectClassDefinition);
 
-		log.debug("Adding new objectClass: {0}", schemaEntry);
+		log.debug("Adding new objectClass: {}", schemaEntry);
 		ldapEntryManager.merge(schemaEntry);
 	}
 
@@ -99,7 +99,7 @@ public class SchemaService {
 		schemaEntry.setDn(getDnForSchema());
 		schemaEntry.addObjectClass(objectClassDefinition);
 
-		log.debug("Removing objectClass: {0}", schemaEntry);
+		log.debug("Removing objectClass: {}", schemaEntry);
 		ldapEntryManager.remove(schemaEntry);
 	}
 
@@ -153,7 +153,7 @@ public class SchemaService {
 		newSchemaEntry.setDn(getDnForSchema());
 		newSchemaEntry.addObjectClass(newObjectClassDefinition);
 
-		log.debug("Adding attributeType to objectClass: {0}", newSchemaEntry);
+		log.debug("Adding attributeType to objectClass: {}", newSchemaEntry);
 		ldapEntryManager.merge(newSchemaEntry);
 	}
 
@@ -200,7 +200,7 @@ public class SchemaService {
 		schemaEntry.setDn(getDnForSchema());
 		schemaEntry.addObjectClass(newObjectClassDefinition);
 
-		log.debug("Removing attributeType from objectClass: {0}", schemaEntry);
+		log.debug("Removing attributeType from objectClass: {}", schemaEntry);
 		ldapEntryManager.merge(schemaEntry);
 
 	}
@@ -218,7 +218,7 @@ public class SchemaService {
 		log.info("oid : ", oid);
 		log.info("name : ", name);
 		schemaEntry.addAttributeType(String.format(schemaAddAttributeDefinition, oid, name));
-		log.debug("Adding new attributeType: {0}", schemaEntry);
+		log.debug("Adding new attributeType: {}", schemaEntry);
 		log.info("merging data");
 		ldapEntryManager.merge(schemaEntry);
 	}
@@ -239,7 +239,7 @@ public class SchemaService {
 			schemaEntry.setDn(getDnForSchema());
 			schemaEntry.addAttributeType(attributeTypeDefinition);
 
-			log.debug("Removing attributeType: {0}", schemaEntry);
+			log.debug("Removing attributeType: {}", schemaEntry);
 			ldapEntryManager.remove(schemaEntry);
 
 		}
@@ -309,7 +309,7 @@ public class SchemaService {
 					try {
 						result.add(new AttributeTypeDefinition(attributeTypeDefinition));
 					} catch (Exception ex) {
-						log.error("Failed to get attribute type definition by string {0}", ex, attributeTypeDefinition);
+						log.error("Failed to get attribute type definition by string {}", ex, attributeTypeDefinition);
 					}
 				}
 			}
@@ -373,7 +373,7 @@ public class SchemaService {
 					objectClassDefinitions.put(StringHelper.toLowerCase(name), definition);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to parse LDAP object class definition: '{0}'", ex, objectClassDefinition);
+				log.error("Failed to parse LDAP object class definition: '{}'", ex, objectClassDefinition);
 			}
 		}
 
@@ -477,7 +477,7 @@ public class SchemaService {
 					resultObjectClasses.add(objectClassType);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to parse LDAP object class definition: '{0}'", ex, objectClassDefinition);
+				log.error("Failed to parse LDAP object class definition: '{}'", ex, objectClassDefinition);
 			}
 		}
 

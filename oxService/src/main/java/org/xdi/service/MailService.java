@@ -49,7 +49,7 @@ public class MailService {
 
 	public boolean sendMail(SmtpConfiguration mailSmtpConfiguration, String from, String to, String subject, String message) {
 		if (mailSmtpConfiguration == null) {
-			log.error("Failed to send message from '{0}' to '{1}' because the SMTP configuration isn't valid!", from, to);
+			log.error("Failed to send message from '{}' to '{}' because the SMTP configuration isn't valid!", from, to);
 			return false;
 		}
 

@@ -75,7 +75,7 @@ public class XmlService implements Serializable {
             this.jaxbMarshaller.marshal(photo, bos);
             return new String(bos.toByteArray(), "UTF-8");
         } catch (Exception ex) {
-            log.error("Failed to convert GluuImage {0} to XML", ex, photo);
+            log.error("Failed to convert GluuImage {} to XML", ex, photo);
         }
 
         return null;
@@ -90,7 +90,7 @@ public class XmlService implements Serializable {
             ByteArrayInputStream bis = new ByteArrayInputStream(xml.getBytes("UTF-8"));
             return (GluuImage) this.jaxbUnmarshaller.unmarshal(bis);
         } catch (Exception ex) {
-            log.error("Failed to create GluuImage from XML {0}", ex, xml);
+            log.error("Failed to create GluuImage from XML {}", ex, xml);
         }
 
         return null;
@@ -105,7 +105,7 @@ public class XmlService implements Serializable {
             ByteArrayInputStream bis = new ByteArrayInputStream(xml.getBytes("UTF-8"));
             return (TrustContact) this.jaxbUnmarshaller.unmarshal(bis);
         } catch (Exception ex) {
-            log.error("Failed to create TrustContact from XML {0}", ex, xml);
+            log.error("Failed to create TrustContact from XML {}", ex, xml);
         }
 
         return null;
@@ -123,7 +123,7 @@ public class XmlService implements Serializable {
     // this.jaxbMarshaller.marshal(deconstructedTR, bos);
     // return new String(bos.toByteArray(), "UTF-8");
     // } catch (Exception ex) {
-    // log.error("Failed to convert DeconstructedTrustRelationship {0} to XML",
+    // log.error("Failed to convert DeconstructedTrustRelationship {} to XML",
     // ex, deconstructedTR);
     // }
     //
@@ -142,7 +142,7 @@ public class XmlService implements Serializable {
     // return (DeconstructedTrustRelationship)
     // this.jaxbUnmarshaller.unmarshal(bis);
     // } catch (Exception ex) {
-    // log.error("Failed to create DeconstructedTrustRelationship from XML {0}",
+    // log.error("Failed to create DeconstructedTrustRelationship from XML {}",
     // ex, xml);
     // }
     //
@@ -159,7 +159,7 @@ public class XmlService implements Serializable {
             this.jaxbMarshaller.marshal(contact, bos);
             return new String(bos.toByteArray(), "UTF-8");
         } catch (Exception ex) {
-            log.error("Failed to convert TrustContact {0} to XML", ex, contact);
+            log.error("Failed to convert TrustContact {} to XML", ex, contact);
         }
 
         return null;
