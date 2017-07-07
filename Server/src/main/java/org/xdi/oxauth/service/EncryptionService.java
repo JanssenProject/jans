@@ -9,6 +9,7 @@ package org.xdi.oxauth.service;
 import java.util.Properties;
 
 import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -23,7 +24,7 @@ import org.xdi.util.security.StringEncrypter.EncryptionException;
  *
  * @author Yuriy Movchan Date: 09/23/2014
  */
-@Stateless
+@ApplicationScoped
 @Named
 public class EncryptionService {
 
