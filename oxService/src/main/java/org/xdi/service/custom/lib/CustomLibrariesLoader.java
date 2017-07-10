@@ -35,17 +35,23 @@ public class CustomLibrariesLoader implements Serializable {
 	protected Logger log;
 
 	public void init() {
+		loadCustomLibraries();
 	}
 
-	public void contextInitialized() {
+	public void loadCustomLibraries() {
 		try {
+			String customLibrariesPath = getCustomLibrariesPath();
+			if (StringHelper.isEmpty(customLibrariesPath)) {
+				return;
+			}
+
 			// Get the method URLClassLoader#addURL(URL)
 			Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 			// Make it accessible as the method is protected
 			method.setAccessible(true);
 
 			ClassLoader webAppClassLoader = Thread.currentThread().getContextClassLoader();
-			String[] paths = { getCustomLibrariesPath() };
+			String[] paths = { customLibrariesPath };
 			for (String path : paths) {
 				File parent = new File(path);
 				File[] jars = parent.listFiles(new FilenameFilter() {
@@ -68,7 +74,6 @@ public class CustomLibrariesLoader implements Serializable {
 			method.setAccessible(false);
 		} catch (Exception ex) {
 			log.error("Failed to register custom librarties");
-			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -78,7 +83,7 @@ public class CustomLibrariesLoader implements Serializable {
 			externalResourceBase += CUSTOM_LIBS_PATH;
 		}
 
-		return externalResourceBase;
+		return null;
 	}
 
 }
