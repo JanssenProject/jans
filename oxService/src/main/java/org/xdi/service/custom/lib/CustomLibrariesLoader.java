@@ -67,6 +67,7 @@ public class CustomLibrariesLoader implements Serializable {
 
 				for (File jar : jars) {
 					method.invoke(webAppClassLoader, jar.toURI().toURL());
+					log.debug("Loaded custom librarty '{}'", jar.toURI().toURL());
 				}
 			}
 
