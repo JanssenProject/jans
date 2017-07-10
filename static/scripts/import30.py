@@ -431,8 +431,8 @@ class Migration(object):
         currentDNs = self.getDns(self.currentData)
         old_dn_map = self.getOldEntryMap()
 
-        ignoreList = ['objectClass', 'ou', 'oxAuthJwks', 'oxAuthConfWebKeys',
-                      'oxIDPAuthentication', 'gluuFreeMemory', 'gluuSystemUptime',
+        ignoreList = ['objectClass', 'ou', 'oxIDPAuthentication',
+                      'gluuFreeMemory', 'gluuSystemUptime',
                       'oxLogViewerConfig', 'gluuLastUpdate']
         multivalueAttrs = ['oxTrustEmail', 'oxTrustPhoneValue', 'oxTrustImsValue',
                            'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
