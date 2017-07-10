@@ -56,7 +56,6 @@ import org.xdi.util.StringHelper;
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @ApplicationScoped
-@Named
 public class CustomScriptManager implements Serializable {
 
 	private static final long serialVersionUID = -4225890597520443390L;
@@ -157,7 +156,7 @@ public class CustomScriptManager implements Serializable {
 		
 		return reloadResult.isModified();
 	}
-	
+
 	private class ReloadResult {
 		private Map<String, CustomScriptConfiguration> customScriptConfigurations;
 		private boolean modified;
@@ -174,7 +173,6 @@ public class CustomScriptManager implements Serializable {
 		public boolean isModified() {
 			return modified;
 		}
-		
 	}
 
 	private ReloadResult reloadCustomScriptConfigurations(
