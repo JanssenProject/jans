@@ -29,6 +29,8 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private List<String> redirectUris;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
+    @JsonProperty(value = "claims_redirect_uri")
+    private List<String> claimsRedirectUri;
 
     @JsonProperty(value = "client_id")
     private String clientId;
@@ -241,6 +243,14 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.contacts = contacts;
     }
 
+    public List<String> getClaimsRedirectUri() {
+        return claimsRedirectUri;
+    }
+
+    public void setClaimsRedirectUri(List<String> claimsRedirectUri) {
+        this.claimsRedirectUri = claimsRedirectUri;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -250,6 +260,7 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         sb.append(", opDiscoveryPath='").append(opDiscoveryPath).append('\'');
         sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
         sb.append(", redirectUris=").append(redirectUris);
+        sb.append(", claimsRedirectUri=").append(claimsRedirectUri);
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", clientSecret='").append(clientSecret).append('\'');
