@@ -202,7 +202,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 2):
-            return "/auth/u2f/u2f-login.xhtml"
+            return "/auth/u2f/login.xhtml"
 
         return ""
 

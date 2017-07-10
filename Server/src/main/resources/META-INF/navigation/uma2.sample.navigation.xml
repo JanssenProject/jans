@@ -8,11 +8,6 @@
 
     <navigation-case>
       <from-action>#{gatherer.prepareForStep}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/uma2/sample/country.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-action>#{gatherer.prepareForStep}</from-action>
       <from-outcome>invalid_step</from-outcome>
       <to-view-id>/error.xhtml</to-view-id>
       <redirect/>
@@ -28,11 +23,6 @@
   <navigation-rule>
     <from-view-id>/uma2/sample/city.xhtml</from-view-id>
 
-    <navigation-case>
-      <from-action>#{gatherer.prepareForStep}</from-action>
-      <from-outcome>success</from-outcome>
-      <to-view-id>/uma2/sample/city.xhtml</to-view-id>
-    </navigation-case>
     <navigation-case>
       <from-action>#{gatherer.prepareForStep}</from-action>
       <from-outcome>invalid_step</from-outcome>
