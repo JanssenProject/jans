@@ -108,7 +108,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         session_attributes = identity.getSessionState().getSessionAttributes()
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         if step == 1:
             print "OTP. Authenticate for step 1"
@@ -183,7 +183,7 @@ class PersonAuthentication(PersonAuthenticationType):
         credentials = identity.getCredentials()
         session_attributes = identity.getSessionState().getSessionAttributes()
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         if step == 1:
             print "OTP. Prepare for step 1"
@@ -268,7 +268,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def logout(self, configurationAttributes, requestParameters):
         return True
 
-    def setEventContextParameters(self, context):
+    def setRequestScopedParameters(self, identity):
         if self.registrationUri != None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
