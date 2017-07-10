@@ -33,6 +33,7 @@ import org.xdi.service.cdi.event.ConfigurationUpdate;
 import org.xdi.service.cdi.event.LdapConfigurationReload;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.cdi.util.CdiUtil;
+import org.xdi.service.custom.lib.CustomLibrariesLoader;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.service.timer.QuartzSchedulerManager;
@@ -129,6 +130,9 @@ public class AppInitializer {
 	private KeyGeneratorTimer keyGeneratorTimer;
 
 	@Inject
+	private CustomLibrariesLoader customLibrariesLoader;
+
+	@Inject
 	private LdapStatusTimer ldapStatusTimer;
 	
 	@Inject
@@ -153,6 +157,8 @@ public class AppInitializer {
     }
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    	customLibrariesLoader.init();
+
     	createConnectionProvider();
         configurationFactory.create();
 
