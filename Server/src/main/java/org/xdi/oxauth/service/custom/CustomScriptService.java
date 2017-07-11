@@ -20,7 +20,7 @@ import org.xdi.service.custom.script.AbstractCustomScriptService;
  */
 @Stateless
 @Named
-public class CustomScriptService extends AbstractCustomScriptService{
+public class CustomScriptService extends AbstractCustomScriptService {
 	
 	@Inject
 	private StaticConfiguration staticConfiguration;
