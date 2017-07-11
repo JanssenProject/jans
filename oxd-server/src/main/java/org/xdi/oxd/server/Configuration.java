@@ -50,6 +50,16 @@ public class Configuration {
     private int publicOpKeyCacheExpirationInMinutes = 60;
     @JsonProperty(value = "protect_commands_with_access_token")
     private Boolean protectCommandsWithAccessToken;
+    @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
+    private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+
+    public Boolean getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient() {
+        return uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+    }
+
+    public void setUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient(Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient) {
+        this.uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient = uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+    }
 
     public int getStateExpirationInMinutes() {
         return stateExpirationInMinutes;
@@ -215,6 +225,7 @@ public class Configuration {
         sb.append(", nonceExpirationInMinutes='").append(nonceExpirationInMinutes).append('\'');
         sb.append(", publicOpKeyCacheExpirationInMinutes='").append(publicOpKeyCacheExpirationInMinutes).append('\'');
         sb.append(", protectCommandsWithAccessToken='").append(protectCommandsWithAccessToken).append('\'');
+        sb.append(", uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient='").append(uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient).append('\'');
         sb.append('}');
         return sb.toString();
     }
