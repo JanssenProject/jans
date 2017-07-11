@@ -3,7 +3,7 @@ dn: inum=%(passport_rs_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthClient
 objectClass: top
 inum: %(passport_rs_client_id)s
-displayName: Pasport Resource Server Client
+displayName: Passport Resource Server Client
 oxAuthAppType: native
 oxAuthIdTokenSignedResponseAlg: HS256
 oxAuthScope: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
@@ -13,7 +13,7 @@ oxPersistClientAuthorizations: false
 oxAuthLogoutSessionRequired: false
 oxAuthRequireAuthTime: false
 
-# Pasport Requesting Party Client
+# Passport Requesting Party Client
 dn: inum=%(passport_rp_client_id)s,ou=clients,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthClient
 objectClass: top
