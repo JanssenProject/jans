@@ -91,7 +91,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         session_attributes = identity.getSessionState().getSessionAttributes()
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         if (step == 1):
             print "UAF. Authenticate for step 1"
@@ -222,7 +222,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         session_attributes = identity.getSessionState().getSessionAttributes()
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         if (step == 1):
             return True
@@ -307,7 +307,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def logout(self, configurationAttributes, requestParameters):
         return True
 
-    def setEventContextParameters(self, context):
+    def setRequestScopedParameters(self, identity):
         if self.registration_uri != None:
             identity.setWorkingParameter("external_registration_uri", self.registration_uri)
         identity.setWorkingParameter("qr_options", self.customQrOptions)
