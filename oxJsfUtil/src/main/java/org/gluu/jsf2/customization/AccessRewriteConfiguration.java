@@ -77,7 +77,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                 String rewriteKey = file.getName().split("\\.")[0];
                 if (rewriteMap.containsKey(rewriteKey)) {
                     builder.addRule(Join.path(rewriteMap.get(rewriteKey)).to(xhtmlUri + ".htm"));
-                    log.debug("Added rule from navigation.xml {}", rewriteMap.get(rewriteKey), xhtmlUri + ".htm");
+                    log.debug("Added rule {} from navigation.xml {}", xhtmlUri + ".htm", rewriteMap.get(rewriteKey));
                 } else {
                 	if (!xhtmlUri.startsWith(WEB_INF_PATH)) {
                         String joinPath = xhtmlUri;
@@ -88,7 +88,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                         }
 
                         builder.addRule(Join.path(joinPath).to(to));
-                        log.debug("Added rule {}", joinPath, to);
+                        log.debug("Added rewrite rule {} to {}", to, joinPath);
                 	}
                 }
             } catch (ParameterizedPatternSyntaxException ex) {

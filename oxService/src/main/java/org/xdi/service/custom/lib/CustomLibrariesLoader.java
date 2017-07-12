@@ -38,7 +38,7 @@ public class CustomLibrariesLoader implements Serializable {
 		loadCustomLibraries();
 	}
 
-	public void loadCustomLibraries() {
+	private void loadCustomLibraries() {
 		try {
 			String customLibrariesPath = getCustomLibrariesPath();
 			if (StringHelper.isEmpty(customLibrariesPath)) {

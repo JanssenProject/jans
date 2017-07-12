@@ -2,6 +2,7 @@ package org.gluu.jsf2.message;
 
 import java.io.Serializable;
 
+import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.ExternalContext;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
  * @author Yuriy Movchan
  * @version 05/06/2017
  */
+@RequestScoped
 public class FacesMessages implements Serializable {
 
 	private static final long serialVersionUID = -6408439483194578659L;
@@ -31,8 +33,9 @@ public class FacesMessages implements Serializable {
 	}
 
 	public void add(Severity severity, String message, Object ... params) {
-		// TODO: CDI Review
+		// TODO: CDI Review. Add params to message
 		add(severity, message);
+		externalContext.getFlash().setKeepMessages(true);
 	}
 
 	public void setKeepMessages() {
