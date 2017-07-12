@@ -2599,8 +2599,6 @@ class Setup(object):
 
         for installedComponent in installedComponents:
             allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
-            print round(allowedRatio * int(self.application_max_ram))
-            print round(allowedRatio * self.application_max_ram)
             allowedMemory = int(round(allowedRatio * int(self.application_max_ram)))
 
             if allowedMemory > installedComponent['memory']['max_allowed_mb']:
