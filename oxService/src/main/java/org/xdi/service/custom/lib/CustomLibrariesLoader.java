@@ -82,9 +82,11 @@ public class CustomLibrariesLoader implements Serializable {
 		String externalResourceBase = System.getProperty(SERVER_BASE_PATH);
 		if (StringHelper.isNotEmpty(externalResourceBase)) {
 			externalResourceBase += CUSTOM_LIBS_PATH;
+		} else {
+			return null;
 		}
 
-		return null;
+		return externalResourceBase;
 	}
 
 }

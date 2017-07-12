@@ -147,7 +147,7 @@ public class PythonService implements Serializable {
         try {
         	currentPythonInterpreter.execfile(scriptFile);
 		} catch (Exception ex) {
-			log.error("Failed to load python file", ex.getMessage());
+			log.error("Failed to load python file", ex.getMessage(), ex);
 			throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
 		}
 
