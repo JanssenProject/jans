@@ -49,7 +49,6 @@ public class RegisterSiteTest {
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
             commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
             commandParams.setRedirectUris(Lists.newArrayList(redirectUrl));
-            commandParams.setClaimsRedirectUri(Lists.newArrayList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
