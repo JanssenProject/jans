@@ -156,32 +156,32 @@ class Setup(object):
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
                             'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded'},
-                            'memory' : {'ratio' : 0.3, "max_allowed_mb" : 4096},
+                            'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                             'installed' : False
             },
                 'identity' : {'name' : 'identity',
                               'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,http-forwarded'},
-                              'memory' : {'ratio' : 0.2, "max_allowed_mb" : 2048},
+                              'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                               'installed' : False
             },
                 'idp' : {'name' : 'idp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.2, "max_allowed_mb" : 1024},
+                         'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                          'installed' : False
             },
                 'asimba' : {'name' : 'asimba',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
+                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                          'installed' : False
             },
                 'cas' : {'name' : 'cas',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.05, "max_allowed_mb" : 1024},
+                         'memory' : {'ratio' : 0.05, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                          'installed' : False
             },
                 'oxauth-rp' : {'name' : 'oxauth-rp',
                          'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.1, "max_allowed_mb" : 512},
+                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                          'installed' : False
             },
                 'passport' : {'name' : 'passport',
@@ -2591,7 +2591,7 @@ class Setup(object):
         if self.installPassport:
             installedComponents.append(self.jetty_app_configuration['passport'])
 
-        usedRatio = 0.01
+        usedRatio = 0.001
         for installedComponent in installedComponents:
             usedRatio += installedComponent['memory']['ratio']
 
@@ -2599,6 +2599,8 @@ class Setup(object):
 
         for installedComponent in installedComponents:
             allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
+            print round(allowedRatio * int(self.application_max_ram))
+            print round(allowedRatio * self.application_max_ram)
             allowedMemory = int(round(allowedRatio * int(self.application_max_ram)))
 
             if allowedMemory > installedComponent['memory']['max_allowed_mb']:
@@ -2608,11 +2610,19 @@ class Setup(object):
 
         # Iterate through all components into order to prepare all keys
         for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
-            if allowedApplicationsMemory.has_key(applicationName):
+            if applicationName in allowedApplicationsMemory:
                 applicationMemory = allowedApplicationsMemory.get(applicationName)
-                self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
             else:
-                self.templateRenderingDict["%s_max_mem" % applicationName] = 256
+                # We uses this dummy value to render template properly of not installed application
+                applicationMemory = 256
+
+            self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
+
+            if 'jvm_heap_ration' in applicationConfiguration['memory']:
+                jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
+                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = int(applicationMemory * jvmHeapRation)
+                self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_head_mem" % applicationName]
+                
 
     def merge_dicts(self, *dict_args):
         result = {}
