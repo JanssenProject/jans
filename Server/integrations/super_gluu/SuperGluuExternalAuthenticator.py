@@ -333,7 +333,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Super-Gluu. Prepare for step 2. auth_method: '%s'" % auth_method
             
-            issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
+            issuer = CdiUtil.bean(ConfigurationFactory).getAppConfiguration().getIssuer()
             super_gluu_request_dictionary = {'username': user.getUserId(),
                                'app': client_redirect_uri,
                                'issuer': issuer,
