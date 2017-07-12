@@ -44,8 +44,8 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String clientTokenEndpointAuthMethod;
     @JsonProperty(value = "client_request_uris")
     private List<String> clientRequestUris;
-    @JsonProperty(value = "client_logout_uris")
-    private List<String> clientLogoutUri;
+    @JsonProperty(value = "client_frontchannel_logout_uris")
+    private List<String> clientFrontchannelLogoutUri;
     @JsonProperty(value = "client_sector_identifier_uri")
     private String clientSectorIdentifierUri;
 
@@ -115,12 +115,12 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.clientSectorIdentifierUri = clientSectorIdentifierUri;
     }
 
-    public List<String> getClientLogoutUri() {
-        return clientLogoutUri;
+    public List<String> getClientFrontchannelLogoutUri() {
+        return clientFrontchannelLogoutUri;
     }
 
-    public void setClientLogoutUri(List<String> clientLogoutUri) {
-        this.clientLogoutUri = clientLogoutUri;
+    public void setClientFrontchannelLogoutUri(List<String> clientFrontchannelLogoutUri) {
+        this.clientFrontchannelLogoutUri = clientFrontchannelLogoutUri;
     }
 
     public List<String> getClientRequestUris() {

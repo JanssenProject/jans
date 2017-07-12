@@ -13,7 +13,6 @@ import org.xdi.oxd.common.response.UpdateSiteResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 
 import static junit.framework.Assert.*;
@@ -48,8 +47,9 @@ public class RegisterSiteTest {
             commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
-            commandParams.setRedirectUris(Arrays.asList(redirectUrl));
+            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+            commandParams.setRedirectUris(Lists.newArrayList(redirectUrl));
+            commandParams.setClaimsRedirectUri(Lists.newArrayList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
@@ -106,12 +106,13 @@ public class RegisterSiteTest {
             commandParams.setAuthorizationRedirectUri("https://gluu.loc/wp-login.php?option=oxdOpenId");
             commandParams.setPostLogoutRedirectUri("https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129");
 
-            commandParams.setRedirectUris(Arrays.asList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
+            commandParams.setRedirectUris(Lists.newArrayList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
+            commandParams.setClaimsRedirectUri(Lists.newArrayList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
             commandParams.setAcrValues(new ArrayList<String>());
-            commandParams.setContacts(Arrays.asList("vlad.karapetyan.1988@gmail.com"));
+            commandParams.setContacts(Lists.newArrayList("vlad.karapetyan.1988@gmail.com"));
 
 //            commandParams.setClientLogoutUri("https://mag.gluu/index.php/customer/account/logout/");
-            commandParams.setClientLogoutUri(Lists.newArrayList("https://gluu.loc/index.php/customer/account/logout/"));
+            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList("https://gluu.loc/index.php/customer/account/logout/"));
             commandParams.setScope(Lists.newArrayList("openid", "profile", "email"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
 
@@ -137,7 +138,7 @@ public class RegisterSiteTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientLogoutUri(Lists.newArrayList(logoutUri));
+        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization", "profile"));
         params.setTrustedClient(true);
 

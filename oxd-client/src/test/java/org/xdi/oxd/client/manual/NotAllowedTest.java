@@ -55,7 +55,7 @@ public class NotAllowedTest {
         commandParams.setAuthorizationRedirectUri("https://192.168.200.58:5053");
         commandParams.setScope(Lists.newArrayList("openid", "profile", "email", "address", "clientinfo", "mobile_phone", "phone", "uma_protection"));
         commandParams.setPostLogoutRedirectUri("https://192.168.200.58:5053");
-        commandParams.setClientLogoutUri(Lists.newArrayList("https://192.168.200.58:5053/logout"));
+        commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList("https://192.168.200.58:5053/logout"));
         commandParams.setAcrValues(Lists.newArrayList("gplus", "basic", "duo", "u2f"));
         commandParams.setGrantType(Lists.newArrayList("authorization_code"));
 

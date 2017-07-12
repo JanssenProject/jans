@@ -37,7 +37,7 @@ public class SetupClientTest {
             commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
+            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
             commandParams.setRedirectUris(Arrays.asList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
@@ -72,7 +72,7 @@ public class SetupClientTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientLogoutUri(Lists.newArrayList(logoutUri));
+        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization", "profile"));
         params.setTrustedClient(true);
 

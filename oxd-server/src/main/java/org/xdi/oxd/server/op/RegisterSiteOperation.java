@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
@@ -28,6 +29,7 @@ import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.RpService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -168,6 +170,18 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
         params.setRedirectUris(Lists.newArrayList(redirectUris));
 
+        // claims_redirect_uri
+        Set<String> claimsRedirectUris = Sets.newHashSet();
+        if (params.getClaimsRedirectUri() != null && !params.getClaimsRedirectUri().isEmpty()) {
+            claimsRedirectUris.addAll(params.getClaimsRedirectUri());
+            final Boolean autoRegister = getConfigurationService().getConfiguration().getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient();
+            if (autoRegister != null && autoRegister) {
+                final UmaMetadata discovery = getDiscoveryService().getUmaDiscovery(params.getOpHost(), params.getOpDiscoveryPath());
+                claimsRedirectUris.add(discovery.getClaimsInteractionEndpoint() + "?authentication=true");
+            }
+        }
+        params.setClaimsRedirectUri(Lists.newArrayList(claimsRedirectUris));
+
         // scope
         if (params.getScope() == null || params.getScope().isEmpty()) {
             params.setScope(fallback.getScope());
@@ -271,6 +285,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         final RegisterRequest request = new RegisterRequest(ApplicationType.WEB, clientName, params.getRedirectUris());
         request.setResponseTypes(responseTypes);
         request.setJwksUri(params.getClientJwksUri());
+        request.setClaimsRedirectUris(params.getClaimsRedirectUri() != null ? params.getClaimsRedirectUri() : new ArrayList<String>());
         request.setPostLogoutRedirectUris(params.getPostLogoutRedirectUri() != null ? Lists.newArrayList(params.getPostLogoutRedirectUri()) : Lists.<String>newArrayList());
         request.setContacts(params.getContacts());
         request.setScopes(params.getScope());
@@ -286,8 +301,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         }
         request.setGrantTypes(grantTypes);
 
-        if (params.getClientLogoutUri() != null) {
-            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientLogoutUri()));
+        if (params.getClientFrontchannelLogoutUri() != null) {
+            request.setFrontChannelLogoutUris(Lists.newArrayList(params.getClientFrontchannelLogoutUri()));
         }
 
         if (StringUtils.isNotBlank(params.getClientTokenEndpointAuthMethod())) {
@@ -322,6 +337,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setOpDiscoveryPath(params.getOpDiscoveryPath());
         rp.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
         rp.setRedirectUris(params.getRedirectUris());
+        rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
