@@ -236,28 +236,21 @@ class Migration(object):
 
     def copyCustomFiles(self):
         logging.info("Copying the custom pages and assets of webapps.")
+        folder_map = [(os.path.join(self.backupDir, 'opt'), '/opt')]
+
         if self.version < 300:
-            bu_custom = os.path.join(self.backupDir, 'var', 'gluu', 'webapps')
-        if self.version >= 300:
-            bu_custom = os.path.join(self.backupDir, 'opt', 'gluu', 'jetty')
+            custom = '/var/gluu/webapps/'
+            folder_map = [
+                (custom+'oxauth/pages', self.jettyDir+'oxauth/custom/pages'),
+                (custom+'oxauth/resources', self.jettyDir+'oxauth/custom/static'),
+                (custom+'oxauth/libs', self.jettyDir+'oxauth/lib/ext'),
+                (custom+'oxtrust/pages', self.jettyDir+'identity/custom/pages')
+                (custom+'oxtrust/resources', self.jettyDir+'identity/custom/static')
+                (custom+'oxtrust/libs', self.jettyDir+'identity/lib/ext')
+            ]
 
-        dir_map = {'oxauth': 'oxauth', 'oxtrust': 'identity',
-                   'pages': 'custom/pages', 'resources': 'custom/static',
-                   'libs': 'lib/ext'}
-        apps = ['oxauth', 'oxtrust']  # old names
-        dirs = ['pages', 'resources', 'libs']  # old names
-
-        for app in apps:
-            for d in dirs:
-                source = os.path.join(bu_custom, app, d)
-                if self.version >= 300:
-                    source = os.path.join(bu_custom, dir_map[app], dir_map[d])
-                dest = os.path.join(self.jettyDir, dir_map[app], dir_map[d])
-                for f in os.listdir(source):
-                    if os.path.isdir(os.path.join(source, f)):
-                        shutil.copytree(os.path.join(source, f), os.path.join(dest, f))
-                    else:
-                        shutil.copy(os.path.join(source, f), dest)
+        for pair in folder_map:
+            copy_tree(pair[0], pair[1])
 
     def stopWebapps(self):
         logging.info("Stopping Webapps oxAuth and Identity.")
