@@ -39,6 +39,8 @@ public class Rp implements Serializable {
     private String applicationType;
     @JsonProperty(value = "redirect_uris")
     private List<String> redirectUris;
+    @JsonProperty(value = "claims_redirect_uri")
+    private List<String> claimsRedirectUri;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
 
@@ -125,6 +127,7 @@ public class Rp implements Serializable {
 
         this.applicationType = conf.applicationType;
         this.redirectUris = conf.redirectUris;
+        this.claimsRedirectUri = conf.claimsRedirectUri;
         this.responseTypes = conf.responseTypes;
 
         this.clientId = conf.clientId;
@@ -388,6 +391,14 @@ public class Rp implements Serializable {
         this.opDiscoveryPath = opDiscoveryPath;
     }
 
+    public List<String> getClaimsRedirectUri() {
+        return claimsRedirectUri;
+    }
+
+    public void setClaimsRedirectUri(List<String> claimsRedirectUri) {
+        this.claimsRedirectUri = claimsRedirectUri;
+    }
+
     public List<String> getRedirectUris() {
         return redirectUris;
     }
@@ -520,6 +531,7 @@ public class Rp implements Serializable {
                 ", postLogoutRedirectUri='" + postLogoutRedirectUri + '\'' +
                 ", applicationType='" + applicationType + '\'' +
                 ", redirectUris=" + redirectUris +
+                ", claimsRedirectUri=" + claimsRedirectUri +
                 ", responseTypes=" + responseTypes +
                 ", clientId='" + clientId + '\'' +
                 ", clientSecret='" + clientSecret + '\'' +
