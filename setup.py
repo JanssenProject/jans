@@ -2619,7 +2619,7 @@ class Setup(object):
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
                 self.templateRenderingDict["%s_max_heap_mem" % applicationName] = int(applicationMemory * jvmHeapRation)
-                self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_head_mem" % applicationName]
+                self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
                 
 
     def merge_dicts(self, *dict_args):
