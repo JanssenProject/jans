@@ -26,16 +26,18 @@ public class FacesMessages implements Serializable {
 
 	public void add(Severity severity, String message) {
 		facesContext.addMessage(null, new FacesMessage(severity, message, message));
+		setKeepMessages();
 	}
 
 	public void add(String clientId, Severity severity, String message) {
 		facesContext.addMessage(clientId, new FacesMessage(severity, message, message));
+		setKeepMessages();
 	}
 
 	public void add(Severity severity, String message, Object ... params) {
-		// TODO: CDI Review. Add params to message
+		// TODO: CDI Review. Add parameters to message
 		add(severity, message);
-		externalContext.getFlash().setKeepMessages(true);
+		setKeepMessages();
 	}
 
 	public void setKeepMessages() {
