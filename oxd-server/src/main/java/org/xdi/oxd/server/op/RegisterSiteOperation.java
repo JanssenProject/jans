@@ -339,6 +339,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setRedirectUris(params.getRedirectUris());
         rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");
+        rp.setOxdRpProgrammingLanguage(params.getOxdRpProgrammingLanguage());
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
             rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());

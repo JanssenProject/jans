@@ -63,8 +63,18 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private List<String> contacts;
     @JsonProperty(value = "trusted_client")
     private Boolean trustedClient = false;
+    @JsonProperty(value = "oxd_rp_programming_language")
+    private String oxdRpProgrammingLanguage;
 
     public RegisterSiteParams() {
+    }
+
+    public String getOxdRpProgrammingLanguage() {
+        return oxdRpProgrammingLanguage;
+    }
+
+    public void setOxdRpProgrammingLanguage(String oxdRpProgrammingLanguage) {
+        this.oxdRpProgrammingLanguage = oxdRpProgrammingLanguage;
     }
 
     public String getProtectionAccessToken() {
