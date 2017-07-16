@@ -109,6 +109,8 @@ public class Rp implements Serializable {
     private Date rptExpiresAt;
     @JsonProperty(value = "rpt_created_at")
     private Date rptCreatedAt;
+    @JsonProperty(value = "oxd_rp_programming_language")
+    private String oxdRpProgrammingLanguage;
 
     public Rp() {
     }
@@ -166,6 +168,7 @@ public class Rp implements Serializable {
         this.rptCreatedAt = conf.rptCreatedAt;
 
         this.umaProtectedResources = conf.umaProtectedResources;
+        this.oxdRpProgrammingLanguage = conf.oxdRpProgrammingLanguage;
     }
 
     public String getClientJwksUri() {
@@ -442,6 +445,14 @@ public class Rp implements Serializable {
         this.umaProtectedResources = umaProtectedResources;
     }
 
+    public String getOxdRpProgrammingLanguage() {
+        return oxdRpProgrammingLanguage;
+    }
+
+    public void setOxdRpProgrammingLanguage(String oxdRpProgrammingLanguage) {
+        this.oxdRpProgrammingLanguage = oxdRpProgrammingLanguage;
+    }
+
     public String getRpt() {
         return rpt;
     }
@@ -563,6 +574,7 @@ public class Rp implements Serializable {
                 ", rptExpiresAt=" + rptExpiresAt +
                 ", rptCreatedAt=" + rptCreatedAt +
                 ", rptUpgraded=" + rptUpgraded +
+                ", oxdRpProgrammingLanguage=" + oxdRpProgrammingLanguage +
                 '}';
     }
 }
