@@ -31,7 +31,7 @@ public interface ClientInfoRestWebService {
     @GET
     @Path("/clientinfo")
     @Produces({MediaType.APPLICATION_JSON})
-    Response requestUserInfoGet(
+    Response requestClientInfoGet(
             @QueryParam("access_token") String accessToken,
             @HeaderParam("Authorization") String authorization,
             @Context SecurityContext securityContext);
@@ -39,7 +39,7 @@ public interface ClientInfoRestWebService {
     @POST
     @Path("/clientinfo")
     @Produces({MediaType.APPLICATION_JSON})
-    Response requestUserInfoPost(
+    Response requestClientInfoPost(
             @FormParam("access_token") String accessToken,
             @HeaderParam("Authorization") String authorization,
             @Context SecurityContext securityContext);
