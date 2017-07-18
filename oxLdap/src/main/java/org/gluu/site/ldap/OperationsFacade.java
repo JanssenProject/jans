@@ -226,49 +226,59 @@ public class OperationsFacade {
 				// Default page size
 				searchLimit = 100;
 			}
-
-			ASN1OctetString cookie = null;
-			if (startIndex > 0) {
-				try {
-					cookie = scrollSimplePagedResultsControl(dn, filter, scope, controls, startIndex);
-				} catch (InvalidSimplePageControlException ex) {
-					throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
-				}
-			}
-
-			if (batchOperation != null) {
-				cookie = batchOperation.getCookie();
-			}
-
-			do {
-				searchRequest.setControls(new Control[] { new SimplePagedResultsControl(searchLimit, cookie) });
-				setControls(searchRequest, controls);
-				if (batchOperation != null) {
-					searchResult = batchOperation.getLdapConnection().search(searchRequest);
-				} else {
-					searchResult = getConnectionPool().search(searchRequest);
-				}
-				searchResultList.add(searchResult);
-				searchResultEntries.addAll(searchResult.getSearchEntries());
-				searchResultReferences.addAll(searchResult.getSearchReferences());
-				cookie = null;
-				try {
-					SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
-					if (c != null) {
-						cookie = c.getCookie();
-						if (batchOperation != null) {
-							batchOperation.setCookie(cookie);
-							batchOperation.setMoreResultsToReturn(c.moreResultsToReturn());
-						}
+			LDAPConnection ldapConnection = null;
+			try {
+				ldapConnection = getConnectionPool().getConnection();
+				ASN1OctetString cookie = null;
+				if (startIndex > 0) {
+					try {
+						cookie = scrollSimplePagedResultsControl(ldapConnection, dn, filter, scope, controls, startIndex);
+					} catch (InvalidSimplePageControlException ex) {
+						throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
+					} catch (LDAPException ex) {
+						throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
 					}
-				} catch (LDAPException ex) {
-					log.error("Error while accessing cookies" + ex.getMessage());
 				}
 
-				if (useSizeLimit) {
-					break;
+				if (batchOperation != null) {
+					cookie = batchOperation.getCookie();
 				}
-			} while ((cookie != null) && (cookie.getValueLength() > 0));
+
+				do {
+					searchRequest.setControls(new Control[]{new SimplePagedResultsControl(searchLimit, cookie)});
+					setControls(searchRequest, controls);
+					if (batchOperation != null) {
+						searchResult = batchOperation.getLdapConnection().search(searchRequest);
+					} else {
+						searchResult = ldapConnection.search(searchRequest);
+					}
+					searchResultList.add(searchResult);
+					searchResultEntries.addAll(searchResult.getSearchEntries());
+					searchResultReferences.addAll(searchResult.getSearchReferences());
+					cookie = null;
+					try {
+						SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
+						if (c != null) {
+							cookie = c.getCookie();
+							if (batchOperation != null) {
+								batchOperation.setCookie(cookie);
+								batchOperation.setMoreResultsToReturn(c.moreResultsToReturn());
+							}
+						}
+					} catch (LDAPException ex) {
+						log.error("Error while accessing cookies" + ex.getMessage());
+					}
+
+					if (useSizeLimit) {
+						break;
+					}
+				} while ((cookie != null) && (cookie.getValueLength() > 0));
+			} catch (LDAPException e) {
+				throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", e);
+			} finally {
+				if (ldapConnection != null)
+					getConnectionPool().releaseConnection(ldapConnection);
+			}
 
 			SearchResult searchResultTemp = searchResultList.get(0);
 			searchResult = new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(),
@@ -283,16 +293,16 @@ public class OperationsFacade {
 		return searchResult;
 	}
 
-	private ASN1OctetString scrollSimplePagedResultsControl(String dn, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPSearchException, InvalidSimplePageControlException {
+	private ASN1OctetString scrollSimplePagedResultsControl(LDAPConnection ldapConnection, String dn, Filter filter, SearchScope scope, Control[] controls, int startIndex) throws LDAPException, InvalidSimplePageControlException {
 		SearchRequest searchRequest = new SearchRequest(dn, scope.getLdapSearchScope(), filter, "dn");
 
 		int currentStartIndex = startIndex;
 		ASN1OctetString cookie = null;
 		do {
 			int pageSize = Math.min(currentStartIndex, 100);
-			searchRequest.setControls(new Control[] { new SimplePagedResultsControl(pageSize, cookie, true) });
+			searchRequest.setControls(new Control[]{new SimplePagedResultsControl(pageSize, cookie, true)});
 			setControls(searchRequest, controls);
-			SearchResult searchResult = getConnectionPool().search(searchRequest);
+			SearchResult searchResult = ldapConnection.search(searchRequest);
 
 			currentStartIndex -= searchResult.getEntryCount();
 			try {
@@ -303,7 +313,7 @@ public class OperationsFacade {
 			} catch (LDAPException ex) {
 				log.error("Error while accessing cookie" + ex.getMessage());
 				throw new InvalidSimplePageControlException("Error while accessing cookie");
-			}
+				}
 		} while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
 
 		return cookie;
