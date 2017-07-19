@@ -10,6 +10,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.gluu.site.ldap.persistence.annotation.*;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.util.LdapUtils;
 
@@ -20,7 +21,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @version July 18, 2017
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
@@ -60,7 +61,7 @@ public class Client implements Serializable {
     private ResponseType[] responseTypes;
 
     @LdapAttribute(name = "oxAuthGrantType")
-    private String[] grantTypes;
+    private GrantType[] grantTypes;
 
     @LdapAttribute(name = "oxAuthAppType")
     private String applicationType;
@@ -365,6 +366,7 @@ public class Client implements Serializable {
      * to pre-registered redirection URIs defined in [RFC6749] unless such URIs are also pre-registered specifically as
      * claims redirection URIs. If the URI is pre-registered, this URI MUST exactly match one of the pre-registered claims
      * redirection URIs, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).
+     *
      * @return claims redirect uris
      */
     public String[] getClaimRedirectUris() {
@@ -373,6 +375,7 @@ public class Client implements Serializable {
 
     /**
      * Sets Claim redirect URIs
+     *
      * @param claimRedirectUris claims redirect uris
      */
     public void setClaimRedirectUris(String[] claimRedirectUris) {
@@ -405,7 +408,7 @@ public class Client implements Serializable {
      *
      * @return The grant types.
      */
-    public String[] getGrantTypes() {
+    public GrantType[] getGrantTypes() {
         return grantTypes;
     }
 
@@ -415,7 +418,7 @@ public class Client implements Serializable {
      *
      * @param grantTypes The grant types.
      */
-    public void setGrantTypes(String[] grantTypes) {
+    public void setGrantTypes(GrantType[] grantTypes) {
         this.grantTypes = grantTypes;
     }
 

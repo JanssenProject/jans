@@ -8,24 +8,28 @@ package org.xdi.oxauth.client;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.client.ClientResponse;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.RegisterErrorResponseType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
+import org.xdi.oxauth.model.util.Util;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
+import static org.xdi.oxauth.model.register.RegisterRequestParam.GRANT_TYPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.RESPONSE_TYPES;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * Represents a register response received from the authorization server.
  *
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version July 18, 2017
  */
 public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorResponseType> {
 
@@ -37,6 +41,8 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
     private String registrationClientUri;
     private Date clientIdIssuedAt;
     private Date clientSecretExpiresAt;
+    private List<ResponseType> responseTypes;
+    private List<GrantType> grantTypes;
     private Map<String, String> claims = new HashMap<String, String>();
 
     public RegisterResponse() {
@@ -103,12 +109,26 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
                     }
                     jsonObj.remove(CLIENT_SECRET_EXPIRES_AT.toString());
                 }
+                if (jsonObj.has(RESPONSE_TYPES.toString())) {
+                    JSONArray responseTypesJsonArray = jsonObj.getJSONArray(RESPONSE_TYPES.toString());
+                    responseTypes = Util.asEnumList(responseTypesJsonArray, ResponseType.class);
+                }
+                if (jsonObj.has(GRANT_TYPES.toString())) {
+                    JSONArray grantTypesJsonArray = jsonObj.getJSONArray(GRANT_TYPES.toString());
+                    grantTypes = Util.asEnumList(grantTypesJsonArray, GrantType.class);
+                }
 
                 for (Iterator<String> it = jsonObj.keys(); it.hasNext(); ) {
                     String key = it.next();
                     getClaims().put(key, jsonObj.getString(key));
                 }
             } catch (JSONException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (NoSuchMethodException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (IllegalAccessException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (InvocationTargetException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -196,6 +216,22 @@ public class RegisterResponse extends BaseResponseWithErrors<RegisterErrorRespon
     public void setClientSecretExpiresAt(Date clientSecretExpiresAt) {
         // findbugs : save copy instead of original object
         this.clientSecretExpiresAt = clientSecretExpiresAt != null ? new Date(clientSecretExpiresAt.getTime()) : null;
+    }
+
+    public List<ResponseType> getResponseTypes() {
+        return responseTypes;
+    }
+
+    public void setResponseTypes(List<ResponseType> responseTypes) {
+        this.responseTypes = responseTypes;
+    }
+
+    public List<GrantType> getGrantTypes() {
+        return grantTypes;
+    }
+
+    public void setGrantTypes(List<GrantType> grantTypes) {
+        this.grantTypes = grantTypes;
     }
 
     public Map<String, String> getClaims() {
