@@ -52,6 +52,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
                     return okResponse(response);
                 } else {
                     LOG.error("access_token is blank in response, params: " + params + ", response: " + tokenResponse);
+                    LOG.error("Please check AS logs for more details (oxauth.log for CE).");
                 }
             } else {
                 LOG.error("No response from TokenClient");
