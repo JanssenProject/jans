@@ -68,7 +68,7 @@ public class UmaGatheringWS {
             if (authenticationRedirect != null && authenticationRedirect) { // restore parameters from session
                 log.debug("Authentication redirect, restoring parameters from session ...");
                 if (session == null) {
-                    log.error("Session is null however authorization=true. Wrong workflow! Please correct custom Glaims-Gathering Script.");
+                    log.error("Session is null however authentication=true. Wrong workflow! Please correct custom Glaims-Gathering Script.");
                     throw new UmaWebException(BAD_REQUEST, errorResponseFactory, INVALID_SESSION);
                 }
                 clientId = sessionService.getClientId(session);
