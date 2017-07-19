@@ -7,6 +7,8 @@
 package org.xdi.oxauth.model.configuration;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.WebKeyStorage;
 
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version June 28, 2017
+ * @version July 18, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -50,8 +52,8 @@ public class AppConfiguration implements Configuration {
     private Boolean umaAddScopesAutomatically;
 
     private String openidSubAttribute;
-    private List<String> responseTypesSupported;
-    private List<String> grantTypesSupported;
+    private Set<Set<ResponseType>> responseTypesSupported;
+    private Set<GrantType> grantTypesSupported;
     private List<String> subjectTypesSupported;
     private String defaultSubjectType;
     private List<String> userInfoSigningAlgValuesSupported;
@@ -467,19 +469,19 @@ public class AppConfiguration implements Configuration {
         this.openIdConfigurationEndpoint = openIdConfigurationEndpoint;
     }
 
-    public List<String> getResponseTypesSupported() {
+    public Set<Set<ResponseType>> getResponseTypesSupported() {
         return responseTypesSupported;
     }
 
-    public void setResponseTypesSupported(List<String> responseTypesSupported) {
+    public void setResponseTypesSupported(Set<Set<ResponseType>> responseTypesSupported) {
         this.responseTypesSupported = responseTypesSupported;
     }
 
-    public List<String> getGrantTypesSupported() {
+    public Set<GrantType> getGrantTypesSupported() {
         return grantTypesSupported;
     }
 
-    public void setGrantTypesSupported(List<String> grantTypesSupported) {
+    public void setGrantTypesSupported(Set<GrantType> grantTypesSupported) {
         this.grantTypesSupported = grantTypesSupported;
     }
 
