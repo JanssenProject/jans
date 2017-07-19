@@ -31,7 +31,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version June 15, 2016
+ * @version July 18, 2017
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -996,7 +996,6 @@ public class RegisterRequest extends BaseRequest {
         }
 
         final Set<ResponseType> responseTypes = new HashSet<ResponseType>();
-        final Set<GrantType> grantTypes = new HashSet<GrantType>();
         if (requestObject.has(RESPONSE_TYPES.toString())) {
             JSONArray responseTypesJsonArray = requestObject.getJSONArray(RESPONSE_TYPES.toString());
             for (int i = 0; i < responseTypesJsonArray.length(); i++) {
@@ -1005,45 +1004,17 @@ public class RegisterRequest extends BaseRequest {
                     responseTypes.add(rt);
                 }
             }
-        } else { // Default
-            responseTypes.add(ResponseType.CODE);
         }
-        if (responseTypes.contains(ResponseType.CODE)) {
-            grantTypes.add(GrantType.AUTHORIZATION_CODE);
-        }
-        if (responseTypes.contains(ResponseType.ID_TOKEN)
-                || responseTypes.containsAll(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN))) {
-            grantTypes.add(GrantType.IMPLICIT);
-        }
-        if (responseTypes.containsAll(Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN))
-                || responseTypes.containsAll(Arrays.asList(ResponseType.CODE, ResponseType.TOKEN))
-                || responseTypes.containsAll(Arrays.asList(ResponseType.CODE, ResponseType.TOKEN, ResponseType.ID_TOKEN))) {
-            grantTypes.add(GrantType.AUTHORIZATION_CODE);
-            grantTypes.add(GrantType.IMPLICIT);
-        }
+
+        final Set<GrantType> grantTypes = new HashSet<GrantType>();
         if (requestObject.has(GRANT_TYPES.toString())) {
             JSONArray grantTypesJsonArray = requestObject.getJSONArray(GRANT_TYPES.toString());
             for (int i = 0; i < grantTypesJsonArray.length(); i++) {
                 GrantType gt = GrantType.fromString(grantTypesJsonArray.getString(i));
                 if (gt != null) {
                     grantTypes.add(gt);
-                    switch (gt) {
-                        case AUTHORIZATION_CODE:
-                            responseTypes.add(ResponseType.CODE);
-                            break;
-                        case IMPLICIT:
-                            responseTypes.add(ResponseType.TOKEN);
-                            responseTypes.add(ResponseType.ID_TOKEN);
-                            break;
-                        case REFRESH_TOKEN:
-                            break;
-                        default:
-                            break;
-                    }
                 }
             }
-        } else { // Default
-            grantTypes.add(GrantType.AUTHORIZATION_CODE);
         }
 
         final List<String> contacts = new ArrayList<String>();

@@ -99,6 +99,12 @@
         </classes>
     </test>
 
+    <test name="Grant Types Restriction (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionHttpTest"/>
+        </classes>
+    </test>
+
     <!-- JWK test -->
     <test name="JWK test (HTTP)" enabled="true">
         <classes>
