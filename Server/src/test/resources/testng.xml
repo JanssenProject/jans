@@ -51,13 +51,6 @@
 		</classes>
 	</test>
 
-	<!-- Grant Types Restriction -->
-	<test name="Grant Types Restriction (embedded)" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionEmbeddedTest" />
-		</classes>
-	</test>
-
 	<!-- JWK test -->
 	<test name="JWK test (embedded)" enabled="true">
 		<classes>

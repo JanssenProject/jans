@@ -6,12 +6,14 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
+import org.gluu.site.ldap.persistence.annotation.LdapEnum;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * <p>
@@ -26,7 +28,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  * implicit grant type flows.
  * </p>
  *
- * @author Javier Rojas Blum Date: 09.20.2011
+ * @author Javier Rojas Blum
+ * @version July 18, 2017
  */
 public enum ResponseType implements HasParamName, LdapEnum {
 
@@ -44,15 +47,15 @@ public enum ResponseType implements HasParamName, LdapEnum {
     ID_TOKEN("id_token", "ID Token");
 
     private final String value;
-	private final String displayName;
+    private final String displayName;
 
-	private static Map<String, ResponseType> mapByValues = new HashMap<String, ResponseType>();
+    private static Map<String, ResponseType> mapByValues = new HashMap<String, ResponseType>();
 
-	static {
-		for (ResponseType enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (ResponseType enumType : values()) {
+            mapByValues.put(enumType.getValue(), enumType);
+        }
+    }
 
     private ResponseType(String value, String displayName) {
         this.value = value;
@@ -65,8 +68,9 @@ public enum ResponseType implements HasParamName, LdapEnum {
      * @param param The response_type parameter.
      * @return The corresponding response type if found, otherwise <code>null</code>.
      */
+    @JsonCreator
     public static ResponseType fromString(String param) {
-    	return getByValue(param);
+        return getByValue(param);
     }
 
     /**
@@ -84,15 +88,15 @@ public enum ResponseType implements HasParamName, LdapEnum {
      * @return display name name
      */
     public String getDisplayName() {
-		return displayName;
-	}
+        return displayName;
+    }
 
-	@Override
-	public String getValue() {
-		return value;
-	}
+    @Override
+    public String getValue() {
+        return value;
+    }
 
-	/**
+    /**
      * Returns a list of the corresponding {@link ResponseType} from a space-separated
      * list of response_type parameters.
      *
@@ -119,32 +123,33 @@ public enum ResponseType implements HasParamName, LdapEnum {
         return responseTypes;
     }
 
-	public static String[] toStringArray(ResponseType[] responseTypes) {
-		if (responseTypes == null) {
-			return null;
-		}
+    public static String[] toStringArray(ResponseType[] responseTypes) {
+        if (responseTypes == null) {
+            return null;
+        }
 
-		String[] resultResponseTypes = new String[responseTypes.length];
-		for (int i = 0; i < responseTypes.length; i++) {
-			resultResponseTypes[i] = responseTypes[i].getValue();
-		}
+        String[] resultResponseTypes = new String[responseTypes.length];
+        for (int i = 0; i < responseTypes.length; i++) {
+            resultResponseTypes[i] = responseTypes[i].getValue();
+        }
 
-		return resultResponseTypes;
-	}
+        return resultResponseTypes;
+    }
 
-	public static ResponseType getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static ResponseType getByValue(String value) {
+        return mapByValues.get(value);
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
     /**
      * Returns a string representation of the object. In this case the parameter
      * name for the response_type parameter.
      */
     @Override
+    @JsonValue
     public String toString() {
         return value;
     }

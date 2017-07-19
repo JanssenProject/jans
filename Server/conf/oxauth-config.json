@@ -24,18 +24,21 @@
     "oxElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
     "openidSubAttribute":"inum",
     "responseTypesSupported":[
-        "code",
-        "code id_token",
-        "token",
-        "token id_token",
-        "code token",
-        "code token id_token",
-        "id_token"
+        ["code"],
+        ["code", "id_token"],
+        ["token"],
+        ["token", "id_token"],
+        ["code", "token"],
+        ["code", "token", "id_token"],
+        ["id_token"]
     ],
     "grantTypesSupported":[
         "authorization_code",
         "implicit",
-        "urn:ietf:params:oauth:grant-type:jwt-bearer"
+        "password",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket"
     ],
     "subjectTypesSupported":[
         "public",
