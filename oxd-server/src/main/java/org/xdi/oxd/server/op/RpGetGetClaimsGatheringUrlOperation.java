@@ -7,7 +7,7 @@ import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
-import org.xdi.oxd.common.params.RpGetGetClaimsGatheringUrlParams;
+import org.xdi.oxd.common.params.RpGetClaimsGatheringUrlParams;
 import org.xdi.oxd.common.response.RpGetClaimsGatheringUrlResponse;
 import org.xdi.oxd.server.service.Rp;
 
@@ -16,16 +16,16 @@ import org.xdi.oxd.server.service.Rp;
  * @version 0.9, 17/06/2016
  */
 
-public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetGetClaimsGatheringUrlParams> {
+public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClaimsGatheringUrlParams> {
 
 //    private static final Logger LOG = LoggerFactory.getLogger(RpGetGetClaimsGatheringUrlOperation.class);
 
     protected RpGetGetClaimsGatheringUrlOperation(Command command, final Injector injector) {
-        super(command, injector, RpGetGetClaimsGatheringUrlParams.class);
+        super(command, injector, RpGetClaimsGatheringUrlParams.class);
     }
 
     @Override
-    public CommandResponse execute(RpGetGetClaimsGatheringUrlParams params) {
+    public CommandResponse execute(RpGetClaimsGatheringUrlParams params) {
         validate(params);
 
         final UmaMetadata metadata = getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId());
@@ -44,7 +44,7 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetGetC
         return okResponse(r);
     }
 
-    private void validate(RpGetGetClaimsGatheringUrlParams params) {
+    private void validate(RpGetClaimsGatheringUrlParams params) {
         if (StringUtils.isBlank(params.getTicket())) {
             throw new ErrorResponseException(ErrorResponseCode.NO_UMA_TICKET_PARAMETER);
         }
