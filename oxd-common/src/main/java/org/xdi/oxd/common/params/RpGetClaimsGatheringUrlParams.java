@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RpGetGetClaimsGatheringUrlParams implements HasProtectionAccessTokenParams {
+public class RpGetClaimsGatheringUrlParams implements HasProtectionAccessTokenParams {
 
     @JsonProperty(value = "oxd_id")
     private String oxdId;
@@ -20,7 +20,7 @@ public class RpGetGetClaimsGatheringUrlParams implements HasProtectionAccessToke
     @JsonProperty(value = "protection_access_token")
     private String protectionAccessToken;
 
-    public RpGetGetClaimsGatheringUrlParams() {
+    public RpGetClaimsGatheringUrlParams() {
     }
 
     public String getProtectionAccessToken() {
