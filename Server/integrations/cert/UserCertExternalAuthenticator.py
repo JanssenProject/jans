@@ -265,7 +265,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             return "/auth/cert/login.xhtml"
         if step == 2:
-            return "/cert-login.xhtml"
+            return "/auth/cert/cert-login.xhtml"
         elif step == 3:
             cert_selected = self.getSessionAttribute("cert_selected")
             if True != cert_selected:
