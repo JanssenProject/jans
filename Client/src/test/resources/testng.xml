@@ -350,7 +350,7 @@
             <class name="org.xdi.oxauth.interop.DisplaysLogoInLoginPage"/>
         </classes>
     </test>
-    <test name="OC5. FeatureTest-Displays Policy in Login Page" enabled="true">
+    <test name="OC5. FeatureTest-Displays Policy in Login Page" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.interop.DisplaysPolicyUriInLoginPage"/>
         </classes>
