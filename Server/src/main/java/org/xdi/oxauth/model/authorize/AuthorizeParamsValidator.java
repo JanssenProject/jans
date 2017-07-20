@@ -20,7 +20,7 @@ import java.util.Set;
  * Validates the parameters received for the authorize web service.
  *
  * @author Javier Rojas Blum
- * @version July 18, 2017
+ * @version July 19, 2017
  */
 public class AuthorizeParamsValidator {
 
@@ -67,7 +67,11 @@ public class AuthorizeParamsValidator {
         return clientSupportedResponseTypes.containsAll(responseTypes);
     }
 
-    public static boolean validateGrantType(List<ResponseType> responseTypes, List<GrantType> clientGrantTypes, Set<GrantType> grantTypesSupported) {
+    public static boolean validateGrantType(List<ResponseType> responseTypes, GrantType[] clientGrantTypesArray, Set<GrantType> grantTypesSupported) {
+        List<GrantType> clientGrantTypes = null;
+        if (clientGrantTypesArray != null) {
+            clientGrantTypes = Arrays.asList(clientGrantTypesArray);
+        }
         if (responseTypes == null || clientGrantTypes == null || grantTypesSupported == null) {
             return false;
         }

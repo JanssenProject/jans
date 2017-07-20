@@ -31,7 +31,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version July 19, 2017
  */
 public class ClientAuthenticationFilterHttpTest extends BaseTest {
 
@@ -48,11 +48,15 @@ public class ClientAuthenticationFilterHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
         customAttrValue1 = UUID.randomUUID().toString();
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.addCustomAttribute("myCustomAttr1", customAttrValue1);
