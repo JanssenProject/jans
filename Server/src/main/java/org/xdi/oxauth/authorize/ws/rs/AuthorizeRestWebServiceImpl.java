@@ -62,7 +62,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version July 18, 2017
+ * @version July 19, 2017
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -222,7 +222,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     boolean validRedirectUri = redirectUri != null;
 
                     if (AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
-                            && AuthorizeParamsValidator.validateGrantType(responseTypes, Arrays.asList(client.getGrantTypes()), appConfiguration.getGrantTypesSupported())) {
+                            && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         if (validRedirectUri) {
 
                             if (StringUtils.isNotBlank(accessToken)) {

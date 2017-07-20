@@ -43,14 +43,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.security.SignatureException;
-import java.util.Arrays;
 
 /**
  * Provides interface for token REST web services
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version July 18, 2017
+ * @version July 19, 2017
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -140,7 +139,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (client == null) {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT));
                     }
-                    if (!TokenParamsValidator.validateGrantType(gt, Arrays.asList(client.getGrantTypes()), appConfiguration.getGrantTypesSupported())) {
+                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT));
                     }
 
@@ -192,7 +191,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (client == null) {
                         return response(error(401, TokenErrorResponseType.INVALID_GRANT));
                     }
-                    if (!TokenParamsValidator.validateGrantType(gt, Arrays.asList(client.getGrantTypes()), appConfiguration.getGrantTypesSupported())) {
+                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT));
                     }
 
@@ -227,7 +226,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     if (client == null) {
                         return response(error(401, TokenErrorResponseType.INVALID_GRANT));
                     }
-                    if (!TokenParamsValidator.validateGrantType(gt, Arrays.asList(client.getGrantTypes()), appConfiguration.getGrantTypesSupported())) {
+                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT));
                     }
 
@@ -259,7 +258,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         log.error("Invalid client", new RuntimeException("Client is empty"));
                         return response(error(401, TokenErrorResponseType.INVALID_CLIENT));
                     }
-                    if (!TokenParamsValidator.validateGrantType(gt, Arrays.asList(client.getGrantTypes()), appConfiguration.getGrantTypesSupported())) {
+                    if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         return response(error(400, TokenErrorResponseType.INVALID_GRANT));
                     }
 

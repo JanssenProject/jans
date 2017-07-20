@@ -9,6 +9,7 @@ package org.xdi.oxauth.model.token;
 import org.xdi.oxauth.model.common.GrantType;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ import java.util.Set;
  * Validates the parameters received for the token web service.
  *
  * @author Javier Rojas Blum
- * @version July 18, 2017
+ * @version July 19, 2017
  */
 public class TokenParamsValidator {
 
@@ -69,7 +70,12 @@ public class TokenParamsValidator {
                 && clientSecret != null && !clientSecret.isEmpty();
     }
 
-    public static boolean validateGrantType(GrantType requestedGrantType, List<GrantType> clientGrantTypes, Set<GrantType> grantTypesSupported) {
+    public static boolean validateGrantType(GrantType requestedGrantType, GrantType[] clientGrantTypesArray, Set<GrantType> grantTypesSupported) {
+        if (clientGrantTypesArray == null) {
+            return false;
+        }
+        List<GrantType> clientGrantTypes = Arrays.asList(clientGrantTypesArray);
+
         return clientGrantTypes.contains(requestedGrantType) && grantTypesSupported.contains(requestedGrantType);
     }
 }
