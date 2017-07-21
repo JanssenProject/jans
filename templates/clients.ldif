@@ -12,6 +12,9 @@ oxAuthAppType: web
 oxAuthResponseType: code
 oxAuthResponseType: id_token
 oxAuthResponseType: token
+oxAuthGrantType: authorization_code
+oxAuthGrantType: implicit
+oxAuthGrantType: refresh_token
 oxAuthScope: inum=%(inumOrg)s!0009!F0C4,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!10B2,ou=scopes,o=%(inumOrg)s,o=gluu
 oxAuthScope: inum=%(inumOrg)s!0009!764C,ou=scopes,o=%(inumOrg)s,o=gluu

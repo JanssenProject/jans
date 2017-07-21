@@ -31,6 +31,8 @@ inum: %(inum)s
 oxAuthClientSecret: %(secret)s
 oxAuthAppType: web
 oxAuthResponseType: code
+oxAuthGrantType: authorization_code
+oxAuthGrantType: refresh_token
 oxAuthRedirectURI: %(callback)s
 oxAuthTokenEndpointAuthMethod: client_secret_basic
 oxAuthIdTokenSignedResponseAlg: HS256
