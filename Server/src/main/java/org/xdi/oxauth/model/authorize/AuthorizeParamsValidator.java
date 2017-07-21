@@ -6,19 +6,21 @@
 
 package org.xdi.oxauth.model.authorize;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.registration.Client;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Validates the parameters received for the authorize web service.
  *
  * @author Javier Rojas Blum
- * @version June 3, 2015
+ * @version July 19, 2017
  */
 public class AuthorizeParamsValidator {
 
@@ -63,5 +65,29 @@ public class AuthorizeParamsValidator {
         List<ResponseType> clientSupportedResponseTypes = Arrays.asList(client.getResponseTypes());
 
         return clientSupportedResponseTypes.containsAll(responseTypes);
+    }
+
+    public static boolean validateGrantType(List<ResponseType> responseTypes, GrantType[] clientGrantTypesArray, Set<GrantType> grantTypesSupported) {
+        List<GrantType> clientGrantTypes = null;
+        if (clientGrantTypesArray != null) {
+            clientGrantTypes = Arrays.asList(clientGrantTypesArray);
+        }
+        if (responseTypes == null || clientGrantTypes == null || grantTypesSupported == null) {
+            return false;
+        }
+        if (responseTypes.contains(ResponseType.CODE)) {
+            GrantType requestedGrantType = GrantType.AUTHORIZATION_CODE;
+            if (!clientGrantTypes.contains(requestedGrantType) || !grantTypesSupported.contains(requestedGrantType)) {
+                return false;
+            }
+        }
+        if (responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN)) {
+            GrantType requestedGrantType = GrantType.IMPLICIT;
+            if (!clientGrantTypes.contains(requestedGrantType) || !grantTypesSupported.contains(requestedGrantType)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
