@@ -16,15 +16,19 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.xdi.oxauth.model.common.HasParamName;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
+ * @version July 18, 2017
  */
 
 public class Util {
@@ -75,6 +79,21 @@ public class Util {
             if (length > 0) {
                 for (int i = 0; i < length; i++) {
                     result.add(p_array.getString(i));
+                }
+            }
+        }
+        return result;
+    }
+
+    public static <T extends LdapEnum> List<T> asEnumList(JSONArray p_array, Class<T> clazz)
+            throws JSONException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final List<T> result = new ArrayList<T>();
+        if (p_array != null) {
+            final int length = p_array.length();
+            if (length > 0) {
+                for (int i = 0; i < length; i++) {
+                    Method method = clazz.getMethod("getByValue", String.class);
+                    result.add((T) method.invoke(null, new Object[]{p_array.getString(i)}));
                 }
             }
         }

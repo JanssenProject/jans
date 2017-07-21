@@ -19,6 +19,7 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
@@ -28,7 +29,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version June 28, 2017
+ * @version July 19, 2017
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -80,11 +81,15 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAccessTokenPassword");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -127,11 +132,16 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String redirectUris, final String userId, final String userSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretPost");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -177,11 +187,16 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtHS256");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -231,11 +246,16 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtHS384");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -286,11 +306,16 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtHS512");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -343,6 +368,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS256");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -350,6 +379,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -404,6 +434,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS384");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -411,6 +445,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -465,6 +500,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS512");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -472,6 +511,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -525,6 +565,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES256");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -532,6 +576,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -586,6 +631,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES384");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -593,6 +642,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -647,6 +697,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES512");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -654,6 +708,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -708,6 +763,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS256X509Cert");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -715,6 +774,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -769,6 +829,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS384X509Cert");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -776,6 +840,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -830,6 +895,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtRS512X509Cert");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -837,6 +906,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -890,6 +960,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES256X509Cert");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -897,6 +971,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -951,6 +1026,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES384X509Cert");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -958,6 +1037,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1012,6 +1092,10 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("requestAccessTokenWithClientSecretJwtES512X509Cert");
 
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
         // 1. Dynamic Client Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -1019,6 +1103,7 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setGrantTypes(grantTypes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1123,11 +1208,15 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAccessTokenClientCredentials");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.CLIENT_CREDENTIALS
+        );
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -1157,48 +1246,6 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getAccessToken(), "The access token is null");
         assertNotNull(response.getTokenType(), "The token type is null");
         assertNotNull(response.getScope(), "The scope is null");
-    }
-
-    @Parameters({"redirectUris", "sectorIdentifierUri"})
-    @Test
-    public void requestAccessTokenExtensions(final String redirectUris, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestAccessTokenExtensions");
-
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
-
-        // 1. Register client
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
-
-        showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
-
-        // 2. Request Extension Grant
-        String grantTypeUri = "http://oauth.net/grant_type/assertion/saml/2.0/bearer";
-        String assertion = "PEFzc2VydGlvbiBJc3N1ZUluc3RhbnQV0aG5TdGF0ZW1lbnQPC9Bc3NlcnRpb24";
-
-        TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse response = tokenClient.execExtensionGrant(grantTypeUri, assertion, clientId, clientSecret);
-
-        showClient(tokenClient);
-        assertEquals(response.getStatus(), 501, "Unexpected response code: " + response.getStatus());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
