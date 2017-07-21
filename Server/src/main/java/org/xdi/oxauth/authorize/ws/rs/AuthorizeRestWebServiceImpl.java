@@ -62,7 +62,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version July 19, 2017
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -103,7 +103,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
-    
+
     @Inject
     private Authenticator authenticator;
 
@@ -187,8 +187,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         try {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(customRespHeaders);
 
-			sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
-            	 
+            sessionStateService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, acrValuesStr);
+
             if (!AuthorizeParamsValidator.validateParams(responseType, clientId, prompts, nonce, request, requestUri)) {
                 if (clientId != null && redirectUri != null && redirectionUriService.validateRedirectionUri(clientId, redirectUri) != null) {
                     RedirectUri redirectUriResponse = new RedirectUri(redirectUri, responseTypes, responseMode);
@@ -221,7 +221,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     redirectUri = redirectionUriService.validateRedirectionUri(clientId, redirectUri);
                     boolean validRedirectUri = redirectUri != null;
 
-                    if (AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)) {
+                    if (AuthorizeParamsValidator.validateResponseTypes(responseTypes, client)
+                            && AuthorizeParamsValidator.validateGrantType(responseTypes, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
                         if (validRedirectUri) {
 
                             if (StringUtils.isNotBlank(accessToken)) {
@@ -764,10 +765,10 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         SessionState sessionUser = identity.getSessionState();
 
         identity.logout();
-        
+
         if (sessionUser != null) {
-	        sessionUser.setUserDn(null);
-	       	sessionUser.setAuthenticationTime(null);
+            sessionUser.setUserDn(null);
+            sessionUser.setAuthenticationTime(null);
         }
 
 

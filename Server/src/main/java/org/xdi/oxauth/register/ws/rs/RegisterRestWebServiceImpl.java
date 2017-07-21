@@ -17,10 +17,7 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.Scope;
-import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
@@ -63,7 +60,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 31, 2016
+ * @version July 18, 2017
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -88,7 +85,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     @Inject
     private ExternalDynamicClientRegistrationService externalDynamicClientRegistrationService;
-    
+
     @Inject
     private RegisterParamsValidator registerParamsValidator;
 
@@ -186,25 +183,25 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                             boolean registerClient = true;
                             if (externalDynamicClientRegistrationService.isEnabled()) {
-                            	registerClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
+                                registerClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(r, client);
                             }
-                            
+
                             if (registerClient) {
-	                            Date currentTime = Calendar.getInstance().getTime();
-	                            client.setLastAccessTime(currentTime);
-	                            client.setLastLogonTime(currentTime);
-	
-	                            Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
-	                            client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
-	
-	                            clientService.persist(client);
-	
-	                            JSONObject jsonObject = getJSONObject(client);
-	                            builder.entity(jsonObject.toString(4).replace("\\/", "/"));
-	
-	                            oAuth2AuditLog.setClientId(client.getClientId());
-	                            oAuth2AuditLog.setScope(clientScopesToString(client));
-	                            oAuth2AuditLog.setSuccess(true);
+                                Date currentTime = Calendar.getInstance().getTime();
+                                client.setLastAccessTime(currentTime);
+                                client.setLastLogonTime(currentTime);
+
+                                Boolean persistClientAuthorizations = appConfiguration.getDynamicRegistrationPersistClientAuthorizations();
+                                client.setPersistClientAuthorizations(persistClientAuthorizations != null ? persistClientAuthorizations : false);
+
+                                clientService.persist(client);
+
+                                JSONObject jsonObject = getJSONObject(client);
+                                builder.entity(jsonObject.toString(4).replace("\\/", "/"));
+
+                                oAuth2AuditLog.setClientId(client.getClientId());
+                                oAuth2AuditLog.setScope(clientScopesToString(client));
+                                oAuth2AuditLog.setSuccess(true);
                             } else {
                                 log.trace("Client parameters are invalid, returns invalid_request error.");
                                 builder = Response.status(Response.Status.BAD_REQUEST).
@@ -273,11 +270,41 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (StringUtils.isNotBlank(requestObject.getSectorIdentifierUri())) {
             p_client.setSectorIdentifierUri(requestObject.getSectorIdentifierUri());
         }
-        List<ResponseType> responseTypes = requestObject.getResponseTypes();
-        if (responseTypes != null && !responseTypes.isEmpty()) {
-            responseTypes = new ArrayList<ResponseType>(new HashSet<ResponseType>(responseTypes)); // Remove repeated elements
-            p_client.setResponseTypes(responseTypes.toArray(new ResponseType[responseTypes.size()]));
+
+        Set<ResponseType> responseTypeSet = new HashSet<ResponseType>();
+        responseTypeSet.addAll(requestObject.getResponseTypes());
+
+        Set<GrantType> grantTypeSet = new HashSet<GrantType>();
+        grantTypeSet.addAll(requestObject.getGrantTypes());
+
+        if (responseTypeSet.size() == 0 && grantTypeSet.size() == 0) {
+            responseTypeSet.add(ResponseType.CODE);
         }
+        if (responseTypeSet.contains(ResponseType.CODE)) {
+            grantTypeSet.add(GrantType.AUTHORIZATION_CODE);
+            grantTypeSet.add(GrantType.REFRESH_TOKEN);
+        }
+        if (responseTypeSet.contains(ResponseType.TOKEN) || responseTypeSet.contains(ResponseType.ID_TOKEN)) {
+            grantTypeSet.add(GrantType.IMPLICIT);
+        }
+        if (grantTypeSet.contains(GrantType.AUTHORIZATION_CODE)) {
+            responseTypeSet.add(ResponseType.CODE);
+            grantTypeSet.add(GrantType.REFRESH_TOKEN);
+        }
+        if (grantTypeSet.contains(GrantType.IMPLICIT)) {
+            responseTypeSet.add(ResponseType.TOKEN);
+        }
+
+        Set<Set<ResponseType>> responseTypesSupported = appConfiguration.getResponseTypesSupported();
+        Set<GrantType> grantTypesSupported = appConfiguration.getGrantTypesSupported();
+
+        if (!responseTypesSupported.contains(responseTypeSet)) {
+            responseTypeSet.clear();
+        }
+        grantTypeSet.retainAll(grantTypesSupported);
+
+        p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
+        p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
@@ -523,7 +550,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_SECRET.toString(), clientService.decryptSecret(client.getClientSecret()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.REGISTRATION_ACCESS_TOKEN.toString(), client.getRegistrationAccessToken());
         Util.addToJSONObjectIfNotNull(responseJsonObject, REGISTRATION_CLIENT_URI.toString(),
-        		appConfiguration.getRegistrationEndpoint() + "?" +
+                appConfiguration.getRegistrationEndpoint() + "?" +
                         RegisterResponseParam.CLIENT_ID.toString() + "=" + client.getClientId());
         responseJsonObject.put(CLIENT_ID_ISSUED_AT.toString(), client.getClientIdIssuedAt().getTime() / 1000);
         responseJsonObject.put(CLIENT_SECRET_EXPIRES_AT.toString(), client.getClientSecretExpiresAt() != null && client.getClientSecretExpiresAt().getTime() > 0 ?
@@ -532,7 +559,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, REDIRECT_URIS.toString(), client.getRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLAIMS_REDIRECT_URIS.toString(), client.getClaimRedirectUris());
         Util.addToJSONObjectIfNotNull(responseJsonObject, RESPONSE_TYPES.toString(), ResponseType.toStringArray(client.getResponseTypes()));
-        Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), client.getGrantTypes());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, GRANT_TYPES.toString(), GrantType.toStringArray(client.getGrantTypes()));
         Util.addToJSONObjectIfNotNull(responseJsonObject, APPLICATION_TYPE.toString(), client.getApplicationType());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CONTACTS.toString(), client.getContacts());
         Util.addToJSONObjectIfNotNull(responseJsonObject, CLIENT_NAME.toString(), client.getClientName());
@@ -576,7 +603,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 scopeNames[i] = scope.getDisplayName();
             }
         }
-        Util.addToJSONObjectIfNotNull(responseJsonObject, "scopes", scopeNames);
+        Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPES.toString(), scopeNames);
 
         return responseJsonObject;
     }
@@ -605,10 +632,10 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             Arrays.asList(p_requestObject.getString(attr));
                     if (parameterValues != null && !parameterValues.isEmpty()) {
                         try {
-                        	boolean processed = processApplicationAttributes(p_client, attr, parameterValues);
-                        	if (!processed) {
-                        		p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
-                        	}
+                            boolean processed = processApplicationAttributes(p_client, attr, parameterValues);
+                            if (!processed) {
+                                p_client.getCustomAttributes().add(new CustomAttribute(attr, parameterValues));
+                            }
                         } catch (Exception e) {
                             log.debug(e.getMessage(), e);
                         }
@@ -618,18 +645,18 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         }
     }
 
-	private boolean processApplicationAttributes(Client p_client, String attr, final List<String> parameterValues) {
-		if (StringHelper.equalsIgnoreCase("oxAuthTrustedClient", attr)) {
-			boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
-			p_client.setTrustedClient(trustedClient);
-			
-			return true;
-		}
-		
-		return false;
-	}
+    private boolean processApplicationAttributes(Client p_client, String attr, final List<String> parameterValues) {
+        if (StringHelper.equalsIgnoreCase("oxAuthTrustedClient", attr)) {
+            boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
+            p_client.setTrustedClient(trustedClient);
 
-    private String clientScopesToString(Client client){
+            return true;
+        }
+
+        return false;
+    }
+
+    private String clientScopesToString(Client client) {
         String[] scopeDns = client.getScopes();
         if (scopeDns != null) {
             String[] scopeNames = new String[scopeDns.length];
