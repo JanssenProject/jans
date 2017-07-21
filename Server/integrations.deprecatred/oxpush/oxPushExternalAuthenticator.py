@@ -4,23 +4,16 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
-from javax.faces.context import FacesContext
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays
 from org.xdi.oxpush import OxPushClient
 
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
 
@@ -51,13 +44,15 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
 
         oxpush_user_timeout = int(configurationAttributes.get("oxpush_user_timeout").getValue2())
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
 
-        credentials = Identity.instance().getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -66,14 +61,14 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                userService = CdiUtil.bean(UserService)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
             # Find user by uid
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
                 print "oxPush. Authenticate for step 1. Failed to find user"
@@ -95,12 +90,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     # Check deployment status
                     print "oxPush. Authenticate for step 1. oxpush_user_uid: ", oxpush_user_uid
-                    deployment_status = self.oxPushClient.getDeploymentStatus(oxpush_user_uid); 
+                    deployment_status = self.oxPushClient.getDeploymentStatus(oxpush_user_uid) 
                     if (deployment_status.result):
                         print "oxPush. Authenticate for step 1. Deployment status is valid"
                         if ("enabled" == deployment_status.status):
                             print "oxPush. Authenticate for step 1. Deployment is enabled"
-                            context.set("oxpush_user_uid", oxpush_user_uid)
+                            identity.setWorkingParameter("oxpush_user_uid", oxpush_user_uid)
                         else:
                             print "oxPush. Authenticate for step 1. Deployment is disabled"
                             return False
@@ -120,7 +115,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Authenticate for step 2. oxpush_user_uid is empty"
 
@@ -146,8 +141,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "oxPush. Authenticate for step 2. Failed to update current user"
                     return False
 
-                context.set("oxpush_count_login_steps", 2)
-                context.set("oxpush_user_uid", oxpush_user_uid)
+                identity.setWorkingParameter("oxpush_count_login_steps", 2)
+                identity.setWorkingParameter("oxpush_user_uid", oxpush_user_uid)
             else:
                 print "oxPush. Authenticate for step 2. Deployment status is valid"
 
@@ -159,7 +154,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("oxpush_user_uid")
+            sessionAttributes = identity.getWorkingParameter("oxpush_user_uid")
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Authenticate for step 3. oxpush_user_uid is empty"
                 return False
@@ -172,7 +167,7 @@ class PersonAuthentication(PersonAuthenticationType):
             # Initialize authentication process
             authentication_request = None
             try:
-                authentication_request = self.oxPushClient.authenticate(oxpush_user_uid, user_name);
+                authentication_request = self.oxPushClient.authenticate(oxpush_user_uid, user_name)
             except java.lang.Exception, err:
                 print "oxPush. Authenticate for step 3. Failed to initialize authentication process: ", err
                 return False
@@ -194,14 +189,14 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
 
         oxpush_application_name = configurationAttributes.get("oxpush_application_name").getValue2()
 
         if (step == 1):
             print "oxPush. Prepare for step 1"
             oxpush_android_download_url = configurationAttributes.get("oxpush_android_download_url").getValue2()
-            context.set("oxpush_android_download_url", oxpush_android_download_url)
+            identity.setWorkingParameter("oxpush_android_download_url", oxpush_android_download_url)
         elif (step == 2):
             print "oxPush. Prepare for step 2"
 
@@ -209,17 +204,19 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
+
             user_name = credentials.getUsername()
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Prepare for step 2. oxpush_user_uid is empty"
 
                 # Initialize pairing process
                 pairing_process = None
                 try:
-                    pairing_process = self.oxPushClient.pair(oxpush_application_name, user_name);
+                    pairing_process = self.oxPushClient.pair(oxpush_application_name, user_name)
                 except java.lang.Exception, err:
                     print "oxPush. Prepare for step 2. Failed to initialize pairing process: ", err
                     return False
@@ -231,9 +228,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 pairing_id = pairing_process.pairingId
                 print "oxPush. Prepare for step 2. Pairing Id: ", pairing_id
     
-                context.set("oxpush_pairing_uid", pairing_id)
-                context.set("oxpush_pairing_code", pairing_process.pairingCode)
-                context.set("oxpush_pairing_qr_image", pairing_process.pairingQrImage)
+                identity.setWorkingParameter("oxpush_pairing_uid", pairing_id)
+                identity.setWorkingParameter("oxpush_pairing_code", pairing_process.pairingCode)
+                identity.setWorkingParameter("oxpush_pairing_qr_image", pairing_process.pairingQrImage)
 
         return True
 
@@ -244,9 +241,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("oxpush_count_login_steps")):
-            return context.get("oxpush_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("oxpush_count_login_steps")):
+            return identity.getWorkingParameter("oxpush_count_login_steps")
 
         return 3
 
@@ -260,7 +257,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return ""
 
     def isPassedDefaultAuthentication():
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 

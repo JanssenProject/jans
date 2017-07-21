@@ -291,7 +291,7 @@ public class HttpService implements Serializable {
 		return false;
 	}
 
-	public final String constructServerUrl(final HttpServletRequest request) {
+	public String constructServerUrl(final HttpServletRequest request) {
     	int serverPort = request.getServerPort();
 
     	String redirectUrl;

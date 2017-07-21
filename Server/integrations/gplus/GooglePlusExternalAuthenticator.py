@@ -4,10 +4,8 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from javax.faces.context import FacesContext
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
 from org.xdi.util import StringHelper, ArrayHelper
@@ -18,11 +16,7 @@ from org.xdi.oxauth.model.common import GrantType, AuthenticationMethod
 from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
 
 import java
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -69,7 +63,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (not extensionModuleInitResult):
                     return False
             except ImportError, ex:
-                print "Google+ Initialization. Failed to load gplus_extension_module:", extensionModuleName
+                print "Google+ Initialization. Failed to load gplus_extension_module: '%s'" % extensionModuleName
                 print "Google+ Initialization. Unexpected error:", ex
                 return False
 
@@ -90,9 +84,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
-        userService = Component.getInstance(UserService)
+        identity = CdiUtil.bean(Identity)
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         mapUserDeployment = False
         enrollUserDeployment = False
@@ -119,16 +113,17 @@ class PersonAuthentication(PersonAuthenticationType):
             if (useBasicAuth):
                 print "Google+ Authenticate for step 1. Basic authentication"
         
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
         
-                credentials = Identity.instance().getCredentials()
+                credentials = identity.getCredentials()
+
                 userName = credentials.getUsername()
                 userPassword = credentials.getPassword()
         
                 loggedIn = False
                 if (StringHelper.isNotEmptyString(userName) and StringHelper.isNotEmptyString(userPassword)):
-                    userService = Component.getInstance(UserService)
-                    loggedIn = userService.authenticate(userName, userPassword)
+                    userService = CdiUtil.bean(UserService)
+                    loggedIn = authenticationService.authenticate(userName, userPassword)
         
                 if (not loggedIn):
                     return False
@@ -144,7 +139,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             
             print "Google+ Authenticate for step 1. Attempting to gets tokens"
-            tokenResponse = self.getTokensByCode(self.clientSecrets, configurationAttributes, gplusAuthCode);
+            tokenResponse = self.getTokensByCode(self.clientSecrets, configurationAttributes, gplusAuthCode)
             if ((tokenResponse == None) or (tokenResponse.getIdToken() == None) or (tokenResponse.getAccessToken() == None)):
                 print "Google+ Authenticate for step 1. Failed to get tokens"
                 return False
@@ -154,12 +149,12 @@ class PersonAuthentication(PersonAuthenticationType):
             jwt = Jwt.parse(tokenResponse.getIdToken())
             # TODO: Validate ID Token Signature  
 
-            gplusUserUid = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
-            print "Google+ Authenticate for step 1. Found Google user ID in the ID token: ", gplusUserUid
+            gplusUserUid = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER)
+            print "Google+ Authenticate for step 1. Found Google user ID in the ID token: '%s'" % gplusUserUid
             
             if (mapUserDeployment):
                 # Use mapping to local IDP user
-                print "Google+ Authenticate for step 1. Attempting to find user by oxExternalUid: gplus:", gplusUserUid
+                print "Google+ Authenticate for step 1. Attempting to find user by oxExternalUid: 'gplus:%s'" % gplusUserUid
 
                 # Check if there is user with specified gplusUserUid
                 foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
@@ -167,12 +162,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (foundUser == None):
                     print "Google+ Authenticate for step 1. Failed to find user"
                     print "Google+ Authenticate for step 1. Setting count steps to 2"
-                    context.set("gplus_count_login_steps", 2)
-                    context.set("gplus_user_uid", gplusUserUid)
+                    identity.setWorkingParameter("gplus_count_login_steps", 2)
+                    identity.setWorkingParameter("gplus_user_uid", gplusUserUid)
                     return True
 
                 foundUserName = foundUser.getUserId()
-                print "Google+ Authenticate for step 1. foundUserName:", foundUserName
+                print "Google+ Authenticate for step 1. foundUserName: '%s'" % foundUserName
                 
                 userAuthenticated = authenticationService.authenticate(foundUserName)
                 if (userAuthenticated == False):
@@ -180,15 +175,15 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
             
                 print "Google+ Authenticate for step 1. Setting count steps to 1"
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
 
                 postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
-                print "Google+ Authenticate for step 1. postLoginResult:", postLoginResult
+                print "Google+ Authenticate for step 1. postLoginResult: '%s'" % postLoginResult
 
                 return postLoginResult
             elif (enrollUserDeployment):
                 # Use auto enrollment to local IDP
-                print "Google+ Authenticate for step 1. Attempting to find user by oxExternalUid: gplus:", gplusUserUid
+                print "Google+ Authenticate for step 1. Attempting to find user by oxExternalUid: 'gplus:%s'" % gplusUserUid
  
                 # Check if there is user with specified gplusUserUid
                 foundUser = userService.getUserByAttribute("oxExternalUid", "gplus:" + gplusUserUid)
@@ -214,7 +209,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             StringHelper.toLowerCase(gplusResponseAttributeEntry.getKey()), gplusResponseAttributeEntry.getValue())
  
                     currentAttributesMapping = self.getCurrentAttributesMapping(self.attributesMapping, configurationAttributes, requestParameters)
-                    print "Google+ Authenticate for step 1. Using next attributes mapping", currentAttributesMapping
+                    print "Google+ Authenticate for step 1. Using next attributes mapping '%s'" % currentAttributesMapping
  
                     newUser = User()
                     for attributesMappingEntry in currentAttributesMapping.entrySet():
@@ -232,13 +227,13 @@ class PersonAuthentication(PersonAuthenticationType):
                         newUser.setAttribute("cn", gplusUserUid)
 
                     newUser.setAttribute("oxExternalUid", "gplus:" + gplusUserUid)
-                    print "Google+ Authenticate for step 1. Attempting to add user", gplusUserUid, " with next attributes", newUser.getCustomAttributes()
+                    print "Google+ Authenticate for step 1. Attempting to add user '%s' with next attributes '%s'" % (gplusUserUid, newUser.getCustomAttributes())
  
                     foundUser = userService.addUser(newUser, True)
-                    print "Google+ Authenticate for step 1. Added new user with UID", foundUser.getUserId()
+                    print "Google+ Authenticate for step 1. Added new user with UID: '%s'" % foundUser.getUserId()
 
                 foundUserName = foundUser.getUserId()
-                print "Google+ Authenticate for step 1. foundUserName:", foundUserName
+                print "Google+ Authenticate for step 1. foundUserName: '%s'" % foundUserName
 
                 userAuthenticated = authenticationService.authenticate(foundUserName)
                 if (userAuthenticated == False):
@@ -246,15 +241,16 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 print "Google+ Authenticate for step 1. Setting count steps to 1"
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
 
+                print "Google+ Authenticate for step 1. Attempting to run extension postLogin"
                 postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
-                print "Google+ Authenticate for step 1. postLoginResult:", postLoginResult
+                print "Google+ Authenticate for step 1. postLoginResult: '%s'" % postLoginResult
 
                 return postLoginResult
             else:
                 # Check if there is user with specified gplusUserUid
-                print "Google+ Authenticate for step 1. Attempting to find user by uid:", gplusUserUid
+                print "Google+ Authenticate for step 1. Attempting to find user by uid: '%s'" % gplusUserUid
 
                 foundUser = userService.getUser(gplusUserUid)
                 if (foundUser == None):
@@ -262,7 +258,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 foundUserName = foundUser.getUserId()
-                print "Google+ Authenticate for step 1. foundUserName:", foundUserName
+                print "Google+ Authenticate for step 1. foundUserName: '%s'" % foundUserName
 
                 userAuthenticated = authenticationService.authenticate(foundUserName)
                 if (userAuthenticated == False):
@@ -270,16 +266,16 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 print "Google+ Authenticate for step 1. Setting count steps to 1"
-                context.set("gplus_count_login_steps", 1)
+                identity.setWorkingParameter("gplus_count_login_steps", 1)
 
                 postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
-                print "Google+ Authenticate for step 1. postLoginResult:", postLoginResult
+                print "Google+ Authenticate for step 1. postLoginResult: '%s'" % postLoginResult
 
                 return postLoginResult
         elif (step == 2):
             print "Google+ Authenticate for step 2"
             
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("gplus_user_uid"):
                 print "Google+ Authenticate for step 2. gplus_user_uid is empty"
                 return False
@@ -289,13 +285,15 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
+
             userName = credentials.getUsername()
             userPassword = credentials.getPassword()
 
             loggedIn = False
             if (StringHelper.isNotEmptyString(userName) and StringHelper.isNotEmptyString(userPassword)):
-                loggedIn = userService.authenticate(userName, userPassword)
+                loggedIn = authenticationService.authenticate(userName, userPassword)
 
             if (not loggedIn):
                 return False
@@ -312,16 +310,16 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
                 postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
-                print "Google+ Authenticate for step 2. postLoginResult:", postLoginResult
+                print "Google+ Authenticate for step 2. postLoginResult: '%s'" % postLoginResult
 
                 return postLoginResult
             else:
                 foundUserName = foundUser.getUserId()
-                print "Google+ Authenticate for step 2. foundUserName:", foundUserName
+                print "Google+ Authenticate for step 2. foundUserName: '%s'" % foundUserName
     
                 if StringHelper.equals(userName, foundUserName):
                     postLoginResult = self.extensionPostLogin(configurationAttributes, foundUser)
-                    print "Google+ Authenticate for step 2. postLoginResult:", postLoginResult
+                    print "Google+ Authenticate for step 2. postLoginResult: '%s'" % postLoginResult
     
                     return postLoginResult
         
@@ -330,8 +328,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
+        identity = CdiUtil.bean(Identity)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         if (step == 1):
             print "Google+ Prepare for step 1"
@@ -341,8 +339,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Google+ Prepare for step 1. Google+ client configuration is invalid"
                 return False
             
-            context.set("gplus_client_id", currentClientSecrets["web"]["client_id"])
-            context.set("gplus_client_secret", currentClientSecrets["web"]["client_secret"])
+            identity.setWorkingParameter("gplus_client_id", currentClientSecrets["web"]["client_id"])
+            identity.setWorkingParameter("gplus_client_secret", currentClientSecrets["web"]["client_secret"])
 
             return True
         elif (step == 2):
@@ -359,9 +357,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("gplus_count_login_steps")):
-            return context.get("gplus_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("gplus_count_login_steps")):
+            return identity.getWorkingParameter("gplus_count_login_steps")
         
         return 2
 
@@ -383,7 +381,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             clientSecrets = json.loads(f.read())
         except:
-            print "Failed to load Google+ client secrets from file:", clientSecrets
+            print "Failed to load Google+ client secrets from file: '%s'" % clientSecrets
             return None
         finally:
             f.close()
@@ -394,7 +392,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # Get client configuration
         if (configurationAttributes.containsKey("gplus_client_configuration_attribute")):
             clientConfigurationAttribute = configurationAttributes.get("gplus_client_configuration_attribute").getValue2()
-            print "Google+ GetClientConfiguration. Using client attribute:", clientConfigurationAttribute
+            print "Google+ GetClientConfiguration. Using client attribute: '%s'" % clientConfigurationAttribute
 
             if (requestParameters == None):
                 return None
@@ -408,25 +406,25 @@ class PersonAuthentication(PersonAuthenticationType):
 
             # Attempt to determine client_id from event context
             if (clientId == None):
-                eventContext = Contexts.getEventContext()
-                if (eventContext.isSet("sessionAttributes")):
-                    clientId = eventContext.get("sessionAttributes").get("client_id")
+                identity = CdiUtil.bean(Identity)
+                if (identity.isSetWorkingParameter("sessionAttributes")):
+                    clientId = identity.getSessionState().getSessionAttributes().get("client_id")
 
             if (clientId == None):
                 print "Google+ GetClientConfiguration. client_id is empty"
                 return None
 
-            clientService = Component.getInstance(ClientService)
+            clientService = CdiUtil.bean(ClientService)
             client = clientService.getClient(clientId)
             if (client == None):
-                print "Google+ GetClientConfiguration. Failed to find client", clientId, " in local LDAP"
+                print "Google+ GetClientConfiguration. Failed to find client '%s' in local LDAP" % clientId
                 return None
 
             clientConfiguration = clientService.getCustomAttribute(client, clientConfigurationAttribute)
             if ((clientConfiguration == None) or StringHelper.isEmpty(clientConfiguration.getValue())):
-                print "Google+ GetClientConfiguration. Client", clientId, " attribute", clientConfigurationAttribute, " is empty"
+                print "Google+ GetClientConfiguration. Client '%s' attribute '%s' is empty" % (clientId, clientConfigurationAttribute)
             else:
-                print "Google+ GetClientConfiguration. Client", clientId, " attribute", clientConfigurationAttribute, " is", clientConfiguration
+                print "Google+ GetClientConfiguration. Client '%s' attribute '%s' is '%s'" % (clientId, clientConfigurationAttribute, clientConfiguration)
                 return clientConfiguration
 
         return None
@@ -520,7 +518,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if (self.extensionModule != None):
             try:
                 postLoginResult = self.extensionModule.postLogin(configurationAttributes, user)
-                print "Google+ PostLogin result:", postLoginResult
+                print "Google+ PostLogin result: '%s'" % postLoginResult
 
                 return postLoginResult
             except Exception, ex:
