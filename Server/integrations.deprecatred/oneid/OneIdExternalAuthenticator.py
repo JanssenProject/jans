@@ -4,14 +4,11 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
-from javax.faces.context import FacesContext
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from org.apache.http.entity import ContentType 
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
-from org.xdi.oxauth.service import AuthenticationService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
@@ -19,10 +16,7 @@ from java.util import Arrays
 
 import java
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 from oneid import OneID
 
@@ -50,10 +44,11 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
-        userService = Component.getInstance(UserService)
-        httpService = Component.getInstance(HttpService)
+        identity = CdiUtil.bean(Identity)
+
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+        httpService = CdiUtil.bean(HttpService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
@@ -63,7 +58,7 @@ class PersonAuthentication(PersonAuthenticationType):
         authn = OneID(server_flag)
 
         # Set path to credentials file
-        authn.creds_file = creds_file;
+        authn.creds_file = creds_file
 
         if (step == 1):
             print "OneId. Authenticate for step 1"
@@ -83,7 +78,7 @@ class PersonAuthentication(PersonAuthenticationType):
             authn.set_credentials()
 
             # Validate request
-            http_client = httpService.getHttpsClientDefaulTrustStore();
+            http_client = httpService.getHttpsClientDefaulTrustStore()
             auth_data = httpService.encodeBase64(authn.api_id + ":" + authn.api_key)
             http_response = httpService.executePost(http_client, authn.helper_server + "/validate", auth_data, request, ContentType.APPLICATION_JSON)
             validation_content = httpService.convertEntityToString(httpService.getResponseContent(http_response))
@@ -111,25 +106,27 @@ class PersonAuthentication(PersonAuthenticationType):
             if (find_user_by_uid == None):
                 print "OneId. Authenticate for step 1. Failed to find user"
                 print "OneId. Authenticate for step 1. Setting count steps to 2"
-                context.set("oneid_count_login_steps", 2)
-                context.set("oneid_user_uid", oneid_user_uid)
+                identity.setWorkingParameter("oneid_count_login_steps", 2)
+                identity.setWorkingParameter("oneid_user_uid", oneid_user_uid)
                 return True
 
             found_user_name = find_user_by_uid.getUserId()
             print "OneId. Authenticate for step 1. found_user_name: " + found_user_name
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
+
             credentials.setUsername(found_user_name)
             credentials.setUser(find_user_by_uid)
             
             print "OneId. Authenticate for step 1. Setting count steps to 1"
-            context.set("oneid_count_login_steps", 1)
+            identity.setWorkingParameter("oneid_count_login_steps", 1)
 
             return True
         elif (step == 2):
             print "OneId. Authenticate for step 2"
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oneid_user_uid"):
                 print "OneId. Authenticate for step 2. oneid_user_uid is empty"
                 return False
@@ -138,22 +135,24 @@ class PersonAuthentication(PersonAuthenticationType):
             passed_step1 = StringHelper.isNotEmptyString(oneid_user_uid)
             if (not passed_step1):
                 return False
-#
-            credentials = Identity.instance().getCredentials()
+
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
 
             user_name = credentials.getUsername()
             passed_step1 = StringHelper.isNotEmptyString(user_name)
 
             if (not passed_step1):
                 return False
-#
-            credentials = Identity.instance().getCredentials()
+
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
 
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
@@ -182,8 +181,8 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        authenticationService = Component.getInstance(AuthenticationService)
+        identity = CdiUtil.bean(Identity)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         server_flag = configurationAttributes.get("oneid_server_flag").getValue2()
         callback_attrs = configurationAttributes.get("oneid_callback_attrs").getValue2()
@@ -193,21 +192,22 @@ class PersonAuthentication(PersonAuthenticationType):
         authn = OneID(server_flag)
 
         # Set path to credentials file
-        authn.creds_file = creds_file; 
+        authn.creds_file = creds_file 
 
         if (step == 1):
             print "OneId. Prepare for step 1"
 
-            request = FacesContext.getCurrentInstance().getExternalContext().getRequest()
+            facesContext = CdiUtil.bean(FacesContext)
+            request = facesContext.getExternalContext().getRequest()
             validation_page = request.getContextPath() + "/postlogin?" + "request_uri=&" + authenticationService.parametersAsString()
             print "OneId. Prepare for step 1. validation_page: " + validation_page
 
             oneid_login_button = authn.draw_signin_button(validation_page, callback_attrs, True)
             print "OneId. Prepare for step 1. oneid_login_button: " + oneid_login_button
             
-            context.set("oneid_login_button", oneid_login_button)
-            context.set("oneid_script_header", authn.script_header)
-            context.set("oneid_form_script", authn.oneid_form_script)
+            identity.setWorkingParameter("oneid_login_button", oneid_login_button)
+            identity.setWorkingParameter("oneid_script_header", authn.script_header)
+            identity.setWorkingParameter("oneid_form_script", authn.oneid_form_script)
 
             return True
         elif (step == 2):
@@ -224,9 +224,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("oneid_count_login_steps")):
-            return context.get("oneid_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("oneid_count_login_steps")):
+            return identity.getWorkingParameter("oneid_count_login_steps")
         
         return 2
 

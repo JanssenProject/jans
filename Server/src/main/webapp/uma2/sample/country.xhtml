@@ -7,19 +7,25 @@
                 template="/WEB-INF/incl/layout/template.xhtml">
 
     <f:metadata>
-        <f:viewAction action="#{gatherer.prepareForStep}"/>
+        <f:viewAction action="#{gatherer.prepareForStep}" onPostback="true"/>
     </f:metadata>
 
     <ui:define name="head">
-
         <style type="text/css">
-
         </style>
     </ui:define>
 
-    <ui:define name="pageTitle">#{msgs['sample.title']}</ui:define>
+    <ui:define name="pageTitle">Country</ui:define>
 
     <ui:define name="body">
-           asdf
+
+        <h:form id="loginForm">
+            <h:outputLabel for="country" value="Country"/><br/>
+            <h:inputText id="country" value="#{gatherer.pageClaims['country']}" autocomplete="off"/>
+
+            <div class="actionButtons">
+                <h:commandButton id="gather" value="Submit" action="#{gatherer.gather}"/>
+            </div>
+        </h:form>
     </ui:define>
 </ui:composition>

@@ -4,25 +4,20 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
-from javax.faces.context import FacesContext
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.service import XmlService
-from org.xdi.util.security import StringEncrypter 
+from org.xdi.oxauth.service import EncryptionService 
 from org.xdi.util import StringHelper
 from org.xdi.util import ArrayHelper
 from java.lang import Boolean
 
 import java
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -47,12 +42,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         iw_cert_password = creds["CERT_PASSWORD"]
         try:
-            stringEncrypter = StringEncrypter.defaultInstance()
-            iw_cert_password = stringEncrypter.decrypt(iw_cert_password)
+            encryptionService = CdiUtil.bean(EncryptionService)
+            iw_cert_password = encryptionService.decrypt(iw_cert_password)
         except:
             return False
 
-        httpService = Component.getInstance(HttpService)
+        httpService = CdiUtil.bean(HttpService)
         self.client = httpService.getHttpsClient(None, None, None, iw_cert_store_type, iw_cert_path, iw_cert_password)
         print "InWebo. Initialized successfully"
 
@@ -73,17 +68,20 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
 
         iw_api_uri = configurationAttributes.get("iw_api_uri").getValue2()
         iw_service_id = configurationAttributes.get("iw_service_id").getValue2()
         iw_helium_enabled = Boolean(configurationAttributes.get("iw_helium_enabled").getValue2()).booleanValue()
 
         if (iw_helium_enabled):
-            context.set("iw_count_login_steps", 1)
+            identity.setWorkingParameter("iw_count_login_steps", 1)
 
-        credentials = Identity.instance().getCredentials()
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -112,15 +110,15 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 logged_in = False
                 if (StringHelper.isNotEmptyString(user_name)):
-                    userService = Component.getInstance(UserService)
-                    logged_in = userService.authenticate(user_name)
+                    userService = CdiUtil.bean(UserService)
+                    logged_in = authenticationService.authenticate(user_name)
     
                 return logged_in
             else:
                 logged_in = False
                 if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                    userService = Component.getInstance(UserService)
-                    logged_in = userService.authenticate(user_name, user_password)
+                    userService = CdiUtil.bean(UserService)
+                    logged_in = authenticationService.authenticate(user_name, user_password)
     
                 return logged_in
             
@@ -148,15 +146,15 @@ class PersonAuthentication(PersonAuthenticationType):
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         if (step == 1):
             print "InWebo. Prepare for step 1"
-            context = Contexts.getEventContext()
+            identity = CdiUtil.bean(Identity)
 
             iw_helium_enabled = Boolean(configurationAttributes.get("iw_helium_enabled").getValue2()).booleanValue()
-            context.set("helium_enabled", iw_helium_enabled)
+            identity.setWorkingParameter("helium_enabled", iw_helium_enabled)
 
             iw_helium_alias = None
             if (iw_helium_enabled):
                 iw_helium_alias = configurationAttributes.get("iw_helium_alias").getValue2()
-                context.set("helium_alias", iw_helium_alias)
+                identity.setWorkingParameter("helium_alias", iw_helium_alias)
 
             print "InWebo. Prepare for step 1. Helium status:", iw_helium_enabled
 
@@ -166,9 +164,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("iw_count_login_steps")):
-            return context.get("iw_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("iw_count_login_steps")):
+            return identity.getWorkingParameter("iw_count_login_steps")
         
         return 2
 
@@ -181,15 +179,17 @@ class PersonAuthentication(PersonAuthenticationType):
             return ""
 
     def isPassedDefaultAuthentication(self):
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 
         return passed_step1
 
     def validateInweboToken(self, iw_api_uri, iw_service_id, user_name, iw_token):
-        httpService = Component.getInstance(HttpService)
-        xmlService = Component.getInstance(XmlService)
+        httpService = CdiUtil.bean(HttpService)
+        xmlService = CdiUtil.bean(XmlService)
 
         if StringHelper.isEmpty(iw_token):
             print "InWebo. Token verification. iw_token is empty"

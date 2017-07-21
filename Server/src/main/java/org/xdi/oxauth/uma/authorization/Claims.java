@@ -35,7 +35,7 @@ public class Claims {
         } else if (claimsToken != null && claimsToken.getClaims() != null && claimsToken.getClaims().hasClaim(key)) {
             return claimsToken.getClaims().getClaim(key);
         } else if (pct != null && pct.getClaims() != null && pct.getClaims().hasClaim(key)) {
-            return claimsToken.getClaims().getClaim(key);
+            return pct.getClaims().getClaim(key);
         }
         return null;
     }
@@ -46,5 +46,9 @@ public class Claims {
 
     public void put(String key, Object value) {
         claims.put(key, value);
+    }
+
+    public void removeClaim(String key) {
+        claims.remove(key);
     }
 }

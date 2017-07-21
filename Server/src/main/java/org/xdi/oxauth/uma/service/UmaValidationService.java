@@ -345,7 +345,7 @@ public class UmaValidationService {
      */
     public Map<UmaScopeDescription, Boolean> validateScopes(String scope, List<UmaPermission> permissions) {
         scope = ServerUtil.urlDecode(scope);
-        final String[] scopesRequested = scope.split(" ");
+        final String[] scopesRequested = StringUtils.isNotBlank(scope) ? scope.split(" ") : new String[0];
 
         final Map<UmaScopeDescription, Boolean> result = new HashMap<UmaScopeDescription, Boolean>();
 
@@ -384,6 +384,11 @@ public class UmaValidationService {
         }
 
         if (StringUtils.isNotBlank(claimsRedirectUri)) {
+            if (ArrayUtils.isEmpty(client.getClaimRedirectUris())) {
+                log.error("Client does not have claims_redirect_uri specified, clientId: " + clientId);
+                throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI);
+            }
+
             String equalRedirectUri = getEqualRedirectUri(claimsRedirectUri, client.getClaimRedirectUris());
             if (equalRedirectUri != null) {
                 log.trace("Found match for claims_redirect_uri : " + equalRedirectUri);

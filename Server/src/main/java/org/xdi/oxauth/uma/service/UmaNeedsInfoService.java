@@ -6,10 +6,14 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.UmaConstants;
+import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
-import org.xdi.oxauth.uma.authorization.*;
+import org.xdi.oxauth.uma.authorization.Claims;
+import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
+import org.xdi.oxauth.uma.authorization.UmaAuthorizationContextBuilder;
+import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ejb.Stateless;
@@ -29,19 +33,14 @@ public class UmaNeedsInfoService {
 
     @Inject
     private Logger log;
-
     @Inject
     private AppConfiguration appConfiguration;
-
     @Inject
     private UmaPermissionService permissionService;
-
     @Inject
     private AttributeService attributeService;
-
     @Inject
     private UmaResourceService resourceService;
-
     @Inject
     private ExternalUmaRptPolicyService policyService;
 
@@ -54,7 +53,8 @@ public class UmaNeedsInfoService {
 
         List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
 
-        UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(attributeService, resourceService, permissions, requestedScopes, claims, httpRequest);
+        UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(appConfiguration,
+                attributeService, resourceService, permissions, requestedScopes, claims, httpRequest);
 
         for (String scriptDN : scriptDNs) {
             CustomScriptConfiguration script = policyService.getScriptByDn(scriptDN);
@@ -74,8 +74,7 @@ public class UmaNeedsInfoService {
 
                 String claimsGatheringScriptName = policyService.getClaimsGatheringScriptName(script, context);
                 if (StringUtils.isNotBlank(claimsGatheringScriptName)) {
-                    context.addRedirectUserParam(UmaConstants.GATHERING_ID, claimsGatheringScriptName);
-                    ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
+                    ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringScriptNameValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
                 } else {
                     log.error("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
                 }
@@ -100,7 +99,7 @@ public class UmaNeedsInfoService {
         return scriptMap;
     }
 
-    private String constructGatheringValue(String existingValue, String claimsGatheringScriptName) {
+    private String constructGatheringScriptNameValue(String existingValue, String claimsGatheringScriptName) {
         if (StringUtils.isBlank(existingValue)) {
             return claimsGatheringScriptName;
         }
@@ -113,9 +112,9 @@ public class UmaNeedsInfoService {
         for (UmaAuthorizationContext context : contexts) {
             queryParameters += context.getRedirectUserParameters().buildQueryString() + "&";
         }
-        StringUtils.removeEnd(queryParameters, "&");
+        queryParameters = StringUtils.removeEnd(queryParameters, "&");
 
-        String result = appConfiguration.getBaseEndpoint() + "/uma/gather_claims" + queryParameters;
+        String result = appConfiguration.getBaseEndpoint() + "/uma/gather_claims";
         if (StringUtils.isNotBlank(queryParameters)) {
             result += "?" + queryParameters;
         }

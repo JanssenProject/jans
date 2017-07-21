@@ -554,10 +554,10 @@
 
 	<profiles>
 		<profile>
-			<id>jetty</id>
+			<id>webapp</id>
 			<activation>
 				<property>
-					<name>!jetty.disable</name>
+					<name>!webapp.disable</name>
 				</property>
 			</activation>
 
@@ -680,8 +680,112 @@
 										<include>**/*.ico</include>
 									</includes>
 								</resource>
+							</webResources>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>webapp-jetty</id>
+			<activation>
+				<property>
+					<name>!jetty.disable</name>
+				</property>
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<webResources>
+								<!-- Duplicity for m2e-wtp plugin -->
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+										<include>**/*.properties</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>META-INF/navigation/*.navigation.xml</include>
+										<include>**/*.xhtml</include>
+										<include>**/*.jsp</include>
+										<include>**/*.html</include>
+										<include>**/*.pdf</include>
+										<include>**/*.js</include>
+										<include>**/*.css</include>
+										<include>**/*.xcss</include>
+										<include>**/*.png</include>
+										<include>**/*.jpg</include>
+										<include>**/*.gif</include>
+										<include>**/*.ico</include>
+									</includes>
+								</resource>
+
 								<resource>
 									<directory>src/main/webapp-jetty</directory>
+									<filtering>true</filtering>
+								</resource>
+							</webResources>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>webapp-tomcat</id>
+			<activation>
+				<property>
+					<name>tomcat.enable</name>
+				</property>
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<webResources>
+								<!-- Duplicity for m2e-wtp plugin -->
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*.xml</include>
+										<include>**/*.properties</include>
+									</includes>
+								</resource>
+								<resource>
+									<directory>src/main/webapp</directory>
+									<filtering>false</filtering>
+									<includes>
+										<include>META-INF/navigation/*.navigation.xml</include>
+										<include>**/*.xhtml</include>
+										<include>**/*.jsp</include>
+										<include>**/*.html</include>
+										<include>**/*.pdf</include>
+										<include>**/*.js</include>
+										<include>**/*.css</include>
+										<include>**/*.xcss</include>
+										<include>**/*.png</include>
+										<include>**/*.jpg</include>
+										<include>**/*.gif</include>
+										<include>**/*.ico</include>
+									</includes>
+								</resource>
+
+								<resource>
+									<directory>src/main/webapp-tomcat</directory>
 									<filtering>true</filtering>
 								</resource>
 							</webResources>

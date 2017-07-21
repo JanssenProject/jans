@@ -257,8 +257,7 @@ public class IdTokenFactory {
     private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
         List<String> amrList = Lists.newArrayList();
 
-        CustomScriptConfiguration script = externalAuthenticationService.getCustomScriptConfiguration(
-                AuthenticationScriptUsageType.BOTH, acrValues);
+        CustomScriptConfiguration script = externalAuthenticationService.getCustomScriptConfigurationByName(acrValues);
         if (script != null) {
             amrList.add(Integer.toString(script.getLevel()));
 

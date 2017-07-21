@@ -1,6 +1,7 @@
 package org.xdi.oxauth.uma.authorization;
 
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
@@ -24,10 +25,12 @@ public class UmaAuthorizationContextBuilder {
     private final Map<UmaScopeDescription, Boolean> scopes;
     private final Claims claims;
     private final HttpServletRequest httpRequest;
+    private final AppConfiguration configuration;
 
-    public UmaAuthorizationContextBuilder(AttributeService attributeService, UmaResourceService resourceService,
+    public UmaAuthorizationContextBuilder(AppConfiguration configuration, AttributeService attributeService, UmaResourceService resourceService,
                                           List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes,
                                           Claims claims, HttpServletRequest httpRequest) {
+        this.configuration = configuration;
         this.attributeService = attributeService;
         this.resourceService = resourceService;
         this.permissions = permissions;
@@ -37,7 +40,7 @@ public class UmaAuthorizationContextBuilder {
     }
 
     public UmaAuthorizationContext build(CustomScriptConfiguration script) {
-        return new UmaAuthorizationContext(attributeService, scopes, getResources(), claims,
+        return new UmaAuthorizationContext(configuration, attributeService, scopes, getResources(), claims,
                 script.getCustomScript().getDn(), httpRequest, script.getConfigurationAttributes());
     }
 

@@ -4,11 +4,10 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.security import Identity
-from org.jboss.seam.contexts import Contexts
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
+from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.util import StringHelper
 
 
@@ -36,35 +35,37 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        context.set("pass_authentication", False)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         if 1 <= step <= 3:
             print "Basic (demo reset step). Authenticate for step '%s'" % step
 
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            identity.setWorkingParameter("pass_authentication", False)
+
+            credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                userService = CdiUtil.bean(UserService)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
-            context.set("pass_authentication", True)
+            identity.setWorkingParameter("pass_authentication", True)
             return True
         else:
             return False
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
         print "Basic (demo reset step). Get next step for step '%s'" % step
+        identity = CdiUtil.bean(Identity)
 
         # If user not pass current step authenticaton change step to previous
-        context = Contexts.getEventContext()
-        pass_authentication = context.get("pass_authentication")
+        pass_authentication = identity.getWorkingParameter("pass_authentication")
         if not pass_authentication:
             if step > 1:
                 resultStep = step - 1
