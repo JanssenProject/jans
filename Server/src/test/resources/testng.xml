@@ -296,6 +296,7 @@
 	<parameter name="umaAatClientId" value="${uma.aat.client.id}" />
 	<parameter name="umaAatClientSecret" value="${uma.aat.client.secret}" />
 	<parameter name="umaRedirectUri" value="https://client.example.com/cb" />
+	<parameter name="umaClaimsRedirectUri" value="https://client.example.com/cb" />
 
 	<parameter name="contactEmail1" value="${contact.email.1}" />
 	<parameter name="contactEmail2" value="${contact.email.2}" />

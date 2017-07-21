@@ -35,6 +35,7 @@ import javax.ws.rs.core.Response;
 public class UmaMetadataWS {
 
     public static final String UMA_SCOPES_SUFFIX = "/uma/scopes";
+    public static final String UMA_CLAIMS_GATHERING_PATH = "/uma/gather_claims";
 
     @Inject
     private Logger log;
@@ -85,7 +86,7 @@ public class UmaMetadataWS {
             c.setResourceRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setPermissionEndpoint(baseEndpointUri + "/host/rsrc_pr");
             c.setScopeEndpoint(baseEndpointUri + UMA_SCOPES_SUFFIX);
-            c.setClaimsInteractionEndpoint(baseEndpointUri + "/uma/gather_claims");
+            c.setClaimsInteractionEndpoint(baseEndpointUri + UMA_CLAIMS_GATHERING_PATH);
 
             // convert manually to avoid possible conflicts between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asPrettyJson(c);

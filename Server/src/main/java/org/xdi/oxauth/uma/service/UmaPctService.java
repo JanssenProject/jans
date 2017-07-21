@@ -13,8 +13,8 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtClaims;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
-import org.xdi.oxauth.uma.authorization.Claims;
 import org.xdi.oxauth.uma.authorization.UmaPCT;
 import org.xdi.util.INumGenerator;
 
@@ -32,7 +32,7 @@ import java.util.UUID;
 @Named
 public class UmaPctService {
 
-    private static final int DEFAULT_PCT_LIFETIME = 3600;
+    public static final int DEFAULT_PCT_LIFETIME = 3600;
 
     @Inject
     private Logger log;
@@ -46,29 +46,41 @@ public class UmaPctService {
     @Inject
     private AppConfiguration appConfiguration;
 
-    public UmaPCT updateClaims(UmaPCT pct, Jwt idToken, Claims claims, String clientId) {
+    public UmaPCT updateClaims(UmaPCT pct, Jwt idToken, String clientId, List<UmaPermission> permissions) {
         try {
+            String ticketPctCode = permissions.get(0).getAttributes().get("pct");
+            UmaPCT ticketPct = StringUtils.isNotBlank(ticketPctCode) ? getByCode(ticketPctCode) : null;
+
             boolean hasPct = pct != null;
 
             if (!hasPct) {
-                pct = createPctAndPersist(clientId);
+                if (ticketPct != null) {
+                    pct = ticketPct;
+                } else {
+                    pct = createPctAndPersist(clientId);
+                }
             }
 
+            // copy claims from pctTicket into normal pct
             JwtClaims pctClaims = pct.getClaims();
-
-            JwtClaims idTokenClaims = idToken.getClaims();
-            for (String key : idTokenClaims.keys()) {
-                pctClaims.setClaimObject(key, idTokenClaims.getClaim(key));
+            if (ticketPct != null && hasPct) {
+                JwtClaims ticketClaims = ticketPct.getClaims();
+                for (String key : ticketClaims.keys()) {
+                    pctClaims.setClaimObject(key, ticketClaims.getClaim(key), false);
+                }
+                pct = ticketPct;
             }
 
-            for (String key : claims.keys()) {
-                pctClaims.setClaimObject(key, claims.get(key));
+            if (idToken != null && idToken.getClaims() != null) {
+                for (String key : idToken.getClaims().keys()) {
+                    pctClaims.setClaimObject(key, idToken.getClaims().getClaim(key), false);
+                }
             }
 
             pct.setClaims(pctClaims);
             log.trace("PCT code: " + pct.getCode() + ", claims: " + pct.getClaimValuesAsJson());
 
-            persist(pct);
+            return ldapEntryManager.merge(pct);
         } catch (Exception e) {
             log.error("Failed to update PCT claims. " + e.getMessage(), e);
         }
@@ -195,5 +207,13 @@ public class UmaPctService {
             }
         };
         batchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
+    }
+
+    public void merge(UmaPCT pct) {
+        try {
+            ldapEntryManager.merge(pct);
+        } catch (Exception e) {
+            log.error("Failed to merge PCT, code: " + pct.getCode() + ". " + e.getMessage(), e);
+        }
     }
 }

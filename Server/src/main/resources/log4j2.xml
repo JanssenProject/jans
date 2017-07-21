@@ -85,6 +85,8 @@
 		<!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message -->
 		<Logger name="jboss.resource.adapter.jms.inflow.JmsActivation" level="error" />
 
+	    <Logger name="com.ocpsoft" level="info" />
+
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
 

@@ -6,16 +6,16 @@
 
 package org.xdi.oxauth.client;
 
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.util.Util;
+
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 01.31.2012
