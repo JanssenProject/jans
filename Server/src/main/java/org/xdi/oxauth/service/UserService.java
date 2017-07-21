@@ -37,7 +37,6 @@ import com.unboundid.ldap.sdk.Filter;
 @Named
 public class UserService {
 
-
 	public static final String[] USER_OBJECT_CLASSES = new String[] { "gluuPerson" };
 
     @Inject

@@ -33,6 +33,7 @@ import org.xdi.service.cdi.event.ConfigurationUpdate;
 import org.xdi.service.cdi.event.LdapConfigurationReload;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.cdi.util.CdiUtil;
+import org.xdi.service.custom.lib.CustomLibrariesLoader;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.service.timer.QuartzSchedulerManager;
@@ -44,6 +45,7 @@ import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import javax.annotation.PostConstruct;
+import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.Initialized;
@@ -128,6 +130,9 @@ public class AppInitializer {
 	private KeyGeneratorTimer keyGeneratorTimer;
 
 	@Inject
+	private CustomLibrariesLoader customLibrariesLoader;
+
+	@Inject
 	private LdapStatusTimer ldapStatusTimer;
 	
 	@Inject
@@ -152,6 +157,8 @@ public class AppInitializer {
     }
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    	customLibrariesLoader.init();
+
     	createConnectionProvider();
         configurationFactory.create();
 
@@ -216,6 +223,7 @@ public class AppInitializer {
         closeLdapAuthEntryManagers(ldapAuthEntryManagers);
     }
     
+    @Asynchronous
     public void reloadConfigurationTimerEvent(@Observes @Scheduled AuthConfigurationEvent authConfigurationEvent) {
 		if (this.isActive.get()) {
 			return;

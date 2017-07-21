@@ -24,38 +24,38 @@
 	<ui:define name="body">
 		<header class="bs-docs-nav navbar navbar-static-top" id="top"> 
 		<div class="container">
-			<div class="navbar-header"> 
+			<!-- start logo-->
+			<div class="logo span2">
 				<ui:param name="client"
-						value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
+					value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
 
-					<h:panelGroup layout="block"
-						rendered='#{!empty client.logoUri}'>
-						<h:graphicImage url='#{client.logoUri}' />
-					</h:panelGroup>
-					<h:panelGroup layout="block"
-						rendered='#{empty client.logoUri}'>
-						<a href="http://www.gluu.org/"> <h:graphicImage
-								url="img/logo.png" />
-						</a>
-					</h:panelGroup>
-				<!--<a target="_blank"  target="_blank"  class="navbar-brand"><img src="assets/img/logo.png" alt="logo"/></a> </div>-->
+				<h:panelGroup layout="block" rendered='#{!empty client.logoUri}'>
+					<h:graphicImage url='#{client.logoUri}' />
+				</h:panelGroup>
+				<h:panelGroup layout="block" rendered='#{empty client.logoUri}'>
+					<a href="http://www.gluu.org/"> <h:graphicImage
+							url="img/logo.png" />
+					</a>
+				</h:panelGroup>
 			</div>
+			<!-- end logo-->
 		</div>
 	</header>
 		<!-- end header-->
 	<div class="bs-docs-section">
 		<div class="container">
+			<h:panelGroup  rendered="#{applianceService.getAppliance().passportEnabled.booleanValue}"> 
 			<div class="login_bx">
 				<div class="row">
 					<div class="col-md-6 col-sm-5 ">
 					   <div class="left_form_bx">
-					   
+
 						<h:form id="loginForm"  class="form-horizontal">
 						<h:panelGroup
 									rendered="#{sessionStateService.notSessionStateAuthenticated}">
-									
+
 						<h:messages style="color:red;" />
-						
+
 						  <div class="form-group">
 							<h:outputLabel styleClass="col-sm-3 control-label"	for="username" value="#{msgs['login.username']}" />
 							<div class="col-sm-9">
@@ -70,7 +70,7 @@
 												autocomplete="off" />
 							</div>
 						  </div>
-						  
+
 						  <div class="form-group">
 							<div class="col-sm-offset-3 col-sm-9">
 							  <h:commandButton id="loginButton" styleClass="btn btn-primary"
@@ -134,6 +134,67 @@
 					</div>
 				</div>
 			</div>
+			</h:panelGroup>
+			
+			<h:panelGroup  rendered="#{!applianceService.getAppliance().passportEnabled.booleanValue}"> 
+			<div class="login_bx_1">
+				<div class="row">
+					<div class="col-md-6_1 col-sm-5_1 ">
+					   <div class="left_form_bx">
+					   
+						<h:form id="loginForm"  class="form-horizontal">
+						<h:panelGroup
+									rendered="#{sessionStateService.notSessionStateAuthenticated}">
+									
+						<h:messages style="color:red;" />
+						
+						  <div class="form-group">
+							<h:outputLabel styleClass="col-sm-3 control-label"	for="username" value="#{msgs['login.username']}" />
+							<div class="col-sm-9">
+							  <h:inputText id="username" value="#{credentials.username}" styleClass="form-control"
+												autocomplete="off" />
+							</div>
+						  </div>
+						  <div class="form-group">
+							<h:outputLabel styleClass="col-sm-3 control-label" for="password" value="#{msgs['login.password']}" />
+							<div class="col-sm-9">
+							  <h:inputSecret id="password" value="#{credentials.password}"  styleClass="form-control"
+												autocomplete="off" />
+							</div>
+						  </div>
+						  
+						  <div class="form-group">
+							<div class="col-sm-offset-3 col-sm-9">
+							  <h:commandButton id="loginButton" styleClass="btn btn-primary"
+													value="#{msgs['login.login']}"
+													action="#{authenticator.authenticate}" />
+							</div>
+						  </div>
+						  
+						  <div class="form-group">
+							<div class="col-sm-offset-3 col-sm-9">
+							  <div class="forgot_link">
+								<a href="/identity/person/passwordReminder.htm">
+								  <h:outputText value="Forgot your Password?" />
+								</a>
+							  </div>
+							</div>
+						  </div>
+						  </h:panelGroup>
+						</h:form>
+						</div>
+						<h:panelGroup layout="block" rendered="#{external_registration_uri != Null}">
+						 <div class="reg_link">
+								<a href="#{external_registration_uri}">
+								 <h:outputText value="Register Now   " />
+								</a>
+						</div>
+						</h:panelGroup>
+					</div>
+				</div>
+			</div>
+			
+			</h:panelGroup>
 		</div>
 	</div>
 	
@@ -142,7 +203,14 @@
 			<div class="row">
 				<div class="col-md-12">
 				  <div class="padding_spc">
-					<p><h:outputText value="#{msgs['common.gluuInc']}" />  | <a target="_blank" href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText value="#{msgs['common.caution']}" escape="false" /></a></p>
+					<p><h:outputText value="#{msgs['common.gluuInc']}" />  | <a target="_blank" href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText value="#{msgs['common.caution']}" escape="false" /></a>
+					<h:panelGroup rendered='#{!empty client.policyUri}'>
+					| <a target="_blank" href="#{client.policyUri}"><h:outputText value="#{msgs['common.privacyPolicy']}" escape="false" /></a>
+					</h:panelGroup>
+					<h:panelGroup rendered='#{!empty client.tosUri}'>
+					| <a target="_blank" href="#{client.tosUri}"><h:outputText value="#{msgs['common.termsOfService']}" escape="false" /></a>
+					</h:panelGroup>
+					</p>
 					</div>
 				</div>
 			</div>
@@ -163,7 +231,7 @@
                     userNameField.focus();
                 }
 
-                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                var displayRegister = #{display_register_action or identity.sessionState.sessionAttributes['display_register_action']};
                 if (displayRegister) {
                     var registerButton = document.getElementById("loginForm:registerId");
                     if (registerButton != null) {

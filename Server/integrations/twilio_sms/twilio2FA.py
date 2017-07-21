@@ -4,15 +4,12 @@
 # Author: Michael Schwartz
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
-from org.xdi.util import StringHelper
-from org.jboss.seam.contexts import Context, Contexts
 from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util import StringHelper 
-from org.xdi.util import ArrayHelper 
+from org.xdi.util import StringHelper, ArrayHelper 
 from java.util import Arrays
 
 import com.twilio.sdk.TwilioRestClient as TwilioRestClient
@@ -77,9 +74,11 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
-        session_attributes = context.get("sessionAttributes")
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
+        session_attributes = identity.getSessionState().getSessionAttributes()
 
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
         form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")
@@ -88,13 +87,15 @@ class PersonAuthentication(PersonAuthenticationType):
         
         if step == 1:
             print "TwilioSMS. Step 1 Password Authentication"
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
+
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
             
             logged_in = False
             if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
             
             if not logged_in:
                 return False
@@ -117,7 +118,7 @@ class PersonAuthentication(PersonAuthenticationType):
             code = random.randint(100000, 999999)
             
             # Get code and save it in LDAP temporarily with special session entry 
-            context.set("code", code)
+            identity.setWorkingParameter("code", code)
 
             client = TwilioRestClient(self.ACCOUNT_SID, self.AUTH_TOKEN)
             bodyParam = BasicNameValuePair("Body", str(code))

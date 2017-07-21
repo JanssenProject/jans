@@ -32,17 +32,26 @@ public class UmaSessionService {
     @Inject
     private ExternalUmaClaimsGatheringService external;
 
-    public SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieSessionId = sessionStateService.getSessionStateFromCookie();
-        log.trace("Cookie - uma_session_state: " + cookieSessionId);
+    public SessionState getConnectSession(HttpServletRequest httpRequest) {
+        String cookieId = sessionStateService.getSessionStateFromCookie(httpRequest);
+        log.trace("Cookie - session_state: " + cookieId);
+        if (StringUtils.isNotBlank(cookieId)) {
+            return sessionStateService.getSessionState(cookieId);
+        }
+        return null;
+    }
 
-        if (StringUtils.isNotBlank(cookieSessionId)) {
-            SessionState ldapSessionState = sessionStateService.getSessionState(cookieSessionId);
-            if (ldapSessionState != null) {
-                log.trace("Loaded uma_session_state from cookie, session: " + ldapSessionState);
-                return ldapSessionState;
+    public SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        String cookieId = sessionStateService.getUmaSessionStateFromCookie(httpRequest);
+        log.trace("Cookie - uma_session_state: " + cookieId);
+
+        if (StringUtils.isNotBlank(cookieId)) {
+            SessionState sessionState = sessionStateService.getSessionState(cookieId);
+            if (sessionState != null) {
+                log.trace("Loaded uma_session_state from cookie, session: " + sessionState);
+                return sessionState;
             } else {
-                log.error("Failed to load uma_session_state from cookie: " + cookieSessionId);
+                log.error("Failed to load uma_session_state from cookie: " + cookieId);
             }
         } else {
             log.error("uma_session_state cookie is not set.");
@@ -92,33 +101,33 @@ public class UmaSessionService {
 
     public void configure(SessionState session, String scriptName, Boolean reset, List<UmaPermission> permissions,
                           String clientId, String claimRedirectUri, String state) {
-        if (reset != null && reset) {
-            setStep(1, session);
-        }
+//        if (reset != null && reset) {
+        setStep(1, session);
+//        }
         setState(session, state);
         setClaimsRedirectUri(session, claimRedirectUri);
         setTicket(session, permissions.get(0).getTicket());
 
-        if (StringUtils.isBlank(getScriptName(session))) {
-            setScriptName(session, scriptName);
+//        if (StringUtils.isBlank(getScriptName(session))) {
+        setScriptName(session, scriptName);
+//        }
+
+//        if (StringUtils.isBlank(getPct(session))) {
+        String pct = permissions.get(0).getAttributes().get("pct");
+
+        if (StringUtils.isBlank(pct)) {
+            log.error("PCT code is null or blank in permission object.");
+            throw new RuntimeException("PCT code is null or blank in permission object.");
         }
 
-        if (StringUtils.isBlank(getPct(session))) {
-            String pct = permissions.get(0).getAttributes().get("pct");
+        setPct(session, pct);
+//        }
 
-            if (StringUtils.isBlank(pct)) {
-                log.error("PCT code is null or blank in permission object.");
-                throw new RuntimeException("PCT code is null or blank in permission object.");
-            }
+//        if (StringUtils.isBlank(getClientId(session))) {
+        setClientId(session, clientId);
+//        }
 
-            setPct(session, pct);
-        }
-
-        if (StringUtils.isBlank(getClientId(session))) {
-            setClientId(session, clientId);
-        }
-
-        getStep(session); // init step
+//        getStep(session); // init step
         persist(session);
     }
 

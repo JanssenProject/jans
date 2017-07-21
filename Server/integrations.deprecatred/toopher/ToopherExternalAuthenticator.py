@@ -4,25 +4,19 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.security import Identity
-from org.jboss.seam import Component
-from javax.faces.context import FacesContext
+from org.xdi.oxauth.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
-from org.xdi.util.security import StringEncrypter 
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.oxauth.service import EncryptionService 
+from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays
 from com.toopher import ToopherAPI
 from com.toopher import RequestError
 
 import java
 import sys
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
 
@@ -45,8 +39,8 @@ class PersonAuthentication(PersonAuthenticationType):
         consumer_key = creds["CONSUMER_KEY"]
         consumer_secret = creds["CONSUMER_SECRET"]
         try:
-            stringEncrypter = StringEncrypter.defaultInstance()
-            consumer_secret = stringEncrypter.decrypt(consumer_secret)
+            encryptionService = CdiUtil.bean(EncryptionService)
+            consumer_secret = encryptionService.decrypt(consumer_secret)
         except:
             return False
 
@@ -70,12 +64,14 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
 
         toopher_user_timeout = int(configurationAttributes.get("toopher_user_timeout").getValue2())
 
-        credentials = Identity.instance().getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -84,14 +80,14 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                userService = CdiUtil.bean(UserService)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
             # Find user by uid
-            userService = Component.getInstance(UserService)
+            userService = CdiUtil.bean(UserService)
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):
                 print "Toopher. Authenticate for step 1. Failed to find user"
@@ -111,7 +107,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (topher_user_uid == None):
                     print "Toopher. Authenticate for step 1. There is no Topher UID for user: ", user_name
                 else:
-                    context.set("toopher_user_uid", topher_user_uid)
+                    identity.setWorkingParameter("toopher_user_uid", topher_user_uid)
 
             return True
         elif (step == 2):
@@ -121,7 +117,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("toopher_user_uid"):
                 print "Toopher. Authenticate for step 2. toopher_user_uid is empty"
 
@@ -133,8 +129,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 pairing_phrase = pairing_phrase_array[0]
                 try:
-                    pairing_status = self.tapi.pair(pairing_phrase, user_name);
-                    toopher_user_uid = pairing_status.id;
+                    pairing_status = self.tapi.pair(pairing_phrase, user_name)
+                    toopher_user_uid = pairing_status.id
                 except RequestError, err:
                     print "Toopher. Authenticate for step 2. Failed pair with phone: ", err
                     return False
@@ -153,7 +149,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Toopher. Authenticate for step 2. Failed to update current user"
                     return False
 
-                context.set("toopher_user_uid", toopher_user_uid)
+                identity.setWorkingParameter("toopher_user_uid", toopher_user_uid)
             else:
                 toopher_user_uid = sessionAttributes.get("toopher_user_uid")
 
@@ -172,7 +168,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            sessionAttributes = context.get("sessionAttributes")
+            sessionAttributes = identity.getSessionState().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("toopher_user_uid"):
                 print "Toopher. Authenticate for step 3. toopher_user_uid is empty"
                 return False
@@ -185,8 +181,8 @@ class PersonAuthentication(PersonAuthenticationType):
             toopher_terminal_name = configurationAttributes.get("toopher_terminal_name").getValue2()
 
             try:
-                request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name);
-                request_id = request_status.id;
+                request_status = self.tapi.authenticate(toopher_user_uid, toopher_terminal_name)
+                request_id = request_status.id
             except RequestError, err:
                 print "Toopher. Authenticate for step 3. Failed to send authentication request to phone: ", err
                 return False
@@ -224,7 +220,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return ""
 
     def isPassedDefaultAuthentication():
-        credentials = Identity.instance().getCredentials()
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
         passed_step1 = StringHelper.isNotEmptyString(user_name)
 

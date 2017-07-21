@@ -24,7 +24,7 @@
                 <div id="header" class="row-fluid">
                     <div class="logo span2">
                         <ui:param name="client"
-                                  value="#{clientService.getClient(sessionAttributes['client_id'])}"/>
+                                  value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}"/>
 
                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
