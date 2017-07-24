@@ -40,8 +40,9 @@ public class FacesMessages implements Serializable {
 	}
 
 	public void add(Severity severity, String message, Object... params) {
-		// TODO: CDI Review. Add parameters to message
-		add(severity, message);
+		String fomrattedMessage = String.format(message, params); 
+
+		add(severity, fomrattedMessage);
 		setKeepMessages();
 	}
 
