@@ -54,5 +54,13 @@ public class DummyUserRegistrationType implements UserRegistrationType {
 			Map<String, SimpleCustomProperty> configurationAttributes) {
 		return false;
 	}
+	
 
+	@Override
+	public boolean getConfirmationPage(Object user,	Map<String, String[]> requestParameters,
+			Map<String, SimpleCustomProperty> configurationAttributes) {
+		return false;
+	}
+
+	
 }
