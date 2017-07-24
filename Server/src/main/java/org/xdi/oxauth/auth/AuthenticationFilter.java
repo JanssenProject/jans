@@ -299,6 +299,16 @@ public class AuthenticationFilter implements Filter {
 
 						requireAuth = !authenticator.authenticateWebService(true);
 					}
+				} else {
+					Client client = clientService.getClient(servletRequest.getParameter("client_id"));
+					if (client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE) {
+						identity.logout();
+
+						identity.getCredentials().setUsername(client.getClientId());
+						identity.getCredentials().setPassword(null);
+
+						requireAuth = !authenticator.authenticateWebService(true);
+					}
 				}
 			}
 
