@@ -22,6 +22,8 @@ public class Configuration {
     private String registerClientAppType = "web";
     //    @JsonProperty(value = "register_client_response_types")
     private String registerClientResponesType = "code";
+    @JsonProperty(value = "server_name")
+    private String serverName;
     @JsonProperty(value = "localhost_only")
     private Boolean localhostOnly;
     @JsonProperty(value = "use_client_authentication_for_pat")
@@ -52,6 +54,14 @@ public class Configuration {
     private Boolean protectCommandsWithAccessToken;
     @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
     private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
 
     public Boolean getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient() {
         return uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
