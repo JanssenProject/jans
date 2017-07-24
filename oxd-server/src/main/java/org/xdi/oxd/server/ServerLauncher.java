@@ -101,7 +101,7 @@ public class ServerLauncher {
             }
         }
         throw new AssertionError("Failed to start oxd, system property " +
-                ConfigurationService.CONF_SYS_PROPERTY_NAME + " is not specified. (Please defined it as -D" +
+                ConfigurationService.CONF_SYS_PROPERTY_NAME + " is not specified. (Please define it as -D" +
                 ConfigurationService.CONF_SYS_PROPERTY_NAME + "=<path to oxd-conf.json>)");
     }
 
