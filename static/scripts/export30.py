@@ -252,7 +252,7 @@ class Exporter(object):
         props['installPassport'] = os.path.isfile(
                 '/opt/gluu/node/passport/server/app.js')
 
-        f = open(self.propertiesFn, 'a')
+        f = open(self.propertiesFn, 'w')
         for key in props.keys():
             f.write("%s=%s\n" % (key, props[key]))
         f.close()
@@ -272,7 +272,6 @@ class Exporter(object):
         print("-------------------------------------------------------------")
         print("The data has been exported to %s" % self.backupDir)
         print("-------------------------------------------------------------")
-
 
 
 if __name__ == "__main__":
