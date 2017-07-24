@@ -67,6 +67,11 @@ public class ConfigurationService implements Provider<Configuration> {
     public void load() {
         configuration = loadImpl();
         Preconditions.checkNotNull(configuration, "Failed to load configuration.");
+
+        if (StringUtils.isBlank(configuration.getServerName())) {
+            LOG.error("'server_name' configuration property is mandatory. Please provide value for it in oxd-conf.json file.");
+            throw new AssertionError("'server_name' configuration property is mandatory. Please provide value for it in oxd-conf.json file.");
+        }
     }
 
     private Configuration loadImpl() {
