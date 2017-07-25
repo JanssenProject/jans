@@ -155,8 +155,9 @@ public class Identity implements Serializable {
 	 * Resets all security state and credentials
 	 */
 	public void unAuthenticate() {
-		principal = null;
-		credentials.clear();
+		this.principal = null;
+		this.credentials.clear();
+		this.subject = new Subject();
 	}
 
 	public void logout() {
