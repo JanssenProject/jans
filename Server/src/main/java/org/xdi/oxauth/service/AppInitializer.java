@@ -485,7 +485,7 @@ public class AppInitializer {
 					configurations.add(configuration);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{}'", ex, configurationJson);
+				log.error("Failed to create object by json: '{}'", configurationJson, ex);
 			}
 		}
 
@@ -538,7 +538,7 @@ public class AppInitializer {
 				return mapLdapConfig(configuration.getConfig());
 			}
 		} catch (Exception ex) {
-			log.error("Failed to create object by oxIDPAuthConf: '{}'", ex, configuration);
+			log.error("Failed to create object by oxIDPAuthConf: '{}'", configuration, ex);
 		}
 
 		return null;
