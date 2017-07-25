@@ -25,4 +25,6 @@ public interface UserRegistrationType extends BaseExternalType {
 	
 	public boolean confirmRegistration(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
 
+	public boolean getConfirmationPage(Object user, Map<String, String[]> requestParameters, Map<String, SimpleCustomProperty> configurationAttributes);
+
 }
