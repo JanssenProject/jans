@@ -222,7 +222,7 @@ public abstract class BaseAuthFilterService {
         try {
             ldapFilter = Filter.create(filter);
         } catch (LDAPException ex) {
-            log.error("Failed to create Ldap filter: '{}'", ex, filter);
+            log.error("Failed to create Ldap filter: '{}'", filter, ex);
             return null;
         }
 
