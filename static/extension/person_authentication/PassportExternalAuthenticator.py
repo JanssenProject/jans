@@ -189,8 +189,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/auth/passport/genericlogin.xhtml"
-        return "/auth/passport/genericpostlogin.xhtml"
+            return "/auth/passport/passportlogin.xhtml"
+        return "/auth/passport/passportpostlogin.xhtml"
 
     def logout(self, configurationAttributes, requestParameters):
         return True
