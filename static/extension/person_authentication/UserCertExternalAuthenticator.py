@@ -229,10 +229,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Store certificate in session
             facesContext = CdiUtil.bean(FacesContext)
             externalContext = facesContext.getExternalContext()
-            request = externalidentity.getWorkingParameterRequest()
+            request = identity.getWorkingParameterRequest()
 
             # Try to get certificate from header X-ClientCert
-            clientCertificate = externalidentity.getWorkingParameterRequestHeaderMap().get("X-ClientCert")
+            clientCertificate = identity.getWorkingParameterRequestHeaderMap().get("X-ClientCert")
             if clientCertificate != None:
                 x509Certificate = self.certFromPemString(clientCertificate)
                 identity.setWorkingParameter("cert_x509",  self.certToString(x509Certificate))
@@ -265,7 +265,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             return "/auth/cert/login.xhtml"
         if step == 2:
-            return "/cert-login.xhtml"
+            return "/auth/cert/cert-login.xhtml"
         elif step == 3:
             cert_selected = self.getSessionAttribute("cert_selected")
             if True != cert_selected:

@@ -122,7 +122,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
         identity.setWorkingParameter("retry_current_step", False)
@@ -278,7 +278,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
@@ -333,7 +333,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Super-Gluu. Prepare for step 2. auth_method: '%s'" % auth_method
             
-            issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
+            issuer = CdiUtil.bean(ConfigurationFactory).getAppConfiguration().getIssuer()
             super_gluu_request_dictionary = {'username': user.getUserId(),
                                'app': client_redirect_uri,
                                'issuer': issuer,
@@ -631,7 +631,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return session_attributes.get("redirect_uri")
 
-    def setEventContextParameters(self, context):
+    def setRequestScopedParameters(self, identity):
         if self.registrationUri != None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
