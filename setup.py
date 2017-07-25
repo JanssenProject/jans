@@ -2633,11 +2633,15 @@ class Setup(object):
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
     def change_rc_links(self):
         if self.os_type in ['ubuntu', 'debian']:
-            self.logIt("Changing RC Level 3 Links")
-            self.run(['mv', '/etc/rc3.d/S03solserver', '/etc/rc3.d/S80solserver'])
-            self.run(['mv', '/etc/rc3.d/S01oxauth', '/etc/rc3.d/S81oxauth'])
-            self.run(['mv', '/etc/rc3.d/S01identity', '/etc/rc3.d/S82identity'])
-            self.run(['mv', '/etc/rc3.d/S02apache2', '/etc/rc3.d/S83apache2'])
+            if os.path.isfile('/etc/rc3.d/S03solserver'):
+                self.logIt("Changing RC Level 3 Links")
+                self.run(['mv', '/etc/rc3.d/S03solserver', '/etc/rc3.d/S80solserver'])
+            if os.path.isfile('/etc/rc3.d/S01oxauth'):
+                self.run(['mv', '/etc/rc3.d/S01oxauth', '/etc/rc3.d/S81oxauth'])
+            if os.path.isfile('/etc/rc3.d/S01identity'):
+                self.run(['mv', '/etc/rc3.d/S01identity', '/etc/rc3.d/S82identity'])
+            if os.path.isfile('/etc/rc3.d/S02apache2'):
+                self.run(['mv', '/etc/rc3.d/S02apache2', '/etc/rc3.d/S83apache2'])
 ############################   Main Loop   #################################################
 
 def print_help():
