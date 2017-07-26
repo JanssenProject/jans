@@ -89,8 +89,11 @@ public class AuthenticationFilter implements Filter {
 		try {
 			final String requestUrl = httpRequest.getRequestURL().toString();
 			log.trace("Get request to: '{}'", requestUrl);
-			if ((requestUrl.endsWith("/token") && ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint())) ||
-					requestUrl.endsWith("/uma/token")) {
+
+			boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
+			boolean umatTokenEndpoint = requestUrl.endsWith("/uma/token");
+
+			if (tokenEndpoint || umatTokenEndpoint) {
 				log.debug("Starting token endpoint authentication");
 				if (httpRequest.getParameter("client_assertion") != null
 						&& httpRequest.getParameter("client_assertion_type") != null) {
@@ -103,7 +106,7 @@ public class AuthenticationFilter implements Filter {
 				} else {
 					log.debug("Starting POST Auth token endpoint authentication");
 					processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse,
-							filterChain);
+							filterChain, tokenEndpoint);
 				}
 			} else if (httpRequest.getHeader("Authorization") != null) {
 				String header = httpRequest.getHeader("Authorization");
@@ -251,8 +254,8 @@ public class AuthenticationFilter implements Filter {
 	}
 
 	private void processPostAuth(ClientService clientService, ClientFilterService clientFilterService,
-			ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest,
-			HttpServletResponse servletResponse, FilterChain filterChain) {
+								 ErrorResponseFactory errorResponseFactory, HttpServletRequest servletRequest,
+								 HttpServletResponse servletResponse, FilterChain filterChain, boolean tokenEndpoint) {
 		try {
 			String clientId = "";
 			String clientSecret = "";
@@ -299,7 +302,7 @@ public class AuthenticationFilter implements Filter {
 
 						requireAuth = !authenticator.authenticateWebService(true);
 					}
-				} else {
+				} else if (tokenEndpoint) {
 					Client client = clientService.getClient(servletRequest.getParameter("client_id"));
 					if (client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE) {
 						identity.logout();
