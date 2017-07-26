@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.session;
 
+import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.util.StringHelper;
 
@@ -23,14 +24,14 @@ public class EndSessionParamsValidator {
     }
 
     public static void validateParams(String idTokenHint, String sessionState, String postLogoutUrl, ErrorResponseFactory errorFactory) {
-        if (!isValidParams(idTokenHint, sessionState) || (postLogoutUrl == null) || postLogoutUrl.isEmpty()) {
-            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
-        }
+        if (!isValidParams(idTokenHint, sessionState))
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
+        else if (StringUtils.isEmpty(postLogoutUrl))
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_PASSED);
     }
 
     public static void validateParams(String idTokenHint, String sessionState, ErrorResponseFactory errorFactory) {
-        if (!isValidParams(idTokenHint, sessionState)) {
-            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
-        }
+        if (!isValidParams(idTokenHint, sessionState))
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
     }
 }
