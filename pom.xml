@@ -14,7 +14,7 @@
         <maven.min-version>3.0.3</maven.min-version>
         <oxCore.version>3.1.0-SNAPSHOT</oxCore.version>
         <jackson.version>1.9.9</jackson.version>
-        <slf4j.version>1.7.11</slf4j.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
         <oxauth.version>3.1.0-SNAPSHOT</oxauth.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
@@ -120,6 +120,18 @@
                         <groupId>com.wordnik</groupId>
                         <artifactId>swagger-jaxrs_2.10</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -131,12 +143,50 @@
                         <groupId>com.wordnik</groupId>
                         <artifactId>swagger-jaxrs_2.10</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxcore-util</artifactId>
                 <version>${oxCore.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
