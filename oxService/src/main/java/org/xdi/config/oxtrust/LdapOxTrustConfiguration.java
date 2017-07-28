@@ -40,6 +40,9 @@ public class LdapOxTrustConfiguration extends Entry {
     @LdapJsonObject //issue 102 - begin  : changed by shekhar
     @LdapAttribute(name = "oxTrustConfImportPerson")
     private ImportPersonConfig importPersonConfig; //issue 102 - end  : changed by shekhar
+    
+    @LdapAttribute(name = "oxTrustAttributeResolver")
+    private String oxTrustAttributeResolver;
 
 	public LdapOxTrustConfiguration() {
 	}
@@ -76,6 +79,15 @@ public class LdapOxTrustConfiguration extends Entry {
 	public void setImportPersonConfig(ImportPersonConfig importPersonConfig) {
 		this.importPersonConfig = importPersonConfig;
 	}//issue 102 - end  : changed by shekhar
+	
+
+	public String getOxTrustAttributeResolver() {
+		return oxTrustAttributeResolver;
+	}
+
+	public void setOxTrustAttributeResolver(String oxTrustAttributeResolver) {
+		this.oxTrustAttributeResolver = oxTrustAttributeResolver;
+	}
 
 	@Override
 	public String toString() {
