@@ -1,4 +1,4 @@
-package org.gluu.jsf2.converter;
+package org.gluu.jsf2.validator;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;

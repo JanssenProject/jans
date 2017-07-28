@@ -8,11 +8,6 @@ package org.xdi.model;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UIInput;
-import javax.faces.context.FacesContext;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -24,7 +19,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.ldap.model.Entry;
 import org.xdi.ldap.model.GluuStatus;
-import org.xdi.util.StringHelper;
 
 /**
  * Attribute Metadata
@@ -447,61 +441,4 @@ public class GluuAttribute extends Entry implements Serializable {
 		return true;
 	}
 
-	public void validateAttribute(FacesContext context, UIComponent comp, Object value) {
-		Integer minvalue = this.attributeValidation != null ? this.attributeValidation.getMinLength() : null;
-		Integer maxValue = this.attributeValidation != null ? this.attributeValidation.getMaxLength() : null;
-		String regexpValue = this.attributeValidation != null ? this.attributeValidation.getRegexp() : null;
-
-		String attribute = (String) value;
-
-		// Minimum length validation
-		if (minvalue != null) {
-			int min = this.attributeValidation.getMinLength();
-
-			if ((attribute != null) && (attribute.length() < min)) {
-				((UIInput) comp).setValid(false);
-
-				FacesMessage message = new FacesMessage(this.displayName + " should be at least " + min + " symbols. ");
-				message.setSeverity(FacesMessage.SEVERITY_ERROR);
-				context.addMessage(comp.getClientId(context), message);
-			}
-		}
-		
-		//default maxlength
-		int max = 400;
-		if (maxValue != null) {
-			max = this.attributeValidation.getMaxLength();
-		}
-
-		// Maximum Length validation
-		if ((attribute != null) && (attribute.length() > max)) {
-			((UIInput) comp).setValid(false);
-		
-			FacesMessage message = new FacesMessage(this.displayName + " should not exceed " + max + " symbols. ");
-			message.setSeverity(FacesMessage.SEVERITY_ERROR);
-			context.addMessage(comp.getClientId(context), message);
-		}
-
-		// Regex Pattern Validation
-		
-		if( (this.name.equalsIgnoreCase("mail")   && ((regexpValue == null) || (StringHelper.isEmpty(regexpValue))))){
-			regexpValue = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@" +
-		            "[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
-		}
-		
-		if ((regexpValue != null) && StringHelper.isNotEmpty(regexpValue)) {
-			java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regexpValue);
-			if ((attribute != null) && !(attribute.trim().equals(""))) {
-				java.util.regex.Matcher matcher = pattern.matcher(attribute);
-				boolean flag = matcher.matches();
-				if (!flag) {
-					((UIInput) comp).setValid(false);
-
-					FacesMessage message = new FacesMessage(this.displayName + " Format is invalid. ");
-					message.setSeverity(FacesMessage.SEVERITY_ERROR);
-					context.addMessage(comp.getClientId(context), message);
-				}
-			}
-		}
-	}
 }
