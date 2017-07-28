@@ -38,9 +38,9 @@ public class DummyUserRegistrationType implements UserRegistrationType {
 	}
 
 	@Override
-	public boolean preRegistration(Object user, Map<String, String[]> requestParameters,
+	public Object preRegistration(Object user, Map<String, String[]> requestParameters,
 			Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
+		return null;
 	}
 
 	@Override
