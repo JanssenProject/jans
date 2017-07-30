@@ -37,8 +37,6 @@ public class CustomScript extends BaseEntry {
 	@LdapAttribute(ignoreDuringUpdate = true)
 	private String inum;
 
-	@Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Name should contain only letters, digits and underscores")
-    @NotNull(message = "Name should be not empty")
     @LdapAttribute(name = "displayName")
 	private String name;
 
