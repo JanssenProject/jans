@@ -320,11 +320,55 @@
                 <groupId>org.xdi</groupId>
                 <artifactId>oxlicense-client</artifactId>
                 <version>${oxlicense.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxlicense-validator</artifactId>
                 <version>${oxlicense.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
