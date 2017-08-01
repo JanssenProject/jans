@@ -179,7 +179,7 @@ public class LicenseService {
 
             StatisticUpdateRequest request = StatisticUpdateRequest.clientUpdate(
                     licenseId, clientId, oxdId, clientName, macAddress, isClientLocal);
-            request.setAppMetadata(appMetadata(rp.getOxdRpProgrammingLanguage()));
+            request.setAppMetadata(appMetadata(rp.getOxdRpProgrammingLanguage(), conf.getServerName()));
             LOG.trace("Updating statistic ... , request: " + request);
             LicenseClient.statisticWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor()).update(request);
             LOG.trace("Updated statistic. oxdId: " + oxdId);
@@ -188,7 +188,7 @@ public class LicenseService {
         }
     }
 
-    private static AppMetadata appMetadata(String programmingLanguage) {
+    private static AppMetadata appMetadata(String programmingLanguage, String serverName) {
         AppMetadata appMetadata = new AppMetadata();
         appMetadata.setAppName("oxd");
         appMetadata.setAppVersion("3.1.0");
@@ -200,6 +200,7 @@ public class LicenseService {
                 appMetadata.getData().put(key, buildProperties.getProperty(key));
             }
         }
+        appMetadata.getData().put("server_name", serverName);
 
         return appMetadata;
     }
