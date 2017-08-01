@@ -52,8 +52,9 @@ public class ValidationService {
             isClientLocal = true;
         }
         if (params instanceof HasProtectionAccessTokenParams) {
-            validate((HasProtectionAccessTokenParams) params);
-            isClientLocal = false;
+            if (validate((HasProtectionAccessTokenParams) params)) {
+                isClientLocal = false;
+            }
         }
 
         if (isClientLocal != null && !(params instanceof RegisterSiteParams)) {
@@ -74,15 +75,21 @@ public class ValidationService {
         }
     }
 
-    private void validate(HasProtectionAccessTokenParams params) {
+    /**
+     * Returns whether has valid token
+     *
+     * @param params params
+     * @return whether has valid token
+     */
+    private boolean validate(HasProtectionAccessTokenParams params) {
         if (params instanceof SetupClientParams) {
-            return;
+            return false;
         }
 
         final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
             if (StringUtils.isBlank(params.getProtectionAccessToken())) {
-                return; // skip validation since protectCommandsWithAccessToken=false
+                return false; // skip validation since protectCommandsWithAccessToken=false
             } // otherwise if token is not blank then let it validate it
         }
 
@@ -92,7 +99,7 @@ public class ValidationService {
             throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
         if (params instanceof RegisterSiteParams) {
-            return; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
+            return false; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
         }
 
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
@@ -107,7 +114,7 @@ public class ValidationService {
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + rp.getSetupClientId());
 
         if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
-            return;
+            return true;
         }
 
         throw new ErrorResponseException(ErrorResponseCode.INVALID_PROTECTION_ACCESS_TOKEN);
