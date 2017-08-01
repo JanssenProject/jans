@@ -61,18 +61,26 @@ public class ServerLauncher {
         startOxd();
     }
 
-    private static void printBuildNumber() {
+    public static Properties buildProperties() {
         InputStream is = null;
         try {
             is = ClassLoader.getSystemClassLoader().getResourceAsStream("git.properties");
             Properties properties = new Properties();
             properties.load(is);
-            LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
-                    ", build time:" + properties.getProperty("git.build.time"));
+            return properties;
         } catch (Exception e) {
             LOG.warn("Unable to read git.properties and print build number, " + e.getMessage());
+            return null;
         } finally {
             IOUtils.closeQuietly(is);
+        }
+    }
+
+    private static void printBuildNumber() {
+        Properties properties = buildProperties();
+        if (properties != null) {
+            LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
+                    ", build time:" + properties.getProperty("git.build.time"));
         }
     }
 
