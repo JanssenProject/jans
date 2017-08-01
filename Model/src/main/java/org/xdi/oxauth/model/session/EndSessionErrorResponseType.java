@@ -20,6 +20,12 @@ public enum EndSessionErrorResponseType implements IErrorType {
     INVALID_GRANT("invalid_grant"),
 
     /**
+     * The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a
+     * parameter, or is otherwise malformed.
+     */
+    INVALID_REQUEST("invalid_request"),
+
+    /**
      * The provided access token and session state are invalid or were issued to another client.
      */
     INVALID_GRANT_AND_SESSION("invalid_grant_and_session"),
