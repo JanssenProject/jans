@@ -180,7 +180,7 @@ public class PersistenceService {
 
             query.close();
             conn.commit();
-            LOG.error("Loaded " + result.size() + " RPs.");
+            LOG.info("Loaded " + result.size() + " RPs.");
             return result;
         } catch (Exception e) {
             LOG.error("Failed to fetch rps. Error: " + e.getMessage(), e);
