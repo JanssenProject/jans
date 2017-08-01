@@ -56,7 +56,7 @@ public class ValidationService {
             isClientLocal = false;
         }
 
-        if (isClientLocal != null) {
+        if (isClientLocal != null && !(params instanceof RegisterSiteParams)) {
             try {
                 String oxdId = ((HasOxdIdParams) params).getOxdId();
                 if (StringUtils.isNotBlank(oxdId)) {
