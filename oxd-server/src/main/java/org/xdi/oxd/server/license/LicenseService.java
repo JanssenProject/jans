@@ -5,21 +5,29 @@ package org.xdi.oxd.server.license;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.license.client.LicenseClient;
+import org.xdi.oxd.license.client.js.AppMetadata;
 import org.xdi.oxd.license.client.js.LicenseMetadata;
 import org.xdi.oxd.license.client.js.Product;
+import org.xdi.oxd.license.client.js.StatisticUpdateRequest;
 import org.xdi.oxd.license.validator.LicenseContent;
 import org.xdi.oxd.license.validator.LicenseValidator;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.ServerLauncher;
 import org.xdi.oxd.server.ShutdownException;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.HttpService;
+import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.TimeService;
 
 import java.util.Date;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -36,15 +44,22 @@ public class LicenseService {
     private final Configuration conf;
     private final LicenseFileUpdateService updateService;
     private final TimeService timeService;
+    private final HttpService httpService;
 
     private volatile LicenseMetadata metadata = null;
     private volatile boolean licenseValid = false;
+
+    private final Cache<String, Rp> clientUpdateCache = CacheBuilder.newBuilder()
+            .maximumSize(100000)
+            .expireAfterWrite(24, TimeUnit.HOURS)
+            .build();
 
     @Inject
     public LicenseService(Configuration conf, HttpService httpService, TimeService timeService) {
         this.conf = conf;
         this.timeService = timeService;
         this.updateService = new LicenseFileUpdateService(conf, httpService);
+        this.httpService = httpService;
     }
 
     public void start() {
@@ -132,5 +147,60 @@ public class LicenseService {
                 licenseValid = validateLicense();
             }
         }, initialDelayInHours, 24, TimeUnit.HOURS);
+    }
+
+    public void notifyClientUsed(final Rp rp, final boolean isClientLocal) {
+        CoreUtils.createExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (shouldNotifyAboutClientUsage(rp)) {
+                    notifyClientUsedImpl(rp, isClientLocal);
+                }
+            }
+        });
+    }
+
+    private boolean shouldNotifyAboutClientUsage(Rp rp) {
+        boolean hasInCache = clientUpdateCache.getIfPresent(rp.getClientId()) != null;
+        if (hasInCache) {
+            return false; // skip update, client was updated already
+        }
+        clientUpdateCache.put(rp.getClientId(), rp);
+        return true;
+    }
+
+    private void notifyClientUsedImpl(Rp rp, boolean isClientLocal) {
+        try {
+            String licenseId = conf.getLicenseId();
+            String clientId = rp.getClientId();
+            String oxdId = rp.getOxdId();
+            String clientName = rp.getClientName();
+            String macAddress = MacAddressProvider.macAddress();
+
+            StatisticUpdateRequest request = StatisticUpdateRequest.clientUpdate(
+                    licenseId, clientId, oxdId, clientName, macAddress, isClientLocal);
+            request.setAppMetadata(appMetadata(rp.getOxdRpProgrammingLanguage()));
+            LOG.trace("Updating statistic ... , request: " + request);
+            LicenseClient.statisticWs(LicenseFileUpdateService.LICENSE_SERVER_ENDPOINT, httpService.getClientExecutor()).update(request);
+            LOG.trace("Updated statistic. ... , request: " + request);
+        } catch (Exception e) {
+            LOG.error("Failed to update statistic. Message: " + e.getMessage(), e);
+        }
+    }
+
+    private static AppMetadata appMetadata(String programmingLanguage) {
+        AppMetadata appMetadata = new AppMetadata();
+        appMetadata.setAppName("oxd");
+        appMetadata.setAppVersion("3.1.0");
+        appMetadata.setProgrammingLanguage(programmingLanguage);
+
+        Properties buildProperties = ServerLauncher.buildProperties();
+        if (buildProperties != null) {
+            for (String key : buildProperties.stringPropertyNames()) {
+                appMetadata.getData().put(key, buildProperties.getProperty(key));
+            }
+        }
+
+        return appMetadata;
     }
 }
