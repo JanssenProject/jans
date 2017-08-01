@@ -79,6 +79,7 @@ public class SetupClientTest {
         params.setGrantType(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setOxdRpProgrammingLanguage("java");
 
         final Command command = new Command(CommandType.SETUP_CLIENT);
         command.setParamsObject(params);
