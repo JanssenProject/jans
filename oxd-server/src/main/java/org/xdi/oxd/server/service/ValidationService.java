@@ -16,6 +16,7 @@ import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.ServerLauncher;
+import org.xdi.oxd.server.license.LicenseService;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -44,12 +45,32 @@ public class ValidationService {
     }
 
     public void validate(IParams params) {
+        Boolean isClientLocal = null;
         notNull(params);
         if (params instanceof HasOxdIdParams) {
             validate((HasOxdIdParams) params);
+            isClientLocal = true;
         }
         if (params instanceof HasProtectionAccessTokenParams) {
             validate((HasProtectionAccessTokenParams) params);
+            isClientLocal = false;
+        }
+
+        if (isClientLocal != null) {
+            try {
+                String oxdId = ((HasOxdIdParams) params).getOxdId();
+                if (StringUtils.isNotBlank(oxdId)) {
+                    final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+                    final Rp rp = rpService.getRp(oxdId);
+                    if (rp != null) {
+                        ServerLauncher.getInjector().getInstance(LicenseService.class).notifyClientUsed(rp, isClientLocal);
+                    }
+                }
+            } catch (ErrorResponseException e) {
+                // ignore
+            } catch (Exception e) {
+                LOG.error("Failed to invoke license service client update. Message: " + e.getMessage(), e);
+            }
         }
     }
 
