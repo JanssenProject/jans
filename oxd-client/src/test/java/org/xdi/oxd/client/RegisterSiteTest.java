@@ -115,6 +115,7 @@ public class RegisterSiteTest {
             commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList("https://gluu.loc/index.php/customer/account/logout/"));
             commandParams.setScope(Lists.newArrayList("openid", "profile", "email"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
+            commandParams.setOxdRpProgrammingLanguage("java");
 
             commandParams.setResponseTypes(Lists.newArrayList("code"));
 
@@ -145,6 +146,7 @@ public class RegisterSiteTest {
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
                 GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setOxdRpProgrammingLanguage("java");
 
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(params);
