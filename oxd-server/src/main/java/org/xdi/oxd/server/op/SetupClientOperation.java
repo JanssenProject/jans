@@ -14,6 +14,7 @@ import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -36,10 +37,15 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
     @Override
     public CommandResponse execute(SetupClientParams params) throws Exception {
         try {
-            prepareParams(params);
+
 
             RegisterSiteOperation registerSiteOperation = new RegisterSiteOperation(getCommand(), getInjector());
+
+            List<String> grantTypes = params.getGrantType();
+            prepareSetupParams(params);
             RegisterSiteResponse setupClient = registerSiteOperation.execute_(params);
+
+            params.setGrantType(grantTypes);
             RegisterSiteResponse registeredClient = registerSiteOperation.execute_(params);
 
             Rp setup = getRpService().getRp(setupClient.getOxdId());
@@ -69,7 +75,7 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
-    private void prepareParams(SetupClientParams params) {
+    private void prepareSetupParams(SetupClientParams params) {
         if (params.getGrantType() == null) {
             params.setGrantType(new ArrayList<String>());
         }
