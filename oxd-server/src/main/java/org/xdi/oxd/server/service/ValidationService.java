@@ -125,6 +125,13 @@ public class ValidationService {
             throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
 
+        final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+        final Rp rp = rpService.getRp(oxdId);
+        if (StringUtils.isNotBlank(rp.getSetupOxdId())) {
+            oxdId = rp.getSetupOxdId();
+        }
+        LOG.trace("Introspect token with rp: " + rpService.getRp(oxdId));
+
         final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
         final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint();
         final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
