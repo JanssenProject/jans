@@ -26,6 +26,7 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SimpleBindRequest;
 import com.unboundid.util.ssl.SSLUtil;
 import com.unboundid.util.ssl.TrustAllTrustManager;
+import com.unboundid.util.ssl.TrustStoreTrustManager;
 
 /**
  * @author Yuriy Movchan
@@ -52,6 +53,8 @@ public class LDAPConnectionProvider {
 	private String bindDn;
 	private String bindPassword;
 	private boolean useSSL;
+	private String sslKeyStore;
+	private String sslKeyStorePin;
 
 	private ArrayList<String> binaryAttributes;
 
@@ -116,10 +119,21 @@ public class LDAPConnectionProvider {
 		connectionOptions.setAutoReconnect(true);
 
 		this.useSSL = Boolean.valueOf(props.getProperty("useSSL")).booleanValue();
-		SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
-
+		
+		SSLUtil sslUtil = null;
 		FailoverServerSet failoverSet;
 		if (this.useSSL) {
+			String sslTrustStoreFile = props.getProperty("ssl.trustStoreFile");
+			String sslTrustStorePin = props.getProperty("ssl.trustStorePin");
+			String sslTrustStoreFormat = props.getProperty("ssl.trustStoreFormat");
+
+			if (StringHelper.isEmpty(sslTrustStoreFile) && StringHelper.isEmpty(sslTrustStorePin)) { 
+				sslUtil = new SSLUtil(new TrustAllTrustManager());
+			} else {
+				TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(sslTrustStoreFile, sslTrustStorePin.toCharArray(), sslTrustStoreFormat, true);
+				sslUtil = new SSLUtil(trustStoreTrustManager);
+			}
+
 			failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(SSL_PROTOCOLS[0]), connectionOptions);
 		} else {
 			failoverSet = new FailoverServerSet(this.addresses, this.ports, connectionOptions);

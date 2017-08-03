@@ -23,6 +23,7 @@ public class PropertiesDecrypter {
 	private static final Logger log = LoggerFactory.getLogger(PropertiesDecrypter.class);
 
 	public static final String bindPassword = "bindPassword";
+	public static final String trustStorePin = "ssl.trustStorePin";
 
 	public static Properties decryptProperties(Properties properties, String encryptionKey) {
 		try {
@@ -44,26 +45,30 @@ public class PropertiesDecrypter {
 		}
 
 		Properties clondedProperties = (Properties) properties.clone();
+		decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.bindPassword);
+		decriptProperty(stringEncrypter, clondedProperties, encryptionKey, PropertiesDecrypter.trustStorePin);
+		
+		return clondedProperties;
+	}
 
-		String encryptedPassword = clondedProperties.getProperty(PropertiesDecrypter.bindPassword);
+	private static void decriptProperty(StringEncrypter stringEncrypter, Properties properties, String encryptionKey, String propertyName) {
+		String encryptedPassword = properties.getProperty(propertyName);
 		if (StringHelper.isEmpty(encryptedPassword)) {
-			return properties;
+			return;
 		}
-
+		
 		try {
 			String decryptedProperty;
 			if (StringHelper.isEmpty(encryptionKey)) {
-				decryptedProperty = stringEncrypter.decrypt(properties.getProperty(PropertiesDecrypter.bindPassword));
+				decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName));
 			} else {
-				decryptedProperty = stringEncrypter.decrypt(properties.getProperty(PropertiesDecrypter.bindPassword), encryptionKey);
+				decryptedProperty = stringEncrypter.decrypt(properties.getProperty(propertyName), encryptionKey);
 			}
 			
-			clondedProperties.put(PropertiesDecrypter.bindPassword, decryptedProperty);
+			properties.put(propertyName, decryptedProperty);
 		} catch (EncryptionException ex) {
-			log.error(String.format("Failed to decript '%s' property", PropertiesDecrypter.bindPassword), ex);
+			log.error(String.format("Failed to decript '%s' property", propertyName), ex);
 		}
-
-		return clondedProperties;
 	}
 
 	public static String decryptProperty(String encryptedValue, boolean returnSource, String encryptionKey) {
