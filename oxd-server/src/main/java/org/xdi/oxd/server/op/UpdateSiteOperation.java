@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
@@ -108,6 +109,18 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
                 site.setResponseTypes(params.getResponseTypes());
             }
         }
+
+        List<GrantType> grantTypes = Lists.newArrayList();
+        if (params.getGrantType() != null) {
+            for (String grantType : params.getGrantType()) {
+                GrantType t = GrantType.fromString(grantType);
+                if (t != null) {
+                    grantTypes.add(t);
+                }
+            }
+        }
+        request.setGrantTypes(grantTypes);
+        site.setGrantType(params.getGrantType());
 
         List<String> redirectUris = Lists.newArrayList();
         redirectUris.add(params.getAuthorizationRedirectUri());
