@@ -320,10 +320,16 @@ public class AppInitializer {
 
         Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
         this.connectionProvider = createConnectionProvider(connectionProperties);
-        log.debug("Created connectionProvider: {}", connectionProvider);
+        if (ResultCode.SUCCESS.equals(this.connectionProvider.getCreationResultCode())) {
+    		throw new ConfigurationException("Failed to create LDAP connection pool!");
+        }
+    	log.debug("Created connectionProvider: {}", connectionProvider);
 
         Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
         this.bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
+        if (ResultCode.SUCCESS.equals(this.bindConnectionProvider.getCreationResultCode())) {
+    		throw new ConfigurationException("Failed to create LDAP connection pool!");
+        }
         log.debug("Created bindConnectionProvider: {}", bindConnectionProvider);
     }
 
