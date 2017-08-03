@@ -9,7 +9,9 @@ package org.xdi.oxauth.model.common;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum Date: 11.25.2011
@@ -47,6 +49,20 @@ public class SimpleUser extends org.xdi.ldap.model.SimpleUser {
         } else {
             throw new InvalidClaimException("The claim " + userAttribute + " was not found.");
         }
+    }
+
+    public List<String> getAttributeValues(String ldapAttribute) {
+        List<String> attributes = null;
+        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
+            for (CustomAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(ldapAttribute, customAttribute.getName())) {
+                    attributes = customAttribute.getValues();
+                    break;
+                }
+            }
+        }
+
+        return attributes;
     }
 
 }
