@@ -31,7 +31,7 @@ public class Convertor {
      * Returns parameter object based on string representation.
      *
      * @param clazz parameter class
-     * @param <T>     parameter calss
+     * @param <T>   parameter calss
      * @return parameter object based on string representation
      */
     public static <T extends IParams> T asParams(Class<T> clazz, Command command) {
