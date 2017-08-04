@@ -23,7 +23,7 @@ public class GetLogoutUrlParams implements HasProtectionAccessTokenParams {
     @JsonProperty(value = "session_state")
     private String sessionState;
     @JsonProperty(value = "protection_access_token")
-        private String protectionAccessToken;
+    private String protectionAccessToken;
 
     public GetLogoutUrlParams() {
     }
