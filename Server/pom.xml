@@ -229,6 +229,11 @@
 	</build>
 
 	<dependencies>
+		<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
+		<dependency>
+			<groupId>com.wywy</groupId>
+			<artifactId>log4j-plugin-fluency</artifactId>
+		</dependency>
 		<!-- oxAuth -->
 		<dependency>
 			<groupId>org.xdi</groupId>
