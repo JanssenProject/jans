@@ -15,11 +15,11 @@ public interface KongApiService {
     @Consumes({"application/x-www-form-urlencoded"})
     @Produces({"application/json"})
     ClientResponse<JsonNode> addApi(@FormParam("name") String name,
-                                     @FormParam("request_host") String requestHost,
-                                  @FormParam("request_path") String requestPath,
-                                  @FormParam("strip_request_path") Boolean stripRequestPath,
-                                  @FormParam("preserve_host") Boolean preserveHost,
-                                  @FormParam("upstream_url") String upstreamUrl);
+                                    @FormParam("request_host") String requestHost,
+                                    @FormParam("request_path") String requestPath,
+                                    @FormParam("strip_request_path") Boolean stripRequestPath,
+                                    @FormParam("preserve_host") Boolean preserveHost,
+                                    @FormParam("upstream_url") String upstreamUrl);
 
     @GET
     @Produces({"application/json"})
@@ -34,11 +34,11 @@ public interface KongApiService {
     @Consumes({"application/x-www-form-urlencoded"})
     @Produces({"application/json"})
     ClientResponse<JsonNode> addKongUmaRsPlugin(@PathParam("apiId") String apiId,
-                   @FormParam("name") String name,
-                   @FormParam("config.oxd_host") String oxdHost,
-                   @FormParam("config.oxd_port") String oxdPort,
-                   @FormParam("config.uma_server_host") String umaServerHost,
-                   @FormParam("config.protection_document") String protectionDocumentJson
+                                                @FormParam("name") String name,
+                                                @FormParam("config.oxd_host") String oxdHost,
+                                                @FormParam("config.oxd_port") String oxdPort,
+                                                @FormParam("config.uma_server_host") String umaServerHost,
+                                                @FormParam("config.protection_document") String protectionDocumentJson
     );
 
 }
