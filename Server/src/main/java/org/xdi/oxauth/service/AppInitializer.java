@@ -25,10 +25,13 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
-import org.xdi.oxauth.service.cdi.event.*;
+import org.xdi.oxauth.service.cdi.event.AuthConfigurationEvent;
+import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.service.logger.LoggerService;
 import org.xdi.oxauth.service.status.ldap.LdapStatusTimer;
 import org.xdi.service.PythonService;
+import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.ConfigurationUpdate;
 import org.xdi.service.cdi.event.LdapConfigurationReload;
 import org.xdi.service.cdi.event.Scheduled;
@@ -45,7 +48,6 @@ import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 import javax.annotation.PostConstruct;
-import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.context.Initialized;
@@ -137,7 +139,10 @@ public class AppInitializer {
 	
 	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
-    
+
+	@Inject
+	private LoggerService loggerService;
+
 	private FileConfiguration ldapConfig;
 	private List<GluuLdapConfiguration> ldapAuthConfigs;
 
@@ -187,6 +192,8 @@ public class AppInitializer {
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
+
+		loggerService.updateLoggerConfigLocation();
 	}
 
     @Produces @ApplicationScoped
