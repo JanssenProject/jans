@@ -14,11 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.license.client.Jackson;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * @author Yuriy Zabrovarnyy

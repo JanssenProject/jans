@@ -13,7 +13,8 @@ import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 /**

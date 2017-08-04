@@ -16,7 +16,7 @@ public class H2PersistenceProvider implements PersistenceProvider {
 
     @Override
     public void onCreate() {
-         pool = JdbcConnectionPool.create("jdbc:h2:./oxd_db", "oxd", "oxd");
+        pool = JdbcConnectionPool.create("jdbc:h2:./oxd_db", "oxd", "oxd");
     }
 
     @Override

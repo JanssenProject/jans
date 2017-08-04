@@ -11,7 +11,7 @@ import java.util.Map;
  * @version 0.9, 12/10/2015
  */
 
-public class GetUserInfoResponse implements IOpResponse  {
+public class GetUserInfoResponse implements IOpResponse {
 
     @JsonProperty("claims")
     private Map<String, List<String>> claims = Maps.newHashMap();
