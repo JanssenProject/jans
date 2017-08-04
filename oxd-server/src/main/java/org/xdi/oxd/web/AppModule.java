@@ -17,9 +17,9 @@ public class AppModule extends AbstractModule {
 
 //       private static final String ENCRYPTION_KEY = "123456789012345678901234567890";
 
-       @Override
-       protected void configure() {
-           // ws
-           bind(CommandWS.class);
-       }
+    @Override
+    protected void configure() {
+        // ws
+        bind(CommandWS.class);
+    }
 }

@@ -79,11 +79,11 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return injector.getInstance(type);
     }
 
-    public StateService getStateService(){
+    public StateService getStateService() {
         return getInstance(StateService.class);
     }
 
-    public LicenseService getLicenseService(){
+    public LicenseService getLicenseService() {
         return getInstance(LicenseService.class);
     }
 
