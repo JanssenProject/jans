@@ -42,52 +42,44 @@ class PersonAuthentication(PersonAuthenticationType):
         date_time[0] = year[2:]
         
         startDate = ""
-        print("Hello World!!!")
         index = 0
         for index in range(0,2):
             startDate += date_time[index]
             startDate += "-"
         index += 1
         startDate = startDate + date_time[index]
-        print(startDate + "Testing 0")
         date_1 = datetime.datetime.strptime(startDate, "%y-%m-%d")
-        print date_1
         expDate = date_1 + datetime.timedelta(days=20)
-        print expDate
 
         return expDate
 
     def previousExpDate(self, dateList):
         year = dateList[0]
         dateList[0] = year[2:]
-        print (dateList[0]+'sssssss')
         startDate = ""
-        print("Hello World!!!")
         index = 0
         for index in range(0,2):
             startDate += dateList[index]
             startDate += "-"
         index += 1
         startDate = startDate + dateList[index]
-        print(startDate + "Testing 0")
         return datetime.datetime.strptime(startDate, "%y-%m-%d")
 
     def authenticate(self, configurationAttributes, requestParameters, step):
         authenticationService = CdiUtil.bean(AuthenticationService)
+        userService = CdiUtil.bean(UserService)
 
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        user_name = credentials.getUsername()
-
         if (step == 1):
             print "Basic (with password update). Authenticate for step 1"
 
+            user_name = credentials.getUsername()
             user_password = credentials.getPassword()
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = CdiUtil.bean(UserService)
                 logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
@@ -95,9 +87,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
             return True
         elif (step == 2):
+            print "Basic (with password update). Authenticate for step 2"
 
-            userService = CdiUtil.bean(UserService)
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
+                print "Basic (with password update). Authenticate for step 2. Failed to determine user name"
+                return False
 
+            user_name = user.getUserId()
             find_user_by_uid = userService.getUser(user_name)
 
             if (find_user_by_uid == None):
