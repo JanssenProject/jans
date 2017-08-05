@@ -467,7 +467,7 @@ public class AuthenticationService {
         return null;
     }
 
-    private String getAuthenticatedUserId() {
+    public String getAuthenticatedUserId() {
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser != null) {
             return authenticatedUser.getUserId();
