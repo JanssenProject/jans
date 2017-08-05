@@ -223,7 +223,11 @@ class PersonAuthentication(PersonAuthenticationType):
         elif step == 2:
             print "Super-Gluu. Authenticate for step 2"
 
-            user_name = authenticationService.getAuthenticatedUserId()
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
+                print "Super-Gluu. Authenticate for step 2. Failed to determine user name"
+                return False
+            user_name = user.getUserId()
 
             session_attributes = identity.getSessionState().getSessionAttributes()
 
