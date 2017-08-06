@@ -302,6 +302,9 @@ class Setup(object):
         self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
         self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
+        self.openldapJksPass = None
+        self.openldapJksFn = '%s/openldap.jks' % self.certFolder
+        
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.openldapRootSchemaFolder = "%s/schema" % self.gluuOptFolder
@@ -612,6 +615,7 @@ class Setup(object):
             self.asimbaJksPass = self.getPW()
         if not self.openldapKeyPass:
             self.openldapKeyPass = self.getPW()
+            self.openldapJksPass = self.getPW()
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.baseInum:
@@ -1220,6 +1224,7 @@ class Setup(object):
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
             self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
             self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
+            self.encoded_openldapJksPass = self.obscure(self.openldapJksPass)
             self.oxauthClient_pw = self.getPW()
             self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
         except:
@@ -1322,6 +1327,12 @@ class Setup(object):
                               self.asimbaJksPass,
                               '%s/asimba.key' % self.certFolder,
                               '%s/asimba.crt' % self.certFolder,
+                              'jetty')
+            self.gen_keystore('openldap',
+                              self.openldapJksFn,
+                              self.openldapJksPass,
+                              '%s/openldap.key' % self.certFolder,
+                              '%s/openldap.crt' % self.certFolder,
                               'jetty')
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])

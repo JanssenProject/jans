@@ -245,5 +245,9 @@
         }
     ],
     "logClientIdOnClientAuthentication": true,
-    "logClientNameOnClientAuthentication": false
+    "logClientNameOnClientAuthentication": false,
+    "httpLoggingEnabled": false,
+    "httpLoggingExludePaths": [],
+    "sessionStateLifetime": 86400,
+    "externalLoggerConfiguration": ""
 }
