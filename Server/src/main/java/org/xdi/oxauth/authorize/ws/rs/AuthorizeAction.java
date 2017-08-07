@@ -153,6 +153,11 @@ public class AuthorizeAction {
 
             if (matchingLocale != null)
                 languageBean.setLocaleCode(matchingLocale.getLanguage());
+        } else {
+            Locale defaultLocale = facesContext.getApplication().getDefaultLocale();
+            if (defaultLocale != null) {
+                languageBean.setLocaleCode(defaultLocale.getLanguage());
+            }
         }
     }
 
