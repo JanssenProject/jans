@@ -246,7 +246,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 								attributeFromLdap));
 					} else {
 						if (!attributeFromLdap.equals(attributeToPersist)) {
-	                    	if (isEmptyAttributeValues(attributeToPersist)) {
+	                    	if (isEmptyAttributeValues(attributeToPersist) && !ldapAttributeConfiguration.updateOnly()) {
 	    						attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
 	                    	} else {
 	                    		attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
