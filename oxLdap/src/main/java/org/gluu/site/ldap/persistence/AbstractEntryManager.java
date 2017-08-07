@@ -163,7 +163,10 @@ public abstract class AbstractEntryManager implements EntityManager {
 					}
 					AttributeModificationType modType = isSchemaUpdate ? schemaModificationType : AttributeModificationType.ADD;
 					if (AttributeModificationType.ADD.equals(modType)) {
-						attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.ADD, attributeToPersist));
+						String[] attributeToPersistValues = attributeToPersist.getValues();
+						if (!(ArrayHelper.isEmpty(attributeToPersistValues) || ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0])))) {
+							attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.ADD, attributeToPersist));
+						}
 					} else {
 						attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
 								attributeToPersist));
