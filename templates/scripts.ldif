@@ -150,6 +150,7 @@ gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F996
 oxLevel: 1
 oxRevision: 1
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxScript::%(uma_claims_gathering_uma_claims_gathering)s
 oxScriptType: uma_claims_gathering
 programmingLanguage: python
