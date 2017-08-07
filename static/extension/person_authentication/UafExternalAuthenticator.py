@@ -87,14 +87,14 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        user_name = credentials.getUsername()
-
         session_attributes = identity.getSessionState().getSessionAttributes()
 
         self.setRequestScopedParameters(identity)
 
         if (step == 1):
             print "UAF. Authenticate for step 1"
+
+            user_name = credentials.getUsername()
             
             authenticated_user = self.processBasicAuthentication(credentials)
             if authenticated_user == None:
@@ -125,9 +125,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "UAF. Prepare for step 2. Failed to determine session_state"
                 return False
 
-            if user_name == None:
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
                 print "UAF. Authenticate for step 2. Failed to determine user name"
                 return False
+            user_name = user.getUserId()
 
             uaf_auth_result = ServerUtil.getFirstValue(requestParameters, "auth_result")
             if uaf_auth_result != "success":

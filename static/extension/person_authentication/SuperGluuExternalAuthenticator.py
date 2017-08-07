@@ -113,8 +113,6 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        user_name = credentials.getUsername()
-
         session_attributes = identity.getSessionState().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
@@ -142,6 +140,8 @@ class PersonAuthentication(PersonAuthenticationType):
         deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
         if step == 1:
             print "Super-Gluu. Authenticate for step 1"
+
+            user_name = credentials.getUsername()
             if self.oneStep:
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
@@ -222,6 +222,13 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
         elif step == 2:
             print "Super-Gluu. Authenticate for step 2"
+
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
+                print "Super-Gluu. Authenticate for step 2. Failed to determine user name"
+                return False
+            user_name = user.getUserId()
+
             session_attributes = identity.getSessionState().getSessionAttributes()
 
             session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
