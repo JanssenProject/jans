@@ -22,43 +22,45 @@ public class MacAddressProvider {
     }
 
     public static String macAddress() {
-           String macAddressFromFile = LicenseFile.MacAddress.getMacAddress();
-           if (!Strings.isNullOrEmpty(macAddressFromFile)) {
-               LOG.trace("Mac address fetched from file: " + macAddressFromFile);
-               return macAddressFromFile;
-           }
-           try {
-               InetAddress ip = InetAddress.getLocalHost();
-               LOG.trace("Generating new mac address ... ip: " + ip);
-               NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-               if (network != null) {
-                   byte[] mac = network.getHardwareAddress();
-                   if (mac != null && mac.length > 0) {
-                       return macAsString(mac);
-                   }
-               }
+        String macAddressFromFile = LicenseFile.MacAddress.getMacAddress();
+        if (!Strings.isNullOrEmpty(macAddressFromFile)) {
+            LOG.trace("Mac address fetched from file: " + macAddressFromFile);
+            return macAddressFromFile;
+        }
+        try {
+            InetAddress ip = InetAddress.getLocalHost();
+            LOG.trace("Generating new mac address ... ip: " + ip);
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+            if (network != null) {
+                byte[] mac = network.getHardwareAddress();
+                if (mac != null && mac.length > 0) {
+                    return macAsString(mac);
+                }
+            } else {
+                LOG.error("Failed to obtain network interface.");
+            }
 
-               for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
-                   byte[] mac = networkInterface.getHardwareAddress();
+            for (NetworkInterface networkInterface : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+                byte[] mac = networkInterface.getHardwareAddress();
 
-                   if (mac != null && mac.length > 0) {
-                       return macAsString(mac);
-                   }
-               }
-           } catch (Exception e) {
-               LOG.error(e.getMessage(), e);
-           }
+                if (mac != null && mac.length > 0) {
+                    return macAsString(mac);
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
 
-           String uuid = UUID.randomUUID().toString();
-           LOG.debug("Generated fallback UUID instead of mac address:" + uuid);
-           return uuid;
-       }
+        String uuid = UUID.randomUUID().toString();
+        LOG.debug("Generated fallback UUID instead of mac address:" + uuid);
+        return uuid;
+    }
 
-       private static String macAsString(byte[] mac) {
-           StringBuilder sb = new StringBuilder();
-           for (int i = 0; i < mac.length; i++) {
-               sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-           }
-           return sb.toString();
-       }
+    private static String macAsString(byte[] mac) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        }
+        return sb.toString();
+    }
 }
