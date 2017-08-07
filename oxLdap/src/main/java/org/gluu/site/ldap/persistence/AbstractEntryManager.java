@@ -151,8 +151,12 @@ public abstract class AbstractEntryManager implements EntityManager {
                 if (attributeFromLdap != null && attributeToPersist != null) {
                     // Modify DN entry attribute in DS
                     if (!attributeFromLdap.equals(attributeToPersist)) {
-                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE, attributeToPersist,
-                                attributeFromLdap));
+                    	if (isEmptyAttributeValues(attributeToPersist) && !ldapAttributeAnnotation.updateOnly()) {
+    						attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
+                    	} else {
+	                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE, attributeToPersist,
+	                                attributeFromLdap));
+                    	}
                     }
                 } else if ((attributeFromLdap == null) && (attributeToPersist != null)) {
                     // Add entry attribute or change schema
@@ -242,8 +246,12 @@ public abstract class AbstractEntryManager implements EntityManager {
 								attributeFromLdap));
 					} else {
 						if (!attributeFromLdap.equals(attributeToPersist)) {
-							attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
-									attributeToPersist, attributeFromLdap));
+	                    	if (isEmptyAttributeValues(attributeToPersist)) {
+	    						attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
+	                    	} else {
+	                    		attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
+	                    				attributeToPersist, attributeFromLdap));
+	                    	}
 						}
 					}
 				}
