@@ -163,8 +163,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 					}
 					AttributeModificationType modType = isSchemaUpdate ? schemaModificationType : AttributeModificationType.ADD;
 					if (AttributeModificationType.ADD.equals(modType)) {
-						String[] attributeToPersistValues = attributeToPersist.getValues();
-						if (!(ArrayHelper.isEmpty(attributeToPersistValues) || ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0])))) {
+						if (!isEmptyAttributeValues(attributeToPersist)) {
 							attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.ADD, attributeToPersist));
 						}
 					} else {
@@ -229,8 +228,7 @@ public abstract class AbstractEntryManager implements EntityManager {
 						// Add entry attribute or change schema
 						AttributeModificationType modType = isSchemaUpdate ? schemaModificationType : AttributeModificationType.ADD;
 						if (AttributeModificationType.ADD.equals(modType)) {
-							String[] attributeToPersistValues = attributeToPersist.getValues();
-							if (!(ArrayHelper.isEmpty(attributeToPersistValues) || ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0])))) {
+							if (!isEmptyAttributeValues(attributeToPersist)) {
 								attributeDataModifications
 										.add(new AttributeDataModification(AttributeModificationType.ADD, attributeToPersist));
 							}
@@ -271,6 +269,12 @@ public abstract class AbstractEntryManager implements EntityManager {
 		merge(dnValue.toString(), attributeDataModifications);
 
 		return (T) find(entryClass, dnValue.toString(), null, propertiesAnnotations);
+	}
+	
+	public boolean isEmptyAttributeValues(AttributeData attributeData) {
+		String[] attributeToPersistValues = attributeData.getValues();
+
+		return ArrayHelper.isEmpty(attributeToPersistValues) || ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0]));
 	}
 
 	public <T> T merge(T entry) {
