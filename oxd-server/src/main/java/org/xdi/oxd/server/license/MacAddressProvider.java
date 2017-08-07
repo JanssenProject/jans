@@ -18,10 +18,18 @@ public class MacAddressProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(MacAddressProvider.class);
 
+    private static class Holder {
+        private static final String MAC_ADDRESS = obtainMacAddress();
+    }
+
     private MacAddressProvider() {
     }
 
     public static String macAddress() {
+        return Holder.MAC_ADDRESS;
+    }
+
+    private static String obtainMacAddress() {
         String macAddressFromFile = LicenseFile.MacAddress.getMacAddress();
         if (!Strings.isNullOrEmpty(macAddressFromFile)) {
             LOG.trace("Mac address fetched from file: " + macAddressFromFile);
