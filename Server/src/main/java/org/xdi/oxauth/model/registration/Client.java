@@ -168,6 +168,9 @@ public class Client implements Serializable {
     @LdapAttribute(name = "oxIncludeClaimsInIdToken")
     private boolean includeClaimsInIdToken;
 
+    @LdapAttribute(name = "oxRefreshTokenLifetime")
+    private Integer refreshTokenLifetime;
+
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
@@ -1048,6 +1051,14 @@ public class Client implements Serializable {
 
     public void setIncludeClaimsInIdToken(boolean includeClaimsInIdToken) {
         this.includeClaimsInIdToken = includeClaimsInIdToken;
+    }
+
+    public Integer getRefreshTokenLifetime() {
+        return refreshTokenLifetime;
+    }
+
+    public void setRefreshTokenLifetime(Integer refreshTokenLifetime) {
+        this.refreshTokenLifetime = refreshTokenLifetime;
     }
 
     public List<CustomAttribute> getCustomAttributes() {
