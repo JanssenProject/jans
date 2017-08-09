@@ -1702,6 +1702,17 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "oxAuth Session State",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxSessionState"
+            ],
+            "oid": "oxAttribute:157",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "oxAuth Permission Granted",
             "equality": "caseIgnoreMatch",
             "names": [
@@ -4659,17 +4670,18 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxLastAccessTime",
-                "oxAuthAuthenticationTime",
-                "oxAuthPermissionGranted",
-                "oxAuthPermissionGrantedMap",
-                "oxAuthUserDN",
                 "oxAuthSessionId",
+                "oxLastAccessTime",
+                "oxAuthUserDN",
+                "oxAuthAuthenticationTime",
                 "oxState",
-                "oxAuthSessionAttribute",
+                "oxSessionState",
+                "oxAuthPermissionGranted",
                 "oxAsJwt",
                 "oxJwt",
-                "oxInvolvedClients"
+                "oxAuthPermissionGrantedMap",
+                "oxInvolvedClients",
+                "oxAuthSessionAttribute"
             ],
             "must": [
                 "objectclass"
