@@ -41,7 +41,7 @@ context.get("sessionAttributes")
 
 with:
 identity = CdiUtil.bean(Identity)
-identity.getSessionState().getSessionAttributes()
+identity.getSessionId().getSessionAttributes()
 
 7. To add faces messages instead of:
 from org.jboss.seam.faces import FacesMessages

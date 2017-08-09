@@ -21,7 +21,9 @@ import org.xdi.oxauth.model.common.ResponseType;
 
 import java.util.Arrays;
 
-
+/**
+ * @version August 9, 2017
+ */
 public class TestSessionWorkflow extends BaseTest {
 
     @Parameters({"userId", "userSecret", "clientId", "clientSecret", "redirectUri"})
@@ -50,7 +52,7 @@ public class TestSessionWorkflow extends BaseTest {
             authorizationRequest1.setAuthPassword(userSecret);
             authorizationRequest1.getPrompts().add(Prompt.NONE);
             authorizationRequest1.setState("af0ifjsldkj");
-            authorizationRequest1.setRequestSessionState(true);
+            authorizationRequest1.setRequestSessionId(true);
 
             AuthorizeClient authorizeClient1 = new AuthorizeClient(authorizationEndpoint);
             authorizeClient1.setRequest(authorizationRequest1);
@@ -59,9 +61,9 @@ public class TestSessionWorkflow extends BaseTest {
             //        showClient(authorizeClient1, cookieStore);
 
             String code1 = authorizationResponse1.getCode();
-            String sessionState = authorizationResponse1.getSessionState();
+            String sessionId = authorizationResponse1.getSessionId();
             Assert.assertNotNull("code1 is null", code1);
-            Assert.assertNotNull("sessionState is null", sessionState);
+            Assert.assertNotNull("sessionId is null", sessionId);
 
             // TV sends the code to the Backend
             // We don't use httpClient and cookieStore during this call
@@ -100,7 +102,7 @@ public class TestSessionWorkflow extends BaseTest {
 
             authorizationRequest2.getPrompts().add(Prompt.NONE);
             authorizationRequest2.setState("af0ifjsldkj");
-            authorizationRequest2.setSessionState(sessionState);
+            authorizationRequest2.setSessionId(sessionId);
 
             AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
             authorizeClient2.setRequest(authorizationRequest2);

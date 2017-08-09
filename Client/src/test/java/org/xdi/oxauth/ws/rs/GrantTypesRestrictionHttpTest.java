@@ -35,7 +35,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
 
 /**
  * @author Javier Rojas Blum
- * @version July 18, 2017
+ * @version August 9, 2017
  */
 public class GrantTypesRestrictionHttpTest extends BaseTest {
 
@@ -233,9 +233,9 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
 
             if (idToken != null) {
                 // 8. End session
-                String endSessionState = UUID.randomUUID().toString();
-                EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState);
-                endSessionRequest.setSessionState(authorizationResponse.getSessionState());
+                String endSessionId = UUID.randomUUID().toString();
+                EndSessionRequest endSessionRequest = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionId);
+                endSessionRequest.setSessionId(authorizationResponse.getSessionId());
 
                 EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
                 endSessionClient.setRequest(endSessionRequest);
@@ -250,7 +250,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 assertTrue(endSessionResponse.getHtmlPage().contains("<html>"));
                 assertTrue(endSessionResponse.getHtmlPage().contains(logoutUri));
                 assertTrue(endSessionResponse.getHtmlPage().contains(postLogoutRedirectUri));
-                // assertEquals(endSessionResponse.getState(), endSessionState); // commented out, for http-based logout we get html page
+                // assertEquals(endSessionResponse.getState(), endSessionId); // commented out, for http-based logout we get html page
             }
         }
     }

@@ -5,17 +5,16 @@
 #
 
 import sys
-
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from javax.faces.context import FacesContext
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util import StringHelper, ArrayHelper
-from org.apache.http.params import CoreConnectionPNames
 from java.util import Arrays
 from java.util import HashMap
+from javax.faces.context import FacesContext
+from org.apache.http.params import CoreConnectionPNames
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.oxauth.service.net import HttpService
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.util import StringHelper, ArrayHelper
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -195,7 +194,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "CAS2. Authenticate for step 2"
 
-            sessionAttributes = identity.getSessionState().getSessionAttributes()
+            sessionAttributes = identity.getSessionId().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("cas2_user_uid"):
                 print "CAS2. Authenticate for step 2. cas2_user_uid is empty"
                 return False
