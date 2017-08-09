@@ -38,9 +38,9 @@
     </test>
 
     <!-- Authorize test -->
-    <test name="Authorize session state test (HTTP)" enabled="true">
+    <test name="Authorize session id test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizeSessionStateRestWebServiceHttpTest"/>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizeSessionIdRestWebServiceHttpTest"/>
         </classes>
     </test>
 

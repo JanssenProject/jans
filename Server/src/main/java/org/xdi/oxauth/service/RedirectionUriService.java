@@ -14,7 +14,7 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
@@ -30,7 +30,7 @@ import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 April 27, 2015
+ * @version August 9, 2017
  */
 @Stateless
 @Named
@@ -140,35 +140,35 @@ public class RedirectionUriService {
         return null;
     }
 
-	public String validatePostLogoutRedirectUri(SessionState sessionState, String postLogoutRedirectUri) {
-		if (Strings.isNullOrEmpty(postLogoutRedirectUri) || (sessionState == null)) {
-	        errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
-	        return null;
-		}
+    public String validatePostLogoutRedirectUri(SessionId sessionId, String postLogoutRedirectUri) {
+        if (Strings.isNullOrEmpty(postLogoutRedirectUri) || (sessionId == null)) {
+            errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
+            return null;
+        }
 
-		final Set<Client> clientsByDns = sessionState.getPermissionGrantedMap() != null
-				? clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true)
-				: Sets.<Client>newHashSet();
+        final Set<Client> clientsByDns = sessionId.getPermissionGrantedMap() != null
+                ? clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true)
+                : Sets.<Client>newHashSet();
 
-		log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {}", postLogoutRedirectUri);
+        log.trace("Validating post logout redirect URI: postLogoutRedirectUri = {}", postLogoutRedirectUri);
 
-		for (Client client : clientsByDns) {
-			String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
-			if (postLogoutRedirectUris == null) {
-				continue;
-			}
+        for (Client client : clientsByDns) {
+            String[] postLogoutRedirectUris = client.getPostLogoutRedirectUris();
+            if (postLogoutRedirectUris == null) {
+                continue;
+            }
 
-			for (String uri : postLogoutRedirectUris) {
-				log.debug("Comparing {} == {}, clientId: {}", uri, postLogoutRedirectUri, client.getClientId());
-				if (uri.equals(postLogoutRedirectUri)) {
-					return postLogoutRedirectUri;
-				}
-			}
-		}
+            for (String uri : postLogoutRedirectUris) {
+                log.debug("Comparing {} == {}, clientId: {}", uri, postLogoutRedirectUri, client.getClientId());
+                if (uri.equals(postLogoutRedirectUri)) {
+                    return postLogoutRedirectUri;
+                }
+            }
+        }
 
         errorResponseFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
         return null;
-	}
+    }
 
     public static Map<String, String> getParams(String uri) {
         Map<String, String> params = new HashMap<String, String>();

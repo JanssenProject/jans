@@ -24,7 +24,7 @@ import java.util.List;
  * Encapsulates functionality to make authorization request calls to an authorization server via REST Services.
  *
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version August 9, 2017
  */
 public class AuthorizeClient extends BaseClient<AuthorizationRequest, AuthorizationResponse> {
 
@@ -239,10 +239,10 @@ public class AuthorizeClient extends BaseClient<AuthorizationRequest, Authorizat
         addReqParam(AuthorizeRequestParam.CODE_CHALLENGE, getRequest().getCodeChallenge());
         addReqParam(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, getRequest().getCodeChallengeMethod());
 
-        if (getRequest().isRequestSessionState()) {
-            addReqParam(AuthorizeRequestParam.REQUEST_SESSION_STATE, Boolean.toString(getRequest().isRequestSessionState()));
+        if (getRequest().isRequestSessionId()) {
+            addReqParam(AuthorizeRequestParam.REQUEST_SESSION_ID, Boolean.toString(getRequest().isRequestSessionId()));
         }
-        addReqParam(AuthorizeRequestParam.SESSION_STATE, getRequest().getSessionState());
+        addReqParam(AuthorizeRequestParam.SESSION_ID, getRequest().getSessionId());
 
         // Custom params
         for (String key : request.getCustomParameters().keySet()) {

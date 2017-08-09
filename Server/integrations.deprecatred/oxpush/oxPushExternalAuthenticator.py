@@ -4,16 +4,15 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.oxauth.security import Identity
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.util import StringHelper, ArrayHelper
-from java.util import Arrays
-from org.xdi.oxpush import OxPushClient
-
 import java
-import json
+from java.util import Arrays
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.oxpush import OxPushClient
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.util import StringHelper
+
 
 class PersonAuthentication(PersonAuthenticationType):
 
@@ -115,7 +114,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not passed_step1):
                 return False
 
-            sessionAttributes = identity.getSessionState().getSessionAttributes()
+            sessionAttributes = identity.getSessionId().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Authenticate for step 2. oxpush_user_uid is empty"
 
@@ -209,7 +208,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             user_name = credentials.getUsername()
 
-            sessionAttributes = identity.getSessionState().getSessionAttributes()
+            sessionAttributes = identity.getSessionId().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oxpush_user_uid"):
                 print "oxPush. Prepare for step 2. oxpush_user_uid is empty"
 

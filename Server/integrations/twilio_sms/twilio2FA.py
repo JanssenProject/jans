@@ -4,26 +4,19 @@
 # Author: Michael Schwartz
 #
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util import StringHelper, ArrayHelper 
-from java.util import Arrays
+import random
 
 import com.twilio.sdk.TwilioRestClient as TwilioRestClient
-import com.twilio.sdk.TwilioRestException as TwilioRestException
-import com.twilio.sdk.resource.factory.MessageFactory as MessageFactory
-import com.twilio.sdk.resource.instance.Message as Message
-import org.apache.http.NameValuePair as NameValuePair
-import org.apache.http.message.BasicNameValuePair as BasicNameValuePair
 import java.util.ArrayList as ArrayList
-import java.util.Arrays.asList as List
+import org.apache.http.message.BasicNameValuePair as BasicNameValuePair
+from java.util import Arrays
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.oxauth.util import ServerUtil
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.util import StringHelper
 
-import java
-import random
-import jarray
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -78,7 +71,7 @@ class PersonAuthentication(PersonAuthenticationType):
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         identity = CdiUtil.bean(Identity)
-        session_attributes = identity.getSessionState().getSessionAttributes()
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
         form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")

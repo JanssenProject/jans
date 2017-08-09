@@ -4,21 +4,18 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.oxauth.security import Identity
-from org.xdi.service.cdi.util import CdiUtil
-from org.apache.http.entity import ContentType 
+import json
+from java.util import Arrays
+from oneid import OneID
+from org.apache.http.entity import ContentType
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util import StringHelper
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import ArrayHelper
-from java.util import Arrays
+from org.xdi.util import StringHelper
 
-import java
-import sys
-import json
-
-from oneid import OneID
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -126,7 +123,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "OneId. Authenticate for step 2"
 
-            sessionAttributes = identity.getSessionState().getSessionAttributes()
+            sessionAttributes = identity.getSessionId().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("oneid_user_uid"):
                 print "OneId. Authenticate for step 2. oneid_user_uid is empty"
                 return False
