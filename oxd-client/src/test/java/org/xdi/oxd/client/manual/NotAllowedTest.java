@@ -13,7 +13,8 @@ import org.xdi.oxd.common.response.RsProtectResponse;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
