@@ -98,15 +98,6 @@ defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 oxScopeType: openid
 
-dn: inum=%(inumOrg)s!0009!6D98,ou=scopes,o=%(inumOrg)s,o=gluu
-defaultScope: false
-description: Obtain UMA AAT
-displayName: uma_authorization
-inum: %(inumOrg)s!0009!6D98
-objectClass: oxAuthCustomScope
-objectClass: top
-oxScopeType: uma
-
 dn: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
 defaultScope: false
 description: Obtain UMA PAT
