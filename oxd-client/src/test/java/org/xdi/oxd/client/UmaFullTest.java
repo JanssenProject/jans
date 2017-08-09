@@ -14,7 +14,8 @@ import org.xdi.oxd.rs.protect.RsResourceList;
 
 import java.io.IOException;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
