@@ -4,7 +4,8 @@ import org.testng.annotations.Test;
 
 import java.util.Calendar;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy

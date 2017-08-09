@@ -37,8 +37,6 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
     @Override
     public CommandResponse execute(SetupClientParams params) throws Exception {
         try {
-
-
             RegisterSiteOperation registerSiteOperation = new RegisterSiteOperation(getCommand(), getInjector());
 
             List<String> grantTypes = params.getGrantType();
