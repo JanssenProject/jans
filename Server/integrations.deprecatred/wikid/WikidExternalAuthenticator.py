@@ -4,14 +4,14 @@
 # Author: Yuriy Movchan
 #
 
+import java
+from com.wikidsystems.client import wClient
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper, ArrayHelper
-from com.wikidsystems.client import wClient
 
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -77,7 +77,7 @@ class PersonAuthentication(PersonAuthenticationType):
         credentials = identity.getCredentials()
 
         is_wikid_registration = False
-        sessionAttributes = identity.getSessionState().getSessionAttributes()
+        sessionAttributes = identity.getSessionId().getSessionAttributes()
         if (sessionAttributes != None) and sessionAttributes.containsKey("wikid_registration"):
             is_wikid_registration = java.lang.Boolean.valueOf(sessionAttributes.get("wikid_registration"))
 
@@ -191,7 +191,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getCountAuthenticationSteps(self, configurationAttributes):
         identity = CdiUtil.bean(Identity)
         
-        sessionAttributes = identity.getSessionState().getSessionAttributes()
+        sessionAttributes = identity.getSessionId().getSessionAttributes()
         if (sessionAttributes != None) and sessionAttributes.containsKey("wikid_count_login_steps"):
             return java.lang.Integer.valueOf(sessionAttributes.get("wikid_count_login_steps"))
 

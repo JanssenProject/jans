@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version July 18, 2017
+ * @version August 9, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -109,7 +109,10 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
-    private Boolean sessionStateHttpOnly;
+    /**
+     * SessionId will be expired after sessionIdLifetime seconds
+     */
+    private Integer sessionIdLifetime = 86400;
     private int configurationUpdateInterval;
 
     private String cssLocation;
@@ -158,11 +161,6 @@ public class AppConfiguration implements Configuration {
      * Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/oxauth/img", "/oxauth/stylesheet"]
      */
     private Set<String> httpLoggingExludePaths;
-
-    /**
-     * SessionState will be expired after sessionStateLifetime seconds
-     */
-    private Integer sessionStateLifetime = 86400;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
@@ -910,18 +908,6 @@ public class AppConfiguration implements Configuration {
         this.sessionIdPersistOnPromptNone = sessionIdPersistOnPromptNone;
     }
 
-    public Boolean getSessionStateHttpOnly() {
-        if (sessionStateHttpOnly == null) {
-            return false;
-        }
-
-        return sessionStateHttpOnly;
-    }
-
-    public void setSessionStateHttpOnly(Boolean sessionStateHttpOnly) {
-        this.sessionStateHttpOnly = sessionStateHttpOnly;
-    }
-
     public Boolean getSessionIdEnabled() {
         return sessionIdEnabled;
     }
@@ -1190,12 +1176,12 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
-    public Integer getSessionStateLifetime() {
-        return sessionStateLifetime;
+    public Integer getSessionIdLifetime() {
+        return sessionIdLifetime;
     }
 
-    public void setSessionStateLifetime(Integer sessionStateLifetime) {
-        this.sessionStateLifetime = sessionStateLifetime;
+    public void setSessionIdLifetime(Integer sessionIdLifetime) {
+        this.sessionIdLifetime = sessionIdLifetime;
     }
 
     public Boolean getLogClientIdOnClientAuthentication() {

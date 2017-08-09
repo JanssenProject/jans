@@ -35,7 +35,7 @@
 		<f:viewParam name="code_challenge_method" value="#{authorizeAction.codeChallengeMethod}" />
 
 		<!-- custom oxAuth parameters -->
-		<f:viewParam name="session_state" value="#{authorizeAction.sessionState}" />
+		<f:viewParam name="session_id" value="#{authorizeAction.sessionId}" />
 	</f:metadata>
 
 	<ui:define name="head">
@@ -79,8 +79,8 @@
 
 	<ui:define name="body">
 		<h:form id="authorizeForm">
-			<h:inputHidden id="session_state"
-				value="#{authorizeAction.sessionState}" />
+			<h:inputHidden id="session_id"
+				value="#{authorizeAction.sessionId}" />
 
 			<div class="authorize-panel">
 				<div class="authorize-panel-header">
