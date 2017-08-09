@@ -22,11 +22,11 @@ import org.xdi.oxauth.service.fido.u2f.RequestService;
 import org.xdi.oxauth.uma.service.UmaPctService;
 import org.xdi.oxauth.uma.service.UmaPermissionService;
 import org.xdi.oxauth.uma.service.UmaRptService;
+import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 
-import org.xdi.service.cdi.async.Asynchronous;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version August 9, 2017
  */
 @ApplicationScoped
 @DependsOn("appInitializer")
@@ -74,9 +74,10 @@ public class CleanerTimer {
     private UmaPermissionService umaPermissionService;
 
     @Inject
-    private SessionStateService sessionStateService;
+    private SessionIdService sessionIdService;
 
-    @Inject @Named("u2fRequestService")
+    @Inject
+    @Named("u2fRequestService")
     private RequestService u2fRequestService;
 
     @Inject
@@ -89,10 +90,10 @@ public class CleanerTimer {
     private AppConfiguration appConfiguration;
 
     @Inject
-	private Event<TimerEvent> cleanerEvent;
+    private Event<TimerEvent> cleanerEvent;
 
     private AtomicBoolean isActive;
-    
+
     public void initTimer() {
         log.debug("Initializing Cleaner Timer");
         this.isActive = new AtomicBoolean(false);
@@ -227,8 +228,7 @@ public class CleanerTimer {
                                 deviceRegistration.getId(),
                                 deviceRegistration.getCreationDate());
                         deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
-                    }
-                    catch (Exception e){
+                    } catch (Exception e) {
                         log.error("Failed to remove entry", e);
                     }
                 }

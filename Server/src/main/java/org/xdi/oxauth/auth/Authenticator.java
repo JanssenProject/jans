@@ -14,8 +14,8 @@ import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.security.Credentials;
 import org.xdi.model.security.SimplePrincipal;
 import org.xdi.oxauth.i18n.LanguageBean;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
-import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -24,7 +24,7 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
 
@@ -44,7 +44,7 @@ import java.util.Map;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 28, 2017
+ * @version August 9, 2017
  */
 @RequestScoped
 @Named
@@ -63,7 +63,7 @@ public class Authenticator {
     private ClientService clientService;
 
     @Inject
-    private SessionStateService sessionStateService;
+    private SessionIdService sessionIdService;
 
     @Inject
     private AuthenticationService authenticationService;
@@ -194,7 +194,7 @@ public class Authenticator {
     private void showClientAuthenticationLog(Client client) {
         StringBuilder sb = new StringBuilder("Authentication success for Client");
         if (StringHelper.toBoolean(appConfiguration.getLogClientIdOnClientAuthentication(), false) ||
-        		StringHelper.toBoolean(appConfiguration.getLogClientNameOnClientAuthentication(), false)) {
+                StringHelper.toBoolean(appConfiguration.getLogClientNameOnClientAuthentication(), false)) {
             sb.append(":");
             if (appConfiguration.getLogClientIdOnClientAuthentication()) {
                 sb.append(" ").append("'").append(client.getClientId()).append("'");
@@ -207,8 +207,8 @@ public class Authenticator {
     }
 
     private boolean userAuthenticationInteractive() {
-        SessionState sessionState = sessionStateService.getSessionState();
-        Map<String, String> sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
+        SessionId sessionId = sessionIdService.getSessionId();
+        Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
         if (sessionIdAttributes == null) {
             log.error("Failed to get session attributes");
             authenticationFailedSessionInvalid();
@@ -217,7 +217,7 @@ public class Authenticator {
 
         // Set current state into identity to allow use in login form and
         // authentication scripts
-        identity.setSessionState(sessionState);
+        identity.setSessionId(sessionId);
 
         initCustomAuthenticatorVariables(sessionIdAttributes);
         boolean useExternalAuthenticator = externalAuthenticationService
@@ -268,11 +268,11 @@ public class Authenticator {
             boolean overrideCurrentStep = false;
             if (overridenNextStep > -1) {
                 overrideCurrentStep = true;
-                // Reload session state
-                sessionState = sessionStateService.getSessionState();
+                // Reload session id
+                sessionId = sessionIdService.getSessionId();
 
                 // Reset to specified step
-                sessionStateService.resetToStep(sessionState, overridenNextStep);
+                sessionIdService.resetToStep(sessionId, overridenNextStep);
 
                 this.authStep = overridenNextStep;
                 log.info("Authentication reset to step : '{}'", this.authStep);
@@ -288,8 +288,8 @@ public class Authenticator {
 
             // Reload from LDAP to make sure that we are updating latest session
             // attributes
-            sessionState = sessionStateService.getSessionState();
-            sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
+            sessionId = sessionIdService.getSessionId();
+            sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
 
             // Prepare for next step
             if ((this.authStep < countAuthenticationSteps) || overrideCurrentStep) {
@@ -317,8 +317,8 @@ public class Authenticator {
                     markAuthStepAsPassed(sessionIdAttributes, this.authStep);
                 }
 
-                if (sessionState != null) {
-                    boolean updateResult = updateSession(sessionState, sessionIdAttributes);
+                if (sessionId != null) {
+                    boolean updateResult = updateSession(sessionId, sessionIdAttributes);
                     if (!updateResult) {
                         return false;
                     }
@@ -330,7 +330,7 @@ public class Authenticator {
             }
 
             if (this.authStep == countAuthenticationSteps) {
-                SessionState eventSessionState = authenticationService.configureSessionUser(sessionState,
+                SessionId eventSessionId = authenticationService.configureSessionUser(sessionId,
                         sessionIdAttributes);
 
                 Principal principal = new SimplePrincipal(credentials.getUsername());
@@ -339,7 +339,7 @@ public class Authenticator {
 
                 // Redirect to authorization workflow
                 log.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
-                authenticationService.onSuccessfulLogin(eventSessionState);
+                authenticationService.onSuccessfulLogin(eventSessionId);
 
                 log.info("Authentication success for User: '{}'", credentials.getUsername());
                 return true;
@@ -349,12 +349,12 @@ public class Authenticator {
                 boolean authenticated = authenticationService.authenticate(credentials.getUsername(),
                         credentials.getPassword());
                 if (authenticated) {
-                    SessionState eventSessionState = authenticationService.configureSessionUser(sessionState,
+                    SessionId eventSessionId = authenticationService.configureSessionUser(sessionId,
                             sessionIdAttributes);
 
                     // Redirect to authorization workflow
                     log.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
-                    authenticationService.onSuccessfulLogin(eventSessionState);
+                    authenticationService.onSuccessfulLogin(eventSessionId);
                 }
 
                 log.info("Authentication success for User: '{}'", credentials.getUsername());
@@ -365,11 +365,11 @@ public class Authenticator {
         return false;
     }
 
-    private boolean updateSession(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        sessionState.setSessionAttributes(sessionIdAttributes);
-        boolean updateResult = sessionStateService.updateSessionState(sessionState, true, true, true);
+    private boolean updateSession(SessionId sessionId, Map<String, String> sessionIdAttributes) {
+        sessionId.setSessionAttributes(sessionIdAttributes);
+        boolean updateResult = sessionIdService.updateSessionId(sessionId, true, true, true);
         if (!updateResult) {
-            log.debug("Failed to update session entry: '{}'", sessionState.getId());
+            log.debug("Failed to update session entry: '{}'", sessionId.getId());
             return false;
         }
 
@@ -447,8 +447,8 @@ public class Authenticator {
     }
 
     private String prepareAuthenticationForStepImpl() {
-        SessionState sessionState = sessionStateService.getSessionState();
-        Map<String, String> sessionIdAttributes = sessionStateService.getSessionAttributes(sessionState);
+        SessionId sessionId = sessionIdService.getSessionId();
+        Map<String, String> sessionIdAttributes = sessionIdService.getSessionAttributes(sessionId);
         if (sessionIdAttributes == null) {
             log.error("Failed to get attributes from session");
             return Constants.RESULT_EXPIRED;
@@ -456,7 +456,7 @@ public class Authenticator {
 
         // Set current state into identity to allow use in login form and
         // authentication scripts
-        identity.setSessionState(sessionState);
+        identity.setSessionId(sessionId);
 
         if (!externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE)) {
             return Constants.RESULT_SUCCESS;
@@ -513,8 +513,8 @@ public class Authenticator {
                 sessionIdAttributes.put("auth_level", determinedAuthLevel);
                 sessionIdAttributes.put("auth_step", Integer.toString(1));
 
-                if (sessionState != null) {
-                    boolean updateResult = updateSession(sessionState, sessionIdAttributes);
+                if (sessionId != null) {
+                    boolean updateResult = updateSession(sessionId, sessionIdAttributes);
                     if (!updateResult) {
                         return Constants.RESULT_EXPIRED;
                     }
@@ -540,8 +540,8 @@ public class Authenticator {
             // Store/Update extra parameters in session attributes map
             updateExtraParameters(customScriptConfiguration, this.authStep, sessionIdAttributes);
 
-            if (sessionState != null) {
-                boolean updateResult = updateSession(sessionState, sessionIdAttributes);
+            if (sessionId != null) {
+                boolean updateResult = updateSession(sessionId, sessionIdAttributes);
                 if (!updateResult) {
                     return Constants.RESULT_FAILURE;
                 }
@@ -553,11 +553,11 @@ public class Authenticator {
         }
     }
 
-    public boolean authenticateBySessionState(String p_sessionState) {
-        if (StringUtils.isNotBlank(p_sessionState) && appConfiguration.getSessionIdEnabled()) {
+    public boolean authenticateBySessionId(String p_sessionId) {
+        if (StringUtils.isNotBlank(p_sessionId) && appConfiguration.getSessionIdEnabled()) {
             try {
-                SessionState sessionState = sessionStateService.getSessionState(p_sessionState);
-                return authenticateBySessionState(sessionState);
+                SessionId sessionId = sessionIdService.getSessionId(p_sessionId);
+                return authenticateBySessionId(sessionId);
             } catch (Exception e) {
                 log.trace(e.getMessage(), e);
             }
@@ -566,21 +566,20 @@ public class Authenticator {
         return false;
     }
 
-    public boolean authenticateBySessionState(SessionState sessionState) {
-        if (sessionState == null) {
+    public boolean authenticateBySessionId(SessionId sessionId) {
+        if (sessionId == null) {
             return false;
         }
-        String p_sessionState = sessionState.getId();
+        String p_sessionId = sessionId.getId();
 
-        log.trace("authenticateBySessionState, sessionState = '{}', session = '{}', state= '{}'", p_sessionState,
-                sessionState, sessionState.getState());
-        // IMPORTANT : authenticate by session state only if state of session is
-        // authenticated!
-        if (SessionIdState.AUTHENTICATED == sessionState.getState()) {
-            final User user = authenticationService.getUserOrRemoveSession(sessionState);
+        log.trace("authenticateBySessionId, sessionId = '{}', session = '{}', state= '{}'", p_sessionId,
+                sessionId, sessionId.getState());
+        // IMPORTANT : authenticate by session id only if state of session is authenticated!
+        if (SessionIdState.AUTHENTICATED == sessionId.getState()) {
+            final User user = authenticationService.getUserOrRemoveSession(sessionId);
             if (user != null) {
                 try {
-                    authenticationService.configureEventUser(sessionState);
+                    authenticationService.configureEventUser(sessionId);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
                 }
