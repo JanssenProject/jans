@@ -63,7 +63,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
     }
 
     private void persist(ResourceRegistrar registrar, Rp site) throws IOException {
-        Map<Key,RsResource> resourceMapCopy = registrar.getResourceMapCopy();
+        Map<Key, RsResource> resourceMapCopy = registrar.getResourceMapCopy();
 
         for (Map.Entry<Key, String> entry : registrar.getIdMapCopy().entrySet()) {
             UmaResource resource = new UmaResource();

@@ -16,7 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 /**
