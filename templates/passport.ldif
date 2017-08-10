@@ -39,7 +39,7 @@ inum: %(inumOrg)s!0010!8CAD.B06E
 owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxId: https://%(hostname)s/oxauth/restv1/uma/scopes/passport_access
 oxRevision: 1
-oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=%(inumOrg)s,o=gluu
+oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F9A5,ou=scripts,o=%(inumOrg)s,o=gluu
 
 # Passport Resource
 dn: oxId=0f963ecc-93f0-49c1-beae-ad2006abbb99,ou=resources,ou=uma,o=%(inumOrg)s,o=gluu
