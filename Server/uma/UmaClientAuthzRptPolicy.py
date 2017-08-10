@@ -43,7 +43,7 @@ class UmaRptPolicy(UmaRptPolicyType):
             
         print "UmaRptPolicy. client_id=", client_id
 
-     if (StringHelper.isEmpty(client_id)):
+        if (StringHelper.isEmpty(client_id)):
             return False
      
         if (self.clientsSet.contains(client_id)):
