@@ -11,7 +11,7 @@ import os
 from schema_parser import LDAPSchemaParser
 from generator import SchemaGenerator
 
-localdir = os.path.dirname(__file__)
+localdir = os.path.dirname(os.path.abspath(__file__))
 
 
 def generate(infile, schema_type=None):
