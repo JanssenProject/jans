@@ -297,7 +297,6 @@ class Setup(object):
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
         self.openldapJksPass = None
         self.openldapJksFn = '%s/openldap.jks' % self.certFolder
-        
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.openldapRootSchemaFolder = "%s/schema" % self.gluuOptFolder
@@ -308,6 +307,7 @@ class Setup(object):
         self.openldapSetupAccessLog = False
         self.accessLogConfFile = "%s/static/openldap/accesslog.conf" % self.install_dir
         self.gluuAccessLogConf = "%s/static/openldap/o_gluu_accesslog.conf" % self.install_dir
+        self.opendlapIndexDef = "%s/static/openldap/index.json" % self.install_dir
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
@@ -2440,7 +2440,7 @@ class Setup(object):
 
         if packageName == None:
             self.logIt('Failed to find OpenLDAP package in folder %s !' % openLdapDistFolder)
-	    return
+            return
 
         self.logIt("Found package '%s' for install" % packageName)
         if packageRpm:
@@ -2452,6 +2452,18 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '775', openldapRunFolder])
         self.run([self.cmd_chgrp, '-R', 'ldap', openldapRunFolder])
 
+    def get_openldap_indexes(self):
+        """Function that reads the static/openldap/index.json file and generates
+        slapd.conf compatible index configuration string"""
+        f = open(self.opendlapIndexDef, 'r')
+        jsoninfo = json.loads(f.read())
+        f.close()
+        outString = ""
+        for entry in jsoninfo["indexes"]:
+            outString += "\t".join(["index", entry["attribute"], entry["index"]]) + "\n"
+        return outString
+
+
     def configure_openldap(self):
         self.logIt("Configuring OpenLDAP")
         # 1. Render templates
@@ -2460,6 +2472,9 @@ class Setup(object):
         if not self.openldapSetupAccessLog:
             self.templateRenderingDict['openldap_accesslog_conf'] = self.commentOutText(self.templateRenderingDict['openldap_accesslog_conf'])
             self.templateRenderingDict['openldap_gluu_accesslog'] = self.commentOutText(self.templateRenderingDict['openldap_gluu_accesslog'])
+
+        # 1.1 convert the indexes
+        self.templateRenderingDict['openldap_indexes'] = self.get_openldap_indexes()
 
         self.renderTemplate(self.openldapSlapdConf)
         self.renderTemplate(self.openldapSymasConf)
@@ -2488,7 +2503,7 @@ class Setup(object):
         self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
         if self.os_type in ['debian', 'ubuntu']:
             self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
-	if not os.path.isdir('/etc/rsyslog.d/'):
+        if not os.path.isdir('/etc/rsyslog.d/'):
             self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
         self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
