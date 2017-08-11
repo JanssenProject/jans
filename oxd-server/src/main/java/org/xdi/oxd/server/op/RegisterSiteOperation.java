@@ -25,6 +25,7 @@ import org.xdi.oxd.common.params.RegisterSiteParams;
 import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 import org.xdi.oxd.server.service.RpService;
 
@@ -137,7 +138,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (Strings.isNullOrEmpty(params.getAuthorizationRedirectUri())) {
             params.setAuthorizationRedirectUri(fallback.getAuthorizationRedirectUri());
         }
-        if (Strings.isNullOrEmpty(params.getAuthorizationRedirectUri())) {
+        if (Utils.isValidUrl(params.getAuthorizationRedirectUri())) {
             throw new ErrorResponseException(ErrorResponseCode.INVALID_AUTHORIZATION_REDIRECT_URI);
         }
 
