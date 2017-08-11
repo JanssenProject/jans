@@ -2497,7 +2497,7 @@ attributetype ( oxAttribute:364 NAME 'oxIncludeClaimsInIdToken'
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:365 NAME 'oxClaimValues'
-	DESC 'Memcached configuration'
+	DESC 'Claim Values'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2511,6 +2511,13 @@ attributetype ( oxAttribute:366 NAME 'oxClaimRedirectURI'
 	X-ORIGIN 'Gluu created attribute' )
 
 attributetype ( oxAttribute:367 NAME 'oxAttributes'
+	DESC 'Attributes'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu created attribute' )
+
+attributetype ( oxAttribute:368 NAME 'userRandomKey'
 	DESC 'Attributes'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
@@ -2535,7 +2542,7 @@ objectclass ( oxObjectClass:2 NAME 'gluuPerson'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID )
+	MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID $ userRandomKey )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:3 NAME 'gluuGroup'
@@ -2678,25 +2685,25 @@ objectclass ( oxObjectClass:22 NAME 'oxApplicationConfiguration'
 	MAY ( ou $ oxConfApplication $ oxRevision )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( oxObjectClass:23 NAME 'oxUmaResource'
+objectclass ( oxObjectClass:23 NAME 'oxAuthUmaResourceSet'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ description )
+	MAY ( displayName $ inum $ owner $ oxAssociatedClient $ oxAuthUmaScope $ oxFaviconImage $ oxGroup $ oxId $ oxResource $ oxRevision $ oxType $ oxUrl )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:24 NAME 'oxAuthUmaScopeDescription'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( displayName $ inum $ description $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyScriptDn $ oxRevision )
+	MAY ( displayName $ inum $ owner $ oxFaviconImage $ oxIconUrl $ oxId $ oxPolicyRule $ oxPolicyScriptDn $ oxRevision $ oxType $ oxUrl )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:25 NAME 'oxUmaResourcePermission'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxStatus $ oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxResourceSetId $ oxTicket $ oxAttributes )
+	MAY ( oxAuthExpiration $ oxAuthUmaScope $ oxConfigurationCode $ oxResourceSetId $ oxAttributes $ oxTicket )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:26 NAME 'oxAuthGrant'
@@ -2717,7 +2724,7 @@ objectclass ( oxObjectClass:28 NAME 'oxAuthUmaRPT'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
+	MAY ( oxAmHost $ oxAuthAuthenticationTime $ oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxAuthUserId $ oxUmaPermission $ uniqueIdentifier )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:29 NAME 'oxLiteralNode'
@@ -2865,11 +2872,4 @@ objectclass ( oxObjectClass:49 NAME 'oxShibbolethCASProtocolConfiguration'
 	STRUCTURAL
 	MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxConfApplication $ oxRevision )
-	X-ORIGIN 'Gluu created objectclass' )
-
-objectclass ( oxObjectClass:50 NAME 'oxAuthUmaPCT'
-	SUP ( top )
-	STRUCTURAL
-	MUST ( objectclass )
-	MAY ( oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxClaimValues )
 	X-ORIGIN 'Gluu created objectclass' )
