@@ -2685,7 +2685,7 @@ objectclass ( oxObjectClass:22 NAME 'oxApplicationConfiguration'
 	MAY ( ou $ oxConfApplication $ oxRevision )
 	X-ORIGIN 'Gluu created objectclass' )
 
-objectclass ( oxObjectClass:23 NAME 'oxAuthUmaResourceSet'
+objectclass ( oxObjectClass:23 NAME 'oxUmaResource'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )

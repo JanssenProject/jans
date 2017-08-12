@@ -4777,7 +4777,7 @@
                 "objectclass"
             ],
             "names": [
-                "oxAuthUmaResourceSet"
+                "oxUmaResource"
             ],
             "oid": "oxObjectClass:23",
             "sup": [
