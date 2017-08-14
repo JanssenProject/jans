@@ -40,6 +40,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 /**
@@ -97,6 +99,15 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
         auditLogging(httpRequest, pair);
 
+        //Perform redirect to RP if id_token is expired (see https://github.com/GluuFederation/oxAuth/issues/575)
+        if (pair.getFirst() == null && pair.getSecond() == null) {
+            try {
+                return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).build();
+            } catch (URISyntaxException e) {
+                log.error("Can't perform redirect", e);
+            }
+        }
+
         return httpBased(postLogoutRedirectUri, state, pair);
     }
 
@@ -136,7 +147,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         SessionState ldapSessionState = removeSessionState(sessionState, httpRequest, httpResponse);
         if ((authorizationGrant == null) && (ldapSessionState == null)) {
             log.info("Failed to find out authorization grant for id_token_hint '{}' and session_state '{}'", idTokenHint, sessionState);
-            errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
+
+            //see https://github.com/GluuFederation/oxAuth/issues/575
+            return new Pair<SessionState, AuthorizationGrant>(null, null);
         }
 
         boolean isExternalLogoutPresent;
@@ -284,10 +297,10 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 	        oAuth2AuditLog.setClientId(authorizationGrant.getClientId());
 	        oAuth2AuditLog.setScope(StringUtils.join(authorizationGrant.getScopes(), " "));
 	        oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
-        } else {
-	        oAuth2AuditLog.setClientId(sessionState.getPermissionGrantedMap().getClientIds(true).toString());
-	        oAuth2AuditLog.setScope(sessionState.getSessionAttributes().get(AuthorizeRequestParam.SCOPE));
-	        oAuth2AuditLog.setUsername(sessionState.getUserDn());
+        } else if (sessionState != null) {
+            oAuth2AuditLog.setClientId(sessionState.getPermissionGrantedMap().getClientIds(true).toString());
+            oAuth2AuditLog.setScope(sessionState.getSessionAttributes().get(AuthorizeRequestParam.SCOPE));
+            oAuth2AuditLog.setUsername(sessionState.getUserDn());
         }
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
