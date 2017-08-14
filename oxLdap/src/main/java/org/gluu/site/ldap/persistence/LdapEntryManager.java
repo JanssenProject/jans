@@ -503,10 +503,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		SearchResult searchResult = null;
 		try {
 			searchResult = this.ldapOperationService.search(baseDN, searchFilter, 1, 1, null, ldapReturnAttributes);
-			if(searchResult != null){
-				if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-					throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
-				}
+			if ((searchResult == null) || !ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+				throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}
 		} catch (LDAPSearchException ex) {
 			if (!ResultCode.NO_SUCH_OBJECT.equals(ex.getResultCode())) {
