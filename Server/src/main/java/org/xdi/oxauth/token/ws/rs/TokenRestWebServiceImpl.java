@@ -124,7 +124,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 GrantType gt = GrantType.fromString(grantType);
                 log.debug("Grant type: '{}'", gt);
 
-                SessionClient sessionClient = identity.getSetSessionClient();
+                SessionClient sessionClient = identity.getSessionClient();
                 Client client = null;
                 if (sessionClient != null) {
                     client = sessionClient.getClient();
