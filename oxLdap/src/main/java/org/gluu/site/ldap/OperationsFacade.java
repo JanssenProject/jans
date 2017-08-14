@@ -273,18 +273,23 @@ public class OperationsFacade {
 						break;
 					}
 				} while ((cookie != null) && (cookie.getValueLength() > 0));
+			}catch (LDAPSearchException e) {
 			} catch (LDAPException e) {
 				throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", e);
-			} finally {
+			}
+			
+			finally {
 				if (ldapConnection != null)
 					getConnectionPool().releaseConnection(ldapConnection);
 			}
 
-			SearchResult searchResultTemp = searchResultList.get(0);
-			searchResult = new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(),
-					searchResultTemp.getDiagnosticMessage(), searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(),
-					searchResultEntries, searchResultReferences, searchResultEntries.size(), searchResultReferences.size(),
-					searchResultTemp.getResponseControls());
+			if(!searchResultList.isEmpty()){
+				SearchResult searchResultTemp = searchResultList.get(0);
+				searchResult = new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(),
+						searchResultTemp.getDiagnosticMessage(), searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(),
+						searchResultEntries, searchResultReferences, searchResultEntries.size(), searchResultReferences.size(),
+						searchResultTemp.getResponseControls());
+			} 
 		} else {
 			setControls(searchRequest, controls);
 			searchResult = getConnectionPool().search(searchRequest);
