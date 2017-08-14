@@ -13,6 +13,8 @@ import javax.inject.Named;
 public class ConversationService implements Serializable {
 
 	private static final long serialVersionUID = -7432197667275722872L;
+	
+	private static final long CONVERSATION_TIMEOUT = 30 * 60 * 60 * 1000L; 
 
 	@Inject
 	private Conversation conversation;
@@ -20,6 +22,7 @@ public class ConversationService implements Serializable {
 	public void initConversation() {
 		if (!FacesContext.getCurrentInstance().isPostback() && conversation.isTransient()) {
 			conversation.begin();
+			conversation.setTimeout(CONVERSATION_TIMEOUT);
 		}
 	}
 
