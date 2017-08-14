@@ -41,10 +41,9 @@ class UmaRptPolicy(UmaRptPolicyType):
         
     def authorize(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
         print "RPT Policy. Authorizing ..."
-        #client_id = context.getHttpRequest().getParameter("client_id")
         
         identity = CdiUtil.bean(Identity)
-        client_id=identity.getSetSessionClient().getClient().getClientId()
+        client_id = identity.getSessionClient().getClient().getClientId()
         
         print "UmaRptPolicy. client_id=", client_id
 
