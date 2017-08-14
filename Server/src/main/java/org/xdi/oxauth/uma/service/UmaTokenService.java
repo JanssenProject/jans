@@ -84,7 +84,7 @@ public class UmaTokenService {
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
             Map<UmaScopeDescription, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
-            Client client = identity.getSetSessionClient().getClient();
+            Client client = identity.getSessionClient().getClient();
 
             pct = pctService.updateClaims(pct, idToken, client.getClientId(), permissions); // creates new pct if pct is null in request
             Claims claims = new Claims(idToken, pct);

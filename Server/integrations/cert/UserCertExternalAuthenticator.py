@@ -229,10 +229,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Store certificate in session
             facesContext = CdiUtil.bean(FacesContext)
             externalContext = facesContext.getExternalContext()
-            request = identity.getWorkingParameterRequest()
+            request = externalContext.getRequest()
 
             # Try to get certificate from header X-ClientCert
-            clientCertificate = identity.getWorkingParameterRequestHeaderMap().get("X-ClientCert")
+            clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
             if clientCertificate != None:
                 x509Certificate = self.certFromPemString(clientCertificate)
                 identity.setWorkingParameter("cert_x509",  self.certToString(x509Certificate))
@@ -311,7 +311,14 @@ class PersonAuthentication(PersonAuthenticationType):
             return identity.getWorkingParameter(attribute_name)
         
         # Try to get attribute from persistent session
-        session_attributes = identity.getSessionState().getSessionAttributes()
+        session_state = identity.getSessionState()
+        if session_state == None:
+            return None
+
+        session_attributes = session_state.getSessionAttributes()
+        if session_attributes == None:
+            return None
+
         if session_attributes.containsKey(attribute_name):
             return session_attributes.get(attribute_name)
 
