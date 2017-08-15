@@ -273,8 +273,6 @@ public class OperationsFacade {
 						break;
 					}
 				} while ((cookie != null) && (cookie.getValueLength() > 0));
-			} catch (LDAPSearchException e) {
-				throw new LDAPSearchException(e.getResultCode(), "Failed to scroll to specified startIndex", e);
 			} catch (LDAPException e) {
 				throw new LDAPSearchException(e.getResultCode(), "Failed to scroll to specified startIndex", e);
 			} finally {
