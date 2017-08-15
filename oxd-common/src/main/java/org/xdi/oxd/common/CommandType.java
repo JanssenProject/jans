@@ -24,6 +24,7 @@ public enum CommandType {
     GET_TOKENS_BY_CODE("get_tokens_by_code"),
     GET_USER_INFO("get_user_info"),
     GET_LOGOUT_URI("get_logout_uri"),
+    GET_ACCESS_TOKEN_BY_REFRESH_TOKEN("get_access_token_by_refresh_token"),
 
     VALIDATE("validate"),
     CHECK_ID_TOKEN("id_token_status"),
