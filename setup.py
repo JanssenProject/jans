@@ -2582,7 +2582,15 @@ class Setup(object):
 
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
-                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = int(applicationMemory * jvmHeapRation)
+
+                minHeapMem = 256
+                maxHeapMem = int(applicationMemory * jvmHeapRation)
+                if maxHeapMem < minHeapMem:
+                    minHeapMem = maxHeapMem
+
+                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
+                self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
+
                 self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
                 
 
