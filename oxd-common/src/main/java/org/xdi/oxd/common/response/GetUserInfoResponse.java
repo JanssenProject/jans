@@ -15,6 +15,10 @@ public class GetUserInfoResponse implements IOpResponse {
 
     @JsonProperty("claims")
     private Map<String, List<String>> claims = Maps.newHashMap();
+    @JsonProperty("refresh_token")
+    private String refreshToken;
+    @JsonProperty("access_token")
+    private String accessToken;
 
     public GetUserInfoResponse() {
     }
@@ -31,12 +35,28 @@ public class GetUserInfoResponse implements IOpResponse {
         this.claims = claims;
     }
 
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("GetUserInfoResponse");
-        sb.append("{claims=").append(claims);
-        sb.append('}');
-        return sb.toString();
+        return "GetUserInfoResponse{" +
+                "claims=" + claims +
+                ", refreshToken='" + refreshToken + '\'' +
+                ", accessToken='" + accessToken + '\'' +
+                '}';
     }
 }

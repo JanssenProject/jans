@@ -42,6 +42,8 @@ public class OperationFactory {
                     return new ValidateOperation(command, injector);
                 case IMPLICIT_FLOW:
                     return new ImplicitFlowOperation(command, injector);
+                case GET_ACCESS_TOKEN_BY_REFRESH_TOKEN:
+                    return new GetAccessTokenByRefreshTokenOperation(command, injector);
                 case REGISTER_SITE:
                     return new RegisterSiteOperation(command, injector);
                 case GET_AUTHORIZATION_CODE:
