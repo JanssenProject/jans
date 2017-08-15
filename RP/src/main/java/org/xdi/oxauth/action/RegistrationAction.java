@@ -183,7 +183,15 @@ public class RegistrationAction implements Serializable {
         this.redirectUris = redirectUris;
     }
 
-    public List<ResponseType> getResponseTypes() {
+    public String getClaimsRedirectUris() {
+		return claimsRedirectUris;
+	}
+
+	public void setClaimsRedirectUris(String claimsRedirectUris) {
+		this.claimsRedirectUris = claimsRedirectUris;
+	}
+
+	public List<ResponseType> getResponseTypes() {
         return responseTypes;
     }
 
