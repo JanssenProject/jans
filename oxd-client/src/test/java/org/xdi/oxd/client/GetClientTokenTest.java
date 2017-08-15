@@ -5,7 +5,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
-import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.xdi.oxd.common.params.GetClientTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
 import org.xdi.oxd.common.response.SetupClientResponse;
@@ -41,21 +40,6 @@ public class GetClientTokenTest {
 
             assertNotNull(resp);
             notEmpty(resp.getAccessToken());
-            notEmpty(resp.getRefreshToken());
-
-            // refresh token
-            String oxdId = setup.getOxdId();
-            final GetAccessTokenByRefreshTokenParams refreshParams = new GetAccessTokenByRefreshTokenParams();
-            refreshParams.setOxdId(oxdId);
-            refreshParams.setScope(Lists.newArrayList("openid"));
-            refreshParams.setRefreshToken(resp.getRefreshToken());
-
-            GetClientTokenResponse refreshResponse = client.send(new Command(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN).setParamsObject(refreshParams)).dataAsResponse(GetClientTokenResponse.class);
-
-            assertNotNull(refreshResponse);
-            notEmpty(refreshResponse.getAccessToken());
-            notEmpty(refreshResponse.getRefreshToken());
-
         } finally {
             CommandClient.closeQuietly(client);
         }
