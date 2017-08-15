@@ -234,9 +234,9 @@ public class OperationsFacade {
 					try {
 						cookie = scrollSimplePagedResultsControl(ldapConnection, dn, filter, scope, controls, startIndex);
 					} catch (InvalidSimplePageControlException ex) {
-						throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
+						throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified startIndex", ex);
 					} catch (LDAPException ex) {
-						throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", ex);
+						throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified startIndex", ex);
 					}
 				}
 
@@ -274,9 +274,9 @@ public class OperationsFacade {
 					}
 				} while ((cookie != null) && (cookie.getValueLength() > 0));
 			} catch (LDAPSearchException e) {
-				throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", e);
+				throw new LDAPSearchException(e.getResultCode(), "Failed to scroll to specified startIndex", e);
 			} catch (LDAPException e) {
-				throw new LDAPSearchException(ResultCode.OPERATIONS_ERROR, "Failed to scroll to specified startIndex", e);
+				throw new LDAPSearchException(e.getResultCode(), "Failed to scroll to specified startIndex", e);
 			} finally {
 				if (ldapConnection != null) {
 					getConnectionPool().releaseConnection(ldapConnection);
@@ -316,9 +316,9 @@ public class OperationsFacade {
 					cookie = c.getCookie();
 				}
 			} catch (LDAPException ex) {
-				log.error("Error while accessing cookie" + ex.getMessage());
-				throw new InvalidSimplePageControlException("Error while accessing cookie");
-				}
+				log.error("Error while accessing cookie", ex);
+				throw new InvalidSimplePageControlException(ex.getResultCode(), "Error while accessing cookie");
+			}
 		} while ((cookie != null) && (cookie.getValueLength() > 0) && (currentStartIndex > 0));
 
 		return cookie;
