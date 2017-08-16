@@ -415,7 +415,7 @@ public class AuthenticationService {
             newSessionId = sessionIdService.setSessionIdStateAuthenticated(sessionId, user.getDn());
         }
 
-        configureEventUserContext(newSessionId);
+        identity.setSessionId(sessionId);
 
         return newSessionId;
     }
@@ -430,7 +430,7 @@ public class AuthenticationService {
 
         SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn());
 
-        configureEventUserContext(sessionId);
+        identity.setSessionId(sessionId);
 
         return sessionId;
     }
@@ -438,11 +438,6 @@ public class AuthenticationService {
     public void configureEventUser(SessionId sessionId) {
         sessionIdService.updateSessionId(sessionId);
 
-        configureEventUserContext(sessionId);
-    }
-
-    private void configureEventUserContext(SessionId sessionId) {
-        identity.setSessionId(sessionId);
         identity.setSessionId(sessionId);
     }
 
