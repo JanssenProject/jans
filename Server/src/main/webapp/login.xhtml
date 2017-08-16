@@ -7,8 +7,7 @@
 	template="/WEB-INF/incl/layout/login-template.xhtml">
 
 	<f:metadata>
-		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
-			if="#{sessionIdService.notSessionIdAuthenticated}" />
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{sessionIdService.notSessionIdAuthenticated}" />
 
 		<f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
 	</f:metadata>

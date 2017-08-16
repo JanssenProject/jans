@@ -16,8 +16,8 @@
 
         <script>
             Duo.init({
-                'host':'#{duo_host}',
-                'sig_request':'#{duo_sig_request}',
+                'host':'#{identity.getWorkingParameter('duo_host')}',
+                'sig_request':'#{identity.getWorkingParameter('duo_sig_request')}',
                 'post_action':'#{request.contextPath}/postlogin',
             });
         </script>

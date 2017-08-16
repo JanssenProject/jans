@@ -143,11 +143,10 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        duo_host = configurationAttributes.get("duo_host").getValue2()
-
         identity = CdiUtil.bean(Identity)
-        credentials = identity.getCredentials()
-        user_name = credentials.getUsername()
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        duo_host = configurationAttributes.get("duo_host").getValue2()
 
         if (step == 1):
             print "Duo. Prepare for step 1"
@@ -155,6 +154,12 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif (step == 2):
             print "Duo. Prepare for step 2"
+
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
+                print "Duo. Prepare for step 2. Failed to determine user name"
+                return False
+            user_name = user.getUserId()
 
             duo_sig_request = duo_web.sign_request(self.ikey, self.skey, self.akey, user_name)
             print "Duo. Prepare for step 2. duo_sig_request: " + duo_sig_request

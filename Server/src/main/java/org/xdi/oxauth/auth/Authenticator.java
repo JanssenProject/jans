@@ -333,9 +333,7 @@ public class Authenticator {
                 SessionId eventSessionId = authenticationService.configureSessionUser(sessionId,
                         sessionIdAttributes);
 
-                Principal principal = new SimplePrincipal(credentials.getUsername());
-                identity.acceptExternallyAuthenticatedPrincipal(principal);
-                identity.quietLogin();
+                authenticationService.quietLogin(credentials.getUsername());
 
                 // Redirect to authorization workflow
                 log.debug("Sending event to trigger user redirection: '{}'", credentials.getUsername());
@@ -579,6 +577,9 @@ public class Authenticator {
             final User user = authenticationService.getUserOrRemoveSession(sessionId);
             if (user != null) {
                 try {
+                    authenticationService.configureEventUser(sessionId);
+                    authenticationService.quietLogin(user.getUserId());
+
                     authenticationService.configureEventUser(sessionId);
                 } catch (Exception e) {
                     log.trace(e.getMessage(), e);
