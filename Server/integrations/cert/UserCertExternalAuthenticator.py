@@ -5,28 +5,28 @@
 # Author: Yuriy Movchan
 #
 
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from javax.faces.context import FacesContext
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.util import StringHelper
+from org.xdi.oxauth.util import ServerUtil
+from org.xdi.oxauth.service import EncryptionService
+from java.util import Arrays
+from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
+from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
+from org.xdi.oxauth.cert.validation.model import ValidationStatus
+from org.xdi.oxauth.util import CertUtil
+from org.xdi.oxauth.service.net import HttpService
+from org.apache.http.params import CoreConnectionPNames
+
+import sys
 import base64
 import urllib
 
 import java
 import json
-import sys
-from java.util import Arrays
-from javax.faces.context import FacesContext
-from org.apache.http.params import CoreConnectionPNames
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.cert.fingerprint import FingerprintHelper
-from org.xdi.oxauth.cert.validation import GenericCertificateVerifier, PathCertificateVerifier, OCSPCertificateVerifier, CRLCertificateVerifier
-from org.xdi.oxauth.cert.validation.model import ValidationStatus
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import EncryptionService
-from org.xdi.oxauth.service import UserService, AuthenticationService
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.oxauth.util import CertUtil
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.util import StringHelper
-
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -229,10 +229,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Store certificate in session
             facesContext = CdiUtil.bean(FacesContext)
             externalContext = facesContext.getExternalContext()
-            request = identity.getWorkingParameterRequest()
+            request = externalContext.getRequest()
 
             # Try to get certificate from header X-ClientCert
-            clientCertificate = identity.getWorkingParameterRequestHeaderMap().get("X-ClientCert")
+            clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
             if clientCertificate != None:
                 x509Certificate = self.certFromPemString(clientCertificate)
                 identity.setWorkingParameter("cert_x509",  self.certToString(x509Certificate))
@@ -311,7 +311,14 @@ class PersonAuthentication(PersonAuthenticationType):
             return identity.getWorkingParameter(attribute_name)
         
         # Try to get attribute from persistent session
-        session_attributes = identity.getSessionId().getSessionAttributes()
+        session_id = identity.getSessionId()
+        if session_id == None:
+            return None
+
+        session_attributes = session_id.getSessionAttributes()
+        if session_attributes == None:
+            return None
+
         if session_attributes.containsKey(attribute_name):
             return session_attributes.get(attribute_name)
 

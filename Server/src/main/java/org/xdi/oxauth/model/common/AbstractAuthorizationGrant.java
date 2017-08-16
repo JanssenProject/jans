@@ -265,6 +265,10 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     @Override
     public RefreshToken createRefreshToken() {
         int lifetime = appConfiguration.getRefreshTokenLifetime();
+        if (client.getRefreshTokenLifetime() != null && client.getRefreshTokenLifetime() > 0) {
+            lifetime = client.getRefreshTokenLifetime();
+        }
+
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setAuthMode(getAcrValues());
