@@ -1,13 +1,19 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2015, Gluu
+ */
+
 package org.xdi.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.service.SessionIdService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -17,7 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
- * @author yuriyz on 06/20/2017.
+ * @author yuriyz
+ * @version August 9, 2017
  */
 @Stateless
 @Named
@@ -28,46 +35,46 @@ public class UmaSessionService {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
     @Inject
-    private SessionStateService sessionStateService;
+    private SessionIdService sessionIdService;
     @Inject
     private ExternalUmaClaimsGatheringService external;
 
-    public SessionState getConnectSession(HttpServletRequest httpRequest) {
-        String cookieId = sessionStateService.getSessionStateFromCookie(httpRequest);
-        log.trace("Cookie - session_state: " + cookieId);
+    public SessionId getConnectSession(HttpServletRequest httpRequest) {
+        String cookieId = sessionIdService.getSessionIdFromCookie(httpRequest);
+        log.trace("Cookie - session_id: " + cookieId);
         if (StringUtils.isNotBlank(cookieId)) {
-            return sessionStateService.getSessionState(cookieId);
+            return sessionIdService.getSessionId(cookieId);
         }
         return null;
     }
 
-    public SessionState getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieId = sessionStateService.getUmaSessionStateFromCookie(httpRequest);
-        log.trace("Cookie - uma_session_state: " + cookieId);
+    public SessionId getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        String cookieId = sessionIdService.getUmaSessionIdFromCookie(httpRequest);
+        log.trace("Cookie - uma_session_id: " + cookieId);
 
         if (StringUtils.isNotBlank(cookieId)) {
-            SessionState sessionState = sessionStateService.getSessionState(cookieId);
-            if (sessionState != null) {
-                log.trace("Loaded uma_session_state from cookie, session: " + sessionState);
-                return sessionState;
+            SessionId sessionId = sessionIdService.getSessionId(cookieId);
+            if (sessionId != null) {
+                log.trace("Loaded uma_session_id from cookie, session: " + sessionId);
+                return sessionId;
             } else {
-                log.error("Failed to load uma_session_state from cookie: " + cookieId);
+                log.error("Failed to load uma_session_id from cookie: " + cookieId);
             }
         } else {
-            log.error("uma_session_state cookie is not set.");
+            log.error("uma_session_id cookie is not set.");
         }
 
-        log.trace("Generating new uma_session_state ...");
-        SessionState session = sessionStateService.generateAuthenticatedSessionState("no");
+        log.trace("Generating new uma_session_id ...");
+        SessionId session = sessionIdService.generateAuthenticatedSessionId("no");
 
-        sessionStateService.createSessionStateCookie(session.getId(), httpResponse, true);
-        log.trace("uma_session_state cookie created.");
+        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), httpResponse, true);
+        log.trace("uma_session_id cookie created.");
         return session;
     }
 
-    public boolean persist(SessionState session) {
+    public boolean persist(SessionId session) {
         try {
-            if (sessionStateService.persistSessionState(session, true)) {
+            if (sessionIdService.persistSessionId(session, true)) {
                 log.trace("Session persisted successfully. Session: " + session);
                 return true;
             }
@@ -77,7 +84,7 @@ public class UmaSessionService {
         return false;
     }
 
-    public int getStep(SessionState session) {
+    public int getStep(SessionId session) {
         String stepString = session.getSessionAttributes().get("step");
         int step = Util.parseIntSilently(stepString);
         if (step == -1) {
@@ -87,11 +94,11 @@ public class UmaSessionService {
         return step;
     }
 
-    public void setStep(int step, SessionState session) {
+    public void setStep(int step, SessionId session) {
         session.getSessionAttributes().put("step", Integer.toString(step));
     }
 
-    public CustomScriptConfiguration getScript(SessionState session) {
+    public CustomScriptConfiguration getScript(SessionId session) {
         String scriptName = getScriptName(session);
         if (StringUtils.isNotBlank(scriptName)) {
             return external.getCustomScriptConfigurationByName(scriptName);
@@ -99,7 +106,7 @@ public class UmaSessionService {
         return null;
     }
 
-    public void configure(SessionState session, String scriptName, Boolean reset, List<UmaPermission> permissions,
+    public void configure(SessionId session, String scriptName, Boolean reset, List<UmaPermission> permissions,
                           String clientId, String claimRedirectUri, String state) {
 //        if (reset != null && reset) {
         setStep(1, session);
@@ -131,11 +138,11 @@ public class UmaSessionService {
         persist(session);
     }
 
-    public boolean isStepPassed(SessionState session, Integer step) {
+    public boolean isStepPassed(SessionId session, Integer step) {
         return Boolean.parseBoolean(session.getSessionAttributes().get(String.format("uma_step_passed_%d", step)));
     }
 
-    public boolean isPassedPreviousSteps(SessionState session, Integer step) {
+    public boolean isPassedPreviousSteps(SessionId session, Integer step) {
         for (int i = 1; i < step; i++) {
             if (!isStepPassed(session, i)) {
                 return false;
@@ -144,7 +151,7 @@ public class UmaSessionService {
         return true;
     }
 
-    public void markStep(SessionState session, Integer step, boolean value) {
+    public void markStep(SessionId session, Integer step, boolean value) {
         String key = String.format("uma_step_passed_%d", step);
         if (value) {
             session.getSessionAttributes().put(key, Boolean.TRUE.toString());
@@ -153,55 +160,55 @@ public class UmaSessionService {
         }
     }
 
-    public String getScriptName(SessionState session) {
+    public String getScriptName(SessionId session) {
         return session.getSessionAttributes().get("gather_script_name");
     }
 
-    public void setScriptName(SessionState session, String scriptName) {
+    public void setScriptName(SessionId session, String scriptName) {
         session.getSessionAttributes().put("gather_script_name", scriptName);
     }
 
-    public String getPct(SessionState session) {
+    public String getPct(SessionId session) {
         return session.getSessionAttributes().get("pct");
     }
 
-    public void setPct(SessionState session, String pct) {
+    public void setPct(SessionId session, String pct) {
         session.getSessionAttributes().put("pct", pct);
     }
 
-    public String getClientId(SessionState session) {
+    public String getClientId(SessionId session) {
         return session.getSessionAttributes().get("client_id");
     }
 
-    public void setClientId(SessionState session, String clientId) {
+    public void setClientId(SessionId session, String clientId) {
         session.getSessionAttributes().put("client_id", clientId);
     }
 
-    public String getClaimsRedirectUri(SessionState session) {
+    public String getClaimsRedirectUri(SessionId session) {
         return session.getSessionAttributes().get("claims_redirect_uri");
     }
 
-    public void setClaimsRedirectUri(SessionState session, String claimsRedirectUri) {
+    public void setClaimsRedirectUri(SessionId session, String claimsRedirectUri) {
         session.getSessionAttributes().put("claims_redirect_uri", claimsRedirectUri);
     }
 
-    public String getState(SessionState session) {
+    public String getState(SessionId session) {
         return session.getSessionAttributes().get("state");
     }
 
-    public void setState(SessionState session, String state) {
+    public void setState(SessionId session, String state) {
         session.getSessionAttributes().put("state", state);
     }
 
-    public String getTicket(SessionState session) {
+    public String getTicket(SessionId session) {
         return session.getSessionAttributes().get("ticket");
     }
 
-    public void setTicket(SessionState session, String ticket) {
+    public void setTicket(SessionId session, String ticket) {
         session.getSessionAttributes().put("ticket", ticket);
     }
 
-    public void resetToStep(SessionState session, int overridenNextStep, int step) {
+    public void resetToStep(SessionId session, int overridenNextStep, int step) {
         for (int i = overridenNextStep; i <= step; i++) {
             markStep(session, i, false);
         }

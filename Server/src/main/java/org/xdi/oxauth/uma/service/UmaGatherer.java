@@ -1,3 +1,9 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2015, Gluu
+ */
+
 package org.xdi.oxauth.uma.service;
 
 import org.apache.commons.lang.StringUtils;
@@ -5,7 +11,7 @@ import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
@@ -25,7 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author yuriyz on 06/20/2017.
+ * @author yuriyz
+ * @version August 9, 2017
  */
 @RequestScoped
 @Named(value = "gatherer")
@@ -60,7 +67,7 @@ public class UmaGatherer {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
-            final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
+            final SessionId session = umaSessionService.getSession(httpRequest, httpResponse);
 
             CustomScriptConfiguration script = umaSessionService.getScript(session);
             UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
@@ -120,14 +127,14 @@ public class UmaGatherer {
         return false;
     }
 
-    private void onSuccess(SessionState session, UmaGatherContext context) {
+    private void onSuccess(SessionId session, UmaGatherContext context) {
         List<UmaPermission> permissions = context.getPermissions();
         String newTicket = umaPermissionService.changeTicket(permissions, permissions.get(0).getAttributes());
 
         facesService.redirectToExternalURL(constructRedirectUri(session, context, newTicket));
     }
 
-    private String constructRedirectUri(SessionState session, UmaGatherContext context, String newTicket) {
+    private String constructRedirectUri(SessionId session, UmaGatherContext context, String newTicket) {
         String claimsRedirectUri = umaSessionService.getClaimsRedirectUri(session);
 
         claimsRedirectUri = addQueryParameters(claimsRedirectUri, context.getRedirectUserParameters().buildQueryString().trim());
@@ -162,7 +169,7 @@ public class UmaGatherer {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
-            final SessionState session = umaSessionService.getSession(httpRequest, httpResponse);
+            final SessionId session = umaSessionService.getSession(httpRequest, httpResponse);
 
             if (session == null || session.getSessionAttributes().isEmpty()) {
                 log.error("Invalid session.");

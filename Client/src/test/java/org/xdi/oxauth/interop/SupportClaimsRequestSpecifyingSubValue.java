@@ -37,7 +37,7 @@ import static org.testng.Assert.*;
  * If that user is logged in, the request succeeds, otherwise it fails.
  *
  * @author Javier Rojas Blum
- * @version January 11, 2017
+ * @version August 9, 2017
  */
 public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
 
@@ -91,7 +91,7 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertNotNull(authorizationResponse1.getScope(), "The scope is null");
 
-        String sessionState = authorizationResponse1.getSessionState();
+        String sessionId = authorizationResponse1.getSessionId();
 
         // 3. Request authorization
         OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
@@ -99,7 +99,7 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest2.getPrompts().add(Prompt.NONE);
         authorizationRequest2.setState(state);
-        authorizationRequest2.setSessionState(sessionState);
+        authorizationRequest2.setSessionId(sessionId);
 
         JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(
                 authorizationRequest2, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);

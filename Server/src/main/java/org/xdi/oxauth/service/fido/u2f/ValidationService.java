@@ -6,82 +6,83 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.fido.u2f.U2fConstants;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserService;
+import org.xdi.util.StringHelper;
+
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.slf4j.Logger;
-import org.xdi.oxauth.model.common.SessionState;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.fido.u2f.U2fConstants;
-import org.xdi.oxauth.service.SessionStateService;
-import org.xdi.oxauth.service.UserService;
-import org.xdi.util.StringHelper;
-
 /**
  * Utility to validate U2F input data
  *
- * @author Yuriy Movchan Date: 05/11/2016
+ * @author Yuriy Movchan
+ * @version August 9, 2017
  */
 @Stateless
 @Named("u2fValidationService")
 public class ValidationService {
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	@Inject
-	private SessionStateService sessionStateService;
+    @Inject
+    private SessionIdService sessionIdService;
 
-	@Inject
-	private UserService userService;
+    @Inject
+    private UserService userService;
 
-	public boolean isValidSessionState(String userName, String sessionState) {
-		if (sessionState == null) {
-			log.error("In two step authentication workflow session_state is mandatory");
-			return false;
-		}
-		
-		SessionState ldapSessionState = sessionStateService.getSessionState(sessionState);
-		if (ldapSessionState == null) {
-			log.error("Specified session_state '{}' is invalid", sessionState);
-			return false;
-		}
-		
-		String sessionStateUser = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
-		if (!StringHelper.equalsIgnoreCase(userName, sessionStateUser)) {
-			log.error("Username '{}' and session_state '{}' don't match", userName, sessionState);
-			return false;
-		}
+    public boolean isValidSessionId(String userName, String sessionId) {
+        if (sessionId == null) {
+            log.error("In two step authentication workflow session_id is mandatory");
+            return false;
+        }
 
-		return true;
-	}
+        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
+        if (ldapSessionId == null) {
+            log.error("Specified session_id '{}' is invalid", sessionId);
+            return false;
+        }
 
-	public boolean isValidEnrollmentCode(String userName, String enrollmentCode) {
-		if (enrollmentCode == null) {
-			log.error("In two step authentication workflow enrollment_code is mandatory");
-			return false;
-		}
-		
-		User user = userService.getUser(userName, U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
-		if (user == null) {
-			log.error("Specified user_name '{}' is invalid", userName);
-			return false;
-		}
-		
-		String userEnrollmentCode = user.getAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
-		if (userEnrollmentCode == null) {
-			log.error("Specified enrollment_code '{}' is invalid", enrollmentCode);
-			return false;
-		}
+        String sessionIdUser = ldapSessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
+        if (!StringHelper.equalsIgnoreCase(userName, sessionIdUser)) {
+            log.error("Username '{}' and session_id '{}' don't match", userName, sessionId);
+            return false;
+        }
 
-		if (!StringHelper.equalsIgnoreCase(userEnrollmentCode, enrollmentCode)) {
-			log.error("Username '{}' and enrollment_code '{}' don't match", userName, enrollmentCode);
-			return false;
-		}
+        return true;
+    }
 
-		return true;
-	}
+    public boolean isValidEnrollmentCode(String userName, String enrollmentCode) {
+        if (enrollmentCode == null) {
+            log.error("In two step authentication workflow enrollment_code is mandatory");
+            return false;
+        }
+
+        User user = userService.getUser(userName, U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
+        if (user == null) {
+            log.error("Specified user_name '{}' is invalid", userName);
+            return false;
+        }
+
+        String userEnrollmentCode = user.getAttribute(U2fConstants.U2F_ENROLLMENT_CODE_ATTRIBUTE);
+        if (userEnrollmentCode == null) {
+            log.error("Specified enrollment_code '{}' is invalid", enrollmentCode);
+            return false;
+        }
+
+        if (!StringHelper.equalsIgnoreCase(userEnrollmentCode, enrollmentCode)) {
+            log.error("Username '{}' and enrollment_code '{}' don't match", userName, enrollmentCode);
+            return false;
+        }
+
+        return true;
+    }
 
 }

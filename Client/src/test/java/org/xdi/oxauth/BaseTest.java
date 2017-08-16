@@ -384,12 +384,12 @@ public abstract class BaseTest {
 
         authorizationResponseStr = driver.getCurrentUrl();
 
-        Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
-        String sessionState = null;
-        if (sessionStateCookie != null) {
-            sessionState = sessionStateCookie.getValue();
+        Cookie sessionIdCookie = driver.manage().getCookieNamed("session_id");
+        String sessionId = null;
+        if (sessionIdCookie != null) {
+            sessionId = sessionIdCookie.getValue();
         }
-        System.out.println("authenticateResourceOwnerAndDenyAccess: sessionState:" + sessionState);
+        System.out.println("authenticateResourceOwnerAndDenyAccess: sessionId:" + sessionId);
 
         stopSelenium();
 
@@ -397,7 +397,7 @@ public abstract class BaseTest {
         if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
             authorizationResponse.setResponseMode(ResponseMode.FORM_POST);
         }
-        authorizationResponse.setSessionState(sessionState);
+        authorizationResponse.setSessionId(sessionId);
         authorizeClient.setResponse(authorizationResponse);
         showClientUserAgent(authorizeClient);
 

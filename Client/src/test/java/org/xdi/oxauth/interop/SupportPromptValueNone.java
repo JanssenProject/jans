@@ -28,7 +28,7 @@ import static org.testng.Assert.assertNotNull;
  * OC5:FeatureTest-Support prompt value none
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version August 9, 2017
  */
 public class SupportPromptValueNone extends BaseTest {
 
@@ -62,7 +62,7 @@ public class SupportPromptValueNone extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        String sessionState;
+        String sessionId;
         {
             // 2. Request authorization
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
@@ -81,7 +81,7 @@ public class SupportPromptValueNone extends BaseTest {
             assertNotNull(authorizationResponse.getScope());
 
             String authorizationCode = authorizationResponse.getCode();
-            sessionState = authorizationResponse.getSessionState();
+            sessionId = authorizationResponse.getSessionId();
 
             // 3. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -113,7 +113,7 @@ public class SupportPromptValueNone extends BaseTest {
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
             authorizationRequest.getPrompts().add(Prompt.NONE);
-            authorizationRequest.setSessionState(sessionState);
+            authorizationRequest.setSessionId(sessionId);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);

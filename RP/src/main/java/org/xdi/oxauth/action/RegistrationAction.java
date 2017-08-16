@@ -29,15 +29,15 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @version August 9, 2017
  */
 @Named
 @SessionScoped
 public class RegistrationAction implements Serializable {
 
-	private static final long serialVersionUID = -5920839612180688968L;
+    private static final long serialVersionUID = -5920839612180688968L;
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject
@@ -147,7 +147,7 @@ public class RegistrationAction implements Serializable {
             requestString = client.getRequestAsString();
             responseString = client.getResponseAsString();
         } catch (Exception e) {
-        	log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -163,7 +163,7 @@ public class RegistrationAction implements Serializable {
             clientReadRequestString = client.getRequestAsString();
             clientReadResponseString = client.getResponseAsString();
         } catch (Exception e) {
-        	log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
