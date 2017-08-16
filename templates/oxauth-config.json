@@ -133,9 +133,7 @@
         "ES512"
     ],
     "dynamicRegistrationCustomAttributes":[
-        "oxAuthTrustedClient",
-        "myCustomAttr1",
-        "myCustomAttr2"
+        "oxAuthTrustedClient"
     ],
     "displayValuesSupported":[
         "page",
@@ -179,7 +177,7 @@
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
-    "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
+    "dynamicRegistrationCustomObjectClass":"",
     "authenticationFiltersEnabled":false,
     "clientAuthenticationFiltersEnabled":false,
     "authenticationFilters":[
