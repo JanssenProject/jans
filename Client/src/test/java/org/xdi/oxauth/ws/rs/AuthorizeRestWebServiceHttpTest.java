@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Functional tests for Authorize Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version August 9, 2017
  */
 public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
@@ -2593,7 +2593,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertNotNull(registerResponse.getClientSecretExpiresAt());
 
         String clientId = registerResponse.getClientId();
-        String sessionState = null;
+        String sessionId = null;
 
         // 2. Request authorization, authenticate resource owner and deny access
         {
@@ -2612,7 +2612,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
             assertNotNull(authorizationResponse.getErrorDescription());
             assertNotNull(authorizationResponse.getState());
 
-            sessionState = authorizationResponse.getSessionState();
+            sessionId = authorizationResponse.getSessionId();
         }
 
         // 3. Request authorization and deny access (resource owner is already authenticated)
@@ -2622,7 +2622,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
             authorizationRequest.setState(state);
-            authorizationRequest.setSessionState(sessionState);
+            authorizationRequest.setSessionId(sessionId);
 
             AuthorizationResponse authorizationResponse = authorizationRequestAndDenyAccess(
                     authorizationEndpoint, authorizationRequest);
@@ -2641,7 +2641,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
             authorizationRequest.setState(state);
-            authorizationRequest.setSessionState(sessionState);
+            authorizationRequest.setSessionId(sessionId);
 
             AuthorizationResponse authorizationResponse = authorizationRequestAndGrantAccess(
                     authorizationEndpoint, authorizationRequest);

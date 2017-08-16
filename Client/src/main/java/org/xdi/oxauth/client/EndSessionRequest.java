@@ -17,13 +17,13 @@ import java.net.URLEncoder;
  * Represents an end session request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version August 9, 2017
  */
 public class EndSessionRequest extends BaseRequest {
 
     private String idTokenHint;
     private String postLogoutRedirectUri;
-    private String sessionState;
+    private String sessionId;
     private String state;
 
     /**
@@ -74,21 +74,21 @@ public class EndSessionRequest extends BaseRequest {
     }
 
     /**
-     * Gets session state.
+     * Gets session id.
      *
-     * @return session state.
+     * @return session id.
      */
-    public String getSessionState() {
-        return sessionState;
+    public String getSessionId() {
+        return sessionId;
     }
 
     /**
-     * Sets session state.
+     * Sets session id.
      *
-     * @param p_sessionState session state
+     * @param p_sessionId session id
      */
-    public void setSessionState(String p_sessionState) {
-        sessionState = p_sessionState;
+    public void setSessionId(String p_sessionId) {
+        sessionId = p_sessionId;
     }
 
     /**
@@ -144,11 +144,11 @@ public class EndSessionRequest extends BaseRequest {
                         .append(URLEncoder.encode(state, Util.UTF8_STRING_ENCODING));
             }
 
-            if (StringUtils.isNotBlank(sessionState)) {
+            if (StringUtils.isNotBlank(sessionId)) {
                 queryStringBuilder.append("&")
-                        .append(EndSessionRequestParam.SESSION_STATE)
+                        .append(EndSessionRequestParam.SESSION_ID)
                         .append("=")
-                        .append(URLEncoder.encode(sessionState, Util.UTF8_STRING_ENCODING));
+                        .append(URLEncoder.encode(sessionId, Util.UTF8_STRING_ENCODING));
             }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();

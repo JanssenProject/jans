@@ -74,7 +74,7 @@
                     <div class="login-panel-header">#{msgs['passport.loginSecondStep']}</div>
                     <div class="login-panel-body">
 			<ui:param name="client"
-				value="#{clientService.getClient(identity.sessionState.sessionAttributes['client_id'])}" />
+				value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
 
                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
