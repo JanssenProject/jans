@@ -1,9 +1,15 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2015, Gluu
+ */
+
 package org.xdi.oxauth.uma.authorization;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.xdi.model.SimpleCustomProperty;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -24,7 +30,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author yuriyz on 06/18/2017.
+ * @author yuriyz
+ * @version August 9, 2017
  */
 public class UmaGatherContext extends ExternalScriptContext {
 
@@ -36,14 +43,14 @@ public class UmaGatherContext extends ExternalScriptContext {
 
     private final Map<String, SimpleCustomProperty> configurationAttributes;
     private final AppConfiguration appConfiguration;
-    private final SessionState session;
+    private final SessionId session;
     private final RedirectParameters redirectUserParameters = new RedirectParameters();
     private final UmaPCT pct;
     private final JwtClaims claims;
     private final Map<String, String> pageClaims;
     private String redirectToExternalUrl = null;
 
-    public UmaGatherContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, SessionState session, UmaSessionService sessionService,
+    public UmaGatherContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, SessionId session, UmaSessionService sessionService,
                             UmaPermissionService permissionService, UmaPctService pctService, Map<String, String> pageClaims,
                             UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
         super(httpRequest);
@@ -73,7 +80,7 @@ public class UmaGatherContext extends ExternalScriptContext {
     }
 
     public Map<String, String> getConnectSessionAttributes() {
-        SessionState connectSession = sessionService.getConnectSession(httpRequest);
+        SessionId connectSession = sessionService.getConnectSession(httpRequest);
         if (connectSession != null) {
             return new HashMap<String, String>(connectSession.getSessionAttributes());
         }
@@ -81,7 +88,7 @@ public class UmaGatherContext extends ExternalScriptContext {
     }
 
     public String getUserDn() {
-        SessionState connectSession = sessionService.getConnectSession(httpRequest);
+        SessionId connectSession = sessionService.getConnectSession(httpRequest);
         if (connectSession != null) {
             return connectSession.getUserDn();
         }

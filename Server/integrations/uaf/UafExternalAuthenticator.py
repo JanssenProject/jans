@@ -16,7 +16,7 @@
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
+from org.xdi.oxauth.service import UserService, AuthenticationService, SessionIdService
 from org.xdi.util import StringHelper, ArrayHelper
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.oxauth.model.config import Constants
@@ -87,7 +87,7 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        session_attributes = identity.getSessionState().getSessionAttributes()
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         self.setRequestScopedParameters(identity)
 
@@ -95,7 +95,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "UAF. Authenticate for step 1"
 
             user_name = credentials.getUsername()
-            
+
             authenticated_user = self.processBasicAuthentication(credentials)
             if authenticated_user == None:
                 return False
@@ -120,9 +120,9 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Authenticate for step 2"
 
-            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
-            if StringHelper.isEmpty(session_state):
-                print "UAF. Prepare for step 2. Failed to determine session_state"
+            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
+            if StringHelper.isEmpty(session_id):
+                print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
             user = authenticationService.getAuthenticatedUser()
@@ -222,7 +222,7 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        session_attributes = identity.getSessionState().getSessionAttributes()
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         self.setRequestScopedParameters(identity)
 
@@ -231,9 +231,9 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "UAF. Prepare for step 2"
 
-            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
-            if StringHelper.isEmpty(session_state):
-                print "UAF. Prepare for step 2. Failed to determine session_state"
+            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
+            if StringHelper.isEmpty(session_id):
+                print "UAF. Prepare for step 2. Failed to determine session_id"
                 return False
 
             user = authenticationService.getAuthenticatedUser()

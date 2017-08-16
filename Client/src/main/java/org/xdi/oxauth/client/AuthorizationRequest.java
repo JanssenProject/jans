@@ -28,7 +28,7 @@ import java.util.Map;
  * Represents an authorization request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version August 9, 2017
  */
 public class AuthorizationRequest extends BaseRequest {
 
@@ -53,8 +53,8 @@ public class AuthorizationRequest extends BaseRequest {
     private String request;
     private String requestUri;
 
-    private boolean requestSessionState;
-    private String sessionState;
+    private boolean requestSessionId;
+    private String sessionId;
 
     private String accessToken;
     private boolean useNoRedirectHeader;
@@ -381,39 +381,39 @@ public class AuthorizationRequest extends BaseRequest {
     }
 
     /**
-     * Returns whether session state is requested.
+     * Returns whether session id is requested.
      *
-     * @return whether session state is requested
+     * @return whether session id is requested
      */
-    public boolean isRequestSessionState() {
-        return requestSessionState;
+    public boolean isRequestSessionId() {
+        return requestSessionId;
     }
 
     /**
-     * Sets whether session state should be requested.
+     * Sets whether session id should be requested.
      *
-     * @param p_requestSessionState session state.
+     * @param p_requestSessionId session id.
      */
-    public void setRequestSessionState(boolean p_requestSessionState) {
-        requestSessionState = p_requestSessionState;
+    public void setRequestSessionId(boolean p_requestSessionId) {
+        requestSessionId = p_requestSessionId;
     }
 
     /**
-     * Gets session state.
+     * Gets session id.
      *
-     * @return session state.
+     * @return session id.
      */
-    public String getSessionState() {
-        return sessionState;
+    public String getSessionId() {
+        return sessionId;
     }
 
     /**
-     * Sets session state.
+     * Sets session id.
      *
-     * @param p_sessionState session state
+     * @param p_sessionId session id
      */
-    public void setSessionState(String p_sessionState) {
-        sessionState = p_sessionState;
+    public void setSessionId(String p_sessionId) {
+        sessionId = p_sessionId;
     }
 
     public String getAccessToken() {
@@ -576,13 +576,13 @@ public class AuthorizationRequest extends BaseRequest {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_URI)
                         .append("=").append(URLEncoder.encode(requestUri, Util.UTF8_STRING_ENCODING));
             }
-            if (requestSessionState) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_SESSION_STATE)
-                        .append("=").append(URLEncoder.encode(Boolean.toString(requestSessionState), Util.UTF8_STRING_ENCODING));
+            if (requestSessionId) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.REQUEST_SESSION_ID)
+                        .append("=").append(URLEncoder.encode(Boolean.toString(requestSessionId), Util.UTF8_STRING_ENCODING));
             }
-            if (StringUtils.isNotBlank(sessionState)) {
-                queryStringBuilder.append("&").append(AuthorizeRequestParam.SESSION_STATE)
-                        .append("=").append(URLEncoder.encode(sessionState, Util.UTF8_STRING_ENCODING));
+            if (StringUtils.isNotBlank(sessionId)) {
+                queryStringBuilder.append("&").append(AuthorizeRequestParam.SESSION_ID)
+                        .append("=").append(URLEncoder.encode(sessionId, Util.UTF8_STRING_ENCODING));
             }
             if (StringUtils.isNotBlank(accessToken)) {
                 queryStringBuilder.append("&").append(AuthorizeRequestParam.ACCESS_TOKEN)
@@ -693,11 +693,11 @@ public class AuthorizationRequest extends BaseRequest {
             if (StringUtils.isNotBlank(requestUri)) {
                 parameters.put(AuthorizeRequestParam.REQUEST_URI, requestUri);
             }
-            if (requestSessionState) {
-                parameters.put(AuthorizeRequestParam.REQUEST_SESSION_STATE, Boolean.toString(requestSessionState));
+            if (requestSessionId) {
+                parameters.put(AuthorizeRequestParam.REQUEST_SESSION_ID, Boolean.toString(requestSessionId));
             }
-            if (StringUtils.isNotBlank(sessionState)) {
-                parameters.put(AuthorizeRequestParam.SESSION_STATE, sessionState);
+            if (StringUtils.isNotBlank(sessionId)) {
+                parameters.put(AuthorizeRequestParam.SESSION_ID, sessionId);
             }
             if (StringUtils.isNotBlank(accessToken)) {
                 parameters.put(AuthorizeRequestParam.ACCESS_TOKEN, accessToken);

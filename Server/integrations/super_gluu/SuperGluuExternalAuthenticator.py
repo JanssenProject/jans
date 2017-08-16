@@ -12,7 +12,7 @@ from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.model.config import ConfigurationFactory
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
+from org.xdi.oxauth.service import UserService, AuthenticationService, SessionIdService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.oxauth.util import ServerUtil
@@ -113,7 +113,7 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        session_attributes = identity.getSessionState().getSessionAttributes()
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
         if client_redirect_uri == None:
@@ -229,7 +229,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             user_name = user.getUserId()
 
-            session_attributes = identity.getSessionState().getSessionAttributes()
+            session_attributes = identity.getSessionId().getSessionAttributes()
 
             session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
             if session_device_status == None:
@@ -278,7 +278,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
-        session_attributes = identity.getSessionState().getSessionAttributes()
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
         if client_redirect_uri == None:
@@ -290,15 +290,15 @@ class PersonAuthentication(PersonAuthenticationType):
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
             if self.oneStep:
-                session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
-                if StringHelper.isEmpty(session_state):
-                    print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
+                session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
+                if StringHelper.isEmpty(session_id):
+                    print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                     return False
             
                 issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
-                                   'state': session_state,
+                                   'state': session_id,
                                    'created': datetime.datetime.now().isoformat()}
 
                 self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
@@ -328,9 +328,9 @@ class PersonAuthentication(PersonAuthenticationType):
                    print "Super-Gluu. Prepare for step 2. Request was generated already"
                    return True
             
-            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
-            if StringHelper.isEmpty(session_state):
-                print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
+            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
+            if StringHelper.isEmpty(session_id):
+                print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                 return False
 
             auth_method = session_attributes.get("super_gluu_auth_method")
@@ -345,7 +345,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                'app': client_redirect_uri,
                                'issuer': issuer,
                                'method': auth_method,
-                               'state': session_state,
+                               'state': session_id,
                                'created': datetime.datetime.now().isoformat()}
 
             self.addGeolocationData(session_attributes, super_gluu_request_dictionary)

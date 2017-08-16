@@ -35,7 +35,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Providing ID Token with max age Restriction
  *
  * @author Javier Rojas Blum
- * @version January 20, 2017
+ * @version August 9, 2017
  */
 public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
@@ -75,7 +75,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        String sessionState;
+        String sessionId;
         {
             // 2. Request authorization
             List<String> scopes = Arrays.asList("openid");
@@ -94,7 +94,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             assertEquals(authorizationResponse.getState(), state);
 
             String authorizationCode = authorizationResponse.getCode();
-            sessionState = authorizationResponse.getSessionState();
+            sessionId = authorizationResponse.getSessionId();
 
             // 3. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -149,7 +149,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
             authorizationRequest.setState(state);
             authorizationRequest.setMaxAge(30);
-            authorizationRequest.setSessionState(sessionState);
+            authorizationRequest.setSessionId(sessionId);
 
             AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                     authorizationEndpoint, authorizationRequest, userId, userSecret);
@@ -238,7 +238,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        String sessionState;
+        String sessionId;
         {
             // 2. Request authorization
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
@@ -258,7 +258,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             assertNotNull(authorizationResponse.getScope());
 
             String authorizationCode = authorizationResponse.getCode();
-            sessionState = authorizationResponse.getSessionState();
+            sessionId = authorizationResponse.getSessionId();
 
             // 3. Get Access Token
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -293,7 +293,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
-            authorizationRequest.setSessionState(sessionState);
+            authorizationRequest.setSessionId(sessionId);
 
             JwtAuthorizationRequest jwtAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.HS256, clientSecret, cryptoProvider);
             jwtAuthorizationRequest.getIdTokenMember().setMaxAge(30);

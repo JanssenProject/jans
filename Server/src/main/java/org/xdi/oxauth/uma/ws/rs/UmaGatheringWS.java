@@ -1,9 +1,15 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2015, Gluu
+ */
+
 package org.xdi.oxauth.uma.ws.rs;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.UmaConstants;
@@ -33,7 +39,8 @@ import static org.xdi.oxauth.model.uma.UmaErrorResponseType.INVALID_SESSION;
 /**
  * Claims-Gathering Endpoint.
  *
- * @author yuriyz on 06/04/2017.
+ * @author yuriyz
+ * @version August 9, 2017
  */
 @Path("/uma/gather_claims")
 public class UmaGatheringWS {
@@ -63,7 +70,7 @@ public class UmaGatheringWS {
             log.trace("gatherClaims client_id: {}, ticket: {}, claims_redirect_uri: {}, state: {}, authenticationRedirect: {}, queryString: {}",
                     clientId, ticket, claimRedirectUri, state, authenticationRedirect, httpRequest.getQueryString());
 
-            SessionState session = sessionService.getSession(httpRequest, httpResponse);
+            SessionId session = sessionService.getSession(httpRequest, httpResponse);
 
             if (authenticationRedirect != null && authenticationRedirect) { // restore parameters from session
                 log.debug("Authentication redirect, restoring parameters from session ...");
@@ -128,17 +135,17 @@ public class UmaGatheringWS {
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response getGatherClaims(
             @QueryParam("client_id")
-            String clientId,
+                    String clientId,
             @QueryParam("ticket")
-            String ticket,
+                    String ticket,
             @QueryParam("claims_redirect_uri")
-            String claimRedirectUri,
+                    String claimRedirectUri,
             @QueryParam("state")
-            String state,
+                    String state,
             @QueryParam("reset")
-            Boolean reset,
+                    Boolean reset,
             @QueryParam("authentication")
-            Boolean authenticationRedirect,
+                    Boolean authenticationRedirect,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
         return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, authenticationRedirect, httpRequest, httpResponse);
@@ -149,17 +156,17 @@ public class UmaGatheringWS {
     @Produces({UmaConstants.JSON_MEDIA_TYPE})
     public Response postGatherClaims(
             @FormParam("client_id")
-            String clientId,
+                    String clientId,
             @FormParam("ticket")
-            String ticket,
+                    String ticket,
             @FormParam("claims_redirect_uri")
-            String claimRedirectUri,
+                    String claimRedirectUri,
             @FormParam("state")
-            String state,
+                    String state,
             @FormParam("reset")
-            Boolean reset,
+                    Boolean reset,
             @FormParam("authentication")
-            Boolean authenticationRedirect,
+                    Boolean authenticationRedirect,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse) {
         return gatherClaims(clientId, ticket, claimRedirectUri, state, reset, authenticationRedirect, httpRequest, httpResponse);
