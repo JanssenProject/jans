@@ -29,7 +29,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for Token Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version August 16, 2017
  */
 public class TokenRestWebServiceHttpTest extends BaseTest {
 
@@ -113,17 +113,66 @@ public class TokenRestWebServiceHttpTest extends BaseTest {
         String scope = "openid";
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
-        TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
+        TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
                 clientId, clientSecret);
 
         showClient(tokenClient);
-        assertEquals(response1.getStatus(), 200, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getEntity(), "The entity is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
-        assertNotNull(response1.getIdToken(), "The id token is null");
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        assertNotNull(tokenResponse.getScope(), "The scope is null");
+        assertNotNull(tokenResponse.getIdToken(), "The id token is null");
+    }
+
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
+    @Test
+    public void requestAccessTokenPasswordFail(
+            final String userId, final String userSecret, final String redirectUris, final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAccessTokenPasswordFail");
+
+        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request Resource Owner Credentials Grant
+        String username = userId;
+        String password = "BAD_PASSWORD";
+        String scope = "openid";
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        TokenResponse tokenResponse = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
+                clientId, clientSecret);
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "sectorIdentifierUri"})
