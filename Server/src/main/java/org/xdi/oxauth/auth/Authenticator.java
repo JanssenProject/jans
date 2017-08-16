@@ -577,7 +577,6 @@ public class Authenticator {
             final User user = authenticationService.getUserOrRemoveSession(sessionId);
             if (user != null) {
                 try {
-                    authenticationService.configureEventUser(sessionId);
                     authenticationService.quietLogin(user.getUserId());
 
                     authenticationService.configureEventUser(sessionId);
