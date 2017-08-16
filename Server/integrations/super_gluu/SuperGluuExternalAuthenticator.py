@@ -4,27 +4,27 @@
 # Author: Yuriy Movchan
 #
 
-import datetime
-import urllib
-
-import json
-import sys
 from com.google.android.gcm.server import Sender, Message
 from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.model.config import ConfigurationFactory
-from org.xdi.oxauth.security import Identity
-from org.xdi.oxauth.service import EncryptionService
 from org.xdi.oxauth.service import UserService, AuthenticationService, SessionIdService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.oxauth.util import ServerUtil
-from org.xdi.service import MailService
-from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper
+from org.xdi.oxauth.service import EncryptionService
+from org.xdi.service import MailService
 
+import datetime
+import urllib
+
+import sys
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -113,8 +113,6 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        user_name = credentials.getUsername()
-
         session_attributes = identity.getSessionId().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
@@ -142,6 +140,8 @@ class PersonAuthentication(PersonAuthenticationType):
         deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
         if step == 1:
             print "Super-Gluu. Authenticate for step 1"
+
+            user_name = credentials.getUsername()
             if self.oneStep:
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
@@ -222,6 +222,13 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
         elif step == 2:
             print "Super-Gluu. Authenticate for step 2"
+
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
+                print "Super-Gluu. Authenticate for step 2. Failed to determine user name"
+                return False
+            user_name = user.getUserId()
+
             session_attributes = identity.getSessionId().getSessionAttributes()
 
             session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)

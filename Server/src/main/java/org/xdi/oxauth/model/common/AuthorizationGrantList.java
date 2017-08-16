@@ -22,6 +22,7 @@ import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.service.CacheService;
 
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -35,7 +36,7 @@ import java.util.List;
  *
  * @author Javier Rojas Blum Date: 09.29.2011
  */
-@RequestScoped
+@Dependent
 public class AuthorizationGrantList implements IAuthorizationGrantList {
 
 	@Inject
