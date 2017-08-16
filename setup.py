@@ -1870,6 +1870,8 @@ class Setup(object):
         self.addUserToGroup('gluu', 'jetty')
         self.addUserToGroup('gluu', 'node')
 
+        self.addUserToGroup('adm', 'ldap')
+
     def makeFolders(self):
         try:
             # Allow write to /tmp
@@ -2500,7 +2502,7 @@ class Setup(object):
                 pem.write(key.read())
 
         # 6. Setup Logging
-        self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
+        self.run([self.cmd_mkdir, '-m', '775', '-p', self.openldapLogDir])
         if self.os_type in ['debian', 'ubuntu']:
             self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
         if not os.path.isdir('/etc/rsyslog.d/'):
