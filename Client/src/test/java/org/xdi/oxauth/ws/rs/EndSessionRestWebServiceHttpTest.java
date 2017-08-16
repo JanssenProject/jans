@@ -27,7 +27,7 @@ import static org.testng.Assert.*;
  * Functional tests for End Session Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version December 20, 2015
+ * @version August 9, 2017
  */
 public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
@@ -83,14 +83,14 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
         assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
-        assertNotNull(authorizationResponse.getSessionState(), "The session_state is null");
+        assertNotNull(authorizationResponse.getSessionId(), "The session_id is null");
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. End session
-        String endSessionState1 = UUID.randomUUID().toString();
-        EndSessionRequest endSessionRequest1 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState1);
-        endSessionRequest1.setSessionState(authorizationResponse.getSessionState());
+        String endSessionId1 = UUID.randomUUID().toString();
+        EndSessionRequest endSessionRequest1 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionId1);
+        endSessionRequest1.setSessionId(authorizationResponse.getSessionId());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest1);
@@ -105,12 +105,12 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertTrue(endSessionResponse1.getHtmlPage().contains("<html>"), "The HTML page is null");
         assertTrue(endSessionResponse1.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
         assertTrue(endSessionResponse1.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
-        // assertEquals(endSessionResponse.getState(), endSessionState); // commented out, for http-based logout we get html page
+        // assertEquals(endSessionResponse.getState(), endSessionId); // commented out, for http-based logout we get html page
 
         // 4. End session with an already ended session
-        String endSessionState2 = UUID.randomUUID().toString();
-        EndSessionRequest endSessionRequest2 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionState2);
-        endSessionRequest2.setSessionState(authorizationResponse.getSessionState());
+        String endSessionId2 = UUID.randomUUID().toString();
+        EndSessionRequest endSessionRequest2 = new EndSessionRequest(idToken, postLogoutRedirectUri, endSessionId2);
+        endSessionRequest2.setSessionId(authorizationResponse.getSessionId());
 
         EndSessionClient endSessionClient2 = new EndSessionClient(endSessionEndpoint);
         endSessionClient2.setRequest(endSessionRequest2);
@@ -124,10 +124,10 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri", "logoutUri", "sectorIdentifierUri"})
     @Test
-    public void requestEndSessionWithSessionState(
+    public void requestEndSessionWithSessionId(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
             final String postLogoutRedirectUri, final String logoutUri, final String sectorIdentifierUri) throws Exception {
-        showTitle("requestEndSession by session_state");
+        showTitle("requestEndSession by session_id");
 
         // 1. OpenID Connect Dynamic Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
@@ -174,12 +174,12 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getTokenType(), "The token type is null");
         assertNotNull(authorizationResponse.getExpiresIn(), "The expires in value is null");
         assertNotNull(authorizationResponse.getScope(), "The scope must be null");
-        assertNotNull(authorizationResponse.getSessionState(), "The session_state is null");
+        assertNotNull(authorizationResponse.getSessionId(), "The session_id is null");
 
         // 3. End session
-        String endSessionState1 = UUID.randomUUID().toString();
-        EndSessionRequest endSessionRequest1 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionState1);
-        endSessionRequest1.setSessionState(authorizationResponse.getSessionState());
+        String endSessionId1 = UUID.randomUUID().toString();
+        EndSessionRequest endSessionRequest1 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionId1);
+        endSessionRequest1.setSessionId(authorizationResponse.getSessionId());
 
         EndSessionClient endSessionClient = new EndSessionClient(endSessionEndpoint);
         endSessionClient.setRequest(endSessionRequest1);
@@ -194,12 +194,12 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         assertTrue(endSessionResponse1.getHtmlPage().contains("<html>"), "The HTML page is null");
         assertTrue(endSessionResponse1.getHtmlPage().contains(logoutUri), "logout_uri is not present on html page");
         assertTrue(endSessionResponse1.getHtmlPage().contains(postLogoutRedirectUri), "postLogoutRedirectUri is not present on html page");
-        // assertEquals(endSessionResponse.getState(), endSessionState); // commented out, for http-based logout we get html page
+        // assertEquals(endSessionResponse.getState(), endSessionId); // commented out, for http-based logout we get html page
 
         // 4. End session with an already ended session
-        String endSessionState2 = UUID.randomUUID().toString();
-        EndSessionRequest endSessionRequest2 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionState2);
-        endSessionRequest2.setSessionState(authorizationResponse.getSessionState());
+        String endSessionId2 = UUID.randomUUID().toString();
+        EndSessionRequest endSessionRequest2 = new EndSessionRequest(null, postLogoutRedirectUri, endSessionId2);
+        endSessionRequest2.setSessionId(authorizationResponse.getSessionId());
 
         EndSessionClient endSessionClient2 = new EndSessionClient(endSessionEndpoint);
         endSessionClient2.setRequest(endSessionRequest2);

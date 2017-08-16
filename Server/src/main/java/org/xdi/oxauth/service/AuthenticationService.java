@@ -20,7 +20,7 @@ import org.xdi.model.metric.MetricType;
 import org.xdi.model.security.Credentials;
 import org.xdi.model.security.SimplePrincipal;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -43,14 +43,14 @@ import java.security.Principal;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 /**
  * Authentication service methods
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version June 28, 2017
+ * @version August 9, 2017
  */
 @Stateless
 @Named
@@ -72,7 +72,7 @@ public class AuthenticationService {
             AuthorizeRequestParam.ID_TOKEN_HINT,
             AuthorizeRequestParam.LOGIN_HINT,
             AuthorizeRequestParam.ACR_VALUES,
-            AuthorizeRequestParam.SESSION_STATE,
+            AuthorizeRequestParam.SESSION_ID,
             AuthorizeRequestParam.REQUEST,
             AuthorizeRequestParam.REQUEST_URI,
             AuthorizeRequestParam.ORIGIN_HEADERS,
@@ -111,7 +111,7 @@ public class AuthenticationService {
     private ClientService clientService;
 
     @Inject
-    private SessionStateService sessionStateService;
+    private SessionIdService sessionIdService;
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
@@ -163,13 +163,13 @@ public class AuthenticationService {
     }
 
     private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
-        SessionState sessionState = sessionStateService.getSessionState();
-        if (sessionState != null) {
-            Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+        SessionId sessionId = sessionIdService.getSessionId();
+        if (sessionId != null) {
+            Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
             if (authenticated) {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
-            sessionStateService.updateSessionStateIfNeeded(sessionState, authenticated);
+            sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
         }
     }
 
@@ -399,28 +399,28 @@ public class AuthenticationService {
         }
     }
 
-    public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        log.trace("configureSessionUser: credentials: '{}', sessionState: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
+    public SessionId configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
+        log.trace("configureSessionUser: credentials: '{}', sessionId: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionId, credentials.getUsername(), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
 
-        SessionState newSessionState;
-        if (sessionState == null) {
-            newSessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn(), sessionIdAttributes);
+        SessionId newSessionId;
+        if (sessionId == null) {
+            newSessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), sessionIdAttributes);
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-            log.trace("configureSessionUser sessionState: '{}', sessionState.auth_user: '{}'", sessionState, sessionAuthUser);
+            log.trace("configureSessionUser sessionId: '{}', sessionId.auth_user: '{}'", sessionId, sessionAuthUser);
 
-            newSessionState = sessionStateService.setSessionStateAuthenticated(sessionState, user.getDn());
+            newSessionId = sessionIdService.setSessionIdStateAuthenticated(sessionId, user.getDn());
         }
 
-        identity.setSessionState(sessionState);
+        identity.setSessionId(sessionId);
 
-        return newSessionState;
+        return newSessionId;
     }
 
-    public SessionState configureEventUser() {
+    public SessionId configureEventUser() {
         User user = getAuthenticatedUser();
         if (user == null) {
             return null;
@@ -428,17 +428,17 @@ public class AuthenticationService {
 
         log.debug("ConfigureEventUser: username: '{}', credentials: '{}'", user.getUserId(), System.identityHashCode(credentials));
 
-        SessionState sessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn());
+        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn());
 
-        identity.setSessionState(sessionState);
+        identity.setSessionId(sessionId);
 
-        return sessionState;
+        return sessionId;
     }
 
-    public void configureEventUser(SessionState sessionState) {
-        sessionStateService.updateSessionState(sessionState);
+    public void configureEventUser(SessionId sessionId) {
+        sessionIdService.updateSessionId(sessionId);
 
-        identity.setSessionState(sessionState);
+        identity.setSessionId(sessionId);
     }
 
 	public void quietLogin(String userName) {
@@ -455,9 +455,9 @@ public class AuthenticationService {
         if (identity.getUser() != null) {
             return identity.getUser();
         } else {
-            SessionState sessionState = sessionStateService.getSessionState();
-            if (sessionState != null) {
-                Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+            SessionId sessionId = sessionIdService.getSessionId();
+            if (sessionId != null) {
+                Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
                 String userId = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
                 if (StringHelper.isNotEmpty(userId)) {
                     User user = userService.getUser(userId);
@@ -499,7 +499,7 @@ public class AuthenticationService {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void onSuccessfulLogin(SessionState sessionUser) {
+    public void onSuccessfulLogin(SessionId sessionUser) {
         log.info("Attempting to redirect user: SessionUser: {}", sessionUser);
 
         if ((sessionUser == null) || StringUtils.isBlank(sessionUser.getUserDn())) {
@@ -514,7 +514,7 @@ public class AuthenticationService {
             final Map<String, String> result = sessionUser.getSessionAttributes();
             Map<String, String> allowedParameters = getAllowedParameters(result);
 
-            result.put(SESSION_STATE, sessionUser.getId());
+            result.put(SESSION_ID, sessionUser.getId());
 
             log.trace("Logged in successfully! User: {}, page: /authorize.xhtml, map: {}", user, allowedParameters);
             facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
@@ -535,18 +535,18 @@ public class AuthenticationService {
         return result;
     }
 
-    public User getUserOrRemoveSession(SessionState p_sessionState) {
-        if (p_sessionState != null) {
+    public User getUserOrRemoveSession(SessionId p_sessionId) {
+        if (p_sessionId != null) {
             try {
-                if (StringUtils.isNotBlank(p_sessionState.getUserDn())) {
-                    final User user = userService.getUserByDn(p_sessionState.getUserDn());
+                if (StringUtils.isNotBlank(p_sessionId.getUserDn())) {
+                    final User user = userService.getUserByDn(p_sessionId.getUserDn());
                     if (user != null) {
                         return user;
                     } else { // if there is no user than session is invalid
-                        sessionStateService.remove(p_sessionState);
+                        sessionIdService.remove(p_sessionId);
                     }
                 } else { // if there is no user than session is invalid
-                    sessionStateService.remove(p_sessionState);
+                    sessionIdService.remove(p_sessionId);
                 }
             } catch (Exception e) {
                 log.trace(e.getMessage(), e);

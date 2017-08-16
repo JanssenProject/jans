@@ -16,8 +16,8 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.Prompt;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
-import org.xdi.oxauth.model.common.SessionState;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -51,15 +51,15 @@ import java.util.concurrent.TimeUnit;
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version December 29, 2016
+ * @version August 9, 2017
  */
-
 @Stateless
 @Named
-public class SessionStateService {
+public class SessionIdService {
 
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
-    public static final String UMA_SESSION_STATE_COOKIE_NAME = "uma_session_state";
+    public static final String SESSION_ID_COOKIE_NAME = "session_id";
+    public static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
     @Inject
@@ -89,7 +89,7 @@ public class SessionStateService {
     @Inject
     private CacheService cacheService;
 
-    public String getAcr(SessionState session) {
+    public String getAcr(SessionId session) {
         if (session == null || session.getSessionAttributes() == null) {
             return null;
         }
@@ -106,7 +106,7 @@ public class SessionStateService {
     // 2) acr change -> throw acr change exception
     // 3) client_id change -> do nothing
     // https://github.com/GluuFederation/oxAuth/issues/34
-    public SessionState assertAuthenticatedSessionCorrespondsToNewRequest(SessionState session, String acrValuesStr) throws AcrChangedException {
+    public SessionId assertAuthenticatedSessionCorrespondsToNewRequest(SessionId session, String acrValuesStr) throws AcrChangedException {
         if (session != null && !session.getSessionAttributes().isEmpty() && session.getState() == SessionIdState.AUTHENTICATED) {
 
             final Map<String, String> sessionAttributes = session.getSessionAttributes();
@@ -138,7 +138,7 @@ public class SessionStateService {
         return session;
     }
 
-    public void reinitLogin(SessionState session, boolean force) {
+    public void reinitLogin(SessionId session, boolean force) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
         if (force || !currentSessionAttributes.equals(sessionAttributes)) {
@@ -157,14 +157,14 @@ public class SessionStateService {
 
             session.setSessionAttributes(currentSessionAttributes);
 
-            boolean updateResult = updateSessionState(session, true, true, true);
+            boolean updateResult = updateSessionId(session, true, true, true);
             if (!updateResult) {
                 log.debug("Failed to update session entry: '{}'", session.getId());
             }
         }
     }
 
-    public void resetToStep(SessionState session, int resetToStep) {
+    public void resetToStep(SessionId session, int resetToStep) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
 
         int currentStep = 1;
@@ -179,7 +179,7 @@ public class SessionStateService {
 
         sessionAttributes.put("auth_step", String.valueOf(resetToStep));
 
-        boolean updateResult = updateSessionState(session, true, true, true);
+        boolean updateResult = updateSessionId(session, true, true, true);
         if (!updateResult) {
             log.debug("Failed to update session entry: '{}'", session.getId());
         }
@@ -206,21 +206,21 @@ public class SessionStateService {
         }
     }
 
-    public String getSessionStateFromCookie(HttpServletRequest request) {
-        return getSessionStateFromCookie(request, SESSION_STATE_COOKIE_NAME);
+    public String getSessionIdFromCookie(HttpServletRequest request) {
+        return getSessionIdFromCookie(request, SESSION_ID_COOKIE_NAME);
     }
 
-    public String getUmaSessionStateFromCookie(HttpServletRequest request) {
-        return getSessionStateFromCookie(request, UMA_SESSION_STATE_COOKIE_NAME);
+    public String getUmaSessionIdFromCookie(HttpServletRequest request) {
+        return getSessionIdFromCookie(request, UMA_SESSION_ID_COOKIE_NAME);
     }
 
-    public String getSessionStateFromCookie(HttpServletRequest request, String cookieName) {
+    public String getSessionIdFromCookie(HttpServletRequest request, String cookieName) {
         try {
             final Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals(cookieName) /*&& cookie.getSecure()*/) {
-                        log.trace("Found session_state cookie: '{}'", cookie.getValue());
+                        log.trace("Found session_id cookie: '{}'", cookie.getValue());
                         return cookie.getValue();
                     }
                 }
@@ -231,13 +231,13 @@ public class SessionStateService {
         return "";
     }
 
-    public String getSessionStateFromCookie() {
+    public String getSessionIdFromCookie() {
         try {
             if (facesContext == null) {
                 return null;
             }
             final HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();
-            return getSessionStateFromCookie(request);
+            return getSessionIdFromCookie(request);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -245,19 +245,47 @@ public class SessionStateService {
         return null;
     }
 
-    public void createSessionStateCookie(String sessionState, HttpServletResponse httpResponse, boolean isUma) {
+    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, boolean isUma) {
+        String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
+        String header = cookieName + "=" + sessionId;
+        header += "; Path=/";
+        header += "; Secure";
+        header += "; HttpOnly";
+
+        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
+        if (sessionStateLifetime != null) {
+            DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
+            Calendar expirationDate = Calendar.getInstance();
+            expirationDate.add(Calendar.SECOND, sessionStateLifetime);
+            header += "; Expires=" + formatter.format(expirationDate.getTime()) + ";";
+        }
+
+        httpResponse.addHeader("Set-Cookie", header);
+
+        createSessionStateCookie(sessionState, httpResponse);
+    }
+
+    public void createSessionIdCookie(String sessionId, String sessionState, boolean isUma) {
+        try {
+            final Object response = externalContext.getResponse();
+            if (response instanceof HttpServletResponse) {
+                final HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+                createSessionIdCookie(sessionId, sessionState, httpResponse, isUma);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    public void createSessionStateCookie(String sessionState, HttpServletResponse httpResponse) {
         // Create the special cookie header with secure flag but not HttpOnly because the session_state
         // needs to be read from the OP iframe using JavaScript
-        String cookieName = isUma ? UMA_SESSION_STATE_COOKIE_NAME : SESSION_STATE_COOKIE_NAME;
-        String header = cookieName + "=" + sessionState;
+        String header = SESSION_STATE_COOKIE_NAME + "=" + sessionState;
         header += "; Path=/";
         header += "; Secure";
 
-        if (appConfiguration.getSessionStateHttpOnly()) {
-            header += "; HttpOnly";
-        }
-
-        Integer sessionStateLifetime = appConfiguration.getSessionStateLifetime();
+        Integer sessionStateLifetime = appConfiguration.getSessionIdLifetime();
         if (sessionStateLifetime != null) {
             DateFormat formatter = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss Z");
             Calendar expirationDate = Calendar.getInstance();
@@ -268,73 +296,61 @@ public class SessionStateService {
         httpResponse.addHeader("Set-Cookie", header);
     }
 
-    public void createSessionStateCookie(String sessionState, boolean isUma) {
-        try {
-            final Object response = externalContext.getResponse();
-            if (response instanceof HttpServletResponse) {
-                final HttpServletResponse httpResponse = (HttpServletResponse) response;
-
-                createSessionStateCookie(sessionState, httpResponse, isUma);
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    public void removeSessionStateCookie(HttpServletResponse httpResponse) {
-        final Cookie cookie = new Cookie(SESSION_STATE_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
+    public void removeSessionIdCookie(HttpServletResponse httpResponse) {
+        final Cookie cookie = new Cookie(SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
         cookie.setPath("/");
         cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
         httpResponse.addCookie(cookie);
     }
 
-    public void removeUmaSessionStateCookie(HttpServletResponse httpResponse) {
-        final Cookie cookie = new Cookie(UMA_SESSION_STATE_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
+    public void removeUmaSessionIdCookie(HttpServletResponse httpResponse) {
+        final Cookie cookie = new Cookie(UMA_SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
         cookie.setPath("/");
         cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
         httpResponse.addCookie(cookie);
     }
 
-    public SessionState getSessionState() {
-        String sessionState = getSessionStateFromCookie();
+    public SessionId getSessionId() {
+        String sessionId = getSessionIdFromCookie();
 
-        if (StringHelper.isNotEmpty(sessionState)) {
-            return getSessionState(sessionState);
+        if (StringHelper.isNotEmpty(sessionId)) {
+            return getSessionId(sessionId);
         }
 
         return null;
     }
 
-    public Map<String, String> getSessionAttributes(SessionState sessionState) {
-        if (sessionState != null) {
-            return sessionState.getSessionAttributes();
+    public Map<String, String> getSessionAttributes(SessionId sessionId) {
+        if (sessionId != null) {
+            return sessionId.getSessionAttributes();
         }
 
         return null;
     }
 
-    public SessionState generateAuthenticatedSessionState(String userDn) {
-        return generateAuthenticatedSessionState(userDn, "");
+    public SessionId generateAuthenticatedSessionId(String userDn) {
+        return generateAuthenticatedSessionId(userDn, "");
     }
 
-    public SessionState generateAuthenticatedSessionState(String userDn, String prompt) {
+    public SessionId generateAuthenticatedSessionId(String userDn, String prompt) {
         Map<String, String> sessionIdAttributes = new HashMap<String, String>();
         sessionIdAttributes.put("prompt", prompt);
 
-        return generateSessionState(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+        return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
     }
 
-    public SessionState generateAuthenticatedSessionState(String userDn, Map<String, String> sessionIdAttributes) {
-        return generateSessionState(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+    public SessionId generateAuthenticatedSessionId(String userDn, Map<String, String> sessionIdAttributes) {
+        return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
     }
 
-    public SessionState generateUnauthenticatedSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
-        return generateSessionState(userDn, authenticationDate, state, sessionIdAttributes, persist);
+    public SessionId generateUnauthenticatedSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
+        return generateSessionId(userDn, authenticationDate, state, sessionIdAttributes, persist);
     }
 
-    private SessionState generateSessionState(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
-        final String uuid = UUID.randomUUID().toString();
-        final String dn = dn(uuid);
+    private SessionId generateSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
+        final String sid = UUID.randomUUID().toString();
+        final String sessionState = UUID.randomUUID().toString();
+        final String dn = dn(sid);
 
         if (StringUtils.isBlank(dn)) {
             return null;
@@ -346,58 +362,59 @@ public class SessionStateService {
             }
         }
 
-        final SessionState sessionState = new SessionState();
-        sessionState.setId(uuid);
-        sessionState.setDn(dn);
-        sessionState.setUserDn(userDn);
+        final SessionId sessionId = new SessionId();
+        sessionId.setId(sid);
+        sessionId.setDn(dn);
+        sessionId.setUserDn(userDn);
+        sessionId.setSessionState(sessionState);
 
         Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
-        sessionState.setIsJwt(sessionAsJwt != null && sessionAsJwt);
+        sessionId.setIsJwt(sessionAsJwt != null && sessionAsJwt);
 
         if (authenticationDate != null) {
-            sessionState.setAuthenticationTime(authenticationDate);
+            sessionId.setAuthenticationTime(authenticationDate);
         }
 
         if (state != null) {
-            sessionState.setState(state);
+            sessionId.setState(state);
         }
 
-        sessionState.setSessionAttributes(sessionIdAttributes);
-    	sessionState.setLastUsedAt(new Date());
+        sessionId.setSessionAttributes(sessionIdAttributes);
+        sessionId.setLastUsedAt(new Date());
 
-        if (sessionState.getIsJwt()) {
-            sessionState.setJwt(generateJwt(sessionState, userDn).asString());
+        if (sessionId.getIsJwt()) {
+            sessionId.setJwt(generateJwt(sessionId, userDn).asString());
         }
 
         boolean persisted = false;
         if (persist) {
-            persisted = persistSessionState(sessionState);
+            persisted = persistSessionId(sessionId);
         }
 
-        auditLogging(sessionState);
+        auditLogging(sessionId);
 
-        log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionState.getId(), sessionState.getState(), sessionState.getIsJwt(), persisted);
-        return sessionState;
+        log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), sessionId.getIsJwt(), persisted);
+        return sessionId;
     }
 
-    private Jwt generateJwt(SessionState sessionState, String audience) {
+    private Jwt generateJwt(SessionId sessionId, String audience) {
         try {
             JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, SignatureAlgorithm.RS512, audience);
             Jwt jwt = jwtSigner.newJwt();
 
             // claims
-            jwt.getClaims().setClaim("id", sessionState.getId());
-            jwt.getClaims().setClaim("authentication_time", sessionState.getAuthenticationTime());
-            jwt.getClaims().setClaim("user_dn", sessionState.getUserDn());
-            jwt.getClaims().setClaim("state", sessionState.getState() != null ?
-                    sessionState.getState().getValue() : "");
+            jwt.getClaims().setClaim("id", sessionId.getId());
+            jwt.getClaims().setClaim("authentication_time", sessionId.getAuthenticationTime());
+            jwt.getClaims().setClaim("user_dn", sessionId.getUserDn());
+            jwt.getClaims().setClaim("state", sessionId.getState() != null ?
+                    sessionId.getState().getValue() : "");
 
-            jwt.getClaims().setClaim("session_attributes", JwtSubClaimObject.fromMap(sessionState.getSessionAttributes()));
+            jwt.getClaims().setClaim("session_attributes", JwtSubClaimObject.fromMap(sessionId.getSessionAttributes()));
 
-            jwt.getClaims().setClaim("last_used_at", sessionState.getLastUsedAt());
-            jwt.getClaims().setClaim("permission_granted", sessionState.getPermissionGranted());
-            jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionState.getPermissionGrantedMap().getPermissionGranted()));
-            jwt.getClaims().setClaim("involved_clients_map", JwtSubClaimObject.fromBooleanMap(sessionState.getInvolvedClients().getPermissionGranted()));
+            jwt.getClaims().setClaim("last_used_at", sessionId.getLastUsedAt());
+            jwt.getClaims().setClaim("permission_granted", sessionId.getPermissionGranted());
+            jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionId.getPermissionGrantedMap().getPermissionGranted()));
+            jwt.getClaims().setClaim("involved_clients_map", JwtSubClaimObject.fromBooleanMap(sessionId.getInvolvedClients().getPermissionGranted()));
 
             // sign
             return jwtSigner.sign();
@@ -407,33 +424,33 @@ public class SessionStateService {
         }
     }
 
-    public SessionState setSessionStateAuthenticated(SessionState sessionState, String p_userDn) {
-        sessionState.setUserDn(p_userDn);
-        sessionState.setAuthenticationTime(new Date());
-        sessionState.setState(SessionIdState.AUTHENTICATED);
+    public SessionId setSessionIdStateAuthenticated(SessionId sessionId, String p_userDn) {
+        sessionId.setUserDn(p_userDn);
+        sessionId.setAuthenticationTime(new Date());
+        sessionId.setState(SessionIdState.AUTHENTICATED);
 
-        boolean persisted = updateSessionState(sessionState, true, true, true);
+        boolean persisted = updateSessionId(sessionId, true, true, true);
 
-        auditLogging(sessionState);
-        log.trace("Authenticated session, id = '{}', state = '{}', persisted = '{}'", sessionState.getId(), sessionState.getState(), persisted);
-        return sessionState;
+        auditLogging(sessionId);
+        log.trace("Authenticated session, id = '{}', state = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), persisted);
+        return sessionId;
     }
 
-    public boolean persistSessionState(final SessionState sessionState) {
-        return persistSessionState(sessionState, false);
+    public boolean persistSessionId(final SessionId sessionId) {
+        return persistSessionId(sessionId, false);
     }
 
-    public boolean persistSessionState(final SessionState sessionState, boolean forcePersistence) {
-        List<Prompt> prompts = getPromptsFromSessionState(sessionState);
+    public boolean persistSessionId(final SessionId sessionId, boolean forcePersistence) {
+        List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
         try {
             final int unusedLifetime = appConfiguration.getSessionIdUnusedLifetime();
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forcePersistence) {
-                sessionState.setLastUsedAt(new Date());
+                sessionId.setLastUsedAt(new Date());
 
-                sessionState.setPersisted(true);
-                log.trace("sessionStateAttributes: " + sessionState.getPermissionGrantedMap());
-                putInCache(sessionState);
+                sessionId.setPersisted(true);
+                log.trace("sessionIdAttributes: " + sessionId.getPermissionGrantedMap());
+                putInCache(sessionId);
                 return true;
             }
         } catch (Exception e) {
@@ -443,61 +460,61 @@ public class SessionStateService {
         return false;
     }
 
-    public boolean updateSessionState(final SessionState sessionState) {
-        return updateSessionState(sessionState, true);
+    public boolean updateSessionId(final SessionId sessionId) {
+        return updateSessionId(sessionId, true);
     }
 
-    public boolean updateSessionState(final SessionState sessionState, boolean updateLastUsedAt) {
-        return updateSessionState(sessionState, updateLastUsedAt, false, true);
+    public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt) {
+        return updateSessionId(sessionId, updateLastUsedAt, false, true);
     }
 
-    public boolean updateSessionState(final SessionState sessionState, boolean updateLastUsedAt, boolean forceUpdate, boolean modified) {
-        List<Prompt> prompts = getPromptsFromSessionState(sessionState);
+    public boolean updateSessionId(final SessionId sessionId, boolean updateLastUsedAt, boolean forceUpdate, boolean modified) {
+        List<Prompt> prompts = getPromptsFromSessionId(sessionId);
 
         try {
             final int unusedLifetime = appConfiguration.getSessionIdUnusedLifetime();
             if ((unusedLifetime > 0 && isPersisted(prompts)) || forceUpdate) {
-            	boolean update = modified;
+                boolean update = modified;
 
-            	if (updateLastUsedAt) {
-            		Date lastUsedAt = new Date();
-            		if (sessionState.getLastUsedAt() != null) {
-                        long diff = lastUsedAt.getTime() - sessionState.getLastUsedAt().getTime();
+                if (updateLastUsedAt) {
+                    Date lastUsedAt = new Date();
+                    if (sessionId.getLastUsedAt() != null) {
+                        long diff = lastUsedAt.getTime() - sessionId.getLastUsedAt().getTime();
                         if (diff > 500) { // update only if diff is more than 500ms
                             update = true;
-                            sessionState.setLastUsedAt(lastUsedAt);
+                            sessionId.setLastUsedAt(lastUsedAt);
                         }
-            		} else {
+                    } else {
                         update = true;
-                        sessionState.setLastUsedAt(lastUsedAt);
+                        sessionId.setLastUsedAt(lastUsedAt);
                     }
                 }
 
-            	if (!sessionState.isPersisted()) {
-            		update = true;
-            		sessionState.setPersisted(true);
-            	}
+                if (!sessionId.isPersisted()) {
+                    update = true;
+                    sessionId.setPersisted(true);
+                }
 
-                if (sessionState.getAuthenticationTime() != null) {
-                    final long currentLifetimeInSeconds = (System.currentTimeMillis() - sessionState.getAuthenticationTime().getTime()) / 1000;
-                    if (appConfiguration.getSessionStateLifetime() != null) {
-                        if (currentLifetimeInSeconds > appConfiguration.getSessionStateLifetime()) {
-                            log.debug("Session state expired: {}, remove it.", sessionState.getId());
-                            remove(sessionState); // expired
+                if (sessionId.getAuthenticationTime() != null) {
+                    final long currentLifetimeInSeconds = (System.currentTimeMillis() - sessionId.getAuthenticationTime().getTime()) / 1000;
+                    if (appConfiguration.getSessionIdLifetime() != null) {
+                        if (currentLifetimeInSeconds > appConfiguration.getSessionIdLifetime()) {
+                            log.debug("Session id expired: {}, remove it.", sessionId.getId());
+                            remove(sessionId); // expired
                             update = false;
                         }
                     } else {
-                        log.error("Session state lifetime configuration is null.");
+                        log.error("Session id lifetime configuration is null.");
                     }
                 }
 
-            	if (update) {
-            		try {
-						mergeWithRetry(sessionState, 3);
-					} catch (EmptyEntryPersistenceException ex) {
-						log.warn("Failed to update session entry '{}': '{}'", sessionState.getId(), ex.getMessage());
-					}
-            	}
+                if (update) {
+                    try {
+                        mergeWithRetry(sessionId, 3);
+                    } catch (EmptyEntryPersistenceException ex) {
+                        log.warn("Failed to update session entry '{}': '{}'", sessionId.getId(), ex.getMessage());
+                    }
+                }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -507,46 +524,46 @@ public class SessionStateService {
         return true;
     }
 
-    private void putInCache(SessionState sessionState) {
-        int expirationInSeconds = sessionState.getState() == SessionIdState.UNAUTHENTICATED ?
+    private void putInCache(SessionId sessionId) {
+        int expirationInSeconds = sessionId.getState() == SessionIdState.UNAUTHENTICATED ?
                 appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() :
-                appConfiguration.getSessionStateLifetime();
-        cacheService.put(Integer.toString(expirationInSeconds), sessionState.getId(), sessionState); // first parameter is expiration instead of region for memcached
+                appConfiguration.getSessionIdLifetime();
+        cacheService.put(Integer.toString(expirationInSeconds), sessionId.getId(), sessionId); // first parameter is expiration instead of region for memcached
     }
 
-    private SessionState getFromCache(String sessionId) {
-        return (SessionState) cacheService.get(null, sessionId);
+    private SessionId getFromCache(String sessionId) {
+        return (SessionId) cacheService.get(null, sessionId);
     }
 
-	private SessionState mergeWithRetry(final SessionState sessionState, int maxAttempts) {
-		EntryPersistenceException lastException = null;
-		for (int i = 1; i <= maxAttempts; i++) {
-			try {
-                putInCache(sessionState);
-				return sessionState;
-			} catch (EntryPersistenceException ex) {
-				lastException = ex;
-				if (ex.getCause() instanceof LDAPException) {
-					LDAPException parentEx = ((LDAPException) ex.getCause());
-					log.debug("LDAP exception resultCode: '{}'", parentEx.getResultCode().intValue());
-					if ((parentEx.getResultCode().intValue() == ResultCode.NO_SUCH_ATTRIBUTE_INT_VALUE) ||
-						(parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE)) {
-						log.warn("Session entry update attempt '{}' was unsuccessfull", i);
-						continue;
-					}
-				}
+    private SessionId mergeWithRetry(final SessionId sessionId, int maxAttempts) {
+        EntryPersistenceException lastException = null;
+        for (int i = 1; i <= maxAttempts; i++) {
+            try {
+                putInCache(sessionId);
+                return sessionId;
+            } catch (EntryPersistenceException ex) {
+                lastException = ex;
+                if (ex.getCause() instanceof LDAPException) {
+                    LDAPException parentEx = ((LDAPException) ex.getCause());
+                    log.debug("LDAP exception resultCode: '{}'", parentEx.getResultCode().intValue());
+                    if ((parentEx.getResultCode().intValue() == ResultCode.NO_SUCH_ATTRIBUTE_INT_VALUE) ||
+                            (parentEx.getResultCode().intValue() == ResultCode.ATTRIBUTE_OR_VALUE_EXISTS_INT_VALUE)) {
+                        log.warn("Session entry update attempt '{}' was unsuccessfull", i);
+                        continue;
+                    }
+                }
 
-				throw ex;
-			}
-		}
+                throw ex;
+            }
+        }
 
         log.error("Session entry update attempt was unsuccessfull after '{}' attempts", maxAttempts);
-		throw lastException;
-	}
+        throw lastException;
+    }
 
-	public void updateSessionStateIfNeeded(SessionState sessionState, boolean modified) {
-		updateSessionState(sessionState, true, false, modified);
-	}
+    public void updateSessionIdIfNeeded(SessionId sessionId, boolean modified) {
+        updateSessionId(sessionId, true, false, modified);
+    }
 
     private boolean isPersisted(List<Prompt> prompts) {
         if (prompts != null && prompts.contains(Prompt.NONE)) {
@@ -565,18 +582,18 @@ public class SessionStateService {
         return sb.toString();
     }
 
-    public SessionState getSessionById(String sessionId) {
+    public SessionId getSessionById(String sessionId) {
         return getFromCache(sessionId);
     }
 
-    public SessionState getSessionState(String sessionState) {
-        if (StringHelper.isEmpty(sessionState)) {
+    public SessionId getSessionId(String sessionId) {
+        if (StringHelper.isEmpty(sessionId)) {
             return null;
         }
 
         try {
-            final SessionState entity = getSessionById(sessionState);
-            log.trace("Try to get session by id: {} ...", sessionState);
+            final SessionId entity = getSessionById(sessionId);
+            log.trace("Try to get session by id: {} ...", sessionId);
             if (entity != null) {
                 log.trace("Session dn: {}", entity.getDn());
 
@@ -588,7 +605,7 @@ public class SessionStateService {
             log.trace(ex.getMessage(), ex);
         }
 
-        log.trace("Failed to get session by id: {}", sessionState);
+        log.trace("Failed to get session by id: {}", sessionId);
         return null;
     }
 
@@ -596,9 +613,9 @@ public class SessionStateService {
         return staticConfiguration.getBaseDn().getSessionId();
     }
 
-    public boolean remove(SessionState sessionState) {
+    public boolean remove(SessionId sessionId) {
         try {
-            cacheService.remove(null, sessionState.getId());
+            cacheService.remove(null, sessionId.getId());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
 
@@ -607,8 +624,8 @@ public class SessionStateService {
         return true;
     }
 
-    public void remove(List<SessionState> list) {
-        for (SessionState id : list) {
+    public void remove(List<SessionId> list) {
+        for (SessionId id : list) {
             try {
                 remove(id);
             } catch (Exception e) {
@@ -617,39 +634,39 @@ public class SessionStateService {
         }
     }
 
-    public boolean isSessionValid(SessionState sessionState) {
-        if (sessionState == null) {
+    public boolean isSessionValid(SessionId sessionId) {
+        if (sessionId == null) {
             return false;
         }
 
         final long sessionInterval = TimeUnit.SECONDS.toMillis(appConfiguration.getSessionIdUnusedLifetime());
         final long sessionUnauthenticatedInterval = TimeUnit.SECONDS.toMillis(appConfiguration.getSessionIdUnauthenticatedUnusedLifetime());
 
-        final long timeSinceLastAccess = System.currentTimeMillis() - sessionState.getLastUsedAt().getTime();
+        final long timeSinceLastAccess = System.currentTimeMillis() - sessionId.getLastUsedAt().getTime();
         if (timeSinceLastAccess > sessionInterval && appConfiguration.getSessionIdUnusedLifetime() != -1) {
             return false;
         }
-        if (sessionState.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() != -1) {
+        if (sessionId.getState() == SessionIdState.UNAUTHENTICATED && timeSinceLastAccess > sessionUnauthenticatedInterval && appConfiguration.getSessionIdUnauthenticatedUnusedLifetime() != -1) {
             return false;
         }
 
         return true;
     }
 
-    private List<Prompt> getPromptsFromSessionState(final SessionState sessionState) {
-        String promptParam = sessionState.getSessionAttributes().get("prompt");
+    private List<Prompt> getPromptsFromSessionId(final SessionId sessionId) {
+        String promptParam = sessionId.getSessionAttributes().get("prompt");
         return Prompt.fromString(promptParam, " ");
     }
 
 
-    public boolean isSessionStateAuthenticated() {
-        SessionState sessionState = getSessionState();
+    public boolean isSessionIdAuthenticated() {
+        SessionId sessionId = getSessionId();
 
-        if (sessionState == null) {
+        if (sessionId == null) {
             return false;
         }
 
-        SessionIdState sessionIdState = sessionState.getState();
+        SessionIdState sessionIdState = sessionId.getState();
 
         if (SessionIdState.AUTHENTICATED.equals(sessionIdState)) {
             return true;
@@ -658,15 +675,15 @@ public class SessionStateService {
         return false;
     }
 
-    public boolean isNotSessionStateAuthenticated() {
-        return !isSessionStateAuthenticated();
+    public boolean isNotSessionIdAuthenticated() {
+        return !isSessionIdAuthenticated();
     }
 
-    private void auditLogging(SessionState sessionState) {
+    private void auditLogging(SessionId sessionId) {
         HttpServletRequest httpServletRequest = ServerUtil.getRequestOrNull();
         if (httpServletRequest != null) {
             Action action;
-            switch (sessionState.getState()) {
+            switch (sessionId.getState()) {
                 case AUTHENTICATED:
                     action = Action.SESSION_AUTHENTICATED;
                     break;

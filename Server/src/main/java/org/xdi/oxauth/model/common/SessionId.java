@@ -6,31 +6,25 @@
 
 package org.xdi.oxauth.model.common;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
+import com.google.common.collect.Maps;
+import org.gluu.site.ldap.persistence.annotation.*;
 
 import javax.annotation.Nonnull;
 import javax.inject.Named;
 import javax.persistence.Transient;
-
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-
-import com.google.common.collect.Maps;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version August 9, 2017
  */
 @Named("sessionUser")
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthSessionId"})
-public class SessionState implements Serializable {
+public class SessionId implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
 
@@ -53,6 +47,9 @@ public class SessionState implements Serializable {
     private SessionIdState state;
 
     @LdapAttribute(name = "oxAuthSessionState")
+    private String sessionState;
+
+    @LdapAttribute(name = "oxAuthPermissionGranted")
     private Boolean permissionGranted;
 
     @LdapAttribute(name = "oxAsJwt")
@@ -76,7 +73,7 @@ public class SessionState implements Serializable {
     @Transient
     private transient boolean persisted;
 
-    public SessionState() {
+    public SessionId() {
     }
 
     public String getDn() {
@@ -120,6 +117,14 @@ public class SessionState implements Serializable {
 
     public void setState(SessionIdState state) {
         this.state = state;
+    }
+
+    public String getSessionState() {
+        return sessionState;
+    }
+
+    public void setSessionState(String sessionState) {
+        this.sessionState = sessionState;
     }
 
     public String getId() {
@@ -206,7 +211,7 @@ public class SessionState implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        SessionState id1 = (SessionState) o;
+        SessionId id1 = (SessionId) o;
 
         return !(id != null ? !id.equals(id1.id) : id1.id != null);
     }
@@ -219,19 +224,22 @@ public class SessionState implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("SessionState");
-        sb.append(", dn='").append(dn).append('\'');
+        sb.append("SessionState {");
+        sb.append("dn='").append(dn).append('\'');
         sb.append(", id='").append(id).append('\'');
-        sb.append(", isJwt=").append(isJwt);
         sb.append(", lastUsedAt=").append(lastUsedAt);
         sb.append(", userDn='").append(userDn).append('\'');
         sb.append(", authenticationTime=").append(authenticationTime);
         sb.append(", state=").append(state);
+        sb.append(", sessionState='").append(sessionState).append('\'');
         sb.append(", permissionGranted=").append(permissionGranted);
+        sb.append(", isJwt=").append(isJwt);
+        sb.append(", jwt=").append(jwt);
         sb.append(", permissionGrantedMap=").append(permissionGrantedMap);
+        sb.append(", involvedClients=").append(involvedClients);
         sb.append(", sessionAttributes=").append(sessionAttributes);
         sb.append(", persisted=").append(persisted);
-        sb.append('}');
+        sb.append("}");
         return sb.toString();
     }
 }

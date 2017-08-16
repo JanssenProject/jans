@@ -26,33 +26,33 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version August 9, 2017
  */
-public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
+public class AuthorizeSessionIdRestWebServiceHttpTest extends BaseTest {
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestSessionStateAuthorizationCode1(
+    public void requestSessionIdAuthorizationCode1(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("requestSessionStateAuthorizationCode1");
+        showTitle("requestSessionIdAuthorizationCode1");
 
-        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationEndpoint,
+        requestSessionIdAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationEndpoint,
                 authorizationEndpoint, sectorIdentifierUri);
     }
 
     @Parameters({"userId", "userSecret", "redirectUris", "redirectUri", "sectorIdentifierUri"})
     @Test
-    public void requestSessionStateAuthorizationCode2(
+    public void requestSessionIdAuthorizationCode2(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("requestSessionStateAuthorizationCode2");
+        showTitle("requestSessionIdAuthorizationCode2");
 
-        requestSessionStateAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationPageEndpoint,
+        requestSessionIdAuthorizationCode(userId, userSecret, redirectUris, redirectUri, authorizationPageEndpoint,
                 authorizationEndpoint, sectorIdentifierUri);
     }
 
-    private void requestSessionStateAuthorizationCode(
+    private void requestSessionIdAuthorizationCode(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String authorizationEndpoint1, final String authorizationEndpoint2, final String sectorIdentifierUri) {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -98,20 +98,20 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization but not enter credentials.
-        // Store session_state parameter value
+        // Store session_id parameter value
         List<String> scopes1 = Arrays.asList("openid", "profile", "address", "email");
         String state1 = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(responseTypes, clientId, scopes1, redirectUri, null);
         authorizationRequest1.setState(state1);
-        String sessionState = waitForResourceOwnerAndGrantLoginForm(authorizationEndpoint1, authorizationRequest1, false);
-        assertNotNull(sessionState, "The sessionState is null");
+        String sessionId = waitForResourceOwnerAndGrantLoginForm(authorizationEndpoint1, authorizationRequest1, false);
+        assertNotNull(sessionId, "The session_id is null");
 
         // 4. Request authorization and receive the authorization code.
-        // Application should returns new session_state
+        // Application should returns new session_id
         List<String> scopes2 = Arrays.asList("openid", "profile", "address", "email");
         String state2 = UUID.randomUUID().toString();
 
@@ -125,7 +125,7 @@ public class AuthorizeSessionStateRestWebServiceHttpTest extends BaseTest {
         assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
         assertNotNull(authorizationResponse.getState(), "The state is null");
         assertNotNull(authorizationResponse.getScope(), "The scope is null");
-        assertNotEquals(sessionState, authorizationResponse.getSessionState(), "The session_state is the same for 2 different authorization requests");
+        assertNotEquals(sessionId, authorizationResponse.getSessionId(), "The session_id is the same for 2 different authorization requests");
     }
 
 }

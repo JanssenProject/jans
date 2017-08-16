@@ -4,19 +4,19 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
-from org.xdi.util import StringHelper, ArrayHelper
-from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
-from org.xdi.oxauth.model.common import User
-from org.xdi.oxauth.client import TokenClient, TokenRequest, UserInfoClient
-from org.xdi.oxauth.model.common import GrantType, AuthenticationMethod
-from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
-
 import java
 import json
+from java.util import Arrays, HashMap, IdentityHashMap
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.client import TokenClient, TokenRequest, UserInfoClient
+from org.xdi.oxauth.model.common import GrantType, AuthenticationMethod
+from org.xdi.oxauth.model.common import User
+from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.util import StringHelper, ArrayHelper
+
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -275,7 +275,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Google+ Authenticate for step 2"
             
-            sessionAttributes = identity.getSessionState().getSessionAttributes()
+            sessionAttributes = identity.getSessionId().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("gplus_user_uid"):
                 print "Google+ Authenticate for step 2. gplus_user_uid is empty"
                 return False
@@ -408,7 +408,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (clientId == None):
                 identity = CdiUtil.bean(Identity)
                 if (identity.isSetWorkingParameter("sessionAttributes")):
-                    clientId = identity.getSessionState().getSessionAttributes().get("client_id")
+                    clientId = identity.getSessionId().getSessionAttributes().get("client_id")
 
             if (clientId == None):
                 print "Google+ GetClientConfiguration. client_id is empty"
