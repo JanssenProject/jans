@@ -209,7 +209,7 @@
     "sessionIdUnauthenticatedUnusedLifetime":120,
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
-    "sessionStateHttpOnly": false,
+    "sessionIdLifetime": 86400,
     "configurationUpdateInterval":3600,
     "cssLocation":"",
     "jsLocation":"",
@@ -248,6 +248,5 @@
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
     "httpLoggingExludePaths": [],
-    "sessionStateLifetime": 86400,
     "externalLoggerConfiguration": ""
 }
