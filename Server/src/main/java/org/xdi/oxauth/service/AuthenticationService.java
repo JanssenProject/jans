@@ -50,7 +50,7 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version August 16, 2017
  */
 @Stateless
 @Named
@@ -259,48 +259,52 @@ public class AuthenticationService {
     public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{}' and key value: '{}', credentials: '{}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
-        List<?> baseDNs;
-        if (ldapAuthConfig == null) {
-            baseDNs = Arrays.asList(userService.getDnForUser(null));
-        } else {
-            baseDNs = ldapAuthConfig.getBaseDNs();
-        }
+        try {
+            List<?> baseDNs;
+            if (ldapAuthConfig == null) {
+                baseDNs = Arrays.asList(userService.getDnForUser(null));
+            } else {
+                baseDNs = ldapAuthConfig.getBaseDNs();
+            }
 
-        if (baseDNs != null && !baseDNs.isEmpty()) {
-            for (Object baseDnProperty : baseDNs) {
-                String baseDn;
-                if (baseDnProperty instanceof SimpleProperty) {
-                    baseDn = ((SimpleProperty) baseDnProperty).getValue();
-                } else {
-                    baseDn = baseDnProperty.toString();
-                }
+            if (baseDNs != null && !baseDNs.isEmpty()) {
+                for (Object baseDnProperty : baseDNs) {
+                    String baseDn;
+                    if (baseDnProperty instanceof SimpleProperty) {
+                        baseDn = ((SimpleProperty) baseDnProperty).getValue();
+                    } else {
+                        baseDn = baseDnProperty.toString();
+                    }
 
-                User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
-                if (user != null) {
-                    String userDn = user.getDn();
-                    log.debug("Attempting to authenticate userDN: {}", userDn);
-                    if (ldapAuthEntryManager.authenticate(userDn, password)) {
-                        log.debug("User authenticated: {}", userDn);
+                    User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
+                    if (user != null) {
+                        String userDn = user.getDn();
+                        log.debug("Attempting to authenticate userDN: {}", userDn);
+                        if (ldapAuthEntryManager.authenticate(userDn, password)) {
+                            log.debug("User authenticated: {}", userDn);
 
-                        log.debug("Attempting to find userDN by local primary key: {}", localPrimaryKey);
-                        User localUser = userService.getUserByAttribute(localPrimaryKey, keyValue);
-                        if (localUser != null) {
-                            if (!checkUserStatus(localUser)) {
-                                return false;
+                            log.debug("Attempting to find userDN by local primary key: {}", localPrimaryKey);
+                            User localUser = userService.getUserByAttribute(localPrimaryKey, keyValue);
+                            if (localUser != null) {
+                                if (!checkUserStatus(localUser)) {
+                                    return false;
+                                }
+
+                                configureAuthenticatedUser(localUser);
+                                updateLastLogonUserTime(localUser);
+
+                                log.trace("authenticate_external: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+
+                                return true;
                             }
-
-                            configureAuthenticatedUser(localUser);
-                            updateLastLogonUserTime(localUser);
-
-                            log.trace("authenticate_external: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
-
-                            return true;
                         }
                     }
                 }
+            } else {
+                log.error("There are no baseDns specified in authentication configuration.");
             }
-        } else {
-            log.error("There are no baseDns specified in authentication configuration.");
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
 
         return false;
@@ -441,11 +445,11 @@ public class AuthenticationService {
         identity.setSessionId(sessionId);
     }
 
-	public void quietLogin(String userName) {
+    public void quietLogin(String userName) {
         Principal principal = new SimplePrincipal(userName);
         identity.acceptExternallyAuthenticatedPrincipal(principal);
         identity.quietLogin();
-	}
+    }
 
     private void configureAuthenticatedUser(User user) {
         identity.setUser(user);
