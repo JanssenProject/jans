@@ -47,12 +47,8 @@ public class Identity extends org.xdi.model.security.Identity {
         this.sessionClient = sessionClient;
     }
 
-    public SessionClient getSetSessionClient() {
-        return sessionClient;
-    }
-
-    public void setSetSessionClient(SessionClient setSessionClient) {
-        this.sessionClient = setSessionClient;
-    }
+	public SessionClient getSessionClient() {
+		return sessionClient;
+	}
 
 }

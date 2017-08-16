@@ -18,6 +18,7 @@ import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.security.Credentials;
+import org.xdi.model.security.SimplePrincipal;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
@@ -38,6 +39,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -441,7 +443,14 @@ public class AuthenticationService {
 
     private void configureEventUserContext(SessionId sessionId) {
         identity.setSessionId(sessionId);
+        identity.setSessionId(sessionId);
     }
+
+	public void quietLogin(String userName) {
+        Principal principal = new SimplePrincipal(userName);
+        identity.acceptExternallyAuthenticatedPrincipal(principal);
+        identity.quietLogin();
+	}
 
     private void configureAuthenticatedUser(User user) {
         identity.setUser(user);
@@ -467,7 +476,7 @@ public class AuthenticationService {
         return null;
     }
 
-    private String getAuthenticatedUserId() {
+    public String getAuthenticatedUserId() {
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser != null) {
             return authenticatedUser.getUserId();

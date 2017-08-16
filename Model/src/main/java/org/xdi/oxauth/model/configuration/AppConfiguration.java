@@ -162,6 +162,11 @@ public class AppConfiguration implements Configuration {
      */
     private Set<String> httpLoggingExludePaths;
 
+    /**
+     * Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+     */
+    private String externalLoggerConfiguration;
+
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
     }
@@ -1198,5 +1203,13 @@ public class AppConfiguration implements Configuration {
 
     public void setLogClientNameOnClientAuthentication(Boolean logClientNameOnClientAuthentication) {
         this.logClientNameOnClientAuthentication = logClientNameOnClientAuthentication;
+    }
+
+    public String getExternalLoggerConfiguration() {
+        return externalLoggerConfiguration;
+    }
+
+    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+        this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
 }
