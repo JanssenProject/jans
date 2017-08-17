@@ -12,8 +12,10 @@ import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -63,6 +65,12 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         }
         if (!Strings.isNullOrEmpty(params.getHostedDomain())) {
             authorizationEndpoint += "&hd=" + params.getHostedDomain();
+        }
+
+        if (params.getCustomParameters() != null && !params.getCustomParameters().isEmpty()) {
+            for (Map.Entry<String, String> entry : params.getCustomParameters().entrySet()) {
+                authorizationEndpoint += "&" + entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
+            }
         }
 
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
