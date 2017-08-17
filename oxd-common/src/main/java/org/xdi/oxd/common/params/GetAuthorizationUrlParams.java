@@ -4,6 +4,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,8 +26,18 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
     private String hostedDomain; // https://developers.google.com/identity/protocols/OpenIDConnect#hd-param
     @JsonProperty(value = "protection_access_token")
     private String protectionAccessToken;
+    @JsonProperty(value = "custom_parameters")
+    private Map<String, String> customParameters;
 
     public GetAuthorizationUrlParams() {
+    }
+
+    public Map<String, String> getCustomParameters() {
+        return customParameters;
+    }
+
+    public void setCustomParameters(Map<String, String> customParameters) {
+        this.customParameters = customParameters;
     }
 
     public String getProtectionAccessToken() {
@@ -77,7 +88,6 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
         this.acrValues = acrValues;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -85,8 +95,7 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
 
         GetAuthorizationUrlParams that = (GetAuthorizationUrlParams) o;
 
-        if (acrValues != null ? !acrValues.equals(that.acrValues) : that.acrValues != null) return false;
-        return !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
+        return !(acrValues != null ? !acrValues.equals(that.acrValues) : that.acrValues != null) && !(oxdId != null ? !oxdId.equals(that.oxdId) : that.oxdId != null);
 
     }
 
@@ -99,15 +108,14 @@ public class GetAuthorizationUrlParams implements HasProtectionAccessTokenParams
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("GetAuthorizationUrlParams");
-        sb.append("{acrValues=").append(acrValues);
-        sb.append(", oxdId='").append(oxdId).append('\'');
-        sb.append(", prompt='").append(prompt).append('\'');
-        sb.append(", scope='").append(scope).append('\'');
-        sb.append(", hostedDomain='").append(hostedDomain).append('\'');
-        sb.append(", protectionAccessToken='").append(protectionAccessToken).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "GetAuthorizationUrlParams{" +
+                "oxdId='" + oxdId + '\'' +
+                ", acrValues=" + acrValues +
+                ", prompt='" + prompt + '\'' +
+                ", scope=" + scope +
+                ", hostedDomain='" + hostedDomain + '\'' +
+                ", protectionAccessToken='" + protectionAccessToken + '\'' +
+                ", customParameters=" + customParameters +
+                '}';
     }
 }
