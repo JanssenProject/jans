@@ -4,29 +4,23 @@
 # Author: Arvind Tomar
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.contexts import Context, Contexts
-from org.jboss.seam.faces import FacesMessages
-from javax.faces.context import FacesContext
-from org.jboss.seam.international import StatusMessage
+from org.xdi.service.cdi.util import CdiUtil
+from org.gluu.jsf2.message import FacesMessages
+from javax.faces.application import FacesMessage
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from org.xdi.oxauth.client import TokenClient, TokenRequest, UserInfoClient
 from org.xdi.oxauth.model.common import GrantType, AuthenticationMethod
 from org.xdi.oxauth.model.jwt import Jwt, JwtClaimName
-from org.jboss.seam.security import Identity
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService
 from org.xdi.oxauth.model.common import User
 from org.xdi.util import StringHelper
 from org.xdi.oxauth.util import ServerUtil
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 import java
-
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -92,6 +86,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print("Passport: Exception inside getUserValueFromAuth " + str(err))
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         try:
             UserId = self.getUserValueFromAuth("userid", requestParameters)
         except Exception, err:
@@ -103,14 +99,16 @@ class PersonAuthentication(PersonAuthenticationType):
         # Use basic method to log in
         if (useBasicAuth):
             print "Passport: Basic Authentication"
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
+
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
-            logged_in = False
 
+            logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                userService = CdiUtil.bean(UserService)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
@@ -118,8 +116,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         else:
             try:
-                userService = Component.getInstance(UserService)
-                authenticationService = Component.getInstance(AuthenticationService)
+                userService = CdiUtil.bean(UserService)
+                authenticationService = CdiUtil.bean(AuthenticationService)
                 foundUser = userService.getUserByAttribute("oxExternalUid", self.getUserValueFromAuth("provider",
                                                                                                       requestParameters) + ":" + self.getUserValueFromAuth(
                     self.getUidRemoteAttr(), requestParameters))
@@ -133,10 +131,10 @@ class PersonAuthentication(PersonAuthenticationType):
                         print("Passport: Error in getting user email: " + str(err))
 
                     if (StringHelper.isEmptyString(UserEmail)):
-                        facesMessages = FacesMessages.instance()
-                        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(True)
+                        facesMessages = CdiUtil.bean(FacesMessages)
+                        facesMessages.setKeepMessages()
                         facesMessages.clear()
-                        facesMessages.add(StatusMessage.Severity.ERROR, "Please provide your email.")
+                        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Please provide your email.")
                         print "Passport: Email was not received so sent error"
 
                         return False
@@ -191,8 +189,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/auth/passport/genericlogin.xhtml"
-        return "/auth/passport/genericpostlogin.xhtml"
+            return "/auth/passport/passportlogin.xhtml"
+        return "/auth/passport/passportpostlogin.xhtml"
 
     def logout(self, configurationAttributes, requestParameters):
         return True

@@ -9,12 +9,6 @@
 
         <navigation-case>
             <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
-            <from-outcome>success</from-outcome>
-            <to-view-id>/auth/u2f/login.xhtml</to-view-id>
-            <redirect/>
-        </navigation-case>
-        <navigation-case>
-            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
             <from-outcome>no_permissions</from-outcome>
             <to-view-id>/error.xhtml</to-view-id>
             <redirect/>

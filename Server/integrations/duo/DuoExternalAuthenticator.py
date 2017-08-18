@@ -4,20 +4,16 @@
 # Author: Yuriy Movchan
 #
 
-import duo_web
-from org.jboss.seam import Component
-from org.jboss.seam.contexts import Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.service import MailService
 from org.xdi.util import ArrayHelper
 from org.xdi.util import StringHelper
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import duo_web
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -87,7 +83,11 @@ class PersonAuthentication(PersonAuthenticationType):
     def authenticate(self, configurationAttributes, requestParameters, step):
         duo_host = configurationAttributes.get("duo_host").getValue2()
 
-        credentials = Identity.instance().getCredentials()
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -96,13 +96,12 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                userService = CdiUtil.bean(UserService)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
 
-            authenticationService = Component.getInstance(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if (self.use_duo_group):
                 print "Duo. Authenticate for step 1. Checking if user belong to Duo group"
@@ -114,8 +113,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     self.processAuditGroup(user)
                     duo_count_login_steps = 1
 
-                context = Contexts.getEventContext()
-                context.set("duo_count_login_steps", duo_count_login_steps)
+                identity.setWorkingParameter("duo_count_login_steps", duo_count_login_steps)
 
             return True
         elif (step == 2):
@@ -137,7 +135,6 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not StringHelper.equals(user_name, authenticated_username)):
                 return False
 
-            authenticationService = Component.getInstance(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             self.processAuditGroup(user)
 
@@ -146,12 +143,10 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
+        identity = CdiUtil.bean(Identity)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         duo_host = configurationAttributes.get("duo_host").getValue2()
-
-        credentials = Identity.instance().getCredentials()
-        user_name = credentials.getUsername()
 
         if (step == 1):
             print "Duo. Prepare for step 1"
@@ -160,11 +155,17 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Duo. Prepare for step 2"
 
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
+                print "Duo. Prepare for step 2. Failed to determine user name"
+                return False
+            user_name = user.getUserId()
+
             duo_sig_request = duo_web.sign_request(self.ikey, self.skey, self.akey, user_name)
             print "Duo. Prepare for step 2. duo_sig_request: " + duo_sig_request
             
-            context.set("duo_host", duo_host)
-            context.set("duo_sig_request", duo_sig_request)
+            identity.setWorkingParameter("duo_host", duo_host)
+            identity.setWorkingParameter("duo_sig_request", duo_sig_request)
 
             return True
         else:
@@ -174,9 +175,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if (context.isSet("duo_count_login_steps")):
-            return context.get("duo_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if (identity.isSetWorkingParameter("duo_count_login_steps")):
+            return identity.getWorkingParameter("duo_count_login_steps")
 
         return 2
 
@@ -208,7 +209,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 
                 # Send e-mail to administrator
                 user_id = user.getUserId()
-                mailService = Component.getInstance(MailService)
+                mailService = CdiUtil.bean(MailService)
                 subject = "User log in: " + user_id
                 body = "User log in: " + user_id
                 mailService.sendMail(self.audit_email, subject, body)

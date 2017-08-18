@@ -31,7 +31,7 @@ import org.xdi.util.StringHelper;
 import org.xdi.util.properties.FileConfiguration;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Asynchronous;
+import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -41,6 +41,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -456,6 +458,7 @@ public class ConfigurationFactory {
 	private String loadLdapConfiguration(String ldapFileName) {
 		try {
 			ldapConfiguration = new FileConfiguration(ldapFileName);
+			replaceWithSystemValues();
 
 			File ldapFile = new File(ldapFileName);
 			if (ldapFile.exists()) {
@@ -469,6 +472,16 @@ public class ConfigurationFactory {
 		}
 
 		return null;
+	}
+
+	private void replaceWithSystemValues() {
+		Set<Map.Entry<Object, Object>> ldapProperties = this.ldapConfiguration.getProperties().entrySet();
+		for (Map.Entry<Object, Object> ldapPropertyEntry : ldapProperties) {
+			String ldapPropertyKey = (String) ldapPropertyEntry.getKey();
+			if (System.getenv(ldapPropertyKey) != null) {
+				ldapPropertyEntry.setValue(System.getenv(ldapPropertyKey));
+			}
+		}
 	}
 
 	private String determineLdapConfigurationFileName() {
@@ -522,7 +535,7 @@ public class ConfigurationFactory {
 
 			this.cryptoConfigurationSalt = cryptoConfiguration.getString("encodeSalt");
 		} catch (Exception ex) {
-			log.error("Failed to load configuration from {}", ex, saltFilePath);
+			log.error("Failed to load configuration from {}", saltFilePath, ex);
 			throw new ConfigurationException("Failed to load configuration from " + saltFilePath, ex);
 		}
 	}
@@ -534,7 +547,7 @@ public class ConfigurationFactory {
 			return fileConfiguration;
 		} catch (Exception ex) {
 			if (isMandatory) {
-				log.error("Failed to load configuration from {}", ex, fileName);
+				log.error("Failed to load configuration from {}", fileName, ex);
 				throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
 			}
 		}

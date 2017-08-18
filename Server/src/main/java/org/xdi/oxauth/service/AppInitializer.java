@@ -25,14 +25,18 @@ import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.config.oxIDPAuthConf;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
-import org.xdi.oxauth.service.cdi.event.*;
+import org.xdi.oxauth.service.cdi.event.AuthConfigurationEvent;
+import org.xdi.oxauth.service.cdi.event.ReloadAuthScript;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.service.logger.LoggerService;
 import org.xdi.oxauth.service.status.ldap.LdapStatusTimer;
 import org.xdi.service.PythonService;
+import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.ConfigurationUpdate;
 import org.xdi.service.cdi.event.LdapConfigurationReload;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.cdi.util.CdiUtil;
+import org.xdi.service.custom.lib.CustomLibrariesLoader;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.service.timer.QuartzSchedulerManager;
@@ -128,11 +132,17 @@ public class AppInitializer {
 	private KeyGeneratorTimer keyGeneratorTimer;
 
 	@Inject
+	private CustomLibrariesLoader customLibrariesLoader;
+
+	@Inject
 	private LdapStatusTimer ldapStatusTimer;
 	
 	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
-    
+
+	@Inject
+	private LoggerService loggerService;
+
 	private FileConfiguration ldapConfig;
 	private List<GluuLdapConfiguration> ldapAuthConfigs;
 
@@ -152,6 +162,8 @@ public class AppInitializer {
     }
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+    	customLibrariesLoader.init();
+
     	createConnectionProvider();
         configurationFactory.create();
 
@@ -166,20 +178,22 @@ public class AppInitializer {
 
 		// Initialize script manager
         List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_AUTHORIZATION_POLICY, CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
-        customScriptManager.init(supportedCustomScriptTypes);
-
-        metricService.init();
+				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING,
+				CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
 
         // Start timer
         quartzSchedulerManager.start();
-    	
-    	// Schedule timer tasks
+
+        // Schedule timer tasks
+        metricService.initTimer();
+        configurationFactory.initTimer();
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();
-        configurationFactory.initTimer();
+        customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
+
+		loggerService.updateLoggerConfigLocation();
 	}
 
     @Produces @ApplicationScoped
@@ -216,6 +230,7 @@ public class AppInitializer {
         closeLdapAuthEntryManagers(ldapAuthEntryManagers);
     }
     
+    @Asynchronous
     public void reloadConfigurationTimerEvent(@Observes @Scheduled AuthConfigurationEvent authConfigurationEvent) {
 		if (this.isActive.get()) {
 			return;
@@ -312,10 +327,16 @@ public class AppInitializer {
 
         Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
         this.connectionProvider = createConnectionProvider(connectionProperties);
-        log.debug("Created connectionProvider: {}", connectionProvider);
+        if (!ResultCode.SUCCESS.equals(this.connectionProvider.getCreationResultCode())) {
+    		throw new ConfigurationException("Failed to create LDAP connection pool!");
+        }
+    	log.debug("Created connectionProvider: {}", connectionProvider);
 
         Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
         this.bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
+        if (!ResultCode.SUCCESS.equals(this.bindConnectionProvider.getCreationResultCode())) {
+    		throw new ConfigurationException("Failed to create LDAP connection pool!");
+        }
         log.debug("Created bindConnectionProvider: {}", bindConnectionProvider);
     }
 
@@ -477,7 +498,7 @@ public class AppInitializer {
 					configurations.add(configuration);
 				}
 			} catch (Exception ex) {
-				log.error("Failed to create object by json: '{}'", ex, configurationJson);
+				log.error("Failed to create object by json: '{}'", configurationJson, ex);
 			}
 		}
 
@@ -530,7 +551,7 @@ public class AppInitializer {
 				return mapLdapConfig(configuration.getConfig());
 			}
 		} catch (Exception ex) {
-			log.error("Failed to create object by oxIDPAuthConf: '{}'", ex, configuration);
+			log.error("Failed to create object by oxIDPAuthConf: '{}'", configuration, ex);
 		}
 
 		return null;

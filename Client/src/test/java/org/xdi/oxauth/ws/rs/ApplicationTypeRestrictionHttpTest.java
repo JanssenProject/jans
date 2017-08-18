@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 20, 2017
+ * @version May 19, 2017
  */
 public class ApplicationTypeRestrictionHttpTest extends BaseTest {
 
@@ -276,8 +276,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,
@@ -422,8 +421,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
         assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxValidationURI"));
-        assertNotNull(jwt.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
 
         RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                 jwksUri,

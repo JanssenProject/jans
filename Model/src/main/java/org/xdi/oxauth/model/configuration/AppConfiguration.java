@@ -7,6 +7,8 @@
 package org.xdi.oxauth.model.configuration;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.WebKeyStorage;
 
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version April 26, 2017
+ * @version August 9, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -45,13 +47,13 @@ public class AppConfiguration implements Configuration {
 
     private String umaConfigurationEndpoint;
     private Boolean umaRptAsJwt = false;
-    private int umaRequesterPermissionTokenLifetime;
+    private int umaRptLifetime;
+    private int umaPctLifetime;
     private Boolean umaAddScopesAutomatically;
-    private Boolean umaKeepClientDuringResourceSetRegistration;
 
     private String openidSubAttribute;
-    private List<String> responseTypesSupported;
-    private List<String> grantTypesSupported;
+    private Set<Set<ResponseType>> responseTypesSupported;
+    private Set<GrantType> grantTypesSupported;
     private List<String> subjectTypesSupported;
     private String defaultSubjectType;
     private List<String> userInfoSigningAlgValuesSupported;
@@ -80,8 +82,7 @@ public class AppConfiguration implements Configuration {
     private int authorizationCodeLifetime;
     private int refreshTokenLifetime;
     private int idTokenLifetime;
-    private int shortLivedAccessTokenLifetime;
-    private int longLivedAccessTokenLifetime;
+    private int accessTokenLifetime;
 
     private int cleanServiceInterval;
     private Boolean keyRegenerationEnabled;
@@ -108,7 +109,10 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
     private Boolean sessionIdEnabled;
     private Boolean sessionIdPersistOnPromptNone;
-    private Boolean sessionStateHttpOnly;
+    /**
+     * SessionId will be expired after sessionIdLifetime seconds
+     */
+    private Integer sessionIdLifetime = 86400;
     private int configurationUpdateInterval;
 
     private Boolean enableClientGrantUpdate;
@@ -148,6 +152,23 @@ public class AppConfiguration implements Configuration {
     private String loggingLevel;
     private Boolean updateUserLastLogonTime;
     private Boolean updateClientAccessTime;
+    private Boolean logClientIdOnClientAuthentication;
+    private Boolean logClientNameOnClientAuthentication;
+
+    /**
+     * Used in ServletLoggingFilter to enable http request/response logging.
+     */
+    private Boolean httpLoggingEnabled;
+
+    /**
+     * Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/oxauth/img", "/oxauth/stylesheet"]
+     */
+    private Set<String> httpLoggingExludePaths;
+
+    /**
+     * Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+     */
+    private String externalLoggerConfiguration;
 
     public Boolean getFrontChannelLogoutSessionSupported() {
         return frontChannelLogoutSessionSupported;
@@ -172,14 +193,6 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionAsJwt(Boolean sessionAsJwt) {
         this.sessionAsJwt = sessionAsJwt;
-    }
-
-    public Boolean getUmaKeepClientDuringResourceSetRegistration() {
-        return umaKeepClientDuringResourceSetRegistration;
-    }
-
-    public void setUmaKeepClientDuringResourceSetRegistration(Boolean p_umaKeepClientDuringResourceSetRegistration) {
-        umaKeepClientDuringResourceSetRegistration = p_umaKeepClientDuringResourceSetRegistration;
     }
 
     public Boolean getUmaAddScopesAutomatically() {
@@ -462,19 +475,19 @@ public class AppConfiguration implements Configuration {
         this.openIdConfigurationEndpoint = openIdConfigurationEndpoint;
     }
 
-    public List<String> getResponseTypesSupported() {
+    public Set<Set<ResponseType>> getResponseTypesSupported() {
         return responseTypesSupported;
     }
 
-    public void setResponseTypesSupported(List<String> responseTypesSupported) {
+    public void setResponseTypesSupported(Set<Set<ResponseType>> responseTypesSupported) {
         this.responseTypesSupported = responseTypesSupported;
     }
 
-    public List<String> getGrantTypesSupported() {
+    public Set<GrantType> getGrantTypesSupported() {
         return grantTypesSupported;
     }
 
-    public void setGrantTypesSupported(List<String> grantTypesSupported) {
+    public void setGrantTypesSupported(Set<GrantType> grantTypesSupported) {
         this.grantTypesSupported = grantTypesSupported;
     }
 
@@ -702,28 +715,28 @@ public class AppConfiguration implements Configuration {
         this.idTokenLifetime = idTokenLifetime;
     }
 
-    public int getShortLivedAccessTokenLifetime() {
-        return shortLivedAccessTokenLifetime;
+    public int getAccessTokenLifetime() {
+        return accessTokenLifetime;
     }
 
-    public void setShortLivedAccessTokenLifetime(int shortLivedAccessTokenLifetime) {
-        this.shortLivedAccessTokenLifetime = shortLivedAccessTokenLifetime;
+    public void setAccessTokenLifetime(int accessTokenLifetime) {
+        this.accessTokenLifetime = accessTokenLifetime;
     }
 
-    public int getLongLivedAccessTokenLifetime() {
-        return longLivedAccessTokenLifetime;
+    public int getUmaRptLifetime() {
+        return umaRptLifetime;
     }
 
-    public void setLongLivedAccessTokenLifetime(int longLivedAccessTokenLifetime) {
-        this.longLivedAccessTokenLifetime = longLivedAccessTokenLifetime;
+    public void setUmaRptLifetime(int umaRptLifetime) {
+        this.umaRptLifetime = umaRptLifetime;
     }
 
-    public int getUmaRequesterPermissionTokenLifetime() {
-        return umaRequesterPermissionTokenLifetime;
+    public int getUmaPctLifetime() {
+        return umaPctLifetime;
     }
 
-    public void setUmaRequesterPermissionTokenLifetime(int umaRequesterPermissionTokenLifetime) {
-        this.umaRequesterPermissionTokenLifetime = umaRequesterPermissionTokenLifetime;
+    public void setUmaPctLifetime(int umaPctLifetime) {
+        this.umaPctLifetime = umaPctLifetime;
     }
 
     public int getCleanServiceInterval() {
@@ -901,18 +914,6 @@ public class AppConfiguration implements Configuration {
 
     public void setSessionIdPersistOnPromptNone(Boolean sessionIdPersistOnPromptNone) {
         this.sessionIdPersistOnPromptNone = sessionIdPersistOnPromptNone;
-    }
-
-    public Boolean getSessionStateHttpOnly() {
-        if (sessionStateHttpOnly == null) {
-            return false;
-        }
-
-        return sessionStateHttpOnly;
-    }
-
-    public void setSessionStateHttpOnly(Boolean sessionStateHttpOnly) {
-        this.sessionStateHttpOnly = sessionStateHttpOnly;
     }
 
     public Boolean getSessionIdEnabled() {
@@ -1159,6 +1160,22 @@ public class AppConfiguration implements Configuration {
         this.updateClientAccessTime = updateClientAccessTime;
     }
 
+    public Boolean getHttpLoggingEnabled() {
+        return httpLoggingEnabled;
+    }
+
+    public void setHttpLoggingEnabled(Boolean httpLoggingEnabled) {
+        this.httpLoggingEnabled = httpLoggingEnabled;
+    }
+
+    public Set<String> getHttpLoggingExludePaths() {
+        return httpLoggingExludePaths;
+    }
+
+    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
+        this.httpLoggingExludePaths = httpLoggingExludePaths;
+    }
+
     public String getLoggingLevel() {
         return loggingLevel;
     }
@@ -1183,4 +1200,35 @@ public class AppConfiguration implements Configuration {
 		this.dynamicClientRegDefaultGrantTypes = dynamicClientRegDefaultGrantTypes;
 	}
 	
+    public Integer getSessionIdLifetime() {
+        return sessionIdLifetime;
+    }
+
+    public void setSessionIdLifetime(Integer sessionIdLifetime) {
+        this.sessionIdLifetime = sessionIdLifetime;
+    }
+
+    public Boolean getLogClientIdOnClientAuthentication() {
+        return logClientIdOnClientAuthentication;
+    }
+
+    public void setLogClientIdOnClientAuthentication(Boolean logClientIdOnClientAuthentication) {
+        this.logClientIdOnClientAuthentication = logClientIdOnClientAuthentication;
+    }
+
+    public Boolean getLogClientNameOnClientAuthentication() {
+        return logClientNameOnClientAuthentication;
+    }
+
+    public void setLogClientNameOnClientAuthentication(Boolean logClientNameOnClientAuthentication) {
+        this.logClientNameOnClientAuthentication = logClientNameOnClientAuthentication;
+    }
+
+    public String getExternalLoggerConfiguration() {
+        return externalLoggerConfiguration;
+    }
+
+    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+        this.externalLoggerConfiguration = externalLoggerConfiguration;
+    }
 }

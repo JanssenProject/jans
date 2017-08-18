@@ -13,6 +13,8 @@ import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.GluuAttribute;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.common.ScopeType;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -34,11 +36,12 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.xdi.oxauth.model.configuration.ConfigurationResponseClaim.*;
+import static org.xdi.oxauth.model.util.StringUtils.implode;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan Date: 2016/04/26
- * @version April 26, 2017
+ * @version July 18, 2017
  */
 @WebServlet(urlPatterns = "/.well-known/openid-configuration")
 public class OpenIdConfiguration extends HttpServlet {
@@ -94,26 +97,25 @@ public class OpenIdConfiguration extends HttpServlet {
 
             JSONArray scopesSupported = new JSONArray();
             for (Scope scope : scopeService.getAllScopesList()) {
-                boolean isUmaAuthorization = UmaScopeType.AUTHORIZATION.getValue()
-                        .equals(scope.getDisplayName());
-                boolean isUmaProtection = UmaScopeType.PROTECTION.getValue().equals(scope.getDisplayName());
-                if (!isUmaAuthorization && !isUmaProtection)
-                    scopesSupported.put(scope.getDisplayName());
+                if (UmaScopeType.PROTECTION.getValue().equals(scope.getDisplayName())) {
+                    continue;
+                }
+                scopesSupported.put(scope.getDisplayName());
             }
             if (scopesSupported.length() > 0) {
                 jsonObj.put(SCOPES_SUPPORTED, scopesSupported);
             }
 
             JSONArray responseTypesSupported = new JSONArray();
-            for (String responseType : appConfiguration.getResponseTypesSupported()) {
-                responseTypesSupported.put(responseType);
+            for (Set<ResponseType> responseTypes : appConfiguration.getResponseTypesSupported()) {
+                responseTypesSupported.put(implode(responseTypes, " "));
             }
             if (responseTypesSupported.length() > 0) {
                 jsonObj.put(RESPONSE_TYPES_SUPPORTED, responseTypesSupported);
             }
 
             JSONArray grantTypesSupported = new JSONArray();
-            for (String grantType : appConfiguration.getGrantTypesSupported()) {
+            for (GrantType grantType : appConfiguration.getGrantTypesSupported()) {
                 grantTypesSupported.put(grantType);
             }
             if (grantTypesSupported.length() > 0) {

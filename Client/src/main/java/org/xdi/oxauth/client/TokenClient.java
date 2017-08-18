@@ -18,7 +18,8 @@ import javax.ws.rs.HttpMethod;
  * Encapsulates functionality to make token request calls to an authorization
  * server via REST Services.
  *
- * @author Javier Rojas Blum Date: 10.19.2011
+ * @author Javier Rojas Blum
+ * @version June 28, 2017
  */
 public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
 
@@ -250,9 +251,6 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
         }
         if (StringUtils.isNotBlank(getRequest().getRefreshToken())) {
             clientRequest.formParameter("refresh_token", getRequest().getRefreshToken());
-        }
-        if (StringUtils.isNotBlank(getRequest().getOxAuthExchangeToken())) {
-            clientRequest.formParameter("oxauth_exchange_token", getRequest().getOxAuthExchangeToken());
         }
         if (getRequest().getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
             if (getRequest().getAuthUsername() != null && !getRequest().getAuthUsername().isEmpty()) {

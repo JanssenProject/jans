@@ -6,9 +6,10 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonValue;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ import java.util.Map;
  * parameter grant_type for access token requests.
  *
  * @author Javier Rojas Blum
- * @version December 9, 2015
+ * @version July 18, 2017
  */
 public enum GrantType implements HasParamName, LdapEnum {
 
@@ -69,21 +70,13 @@ public enum GrantType implements HasParamName, LdapEnum {
     REFRESH_TOKEN("refresh_token"),
 
     /**
-     * The client uses an extension grant type by specifying the grant type
-     * using an absolute URI (defined by the authorization server) as the value
-     * of the grant_type parameter of the token endpoint, and by adding any
-     * additional parameters necessary.
+     * Representing a requesting party, to use a permission ticket to request
+     * an OAuth 2.0 access token to gain access to a protected resource
+     * asynchronously from the time a resource owner grants access.
      */
-    EXTENSION,
-
-    /**
-     * Grant Type for extending the expiration of existing short-lived access_tokens
-     * by exchanging it for a long-lived access_token.
-     */
-    OXAUTH_EXCHANGE_TOKEN("oxauth_exchange_token");
+    OXAUTH_UMA_TICKET("urn:ietf:params:oauth:grant-type:uma-ticket");
 
     private final String value;
-    private String uri;
 
     private static Map<String, GrantType> mapByValues = new HashMap<String, GrantType>();
 
@@ -124,6 +117,7 @@ public enum GrantType implements HasParamName, LdapEnum {
      * @return The corresponding grant type if found, otherwise
      * <code>null</code>.
      */
+    @JsonCreator
     public static GrantType fromString(String param) {
         if (param != null) {
             for (GrantType gt : GrantType.values()) {
@@ -131,16 +125,22 @@ public enum GrantType implements HasParamName, LdapEnum {
                     return gt;
                 }
             }
-            try {
-                URI.create(param);
-                GrantType extension = EXTENSION;
-                extension.uri = param;
-                return extension;
-            } catch (IllegalArgumentException ex) {
-            }
         }
 
         return null;
+    }
+
+    public static String[] toStringArray(GrantType[] grantTypes) {
+        if (grantTypes == null) {
+            return null;
+        }
+
+        String[] resultGrantTypes = new String[grantTypes.length];
+        for (int i = 0; i < grantTypes.length; i++) {
+            resultGrantTypes[i] = grantTypes[i].getValue();
+        }
+
+        return resultGrantTypes;
     }
 
     public static GrantType getByValue(String value) {
@@ -158,11 +158,8 @@ public enum GrantType implements HasParamName, LdapEnum {
      * @return The string representation of the object.
      */
     @Override
+    @JsonValue
     public String toString() {
-        if (this == EXTENSION) {
-            return uri;
-        } else {
-            return value;
-        }
+        return value;
     }
 }

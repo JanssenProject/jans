@@ -4,31 +4,27 @@
 # Author: Yuriy Movchan
 #
 
-import datetime
-import urllib
-
-import sys
 from com.google.android.gcm.server import Sender, Message
 from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
-from org.jboss.seam import Component
-from org.jboss.seam.contexts import Contexts
-from org.jboss.seam.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.model.config import ConfigurationFactory
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
+from org.xdi.oxauth.service import UserService, AuthenticationService, SessionIdService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.oxauth.util import ServerUtil
 from org.xdi.util import StringHelper
-from org.xdi.util.security import StringEncrypter
+from org.xdi.oxauth.service import EncryptionService
 from org.xdi.service import MailService
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import datetime
+import urllib
+
+import sys
+import json
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -112,21 +108,22 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
-        user_name = credentials.getUsername()
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
+
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
         if client_redirect_uri == None:
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
-        context.set("retry_current_step", False)
+        identity.setWorkingParameter("retry_current_step", False)
         form_auth_result = ServerUtil.getFirstValue(requestParameters, "auth_result")
         if StringHelper.isNotEmpty(form_auth_result):
             print "Super-Gluu. Authenticate for step %s. Get auth_result: '%s'" % (step, form_auth_result)
@@ -136,13 +133,15 @@ class PersonAuthentication(PersonAuthenticationType):
             if form_auth_result in ['timeout']:
                 if ((step == 1) and self.oneStep) or ((step == 2) and self.twoStep):        
                     print "Super-Gluu. Authenticate for step %s. Reinitializing current step" % step
-                    context.set("retry_current_step", True)
+                    identity.setWorkingParameter("retry_current_step", True)
                     return False
 
-        userService = Component.getInstance(UserService)
-        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
+        userService = CdiUtil.bean(UserService)
+        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
         if step == 1:
             print "Super-Gluu. Authenticate for step 1"
+
+            user_name = credentials.getUsername()
             if self.oneStep:
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
@@ -164,7 +163,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 if session_device_status['enroll']:
                     return validation_result
 
-                context.set("super_gluu_count_login_steps", 1)
+                identity.setWorkingParameter("super_gluu_count_login_steps", 1)
 
                 user_inum = session_device_status['user_inum']
 
@@ -173,7 +172,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Super-Gluu. Authenticate for step 1. Failed to load u2f_device '%s'" % u2f_device_id
                     return False
 
-                logged_in = userService.authenticate(user_name)
+                logged_in = authenticationService.authenticate(user_name)
                 if not logged_in:
                     print "Super-Gluu. Authenticate for step 1. Failed to authenticate user '%s'" % user_name
                     return False
@@ -197,7 +196,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             self.processAuditGroup(authenticated_user, self.audit_attribute, self.audit_group)
                         super_gluu_count_login_steps = 1
     
-                    context.set("super_gluu_count_login_steps", super_gluu_count_login_steps)
+                    identity.setWorkingParameter("super_gluu_count_login_steps", super_gluu_count_login_steps)
                     
                     if super_gluu_count_login_steps == 1:
                         return True
@@ -216,14 +215,21 @@ class PersonAuthentication(PersonAuthenticationType):
     
                 print "Super-Gluu. Authenticate for step 1. auth_method: '%s'" % auth_method
                 
-                context.set("super_gluu_auth_method", auth_method)
+                identity.setWorkingParameter("super_gluu_auth_method", auth_method)
 
                 return True
 
             return False
         elif step == 2:
             print "Super-Gluu. Authenticate for step 2"
-            session_attributes = context.get("sessionAttributes")
+
+            user = authenticationService.getAuthenticatedUser()
+            if (user == None):
+                print "Super-Gluu. Authenticate for step 2. Failed to determine user name"
+                return False
+            user_name = user.getUserId()
+
+            session_attributes = identity.getSessionId().getSessionAttributes()
 
             session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
             if session_device_status == None:
@@ -271,28 +277,28 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        session_attributes = context.get("sessionAttributes")
+        identity = CdiUtil.bean(Identity)
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         client_redirect_uri = self.getClientRedirecUri(session_attributes)
         if client_redirect_uri == None:
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
 
-        self.setEventContextParameters(context)
+        self.setRequestScopedParameters(identity)
 
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
             if self.oneStep:
-                session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
-                if StringHelper.isEmpty(session_state):
-                    print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
+                session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
+                if StringHelper.isEmpty(session_id):
+                    print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                     return False
             
-                issuer = Component.getInstance(ConfigurationFactory).getConfiguration().getIssuer()
+                issuer = CdiUtil.bean(ConfigurationFactory).getConfiguration().getIssuer()
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
-                                   'state': session_state,
+                                   'state': session_id,
                                    'created': datetime.datetime.now().isoformat()}
 
                 self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
@@ -300,9 +306,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 super_gluu_request = json.dumps(super_gluu_request_dictionary, separators=(',',':'))
                 print "Super-Gluu. Prepare for step 1. Prepared super_gluu_request:", super_gluu_request
     
-                context.set("super_gluu_request", super_gluu_request)
+                identity.setWorkingParameter("super_gluu_request", super_gluu_request)
 #            elif self.twoStep:
-#                context.set("display_register_action", True)
+#                identity.setWorkingParameter("display_register_action", True)
 
             return True
         elif step == 2:
@@ -310,7 +316,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.oneStep:
                 return True
 
-            authenticationService = Component.getInstance(AuthenticationService)
+            authenticationService = CdiUtil.bean(AuthenticationService)
             user = authenticationService.getAuthenticatedUser()
             if user == None:
                 print "Super-Gluu. Prepare for step 2. Failed to determine user name"
@@ -322,9 +328,9 @@ class PersonAuthentication(PersonAuthenticationType):
                    print "Super-Gluu. Prepare for step 2. Request was generated already"
                    return True
             
-            session_state = Component.getInstance(SessionStateService).getSessionStateFromCookie()
-            if StringHelper.isEmpty(session_state):
-                print "Super-Gluu. Prepare for step 2. Failed to determine session_state"
+            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
+            if StringHelper.isEmpty(session_id):
+                print "Super-Gluu. Prepare for step 2. Failed to determine session_id"
                 return False
 
             auth_method = session_attributes.get("super_gluu_auth_method")
@@ -334,12 +340,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "Super-Gluu. Prepare for step 2. auth_method: '%s'" % auth_method
             
-            issuer = Component.getInstance(ConfigurationFactory).getConfiguration().getIssuer()
+            issuer = CdiUtil.bean(ConfigurationFactory).getAppConfiguration().getIssuer()
             super_gluu_request_dictionary = {'username': user.getUserId(),
                                'app': client_redirect_uri,
                                'issuer': issuer,
                                'method': auth_method,
-                               'state': session_state,
+                               'state': session_id,
                                'created': datetime.datetime.now().isoformat()}
 
             self.addGeolocationData(session_attributes, super_gluu_request_dictionary)
@@ -347,7 +353,7 @@ class PersonAuthentication(PersonAuthenticationType):
             super_gluu_request = json.dumps(super_gluu_request_dictionary, separators=(',',':'))
             print "Super-Gluu. Prepare for step 2. Prepared super_gluu_request:", super_gluu_request
 
-            context.set("super_gluu_request", super_gluu_request)
+            identity.setWorkingParameter("super_gluu_request", super_gluu_request)
 
             if auth_method in ['authenticate']:
                 self.sendPushNotification(client_redirect_uri, user, super_gluu_request)
@@ -358,14 +364,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
         # If user not pass current step change step to previous
-        context = Contexts.getEventContext()
-        retry_current_step = context.get("retry_current_step")
+        identity = CdiUtil.bean(Identity)
+        retry_current_step = identity.getWorkingParameter("retry_current_step")
         if retry_current_step:
             print "Super-Gluu. Get next step. Retrying current step"
 
             # Remove old QR code
-            context = Contexts.getEventContext()
-            context.set("super_gluu_request", "timeout")
+            identity.setWorkingParameter("super_gluu_request", "timeout")
 
             resultStep = step
             return resultStep
@@ -384,9 +389,9 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def getCountAuthenticationSteps(self, configurationAttributes):
-        context = Contexts.getEventContext()
-        if context.isSet("super_gluu_count_login_steps"):
-            return context.get("super_gluu_count_login_steps")
+        identity = CdiUtil.bean(Identity)
+        if identity.isSetWorkingParameter("super_gluu_count_login_steps"):
+            return identity.getWorkingParameter("super_gluu_count_login_steps")
         else:
             return 2
 
@@ -406,14 +411,15 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = Component.getInstance(UserService)
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
         user_password = credentials.getPassword()
 
         logged_in = False
         if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-            logged_in = userService.authenticate(user_name, user_password)
+            logged_in = authenticationService.authenticate(user_name, user_password)
 
         if not logged_in:
             return None
@@ -426,8 +432,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return find_user_by_uid
 
     def validateSessionDeviceStatus(self, client_redirect_uri, session_device_status, user_name = None):
-        userService = Component.getInstance(UserService)
-        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
+        userService = CdiUtil.bean(UserService)
+        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
 
         u2f_device_id = session_device_status['device_id']
 
@@ -534,8 +540,8 @@ class PersonAuthentication(PersonAuthenticationType):
             p12_passowrd = ios_creads["p12_password"]
 
             try:
-                stringEncrypter = StringEncrypter.defaultInstance()
-                p12_passowrd = stringEncrypter.decrypt(p12_passowrd)
+                encryptionService = CdiUtil.bean(EncryptionService)
+                p12_passowrd = encryptionService.decrypt(p12_passowrd)
             except:
                 # Ignore exception. Password is not encrypted
                 print "Super-Gluu. Initialize notification services. Assuming that 'p12_passowrd' password in not encrypted"
@@ -568,8 +574,8 @@ class PersonAuthentication(PersonAuthenticationType):
         send_notification = False
         send_notification_result = True
 
-        userService = Component.getInstance(UserService)
-        deviceRegistrationService = Component.getInstance(DeviceRegistrationService)
+        userService = CdiUtil.bean(UserService)
+        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
 
         user_inum = userService.getUserInum(user_name)
 
@@ -632,14 +638,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return session_attributes.get("redirect_uri")
 
-    def setEventContextParameters(self, context):
+    def setRequestScopedParameters(self, identity):
         if self.registrationUri != None:
-            context.set("external_registration_uri", self.registrationUri)
+            identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
         if self.customLabel != None:
-            context.set("super_gluu_label", self.customLabel)
+            identity.setWorkingParameter("super_gluu_label", self.customLabel)
 
-        context.set("super_gluu_qr_options", self.customQrOptions)
+        identity.setWorkingParameter("super_gluu_qr_options", self.customQrOptions)
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
         if session_attributes.containsKey("remote_ip"):
@@ -659,7 +665,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def determineGeolocationData(self, remote_ip):
         print "Super-Gluu. Determine remote location. remote_ip: '%s'" % remote_ip
-        httpService = Component.getInstance(HttpService)
+        httpService = CdiUtil.bean(HttpService)
 
         http_client = httpService.getHttpsClient()
         http_client_params = http_client.getParams()
@@ -718,7 +724,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
             # Send e-mail to administrator
             user_id = user.getUserId()
-            mailService = Component.getInstance(MailService)
+            mailService = CdiUtil.bean(MailService)
             subject = "User log in: %s" % user_id
             body = "User log in: %s" % user_id
             mailService.sendMail(self.audit_email, subject, body)

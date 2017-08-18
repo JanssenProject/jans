@@ -6,26 +6,6 @@
 
 package org.xdi.oxauth.model.uma;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -35,13 +15,21 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Holder;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
+
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -62,12 +50,6 @@ public class TTokenRequest {
 			final String umaClientId, final String umaClientSecret, final String umaRedirectUri) {
 		return internalRequest(authorizePath, tokenPath, userId, userSecret, umaClientId, umaClientSecret,
 				umaRedirectUri, UmaScopeType.PROTECTION);
-	}
-
-	public Token aat(final String authorizePath, final String tokenPath, final String userId, final String userSecret,
-			final String umaClientId, final String umaClientSecret, final String umaRedirectUri) {
-		return internalRequest(authorizePath, tokenPath, userId, userSecret, umaClientId, umaClientSecret,
-				umaRedirectUri, UmaScopeType.AUTHORIZATION);
 	}
 
 	public Token newTokenByRefreshToken(final String tokenPath, final Token p_oldToken, final String umaClientId,
@@ -257,14 +239,14 @@ public class TTokenRequest {
 		}
 	}
 
-	public RPTResponse requestRpt(final Token p_aat, final String p_rptPath, final String p_umaAmHost) {
+	// todo UMA2
+	public RPTResponse requestRpt(final String p_rptPath) {
 		final Holder<RPTResponse> h = new Holder<RPTResponse>();
 
 		try {
 			Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + p_rptPath).request();
 			request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
-			request.header("Authorization", "Bearer " + p_aat.getAccessToken());
-			request.header("Host", p_umaAmHost);
+			//request.header("Authorization", "Bearer " + p_aat.getAccessToken());
 			Response response = request.post(Entity.form(new Form()));
 			String entity = response.readEntity(String.class);
 
@@ -297,19 +279,17 @@ public class TTokenRequest {
 		return h.getT();
 	}
 
-	public RptIntrospectionResponse requestRptStatus(String p_umaRptStatusPath, final String p_umaAmHost,
-			final Token p_aat, final String rpt) {
+	public RptIntrospectionResponse requestRptStatus(String p_umaRptStatusPath, final String rpt) {
 		final Holder<RptIntrospectionResponse> h = new Holder<RptIntrospectionResponse>();
 
 		try {
 			Builder request = ResteasyClientBuilder.newClient().target(baseUri.toString() + p_umaRptStatusPath)
 					.request();
 			request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-			request.header("Authorization", "Bearer " + p_aat.getAccessToken());
+			// todo uma2
+//			request.header("Authorization", "Bearer " + p_aat.getAccessToken());
 			Response response = request.post(Entity.form(new Form("token", rpt)));
 			String entity = response.readEntity(String.class);
-
-			// request.addHeader("Host", p_umaAmHost);
 
 			// try {
 			// final String json =

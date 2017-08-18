@@ -22,12 +22,14 @@ import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
 
 import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version July 19, 2017
  */
 public class TokenEncryptionHttpTest extends BaseTest {
 
@@ -40,6 +42,10 @@ public class TokenEncryptionHttpTest extends BaseTest {
         try {
             showTitle("requestIdTokenAlgRSAOAEPEncA256GCM");
 
+            List<GrantType> grantTypes = Arrays.asList(
+                    GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+            );
+
             // 1. Dynamic Client Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
@@ -48,6 +54,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setGrantTypes(grantTypes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -98,8 +105,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -114,6 +120,10 @@ public class TokenEncryptionHttpTest extends BaseTest {
         try {
             showTitle("requestIdTokenAlgRSA15EncA128CBCPLUSHS256");
 
+            List<GrantType> grantTypes = Arrays.asList(
+                    GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+            );
+
             // 1. Dynamic Client Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
@@ -122,6 +132,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setGrantTypes(grantTypes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -172,8 +183,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -188,6 +198,10 @@ public class TokenEncryptionHttpTest extends BaseTest {
         try {
             showTitle("requestIdTokenAlgRSA15EncA256CBCPLUSHS512");
 
+            List<GrantType> grantTypes = Arrays.asList(
+                    GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+            );
+
             // 1. Dynamic Client Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
@@ -196,6 +210,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setGrantTypes(grantTypes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -246,8 +261,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -260,6 +274,10 @@ public class TokenEncryptionHttpTest extends BaseTest {
         try {
             showTitle("requestIdTokenAlgA128KWEncA128GCM");
 
+            List<GrantType> grantTypes = Arrays.asList(
+                    GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+            );
+
             // 1. Dynamic Client Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
@@ -267,6 +285,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setGrantTypes(grantTypes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -314,8 +333,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -328,6 +346,10 @@ public class TokenEncryptionHttpTest extends BaseTest {
         try {
             showTitle("requestIdTokenAlgA256KWEncA256GCM");
 
+            List<GrantType> grantTypes = Arrays.asList(
+                    GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+            );
+
             // 1. Dynamic Client Registration
             RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                     StringUtils.spaceSeparatedToList(redirectUris));
@@ -335,6 +357,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
             registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setGrantTypes(grantTypes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -382,8 +405,7 @@ public class TokenEncryptionHttpTest extends BaseTest {
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
             assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxValidationURI"));
-            assertNotNull(jwe.getClaims().getClaimAsString("oxOpenIDConnectVersion"));
+            assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
