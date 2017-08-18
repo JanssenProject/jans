@@ -97,7 +97,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
-        user_name = credentials.getUsername()
 
         session_attributes = identity.getSessionId().getSessionAttributes()
 
@@ -105,7 +104,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             print "OTP. Authenticate for step 1"
-            
             authenticated_user = self.processBasicAuthentication(credentials)
             if authenticated_user == None:
                 return False
@@ -117,10 +115,10 @@ class PersonAuthentication(PersonAuthenticationType):
             #    otp_auth_method = "enroll"
             
             if otp_auth_method == "authenticate":
-                user_enrollments = self.findEnrollments(user_name)
+                user_enrollments = self.findEnrollments(authenticated_user.getUserId())
                 if len(user_enrollments) == 0:
                     otp_auth_method = "enroll"
-                    print "OTP. Authenticate for step 1. There is no OTP enrollment for user '%s'. Changing otp_auth_method to '%s'" % (user_name, otp_auth_method)
+                    print "OTP. Authenticate for step 1. There is no OTP enrollment for user '%s'. Changing otp_auth_method to '%s'" % (authenticated_user.getUserId(), otp_auth_method)
                     
             if otp_auth_method == "enroll":
                 print "OTP. Authenticate for step 1. Setting count steps: '%s'" % 3
@@ -132,6 +130,12 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif step == 2:
             print "OTP. Authenticate for step 2"
+
+            authenticationService = CdiUtil.bean(AuthenticationService)
+            user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                print "OTP. Authenticate for step 2. Failed to determine user name"
+                return False
 
             session_id_validation = self.validateSessionId(session_attributes)
             if not session_id_validation:
@@ -148,12 +152,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "OTP. Authenticate for step 2. Skipping this step during enrollment"
                 return True
 
-            otp_auth_result = self.processOtpAuthentication(requestParameters, user_name, session_attributes, otp_auth_method)
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), session_attributes, otp_auth_method)
             print "OTP. Authenticate for step 2. OTP authentication result: '%s'" % otp_auth_result
 
             return otp_auth_result
         elif step == 3:
             print "OTP. Authenticate for step 3"
+
+            authenticationService = CdiUtil.bean(AuthenticationService)
+            user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                print "OTP. Authenticate for step 2. Failed to determine user name"
+                return False
 
             session_id_validation = self.validateSessionId(session_attributes)
             if not session_id_validation:
@@ -164,7 +174,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if otp_auth_method != 'enroll':
                 return False
 
-            otp_auth_result = self.processOtpAuthentication(requestParameters, user_name, session_attributes, otp_auth_method)
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), session_attributes, otp_auth_method)
             print "OTP. Authenticate for step 3. OTP authentication result: '%s'" % otp_auth_result
 
             return otp_auth_result
