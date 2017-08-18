@@ -115,8 +115,8 @@ public class AppConfiguration implements Configuration {
     private Integer sessionIdLifetime = 86400;
     private int configurationUpdateInterval;
 
-    private Boolean enableClientGrantUpdate;
-    private List<GrantType> dynamicGrantTypeDefault;
+    private Boolean enableClientGrantTypeUpdate;
+    private Set<GrantType> dynamicGrantTypeDefault;
     
     private String cssLocation;
     private String jsLocation;
@@ -1184,19 +1184,19 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
-	public Boolean getEnableClientGrantUpdate() {
-		return enableClientGrantUpdate;
+	public Boolean getEnableClientGrantTypeUpdate() {
+		return enableClientGrantTypeUpdate;
 	}
 
-	public void setEnableClientGrantUpdate(Boolean enableClientGrantUpdate) {
-		this.enableClientGrantUpdate = enableClientGrantUpdate;
+	public void setEnableClientGrantTypeUpdate(Boolean enableClientGrantTypeUpdate) {
+		this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
 	}
 
-	public List<GrantType> getDynamicGrantTypeDefault() {
+	public Set<GrantType> getDynamicGrantTypeDefault() {
 		return dynamicGrantTypeDefault;
 	}
 
-	public void setDynamicGrantTypeDefault(List<GrantType> dynamicGrantTypeDefault) {
+	public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
 		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
 	}
 	
