@@ -237,7 +237,7 @@
     "frontChannelLogoutSessionSupported":true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
-    "enableClientGrantUpdate": true,
+    "enableClientGrantTypeUpdate": true,
     "corsConfigurationFilters": [
         {
             "filterName": "CorsFilter",
