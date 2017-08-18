@@ -318,12 +318,14 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setClientUri(requestObject.getClientUri());
         }
         List<GrantType> grantTypes = requestObject.getGrantTypes();
-        if (grantTypes != null && grantTypes.isEmpty()){
-        	String[] availableGrantTypes = getGrantTypeArray(grantTypes);
-        	if(availableGrantTypes != null){
-        		p_client.setGrantTypes(availableGrantTypes);
-        	}
-        }
+		if ((grantTypes != null) && grantTypes.isEmpty()) {
+			if (appConfiguration.getEnableClientGrantUpdate()) {
+				GrantType[] availableGrantTypes = getAllowedDynamicGrantTypes(grantTypes);
+				if (availableGrantTypes != null) {
+					p_client.setGrantTypes(availableGrantTypes);
+				}
+			}
+		}
         if (StringUtils.isNotBlank(requestObject.getPolicyUri())) {
             p_client.setPolicyUri(requestObject.getPolicyUri());
         }
@@ -545,26 +547,17 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         return builder.build();
     }
 
-    private String[] getGrantTypeArray(List<GrantType> grantTypes){
-    	String[] availableGrantTypeArray = null ;
-    	if(appConfiguration.getEnableClientGrantUpdate()) {
-			if(grantTypes != null && !grantTypes.isEmpty()){
-				List<String> dynamicClientRegDefaultGrantType = appConfiguration.getDynamicClientRegDefaultGrantTypes();
-				List<String> grantTypesValue = new ArrayList<String>();
-				for(GrantType grantType: grantTypes){
-					grantTypesValue.add(grantType.toString());
-				}
-				List<String> availableGrantTypes = new ArrayList<String>(dynamicClientRegDefaultGrantType);
-				availableGrantTypes.retainAll(grantTypesValue);
-				availableGrantTypeArray = new String[availableGrantTypes.size()];
-				availableGrantTypeArray = availableGrantTypes.toArray(availableGrantTypeArray);
-				return availableGrantTypeArray;
-			}
+	private GrantType[] getAllowedDynamicGrantTypes(List<GrantType> grantTypes) {
+		GrantType[] allowedGrantTypeArray = null;
+		if ((grantTypes != null) && !grantTypes.isEmpty()) {
+			List<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
+			List<GrantType> dynamicGrantTypeDefaultCloned = new ArrayList<GrantType>(dynamicGrantTypeDefault);
+			dynamicGrantTypeDefaultCloned.retainAll(grantTypes);
+
+			allowedGrantTypeArray = dynamicGrantTypeDefaultCloned.toArray(new GrantType[0]);
 		}
-    	else{
-    		log.trace("Client don't have authentication for grant type update.");
-    	}
-		return availableGrantTypeArray;
+
+		return allowedGrantTypeArray;
 	}
     
     private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
