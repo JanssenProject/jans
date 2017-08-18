@@ -14,6 +14,10 @@ import org.xdi.oxauth.model.error.IErrorType;
  * @author Javier Rojas Blum Date: 12.16.2011
  */
 public enum EndSessionErrorResponseType implements IErrorType {
+    /**
+     * The provided access token is invalid, or was issued to another client.
+     */
+    INVALID_GRANT("invalid_grant"),
 
     /**
      * The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a
@@ -22,9 +26,24 @@ public enum EndSessionErrorResponseType implements IErrorType {
     INVALID_REQUEST("invalid_request"),
 
     /**
-     * The provided access token is invalid, or was issued to another client.
+     * The provided access token and session state are invalid or were issued to another client.
      */
-    INVALID_GRANT("invalid_grant");
+    INVALID_GRANT_AND_SESSION("invalid_grant_and_session"),
+
+    /**
+     * The provided session state is empty.
+     */
+    SESSION_NOT_PASSED("session_not_passed"),
+
+    /**
+     * The provided post logout uri is empty.
+     */
+    POST_LOGOUT_URI_NOT_PASSED("post_logout_uri_not_passed"),
+
+    /**
+     * The provided post logout uri is not associated with client
+     */
+    POST_LOGOUT_URI_NOT_ASSOCIATED_WITH_CLIENT("post_logout_uri_not_associated_with_client");
 
     private final String paramName;
 

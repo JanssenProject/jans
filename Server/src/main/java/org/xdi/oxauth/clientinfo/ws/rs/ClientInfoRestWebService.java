@@ -25,13 +25,13 @@ import com.wordnik.swagger.annotations.Api;
  *
  * @author Javier Rojas Blum Date: 07.19.2012
  */
-@Api(value = "/oxauth", description = "The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.")
+@Api(value = "/", description = "The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.")
 public interface ClientInfoRestWebService {
 
     @GET
     @Path("/clientinfo")
     @Produces({MediaType.APPLICATION_JSON})
-    Response requestUserInfoGet(
+    Response requestClientInfoGet(
             @QueryParam("access_token") String accessToken,
             @HeaderParam("Authorization") String authorization,
             @Context SecurityContext securityContext);
@@ -39,7 +39,7 @@ public interface ClientInfoRestWebService {
     @POST
     @Path("/clientinfo")
     @Produces({MediaType.APPLICATION_JSON})
-    Response requestUserInfoPost(
+    Response requestClientInfoPost(
             @FormParam("access_token") String accessToken,
             @HeaderParam("Authorization") String authorization,
             @Context SecurityContext securityContext);

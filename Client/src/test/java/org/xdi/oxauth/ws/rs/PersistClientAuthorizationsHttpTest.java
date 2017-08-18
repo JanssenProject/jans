@@ -26,7 +26,7 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Javier Rojas Blum
- * @version January 20, 2017
+ * @version August 9, 2017
  */
 public class PersistClientAuthorizationsHttpTest extends BaseTest {
 
@@ -60,7 +60,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        String sessionState = null;
+        String sessionId = null;
         {
             // 2. Request authorization
             // Scopes: openid, profile
@@ -81,7 +81,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             assertNotNull(authorizationResponse.getState());
 
             String authorizationCode = authorizationResponse.getCode();
-            sessionState = authorizationResponse.getSessionState();
+            sessionId = authorizationResponse.getSessionId();
 
             // 3. Request access token using the authorization code.
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -234,7 +234,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         {
             // 10. Request authorization
             // Scopes: openid, profile, address, email
-            // Do not show authenticate page because we are including the session_state in the authorization request and the session is already authenticated.
+            // Do not show authenticate page because we are including the session_id in the authorization request and the session is already authenticated.
             // Do not show authorize page because those scopes are already authorized.
             List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String nonce = UUID.randomUUID().toString();
@@ -243,7 +243,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
             authorizationRequest.setState(state);
             authorizationRequest.getPrompts().add(Prompt.NONE);
-            authorizationRequest.setSessionState(sessionState);
+            authorizationRequest.setSessionId(sessionId);
 
             AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
             authorizeClient.setRequest(authorizationRequest);

@@ -6,7 +6,6 @@
 
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.security import Identity
-from org.xdi.model.security import Credentials
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.service import AuthenticationService
 from org.xdi.util import StringHelper
@@ -37,6 +36,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
         if (step == 1):
             print "Basic. Authenticate for step 1"
 
@@ -48,7 +49,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                authenticationService = CdiUtil.bean(AuthenticationService)
                 logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):

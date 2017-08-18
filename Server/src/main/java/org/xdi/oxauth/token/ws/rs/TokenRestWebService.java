@@ -6,6 +6,8 @@
 
 package org.xdi.oxauth.token.ws.rs;
 
+import com.wordnik.swagger.annotations.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -16,18 +18,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
-
 /**
  * Provides interface for token REST web services
  *
- * @author Javier Rojas Blum Date: 09.21.2011
+ * @author Javier Rojas Blum
+ * @author Yuriy Zabrovarnyy
  */
-@Api(value = "/oxauth", description = "Token Endpoint is used to obtain an Access Token, an ID Token, and optionally a Refresh Token. The RP (Client) sends a Token Request to the Token Endpoint to obtain a Token Response")
+@Api(value = "/", description = "Token Endpoint is used to obtain an Access Token, an ID Token, and optionally a Refresh Token. The RP (Client) sends a Token Request to the Token Endpoint to obtain a Token Response")
 public interface TokenRestWebService {
 
     @POST
@@ -85,9 +82,6 @@ public interface TokenRestWebService {
             @FormParam("refresh_token")
             @ApiParam(value = "Refresh token", required = false)
             String refreshToken,
-            @FormParam("oxauth_exchange_token")
-            @ApiParam(value = "oxauth_exchange_token", required = false)
-            String oxAuthExchangeToken,
             @FormParam("client_id")
             @ApiParam(value = "OAuth 2.0 Client Identifier valid at the Authorization Server.", required = false)
             String clientId,
@@ -97,6 +91,16 @@ public interface TokenRestWebService {
             @FormParam("code_verifier")
             @ApiParam(value = "The client's PKCE code verifier.", required = false)
             String codeVerifier,
+            @FormParam("ticket")
+            String ticket,
+            @FormParam("claim_token")
+            String claimToken,
+            @FormParam("claim_token_format")
+            String claimTokenFormat,
+            @FormParam("pct")
+            String pctCode,
+            @FormParam("rpt")
+            String rptCode,
             @Context HttpServletRequest request,
             @Context SecurityContext sec);
 }

@@ -6,13 +6,7 @@
 
 package org.xdi.oxauth.action;
 
-import java.io.Serializable;
-import java.util.List;
-
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
@@ -27,19 +21,23 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
-import com.google.common.collect.Lists;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @version August 9, 2017
  */
 @Named
 @SessionScoped
 public class RegistrationAction implements Serializable {
 
-	private static final long serialVersionUID = -5920839612180688968L;
+    private static final long serialVersionUID = -5920839612180688968L;
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject
@@ -50,6 +48,7 @@ public class RegistrationAction implements Serializable {
 
     private String registrationEndpoint;
     private String redirectUris;
+    private String claimsRedirectUris;
     private List<ResponseType> responseTypes;
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
@@ -97,6 +96,7 @@ public class RegistrationAction implements Serializable {
     public void exec() {
         try {
             RegisterRequest request = new RegisterRequest(applicationType, clientName, StringUtils.spaceSeparatedToList(redirectUris));
+            request.setClaimsRedirectUris(StringUtils.spaceSeparatedToList(claimsRedirectUris));
             request.setResponseTypes(responseTypes);
             request.setGrantTypes(grantTypes);
             request.setContacts(StringUtils.spaceSeparatedToList(contacts));
@@ -147,7 +147,7 @@ public class RegistrationAction implements Serializable {
             requestString = client.getRequestAsString();
             responseString = client.getResponseAsString();
         } catch (Exception e) {
-        	log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -163,7 +163,7 @@ public class RegistrationAction implements Serializable {
             clientReadRequestString = client.getRequestAsString();
             clientReadResponseString = client.getResponseAsString();
         } catch (Exception e) {
-        	log.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -183,7 +183,15 @@ public class RegistrationAction implements Serializable {
         this.redirectUris = redirectUris;
     }
 
-    public List<ResponseType> getResponseTypes() {
+    public String getClaimsRedirectUris() {
+		return claimsRedirectUris;
+	}
+
+	public void setClaimsRedirectUris(String claimsRedirectUris) {
+		this.claimsRedirectUris = claimsRedirectUris;
+	}
+
+	public List<ResponseType> getResponseTypes() {
         return responseTypes;
     }
 

@@ -9,12 +9,6 @@
 
         <navigation-case>
             <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
-            <from-outcome>success</from-outcome>
-            <to-view-id>/auth/otp/enroll.xhtml</to-view-id>
-            <redirect/>
-        </navigation-case>
-        <navigation-case>
-            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
             <from-outcome>no_permissions</from-outcome>
             <to-view-id>/error.xhtml</to-view-id>
             <redirect/>
@@ -30,12 +24,6 @@
     <navigation-rule>
         <from-view-id>/auth/otp/otplogin.xhtml</from-view-id>
 
-        <navigation-case>
-            <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
-            <from-outcome>success</from-outcome>
-            <to-view-id>/auth/otp/otplogin.xhtml</to-view-id>
-            <redirect/>
-        </navigation-case>
         <navigation-case>
             <from-action>#{authenticator.prepareAuthenticationForStep}</from-action>
             <from-outcome>no_permissions</from-outcome>

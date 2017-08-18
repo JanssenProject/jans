@@ -6,26 +6,22 @@
 
 package org.xdi.oxauth.model.registration;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.gluu.site.ldap.persistence.annotation.*;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.util.LdapUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.ArrayUtils;
-import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
-import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
-import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
-import org.gluu.site.ldap.persistence.annotation.LdapDN;
-import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.util.LdapUtils;
-
 /**
  * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @version July 18, 2017
  */
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthClient"})
@@ -58,11 +54,14 @@ public class Client implements Serializable {
     @LdapAttribute(name = "oxAuthRedirectURI")
     private String[] redirectUris;
 
+    @LdapAttribute(name = "oxClaimRedirectURI")
+    private String[] claimRedirectUris;
+
     @LdapAttribute(name = "oxAuthResponseType")
     private ResponseType[] responseTypes;
 
     @LdapAttribute(name = "oxAuthGrantType")
-    private String[] grantTypes;
+    private GrantType[] grantTypes;
 
     @LdapAttribute(name = "oxAuthAppType")
     private String applicationType;
@@ -165,6 +164,12 @@ public class Client implements Serializable {
 
     @LdapAttribute(name = "oxPersistClientAuthorizations")
     private boolean persistClientAuthorizations;
+
+    @LdapAttribute(name = "oxIncludeClaimsInIdToken")
+    private boolean includeClaimsInIdToken;
+
+    @LdapAttribute(name = "oxRefreshTokenLifetime")
+    private Integer refreshTokenLifetime;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
@@ -353,6 +358,34 @@ public class Client implements Serializable {
     }
 
     /**
+     * Returns UMA2 Array of The Claims Redirect URIs to which the client wishes the authorization server to direct
+     * the requesting party's user agent after completing its interaction.
+     * The URI MUST be absolute, MAY contain an application/x-www-form-urlencoded-formatted query parameter component
+     * that MUST be retained when adding additional parameters, and MUST NOT contain a fragment component.
+     * The client SHOULD pre-register its claims_redirect_uri with the authorization server, and the authorization server
+     * SHOULD require all clients to pre-register their claims redirection endpoints. Claims redirection URIs
+     * are different from the redirection URIs defined in [RFC6749] in that they are intended for the exclusive use
+     * of requesting parties and not resource owners. Therefore, authorization servers MUST NOT redirect requesting parties
+     * to pre-registered redirection URIs defined in [RFC6749] unless such URIs are also pre-registered specifically as
+     * claims redirection URIs. If the URI is pre-registered, this URI MUST exactly match one of the pre-registered claims
+     * redirection URIs, with the matching performed as described in Section 6.2.1 of [RFC3986] (Simple String Comparison).
+     *
+     * @return claims redirect uris
+     */
+    public String[] getClaimRedirectUris() {
+        return claimRedirectUris;
+    }
+
+    /**
+     * Sets Claim redirect URIs
+     *
+     * @param claimRedirectUris claims redirect uris
+     */
+    public void setClaimRedirectUris(String[] claimRedirectUris) {
+        this.claimRedirectUris = claimRedirectUris;
+    }
+
+    /**
      * Returns a JSON array containing a list of the OAuth 2.0 response type values that the Client is declaring
      * that it will restrict itself to using.
      *
@@ -378,7 +411,7 @@ public class Client implements Serializable {
      *
      * @return The grant types.
      */
-    public String[] getGrantTypes() {
+    public GrantType[] getGrantTypes() {
         return grantTypes;
     }
 
@@ -388,7 +421,7 @@ public class Client implements Serializable {
      *
      * @param grantTypes The grant types.
      */
-    public void setGrantTypes(String[] grantTypes) {
+    public void setGrantTypes(GrantType[] grantTypes) {
         this.grantTypes = grantTypes;
     }
 
@@ -1010,6 +1043,22 @@ public class Client implements Serializable {
 
     public void setPersistClientAuthorizations(boolean persistClientAuthorizations) {
         this.persistClientAuthorizations = persistClientAuthorizations;
+    }
+
+    public boolean isIncludeClaimsInIdToken() {
+        return includeClaimsInIdToken;
+    }
+
+    public void setIncludeClaimsInIdToken(boolean includeClaimsInIdToken) {
+        this.includeClaimsInIdToken = includeClaimsInIdToken;
+    }
+
+    public Integer getRefreshTokenLifetime() {
+        return refreshTokenLifetime;
+    }
+
+    public void setRefreshTokenLifetime(Integer refreshTokenLifetime) {
+        this.refreshTokenLifetime = refreshTokenLifetime;
     }
 
     public List<CustomAttribute> getCustomAttributes() {

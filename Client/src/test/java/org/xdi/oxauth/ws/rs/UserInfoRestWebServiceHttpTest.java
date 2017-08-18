@@ -14,6 +14,7 @@ import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
 import org.xdi.oxauth.model.common.AuthorizationMethod;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
@@ -36,7 +37,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version April 28, 2017
+ * @version July 19, 2017
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -51,9 +52,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN
         );
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -90,9 +94,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN
         );
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -129,11 +136,13 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN
         );
-
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "org_name", "work_phone");
 
         // 1. Register client
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -166,8 +175,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showTitle("requestUserInfoPasswordFlow");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
@@ -214,8 +226,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showTitle("requestUserInfoWithNotAllowedScopePasswordFlow");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
@@ -261,8 +276,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showTitle("requestUserInfoDynamicScopesPasswordFlow");
 
         List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
@@ -339,8 +357,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN
         );
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -382,8 +403,11 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         showTitle("requestUserInfoAdditionalClaims");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<GrantType> grantTypes = Arrays.asList(
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
+        );
 
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
@@ -1293,10 +1317,12 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
     }
 
-    private RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes, final String sectorIdentifierUri) {
+    private RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
+                                            final List<GrantType> grantTypes, final String sectorIdentifierUri) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
 

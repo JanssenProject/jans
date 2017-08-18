@@ -32,7 +32,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  * @author Yuriy Zabrovarnyy
  * @version 0.1, 01.11.2012
  */
-@Api(value = "/oxauth", description = "The Client Registration Endpoint is an OAuth 2.0 Protected Resource through which a new Client registration can be requested. The OpenID Provider MAY require an Initial Access Token that is provisioned out-of-band (in a manner that is out of scope for this specification) to restrict registration requests to only authorized Clients or developers.")
+@Api(value = "/", description = "The Client Registration Endpoint is an OAuth 2.0 Protected Resource through which a new Client registration can be requested. The OpenID Provider MAY require an Initial Access Token that is provisioned out-of-band (in a manner that is out of scope for this specification) to restrict registration requests to only authorized Clients or developers.")
 public interface RegisterRestWebService {
 
     /**

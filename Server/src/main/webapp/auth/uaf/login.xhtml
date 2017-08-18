@@ -47,10 +47,10 @@
                 helper.onSignInCallback(authResult, authHandle);
             }
 
-            var qr_image = '${qr_image}';
-            var qr_options = ${qr_options};
-            var server_uri = '${uaf_obb_server_uri}';
-            var status_request = ${uaf_obb_status_request};
+            var qr_image = '${identity.getWorkingParameter('qr_image')}';
+            var qr_options = ${identity.getWorkingParameter('qr_options')};
+            var server_uri = '${identity.getWorkingParameter('uaf_obb_server_uri')}';
+            var status_request = ${identity.getWorkingParameter('uaf_obb_status_request')};
 
             $(document).ready(function() {
                 if (qr_image == '') {
@@ -116,7 +116,7 @@
                                         <h:outputText value="#{msgs['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
-                                        <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
+                                        <ui:param name="client" value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
 
                                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
