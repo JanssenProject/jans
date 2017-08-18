@@ -301,10 +301,16 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (!responseTypesSupported.contains(responseTypeSet)) {
             responseTypeSet.clear();
         }
+
         grantTypeSet.retainAll(grantTypesSupported);
 
+        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
+        grantTypeSet.retainAll(dynamicGrantTypeDefault);
+
         p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
-        p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+		if (appConfiguration.getEnableClientGrantTypeUpdate()) {
+			p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+		}
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
@@ -537,7 +543,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
-
+    
     private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
         final JSONObject jsonObject = getJSONObject(p_client);
         return jsonObject.toString(4).replace("\\/", "/");
