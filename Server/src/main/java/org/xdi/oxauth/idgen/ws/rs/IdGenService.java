@@ -7,14 +7,14 @@
 package org.xdi.oxauth.idgen.ws.rs;
 
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.service.external.ExternalIdGeneratorService;
 import org.xdi.util.StringHelper;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -24,8 +24,6 @@ import org.xdi.util.StringHelper;
 @Stateless
 @Named("idGenService")
 public class IdGenService implements IdGenerator {
-
-    public static final String PYTHON_CLASS_NAME = "PythonExternalIdGenerator";
 
     @Inject
     private Logger log;

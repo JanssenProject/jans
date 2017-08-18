@@ -1,8 +1,14 @@
+/*
+ * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.xdi.oxauth.i18n;
 
 import org.apache.logging.log4j.util.Strings;
 import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.service.SessionIdService;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.faces.context.FacesContext;
@@ -16,6 +22,9 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+/**
+ * @version August 9, 2017
+ */
 @Named("language")
 @ApplicationScoped
 public class LanguageBean implements Serializable {
@@ -27,7 +36,7 @@ public class LanguageBean implements Serializable {
     private static final String COOKIE_PATH = "/";
 
     @Inject
-    private SessionStateService sessionStateService;
+    private SessionIdService sessionIdService;
 
     @Inject
     private AuthenticationService authenticationService;

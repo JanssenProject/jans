@@ -10,9 +10,9 @@ import org.jboss.resteasy.client.ClientResponseFailure;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.uma.UmaConfigurationService;
+import org.xdi.oxauth.client.uma.UmaMetadataService;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.model.uma.UmaConfiguration;
+import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaTestUtil;
 
 /**
@@ -30,12 +30,12 @@ public class MetaDataFlowHttpTest extends BaseTest {
     public void testGetUmaMetaDataConfiguration(final String umaMetaDataUrl) throws Exception {
         showTitle("testGetUmaMetaDataConfiguration");
 
-        UmaConfigurationService metaDataConfigurationService = UmaClientFactory.instance().createMetaDataConfigurationService(umaMetaDataUrl);
+        UmaMetadataService metaDataConfigurationService = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true));
 
-        // Get meta data configuration
-        UmaConfiguration c = null;
+        // Get meta data
+        UmaMetadata c = null;
         try {
-            c = metaDataConfigurationService.getMetadataConfiguration();
+            c = metaDataConfigurationService.getMetadata();
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;

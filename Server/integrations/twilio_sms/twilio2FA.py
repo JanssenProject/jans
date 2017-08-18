@@ -4,29 +4,19 @@
 # Author: Michael Schwartz
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.security import Identity
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
-from org.xdi.util import StringHelper
-from org.jboss.seam.contexts import Context, Contexts
-from org.xdi.oxauth.util import ServerUtil
-from org.xdi.util import StringHelper 
-from org.xdi.util import ArrayHelper 
-from java.util import Arrays
+import random
 
 import com.twilio.sdk.TwilioRestClient as TwilioRestClient
-import com.twilio.sdk.TwilioRestException as TwilioRestException
-import com.twilio.sdk.resource.factory.MessageFactory as MessageFactory
-import com.twilio.sdk.resource.instance.Message as Message
-import org.apache.http.NameValuePair as NameValuePair
-import org.apache.http.message.BasicNameValuePair as BasicNameValuePair
 import java.util.ArrayList as ArrayList
-import java.util.Arrays.asList as List
+import org.apache.http.message.BasicNameValuePair as BasicNameValuePair
+from java.util import Arrays
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.oxauth.util import ServerUtil
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.util import StringHelper
 
-import java
-import random
-import jarray
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -77,9 +67,11 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        context = Contexts.getEventContext()
-        userService = Component.getInstance(UserService)
-        session_attributes = context.get("sessionAttributes")
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
+        session_attributes = identity.getSessionId().getSessionAttributes()
 
         form_passcode = ServerUtil.getFirstValue(requestParameters, "passcode")
         form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")
@@ -88,13 +80,15 @@ class PersonAuthentication(PersonAuthenticationType):
         
         if step == 1:
             print "TwilioSMS. Step 1 Password Authentication"
-            credentials = Identity.instance().getCredentials()
+            identity = CdiUtil.bean(Identity)
+            credentials = identity.getCredentials()
+
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
             
             logged_in = False
             if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
             
             if not logged_in:
                 return False
@@ -117,7 +111,7 @@ class PersonAuthentication(PersonAuthenticationType):
             code = random.randint(100000, 999999)
             
             # Get code and save it in LDAP temporarily with special session entry 
-            context.set("code", code)
+            identity.setWorkingParameter("code", code)
 
             client = TwilioRestClient(self.ACCOUNT_SID, self.AUTH_TOKEN)
             bodyParam = BasicNameValuePair("Body", str(code))
@@ -135,8 +129,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 print 'TwilioSMs, Message Sid: %s' % (message.getSid())
                 return True
-            except:
+            except Exception, ex:
                 print "TwilioSMS. Error sending message to Twilio"
+                print "TwilioSMS. Unexpected error:", ex
 
             return False
         elif step == 2:

@@ -4,19 +4,20 @@ namespace org\xdi\oxauth\model\common;
 /**
  * Description of Parameters
  *
- * @author Gabin Dongmo Date: 29/03/2013
+ * @author Gabin Dongmo
+ * @version August 9, 2017
  */
 class Parameters implements HasParamName {
     
     /**
-     * Session State
+     * Session Id
      */
-    const SESSION_STATE = "session_state";
+    const SESSION_ID = "session_id";
     
     /**
-     * Request Session State
+     * Request Session Id
      */
-    const REQUEST_SESSION_STATE = "request_session_state";
+    const REQUEST_SESSION_ID = "request_session_id";
     
     /**
      * Parameter Name

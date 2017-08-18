@@ -19,7 +19,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version July 18, 2017
  */
 public class StringUtils {
 
@@ -74,20 +74,18 @@ public class StringUtils {
     /**
      * Method to join a list of elements of type string
      *
-     * @param inputList  List which contains strings
+     * @param collection List which contains strings
      * @param glueString String between each array element
      * @return String containing all array elements separated by glue string.
      */
-    public static String implode(List inputList, String glueString) {
+    public static String implode(Collection collection, String glueString) {
         String output = EMPTY_STRING;
 
-        if (inputList != null && !inputList.isEmpty()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(inputList.get(0));
+        if (collection != null && !collection.isEmpty()) {
+            StringJoiner sb = new StringJoiner(glueString);
 
-            for (int i = 1; i < inputList.size(); i++) {
-                sb.append(glueString);
-                sb.append(inputList.get(i));
+            for (Object obj : collection) {
+                sb.add(obj.toString());
             }
 
             output = sb.toString();

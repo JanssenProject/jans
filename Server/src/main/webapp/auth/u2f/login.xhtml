@@ -13,8 +13,8 @@
         <script src="./scripts/u2f-api.js"/>
 
         <script>
-            var auth_request = ${fido_u2f_authentication_request};
-            var register_request = ${fido_u2f_registration_request};
+            var auth_request = ${identity.getWorkingParameter('fido_u2f_authentication_request')};
+            var register_request = ${identity.getWorkingParameter('fido_u2f_registration_request')};
 
             function startRegistration() {
                 u2f.register(register_request.registerRequests, register_request.authenticateRequests,
@@ -90,7 +90,7 @@
 
     <ui:define name="body">
         <form method="post" action="#{request.contextPath}/postlogin" id="u2f_form" onsubmit="return false;">
-            <input type="hidden" name="username" value="${identity.username}"/>
+            <input type="hidden" name="username" value="${credentials.username}"/>
             <input type="hidden" name="authMethod" id="authMethod"/>
             <input type="hidden" name="tokenResponse" id="tokenResponse"/>
         </form>
@@ -106,7 +106,7 @@
                                         <h:outputText value="#{msgs['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
-                                        <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
+                                        <ui:param name="client" value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
 
                                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>

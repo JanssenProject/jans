@@ -25,7 +25,7 @@ import static org.testng.Assert.assertNotNull;
  * Functional tests for SSO with Multiple Backend Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version December 12, 2016
+ * @version August 9, 2017
  */
 public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
@@ -67,20 +67,20 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
                 null);
 
         authorizationRequest1.setState(state1);
-        authorizationRequest1.setRequestSessionState(true);
+        authorizationRequest1.setRequestSessionId(true);
 
         AuthorizationResponse authorizationResponse1 = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1, userId, userSecret);
 
         assertNotNull(authorizationResponse1.getLocation(), "The location is null");
         assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse1.getSessionState(), "The session state is null");
+        assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
         assertNotNull(authorizationResponse1.getScope(), "The scope is null");
         assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertEquals(authorizationResponse1.getState(), state1);
 
         String code1 = authorizationResponse1.getCode();
-        String sessionState = authorizationResponse1.getSessionState();
+        String sessionId = authorizationResponse1.getSessionId();
 
         // TV sends the code to the Backend
         // We don't use httpClient and cookieStore during this call
@@ -131,7 +131,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         authorizationRequest2.getPrompts().add(Prompt.NONE);
         authorizationRequest2.setState(state2);
-        authorizationRequest2.setSessionState(sessionState);
+        authorizationRequest2.setSessionId(sessionId);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
@@ -225,20 +225,20 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         authorizationRequest1.getPrompts().add(Prompt.NONE);
         authorizationRequest1.setState(state1);
         authorizationRequest1.setAuthorizationMethod(AuthorizationMethod.FORM_ENCODED_BODY_PARAMETER);
-        authorizationRequest1.setRequestSessionState(true);
+        authorizationRequest1.setRequestSessionId(true);
 
         AuthorizationResponse authorizationResponse1 = authorizationRequestAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1);
 
         assertNotNull(authorizationResponse1.getLocation(), "The location is null");
         assertNotNull(authorizationResponse1.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse1.getSessionState(), "The session id is null");
+        assertNotNull(authorizationResponse1.getSessionId(), "The session id is null");
         assertNotNull(authorizationResponse1.getScope(), "The scope is null");
         assertNotNull(authorizationResponse1.getState(), "The state is null");
         assertEquals(authorizationRequest1.getState(), state1);
 
         String authorizationCode1 = authorizationResponse1.getCode();
-        String sessionState = authorizationResponse1.getSessionState();
+        String sessionId = authorizationResponse1.getSessionId();
 
         TokenRequest tokenRequest1 = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest1.setCode(authorizationCode1);
@@ -272,7 +272,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         authorizationRequest2.getPrompts().add(Prompt.NONE);
         authorizationRequest2.setState(state2);
-        authorizationRequest2.setSessionState(sessionState);
+        authorizationRequest2.setSessionId(sessionId);
 
         AuthorizeClient authorizeClient2 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient2.setRequest(authorizationRequest2);
@@ -320,7 +320,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
 
         authorizationRequest3.getPrompts().add(Prompt.NONE);
         authorizationRequest3.setState(state3);
-        authorizationRequest3.setSessionState(sessionState);
+        authorizationRequest3.setSessionId(sessionId);
 
         AuthorizeClient authorizeClient3 = new AuthorizeClient(authorizationEndpoint);
         authorizeClient3.setRequest(authorizationRequest3);

@@ -6,17 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.net.URI;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
-
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -28,6 +17,14 @@ import org.xdi.oxauth.model.uma.UmaTestUtil;
 import org.xdi.oxauth.model.uma.wrapper.Token;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.Form;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+
+import static org.testng.Assert.*;
+
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 17/09/2013
@@ -38,27 +35,27 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 	@ArquillianResource
 	private URI url;
 
-	private static Token m_authorization;
-	private static Token m_tokenToIntrospect;
+	private static Token authorization;
+	private static Token tokenToIntrospect;
 
 	@Test
 	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
 			"umaRedirectUri" })
 	public void requestAuthorization(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
 			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-		m_authorization = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+		authorization = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
 				umaPatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(m_authorization);
+		UmaTestUtil.assert_(authorization);
 	}
 
 	@Test(dependsOnMethods = "requestAuthorization")
-	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaAatClientId", "umaAatClientSecret",
+	@Parameters({ "authorizePath", "tokenPath", "umaUserId", "umaUserSecret", "umaPatClientId", "umaPatClientSecret",
 			"umaRedirectUri" })
 	public void requestTokenToIntrospect(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
-			String umaAatClientId, String umaAatClientSecret, String umaRedirectUri) {
-		m_tokenToIntrospect = TUma.requestAat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaAatClientId,
-				umaAatClientSecret, umaRedirectUri);
-		UmaTestUtil.assert_(m_tokenToIntrospect);
+			String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
+		tokenToIntrospect = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+				umaPatClientSecret, umaRedirectUri);
+		UmaTestUtil.assert_(tokenToIntrospect);
 	}
 
 	@Test(dependsOnMethods = "requestTokenToIntrospect")
@@ -67,8 +64,8 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
 		Builder request = ResteasyClientBuilder.newClient().target(url.toString() + introspectionPath).request();
 
 		request.header("Accept", "application/json");
-		request.header("Authorization", "Bearer " + m_authorization.getAccessToken());
-		Response response = request.post(Entity.form(new Form("token", m_tokenToIntrospect.getAccessToken())));
+		request.header("Authorization", "Bearer " + authorization.getAccessToken());
+		Response response = request.post(Entity.form(new Form("token", tokenToIntrospect.getAccessToken())));
 
 		String entity = response.readEntity(String.class);
 		showResponse("introspection", response, entity);

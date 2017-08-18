@@ -29,7 +29,7 @@ import java.util.*;
  * Represents a token request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version June 28, 2017
  */
 public class TokenRequest extends BaseRequest {
 
@@ -60,16 +60,6 @@ public class TokenRequest extends BaseRequest {
             return scope(scope);
         }
 
-        public Builder aat(String... scopeArray) {
-            String scope = UmaScopeType.AUTHORIZATION.getValue();
-            if (scopeArray != null && scopeArray.length > 0) {
-                for (String s : scopeArray) {
-                    scope = scope + " " + s;
-                }
-            }
-            return scope(scope);
-        }
-
         public TokenRequest build() {
             final TokenRequest request = new TokenRequest(grantType);
             request.setScope(scope);
@@ -85,7 +75,6 @@ public class TokenRequest extends BaseRequest {
     private String scope;
     private String assertion;
     private String refreshToken;
-    private String oxAuthExchangeToken;
     private String audience;
     private String codeVerifier;
 
@@ -281,14 +270,6 @@ public class TokenRequest extends BaseRequest {
         this.refreshToken = refreshToken;
     }
 
-    public String getOxAuthExchangeToken() {
-        return oxAuthExchangeToken;
-    }
-
-    public void setOxAuthExchangeToken(String oxAuthExchangeToken) {
-        this.oxAuthExchangeToken = oxAuthExchangeToken;
-    }
-
     public void setAudience(String audience) {
         this.audience = audience;
     }
@@ -409,10 +390,6 @@ public class TokenRequest extends BaseRequest {
                 queryStringBuilder.append("&");
                 queryStringBuilder.append("refresh_token=").append(refreshToken);
             }
-            if (oxAuthExchangeToken != null && !oxAuthExchangeToken.isEmpty()) {
-                queryStringBuilder.append("&");
-                queryStringBuilder.append("oxauth_exchange_token=").append(oxAuthExchangeToken);
-            }
             if (getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
                 if (getAuthUsername() != null && !getAuthUsername().isEmpty()) {
                     queryStringBuilder.append("&");
@@ -474,9 +451,6 @@ public class TokenRequest extends BaseRequest {
         }
         if (refreshToken != null && !refreshToken.isEmpty()) {
             parameters.put("refresh_token", refreshToken);
-        }
-        if (oxAuthExchangeToken != null && !oxAuthExchangeToken.isEmpty()) {
-            parameters.put("oxauth_exchange_token", oxAuthExchangeToken);
         }
         if (getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_POST) {
             if (getAuthUsername() != null && !getAuthUsername().isEmpty()) {

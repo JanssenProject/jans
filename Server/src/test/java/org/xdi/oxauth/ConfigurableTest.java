@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.testng.Arquillian;
@@ -40,22 +41,6 @@ public abstract class ConfigurableTest extends Arquillian {
 		return Deployments.createDeployment();
 	}
 
-	/**
-	 * Prepare configuration before tests execution
-	 */
-	@BeforeClass
-	public static void initTest() {
-		String propertiesFile = "./target/test-classes/testng.properties";
-		testData = new FileConfiguration(propertiesFile);
-	}
-
-	/**
-	 * Get configuration
-	 */
-	public FileConfiguration getTestData() {
-		return testData;
-	}
-
 	@BeforeSuite
 	public void initTestSuite(ITestContext context) throws FileNotFoundException, IOException {
 		String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
@@ -64,11 +49,14 @@ public abstract class ConfigurableTest extends Arquillian {
 		}
 
 		// Load test parameters
-		// propertiesFile =
-		// "/Users/JAVIER/IdeaProjects/oxAuth/Client/target/test-classes/testng.properties";
 		FileInputStream conf = new FileInputStream(propertiesFile);
-		Properties prop = new Properties();
-		prop.load(conf);
+        Properties prop;
+        try {
+			prop = new Properties();
+			prop.load(conf);
+		} finally {
+			IOUtils.closeQuietly(conf);
+		}
 
 		Map<String, String> parameters = new HashMap<String, String>();
 		for (Entry<Object, Object> entry : prop.entrySet()) {
@@ -81,7 +69,7 @@ public abstract class ConfigurableTest extends Arquillian {
 			parameters.put(key.toString(), value.toString());
 		}
 
-		// Overrided test paramters
+		// Overrided test parameters
 		context.getSuite().getXmlSuite().setParameters(parameters);
 	}
 

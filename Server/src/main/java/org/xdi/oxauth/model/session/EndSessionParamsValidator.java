@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.session;
 
+import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.util.StringHelper;
 
@@ -13,24 +14,23 @@ import org.xdi.util.StringHelper;
  * @author Javier Rojas
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- *
- * Date: 12.15.2011
+ * @version August 9, 2017
  */
 public class EndSessionParamsValidator {
 
-    public static boolean isValidParams(String idTokenHint, String sessionState) {
-        return StringHelper.isNotEmpty(idTokenHint) || StringHelper.isNotEmpty(sessionState);
+    public static boolean isValidParams(String idTokenHint, String sessionId) {
+        return StringHelper.isNotEmpty(idTokenHint) || StringHelper.isNotEmpty(sessionId);
     }
 
-    public static void validateParams(String idTokenHint, String sessionState, String postLogoutUrl, ErrorResponseFactory errorFactory) {
-        if (!isValidParams(idTokenHint, sessionState) || (postLogoutUrl == null) || postLogoutUrl.isEmpty()) {
-            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
-        }
+    public static void validateParams(String idTokenHint, String sessionId, String postLogoutUrl, ErrorResponseFactory errorFactory) {
+        if (!isValidParams(idTokenHint, sessionId))
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
+        else if (StringUtils.isEmpty(postLogoutUrl))
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.POST_LOGOUT_URI_NOT_PASSED);
     }
 
-    public static void validateParams(String idTokenHint, String sessionState, ErrorResponseFactory errorFactory) {
-        if (!isValidParams(idTokenHint, sessionState)) {
-            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_REQUEST);
-        }
+    public static void validateParams(String idTokenHint, String sessionId, ErrorResponseFactory errorFactory) {
+        if (!isValidParams(idTokenHint, sessionId))
+            errorFactory.throwBadRequestException(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
     }
 }

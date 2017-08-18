@@ -18,8 +18,9 @@ import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.security.Credentials;
+import org.xdi.model.security.SimplePrincipal;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.Constants;
@@ -38,23 +39,24 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_STATE;
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 /**
  * Authentication service methods
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version August 16, 2017
  */
 @Stateless
 @Named
 public class AuthenticationService {
 
-	// use only "acr" instead of "acr_values" #334
+    // use only "acr" instead of "acr_values" #334
     public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
             AuthorizeRequestParam.SCOPE,
             AuthorizeRequestParam.RESPONSE_TYPE,
@@ -70,7 +72,7 @@ public class AuthenticationService {
             AuthorizeRequestParam.ID_TOKEN_HINT,
             AuthorizeRequestParam.LOGIN_HINT,
             AuthorizeRequestParam.ACR_VALUES,
-            AuthorizeRequestParam.SESSION_STATE,
+            AuthorizeRequestParam.SESSION_ID,
             AuthorizeRequestParam.REQUEST,
             AuthorizeRequestParam.REQUEST_URI,
             AuthorizeRequestParam.ORIGIN_HEADERS,
@@ -87,17 +89,19 @@ public class AuthenticationService {
 
     @Inject
     private Identity identity;
-    
+
     @Inject
     private Credentials credentials;
 
-    @Inject @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
+    @Inject
+    @Named(AppInitializer.LDAP_AUTH_CONFIG_NAME)
     private List<GluuLdapConfiguration> ldapAuthConfigs;
 
     @Inject
     private LdapEntryManager ldapEntryManager;
 
-    @Inject @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
+    @Inject
+    @Named(AppInitializer.LDAP_AUTH_ENTRY_MANAGER_NAME)
     private List<LdapEntryManager> ldapAuthEntryManagers;
 
     @Inject
@@ -107,7 +111,7 @@ public class AuthenticationService {
     private ClientService clientService;
 
     @Inject
-    private SessionStateService sessionStateService;
+    private SessionIdService sessionIdService;
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
@@ -159,13 +163,13 @@ public class AuthenticationService {
     }
 
     private void setAuthenticatedUserSessionAttribute(String userName, boolean authenticated) {
-        SessionState sessionState = sessionStateService.getSessionState();
-        if (sessionState != null) {
-            Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+        SessionId sessionId = sessionIdService.getSessionId();
+        if (sessionId != null) {
+            Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
             if (authenticated) {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
-            sessionStateService.updateSessionStateIfNeeded(sessionState, authenticated);
+            sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
         }
     }
 
@@ -255,48 +259,52 @@ public class AuthenticationService {
     public boolean authenticate(GluuLdapConfiguration ldapAuthConfig, LdapEntryManager ldapAuthEntryManager, String keyValue, String password, String primaryKey, String localPrimaryKey) {
         log.debug("Attempting to find userDN by primary key: '{}' and key value: '{}', credentials: '{}'", primaryKey, keyValue, System.identityHashCode(credentials));
 
-        List<?> baseDNs;
-        if (ldapAuthConfig == null) {
-            baseDNs = Arrays.asList(userService.getDnForUser(null));
-        } else {
-            baseDNs = ldapAuthConfig.getBaseDNs();
-        }
+        try {
+            List<?> baseDNs;
+            if (ldapAuthConfig == null) {
+                baseDNs = Arrays.asList(userService.getDnForUser(null));
+            } else {
+                baseDNs = ldapAuthConfig.getBaseDNs();
+            }
 
-        if (baseDNs != null && !baseDNs.isEmpty()) {
-            for (Object baseDnProperty : baseDNs) {
-                String baseDn;
-                if (baseDnProperty instanceof SimpleProperty) {
-                    baseDn = ((SimpleProperty) baseDnProperty).getValue();
-                } else {
-                    baseDn = baseDnProperty.toString();
-                }
+            if (baseDNs != null && !baseDNs.isEmpty()) {
+                for (Object baseDnProperty : baseDNs) {
+                    String baseDn;
+                    if (baseDnProperty instanceof SimpleProperty) {
+                        baseDn = ((SimpleProperty) baseDnProperty).getValue();
+                    } else {
+                        baseDn = baseDnProperty.toString();
+                    }
 
-                User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
-                if (user != null) {
-                    String userDn = user.getDn();
-                    log.debug("Attempting to authenticate userDN: {}", userDn);
-                    if (ldapAuthEntryManager.authenticate(userDn, password)) {
-                        log.debug("User authenticated: {}", userDn);
+                    User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
+                    if (user != null) {
+                        String userDn = user.getDn();
+                        log.debug("Attempting to authenticate userDN: {}", userDn);
+                        if (ldapAuthEntryManager.authenticate(userDn, password)) {
+                            log.debug("User authenticated: {}", userDn);
 
-                        log.debug("Attempting to find userDN by local primary key: {}", localPrimaryKey);
-                        User localUser = userService.getUserByAttribute(localPrimaryKey, keyValue);
-                        if (localUser != null) {
-                            if (!checkUserStatus(localUser)) {
-                                return false;
+                            log.debug("Attempting to find userDN by local primary key: {}", localPrimaryKey);
+                            User localUser = userService.getUserByAttribute(localPrimaryKey, keyValue);
+                            if (localUser != null) {
+                                if (!checkUserStatus(localUser)) {
+                                    return false;
+                                }
+
+                                configureAuthenticatedUser(localUser);
+                                updateLastLogonUserTime(localUser);
+
+                                log.trace("authenticate_external: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
+
+                                return true;
                             }
-
-                            configureAuthenticatedUser(localUser);
-                            updateLastLogonUserTime(localUser);
-
-                            log.trace("authenticate_external: credentials: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), credentials.getUsername(), getAuthenticatedUserId());
-
-                            return true;
                         }
                     }
                 }
+            } else {
+                log.error("There are no baseDns specified in authentication configuration.");
             }
-        } else {
-            log.error("There are no baseDns specified in authentication configuration.");
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
 
         return false;
@@ -377,13 +385,13 @@ public class AuthenticationService {
     }
 
     private void updateLastLogonUserTime(User user) {
-		if (!appConfiguration.getUpdateUserLastLogonTime()) {
-			return;
-		}
+        if (!appConfiguration.getUpdateUserLastLogonTime()) {
+            return;
+        }
 
-		CustomEntry customEntry = new CustomEntry();
+        CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
-		customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
+        customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
 
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
         customEntry.getCustomAttributes().add(customAttribute);
@@ -395,28 +403,28 @@ public class AuthenticationService {
         }
     }
 
-    public SessionState configureSessionUser(SessionState sessionState, Map<String, String> sessionIdAttributes) {
-        log.trace("configureSessionUser: credentials: '{}', sessionState: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionState, credentials.getUsername(), getAuthenticatedUserId());
+    public SessionId configureSessionUser(SessionId sessionId, Map<String, String> sessionIdAttributes) {
+        log.trace("configureSessionUser: credentials: '{}', sessionId: '{}', credentials.userName: '{}', authenticatedUser.userId: '{}'", System.identityHashCode(credentials), sessionId, credentials.getUsername(), getAuthenticatedUserId());
 
         User user = getAuthenticatedUser();
 
-        SessionState newSessionState;
-        if (sessionState == null) {
-            newSessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn(), sessionIdAttributes);
+        SessionId newSessionId;
+        if (sessionId == null) {
+            newSessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn(), sessionIdAttributes);
         } else {
             // TODO: Remove after 2.4.5
             String sessionAuthUser = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
-            log.trace("configureSessionUser sessionState: '{}', sessionState.auth_user: '{}'", sessionState, sessionAuthUser);
+            log.trace("configureSessionUser sessionId: '{}', sessionId.auth_user: '{}'", sessionId, sessionAuthUser);
 
-            newSessionState = sessionStateService.setSessionStateAuthenticated(sessionState, user.getDn());
+            newSessionId = sessionIdService.setSessionIdStateAuthenticated(sessionId, user.getDn());
         }
 
-        configureEventUserContext(newSessionState);
+        identity.setSessionId(sessionId);
 
-        return newSessionState;
+        return newSessionId;
     }
 
-    public SessionState configureEventUser() {
+    public SessionId configureEventUser() {
         User user = getAuthenticatedUser();
         if (user == null) {
             return null;
@@ -424,21 +432,23 @@ public class AuthenticationService {
 
         log.debug("ConfigureEventUser: username: '{}', credentials: '{}'", user.getUserId(), System.identityHashCode(credentials));
 
-        SessionState sessionState = sessionStateService.generateAuthenticatedSessionState(user.getDn());
+        SessionId sessionId = sessionIdService.generateAuthenticatedSessionId(user.getDn());
 
-        configureEventUserContext(sessionState);
+        identity.setSessionId(sessionId);
 
-        return sessionState;
+        return sessionId;
     }
 
-    public void configureEventUser(SessionState sessionState) {
-        sessionStateService.updateSessionState(sessionState);
+    public void configureEventUser(SessionId sessionId) {
+        sessionIdService.updateSessionId(sessionId);
 
-        configureEventUserContext(sessionState);
+        identity.setSessionId(sessionId);
     }
 
-    private void configureEventUserContext(SessionState sessionState) {
-        identity.setSessionState(sessionState);
+    public void quietLogin(String userName) {
+        Principal principal = new SimplePrincipal(userName);
+        identity.acceptExternallyAuthenticatedPrincipal(principal);
+        identity.quietLogin();
     }
 
     private void configureAuthenticatedUser(User user) {
@@ -449,9 +459,9 @@ public class AuthenticationService {
         if (identity.getUser() != null) {
             return identity.getUser();
         } else {
-            SessionState sessionState = sessionStateService.getSessionState();
-            if (sessionState != null) {
-                Map<String, String> sessionIdAttributes = sessionState.getSessionAttributes();
+            SessionId sessionId = sessionIdService.getSessionId();
+            if (sessionId != null) {
+                Map<String, String> sessionIdAttributes = sessionId.getSessionAttributes();
                 String userId = sessionIdAttributes.get(Constants.AUTHENTICATED_USER);
                 if (StringHelper.isNotEmpty(userId)) {
                     User user = userService.getUser(userId);
@@ -465,7 +475,7 @@ public class AuthenticationService {
         return null;
     }
 
-    private String getAuthenticatedUserId() {
+    public String getAuthenticatedUserId() {
         User authenticatedUser = getAuthenticatedUser();
         if (authenticatedUser != null) {
             return authenticatedUser.getUserId();
@@ -474,12 +484,13 @@ public class AuthenticationService {
         return null;
     }
 
-    public void configureSessionClient() {
+    public Client configureSessionClient() {
         String clientInum = credentials.getUsername();
         log.debug("ConfigureSessionClient: username: '{}', credentials: '{}'", clientInum, System.identityHashCode(credentials));
 
         Client client = clientService.getClient(clientInum);
         configureSessionClient(client);
+        return client;
     }
 
     public void configureSessionClient(Client client) {
@@ -492,7 +503,7 @@ public class AuthenticationService {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void onSuccessfulLogin(SessionState sessionUser) {
+    public void onSuccessfulLogin(SessionId sessionUser) {
         log.info("Attempting to redirect user: SessionUser: {}", sessionUser);
 
         if ((sessionUser == null) || StringUtils.isBlank(sessionUser.getUserDn())) {
@@ -507,7 +518,7 @@ public class AuthenticationService {
             final Map<String, String> result = sessionUser.getSessionAttributes();
             Map<String, String> allowedParameters = getAllowedParameters(result);
 
-            result.put(SESSION_STATE, sessionUser.getId());
+            result.put(SESSION_ID, sessionUser.getId());
 
             log.trace("Logged in successfully! User: {}, page: /authorize.xhtml, map: {}", user, allowedParameters);
             facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
@@ -528,18 +539,18 @@ public class AuthenticationService {
         return result;
     }
 
-    public User getUserOrRemoveSession(SessionState p_sessionState) {
-        if (p_sessionState != null) {
+    public User getUserOrRemoveSession(SessionId p_sessionId) {
+        if (p_sessionId != null) {
             try {
-                if (StringUtils.isNotBlank(p_sessionState.getUserDn())) {
-                    final User user = userService.getUserByDn(p_sessionState.getUserDn());
+                if (StringUtils.isNotBlank(p_sessionId.getUserDn())) {
+                    final User user = userService.getUserByDn(p_sessionId.getUserDn());
                     if (user != null) {
                         return user;
                     } else { // if there is no user than session is invalid
-                        sessionStateService.remove(p_sessionState);
+                        sessionIdService.remove(p_sessionId);
                     }
                 } else { // if there is no user than session is invalid
-                    sessionStateService.remove(p_sessionState);
+                    sessionIdService.remove(p_sessionId);
                 }
             } catch (Exception e) {
                 log.trace(e.getMessage(), e);

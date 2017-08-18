@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Map;
@@ -171,7 +172,7 @@ public class HttpService implements Serializable {
 		try {
 			return new String(base64.encode((value).getBytes(Util.UTF8)), Util.UTF8);
 		} catch (UnsupportedEncodingException ex) {
-	    	log.error("Failed to convert '{}' to base64", ex, value);
+	    	log.error("Failed to convert '{}' to base64", value, ex);
 		}
 
 		return null;
@@ -181,7 +182,7 @@ public class HttpService implements Serializable {
 		try {
 			return URLEncoder.encode(value, Util.UTF8);
 		} catch (UnsupportedEncodingException ex) {
-	    	log.error("Failed to encode url '{}'", ex, value);
+	    	log.error("Failed to encode url '{}'", value, ex);
 		}
 
 		return null;
@@ -250,6 +251,22 @@ public class HttpService implements Serializable {
 		return new String(responseBytes);
 	}
 
+	public String convertEntityToString(byte[] responseBytes, Charset charset) {
+		if (responseBytes == null) {
+			return null;
+		}
+
+		return new String(responseBytes, charset);
+	}
+
+	public String convertEntityToString(byte[] responseBytes, String charsetName) throws UnsupportedEncodingException {
+		if (responseBytes == null) {
+			return null;
+		}
+
+		return new String(responseBytes, charsetName);
+	}
+
 	public boolean isResponseStastusCodeOk(HttpResponse httpResponse) {
 		int responseStastusCode = httpResponse.getStatusLine().getStatusCode();
 		if (responseStastusCode == HttpStatus.SC_OK) {
@@ -274,7 +291,7 @@ public class HttpService implements Serializable {
 		return false;
 	}
 
-	public final String constructServerUrl(final HttpServletRequest request) {
+	public String constructServerUrl(final HttpServletRequest request) {
     	int serverPort = request.getServerPort();
 
     	String redirectUrl;

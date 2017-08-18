@@ -7,7 +7,7 @@
                 template="/WEB-INF/incl/layout/template.xhtml">
 
     <f:metadata>
-        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+	<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}" />
     </f:metadata>
 
     <ui:define name="head">
@@ -53,7 +53,7 @@
                 font-weight: bold;
             }
         </style>
-        <h:panelGroup rendered="#{recaptcha_site_key != null}">
+        <h:panelGroup rendered="#{identity.getWorkingParameter('recaptcha_site_key') != null}">
             <script src="https://www.google.com/recaptcha/api.js" async="async" defer="defer"></script>
         </h:panelGroup>
     </ui:define>
@@ -74,7 +74,7 @@
                                         <h:outputText value="#{msgs['login.login']}"/>
                                     </div>
                                     <div class="login-panel-body">
-                                        <ui:param name="client" value="#{clientService.getClient(sessionAttributes['client_id'])}" />
+                                        <ui:param name="client" value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
 
                                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
@@ -86,15 +86,15 @@
 
                                         <div class="dialog">
                                             <h:panelGrid columns="1" border="0" rowClasses="prop" columnClasses="name, name">
-                                                <h:panelGroup rendered="#{recaptcha_site_key != null}">
+                                                <h:panelGroup rendered="#{identity.getWorkingParameter('recaptcha_site_key') != null}">
                                                     <p class="body-list">1. Enter right answer:</p>
-                                                    <div class="g-recaptcha" data-sitekey="#{recaptcha_site_key}"></div>
+                                                    <div class="g-recaptcha" data-sitekey="#{identity.getWorkingParameter('recaptcha_site_key')}"></div>
                                                 </h:panelGroup>
 
-                                                <p class="body-list">#{recaptcha_site_key == null ? '1' : '2'}. Click «Login» button.</p>
+                                                <p class="body-list">#{identity.getWorkingParameter('recaptcha_site_key') == null ? '1' : '2'}. Click «Login» button.</p>
                                                 <p/>
 
-                                                <p class="body-list">#{recaptcha_site_key == null ? '2' : '3'}. If the certificates list appears then choose right certificate.</p>
+                                                <p class="body-list">#{identity.getWorkingParameter('recaptcha_site_key') == null ? '2' : '3'}. If the certificates list appears then choose right certificate.</p>
                                                 <p/>
                                             </h:panelGrid>
                                         </div>
@@ -140,7 +140,7 @@
             window.onload = function() {
                 document.getElementById("loginForm:username").focus();
 
-                var displayRegister = #{display_register_action or sessionAttributes['display_register_action']};
+                var displayRegister = #{identity.getWorkingParameter('display_register_action') or identity.sessionId.sessionAttributes['display_register_action']};
                 if (displayRegister) {
                     document.getElementById("loginForm:registerId").style.display = 'inline';
                 }

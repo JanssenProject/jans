@@ -19,13 +19,14 @@ import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.cdi.event.CleanerEvent;
 import org.xdi.oxauth.service.fido.u2f.DeviceRegistrationService;
 import org.xdi.oxauth.service.fido.u2f.RequestService;
-import org.xdi.oxauth.service.uma.ResourceSetPermissionManager;
-import org.xdi.oxauth.service.uma.RptManager;
+import org.xdi.oxauth.uma.service.UmaPctService;
+import org.xdi.oxauth.uma.service.UmaPermissionService;
+import org.xdi.oxauth.uma.service.UmaRptService;
+import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 
-import javax.ejb.Asynchronous;
 import javax.ejb.DependsOn;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 15, 2015
+ * @version August 9, 2017
  */
 @ApplicationScoped
 @DependsOn("appInitializer")
@@ -64,15 +65,19 @@ public class CleanerTimer {
     private GrantService grantService;
 
     @Inject
-    private RptManager rptManager;
+    private UmaRptService umaRptService;
 
     @Inject
-    private ResourceSetPermissionManager resourceSetPermissionManager;
+    private UmaPctService umaPctService;
 
     @Inject
-    private SessionStateService sessionStateService;
+    private UmaPermissionService umaPermissionService;
 
-    @Inject @Named("u2fRequestService")
+    @Inject
+    private SessionIdService sessionIdService;
+
+    @Inject
+    @Named("u2fRequestService")
     private RequestService u2fRequestService;
 
     @Inject
@@ -85,10 +90,10 @@ public class CleanerTimer {
     private AppConfiguration appConfiguration;
 
     @Inject
-	private Event<TimerEvent> cleanerEvent;
+    private Event<TimerEvent> cleanerEvent;
 
     private AtomicBoolean isActive;
-    
+
     public void initTimer() {
         log.debug("Initializing Cleaner Timer");
         this.isActive = new AtomicBoolean(false);
@@ -98,7 +103,7 @@ public class CleanerTimer {
             interval = DEFAULT_INTERVAL;
         }
 
-        cleanerEvent.fire(new TimerEvent(new TimerSchedule(30, 30), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+        cleanerEvent.fire(new TimerEvent(new TimerSchedule(interval, interval), new CleanerEvent(), Scheduled.Literal.INSTANCE));
     }
 
     @Asynchronous
@@ -116,8 +121,9 @@ public class CleanerTimer {
             processRegisteredClients();
 
             Date now = new Date();
-            this.rptManager.cleanupRPTs(now);
-            this.resourceSetPermissionManager.cleanupResourceSetPermissions(now);
+            this.umaRptService.cleanup(now);
+            this.umaPermissionService.cleanup(now);
+            this.umaPctService.cleanup(now);
 
             processU2fRequests();
             processU2fDeviceRegistrations();
@@ -222,8 +228,7 @@ public class CleanerTimer {
                                 deviceRegistration.getId(),
                                 deviceRegistration.getCreationDate());
                         deviceRegistrationService.removeUserDeviceRegistration(deviceRegistration);
-                    }
-                    catch (Exception e){
+                    } catch (Exception e) {
                         log.error("Failed to remove entry", e);
                     }
                 }

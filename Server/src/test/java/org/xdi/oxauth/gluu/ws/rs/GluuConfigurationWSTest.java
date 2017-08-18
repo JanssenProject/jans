@@ -35,7 +35,7 @@ public class GluuConfigurationWSTest extends BaseTest {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Test
 	public void getConfigurationTest(String gluuConfigurationPath,
-			@Optional @ArquillianResteasyResource("seam/resource") final WebTarget webTarget) throws Exception {
+			@Optional @ArquillianResteasyResource("") final WebTarget webTarget) throws Exception {
 		Response response = webTarget.path(gluuConfigurationPath).request().get();
 		String entity = response.readEntity(String.class);
 		BaseTest.showResponse("UMA : TConfiguration.configuration", response, entity);
