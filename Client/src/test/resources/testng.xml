@@ -38,9 +38,9 @@
     </test>
 
     <!-- Authorize test -->
-    <test name="Authorize session state test (HTTP)" enabled="true">
+    <test name="Authorize session id test (HTTP)" enabled="true">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.AuthorizeSessionStateRestWebServiceHttpTest"/>
+            <class name="org.xdi.oxauth.ws.rs.AuthorizeSessionIdRestWebServiceHttpTest"/>
         </classes>
     </test>
 
@@ -96,6 +96,12 @@
     <test name="End Session test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.EndSessionRestWebServiceHttpTest"/>
+        </classes>
+    </test>
+
+    <test name="Grant Types Restriction (HTTP)" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionHttpTest"/>
         </classes>
     </test>
 
@@ -221,7 +227,7 @@
     <!-- Register UMA resource set description test -->
     <test name="Register UMA resource set test (HTTP)" enabled="false">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceSetFlowHttpTest"/>
+            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceFlowHttpTest"/>
         </classes>
     </test>
 
@@ -231,24 +237,10 @@
         </classes>
     </test>
 
-    <!-- Obtain UMA AAT token test -->
-    <test name="Obtain UMA AAT token test (HTTP)" enabled="false">
+    <!-- Register UMA resource permissions test -->
+    <test name="Register UMA resource description permissions test (HTTP)" enabled="false">
         <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.ObtainAatTokenFlowHttpTest"/>
-        </classes>
-    </test>
-
-    <!-- Obtain UMA RPT token test -->
-    <test name="Obtain UMA RPT token test (HTTP)" enabled="false">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.ObtainRptTokenFlowHttpTest"/>
-        </classes>
-    </test>
-
-    <!-- Register UMA resource set description permissions test -->
-    <test name="Register UMA resource set description permissions test (HTTP)" enabled="false">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceSetPermissionFlowHttpTest"/>
+            <class name="org.xdi.oxauth.ws.rs.uma.UmaRegisterPermissionFlowHttpTest"/>
         </classes>
     </test>
 
@@ -262,12 +254,6 @@
     <test name="Test for getting UMA scopes (HTTP)" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.ScopeHttpTest"/>
-        </classes>
-    </test>
-
-    <test name="ID Generation test (HTTP)" enabled="false">
-        <classes>
-            <class name="org.xdi.oxauth.ws.rs.IdGenWsHttpTest"/>
         </classes>
     </test>
 

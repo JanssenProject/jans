@@ -31,7 +31,7 @@ import com.wordnik.swagger.annotations.ApiResponses;
  *
  * @author Yuriy Movchan Date: 05/13/2015
  */
-@Path("/oxauth/fido-u2f-configuration")
+@Path("/fido-u2f-configuration")
 @Api(value = "/.well-known/fido-u2f-configuration", description = "The FIDO server endpoint that provides configuration data in a JSON [RFC4627] document that resides in at /.well-known/fido-u2f-configuration directory at its hostmeta [hostmeta] location. The configuration data documents conformance options and endpoints supported by the FIDO U2f server.")
 public class U2fConfigurationWS {
 

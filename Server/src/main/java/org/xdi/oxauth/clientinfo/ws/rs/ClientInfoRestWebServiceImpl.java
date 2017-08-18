@@ -35,7 +35,7 @@ import org.xdi.oxauth.service.ScopeService;
  * @author Javier Rojas Blum
  * @version 0.9 March 27, 2015
  */
-@Path("/oxauth")
+@Path("/")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
 	@Inject
@@ -57,12 +57,12 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 	private AttributeService attributeService;
 
     @Override
-    public Response requestUserInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
+    public Response requestClientInfoGet(String accessToken, String authorization, SecurityContext securityContext) {
         return requestClientInfo(accessToken, authorization, securityContext);
     }
 
     @Override
-    public Response requestUserInfoPost(String accessToken, String authorization, SecurityContext securityContext) {
+    public Response requestClientInfoPost(String accessToken, String authorization, SecurityContext securityContext) {
         return requestClientInfo(accessToken, authorization, securityContext);
     }
 

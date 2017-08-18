@@ -14,10 +14,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
 
-		<oxcore.version>3.1.0.weld-SNAPSHOT</oxcore.version>
+		<oxcore.version>3.1.0-SNAPSHOT</oxcore.version>
 		<oxeleven.version>3.1.0-SNAPSHOT</oxeleven.version>
 
-		<jackson.version>1.9.11</jackson.version>
+		<jackson.version>2.8.9</jackson.version>
+		<jackson.prev.version>1.9.11</jackson.prev.version>
 		<jettison.version>1.3.2</jettison.version>
 		<resteasy.version>3.0.21.Final</resteasy.version>
 		<jaxr.version>3.0.12.Final</jaxr.version>
@@ -28,7 +29,7 @@
 		<log4j.version>2.8.2</log4j.version>
 		<slf4j.version>1.7.25</slf4j.version>
 
-		<weld.version>3.0.0.CR2</weld.version>
+		<weld.version>3.0.0.Final</weld.version>
 		<richfaces.version>4.5.17.Final</richfaces.version>
 		<jsf.version>2.2.14</jsf.version>
 		<uel.version>2.2</uel.version>
@@ -89,6 +90,12 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- https://github.com/wywygmbh/log4j-plugin-fluency -->
+			<dependency>
+				<groupId>com.wywy</groupId>
+				<artifactId>log4j-plugin-fluency</artifactId>
+				<version>1.3.2</version>
+			</dependency>
 			<!-- oxAuth -->
 			<dependency>
 				<groupId>org.xdi</groupId>
@@ -173,6 +180,11 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
+				<groupId>javax.websocket</groupId>
+				<artifactId>javax.websocket-api</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
 				<groupId>org.glassfish.web</groupId>
 				<artifactId>el-impl</artifactId>
 				<version>${uel.version}</version>
@@ -186,6 +198,11 @@
 				<groupId>com.sun.faces</groupId>
 				<artifactId>jsf-impl</artifactId>
 				<version>${jsf.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-validator-cdi</artifactId>
+			    <version>5.4.1.Final</version>
 			</dependency>
 
 			<!-- Richfaces -->
@@ -314,13 +331,6 @@
 				<version>${slf4j.version}</version>
 			</dependency>
 
-			<!-- Enable async loggers -->
-			<dependency>
-			    <groupId>com.lmax</groupId>
-			    <artifactId>disruptor</artifactId>
-			    <version>3.3.6</version>
-			</dependency>
-
 			<!-- Security -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
@@ -422,24 +432,24 @@
 
 			<!-- Jackson -->
 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jackson-provider</artifactId>
-				<version>${resteasy.version}</version>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-core-asl</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson.prev.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-mapper-asl</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson.prev.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-jaxrs</artifactId>
-				<version>${jackson.version}</version>
+				<version>${jackson.prev.version}</version>
 			</dependency>
 
 			<!-- Jettison -->
@@ -509,7 +519,7 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.9.10</version>
+				<version>6.11</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -599,13 +609,6 @@
 			    <version>1.1.1</version>
 			    <scope>test</scope>
 			</dependency>
-
-	        <dependency>
-	            <groupId>org.jboss.shrinkwrap.resolver</groupId>
-	            <artifactId>shrinkwrap-resolver-depchain</artifactId>
-	            <type>pom</type>
-                <scope>test</scope>
-	        </dependency>
 
 			<!-- Documentation -->
 			<dependency>

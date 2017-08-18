@@ -6,28 +6,25 @@
 
 package org.xdi.oxauth.client.fido.u2f;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.AuthenticateStatus;
 
+import javax.ws.rs.*;
+
 /**
  * The endpoint allows to start and finish U2F authentication process
- * 
- * @author Yuriy Movchan Date: 05/27/2015
+ *
+ * @author Yuriy Movchan
+ * @version August 9, 2017
  */
 public interface AuthenticationRequestService {
 
-	@GET
-	@Produces({ "application/json" })
-	public AuthenticateRequestMessage startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_state") String sessionState);
+    @GET
+    @Produces({"application/json"})
+    public AuthenticateRequestMessage startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId);
 
-	@POST
-	@Produces({ "application/json" })
-	public AuthenticateStatus finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString);
+    @POST
+    @Produces({"application/json"})
+    public AuthenticateStatus finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString);
 
 }

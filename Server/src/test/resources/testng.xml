@@ -51,13 +51,6 @@
 		</classes>
 	</test>
 
-	<!-- Grant Types Restriction -->
-	<test name="Grant Types Restriction (embedded)" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.ws.rs.GrantTypesRestrictionEmbeddedTest" />
-		</classes>
-	</test>
-
 	<!-- JWK test -->
 	<test name="JWK test (embedded)" enabled="true">
 		<classes>
@@ -175,7 +168,7 @@
 
 	<test name="Session ID service test" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.comp.SessionStateServiceTest" />
+			<class name="org.xdi.oxauth.comp.SessionIdServiceTest" />
 		</classes>
 	</test>
 
@@ -196,11 +189,6 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.UmaConfigurationWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Obtain AAT test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.ObtainAatWSTest" />
-		</classes>
-	</test>
 	<test name="UMA. Obtain PAT test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.ObtainPatWSTest" />
@@ -213,7 +201,7 @@
 	</test>
 	<test name="UMA. Register resource set test" enabled="true">
 		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.RegisterResourceSetWSTest" />
+			<class name="org.xdi.oxauth.uma.ws.rs.UmaRegisterResourceWSTest" />
 		</classes>
 	</test>
 	<test name="UMA. Register permission test" enabled="true">
@@ -221,7 +209,7 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.RegisterPermissionWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Workflow test" enabled="true">
+	<test name="UMA. Workflow test" enabled="false">
 		<classes>
 			<class name="org.xdi.oxauth.uma.ws.rs.AccessProtectedResourceFlowWSTest" />
 		</classes>
@@ -231,24 +219,9 @@
 			<class name="org.xdi.oxauth.uma.ws.rs.UmaScopeWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Trust elevation test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.uma.ws.rs.TrustElevationWSTest" />
-		</classes>
-	</test>
-	<test name="ID Generation test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.ws.rs.IdGenRestWSEmbeddedTest" />
-		</classes>
-	</test>
 	<test name="Inum Generation test" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.comp.InumGeneratorTest" />
-		</classes>
-	</test>
-	<test name="ID Gen Service test" enabled="true">
-		<classes>
-			<class name="org.xdi.oxauth.comp.IdGenServiceTest" />
 		</classes>
 	</test>
 	<test name="Introspection endpoint test" enabled="true">
@@ -277,17 +250,17 @@
 	</test>
 
 	<parameter name="serverUri" value="https://${test.server.name}" />
-	<parameter name="authorizePath" value="seam/resource/restv1/oxauth/authorize" />
-	<parameter name="introspectionPath" value="seam/resource/restv1/introspection" />
-	<parameter name="tokenPath" value="seam/resource/restv1/oxauth/token" />
-	<parameter name="validateTokenPath" value="seam/resource/restv1/oxauth/validate" />
-	<parameter name="jwksPath" value="seam/resource/restv1/oxauth/jwks" />
-	<parameter name="userInfoPath" value="seam/resource/restv1/oxauth/userinfo" />
-	<parameter name="clientInfoPath" value="seam/resource/restv1/oxauth/clientinfo" />
-	<parameter name="endSessionPath" value="seam/resource/restv1/oxauth/end_session" />
-	<parameter name="endSessionPagePath" value="seam/resource/restv1/oxauth/end_session_page" />
-	<parameter name="registerPath" value="seam/resource/restv1/oxauth/register" />
-	<parameter name="idGenerationPath" value="seam/resource/restv1/id" />
+	<parameter name="authorizePath" value="restv1/authorize" />
+	<parameter name="introspectionPath" value="restv1/introspection" />
+	<parameter name="tokenPath" value="restv1/token" />
+	<parameter name="validateTokenPath" value="restv1/validate" />
+	<parameter name="jwksPath" value="restv1/jwks" />
+	<parameter name="userInfoPath" value="restv1/userinfo" />
+	<parameter name="clientInfoPath" value="restv1/clientinfo" />
+	<parameter name="endSessionPath" value="restv1/end_session" />
+	<parameter name="endSessionPagePath" value="restv1/end_session_page" />
+	<parameter name="registerPath" value="restv1/register" />
+	<parameter name="idGenerationPath" value="restv1/id" />
 	<parameter name="userId" value="${auth.user.uid}" />
 	<parameter name="userSecret" value="${auth.user.password}" />
 	<parameter name="userInum" value="${auth.user.inum}" />
@@ -298,26 +271,24 @@
 	<parameter name="redirectUris" value="https://client.example.com/cb https://client.example.com/cb1 https://client.example.com/cb2" />
 	<parameter name="postLogoutRedirectUri" value="https://client.example.com/pl" />
 	<parameter name="ldapAdminPassword" value="${ldap.admin.password}" />
-	<parameter name="audience" value="${test.server.url}/seam/resource/restv1/oxauth/token" />
+	<parameter name="audience" value="${test.server.url}/restv1/token" />
 	<parameter name="sectorIdentifierUri" value="https://${test.server.name}/oxauth/sectoridentifier/${config.oxauth.organization}!0012!D426.70FD" />
 	<!-- By enabling this block, you require a place to publish files via HTTP or HTTPS -->
 	<!--<parameter name="requestFileBasePath" value="/var/www/html/oxAuth"/> -->
 	<!--<parameter name="requestFileBaseUrl" value="http://localhost/oxAuth"/> -->
 
 	<!-- Gluu -->
-	<parameter name="umaConfigurationPath" value="seam/resource/restv1/.well-known/gluu-configuration" />
+	<parameter name="umaConfigurationPath" value="restv1/.well-known/gluu-configuration" />
 
 	<!-- UMA -->
-	<parameter name="umaConfigurationPath" value="seam/resource/restv1/oxauth/uma-configuration" />
-	<parameter name="umaRegisterResourcePath" value="seam/resource/restv1/host/rsrc/resource_set" />
-	<parameter name="umaScopePath" value="seam/resource/restv1/uma/scopes" />
-	<parameter name="umaPermissionPath" value="seam/resource/restv1/host/rsrc_pr" />
-	<parameter name="umaPermissionAuthorizationPath" value="seam/resource/restv1/requester/perm" />
-	<parameter name="umaRptPath" value="seam/resource/restv1/requester/rpt" />
-	<parameter name="umaGatPath" value="seam/resource/restv1/requester/gat" />
-	<parameter name="umaRptStatusPath" value="seam/resource/restv1/rpt/status" />
-	<parameter name="umaAmHost" value="localhost" />
-	<parameter name="umaHost" value="photoz.example.com" />
+	<parameter name="umaConfigurationPath" value="restv1/uma2-configuration" />
+	<parameter name="umaRegisterResourcePath" value="restv1/host/rsrc/resource_set" />
+	<parameter name="umaScopePath" value="restv1/uma/scopes" />
+	<parameter name="umaPermissionPath" value="restv1/host/rsrc_pr" />
+	<parameter name="umaPermissionAuthorizationPath" value="restv1/requester/perm" />
+	<parameter name="umaRptPath" value="restv1/requester/rpt" />
+	<parameter name="umaGatPath" value="restv1/requester/gat" />
+	<parameter name="umaRptStatusPath" value="restv1/rpt/status" />
 	<parameter name="umaUserId" value="${uma.user.uid}" />
 	<parameter name="umaUserSecret" value="${uma.user.password}" />
 	<parameter name="umaPatClientId" value="${uma.pat.client.id}" />
@@ -325,6 +296,7 @@
 	<parameter name="umaAatClientId" value="${uma.aat.client.id}" />
 	<parameter name="umaAatClientSecret" value="${uma.aat.client.secret}" />
 	<parameter name="umaRedirectUri" value="https://client.example.com/cb" />
+	<parameter name="umaClaimsRedirectUri" value="https://client.example.com/cb" />
 
 	<parameter name="contactEmail1" value="${contact.email.1}" />
 	<parameter name="contactEmail2" value="${contact.email.2}" />

@@ -75,32 +75,87 @@ public enum UmaErrorResponseType implements IErrorType {
 	 * The host request used an unsupported HTTP method.
 	 */
 	UNSUPPORTED_METHOD_TYPE("unsupported_method_type"),
+
+	/**
+	 * Forbidden by policy (policy returned false).
+	 */
+	FORBIDDEN_BY_POLICY("forbidden_by_policy"),
 	
 	/**
 	 * The access token expired.
 	 */
-	INVALID_TOKEN("invalid_token"),	
+	INVALID_TOKEN("invalid_token"),
 
 	/**
-	 * The provided resource set identifier was not found at the AM.
+	 * Grant type is not urn:ietf:params:oauth:grant-type:uma-ticket (required for UMA 2).
 	 */
-	INVALID_RESOURCE_SET_ID("invalid_resource_set_id"),
+	INVALID_GRANT_TYPE("invalid_grant_type"),
 
 	/**
-	 * The provided resource set identifier was not found at the AM.
+	 * Invalid permission request.
 	 */
-	INVALID_RESOURCE_SET_SCOPE("invalid_scope"),
-	
+	INVALID_PERMISSION_REQUEST("invalid_permission_request"),
+
 	/**
-	 * The provided ticket was not found at the AM.
+	 * The provided resource id was not found at the AS.
+	 */
+	INVALID_RESOURCE_ID("invalid_resource_id"),
+
+	/**
+	 * At least one of the scopes included in the request was not registered previously by this host.
+	 */
+	INVALID_RESOURCE_SCOPE("invalid_scope"),
+
+	/**
+	 * The provided client_id is not valid.
+	 */
+	INVALID_CLIENT_ID("invalid_client_id"),
+
+	/**
+	 * The provided invalid_claims_redirect_uri is not valid.
+	 */
+	INVALID_CLAIMS_REDIRECT_URI("invalid_claims_redirect_uri"),
+
+	/**
+	 * The provided ticket was not found at the AS.
 	 */
 	INVALID_TICKET("invalid_ticket"),
-	
+
+	/**
+	 * The claims-gathering script name is not provided or otherwise failed to load script with this name(s).
+	 */
+	INVALID_CLAIMS_GATHERING_SCRIPT_NAME("invalid_claims_gathering_script_name"),
+
 	/**
 	 * The provided ticket has expired.
 	 */
 	EXPIRED_TICKET("expired_ticket"),
-	
+
+	/**
+	 * The provided session is invalid.
+	 */
+	INVALID_SESSION("invalid_session"),
+
+	/**
+	 * The claim token format is blank or otherwise not supported (supported format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken).
+	 */
+	INVALID_CLAIM_TOKEN_FORMAT("invalid_claim_token_format"),
+
+	/**
+	 * The claim token is not valid or unsupported. (If format is http://openid.net/specs/openid-connect-core-1_0.html#IDToken then claim token has to be ID Token).
+	 */
+	INVALID_CLAIM_TOKEN("invalid_claim_token"),
+
+	/**
+	 * PCT is invalid (revoked, expired or does not exist anymore on AS)
+	 */
+	INVALID_PCT("invalid_pct"),
+
+	/**
+	 * RPT is invalid (revoked, expired or does not exist anymore on AS)
+	 */
+	INVALID_RPT("invalid_rpt"),
+
 	/**
 	 * The requester is definitively not authorized for this permission according to user policy.
 	 */

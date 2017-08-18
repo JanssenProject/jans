@@ -7,38 +7,70 @@
 package org.xdi.oxauth.filter;
 
 import org.gluu.oxserver.filters.AbstractCorsFilter;
+import org.xdi.oxauth.model.config.ConfigurationFactory;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 
 import javax.inject.Inject;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebInitParam;
 
 /**
- * CORS wrapper to support both Tomcat and Jetty
+ * CORS Filter to support both Tomcat and Jetty
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version March 9, 2017
+ * @version June 27, 2017
  */
-@WebFilter(asyncSupported = true, initParams = { @WebInitParam(name = "cors.allowed.origins", value = "*") }, urlPatterns = { "/.well-known/*",
-		"/seam/resource/restv1/oxauth/*", "/opiframe" })
+@WebFilter(
+        filterName = "CorsFilter",
+        asyncSupported = true,
+        urlPatterns = {"/.well-known/*", "/restv1/*", "/opiframe"})
 public class CorsFilter extends AbstractCorsFilter {
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    @Inject
+    private ConfigurationFactory configurationFactory;
 
-	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
-		this.filter = getServerCorsFilter();
+    @Inject
+    private AppConfiguration appConfiguration;
 
-		if (this.filter != null) {
-			String filterName = filterConfig.getFilterName();
+    public CorsFilter() {
+        super();
+    }
 
-			CorsFilterConfig corsFilterConfig = new CorsFilterConfig(filterName, appConfiguration);
+    @Override
+    public void init(final FilterConfig filterConfig) throws ServletException {
+        // Initialize defaults
+        parseAndStore(DEFAULT_ALLOWED_ORIGINS, DEFAULT_ALLOWED_HTTP_METHODS,
+                DEFAULT_ALLOWED_HTTP_HEADERS, DEFAULT_EXPOSED_HEADERS,
+                DEFAULT_SUPPORTS_CREDENTIALS, DEFAULT_PREFLIGHT_MAXAGE,
+                DEFAULT_DECORATE_REQUEST);
 
-			filter.init(corsFilterConfig);
-		}
-	}
+        AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
+
+        if (filterConfig != null) {
+            String filterName = filterConfig.getFilterName();
+            CorsFilterConfig corsFilterConfig = new CorsFilterConfig(filterName, appConfiguration);
+
+            String configAllowedOrigins = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_ALLOWED_ORIGINS);
+            String configAllowedHttpMethods = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_ALLOWED_METHODS);
+            String configAllowedHttpHeaders = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_ALLOWED_HEADERS);
+            String configExposedHeaders = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_EXPOSED_HEADERS);
+            String configSupportsCredentials = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_SUPPORT_CREDENTIALS);
+            String configPreflightMaxAge = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_PREFLIGHT_MAXAGE);
+            String configDecorateRequest = corsFilterConfig
+                    .getInitParameter(PARAM_CORS_REQUEST_DECORATE);
+
+            parseAndStore(configAllowedOrigins, configAllowedHttpMethods,
+                    configAllowedHttpHeaders, configExposedHeaders,
+                    configSupportsCredentials, configPreflightMaxAge,
+                    configDecorateRequest);
+        }
+    }
 }

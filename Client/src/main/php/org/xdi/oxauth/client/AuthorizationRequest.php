@@ -8,7 +8,8 @@ require_once 'ResponseType.php';
 /**
  * Represents an authorization request to send to the authorization server.
  *
- * @author Gabin Dongmo 29/03/2013
+ * @author Gabin Dongmo
+ * @version August 9, 2017
  */
 class AuthorizationRequest extends BaseRequest {
     
@@ -23,8 +24,8 @@ class AuthorizationRequest extends BaseRequest {
     private $requestUri;
     private $display;
     private $prompts;
-    private $requestSessionState;
-    private $sessionState;
+    private $requestSessionId;
+    private $sessionId;
 
     private $accessToken;
     private $useNoRedirectHeader;
@@ -105,39 +106,39 @@ class AuthorizationRequest extends BaseRequest {
     }
     
     /**
-     * Returns whether session state is requested.
+     * Returns whether session id is requested.
      *
-     * @return whether session state is requested.
+     * @return whether session id is requested.
      */
-    public function isRequestSessionState() {
-        return $this->requestSessionState;
+    public function isRequestSessionId() {
+        return $this->requestSessionId;
     }
     
     /**
-     * Sets whether session state should be requested.
+     * Sets whether session id should be requested.
      *
-     * @param p_requestSessionState session state.
+     * @param $p_requestSessionId session id.
      */
-    public function setRequestSessionState($p_requestSessionState) {
-        $this->requestSessionState = $p_requestSessionState;
+    public function setRequestSessionId($p_requestSessionId) {
+        $this->requestSessionId = $p_requestSessionId;
     }
     
     /**
-     * Gets session state.
+     * Gets session id.
      *
-     * @return session state.
+     * @return session id.
      */
-    public function getSessionState() {
-        return $this->sessionState;
+    public function getSessionId() {
+        return $this->sessionId;
     }    
     
     /**
-     * Sets session state.
+     * Sets session id.
      *
-     * @param p_sessionState session state.
+     * @param $p_sessionId session id.
      */
-    public function setSessionState($p_sessionState) {
-        $this->sessionState = $p_sessionState;
+    public function setSessionId($p_sessionId) {
+        $this->sessionId = $p_sessionId;
     }
     
     /**

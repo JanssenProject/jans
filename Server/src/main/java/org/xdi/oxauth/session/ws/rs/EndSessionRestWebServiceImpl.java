@@ -6,16 +6,7 @@
 
 package org.xdi.oxauth.session.ws.rs;
 
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
@@ -25,7 +16,7 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.SessionState;
+import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -36,21 +27,30 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.SessionStateService;
+import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalApplicationSessionService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.Pair;
 import org.xdi.util.StringHelper;
 
-import com.google.common.collect.Sets;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Set;
 
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
  * @author Yuriy Zabrovarnyy
- * @version December 15, 2015
+ * @version August 9, 2017
  */
-@Path("/oxauth")
+@Path("/")
 public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject
@@ -69,7 +69,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private ExternalApplicationSessionService externalApplicationSessionService;
 
     @Inject
-    private SessionStateService sessionStateService;
+    private SessionIdService sessionIdService;
 
     @Inject
     private ClientService clientService;
@@ -87,32 +87,41 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private AppConfiguration appConfiguration;
 
     @Override
-    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionState,
+    public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
 
-        log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionState: {}, Is Secure = {}",
-                idTokenHint, postLogoutRedirectUri, sessionState, sec.isSecure());
+        log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
+                idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
 
-        EndSessionParamsValidator.validateParams(idTokenHint, sessionState, errorResponseFactory);
+        EndSessionParamsValidator.validateParams(idTokenHint, sessionId, errorResponseFactory);
 
-        final Pair<SessionState, AuthorizationGrant> pair = endSession(idTokenHint, sessionState, httpRequest, httpResponse, sec);
+        final Pair<SessionId, AuthorizationGrant> pair = endSession(idTokenHint, sessionId, httpRequest, httpResponse, sec);
 
         auditLogging(httpRequest, pair);
+
+        //Perform redirect to RP if id_token is expired (see https://github.com/GluuFederation/oxAuth/issues/575)
+        if (pair.getFirst() == null && pair.getSecond() == null) {
+            try {
+                return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).build();
+            } catch (URISyntaxException e) {
+                log.error("Can't perform redirect", e);
+            }
+        }
 
         return httpBased(postLogoutRedirectUri, state, pair);
     }
 
 
-    public Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionState, AuthorizationGrant> pair) {
-        SessionState sessionState = pair.getFirst();
+    public Response httpBased(String postLogoutRedirectUri, String state, Pair<SessionId, AuthorizationGrant> pair) {
+        SessionId sessionId = pair.getFirst();
         AuthorizationGrant authorizationGrant = pair.getSecond();
 
         // Validate redirectUri
         String redirectUri;
         if (authorizationGrant == null) {
-        	redirectUri = redirectionUriService.validatePostLogoutRedirectUri(sessionState, postLogoutRedirectUri);
+            redirectUri = redirectionUriService.validatePostLogoutRedirectUri(sessionId, postLogoutRedirectUri);
         } else {
-        	redirectUri = redirectionUriService.validatePostLogoutRedirectUri(authorizationGrant.getClient().getClientId(), postLogoutRedirectUri);
+            redirectUri = redirectionUriService.validatePostLogoutRedirectUri(authorizationGrant.getClient().getClientId(), postLogoutRedirectUri);
         }
 
         final Set<String> frontchannelLogoutUris = getRpFrontchannelLogoutUris(pair);
@@ -125,29 +134,31 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                 build();
     }
 
-    private Pair<SessionState, AuthorizationGrant> endSession(String idTokenHint, String sessionState,
-                                                              HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
+    private Pair<SessionId, AuthorizationGrant> endSession(String idTokenHint, String sessionId,
+                                                           HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
         if (authorizationGrant == null) {
-        	Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
-        	if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
-        		authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
-        	}
+            Boolean endSessionWithAccessToken = appConfiguration.getEndSessionWithAccessToken();
+            if ((endSessionWithAccessToken != null) && endSessionWithAccessToken) {
+                authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(idTokenHint);
+            }
         }
 
-        SessionState ldapSessionState = removeSessionState(sessionState, httpRequest, httpResponse);
-        if ((authorizationGrant == null) && (ldapSessionState == null)) {
-            log.info("Failed to find out authorization grant for id_token_hint '{}' and session_state '{}'", idTokenHint, sessionState);
-            errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
+        SessionId ldapSessionId = removeSessionId(sessionId, httpRequest, httpResponse);
+        if ((authorizationGrant == null) && (ldapSessionId == null)) {
+            log.info("Failed to find out authorization grant for id_token_hint '{}' and session_id '{}'", idTokenHint, sessionId);
+
+            //see https://github.com/GluuFederation/oxAuth/issues/575
+            return new Pair<SessionId, AuthorizationGrant>(null, null);
         }
 
         boolean isExternalLogoutPresent;
         boolean externalLogoutResult = false;
 
         isExternalLogoutPresent = externalApplicationSessionService.isEnabled();
-        if (isExternalLogoutPresent && (ldapSessionState != null)) {
-        	String userName = ldapSessionState.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
-            externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, ldapSessionState);
+        if (isExternalLogoutPresent && (ldapSessionId != null)) {
+            String userName = ldapSessionId.getSessionAttributes().get(Constants.AUTHENTICATED_USER);
+            externalLogoutResult = externalApplicationSessionService.executeExternalEndSessionMethods(httpRequest, ldapSessionId);
             log.info("End session result for '{}': '{}'", userName, "logout", externalLogoutResult);
         }
 
@@ -156,33 +167,33 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             errorResponseFactory.throwUnauthorizedException(EndSessionErrorResponseType.INVALID_GRANT);
         }
 
-        if (ldapSessionState != null) {
-            grantService.removeAllTokensBySession(ldapSessionState.getDn());
+        if (ldapSessionId != null) {
+            grantService.removeAllTokensBySession(ldapSessionId.getDn());
         }
 
         if (identity != null) {
             identity.logout();
         }
 
-        return new Pair<SessionState, AuthorizationGrant>(ldapSessionState, authorizationGrant);
+        return new Pair<SessionId, AuthorizationGrant>(ldapSessionId, authorizationGrant);
     }
 
-    private Set<String> getRpFrontchannelLogoutUris(Pair<SessionState, AuthorizationGrant> pair) {
+    private Set<String> getRpFrontchannelLogoutUris(Pair<SessionId, AuthorizationGrant> pair) {
         final Set<String> result = Sets.newHashSet();
 
-        SessionState sessionState = pair.getFirst();
+        SessionId sessionId = pair.getFirst();
         AuthorizationGrant authorizationGrant = pair.getSecond();
-        if (sessionState == null) {
-            log.error("session_state is not passed to endpoint (as cookie or manually). Therefore unable to match clients for session_state." +
+        if (sessionId == null) {
+            log.error("session_id is not passed to endpoint (as cookie or manually). Therefore unable to match clients for session_id." +
                     "Http based html will contain no iframes.");
             return result;
         }
 
-        final Set<Client> clientsByDns = sessionState.getPermissionGrantedMap() != null ?
-                clientService.getClient(sessionState.getPermissionGrantedMap().getClientIds(true), true) :
+        final Set<Client> clientsByDns = sessionId.getPermissionGrantedMap() != null ?
+                clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
                 Sets.<Client>newHashSet();
         if (authorizationGrant != null) {
-        	clientsByDns.add(authorizationGrant.getClient());
+            clientsByDns.add(authorizationGrant.getClient());
         }
 
         for (Client client : clientsByDns) {
@@ -199,9 +210,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
                 if (client.getFrontChannelLogoutSessionRequired() != null && client.getFrontChannelLogoutSessionRequired()) {
                     if (logoutUri.contains("?")) {
-                        logoutUri = logoutUri + "&sid=" + sessionState.getId();
+                        logoutUri = logoutUri + "&sid=" + sessionId.getId();
                     } else {
-                        logoutUri = logoutUri + "?sid=" + sessionState.getId();
+                        logoutUri = logoutUri + "?sid=" + sessionId.getId();
                     }
                 }
                 result.add(logoutUri);
@@ -210,32 +221,32 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return result;
     }
 
-    private SessionState removeSessionState(String sessionState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        SessionState ldapSessionState = null;
+    private SessionId removeSessionId(String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        SessionId ldapSessionId = null;
 
         try {
-            String id = sessionState;
+            String id = sessionId;
             if (StringHelper.isEmpty(id)) {
-                id = sessionStateService.getSessionStateFromCookie(httpRequest);
+                id = sessionIdService.getSessionIdFromCookie(httpRequest);
             }
 
             if (StringHelper.isNotEmpty(id)) {
-                ldapSessionState = sessionStateService.getSessionState(id);
-                if (ldapSessionState != null) {
-                    boolean result = sessionStateService.remove(ldapSessionState);
+                ldapSessionId = sessionIdService.getSessionId(id);
+                if (ldapSessionId != null) {
+                    boolean result = sessionIdService.remove(ldapSessionId);
                     if (!result) {
-                        log.error("Failed to remove session_state '{}' from LDAP", id);
+                        log.error("Failed to remove session_id '{}' from LDAP", id);
                     }
                 } else {
-                    log.error("Failed to load session from LDAP by session_state: '{}'", id);
+                    log.error("Failed to load session from LDAP by session_id: '{}'", id);
                 }
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         } finally {
-            sessionStateService.removeSessionStateCookie(httpResponse);
+            sessionIdService.removeSessionIdCookie(httpResponse);
         }
-        return ldapSessionState;
+        return ldapSessionId;
     }
 
     private String constructPage(Set<String> logoutUris, String postLogoutUrl, String state) {
@@ -275,21 +286,21 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         return html;
     }
 
-    private void auditLogging(HttpServletRequest request, Pair<SessionState, AuthorizationGrant> pair){
-    	SessionState sessionState = pair.getFirst();
-    	AuthorizationGrant authorizationGrant = pair.getSecond();
+    private void auditLogging(HttpServletRequest request, Pair<SessionId, AuthorizationGrant> pair) {
+        SessionId sessionId = pair.getFirst();
+        AuthorizationGrant authorizationGrant = pair.getSecond();
 
-    	OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.SESSION_DESTROYED);
+        OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.SESSION_DESTROYED);
         oAuth2AuditLog.setSuccess(true);
-        
+
         if (authorizationGrant != null) {
 	        oAuth2AuditLog.setClientId(authorizationGrant.getClientId());
 	        oAuth2AuditLog.setScope(StringUtils.join(authorizationGrant.getScopes(), " "));
 	        oAuth2AuditLog.setUsername(authorizationGrant.getUserId());
-        } else {
-	        oAuth2AuditLog.setClientId(sessionState.getPermissionGrantedMap().getClientIds(true).toString());
-	        oAuth2AuditLog.setScope(sessionState.getSessionAttributes().get(AuthorizeRequestParam.SCOPE));
-	        oAuth2AuditLog.setUsername(sessionState.getUserDn());
+        } else if (sessionId != null) {
+            oAuth2AuditLog.setClientId(sessionId.getPermissionGrantedMap().getClientIds(true).toString());
+            oAuth2AuditLog.setScope(sessionId.getSessionAttributes().get(AuthorizeRequestParam.SCOPE));
+            oAuth2AuditLog.setUsername(sessionId.getUserDn());
         }
 
         applicationAuditLogger.sendMessage(oAuth2AuditLog);

@@ -4,12 +4,12 @@
 # Author: Yuriy Movchan
 #
 
-from org.jboss.seam import Component
-from org.jboss.seam.security import Identity
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService
-from org.xdi.util import StringHelper
-from org.xdi.util import ArrayHelper
+from org.xdi.oxauth.service import UserService, AuthenticationService
+from org.xdi.util import StringHelper, ArrayHelper
+from org.xdi.oxauth.util import ServerUtil
 
 import java
 
@@ -37,7 +37,11 @@ class PersonAuthentication(PersonAuthenticationType):
         return None
 
     def authenticate(self, configurationAttributes, requestParameters, step):
-        credentials = Identity.instance().getCredentials()
+        userService = CdiUtil.bean(UserService)
+        authenticationService = CdiUtil.bean(AuthenticationService)
+
+        identity = CdiUtil.bean(Identity)
+        credentials = identity.getCredentials()
         user_name = credentials.getUsername()
 
         if (step == 1):
@@ -47,8 +51,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
-                userService = Component.getInstance(UserService)
-                logged_in = userService.authenticate(user_name, user_password)
+                logged_in = authenticationService.authenticate(user_name, user_password)
 
             if (not logged_in):
                 return False
@@ -57,20 +60,16 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Basic (with password update). Authenticate for step 2"
 
-            userService = Component.getInstance(UserService)
-
-            update_button = requestParameters.get("loginForm:updateButton")
+            update_button = ServerUtil.getFirstValue(requestParameters, "loginForm:updateButton")
             if ArrayHelper.isEmpty(update_button):
                 return True
 
-            new_password_array = requestParameters.get("new_password")
-            if ArrayHelper.isEmpty(new_password_array) or StringHelper.isEmpty(new_password_array[0]):
+            new_password = ServerUtil.getFirstValue(requestParameters, "new_password")
+            if ArrayHelper.isEmpty(new_password):
                 print "Basic (with password update). Authenticate for step 2. New password is empty"
                 return False
 
-            new_password = new_password_array[0]
-
-            print "Basic (with password update). Authenticate for step 2. Attemprin to set new user '" + user_name + "' password"
+            print "Basic (with password update). Authenticate for step 2. Attempting to set new user '" + user_name + "' password"
 
             find_user_by_uid = userService.getUser(user_name)
             if (find_user_by_uid == None):

@@ -8,7 +8,6 @@ package org.xdi.oxauth.model.registration;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
@@ -27,10 +26,8 @@ import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -177,18 +174,6 @@ public class RegisterParamsValidator {
                     JSONArray sectorIdentifierJsonArray = new JSONArray(entity);
                     valid = Util.asList(sectorIdentifierJsonArray).containsAll(redirectUris);
                 }
-            } catch (URISyntaxException e) {
-                log.trace(e.getMessage(), e);
-                valid = false;
-            } catch (UnknownHostException e) {
-                log.trace(e.getMessage(), e);
-                valid = false;
-            } catch (ConnectException e) {
-                log.trace(e.getMessage(), e);
-                valid = false;
-            } catch (JSONException e) {
-                log.trace(e.getMessage(), e);
-                valid = false;
             } catch (Exception e) {
                 log.trace(e.getMessage(), e);
                 valid = false;

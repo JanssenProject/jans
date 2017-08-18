@@ -7,23 +7,66 @@
 package org.xdi.oxauth.model.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.xdi.oxauth.model.common.HasParamName;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version December 26, 2016
+ * @version July 18, 2017
  */
 
 public class Util {
 
+    private static final Logger LOG = Logger.getLogger(Util.class);
+
     public static final String UTF8_STRING_ENCODING = "UTF-8";
+
+    public static ObjectMapper createJsonMapper() {
+        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
+        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
+
+        final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
+
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.getDeserializationConfig().withAnnotationIntrospector(pair);
+        mapper.getSerializationConfig().withAnnotationIntrospector(pair);
+        return mapper;
+    }
+
+    public static String asJsonSilently(Object p_object) {
+        try {
+            return asJson(p_object);
+        } catch (IOException e) {
+            LOG.trace(e.getMessage(), e);
+            return "";
+        }
+    }
+
+    public static String asPrettyJson(Object p_object) throws IOException {
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
+    }
+
+    public static String asJson(Object p_object) throws IOException {
+        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        return mapper.writeValueAsString(p_object);
+    }
 
     public static byte[] getBytes(String p_str) throws UnsupportedEncodingException {
         return p_str.getBytes(UTF8_STRING_ENCODING);
@@ -36,6 +79,21 @@ public class Util {
             if (length > 0) {
                 for (int i = 0; i < length; i++) {
                     result.add(p_array.getString(i));
+                }
+            }
+        }
+        return result;
+    }
+
+    public static <T extends LdapEnum> List<T> asEnumList(JSONArray p_array, Class<T> clazz)
+            throws JSONException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        final List<T> result = new ArrayList<T>();
+        if (p_array != null) {
+            final int length = p_array.length();
+            if (length > 0) {
+                for (int i = 0; i < length; i++) {
+                    Method method = clazz.getMethod("getByValue", String.class);
+                    result.add((T) method.invoke(null, new Object[]{p_array.getString(i)}));
                 }
             }
         }
@@ -174,4 +232,11 @@ public class Util {
         return string == null || string.length() == 0;
     }
 
+    public static int parseIntSilently(String intString) {
+        try {
+            return Integer.parseInt(intString);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 }

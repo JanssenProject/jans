@@ -6,7 +6,7 @@
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 		</Console>
 
-		<RollingFile name="FILE" fileName="${sys:catalina.base}/logs/oxauth.log" filePattern="${sys:catalina.base}/logs/oxauth-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="OX_HTTP_REQUEST_RESPONSE_FILE" fileName="${sys:log.base}/logs/http_request_response.log" filePattern="${sys:log.base}/logs/http_request_response-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -17,7 +17,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_PERSISTENCE_FILE" fileName="${sys:catalina.base}/logs/oxauth_persistence.log" filePattern="${sys:catalina.base}/logs/oxauth_persistence-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="FILE" fileName="${sys:log.base}/logs/oxauth.log" filePattern="${sys:log.base}/logs/oxauth-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -28,8 +28,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:catalina.base}/logs/oxauth_persistence_ldap_statistics.log"
-			filePattern="${sys:catalina.base}/logs/oxauth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="OX_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/oxauth_persistence.log" filePattern="${sys:log.base}/logs/oxauth_persistence-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -40,7 +39,8 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_SCRIPT_LOG_FILE" fileName="${sys:catalina.base}/logs/oxauth_script.log" filePattern="${sys:catalina.base}/logs/oxauth_script-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="OX_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/oxauth_persistence_ldap_statistics.log"
+			filePattern="${sys:log.base}/logs/oxauth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -51,7 +51,18 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="OX_AUDIT_LOG_FILE" fileName="${sys:catalina.base}/logs/oxauth_audit.log" filePattern="${sys:catalina.base}/logs/oxauth_audit-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="OX_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/oxauth_script.log" filePattern="${sys:log.base}/logs/oxauth_script-%d{yyyy-MM-dd}-%i.log">
+
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
+		<RollingFile name="OX_AUDIT_LOG_FILE" fileName="${sys:log.base}/logs/oxauth_audit.log" filePattern="${sys:log.base}/logs/oxauth_audit-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%macAddr] [%t] [%C{6}] (%F:%L) - %m%n" />
 
@@ -74,8 +85,14 @@
 		<!-- EMB-6, JMS activation throws an error due to deployment ordering, but as there is a timeout and retry the tests pass. Hide the error message -->
 		<Logger name="jboss.resource.adapter.jms.inflow.JmsActivation" level="error" />
 
+	    <Logger name="com.ocpsoft" level="info" />
+
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
+
+		<Logger name="org.xdi.oxauth.audit.debug" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="OX_HTTP_REQUEST_RESPONSE_FILE" />
+		</Logger>
 
 		<Logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="OX_PERSISTENCE_FILE" />

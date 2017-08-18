@@ -6,81 +6,84 @@
 
 package org.xdi.oxauth.util;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Named;
-
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.Display;
-import org.xdi.oxauth.model.common.GrantType;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.SubjectType;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 
+import javax.enterprise.inject.Produces;
+import javax.inject.Named;
+
 /**
- * @author Javier Rojas Blum Date: 09.13.2013
+ * @author Javier Rojas Blum
+ * @version August 9, 2017
  */
 public class EnumValuesFactory {
 
-	@Produces
-	@Named
+    @Produces
+    @Named
     public ResponseType[] getResponseTypes() {
         return ResponseType.values();
     }
 
     @Produces
-	@Named
+    @Named
     public GrantType[] getGrantTypes() {
-        return new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT};
+        return new GrantType[]{
+                GrantType.AUTHORIZATION_CODE,
+                GrantType.IMPLICIT,
+                GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
+                GrantType.CLIENT_CREDENTIALS,
+                GrantType.REFRESH_TOKEN,
+                GrantType.OXAUTH_UMA_TICKET
+        };
     }
 
     @Produces
-	@Named
+    @Named
     public ApplicationType[] getApplicationTypes() {
         return ApplicationType.values();
     }
 
     @Produces
-	@Named
+    @Named
     public AuthenticationMethod[] getAuthenticationMethods() {
         return AuthenticationMethod.values();
     }
 
     @Produces
-	@Named
+    @Named
     public SubjectType[] getSubjectTypes() {
         return SubjectType.values();
     }
 
     @Produces
-	@Named
+    @Named
     public Display[] getDisplays() {
         return Display.values();
     }
 
     @Produces
-	@Named
+    @Named
     public Prompt[] getPrompts() {
         return Prompt.values();
     }
 
     @Produces
-	@Named
+    @Named
     public SignatureAlgorithm[] getSignatureAlgorithms() {
         return SignatureAlgorithm.values();
     }
 
     @Produces
-	@Named
+    @Named
     public KeyEncryptionAlgorithm[] getKeyEncryptionAlgorithms() {
         return KeyEncryptionAlgorithm.values();
     }
 
     @Produces
-	@Named
+    @Named
     public BlockEncryptionAlgorithm[] getBlockEncryptionAlgorithms() {
         return BlockEncryptionAlgorithm.values();
     }

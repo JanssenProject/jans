@@ -9,7 +9,7 @@ package org.xdi.oxauth.load.benchmark;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.testng.Reporter;
@@ -26,6 +26,7 @@ import org.xdi.oxauth.client.TokenResponse;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestListener;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestSuiteListener;
 import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
@@ -40,20 +41,15 @@ public class BenchmarkRequestAccessToken extends BaseTest {
     private String clientId;
 	private String clientSecret;
 
-	@Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @BeforeClass
     public void registerClient(final String userId, final String userSecret, String redirectUris, String sectorIdentifierUri) throws Exception {
         Reporter.log("Register client", true);
 
-        List<ResponseType> responseTypes = new ArrayList<ResponseType>();
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app", StringUtils.spaceSeparatedToList(redirectUris));
-        registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
-
-        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
-        registerClient.setRequest(registerRequest);
-        RegisterResponse registerResponse = registerClient.exec();
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
         assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
         assertNotNull(registerResponse.getClientId());
@@ -66,21 +62,21 @@ public class BenchmarkRequestAccessToken extends BaseTest {
         this.clientSecret = registerResponse.getClientSecret();
     }
 
-    @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1000, threadPoolSize = 10)
+	@Parameters({"userId", "userSecret"})
+    @Test(invocationCount = 200, threadPoolSize = 1)
     public void requestAccessTokenPassword1(final String userId, final String userSecret) throws Exception {
     	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 1000, threadPoolSize = 10, dependsOnMethods = { "requestAccessTokenPassword1" })
+    @Test(invocationCount = 200, threadPoolSize = 5, dependsOnMethods = { "requestAccessTokenPassword1" })
     public void requestAccessTokenPassword2(final String userId, final String userSecret) throws Exception {
     	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 500, threadPoolSize = 2, dependsOnMethods = { "requestAccessTokenPassword2" })
-    public void requestAccessTokenPassword3(final String userId, final String userSecret) throws Exception {
+    @Test(invocationCount = 200, threadPoolSize = 2, dependsOnMethods = { "requestAccessTokenPassword2" })
+    public void requestAccessTokenPassword4(final String userId, final String userSecret) throws Exception {
     	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
@@ -98,6 +94,30 @@ public class BenchmarkRequestAccessToken extends BaseTest {
         assertNotNull(response1.getRefreshToken(), "The refresh token is null");
         assertNotNull(response1.getScope(), "The scope is null");
         assertNotNull(response1.getIdToken(), "The id token is null");
+    }
+
+    private RegisterResponse registerClient(
+            final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScopes(scopes);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        return registerResponse;
     }
 
 }
