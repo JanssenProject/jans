@@ -141,6 +141,14 @@
         "page",
         "popup"
     ],
+    "dynamicGrantTypeDefault":[
+        "authorization_code",
+        "implicit",
+        "password",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket"
+    ],
     "claimTypesSupported":[
         "normal"
     ],
@@ -230,6 +238,7 @@
     "customHeadersWithAuthorizationResponse": true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
+    "enableClientGrantTypeUpdate": true,
     "corsConfigurationFilters": [
         {
             "filterName": "CorsFilter",
