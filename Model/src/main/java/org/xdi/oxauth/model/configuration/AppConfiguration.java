@@ -116,7 +116,7 @@ public class AppConfiguration implements Configuration {
     private int configurationUpdateInterval;
 
     private Boolean enableClientGrantUpdate;
-    private List<String> dynamicClientRegDefaultGrantTypes;
+    private List<GrantType> dynamicGrantTypeDefault;
     
     private String cssLocation;
     private String jsLocation;
@@ -1192,12 +1192,12 @@ public class AppConfiguration implements Configuration {
 		this.enableClientGrantUpdate = enableClientGrantUpdate;
 	}
 
-	public List<String> getDynamicClientRegDefaultGrantTypes() {
-		return dynamicClientRegDefaultGrantTypes;
+	public List<GrantType> getDynamicGrantTypeDefault() {
+		return dynamicGrantTypeDefault;
 	}
 
-	public void setDynamicClientRegDefaultGrantTypes(List<String> dynamicClientRegDefaultGrantTypes) {
-		this.dynamicClientRegDefaultGrantTypes = dynamicClientRegDefaultGrantTypes;
+	public void setDynamicGrantTypeDefault(List<GrantType> dynamicGrantTypeDefault) {
+		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
 	}
 	
     public Integer getSessionIdLifetime() {
