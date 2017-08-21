@@ -179,7 +179,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 }
                             }
 
-                            updateClientFromRequestObject(client, r);
+                            updateClientFromRequestObject(client, r, false);
 
                             boolean registerClient = true;
                             if (externalDynamicClientRegistrationService.isEnabled()) {
@@ -250,7 +250,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
-    private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject) throws JSONException {
+    private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject, boolean update) throws JSONException {
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<String>(new HashSet<String>(redirectUris)); // Remove repeated elements
@@ -308,7 +308,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
         p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
-		if (appConfiguration.getEnableClientGrantTypeUpdate()) {
+		if (update && appConfiguration.getEnableClientGrantTypeUpdate()) {
 			p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
 		}
 
@@ -464,7 +464,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                         final Client client = clientService.getClient(clientId, accessToken);
                         if (client != null) {
-                            updateClientFromRequestObject(client, request);
+                            updateClientFromRequestObject(client, request, true);
                             clientService.merge(client);
 
                             oAuth2AuditLog.setScope(clientScopesToString(client));
