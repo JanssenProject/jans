@@ -252,6 +252,5 @@
         }
     ],
     "logClientIdOnClientAuthentication": true,
-    "logClientNameOnClientAuthentication": false,
-    "enableClientGrantUpdate": false
+    "logClientNameOnClientAuthentication": false
 }
