@@ -97,7 +97,7 @@ public class AppConfiguration implements Configuration {
     private Boolean trustedClientEnabled;
     private Boolean dynamicRegistrationScopesParamEnabled;
     private String dynamicRegistrationCustomObjectClass;
-    private String personCustomObjectClass;
+    private List<String> personCustomObjectClassList;
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
@@ -844,12 +844,12 @@ public class AppConfiguration implements Configuration {
         dynamicRegistrationCustomObjectClass = p_dynamicRegistrationCustomObjectClass;
     }
 
-    public String getPersonCustomObjectClass() {
-		return personCustomObjectClass;
+	public List<String> getPersonCustomObjectClassList() {
+		return personCustomObjectClassList;
 	}
 
-	public void setPersonCustomObjectClass(String personCustomObjectClass) {
-		this.personCustomObjectClass = personCustomObjectClass;
+	public void setPersonCustomObjectClassList(List<String> personCustomObjectClassList) {
+		this.personCustomObjectClassList = personCustomObjectClassList;
 	}
 
 	public Boolean getAuthenticationFiltersEnabled() {
