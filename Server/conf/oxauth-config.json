@@ -186,6 +186,7 @@
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
+    "personCustomObjectClass":"gluuCustomPerson",
     "authenticationFiltersEnabled":true,
     "clientAuthenticationFiltersEnabled":true,
     "authenticationFilters":[
