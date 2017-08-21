@@ -186,6 +186,8 @@
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
     "personCustomObjectClassList":[],
+    "persistIdTokenInLdap":false,
+    "persistRefreshTokenInLdap":false,
     "authenticationFiltersEnabled":false,
     "clientAuthenticationFiltersEnabled":false,
     "authenticationFilters":[
