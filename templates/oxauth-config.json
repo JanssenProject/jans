@@ -185,7 +185,7 @@
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
-    "personCustomObjectClass":"",
+    "personCustomObjectClassList":[],
     "authenticationFiltersEnabled":false,
     "clientAuthenticationFiltersEnabled":false,
     "authenticationFilters":[
