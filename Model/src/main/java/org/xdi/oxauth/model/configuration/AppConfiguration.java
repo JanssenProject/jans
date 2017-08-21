@@ -99,6 +99,9 @@ public class AppConfiguration implements Configuration {
     private String dynamicRegistrationCustomObjectClass;
     private List<String> personCustomObjectClassList;
 
+    private Boolean persistIdTokenInLdap = false;
+    private Boolean persistRefreshTokenInLdap = false;
+
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
@@ -834,6 +837,22 @@ public class AppConfiguration implements Configuration {
 
     public void setDynamicRegistrationScopesParamEnabled(Boolean dynamicRegistrationScopesParamEnabled) {
         this.dynamicRegistrationScopesParamEnabled = dynamicRegistrationScopesParamEnabled;
+    }
+
+    public Boolean getPersistIdTokenInLdap() {
+        return persistIdTokenInLdap;
+    }
+
+    public void setPersistIdTokenInLdap(Boolean persistIdTokenInLdap) {
+        this.persistIdTokenInLdap = persistIdTokenInLdap;
+    }
+
+    public Boolean getPersistRefreshTokenInLdap() {
+        return persistRefreshTokenInLdap;
+    }
+
+    public void setPersistRefreshTokenInLdap(Boolean persistRefreshTokenInLdap) {
+        this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
     }
 
     public String getDynamicRegistrationCustomObjectClass() {
