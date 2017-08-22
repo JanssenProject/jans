@@ -6,12 +6,12 @@
 
 package org.xdi.oxauth.model.ldap;
 
-import java.util.Date;
-
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -63,6 +63,8 @@ public class TokenLdap {
 
     @LdapAttribute(name = "oxAuthSessionDn")
     private String sessionDn;
+
+    private boolean isFromCache;
 
     public TokenLdap() {
     }
@@ -227,6 +229,14 @@ public class TokenLdap {
 
     public void setSessionDn(String sessionDn) {
         this.sessionDn = sessionDn;
+    }
+
+    public boolean isFromCache() {
+        return isFromCache;
+    }
+
+    public void setIsFromCache(boolean isFromCache) {
+        this.isFromCache = isFromCache;
     }
 
     @Override
