@@ -121,7 +121,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
         showClient(endSessionClient2);
         assertEquals(endSessionResponse2.getStatus(), Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT);
+        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri", "logoutUri", "sectorIdentifierUri"})
@@ -210,7 +210,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
 
         showClient(endSessionClient2);
         assertEquals(endSessionResponse2.getStatus(), Status.TEMPORARY_REDIRECT.getStatusCode());
-        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT);
+        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
     }
 
     @Test
