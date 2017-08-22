@@ -308,9 +308,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
         p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
-		if (update && appConfiguration.getEnableClientGrantTypeUpdate()) {
+		if (!update) {
 			p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
-		}
+		} else if (appConfiguration.getEnableClientGrantTypeUpdate()) {
+            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+        }
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
