@@ -100,7 +100,7 @@ public class AppConfiguration implements Configuration {
     private List<String> personCustomObjectClassList;
 
     private Boolean persistIdTokenInLdap = false;
-    private Boolean persistRefreshTokenInLdap = false;
+    private Boolean persistRefreshTokenInLdap = true;
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
