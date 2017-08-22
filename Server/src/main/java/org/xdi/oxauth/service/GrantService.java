@@ -6,17 +6,9 @@
 
 package org.xdi.oxauth.service;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.util.StaticUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -26,16 +18,22 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
+import org.xdi.oxauth.model.common.ClientTokens;
 import org.xdi.oxauth.model.common.MemcachedGrant;
 import org.xdi.oxauth.model.config.StaticConfiguration;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.Grant;
 import org.xdi.oxauth.model.ldap.TokenLdap;
+import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.*;
+
+import static org.xdi.oxauth.util.ServerUtil.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -64,6 +62,9 @@ public class GrantService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     public static String generateGrantId() {
         return UUID.randomUUID().toString();
     }
@@ -91,10 +92,56 @@ public class GrantService {
         }
     }
 
-    public void persist(TokenLdap p_token) {
-        prepareGrantBranch(p_token.getGrantId(), p_token.getClientId());
-        p_token.setTokenCode(TokenHashUtil.getHashedToken(p_token.getTokenCode()));
-        ldapEntryManager.persist(p_token);
+    private boolean shouldPutInCache(TokenType tokenType) {
+        switch (tokenType) {
+            case ID_TOKEN:
+                if (!isTrue(appConfiguration.getPersistIdTokenInLdap())) {
+                    return true;
+                }
+            case REFRESH_TOKEN:
+                if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
+                    return true;
+                }
+        }
+        return false;
+    }
+
+    public void persist(TokenLdap token) {
+        String hashedToken = TokenHashUtil.getHashedToken(token.getTokenCode());
+
+        if (shouldPutInCache(token.getTokenTypeEnum())) {
+            ClientTokens clientTokens = getClientTokens(token.getClientId());
+            clientTokens.getTokenHashes().add(hashedToken);
+
+            String expiration = null;
+            switch (token.getTokenTypeEnum()) {
+                case ID_TOKEN:
+                    expiration = Integer.toString(appConfiguration.getIdTokenLifetime());
+                    break;
+                case REFRESH_TOKEN:
+                    expiration = Integer.toString(appConfiguration.getRefreshTokenLifetime());
+                    break;
+            }
+
+            token.setIsFromCache(true);
+            cacheService.put(expiration, hashedToken, token);
+            cacheService.put(expiration, clientTokens.cacheKey(), clientTokens);
+            return;
+        }
+
+        prepareGrantBranch(token.getGrantId(), token.getClientId());
+        token.setTokenCode(hashedToken);
+        ldapEntryManager.persist(token);
+    }
+
+    private ClientTokens getClientTokens(String clientId) {
+        ClientTokens clientTokens = new ClientTokens(clientId);
+        Object o = cacheService.get(null, clientTokens.cacheKey());
+        if (o instanceof ClientTokens) {
+            return (ClientTokens) o;
+        } else {
+            return clientTokens;
+        }
     }
 
     public void remove(Grant grant) {
@@ -103,8 +150,13 @@ public class GrantService {
     }
 
     public void remove(TokenLdap p_token) {
-        ldapEntryManager.remove(p_token);
-        log.trace("Removed token, code: " + p_token.getTokenCode());
+        if (p_token.isFromCache()) {
+            cacheService.remove(null, TokenHashUtil.getHashedToken(p_token.getTokenCode()));
+            log.trace("Removed token from cache, code: " + p_token.getTokenCode());
+        } else {
+            ldapEntryManager.remove(p_token);
+            log.trace("Removed token from LDAP, code: " + p_token.getTokenCode());
+        }
     }
 
     public void removeSilently(TokenLdap token) {

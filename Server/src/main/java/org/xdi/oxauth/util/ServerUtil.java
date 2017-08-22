@@ -61,6 +61,10 @@ public class ServerUtil {
         }
     }
 
+    public static boolean isTrue(Boolean booleanObject) {
+        return booleanObject != null && booleanObject;
+    }
+
     public static String asPrettyJson(Object p_object) throws IOException {
         final ObjectMapper mapper = ServerUtil.createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(p_object);
