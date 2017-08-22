@@ -109,13 +109,11 @@ public class GrantService {
 
     public void persist(TokenLdap token) {
         String hashedToken = TokenHashUtil.getHashedToken(token.getTokenCode());
+        token.setTokenCode(hashedToken);
 
         if (shouldPutInCache(token.getTokenTypeEnum())) {
             ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
             clientTokens.getTokenHashes().add(hashedToken);
-
-            SessionTokens sessionTokens = getCacheSessionTokens(token.getSessionDn());
-            sessionTokens.getTokenHashes().add(hashedToken);
 
             String expiration = null;
             switch (token.getTokenTypeEnum()) {
@@ -130,12 +128,17 @@ public class GrantService {
             token.setIsFromCache(true);
             cacheService.put(expiration, hashedToken, token);
             cacheService.put(expiration, clientTokens.cacheKey(), clientTokens);
-            cacheService.put(expiration, sessionTokens.cacheKey(), sessionTokens);
+
+            if (StringUtils.isNotBlank(token.getSessionDn())) {
+                SessionTokens sessionTokens = getCacheSessionTokens(token.getSessionDn());
+                sessionTokens.getTokenHashes().add(hashedToken);
+
+                cacheService.put(expiration, sessionTokens.cacheKey(), sessionTokens);
+            }
             return;
         }
 
         prepareGrantBranch(token.getGrantId(), token.getClientId());
-        token.setTokenCode(hashedToken);
         ldapEntryManager.persist(token);
     }
 
@@ -297,6 +300,9 @@ public class GrantService {
     }
 
     public List<TokenLdap> getGrantsFromCacheBySessionDn(String sessionDn) {
+        if (StringUtils.isBlank(sessionDn)) {
+            return Collections.emptyList();
+        }
         return getCacheTokensEntries(getCacheSessionTokens(sessionDn).getTokenHashes());
     }
 
