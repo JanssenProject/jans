@@ -89,7 +89,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
-
         log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
                 idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
 
