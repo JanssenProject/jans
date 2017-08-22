@@ -179,7 +179,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 }
                             }
 
-                            updateClientFromRequestObject(client, r, true);
+                            updateClientFromRequestObject(client, r, false);
 
                             boolean registerClient = true;
                             if (externalDynamicClientRegistrationService.isEnabled()) {
@@ -308,9 +308,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
         p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
-		if (update && appConfiguration.getEnableClientGrantTypeUpdate()) {
+		if (!update) {
 			p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
-		}
+		} else if (appConfiguration.getEnableClientGrantTypeUpdate()) {
+            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+        }
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
@@ -464,7 +466,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                         final Client client = clientService.getClient(clientId, accessToken);
                         if (client != null) {
-                            updateClientFromRequestObject(client, request, false);
+                            updateClientFromRequestObject(client, request, true);
                             clientService.merge(client);
 
                             oAuth2AuditLog.setScope(clientScopesToString(client));
