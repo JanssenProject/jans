@@ -135,7 +135,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         try {
             final List<TokenLdap> entries = new ArrayList<TokenLdap>();
             entries.addAll(grantService.getGrantsOfClient(clientId));
-            entries.addAll(getCacheClientTokensEntries(clientId));
+            entries.addAll(grantService.getCacheClientTokensEntries(clientId));
 
             for (TokenLdap t : entries) {
                 final AuthorizationGrant grant = asGrant(t);
@@ -147,22 +147,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
             log.trace(e.getMessage(), e);
         }
         return result;
-    }
-
-    private Collection<TokenLdap> getCacheClientTokensEntries(String clientId) {
-        List<TokenLdap> tokens = new ArrayList<TokenLdap>();
-        Object o = cacheService.get(null, new ClientTokens(clientId).cacheKey());
-        if (o instanceof ClientTokens) {
-            for (String tokenHash : ((ClientTokens)o).getTokenHashes()) {
-                Object o1 = cacheService.get(null, tokenHash);
-                if (o1 instanceof TokenLdap) {
-                    TokenLdap token = (TokenLdap) o1;
-                    token.setIsFromCache(true);
-                    tokens.add(token);
-                }
-            }
-        }
-        return tokens;
     }
 
     @Override
