@@ -179,7 +179,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 }
                             }
 
-                            updateClientFromRequestObject(client, r, false);
+                            updateClientFromRequestObject(client, r, true);
 
                             boolean registerClient = true;
                             if (externalDynamicClientRegistrationService.isEnabled()) {
@@ -464,7 +464,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                         final Client client = clientService.getClient(clientId, accessToken);
                         if (client != null) {
-                            updateClientFromRequestObject(client, request, true);
+                            updateClientFromRequestObject(client, request, false);
                             clientService.merge(client);
 
                             oAuth2AuditLog.setScope(clientScopesToString(client));
