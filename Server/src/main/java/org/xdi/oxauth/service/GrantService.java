@@ -20,6 +20,7 @@ import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.ClientTokens;
 import org.xdi.oxauth.model.common.MemcachedGrant;
+import org.xdi.oxauth.model.common.SessionTokens;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.ldap.Grant;
@@ -110,8 +111,11 @@ public class GrantService {
         String hashedToken = TokenHashUtil.getHashedToken(token.getTokenCode());
 
         if (shouldPutInCache(token.getTokenTypeEnum())) {
-            ClientTokens clientTokens = getClientTokens(token.getClientId());
+            ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
             clientTokens.getTokenHashes().add(hashedToken);
+
+            SessionTokens sessionTokens = getCacheSessionTokens(token.getSessionDn());
+            sessionTokens.getTokenHashes().add(hashedToken);
 
             String expiration = null;
             switch (token.getTokenTypeEnum()) {
@@ -126,6 +130,7 @@ public class GrantService {
             token.setIsFromCache(true);
             cacheService.put(expiration, hashedToken, token);
             cacheService.put(expiration, clientTokens.cacheKey(), clientTokens);
+            cacheService.put(expiration, sessionTokens.cacheKey(), sessionTokens);
             return;
         }
 
@@ -134,13 +139,23 @@ public class GrantService {
         ldapEntryManager.persist(token);
     }
 
-    private ClientTokens getClientTokens(String clientId) {
+    public ClientTokens getCacheClientTokens(String clientId) {
         ClientTokens clientTokens = new ClientTokens(clientId);
         Object o = cacheService.get(null, clientTokens.cacheKey());
         if (o instanceof ClientTokens) {
             return (ClientTokens) o;
         } else {
             return clientTokens;
+        }
+    }
+
+    public SessionTokens getCacheSessionTokens(String sessionDn) {
+        SessionTokens sessionTokens = new SessionTokens(sessionDn);
+        Object o = cacheService.get(null, sessionTokens.cacheKey());
+        if (o instanceof SessionTokens) {
+            return (SessionTokens) o;
+        } else {
+            return sessionTokens;
         }
     }
 
@@ -268,12 +283,43 @@ public class GrantService {
     }
 
     public List<TokenLdap> getGrantsBySessionDn(String sessionDn) {
+        List<TokenLdap> grants = new ArrayList<TokenLdap>();
         try {
-            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.create(String.format("oxAuthSessionDn=%s", sessionDn)));
+            List<TokenLdap> ldapGrants = ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.create(String.format("oxAuthSessionDn=%s", sessionDn)));
+            if (ldapGrants != null) {
+                grants.addAll(ldapGrants);
+            }
+            grants.addAll(getGrantsFromCacheBySessionDn(sessionDn));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+        return grants;
+    }
+
+    public List<TokenLdap> getGrantsFromCacheBySessionDn(String sessionDn) {
+        return getCacheTokensEntries(getCacheSessionTokens(sessionDn).getTokenHashes());
+    }
+
+    public List<TokenLdap> getCacheClientTokensEntries(String clientId) {
+        Object o = cacheService.get(null, new ClientTokens(clientId).cacheKey());
+        if (o instanceof ClientTokens) {
+            return getCacheTokensEntries(((ClientTokens)o).getTokenHashes());
+        }
         return Collections.emptyList();
+    }
+
+    public List<TokenLdap> getCacheTokensEntries(Set<String> tokenHashes) {
+        List<TokenLdap> tokens = new ArrayList<TokenLdap>();
+
+        for (String tokenHash : tokenHashes) {
+            Object o1 = cacheService.get(null, tokenHash);
+            if (o1 instanceof TokenLdap) {
+                TokenLdap token = (TokenLdap) o1;
+                token.setIsFromCache(true);
+                tokens.add(token);
+            }
+        }
+        return tokens;
     }
 
     public void removeAllTokensBySession(String sessionDn) {
