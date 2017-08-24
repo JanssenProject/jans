@@ -210,22 +210,19 @@
     </test>
 
     <!-- UMA tests -->
-    <!-- Test for getting UMA meta data configuration -->
-    <test name="Test for getting UMA meta data configuration (HTTP)" enabled="true">
+    <test name="UMA : Getting UMA meta data configuration (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.MetaDataFlowHttpTest"/>
         </classes>
     </test>
 
-    <!-- Obtain UMA PAT token test -->
-    <test name="Obtain UMA PAT token test (HTTP)" enabled="false">
+    <test name="UMA : Obtain PAT token test (HTTP)" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.ObtainPatTokenFlowHttpTest"/>
         </classes>
     </test>
 
-    <!-- Register UMA resource set description test -->
-    <test name="Register UMA resource set test (HTTP)" enabled="false">
+    <test name="UMA : Register resource test (HTTP)" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceFlowHttpTest"/>
         </classes>
@@ -237,21 +234,19 @@
         </classes>
     </test>
 
-    <!-- Register UMA resource permissions test -->
-    <test name="Register UMA resource description permissions test (HTTP)" enabled="true">
+    <test name="UMA : Register UMA permissions test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.UmaRegisterPermissionFlowHttpTest"/>
         </classes>
     </test>
 
-    <!-- Test for getting UMA protected resource -->
-    <test name="Test for getting UMA protected resource (HTTP)" enabled="false">
+    <test name="UMA : Test for getting access to UMA protected resource (HTTP)" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.AccessProtectedResourceFlowHttpTest"/>
         </classes>
     </test>
 
-    <test name="Test for getting UMA scopes (HTTP)" enabled="false">
+    <test name="UMA : Test for getting UMA scopes (HTTP)" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.ScopeHttpTest"/>
         </classes>
