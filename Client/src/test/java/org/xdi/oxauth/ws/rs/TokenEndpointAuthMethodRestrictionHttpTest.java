@@ -27,7 +27,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version August 23, 2017
  */
 public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
@@ -82,7 +82,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
     }
 
     /**
@@ -143,7 +143,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -244,7 +244,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -342,7 +342,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -442,7 +442,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -550,7 +550,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -651,7 +651,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -749,7 +749,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -849,7 +849,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -958,7 +958,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1006,6 +1006,1926 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
         assertNotNull(tokenResponse.getTokenType(), "The token type is null");
         assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtHS256(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtHS256");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtHS384(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtHS384");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * any algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtHS512(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtHS512");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "RS256_keyId", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtRS256Fail(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String keyId,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtRS256Fail");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "RS384_keyId", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtRS384Fail(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String keyId,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtRS384Fail");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "RS512_keyId", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtRS512Fail(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String keyId,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtRS512Fail");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "ES256_keyId", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtES256Fail(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String keyId,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtES256Fail");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "ES384_keyId", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtES384Fail(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String keyId,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtES384Fail");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    /**
+     * If token_endpoint_auth_signing_alg is omitted in client registration,
+     * only symmetric algorithm supported by the OP and the RP can be used.
+     */
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "ES512_keyId", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtES512Fail(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String keyId,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtES512Fail");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.CLIENT_SECRET_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.HS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.HS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
     /**
@@ -1063,7 +2983,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1161,7 +3081,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1260,7 +3180,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1370,7 +3290,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1477,7 +3397,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1576,7 +3496,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1675,7 +3595,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1708,6 +3628,4470 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtRS256(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtRS256");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtRS384(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtRS384");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtRS512(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtRS512");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtES256(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtES256");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtES384(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtES384");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtES512(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtES512");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail3(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail3");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail4(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail4");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail5(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS256Fail5");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail3(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail3");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail4(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail4");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail5(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS384Fail5");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail3(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail3");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail4(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail4");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail5(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgRS512Fail5");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.RS512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail3(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail3");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail4(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail4");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail5(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES256Fail5");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES256.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail3(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail3");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail4(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail4");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail5(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES384Fail5");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES384.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getEntity(), "The entity is null");
+        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
+        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
+        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail1(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail1");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail2(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail2");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "RS512_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail3(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail3");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail4(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail4");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 401, "Unexpected response code: " + tokenResponse.getStatus());
+        assertNotNull(tokenResponse.getErrorType(), "The error type is null");
+        assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
+    }
+
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "ES384_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
+    @Test
+    public void tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail5(
+            final String redirectUris, final String redirectUri, final String userId, final String userSecret,
+            final String clientJwksUri, final String keyId, final String dnName, final String keyStoreFile,
+            final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("tokenEndpointAuthMethodPrivateKeyJwtSigningAlgES512Fail5");
+
+        // 1. Register client
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200, "Unexpected response code: " + registerResponse.getEntity());
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientIdIssuedAt());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String registrationAccessToken = registerResponse.getRegistrationAccessToken();
+        String registrationClientUri = registerResponse.getRegistrationClientUri();
+
+        // 2. Client read
+        RegisterRequest readClientRequest = new RegisterRequest(registrationAccessToken);
+
+        RegisterClient readClient = new RegisterClient(registrationClientUri);
+        readClient.setRequest(readClientRequest);
+        RegisterResponse readClientResponse = readClient.exec();
+
+        showClient(readClient);
+        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
+        assertNotNull(readClientResponse.getClientId());
+        assertNotNull(readClientResponse.getClientSecret());
+        assertNotNull(readClientResponse.getClientIdIssuedAt());
+        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
+                AuthenticationMethod.PRIVATE_KEY_JWT.toString());
+        assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
+        assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
+                SignatureAlgorithm.ES512.toString());
+        assertNotNull(readClientResponse.getClaims().get(RESPONSE_TYPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(REDIRECT_URIS.toString()));
+        assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
+        assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
+        assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+
+        // 3. Request authorization
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation(), "The location is null");
+        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
+        assertNotNull(authorizationResponse.getState(), "The state is null");
+        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        assertNull(authorizationResponse.getIdToken(), "The id token is not null");
+
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 4. Get Access Token
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
+        tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
+        tokenRequest.setCryptoProvider(cryptoProvider);
+        tokenRequest.setKeyId(keyId);
+        tokenRequest.setAudience(tokenEndpoint);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         tokenClient.setRequest(tokenRequest);
