@@ -46,8 +46,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
-    public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret,
-                     final String umaPatClientId, final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
+    public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         if (this.metadata == null) {
             this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
             UmaTestUtil.assert_(this.metadata);
