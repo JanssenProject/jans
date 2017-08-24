@@ -20,16 +20,14 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.GrantService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.util.ServerUtil;
+import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
 
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Component to hold in memory authorization grant objects.
@@ -125,6 +123,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
+        if (!ServerUtil.isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
+            return asGrant((TokenLdap) cacheService.get(null, TokenHashUtil.getHashedToken(refreshTokenCode)));
+        }
         return load(clientId, refreshTokenCode);
     }
 
@@ -132,17 +133,18 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     public List<AuthorizationGrant> getAuthorizationGrant(String clientId) {
         final List<AuthorizationGrant> result = new ArrayList<AuthorizationGrant>();
         try {
-            final List<TokenLdap> entries = grantService.getGrantsOfClient(clientId);
-            if (entries != null && !entries.isEmpty()) {
-                for (TokenLdap t : entries) {
-                    final AuthorizationGrant grant = asGrant(t);
-                    if (grant != null) {
-                        result.add(grant);
-                    }
+            final List<TokenLdap> entries = new ArrayList<TokenLdap>();
+            entries.addAll(grantService.getGrantsOfClient(clientId));
+            entries.addAll(grantService.getCacheClientTokensEntries(clientId));
+
+            for (TokenLdap t : entries) {
+                final AuthorizationGrant grant = asGrant(t);
+                if (grant != null) {
+                    result.add(grant);
                 }
             }
         } catch (Exception e) {
-        	log.trace(e.getMessage(), e);
+            log.trace(e.getMessage(), e);
         }
         return result;
     }
@@ -158,7 +160,13 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
-        TokenLdap tokenLdap = grantService.getGrantsByCode(idToken);
+        final TokenLdap tokenLdap;
+        if (ServerUtil.isTrue(appConfiguration.getPersistIdTokenInLdap())) {
+            tokenLdap = grantService.getGrantsByCode(idToken);
+        } else {
+            tokenLdap = (TokenLdap) cacheService.get(null, TokenHashUtil.getHashedToken(idToken));
+        }
+
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.ID_TOKEN)) {
             return asGrant(tokenLdap);
         }
