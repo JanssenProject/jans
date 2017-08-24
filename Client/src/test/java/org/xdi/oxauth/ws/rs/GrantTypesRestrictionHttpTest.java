@@ -35,7 +35,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
 
 /**
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version August 23, 2017
  */
 public class GrantTypesRestrictionHttpTest extends BaseTest {
 
@@ -199,23 +199,28 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             assertNotNull(tokenResponse.getAccessToken());
             assertNotNull(tokenResponse.getExpiresIn());
             assertNotNull(tokenResponse.getTokenType());
-            assertNotNull(tokenResponse.getRefreshToken());
 
-            refreshToken = tokenResponse.getRefreshToken();
+            if (expectedGrantTypes.contains(GrantType.REFRESH_TOKEN)) {
+                assertNotNull(tokenResponse.getRefreshToken());
 
-            // 6. Request new access token using the refresh token.
-            TokenClient refreshTokenClient = new TokenClient(tokenEndpoint);
-            TokenResponse refreshTokenResponse = refreshTokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
+                refreshToken = tokenResponse.getRefreshToken();
 
-            showClient(refreshTokenClient);
-            assertEquals(refreshTokenResponse.getStatus(), 200);
-            assertNotNull(refreshTokenResponse.getEntity());
-            assertNotNull(refreshTokenResponse.getAccessToken());
-            assertNotNull(refreshTokenResponse.getTokenType());
-            assertNotNull(refreshTokenResponse.getRefreshToken());
-            assertNotNull(refreshTokenResponse.getScope());
+                // 6. Request new access token using the refresh token.
+                TokenClient refreshTokenClient = new TokenClient(tokenEndpoint);
+                TokenResponse refreshTokenResponse = refreshTokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
-            accessToken = refreshTokenResponse.getAccessToken();
+                showClient(refreshTokenClient);
+                assertEquals(refreshTokenResponse.getStatus(), 200);
+                assertNotNull(refreshTokenResponse.getEntity());
+                assertNotNull(refreshTokenResponse.getAccessToken());
+                assertNotNull(refreshTokenResponse.getTokenType());
+                assertNotNull(refreshTokenResponse.getRefreshToken());
+                assertNotNull(refreshTokenResponse.getScope());
+
+                accessToken = refreshTokenResponse.getAccessToken();
+            } else {
+                assertNull(tokenResponse.getRefreshToken());
+            }
         }
 
         if (accessToken != null) {

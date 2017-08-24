@@ -43,13 +43,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import java.security.SignatureException;
+import java.util.Arrays;
 
 /**
  * Provides interface for token REST web services
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version August 23, 2017
  */
 @Path("/")
 public class TokenRestWebServiceImpl implements TokenRestWebService {
@@ -156,7 +157,12 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         AccessToken accToken = authorizationCodeGrant.createAccessToken();
                         log.debug("Issuing access token: {}", accToken.getCode());
 
-                        RefreshToken reToken = authorizationCodeGrant.createRefreshToken();
+                        RefreshToken reToken = null;
+                        if (client.getGrantTypes() != null
+                                && client.getGrantTypes().length > 0
+                                && Arrays.asList(client.getGrantTypes()).contains(GrantType.REFRESH_TOKEN)) {
+                            reToken = authorizationCodeGrant.createRefreshToken();
+                        }
 
                         if (scope != null && !scope.isEmpty()) {
                             scope = authorizationCodeGrant.checkScopesPolicy(scope);
