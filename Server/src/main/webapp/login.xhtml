@@ -43,7 +43,7 @@
 		<!-- end header-->
 	<div class="bs-docs-section">
 		<div class="container">
-			<h:panelGroup  rendered="#{applianceService.getAppliance().passportEnabled.booleanValue}"> 
+			<h:panelGroup  rendered="false"> 
 			<div class="login_bx">
 				<div class="row">
 					<div class="col-md-6 col-sm-5 ">
@@ -135,7 +135,7 @@
 			</div>
 			</h:panelGroup>
 			
-			<h:panelGroup  rendered="#{!applianceService.getAppliance().passportEnabled.booleanValue}"> 
+			<h:panelGroup  rendered="true"> 
 			<div class="login_bx_1">
 				<div class="row">
 					<div class="col-md-6_1 col-sm-5_1 ">
