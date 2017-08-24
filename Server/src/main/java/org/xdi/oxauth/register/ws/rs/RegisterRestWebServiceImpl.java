@@ -179,7 +179,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                                 }
                             }
 
-                            updateClientFromRequestObject(client, r);
+                            updateClientFromRequestObject(client, r, false);
 
                             boolean registerClient = true;
                             if (externalDynamicClientRegistrationService.isEnabled()) {
@@ -250,7 +250,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
     // yuriyz - ATTENTION : this method is used for both registration and update client metadata cases, therefore any logic here
     // will be applied for both cases.
-    private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject) throws JSONException {
+    private void updateClientFromRequestObject(Client p_client, RegisterRequest requestObject, boolean update) throws JSONException {
         List<String> redirectUris = requestObject.getRedirectUris();
         if (redirectUris != null && !redirectUris.isEmpty()) {
             redirectUris = new ArrayList<String>(new HashSet<String>(redirectUris)); // Remove repeated elements
@@ -301,10 +301,18 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (!responseTypesSupported.contains(responseTypeSet)) {
             responseTypeSet.clear();
         }
+
         grantTypeSet.retainAll(grantTypesSupported);
 
+        Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
+        grantTypeSet.retainAll(dynamicGrantTypeDefault);
+
         p_client.setResponseTypes(responseTypeSet.toArray(new ResponseType[responseTypeSet.size()]));
-        p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+		if (!update) {
+			p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+		} else if (appConfiguration.getEnableClientGrantTypeUpdate()) {
+            p_client.setGrantTypes(grantTypeSet.toArray(new GrantType[grantTypeSet.size()]));
+        }
 
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
@@ -458,7 +466,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                         final Client client = clientService.getClient(clientId, accessToken);
                         if (client != null) {
-                            updateClientFromRequestObject(client, request);
+                            updateClientFromRequestObject(client, request, true);
                             clientService.merge(client);
 
                             oAuth2AuditLog.setScope(clientScopesToString(client));
@@ -537,7 +545,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
     }
-
+    
     private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
         final JSONObject jsonObject = getJSONObject(p_client);
         return jsonObject.toString(4).replace("\\/", "/");
