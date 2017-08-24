@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.ldap.model.GluuStatus;
 import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.model.util.Util;
@@ -50,6 +51,9 @@ public class UserService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     /**
      * returns User by Dn
@@ -142,7 +146,12 @@ public class UserService {
     			new CustomAttribute("inum", inum),
     			new CustomAttribute("gluuStatus", GluuStatus.ACTIVE.getValue()),
 				new CustomAttribute("displayName", "User " + uid + " added via oxAuth custom plugin")));
-    	user.setUserId(uid); 
+    	user.setUserId(uid);
+
+    	List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
+    	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
+    		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[0]));
+    	}
     	
 		ldapEntryManager.persist(user);
 		
@@ -159,7 +168,13 @@ public class UserService {
         
         GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
         user.setAttribute("gluuStatus",  status.getValue());
-		ldapEntryManager.persist(user);
+
+        List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
+    	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
+    		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[0]));
+    	}
+
+    	ldapEntryManager.persist(user);
 		
 		return getUserByDn(user.getDn());
 	}

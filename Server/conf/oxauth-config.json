@@ -141,6 +141,13 @@
         "page",
         "popup"
     ],
+    "dynamicGrantTypeDefault":[
+        "authorization_code",
+        "implicit",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket"
+    ],
     "claimTypesSupported":[
         "normal"
     ],
@@ -179,6 +186,7 @@
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
+    "personCustomObjectClassList":["gluuCustomPerson"],
     "authenticationFiltersEnabled":true,
     "clientAuthenticationFiltersEnabled":true,
     "authenticationFilters":[
@@ -230,6 +238,7 @@
     "customHeadersWithAuthorizationResponse": true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
+    "enableClientGrantTypeUpdate": true,
     "corsConfigurationFilters": [
         {
             "filterName": "CorsFilter",

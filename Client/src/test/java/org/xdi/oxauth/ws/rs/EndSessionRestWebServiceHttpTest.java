@@ -16,6 +16,8 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.session.EndSessionErrorResponseType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import javax.ws.rs.core.Response.Status;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -118,8 +120,8 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         EndSessionResponse endSessionResponse2 = endSessionClient2.exec();
 
         showClient(endSessionClient2);
-        assertEquals(endSessionResponse2.getStatus(), 401);
-        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT);
+        assertEquals(endSessionResponse2.getStatus(), Status.TEMPORARY_REDIRECT.getStatusCode());
+        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "postLogoutRedirectUri", "logoutUri", "sectorIdentifierUri"})
@@ -207,8 +209,8 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         EndSessionResponse endSessionResponse2 = endSessionClient2.exec();
 
         showClient(endSessionClient2);
-        assertEquals(endSessionResponse2.getStatus(), 401);
-        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT);
+        assertEquals(endSessionResponse2.getStatus(), Status.TEMPORARY_REDIRECT.getStatusCode());
+        assertEquals(endSessionResponse2.getErrorType(), EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
     }
 
     @Test
@@ -236,7 +238,7 @@ public class EndSessionRestWebServiceHttpTest extends BaseTest {
         EndSessionResponse response = endSessionClient.execEndSession("INVALID_ACCESS_TOKEN", postLogoutRedirectUri, state);
 
         showClient(endSessionClient);
-        assertEquals(response.getStatus(), 401, "Unexpected response code. Entity: " + response.getEntity());
+        assertEquals(response.getStatus(), Status.TEMPORARY_REDIRECT.getStatusCode(), "Unexpected response code. Entity: " + response.getEntity());
         assertNotNull(response.getEntity(), "The entity is null");
         assertNotNull(response.getErrorType(), "The error type is null");
         assertNotNull(response.getErrorDescription(), "The error description is null");

@@ -97,6 +97,10 @@ public class AppConfiguration implements Configuration {
     private Boolean trustedClientEnabled;
     private Boolean dynamicRegistrationScopesParamEnabled;
     private String dynamicRegistrationCustomObjectClass;
+    private List<String> personCustomObjectClassList;
+
+    private Boolean persistIdTokenInLdap = false;
+    private Boolean persistRefreshTokenInLdap = true;
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
@@ -115,6 +119,9 @@ public class AppConfiguration implements Configuration {
     private Integer sessionIdLifetime = 86400;
     private int configurationUpdateInterval;
 
+    private Boolean enableClientGrantTypeUpdate;
+    private Set<GrantType> dynamicGrantTypeDefault;
+    
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
@@ -832,6 +839,22 @@ public class AppConfiguration implements Configuration {
         this.dynamicRegistrationScopesParamEnabled = dynamicRegistrationScopesParamEnabled;
     }
 
+    public Boolean getPersistIdTokenInLdap() {
+        return persistIdTokenInLdap;
+    }
+
+    public void setPersistIdTokenInLdap(Boolean persistIdTokenInLdap) {
+        this.persistIdTokenInLdap = persistIdTokenInLdap;
+    }
+
+    public Boolean getPersistRefreshTokenInLdap() {
+        return persistRefreshTokenInLdap;
+    }
+
+    public void setPersistRefreshTokenInLdap(Boolean persistRefreshTokenInLdap) {
+        this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
+    }
+
     public String getDynamicRegistrationCustomObjectClass() {
         return dynamicRegistrationCustomObjectClass;
     }
@@ -840,7 +863,15 @@ public class AppConfiguration implements Configuration {
         dynamicRegistrationCustomObjectClass = p_dynamicRegistrationCustomObjectClass;
     }
 
-    public Boolean getAuthenticationFiltersEnabled() {
+	public List<String> getPersonCustomObjectClassList() {
+		return personCustomObjectClassList;
+	}
+
+	public void setPersonCustomObjectClassList(List<String> personCustomObjectClassList) {
+		this.personCustomObjectClassList = personCustomObjectClassList;
+	}
+
+	public Boolean getAuthenticationFiltersEnabled() {
         return authenticationFiltersEnabled;
     }
 
@@ -1181,6 +1212,22 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
+	public Boolean getEnableClientGrantTypeUpdate() {
+		return enableClientGrantTypeUpdate;
+	}
+
+	public void setEnableClientGrantTypeUpdate(Boolean enableClientGrantTypeUpdate) {
+		this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
+	}
+
+	public Set<GrantType> getDynamicGrantTypeDefault() {
+		return dynamicGrantTypeDefault;
+	}
+
+	public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
+		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
+	}
+	
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
     }
@@ -1212,4 +1259,5 @@ public class AppConfiguration implements Configuration {
     public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
+    
 }
