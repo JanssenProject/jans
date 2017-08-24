@@ -6,9 +6,7 @@
 
 package org.xdi.oxauth.model.token;
 
-import java.util.Date;
-import java.util.List;
-
+import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
@@ -24,15 +22,15 @@ import org.xdi.oxauth.model.jwt.JwtType;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.security.StringEncrypter;
 
-import com.google.common.base.Strings;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version August 23, 2017
  */
 public class ClientAssertion {
 
@@ -76,11 +74,9 @@ public class ClientAssertion {
                 List<String> audience = jwt.getClaims().getClaimAsStringList(JwtClaimName.AUDIENCE);
                 Date expirationTime = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
                 //SignatureAlgorithm algorithm = SignatureAlgorithm.fromName(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-                if ((clientId == null && StringUtils.isNotBlank(issuer) && StringUtils.isNotBlank(subject)
-                        && issuer.equals(subject)) || (StringUtils.isNotBlank(clientId)
-                        && StringUtils.isNotBlank(issuer)
-                        && StringUtils.isNotBlank(subject)
-                        && clientId.equals(issuer) && issuer.equals(subject))) {
+                if ((clientId == null && StringUtils.isNotBlank(issuer) && StringUtils.isNotBlank(subject) && issuer.equals(subject))
+                        || (StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(issuer)
+                        && StringUtils.isNotBlank(subject) && clientId.equals(issuer) && issuer.equals(subject))) {
 
                     // Validate audience
                     String tokenUrl = appConfiguration.getTokenEndpoint();
@@ -104,23 +100,27 @@ public class ClientAssertion {
                                 if (jwtType != null && signatureAlgorithm != null && signatureAlgorithm.getFamily() != null &&
                                         ((authenticationMethod == AuthenticationMethod.CLIENT_SECRET_JWT && signatureAlgorithm.getFamily().equals("HMAC"))
                                                 || (authenticationMethod == AuthenticationMethod.PRIVATE_KEY_JWT && (signatureAlgorithm.getFamily().equals("RSA") || signatureAlgorithm.getFamily().equals("EC"))))) {
-                                    clientSecret = clientService.decryptSecret(client.getClientSecret());
+                                    if (client.getTokenEndpointAuthSigningAlg() == null || SignatureAlgorithm.fromString(client.getTokenEndpointAuthSigningAlg()).equals(signatureAlgorithm)) {
+                                        clientSecret = clientService.decryptSecret(client.getClientSecret());
 
-                                    // Validate the crypto segment
-                                    String keyId = jwt.getHeader().getKeyId();
-                                    JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
-                                            JwtUtil.getJSONWebKeys(client.getJwksUri()) :
-                                            new JSONObject(client.getJwks());
-                                    String sharedSecret = clientService.decryptSecret(client.getClientSecret());
-                                    AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
-                                    		appConfiguration);
-                                    boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
-                                            keyId, jwks, sharedSecret, signatureAlgorithm);
+                                        // Validate the crypto segment
+                                        String keyId = jwt.getHeader().getKeyId();
+                                        JSONObject jwks = Strings.isNullOrEmpty(client.getJwks()) ?
+                                                JwtUtil.getJSONWebKeys(client.getJwksUri()) :
+                                                new JSONObject(client.getJwks());
+                                        String sharedSecret = clientService.decryptSecret(client.getClientSecret());
+                                        AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(
+                                                appConfiguration);
+                                        boolean validSignature = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
+                                                keyId, jwks, sharedSecret, signatureAlgorithm);
 
-                                    if (validSignature) {
-                                        result = true;
+                                        if (validSignature) {
+                                            result = true;
+                                        } else {
+                                            throw new InvalidJwtException("Invalid cryptographic segment");
+                                        }
                                     } else {
-                                        throw new InvalidJwtException("Invalid cryptographic segment");
+                                        throw new InvalidJwtException("Invalid signing algorithm");
                                     }
                                 } else {
                                     throw new InvalidJwtException("Invalid authentication method");
