@@ -3,6 +3,7 @@ package org.xdi.oxd.server.op;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.RegisterClient;
@@ -12,6 +13,8 @@ import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.UpdateSiteParams;
 import org.xdi.oxd.common.response.UpdateSiteResponse;
 import org.xdi.oxd.server.service.Rp;
@@ -43,7 +46,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
     public CommandResponse execute(UpdateSiteParams params) {
         final Rp rp = getRp();
 
-        LOG.info("Updating rp ...");
+        LOG.info("Updating rp ... rp: " + rp);
         persistRp(rp, params);
 
         UpdateSiteResponse response = new UpdateSiteResponse();
@@ -63,14 +66,19 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         }
     }
 
-    private void updateRegisteredClient(Rp site, UpdateSiteParams params) {
-        final RegisterClient registerClient = new RegisterClient(site.getClientRegistrationClientUri());
-        registerClient.setRequest(createRegisterClientRequest(site, params));
+    private void updateRegisteredClient(Rp rp, UpdateSiteParams params) {
+        if (StringUtils.isBlank(rp.getClientRegistrationClientUri())) {
+            LOG.error("Registration client url is blank.");
+            throw new ErrorResponseException(ErrorResponseCode.INVALID_REGISTRATION_CLIENT_URL);
+        }
+
+        final RegisterClient registerClient = new RegisterClient(rp.getClientRegistrationClientUri());
+        registerClient.setRequest(createRegisterClientRequest(rp, params));
         registerClient.setExecutor(getHttpService().getClientExecutor());
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (response.getStatus() == 200) {
-                LOG.trace("Client updated successfully. for site - client_id: " + site.getClientId());
+                LOG.trace("Client updated successfully. for rp - client_id: " + rp.getClientId());
                 return;
             } else {
                 LOG.error("Response is not OK (200).");
@@ -82,7 +90,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             LOG.error(response.getErrorDescription());
         }
 
-        throw new RuntimeException("Failed to register client for site. Details:" + response.getEntity());
+        throw new RuntimeException("Failed to update client for rp. Details:" + response.getEntity());
     }
 
     private RegisterRequest createRegisterClientRequest(Rp site, UpdateSiteParams params) {
