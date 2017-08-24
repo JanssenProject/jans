@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNull;
 
 /**
@@ -111,7 +111,9 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
                     "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
-            assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
+            assertTrue(ex.getResponse().getStatus() != Response.Status.CREATED.getStatusCode() &&
+                    ex.getResponse().getStatus() != Response.Status.OK.getStatusCode()
+                    , "Unexpected response status");
         }
 
         assertNull(ticket, "Resource permission is not null");
