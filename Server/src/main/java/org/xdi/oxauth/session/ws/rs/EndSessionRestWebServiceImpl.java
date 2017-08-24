@@ -89,7 +89,6 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sessionId,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
-
         log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sessionId: {}, Is Secure = {}",
                 idTokenHint, postLogoutRedirectUri, sessionId, sec.isSecure());
 
@@ -102,7 +101,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         //Perform redirect to RP if id_token is expired (see https://github.com/GluuFederation/oxAuth/issues/575)
         if (pair.getFirst() == null && pair.getSecond() == null) {
             try {
-                return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).build();
+            	String error = errorResponseFactory.getErrorAsJson(EndSessionErrorResponseType.INVALID_GRANT_AND_SESSION);
+                return Response.temporaryRedirect(new URI(postLogoutRedirectUri)).entity(error).build();
             } catch (URISyntaxException e) {
                 log.error("Can't perform redirect", e);
             }
