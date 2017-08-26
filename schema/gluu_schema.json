@@ -4019,6 +4019,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxTrust Attribute Resolver ",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxTrustConfAttributeResolver"
+            ],
+            "oid": "oxAttribute:370",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4736,7 +4747,8 @@
                 "oxTrustConfApplication",
                 "oxTrustConfCacheRefresh",
                 "oxRevision",
-                "oxTrustConfImportPerson"
+                "oxTrustConfImportPerson",
+                "oxTrustConfAttributeResolver"
             ],
             "must": [
                 "objectclass"
