@@ -4024,7 +4024,7 @@
             "desc": "oxTrust Attribute Resolver ",
             "equality": "caseIgnoreMatch",
             "names": [
-                "oxTrustAttributeResolver"
+                "oxTrustConfAttributeResolver"
             ],
             "oid": "oxAttribute:370",
             "substr": "caseIgnoreSubstringsMatch",
@@ -4748,7 +4748,7 @@
                 "oxTrustConfCacheRefresh",
                 "oxRevision",
                 "oxTrustConfImportPerson",
-                "oxTrustAttributeResolver"
+                "oxTrustConfAttributeResolver"
             ],
             "must": [
                 "objectclass"
