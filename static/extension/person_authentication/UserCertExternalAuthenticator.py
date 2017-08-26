@@ -311,11 +311,11 @@ class PersonAuthentication(PersonAuthenticationType):
             return identity.getWorkingParameter(attribute_name)
         
         # Try to get attribute from persistent session
-        session_state = identity.getSessionState()
-        if session_state == None:
+        session_id = identity.getSessionId()
+        if session_id == None:
             return None
 
-        session_attributes = session_state.getSessionAttributes()
+        session_attributes = session_id.getSessionAttributes()
         if session_attributes == None:
             return None
 

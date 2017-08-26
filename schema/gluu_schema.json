@@ -4010,12 +4010,23 @@
             "x_origin": "Gluu created attribute"
         },
         {
+            "desc": "oxTrust Attribute Resolver ",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxTrustConfAttributeResolver"
+            ],
+            "oid": "oxAttribute:370",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
             "desc": "oxAuth Permission Granted",
             "equality": "caseIgnoreMatch",
             "names": [
                 "oxAuthPermissionGranted"
             ],
-            "oid": "oxAttribute:370",
+            "oid": "oxAttribute:371",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
@@ -4026,7 +4037,7 @@
             "names": [
                 "oxNickName"
             ],
-            "oid": "oxAttribute:371",
+            "oid": "oxAttribute:372",
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
@@ -4747,7 +4758,8 @@
                 "oxTrustConfApplication",
                 "oxTrustConfCacheRefresh",
                 "oxRevision",
-                "oxTrustConfImportPerson"
+                "oxTrustConfImportPerson",
+                "oxTrustConfAttributeResolver"
             ],
             "must": [
                 "objectclass"
