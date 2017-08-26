@@ -4,23 +4,22 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.oxauth.security import Identity
-from org.xdi.service.cdi.util import CdiUtil
-from org.gluu.jsf2.message import FacesMessages
-from javax.faces.application import FacesMessage
-from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
-from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
-from org.xdi.oxauth.service.net import HttpService
-from org.xdi.util import StringHelper, ArrayHelper, Util
-from org.gluu.saml import SamlConfiguration, AuthRequest, Response
-from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
-from org.xdi.oxauth.model.common import User
-from org.xdi.ldap.model import CustomAttribute
-from java.lang import String, StringBuilder
-
-from jarray import array
 import java
 import json
+from java.lang import StringBuilder
+from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
+from javax.faces.application import FacesMessage
+from org.gluu.jsf2.message import FacesMessages
+from org.gluu.saml import SamlConfiguration, AuthRequest, Response
+from org.xdi.ldap.model import CustomAttribute
+from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
+from org.xdi.oxauth.model.common import User
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, ClientService, AuthenticationService, AttributeService
+from org.xdi.oxauth.service.net import HttpService
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.util import StringHelper, ArrayHelper, Util
+
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -377,7 +376,7 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "Asimba. Authenticate for step 2"
 
-            sessionAttributes = identity.getSessionState().getSessionAttributes()
+            sessionAttributes = identity.getSessionId().getSessionAttributes()
             if (sessionAttributes == None) or not sessionAttributes.containsKey("saml_user_uid"):
                 print "Asimba. Authenticate for step 2. saml_user_uid is empty"
                 return False
@@ -527,8 +526,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
             if client_id == None:
                 identity = CdiUtil.bean(Identity)
-                if identity.getSessionState() != None:
-                    client_id = identity.getSessionState().getSessionAttributes().get("client_id")
+                if identity.getSessionId() != None:
+                    client_id = identity.getSessionId().getSessionAttributes().get("client_id")
 
             if client_id == None:
                 print "Asimba. GetClientConfiguration. client_id is empty"

@@ -62,6 +62,24 @@ class UserRegistration(UserRegistrationType):
         print "User registration. Post method"
 
         return True
+    
+    # User confirm New Registration method
+    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   requestParameters is java.util.Map<String, String[]>
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
+    def confirmRegistration(self, user, requestParameters, configurationAttributes):
+        print "User registration. confirm Registration method"
+
+        return True
+    
+    # User Get confirmation page method
+    #   user is org.gluu.oxtrust.model.GluuCustomPerson
+    #   requestParameters is java.util.Map<String, String[]>
+    #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
+    def getConfirmationPage(self, user, requestParameters, configurationAttributes):
+        print "User registration. Get confirmation page method"
+
+        return True
 
     def getApiVersion(self):
         return 1
