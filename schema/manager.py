@@ -11,6 +11,8 @@ import os
 from schema_parser import LDAPSchemaParser
 from generator import SchemaGenerator
 
+localdir = os.path.dirname(os.path.abspath(__file__))
+
 
 def generate(infile, schema_type=None):
     """Function generates the LDAP schema definitions from the JSON data
@@ -34,10 +36,10 @@ def autogenerate():
     gluu_schema.json and custom_schema.json and puts them in their respective
     folders.
     """
-    openldap_folder = '../static/openldap/'
-    opendj_folder = '../static/opendj/deprecated/'
+    openldap_folder = os.path.join(os.path.dirname(localdir), 'static/openldap/')
+    opendj_folder = os.path.join(os.path.dirname(localdir), 'static/opendj/deprecated/')
 
-    fp = open('gluu_schema.json', 'r')
+    fp = open(os.path.join(localdir, 'gluu_schema.json'), 'r')
     gluu_json = fp.read()
     fp.close()
     gen = SchemaGenerator(gluu_json)
@@ -46,7 +48,7 @@ def autogenerate():
     with open(os.path.join(opendj_folder, '101-ox.ldif'), 'w') as f:
         f.write(gen.generate_ldif().encode('utf-8'))
 
-    fp = open('custom_schema.json', 'r')
+    fp = open(os.path.join(localdir, 'custom_schema.json'), 'r')
     custom_json = fp.read()
     fp.close()
     gen = SchemaGenerator(custom_json)
@@ -108,7 +110,7 @@ def make_json(filename):
 
 
 def make_schema_docs():
-    schema = 'gluu_schema.json'
+    schema = os.path.join(localdir, 'gluu_schema.json')
     f = open(schema)
     json_string = f.read()
     f.close()

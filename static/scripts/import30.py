@@ -244,9 +244,9 @@ class Migration(object):
                 (custom+'oxauth/pages', self.jettyDir+'oxauth/custom/pages'),
                 (custom+'oxauth/resources', self.jettyDir+'oxauth/custom/static'),
                 (custom+'oxauth/libs', self.jettyDir+'oxauth/lib/ext'),
-                (custom+'oxtrust/pages', self.jettyDir+'identity/custom/pages')
-                (custom+'oxtrust/resources', self.jettyDir+'identity/custom/static')
-                (custom+'oxtrust/libs', self.jettyDir+'identity/lib/ext')
+                (custom+'oxtrust/pages', self.jettyDir+'identity/custom/pages'),
+                (custom+'oxtrust/resources', self.jettyDir+'identity/custom/static'),
+                (custom+'oxtrust/libs', self.jettyDir+'identity/lib/ext'),
             ]
 
         for pair in folder_map:

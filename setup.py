@@ -59,7 +59,6 @@ class Setup(object):
         self.idp3_dist_jar = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethStatic/%s/oxShibbolethStatic-%s.jar' % (self.oxVersion, self.oxVersion)
         self.idp3_cml_keygenerator = 'http://ox.gluu.org/maven/org/xdi/oxShibbolethKeyGenerator/%s/oxShibbolethKeyGenerator-%s.jar' % (self.oxVersion, self.oxVersion)
         self.asimba_war = 'http://ox.gluu.org/maven/org/asimba/asimba-wa/%s/asimba-wa-%s.war' % (self.oxVersion, self.oxVersion)
-        self.cas_war = 'http://ox.gluu.org/maven/org/xdi/ox-cas-server-webapp/%s/ox-cas-server-webapp-%s.war' % (self.oxVersion, self.oxVersion)
         self.ce_setup_zip = 'https://github.com/GluuFederation/community-edition-setup/archive/%s.zip' % self.githubBranchName
         self.java_1_8_jce_zip = 'http://download.oracle.com/otn-pub/java/jce/8/jce_policy-8.zip'
 
@@ -99,7 +98,6 @@ class Setup(object):
         self.installHttpd = True
         self.installSaml = False
         self.installAsimba = False
-        self.installCas = False
         self.installOxAuthRP = False
         self.installPassport = False
         self.allowPreReleasedApplications = False
@@ -155,12 +153,12 @@ class Setup(object):
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
                 'oxauth' : {'name' : 'oxauth',
-                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded'},
+                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded,websocket'},
                             'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                             'installed' : False
             },
                 'identity' : {'name' : 'identity',
-                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,http-forwarded'},
+                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,http-forwarded,websocket'},
                               'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
                               'installed' : False
             },
@@ -174,13 +172,8 @@ class Setup(object):
                          'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
                          'installed' : False
             },
-                'cas' : {'name' : 'cas',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.05, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
-                         'installed' : False
-            },
                 'oxauth-rp' : {'name' : 'oxauth-rp',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
+                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded,websocket'},
                          'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                          'installed' : False
             },
@@ -302,6 +295,8 @@ class Setup(object):
         self.openldapTLSCACert = '%s/openldap.pem' % self.certFolder
         self.openldapTLSCert = '%s/openldap.crt' % self.certFolder
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
+        self.openldapJksPass = None
+        self.openldapJksFn = '%s/openldap.jks' % self.certFolder
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.openldapRootSchemaFolder = "%s/schema" % self.gluuOptFolder
@@ -312,6 +307,7 @@ class Setup(object):
         self.openldapSetupAccessLog = False
         self.accessLogConfFile = "%s/static/openldap/accesslog.conf" % self.install_dir
         self.gluuAccessLogConf = "%s/static/openldap/o_gluu_accesslog.conf" % self.install_dir
+        self.opendlapIndexDef = "%s/static/openldap/index.json" % self.install_dir
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
@@ -320,7 +316,6 @@ class Setup(object):
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
         self.oxtrust_import_person_json = '%s/oxtrust-import-person.json' % self.outputFolder
         self.oxidp_config_json = '%s/oxidp-config.json' % self.outputFolder
-        self.oxcas_config_json = '%s/oxcas-config.json' % self.outputFolder
         self.oxasimba_config_json = '%s/oxasimba-config.json' % self.outputFolder
         self.gluu_python_base = '%s/python' % self.gluuOptFolder
         self.gluu_python_readme = '%s/libs/python.txt' % self.gluuOptPythonFolder
@@ -347,7 +342,6 @@ class Setup(object):
         self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
-        self.cas_properties = '%s/cas.properties' % self.outputFolder
         self.network = "/etc/sysconfig/network"
         self.system_profile_update = '%s/system_profile' % self.outputFolder
         
@@ -434,7 +428,6 @@ class Setup(object):
                      self.oxtrust_cache_refresh_json: False,
                      self.oxtrust_import_person_json: False,
                      self.oxidp_config_json: False,
-                     self.oxcas_config_json: False,
                      self.oxasimba_config_json: False,
                      self.ox_ldap_properties: True,
                      self.oxauth_static_conf_json: False,
@@ -459,7 +452,6 @@ class Setup(object):
                      self.ldif_passport: False,
                      self.ldif_passport_config: False,
                      self.ldif_idp: False,
-                     self.cas_properties: False,
                      self.asimba_configuration: False,
                      self.asimba_properties: False,
                      self.asimba_selector_configuration: False,
@@ -489,7 +481,6 @@ class Setup(object):
                 + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
                 + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
                 + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
-                + 'Install CAS'.ljust(30) + repr(self.installCas).rjust(35) + "\n" \
                 + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
                 + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
         except:
@@ -612,6 +603,7 @@ class Setup(object):
             self.asimbaJksPass = self.getPW()
         if not self.openldapKeyPass:
             self.openldapKeyPass = self.getPW()
+            self.openldapJksPass = self.getPW()
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.baseInum:
@@ -1180,8 +1172,6 @@ class Setup(object):
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distGluuFolder])
             print "Downloading oxTrust war file..."
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
-            print "Downloading CAS war file..."
-            self.run(['/usr/bin/wget', self.cas_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cas.war' % self.distGluuFolder])
 
             print "Finished downloading latest war files"
 
@@ -1220,6 +1210,7 @@ class Setup(object):
             self.encoded_ldap_pw = self.ldap_encode(self.ldapPass)
             self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
             self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
+            self.encoded_openldapJksPass = self.obscure(self.openldapJksPass)
             self.oxauthClient_pw = self.getPW()
             self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
         except:
@@ -1322,6 +1313,12 @@ class Setup(object):
                               self.asimbaJksPass,
                               '%s/asimba.key' % self.certFolder,
                               '%s/asimba.crt' % self.certFolder,
+                              'jetty')
+            self.gen_keystore('openldap',
+                              self.openldapJksFn,
+                              self.openldapJksPass,
+                              '%s/openldap.key' % self.certFolder,
+                              '%s/openldap.crt' % self.certFolder,
                               'jetty')
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])
@@ -1741,44 +1738,6 @@ class Setup(object):
         jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
         self.copyFile(distAsimbaPath, jettyServiceWebapps)
 
-    def install_cas(self):
-        casWar = 'cas.war'
-        distCasPath = '%s/%s' % (self.distGluuFolder, casWar)
-        tmpCasDir = '%s/tmp_cas' % self.distTmpFolder
-
-        self.logIt("Unpacking %s..." % casWar)
-        self.removeDirs(tmpCasDir)
-        self.createDirs(tmpCasDir)
-
-        self.run([self.cmd_jar,
-                  'xf',
-                  distCasPath], tmpCasDir)
-
-        self.logIt("Configuring CAS...")
-        casTemplatePropertiesPath = '%s/cas.properties' % self.outputFolder
-        casWarPropertiesPath = '%s/WEB-INF/cas.properties' % tmpCasDir
-
-        self.copyFile(casTemplatePropertiesPath, casWarPropertiesPath)
-
-        self.logIt("Generating cas.war...")
-        self.run([self.cmd_jar,
-                  'cmf',
-                  'tmp_cas/META-INF/MANIFEST.MF',
-                  'cas.war',
-                  '-C',
-                  '%s/' % tmpCasDir,
-                  '.'], self.distTmpFolder)
-
-        self.logIt("Copying cas.war into jetty webapps folder...")
-        jettyServiceName = 'cas'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
-
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/cas.war' % self.distTmpFolder, jettyServiceWebapps)
-
-        self.removeDirs(tmpCasDir)
-        self.removeFile('%s/cas.war' % self.distTmpFolder)
-
     def install_oxauth_rp(self):
         oxAuthRPWar = 'oxauth-rp.war'
         distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, oxAuthRPWar)
@@ -1852,9 +1811,6 @@ class Setup(object):
         if self.installSaml:
             self.install_saml()
 
-        if self.installCas:
-            self.install_cas()
-
         if self.installAsimba:
             self.install_asimba()
 
@@ -1913,6 +1869,8 @@ class Setup(object):
         self.addUserToGroup('gluu', 'ldap')
         self.addUserToGroup('gluu', 'jetty')
         self.addUserToGroup('gluu', 'node')
+
+        self.addUserToGroup('adm', 'ldap')
 
     def makeFolders(self):
         try:
@@ -2093,12 +2051,8 @@ class Setup(object):
         else:
             self.installPassport = False
             
-        if self.allowDeprecatedApplications:
-            promptForCAS = self.getPrompt("Install CAS? [WARNING: Deprecated Application]", "No")[0].lower()
-            if promptForCAS == 'y':
-                self.installCas = True
-            else:
-                self.installCas = False
+        #if self.allowDeprecatedApplications:
+            # Empty deprecated option
 
         promptForJCE = self.getPrompt("Install JCE 1.8?", "Yes")[0].lower()
         if promptForJCE == 'y':
@@ -2266,7 +2220,6 @@ class Setup(object):
         self.templateRenderingDict['oxtrust_import_person_base64'] = self.generate_base64_ldap_file(self.oxtrust_import_person_json)
 
         self.templateRenderingDict['oxidp_config_base64'] = self.generate_base64_ldap_file(self.oxidp_config_json)
-        self.templateRenderingDict['oxcas_config_base64'] = self.generate_base64_ldap_file(self.oxcas_config_json)
         self.templateRenderingDict['oxasimba_config_base64'] = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
@@ -2489,7 +2442,7 @@ class Setup(object):
 
         if packageName == None:
             self.logIt('Failed to find OpenLDAP package in folder %s !' % openLdapDistFolder)
-	    return
+            return
 
         self.logIt("Found package '%s' for install" % packageName)
         if packageRpm:
@@ -2501,6 +2454,18 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', '775', openldapRunFolder])
         self.run([self.cmd_chgrp, '-R', 'ldap', openldapRunFolder])
 
+    def get_openldap_indexes(self):
+        """Function that reads the static/openldap/index.json file and generates
+        slapd.conf compatible index configuration string"""
+        f = open(self.opendlapIndexDef, 'r')
+        jsoninfo = json.loads(f.read())
+        f.close()
+        outString = ""
+        for entry in jsoninfo["indexes"]:
+            outString += "\t".join(["index", entry["attribute"], entry["index"]]) + "\n"
+        return outString
+
+
     def configure_openldap(self):
         self.logIt("Configuring OpenLDAP")
         # 1. Render templates
@@ -2509,6 +2474,9 @@ class Setup(object):
         if not self.openldapSetupAccessLog:
             self.templateRenderingDict['openldap_accesslog_conf'] = self.commentOutText(self.templateRenderingDict['openldap_accesslog_conf'])
             self.templateRenderingDict['openldap_gluu_accesslog'] = self.commentOutText(self.templateRenderingDict['openldap_gluu_accesslog'])
+
+        # 1.1 convert the indexes
+        self.templateRenderingDict['openldap_indexes'] = self.get_openldap_indexes()
 
         self.renderTemplate(self.openldapSlapdConf)
         self.renderTemplate(self.openldapSymasConf)
@@ -2534,10 +2502,10 @@ class Setup(object):
                 pem.write(key.read())
 
         # 6. Setup Logging
-        self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
+        self.run([self.cmd_mkdir, '-m', '775', '-p', self.openldapLogDir])
         if self.os_type in ['debian', 'ubuntu']:
             self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
-	if not os.path.isdir('/etc/rsyslog.d/'):
+        if not os.path.isdir('/etc/rsyslog.d/'):
             self.run([self.cmd_mkdir, '-p', '/etc/rsyslog.d/'])
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
         self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
@@ -2580,8 +2548,6 @@ class Setup(object):
             installedComponents.append(self.jetty_app_configuration['identity'])
         if self.installSaml:
             installedComponents.append(self.jetty_app_configuration['idp'])
-        if self.installCas:
-            installedComponents.append(self.jetty_app_configuration['cas'])
         if self.installAsimba:
             installedComponents.append(self.jetty_app_configuration['asimba'])
         if self.installOxAuthRP:
@@ -2618,7 +2584,15 @@ class Setup(object):
 
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
-                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = int(applicationMemory * jvmHeapRation)
+
+                minHeapMem = 256
+                maxHeapMem = int(applicationMemory * jvmHeapRation)
+                if maxHeapMem < minHeapMem:
+                    minHeapMem = maxHeapMem
+
+                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
+                self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
+
                 self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
                 
 
@@ -2633,11 +2607,15 @@ class Setup(object):
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
     def change_rc_links(self):
         if self.os_type in ['ubuntu', 'debian']:
-            self.logIt("Changing RC Level 3 Links")
-            self.run(['mv', '/etc/rc3.d/S03solserver', '/etc/rc3.d/S80solserver'])
-            self.run(['mv', '/etc/rc3.d/S01oxauth', '/etc/rc3.d/S81oxauth'])
-            self.run(['mv', '/etc/rc3.d/S01identity', '/etc/rc3.d/S82identity'])
-            self.run(['mv', '/etc/rc3.d/S02apache2', '/etc/rc3.d/S83apache2'])
+            if os.path.isfile('/etc/rc3.d/S03solserver'):
+                self.logIt("Changing RC Level 3 Links")
+                self.run(['mv', '/etc/rc3.d/S03solserver', '/etc/rc3.d/S80solserver'])
+            if os.path.isfile('/etc/rc3.d/S01oxauth'):
+                self.run(['mv', '/etc/rc3.d/S01oxauth', '/etc/rc3.d/S81oxauth'])
+            if os.path.isfile('/etc/rc3.d/S01identity'):
+                self.run(['mv', '/etc/rc3.d/S01identity', '/etc/rc3.d/S82identity'])
+            if os.path.isfile('/etc/rc3.d/S02apache2'):
+                self.run(['mv', '/etc/rc3.d/S02apache2', '/etc/rc3.d/S83apache2'])
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -2722,7 +2700,6 @@ if __name__ == '__main__':
         'installHTTPD': True,
         'installSaml': False,
         'installAsimba': False,
-        'installCas': False,
         'installOxAuthRP': False,
         'installPassport': False,
         'allowPreReleasedApplications': False,
@@ -2742,7 +2719,6 @@ if __name__ == '__main__':
     installObject.installHttpd = setupOptions['installHTTPD']
     installObject.installSaml = setupOptions['installSaml']
     installObject.installAsimba = setupOptions['installAsimba']
-    installObject.installCas = setupOptions['installCas']
     installObject.installOxAuthRP = setupOptions['installOxAuthRP']
     installObject.installPassport = setupOptions['installPassport']
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
