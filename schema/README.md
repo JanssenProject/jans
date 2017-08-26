@@ -7,38 +7,38 @@ The `manager.py` acts as the command excution interface to perform various activ
 ## How to update Schema of Gluu Server?
 
 1. Edit the file `gluu_schema.json` and add the custom attribute under `attributeTypes` list and the custom classes under `objectClasses` list.
-2. Run `python manage.py autogenerate` - this will update the schema files in the folder `static/openldap` and `static/opendj` with new schema definitions.
+2. Run `python manager.py autogenerate` - this will update the schema files in the folder `static/openldap` and `static/opendj` with new schema definitions.
 
 ## Available Commands
 
 ### Generating the Schema files for OpenLDAP and OpenDJ
 
 ```
-python manage.py autogenerate
+python manager.py autogenerate
 ```
 
 ### Generating a specific type of schema file
 
 ```
-python manage.py generate --type openldap --filename gluu_schema.json
+python manager.py generate --type openldap --filename gluu_schema.json
 (or)
-python manage.py generate --type opendj --filename <json filename>
+python manager.py generate --type opendj --filename <json filename>
 ```
 
 ### Generate JSON from Schema files
 
 ```
-python manage.py makejson --filename <path to schema file>
+python manager.py makejson --filename <path to schema file>
 ```
 
 ### Generate Markdown Docs for the Schema
 
 ```
-python manage.py makedocs
+python manager.py makedocs
 ```
 
 ### Getting Help
 
 ```
-python manage.py --help
+python manager.py --help
 ```

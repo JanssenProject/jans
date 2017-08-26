@@ -150,6 +150,13 @@
         "en",
         "es"
     ],
+    "dynamicGrantTypeDefault":[
+        "authorization_code",
+        "implicit",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket"
+    ],
     "claimsParameterSupported":true,
     "requestParameterSupported":true,
     "requestUriParameterSupported":true,
@@ -178,6 +185,9 @@
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
+    "personCustomObjectClassList":[],
+    "persistIdTokenInLdap":false,
+    "persistRefreshTokenInLdap":true,
     "authenticationFiltersEnabled":false,
     "clientAuthenticationFiltersEnabled":false,
     "authenticationFilters":[
@@ -229,6 +239,7 @@
     "frontChannelLogoutSessionSupported":true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
+    "enableClientGrantTypeUpdate": true,
     "corsConfigurationFilters": [
         {
             "filterName": "CorsFilter",

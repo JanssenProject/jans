@@ -4,21 +4,21 @@
 # Author: Yuriy Movchan
 #
 
+import java
+import sys
 from javax.ws.rs.core import Response
 from org.jboss.resteasy.client import ClientResponseFailure
 from org.jboss.resteasy.client.exception import ResteasyClientException
-from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
 from org.xdi.model.custom.script.type.auth import PersonAuthenticationType
 from org.xdi.oxauth.client.fido.u2f import FidoU2fClientFactory
 from org.xdi.oxauth.model.config import Constants
-from org.xdi.oxauth.service import UserService, AuthenticationService, SessionStateService
+from org.xdi.oxauth.security import Identity
+from org.xdi.oxauth.service import UserService, AuthenticationService, SessionIdService
 from org.xdi.oxauth.service.fido.u2f import DeviceRegistrationService
 from org.xdi.oxauth.util import ServerUtil
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper
 
-import sys
-import java
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -146,9 +146,9 @@ class PersonAuthentication(PersonAuthenticationType):
         elif (step == 2):
             print "U2F. Prepare for step 2"
 
-            session_state = CdiUtil.bean(SessionStateService).getSessionStateFromCookie()
-            if StringHelper.isEmpty(session_state):
-                print "U2F. Prepare for step 2. Failed to determine session_state"
+            session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
+            if StringHelper.isEmpty(session_id):
+                print "U2F. Prepare for step 2. Failed to determine session_id"
                 return False
 
             authenticationService = CdiUtil.bean(AuthenticationService)
@@ -173,7 +173,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     authenticationRequestService = FidoU2fClientFactory.instance().createAuthenticationRequestService(self.metaDataConfiguration)
-                    authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_state)
+                    authenticationRequest = authenticationRequestService.startAuthentication(user.getUserId(), None, u2f_application_id, session_id)
                 except ClientResponseFailure, ex:
                     if (ex.getResponse().getResponseStatus() != Response.Status.NOT_FOUND):
                         print "U2F. Prepare for step 2. Failed to start authentication workflow. Exception:", sys.exc_info()[1]
@@ -181,7 +181,7 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 print "U2F. Prepare for step 2. Call FIDO U2F in order to start registration workflow"
                 registrationRequestService = FidoU2fClientFactory.instance().createRegistrationRequestService(self.metaDataConfiguration)
-                registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_state)
+                registrationRequest = registrationRequestService.startRegistration(user.getUserId(), u2f_application_id, session_id)
 
             identity.setWorkingParameter("fido_u2f_authentication_request", ServerUtil.asJson(authenticationRequest))
             identity.setWorkingParameter("fido_u2f_registration_request", ServerUtil.asJson(registrationRequest))
