@@ -123,6 +123,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Duo. Authenticate for step 2. Failed to determine user name"
                 return False
 
+            user_name = user.getUserId()
+
             sig_response_array = requestParameters.get("sig_response")
             if ArrayHelper.isEmpty(sig_response_array):
                 print "Duo. Authenticate for step 2. sig_response is empty"
@@ -134,7 +136,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             authenticated_username = duo_web.verify_response(self.ikey, self.skey, self.akey, duo_sig_response)
 
-            print "Duo. Authenticate for step 2. authenticated_username: " + authenticated_username + ", expected user_name: " + user.getUserId()
+            print "Duo. Authenticate for step 2. authenticated_username: " + authenticated_username + ", expected user_name: " + user_name
 
             if (not StringHelper.equals(user_name, authenticated_username)):
                 return False
