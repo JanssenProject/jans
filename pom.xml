@@ -17,7 +17,8 @@
 		<oxcore.version>3.1.0-SNAPSHOT</oxcore.version>
 		<oxeleven.version>3.1.0-SNAPSHOT</oxeleven.version>
 
-		<jackson.version>2.8.9</jackson.version>
+		<jackson.version>2.8.10</jackson.version>
+		<jackson.databind.version>2.8.10</jackson.databind.version>
 		<jackson.prev.version>1.9.11</jackson.prev.version>
 		<jettison.version>1.3.2</jettison.version>
 		<resteasy.version>3.0.21.Final</resteasy.version>
@@ -34,6 +35,8 @@
 		<jsf.version>2.2.14</jsf.version>
 		<uel.version>2.2</uel.version>
 		<omnifaces.version>2.6.1</omnifaces.version>
+
+		<aws.sns.version>1.11.184</aws.sns.version>
 
 		<swagger.version>1.3.7</swagger.version>
 
@@ -437,6 +440,11 @@
 				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.databind.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
 				<artifactId>jackson-core-asl</artifactId>
 				<version>${jackson.prev.version}</version>
@@ -474,6 +482,13 @@
 				<groupId>org.apache.activemq</groupId>
 				<artifactId>activemq-pool</artifactId>
 				<version>5.13.3</version>
+			</dependency>
+
+			<!-- AWS SNS -->
+			<dependency>
+				<groupId>com.amazonaws</groupId>
+				<artifactId>aws-java-sdk-sns</artifactId>
+				<version>${aws.sns.version}</version>
 			</dependency>
 
 			<!-- Other -->
