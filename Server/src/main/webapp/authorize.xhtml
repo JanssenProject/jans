@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:f="http://xmlns.jcp.org/jsf/core"
-	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	template="/WEB-INF/incl/layout/template.xhtml">
+				xmlns:f="http://xmlns.jcp.org/jsf/core"
+				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+				xmlns:h="http://xmlns.jcp.org/jsf/html"
+				template="/WEB-INF/incl/layout/authorize-template.xhtml">
 
 	<f:metadata>
 		<f:viewAction action="#{authorizeAction.checkUiLocales}" />
@@ -40,36 +40,8 @@
 
 	<ui:define name="head">
 		<style type="text/css">
-			.authorize-panel {
-				border-style: solid;
-				border-width: 1px;
-				padding: 1px;
-				background-color: #FFFFFF;
-				border-color: #C4C0B9;
-			}
-			
-			.authorize-panel-header {
-				background-color: #D4CFC7;
-				background-image:
-					url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
-				background-position: left top;
-				background-repeat: repeat-x;
-				border-style: solid;
-				border-width: 1px;
-				padding: 2px;
-				border-color: #D4CFC7;
-				color: #000000;
-				font-family: Arial, Verdana, sans-serif;
-				font-size: 11px;
-				font-weight: bold;
-			}
-			
-			.authorize-panel-body {
-				padding: 10px;
-				color: #000000;
-				font-family: Arial, Verdana, sans-serif;
-				font-size: 11px;
-			}
+
+
 		</style>
 	</ui:define>
 
@@ -77,38 +49,61 @@
 		<h:outputText value="#{msgs['authorize.pageTitle']}" />
 	</ui:define>
 
-	<ui:define name="body">
-		<h:form id="authorizeForm">
+	<ui:define name="body" class="notification_cls">
+		<h:form id="authorizeForm" >
 			<h:inputHidden id="session_id"
-				value="#{authorizeAction.sessionId}" />
+						   value="#{authorizeAction.sessionId}" />
 
-			<div class="authorize-panel">
-				<div class="authorize-panel-header">
-					<h:outputText value="#{msgs['authorize.requestForPermission']}" />
+			<div class="notification_popup">
+				<div class="not_header">
+
 				</div>
-				<div class="authorize-panel-body">
-					<ui:param name="client"
-						value='#{clientService.getClient(request.getParameter("client_id"))}' />
+				<div class="not_header">
+					<div class="row">
+						<div class="col-md-5">
+							<h:panelGroup layout="block" rendered='#{empty client.logoUri}'>
+								<a href="http://www.gluu.org/"> <h:graphicImage
+										url="img/logo.png" />
+								</a>
+							</h:panelGroup>
+						</div>
 
-					<h:panelGroup layout="block"
-						rendered='#{!empty client.getLogoUri()}'>
-						<h:graphicImage url='#{client.getLogoUri()}' />
+
+					</div>
+				</div>
+				<div class="not_body">
+					<h3><h:outputText value="#{msgs['authorize.requestForPermission']}" /></h3>
+					<ui:param name="client"
+							  value='#{clientService.getClient(request.getParameter("client_id"))}' />
+
+					<h:panelGroup layout="block" class="border_rad"
+								  rendered='#{!empty client.getLogoUri()}'>
+						<h:graphicImage url='#{client.getLogoUri()}' width="65px" height="65px" />
 					</h:panelGroup>
 
-					<p class="info">
-						<h:outputFormat value="#{msgs['authorize.requestingPermissionForScopes']}">
-							<f:param value="#{empty client.getClientName()? client.getClientId() : client.getClientName()}" />
-						</h:outputFormat>
-					</p>
+					<h3>
+						<p class="info">
+							<h:outputFormat value="#{msgs['authorize.requestingPermissionForScopes']}">
+								<f:param value="#{empty client.getClientName()? client.getClientId() : client.getClientName()}" />
+							</h:outputFormat>
+						</p></h3>
 
 					<ul>
 						<ui:repeat var="_scope" value="#{authorizeAction.scopes}">
-							<li><h:outputText value="#{_scope.description}" /></li>
+							<li><table><tr><td><span class="user"><i class="fa fa-user-circle"></i></span></td>
+								<td><h:outputText value="#{_scope.description}" /></td></tr></table>
+								<!-- i id="tog3" class="fa fa-info-circle" aria-hidden="true"></i>
+								<div class="clearfix"></div>
+								<div class="pop_tog" id="pop_tog2">
+								<p>more details can be show here but currently we have description field only </p>
+							<p>Compose and send new email</p>
+						</div> -->
+							</li>
 						</ui:repeat>
 					</ul>
 
 					<h:panelGroup layout="block"
-						rendered='#{!empty client.getPolicyUri()}'>
+								  rendered='#{!empty client.getPolicyUri()}'>
 						<p>
 							<h:outputText value="#{msgs['common.agreePolicy']}" />
 							<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
@@ -118,7 +113,7 @@
 					</h:panelGroup>
 
 					<h:panelGroup layout="block"
-						rendered='#{!empty client.getTosUri()}'>
+								  rendered='#{!empty client.getTosUri()}'>
 						<p>
 							<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
 							<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
@@ -127,15 +122,20 @@
 						</p>
 					</h:panelGroup>
 
-					<div class="actionButtons">
-						<h:commandButton id="allowButton"
-							value="#{msgs['authorize.allow']}"
-							action="#{authorizeAction.permissionGranted}" />
-						<h:commandButton id="doNotAllowButton"
-							value="#{msgs['authorize.doNotAllow']}"
-							action="#{authorizeAction.permissionDenied}" />
+					<div class="btn_rw">
+
+						<h:commandLink id="doNotAllowButton"  class="button button-default"
+									   value="#{msgs['authorize.doNotAllow']}"
+									   action="#{authorizeAction.permissionDenied}" />&nbsp;
+						<h:commandLink id="allowButton" class="button button-primary"
+									   value="#{msgs['authorize.allow']}"
+									   action="#{authorizeAction.permissionGranted}" />
 					</div>
 				</div>
+				<center>
+					Powered by <a href="http://www.gluu.org">Gluu</a>. Free and open
+					source access management.
+				</center>
 			</div>
 		</h:form>
 	</ui:define>
