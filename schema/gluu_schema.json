@@ -4041,6 +4041,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Extended push notification configuration",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxDeviceNotificationConf"
+            ],
+            "oid": "oxAttribute:369",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -5151,6 +5162,7 @@
                 "oxDeviceHashCode",
                 "oxApplication",
                 "oxDeviceRegistrationConf",
+                "oxDeviceNotificationConf",
                 "oxNickName",
                 "oxDeviceData",
                 "oxCounter",
