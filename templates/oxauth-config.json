@@ -133,9 +133,7 @@
         "ES512"
     ],
     "dynamicRegistrationCustomAttributes":[
-        "oxAuthTrustedClient",
-        "myCustomAttr1",
-        "myCustomAttr2"
+        "oxAuthTrustedClient"
     ],
     "displayValuesSupported":[
         "page",
@@ -151,6 +149,13 @@
     "uiLocalesSupported":[
         "en",
         "es"
+    ],
+    "dynamicGrantTypeDefault":[
+        "authorization_code",
+        "implicit",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket"
     ],
     "claimsParameterSupported":true,
     "requestParameterSupported":true,
@@ -179,7 +184,10 @@
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
-    "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
+    "dynamicRegistrationCustomObjectClass":"",
+    "personCustomObjectClassList":[],
+    "persistIdTokenInLdap":false,
+    "persistRefreshTokenInLdap":true,
     "authenticationFiltersEnabled":false,
     "clientAuthenticationFiltersEnabled":false,
     "authenticationFilters":[
@@ -209,7 +217,7 @@
     "sessionIdUnauthenticatedUnusedLifetime":120,
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
-    "sessionStateHttpOnly": false,
+    "sessionIdLifetime": 86400,
     "configurationUpdateInterval":3600,
     "cssLocation":"",
     "jsLocation":"",
@@ -231,6 +239,7 @@
     "frontChannelLogoutSessionSupported":true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
+    "enableClientGrantTypeUpdate": true,
     "corsConfigurationFilters": [
         {
             "filterName": "CorsFilter",
@@ -248,6 +257,5 @@
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
     "httpLoggingExludePaths": [],
-    "sessionStateLifetime": 86400,
     "externalLoggerConfiguration": ""
 }

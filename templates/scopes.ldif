@@ -99,7 +99,7 @@ oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 oxScopeType: openid
 
 dn: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
-defaultScope: false
+defaultScope: true
 description: Obtain UMA PAT
 displayName: uma_protection
 inum: %(inumOrg)s!0009!6D99

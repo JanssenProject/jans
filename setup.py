@@ -1870,6 +1870,8 @@ class Setup(object):
         self.addUserToGroup('gluu', 'jetty')
         self.addUserToGroup('gluu', 'node')
 
+        self.addUserToGroup('adm', 'ldap')
+
     def makeFolders(self):
         try:
             # Allow write to /tmp
@@ -2500,7 +2502,7 @@ class Setup(object):
                 pem.write(key.read())
 
         # 6. Setup Logging
-        self.run([self.cmd_mkdir, '-p', self.openldapLogDir])
+        self.run([self.cmd_mkdir, '-m', '775', '-p', self.openldapLogDir])
         if self.os_type in ['debian', 'ubuntu']:
             self.run([self.cmd_chown, '-R', 'syslog:adm', self.openldapLogDir])
         if not os.path.isdir('/etc/rsyslog.d/'):
@@ -2582,7 +2584,15 @@ class Setup(object):
 
             if 'jvm_heap_ration' in applicationConfiguration['memory']:
                 jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
-                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = int(applicationMemory * jvmHeapRation)
+
+                minHeapMem = 256
+                maxHeapMem = int(applicationMemory * jvmHeapRation)
+                if maxHeapMem < minHeapMem:
+                    minHeapMem = maxHeapMem
+
+                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
+                self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
+
                 self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
                 
 
