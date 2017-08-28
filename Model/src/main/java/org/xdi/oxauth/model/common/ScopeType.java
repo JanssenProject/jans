@@ -48,7 +48,7 @@ public enum ScopeType implements LdapEnum {
      * The Claims requested by the profile, email, address, and phone scope values are returned from the
      * UserInfo Endpoint.
      */
-    OPENID("openid", "Openid"),
+    OPENID("openid", "OpenID"),
 
     /**
      * Dynamic scope calls scripts which add claims dynamically.
