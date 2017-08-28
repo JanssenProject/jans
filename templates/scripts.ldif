@@ -365,7 +365,7 @@ dn: inum=%(inumOrg)s!0011!D40C.1CA3,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Inbound SAML via Asimba authentication module
-displayName: asimba
+displayName: saml
 gluuStatus: false
 inum: %(inumOrg)s!0011!D40C.1CA3
 oxConfigurationProperty: {"value1":"asimba_saml_certificate_file","value2":"/etc/certs/saml.pem","description":""}

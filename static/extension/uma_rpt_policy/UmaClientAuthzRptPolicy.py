@@ -9,6 +9,8 @@
 #   (i.e. the SCIM RP client)
 
 from org.xdi.model.custom.script.type.uma import UmaRptPolicyType
+from org.xdi.service.cdi.util import CdiUtil
+from org.xdi.oxauth.security import Identity
 from org.xdi.model.uma import ClaimDefinitionBuilder
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
@@ -39,8 +41,10 @@ class UmaRptPolicy(UmaRptPolicyType):
         
     def authorize(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
         print "RPT Policy. Authorizing ..."
-        client_id = context.getHttpRequest().getParameter("client_id")
-            
+        
+        identity = CdiUtil.bean(Identity)
+        client_id = identity.getSessionClient().getClient().getClientId()
+        
         print "UmaRptPolicy. client_id=", client_id
 
         if (StringHelper.isEmpty(client_id)):
