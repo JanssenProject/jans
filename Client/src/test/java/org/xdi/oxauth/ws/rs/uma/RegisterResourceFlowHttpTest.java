@@ -70,7 +70,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     /**
      * Add resource
      */
-    @Test(dependsOnMethods = {"init"})
+    @Test
     public void addResource() throws Exception {
         showTitle("addResource");
         registerResource(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
