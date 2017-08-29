@@ -22,7 +22,9 @@ import org.xdi.oxd.server.service.Rp;
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -93,9 +95,9 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
         throw new RuntimeException("Failed to update client for rp. Details:" + response.getEntity());
     }
 
-    private RegisterRequest createRegisterClientRequest(Rp site, UpdateSiteParams params) {
+    private RegisterRequest createRegisterClientRequest(Rp rp, UpdateSiteParams params) {
 
-        final RegisterRequest request = new RegisterRequest(site.getClientRegistrationAccessToken());
+        final RegisterRequest request = new RegisterRequest(rp.getClientRegistrationAccessToken());
         request.setHttpMethod(HttpMethod.PUT); // force update
 
         Date clientSecretExpiresAt = params.getClientSecretExpiresAt();
@@ -105,7 +107,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
                 clientSecretExpiresAt = new Date(clientSecretExpiresAt.getTime() * 1000);
             }
             request.setClientSecretExpiresAt(clientSecretExpiresAt);
-            site.setClientSecretExpiresAt(clientSecretExpiresAt);
+            rp.setClientSecretExpiresAt(clientSecretExpiresAt);
         }
 
         List<ResponseType> responseTypes = Lists.newArrayList();
@@ -114,7 +116,7 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
                 responseTypes.add(ResponseType.fromString(type));
 
                 request.setResponseTypes(responseTypes);
-                site.setResponseTypes(params.getResponseTypes());
+                rp.setResponseTypes(params.getResponseTypes());
             }
         }
 
@@ -128,18 +130,19 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
             }
         }
         request.setGrantTypes(grantTypes);
-        site.setGrantType(params.getGrantType());
+        rp.setGrantType(params.getGrantType());
 
-        List<String> redirectUris = Lists.newArrayList();
+        Set<String> redirectUris = new HashSet<>();
         redirectUris.add(params.getAuthorizationRedirectUri());
+        rp.setAuthorizationRedirectUri(params.getAuthorizationRedirectUri());
         if (params.getRedirectUris() != null && !params.getRedirectUris().isEmpty()) {
             redirectUris.addAll(params.getRedirectUris());
             if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
                 redirectUris.add(params.getPostLogoutRedirectUri());
             }
 
-            request.setRedirectUris(redirectUris);
-            site.setRedirectUris(redirectUris);
+            request.setRedirectUris(Lists.newArrayList(redirectUris));
+            rp.setRedirectUris(Lists.newArrayList(redirectUris));
         }
 
         if (!Strings.isNullOrEmpty(params.getClientJwksUri())) {
@@ -152,17 +155,17 @@ public class UpdateSiteOperation extends BaseOperation<UpdateSiteParams> {
 
         if (params.getContacts() != null && !params.getContacts().isEmpty()) {
             request.setContacts(params.getContacts());
-            site.setContacts(params.getContacts());
+            rp.setContacts(params.getContacts());
         }
 
         if (params.getScope() != null && !params.getScope().isEmpty()) {
             request.setScopes(params.getScope());
-            site.setScope(params.getScope());
+            rp.setScope(params.getScope());
         }
 
         if (!Strings.isNullOrEmpty(params.getClientSectorIdentifierUri())) {
             request.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
-            site.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
+            rp.setSectorIdentifierUri(params.getClientSectorIdentifierUri());
         }
 
         if (params.getClientLogoutUri() != null && !params.getClientLogoutUri().isEmpty()) {
