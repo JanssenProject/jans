@@ -124,7 +124,14 @@
                                             <div id="container"></div>
                                             <div id="progressbar"></div>
                                         </div>
+                                        <div align="center">
 
+                                                    <h:outputLink value="#{identity.getWorkingParameter('supergluu_android_download_url')}" title="Android" rendered="#{!empty identity.getWorkingParameter('supergluu_android_download_url')}"><h:graphicImage value="../../img/android.png" /></h:outputLink>
+
+                                                    <h:outputLink value="#{identity.getWorkingParameter('supergluu_ios_download_url')}" title="Android" rendered="#{!empty identity.getWorkingParameter('supergluu_ios_download_url')}"><h:graphicImage value="../../img/ios.png" /></h:outputLink>
+
+
+                                        </div>
                                         <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
                                                 <h:outputText value="#{msgs['common.agreePolicy']}"/>
