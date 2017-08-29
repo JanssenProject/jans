@@ -129,20 +129,18 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void modifyNotExistingResource() throws Exception {
         showTitle("modifyNotExistingResource");
 
-        UmaResourceResponse resourceStatus = null;
         try {
             UmaResource resource = new UmaResource();
             resource.setName("Photo Album 3");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
+            getResourceService().updateResource("Bearer " + pat.getAccessToken(), "fake_resource_id", resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
-            assertEquals(ex.getResponse().getStatus(), Response.Status.NOT_FOUND.getStatusCode(), "Unexpected response status");
+            int status = ex.getResponse().getStatus();
+            assertTrue(status != Response.Status.OK.getStatusCode(), "Unexpected response status");
         }
-
-        assertNull(resourceStatus, "Resource status is not null");
     }
 
     /**
