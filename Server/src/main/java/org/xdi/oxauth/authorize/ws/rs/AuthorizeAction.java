@@ -9,6 +9,7 @@ package org.xdi.oxauth.authorize.ws.rs;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
+import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
 import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
@@ -107,6 +109,9 @@ public class AuthorizeAction {
 
     @Inject
     private FacesService facesService;
+    
+    @Inject
+    private FacesMessages facesMessages;
 
     @Inject
     private FacesContext facesContext;
@@ -690,8 +695,13 @@ public class AuthorizeAction {
     public void permissionDenied() {
         log.trace("permissionDenied");
         final SessionId session = getSession();
-        StringBuilder sb = new StringBuilder();
+        
+        if (session == null) {
+        	authenticationFailedSessionInvalid();
+        	return;
+        }
 
+        StringBuilder sb = new StringBuilder();
         if (redirectUri == null) {
             redirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
         }
@@ -709,6 +719,11 @@ public class AuthorizeAction {
                 getState()));
 
         facesService.redirectToExternalURL(sb.toString());
+    }
+
+    private void authenticationFailedSessionInvalid() {
+    	facesMessages.add(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
+        facesService.redirect("/error.xhtml");
     }
 
     public void invalidRequest() {
