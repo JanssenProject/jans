@@ -246,7 +246,7 @@
         </classes>
     </test>
 
-    <test name="UMA : Test for getting UMA scopes (HTTP)" enabled="false">
+    <test name="UMA : Test for getting UMA scopes (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.ScopeHttpTest"/>
         </classes>
