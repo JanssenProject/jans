@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNull;
 
 /**
@@ -46,8 +46,7 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
 
     @BeforeClass
     @Parameters({"umaMetaDataUrl", "umaPatClientId", "umaPatClientSecret"})
-    public void init(final String umaMetaDataUrl, final String umaUserId, final String umaUserSecret,
-                     final String umaPatClientId, final String umaPatClientSecret, final String umaRedirectUri) throws Exception {
+    public void init(final String umaMetaDataUrl, final String umaPatClientId, final String umaPatClientSecret) throws Exception {
         if (this.metadata == null) {
             this.metadata = UmaClientFactory.instance().createMetadataService(umaMetaDataUrl, clientExecutor(true)).getMetadata();
             UmaTestUtil.assert_(this.metadata);
@@ -112,7 +111,9 @@ public class UmaRegisterPermissionFlowHttpTest extends BaseTest {
                     "Bearer " + this.registerResourceTest.pat.getAccessToken(), UmaPermissionList.instance(permission));
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
-            assertEquals(ex.getResponse().getStatus(), Response.Status.BAD_REQUEST.getStatusCode(), "Unexpected response status");
+            assertTrue(ex.getResponse().getStatus() != Response.Status.CREATED.getStatusCode() &&
+                    ex.getResponse().getStatus() != Response.Status.OK.getStatusCode()
+                    , "Unexpected response status");
         }
 
         assertNull(ticket, "Resource permission is not null");
