@@ -240,7 +240,7 @@
         </classes>
     </test>
 
-    <test name="UMA : Test for getting access to UMA protected resource (HTTP)" enabled="false">
+    <test name="UMA : Test for getting access to UMA protected resource (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.AccessProtectedResourceFlowHttpTest"/>
         </classes>
