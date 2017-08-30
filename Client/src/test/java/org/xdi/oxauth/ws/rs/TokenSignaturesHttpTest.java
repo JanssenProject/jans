@@ -10,11 +10,12 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.*;
+import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.crypto.OxAuthCryptoProvider;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
-import org.xdi.oxauth.model.jws.HMACSigner;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtHeaderName;
 import org.xdi.oxauth.model.register.ApplicationType;
@@ -37,9 +38,95 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version November 30, 2016
+ * @version August 29, 2017
  */
 public class TokenSignaturesHttpTest extends BaseTest {
+
+    @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
+    @Test
+    public void requestAuthorizationIdTokenNone(
+            final String redirectUris, final String userId, final String userSecret, final String redirectUri,
+            final String sectorIdentifierUri) throws Exception {
+        showTitle("requestAuthorizationIdTokenNone");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+
+        // 1. Registration
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(registerResponse.getStatus(), 200);
+        assertNotNull(registerResponse.getClientId());
+        assertNotNull(registerResponse.getClientSecret());
+        assertNotNull(registerResponse.getRegistrationAccessToken());
+        assertNotNull(registerResponse.getClientSecretExpiresAt());
+
+        String clientId = registerResponse.getClientId();
+        String clientSecret = registerResponse.getClientSecret();
+
+        // 2. Request authorization and receive the authorization code.
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+        String nonce = UUID.randomUUID().toString();
+        String state = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        authorizationRequest.setState(state);
+
+        AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
+                authorizationEndpoint, authorizationRequest, userId, userSecret);
+
+        assertNotNull(authorizationResponse.getLocation());
+        assertNotNull(authorizationResponse.getCode());
+        assertNotNull(authorizationResponse.getState());
+        assertNotNull(authorizationResponse.getScope());
+        assertNull(authorizationResponse.getIdToken());
+
+        String scope = authorizationResponse.getScope();
+        String authorizationCode = authorizationResponse.getCode();
+
+        // 3. Request access token using the authorization code.
+        TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
+        tokenRequest.setCode(authorizationCode);
+        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setAuthUsername(clientId);
+        tokenRequest.setAuthPassword(clientSecret);
+        tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
+
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        tokenClient.setRequest(tokenRequest);
+        TokenResponse tokenResponse = tokenClient.exec();
+
+        showClient(tokenClient);
+        assertEquals(tokenResponse.getStatus(), 200);
+        assertNotNull(tokenResponse.getEntity());
+        assertNotNull(tokenResponse.getAccessToken());
+        assertNotNull(tokenResponse.getExpiresIn());
+        assertNotNull(tokenResponse.getTokenType());
+        assertNotNull(tokenResponse.getRefreshToken());
+
+        String idToken = tokenResponse.getIdToken();
+
+        // 3. Validate id_token
+        Jwt jwt = Jwt.parse(idToken);
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
+                null, null, SignatureAlgorithm.NONE);
+        assertTrue(validJwt);
+    }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
     @Test
@@ -102,8 +189,11 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS256, clientSecret);
-        assertTrue(hmacSigner.validate(jwt));
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
+                null, clientSecret, SignatureAlgorithm.HS256);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
@@ -167,8 +257,11 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS384, clientSecret);
-        assertTrue(hmacSigner.validate(jwt));
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
+                null, clientSecret, SignatureAlgorithm.HS384);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
@@ -232,8 +325,11 @@ public class TokenSignaturesHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        HMACSigner hmacSigner = new HMACSigner(SignatureAlgorithm.HS512, clientSecret);
-        assertTrue(hmacSigner.validate(jwt));
+
+        OxAuthCryptoProvider cryptoProvider = new OxAuthCryptoProvider();
+        boolean validJwt = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), null,
+                null, clientSecret, SignatureAlgorithm.HS512);
+        assertTrue(validJwt);
     }
 
     @Parameters({"redirectUris", "userId", "userSecret", "redirectUri", "sectorIdentifierUri"})
