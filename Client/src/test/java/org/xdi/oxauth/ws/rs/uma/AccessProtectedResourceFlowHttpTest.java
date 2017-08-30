@@ -118,7 +118,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     }
 
 
-    @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"})
+    @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"}, enabled = false)
     @Parameters({"umaPatClientId", "umaClaimsRedirectUri"})
     public void claimsGathering(String umaPatClientId, String umaClaimsRedirectUri) throws Exception {
         String gatheringUrl = needInfo.buildClaimsGatheringUrl(umaPatClientId, umaClaimsRedirectUri);
