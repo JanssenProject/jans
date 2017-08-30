@@ -90,7 +90,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     /**
      * RP requests RPT with ticket and gets needs_info error (not all claims are provided, so redirect to claims-gathering endpoint)
      */
-    @Test(dependsOnMethods = {"rsRegisterPermissions"}, enabled = false)
+    @Test(dependsOnMethods = {"rsRegisterPermissions"})
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void requestRptAndGetNeedsInfo(String umaPatClientId, String umaPatClientSecret) throws Exception {
         showTitle("requestRptAndGetNeedsInfo");
