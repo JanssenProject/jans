@@ -77,23 +77,22 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     }
 
     public String registerResource(List<String> scopes) throws Exception {
-        UmaResourceResponse resourceStatus = null;
         try {
             UmaResource resource = new UmaResource();
             resource.setName("Photo Album");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(scopes);
+            resource.setType("myType");
 
-            resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
+            UmaResourceResponse resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
+            UmaTestUtil.assert_(resourceStatus);
+
+            this.resourceId = resourceStatus.getId();
+            return this.resourceId;
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
-
-        UmaTestUtil.assert_(resourceStatus);
-
-        this.resourceId = resourceStatus.getId();
-        return this.resourceId;
     }
 
     /**
@@ -110,6 +109,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setName("Photo Album 2");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+            resource.setType("myType");
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
         } catch (ClientResponseFailure ex) {
@@ -173,15 +173,13 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void getOneResource() throws Exception {
         showTitle("getOneResource");
 
-        UmaResourceWithId resources = null;
         try {
-            resources = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceId);
+            UmaResourceWithId resource = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceId);
+            assertEquals(resource.getType(), "myType");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
-
-        assertNotNull(resources, "Resource descriptions is null");
     }
 
     /**
