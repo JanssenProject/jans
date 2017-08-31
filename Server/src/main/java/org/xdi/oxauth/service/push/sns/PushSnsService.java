@@ -74,7 +74,7 @@ public class PushSnsService {
 		return sendPushMessage(snsClient, platform, targetArn, message, messageAttributes);
 	}
 
-	private PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, String message,
+	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, String message,
 			Map<String, MessageAttributeValue> messageAttributes) throws IOException {
 		Map<String, String> messageMap = new HashMap<String, String>();
 		messageMap.put(platform.name(), message);
