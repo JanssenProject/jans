@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.params.GetAuthorizationUrlParams;
@@ -12,10 +14,8 @@ import org.xdi.oxd.common.response.GetAuthorizationUrlResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -68,9 +68,7 @@ public class GetAuthorizationUrlOperation extends BaseOperation<GetAuthorization
         }
 
         if (params.getCustomParameters() != null && !params.getCustomParameters().isEmpty()) {
-            for (Map.Entry<String, String> entry : params.getCustomParameters().entrySet()) {
-                authorizationEndpoint += "&" + entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), "UTF-8");
-            }
+            authorizationEndpoint += "&" + AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS + "=" + Util.mapAsString(params.getCustomParameters());
         }
 
         return okResponse(new GetAuthorizationUrlResponse(authorizationEndpoint));
