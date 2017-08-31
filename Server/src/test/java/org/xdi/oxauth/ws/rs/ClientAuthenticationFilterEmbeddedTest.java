@@ -6,29 +6,6 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -36,10 +13,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.QueryStringDecoder;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.TokenRequest;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
@@ -48,6 +22,20 @@ import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for the Client Authentication Filter (embedded)
@@ -93,22 +81,9 @@ public class ClientAuthenticationFilterEmbeddedTest extends BaseTest {
 
 		showResponse("requestClientRegistrationWithCustomAttributes", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-		assertNotNull(entity, "Unexpected result: " + entity);
-		try {
-			JSONObject jsonObj = new JSONObject(entity);
-			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-			clientId = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage() + "\nResponse was: " + entity);
-		}
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		responseAsserter.assertRegisterResponse();
+		clientId = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
 	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri" })
