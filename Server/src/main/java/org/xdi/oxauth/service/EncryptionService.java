@@ -42,6 +42,29 @@ public class EncryptionService {
 		return stringEncrypter.decrypt(encryptedString);
     }
 
+	public String decrypt(String encryptedValue, boolean returnSource) {
+		if (encryptedValue == null) {
+			return encryptedValue;
+		}
+
+		String resultValue;
+		if (returnSource) {
+			resultValue = encryptedValue;
+		} else {
+			resultValue = null;
+		}
+
+		try {
+			resultValue = stringEncrypter.decrypt(encryptedValue);
+		} catch (Exception ex) {
+			if (!returnSource) {
+				log.error(String.format("Failed to decrypt value: '%s'", encryptedValue, ex));
+			}
+		}
+
+		return resultValue;
+	}
+
 	public String encrypt(String unencryptedString) throws EncryptionException {
 		if (StringHelper.isEmpty(unencryptedString)) {
 			return null;
