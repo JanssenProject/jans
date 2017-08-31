@@ -6,6 +6,12 @@
 
 package org.xdi.oxauth.util;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.common.ResponseMode;
+import org.xdi.oxauth.model.common.ResponseType;
+import org.xdi.oxauth.model.util.Util;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -13,12 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.util.Util;
 
 /**
  * @author Javier Rojas Blum
@@ -151,10 +151,10 @@ public class RedirectUri {
                 sb.append("<head><title>oxAuth - Submit This Form</title></head>");
                 sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
                 //sb.append("<body>");
-                sb.append("<form method=\"post\" action=\"" + baseRedirectUri + "\">");
+                sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
                 for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
                     String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
-                    sb.append("<input type=\"hidden\" name=\"" + entry.getKey() + "\" value=\"" + entryValue + "\"/>");
+                    sb.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"").append(entryValue).append("\"/>");
                 }
                 sb.append("</form>");
                 sb.append("</body>");

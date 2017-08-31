@@ -97,7 +97,7 @@ public class U2fRegistrationWS {
                     }
                     removeEnrollment = true;
                 } else {
-                    throw new BadInputException(String.format("session_id or enrollment_code is mandatory"));
+                    throw new BadInputException("session_id or enrollment_code is mandatory");
                 }
 
                 User user = userService.getUser(userName);
