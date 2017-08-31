@@ -6,30 +6,7 @@
 
 package org.xdi.oxauth.ws.rs;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_ID_ISSUED_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.CLIENT_SECRET_EXPIRES_AT;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_ACCESS_TOKEN;
-import static org.xdi.oxauth.model.register.RegisterResponseParam.REGISTRATION_CLIENT_URI;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
@@ -38,6 +15,7 @@ import org.xdi.oxauth.BaseTest;
 import org.xdi.oxauth.client.AuthorizationRequest;
 import org.xdi.oxauth.client.QueryStringDecoder;
 import org.xdi.oxauth.client.RegisterRequest;
+import org.xdi.oxauth.client.ResponseAsserter;
 import org.xdi.oxauth.client.model.authorize.Claim;
 import org.xdi.oxauth.client.model.authorize.ClaimValue;
 import org.xdi.oxauth.client.model.authorize.JwtAuthorizationRequest;
@@ -49,6 +27,19 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.register.RegisterResponseParam;
 import org.xdi.oxauth.model.util.StringUtils;
+
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for OpenID Request Object (embedded)
@@ -96,22 +87,9 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
 		showResponse("requestParameterMethodRS256Step1", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-		assertNotNull(entity, "Unexpected result: " + entity);
-		try {
-			JSONObject jsonObj = new JSONObject(entity);
-			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-			clientId1 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage() + "\nResponse was: " + entity);
-		}
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		responseAsserter.assertRegisterResponse();
+		clientId1 = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
 	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri", "RS256_keyId", "dnName", "keyStoreFile",
@@ -213,22 +191,9 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
 		showResponse("requestParameterMethodRS384Step1", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-		assertNotNull(entity, "Unexpected result: " + entity);
-		try {
-			JSONObject jsonObj = new JSONObject(entity);
-			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-			clientId2 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage() + "\nResponse was: " + entity);
-		}
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		responseAsserter.assertRegisterResponse();
+		clientId2 = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
 	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri", "RS384_keyId", "dnName", "keyStoreFile",
@@ -330,22 +295,9 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
 		showResponse("requestParameterMethodRS512Step1", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-		assertNotNull(entity, "Unexpected result: " + entity);
-		try {
-			JSONObject jsonObj = new JSONObject(entity);
-			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-			clientId3 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage() + "\nResponse was: " + entity);
-		}
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		responseAsserter.assertRegisterResponse();
+		clientId3 = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
 	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri", "RS512_keyId", "dnName", "keyStoreFile",
@@ -447,22 +399,9 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
 		showResponse("requestParameterMethodRS256X509CertStep1", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-		assertNotNull(entity, "Unexpected result: " + entity);
-		try {
-			JSONObject jsonObj = new JSONObject(entity);
-			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-			clientId4 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage() + "\nResponse was: " + entity);
-		}
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		responseAsserter.assertRegisterResponse();
+		clientId4 = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
 	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri", "RS256_keyId", "dnName", "keyStoreFile",
@@ -565,22 +504,9 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
 		showResponse("requestParameterMethodRS384X509CertStep1", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-		assertNotNull(entity, "Unexpected result: " + entity);
-		try {
-			JSONObject jsonObj = new JSONObject(entity);
-			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-			clientId5 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage() + "\nResponse was: " + entity);
-		}
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		responseAsserter.assertRegisterResponse();
+		clientId5 = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
 	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri", "RS384_keyId", "dnName", "keyStoreFile",
@@ -682,22 +608,9 @@ public class OpenIDRequestObjectWithRSAlgEmbeddedTest extends BaseTest {
 
 		showResponse("requestParameterMethodRS512X509CertStep1", response, entity);
 
-		assertEquals(response.getStatus(), 200, "Unexpected response code. " + entity);
-		assertNotNull(entity, "Unexpected result: " + entity);
-		try {
-			JSONObject jsonObj = new JSONObject(entity);
-			assertTrue(jsonObj.has(RegisterResponseParam.CLIENT_ID.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_ACCESS_TOKEN.toString()));
-			assertTrue(jsonObj.has(REGISTRATION_CLIENT_URI.toString()));
-			assertTrue(jsonObj.has(CLIENT_ID_ISSUED_AT.toString()));
-			assertTrue(jsonObj.has(CLIENT_SECRET_EXPIRES_AT.toString()));
-
-			clientId6 = jsonObj.getString(RegisterResponseParam.CLIENT_ID.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-			fail(e.getMessage() + "\nResponse was: " + entity);
-		}
+		ResponseAsserter responseAsserter = ResponseAsserter.of(response);
+		responseAsserter.assertRegisterResponse();
+		clientId6 = responseAsserter.getJson().getJson().getString(RegisterResponseParam.CLIENT_ID.toString());
 	}
 
 	@Parameters({ "authorizePath", "userId", "userSecret", "redirectUri", "RS512_keyId", "dnName", "keyStoreFile",

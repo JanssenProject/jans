@@ -73,7 +73,7 @@ public class U2fAuthenticationWS {
             log.debug("Startig authentication with username '{}', keyhandle '{}' for appId '{}' and session_id '{}'", userName, keyHandle, appId, sessionId);
 
             if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
-                throw new BadInputException(String.format("The request should contains either username or keyhandle"));
+                throw new BadInputException("The request should contains either username or keyhandle");
             }
 
             String foundUserInum = null;
