@@ -217,7 +217,7 @@ public class AppInitializer {
 		this.isActive = new AtomicBoolean(false);
 		this.lastFinishedTime = System.currentTimeMillis();
 
-		timerEvent.fire(new TimerEvent(new TimerSchedule(1 * 60, DEFAULT_INTERVAL), new AuthConfigurationEvent(),
+		timerEvent.fire(new TimerEvent(new TimerSchedule(60, DEFAULT_INTERVAL), new AuthConfigurationEvent(),
 				Scheduled.Literal.INSTANCE));
     }
 
