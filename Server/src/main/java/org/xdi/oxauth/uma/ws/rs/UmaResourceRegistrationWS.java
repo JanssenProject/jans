@@ -325,6 +325,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setDn(resourceDn);
         ldapResource.setScopes(scopeDNs);
         ldapResource.setClients(new ArrayList<String>(Collections.singletonList(clientDn)));
+        ldapResource.setType(resource.getType());
 
         resourceService.addResource(ldapResource);
 
