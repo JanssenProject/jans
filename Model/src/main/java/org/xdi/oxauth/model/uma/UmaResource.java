@@ -27,7 +27,7 @@ import java.util.List;
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
 @JsonPropertyOrder({"name", "uri", "type", "scopes", "icon_uri"})
-@JsonIgnoreProperties(value = {"type"})
+@JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 @ApiModel(value = "The resource server defines a resource set that the authorization server needs to be aware of by registering a resource set description at the authorization server. This registration process results in a unique identifier for the resource set that the resource server can later use for managing its description.")
 public class UmaResource {
