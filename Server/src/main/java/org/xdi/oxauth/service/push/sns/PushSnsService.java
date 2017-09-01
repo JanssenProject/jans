@@ -62,7 +62,7 @@ public class PushSnsService {
 		platformEndpointRequest.setPlatformApplicationArn(platformApplicationArn);
 		platformEndpointRequest.setToken(token);
 		
-		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getOxAuthIssuer(), user.getUserId(),
+		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
 				ldapEntryManager.encodeGeneralizedTime(new Date()));
 		platformEndpointRequest.setCustomUserData(customUserData);
 		
