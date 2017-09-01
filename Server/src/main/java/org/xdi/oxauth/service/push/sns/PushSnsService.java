@@ -1,6 +1,7 @@
 package org.xdi.oxauth.service.push.sns;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.xdi.config.oxtrust.AppConfiguration;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -34,6 +38,12 @@ public class PushSnsService {
 	@Inject
     private EncryptionService encryptionService;
 
+	@Inject
+	private AppConfiguration appConfiguration;
+
+	@Inject
+    private LdapEntryManager ldapEntryManager;
+
 	public AmazonSNS createSnsClient(String accessKey, String secretKey, String region) {
 		String decryptedAccessKey = encryptionService.decrypt(accessKey, true);
 		String decryptedSecretKey = encryptionService.decrypt(secretKey, true);
@@ -44,10 +54,13 @@ public class PushSnsService {
 	    return snsClient;
 	}
 
-	public String createPlatformArn(AmazonSNS snsClient, String platformApplicationArn, String token, String customUserData) {
+	public String createPlatformArn(AmazonSNS snsClient, String platformApplicationArn, String token, User user) {
 		CreatePlatformEndpointRequest platformEndpointRequest = new CreatePlatformEndpointRequest();
 		platformEndpointRequest.setPlatformApplicationArn(platformApplicationArn);
 		platformEndpointRequest.setToken(token);
+		
+		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getOxAuthIssuer(), user.getUserId(),
+				ldapEntryManager.encodeGeneralizedTime(new Date()));
 		platformEndpointRequest.setCustomUserData(customUserData);
 		
 		CreatePlatformEndpointResult platformEndpointResult = snsClient.createPlatformEndpoint(platformEndpointRequest);
@@ -74,7 +87,7 @@ public class PushSnsService {
 		return sendPushMessage(snsClient, platform, targetArn, message, messageAttributes);
 	}
 
-	private PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, String message,
+	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, String message,
 			Map<String, MessageAttributeValue> messageAttributes) throws IOException {
 		Map<String, String> messageMap = new HashMap<String, String>();
 		messageMap.put(platform.name(), message);
