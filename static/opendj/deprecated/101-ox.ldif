@@ -2159,14 +2159,26 @@ attributeTypes: ( 1.3.6.1.4.1.48710.1.3.369 NAME 'oxRefreshTokenLifetime'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.370 NAME 'oxAuthPermissionGranted'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.370 NAME 'oxTrustConfAttributeResolver'
+  DESC 'oxTrust Attribute Resolver '
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.371 NAME 'oxAuthPermissionGranted'
   DESC 'oxAuth Permission Granted'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
   X-ORIGIN 'Gluu created attribute' )
-attributeTypes: ( 1.3.6.1.4.1.48710.1.3.371 NAME 'oxNickName'
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.372 NAME 'oxNickName'
   DESC 'oxNickName'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  X-ORIGIN 'Gluu created attribute' )
+attributeTypes: ( 1.3.6.1.4.1.48710.1.3.369 NAME 'oxDeviceNotificationConf'
+  DESC 'Extended push notification configuration'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2295,7 +2307,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.21 NAME 'oxTrustConfiguration'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson )
+  MAY ( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson $ oxTrustConfAttributeResolver )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.22 NAME 'oxApplicationConfiguration'
   SUP ( top )
@@ -2397,7 +2409,7 @@ objectClasses: ( 1.3.6.1.4.1.48710.1.4.38 NAME 'oxDeviceRegistration'
   SUP ( top )
   STRUCTURAL
   MUST ( objectclass )
-  MAY ( oxId $ displayName $ description $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxNickName $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion )
+  MAY ( oxId $ displayName $ description $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceNotificationConf $ oxNickName $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion )
   X-ORIGIN 'Gluu created objectclass' )
 objectClasses: ( 1.3.6.1.4.1.48710.1.4.39 NAME 'oxU2fRequest'
   SUP ( top )
