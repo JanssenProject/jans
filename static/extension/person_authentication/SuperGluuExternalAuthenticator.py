@@ -754,16 +754,15 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
 
                         title = "Super-Gluu"
-                        message = "Super-Gluu login request to: %s" % client_redirect_uri
+                        message = {"body": "Super-Gluu login request to: %s" % client_redirect_uri}
 
-                        sns_push_request_dictionary = { "alert": title,
-                                                        "badge": 9,
-                                                        "sound": 'default',
+                        sns_push_request_dictionary = { "sound": 'default',
                                                         "aps": 
-                                                            { "message" : super_gluu_request,
+                                                            { "badge": 9,
                                                               "title" : title,
                                                               "alert" : message },
-                                                       "event-category": "ACTIONABLE",
+                                                       "category": "ACTIONABLE",
+                                                       "content-available": "1",
                                                        "request" : super_gluu_request
                         }
                         push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
@@ -817,7 +816,7 @@ class PersonAuthentication(PersonAuthenticationType):
             snsClient = self.pushAndroidService
             platformApplicationArn = self.pushAndroidPlatformArn
         elif platform == PushPlatform.APNS:
-            snsClient = self.pushApplePlatformArn
+            snsClient = self.pushAppleService
             platformApplicationArn = self.pushApplePlatformArn
         else:
             return None
