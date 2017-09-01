@@ -613,7 +613,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if ios_creads["enabled"]:
             self.pushAppleService = snsClient 
-            self.pushApplePlatformArn = android_creds["platform_arn"]
+            self.pushApplePlatformArn = ios_creads["platform_arn"]
             print "Super-Gluu. Initialize SNS notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
@@ -743,8 +743,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 platform = device_data.getPlatform()
                 push_token = device_data.getPushToken()
-                notification_conf = u2f_device.getDeviceNotificationConf()
-                debug = False
+                debug = True
 
                 if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
@@ -757,14 +756,19 @@ class PersonAuthentication(PersonAuthenticationType):
                         title = "Super-Gluu"
                         message = "Super-Gluu login request to: %s" % client_redirect_uri
 
-                        additional_fields = { "request" : super_gluu_request }
+                        sns_push_request_dictionary = { "alert": title,
+                                                        "badge": 9,
+                                                        "sound": 'default',
+                                                        "aps": 
+                                                            { "message" : super_gluu_request,
+                                                              "title" : title,
+                                                              "alert" : message },
+                                                       "event-category": "ACTIONABLE",
+                                                       "request" : super_gluu_request
+                        }
+                        push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
 
-                        msgBuilder = APNS.newPayload().alertBody(message).alertTitle(title).sound("default")
-                        msgBuilder.category('ACTIONABLE').badge(0)
-                        msgBuilder.forNewsstand()
-                        msgBuilder.customFields(additional_fields)
-                        push_message = msgBuilder.build()
-
+#                        msgBuilder.forNewsstand()
                         send_notification_result = pushSnsService.sendPushMessage(self.pushAppleService, PushPlatform.APNS, targetEndpointArn, push_message, None)
                         if debug:
                             print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
@@ -778,8 +782,14 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
 
                         title = "Super-Gluu"
-                        msgBuilder = Message.Builder().addData("message", super_gluu_request).addData("title", title).collapseKey("single").contentAvailable(True)
-                        push_message = msgBuilder.build()
+                        sns_push_request_dictionary = { "collapse_key": "single",
+                                                        "content_available": True,
+                                                        "time_to_live": 60,
+                                                        "data": 
+                                                            { "message" : super_gluu_request,
+                                                              "title" : title }
+                        }
+                        push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
 
                         send_notification_result = pushSnsService.sendPushMessage(self.pushAndroidService, PushPlatform.GCM, targetEndpointArn, push_message, None)
                         if debug:
