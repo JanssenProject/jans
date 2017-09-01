@@ -9,6 +9,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.xdi.config.oxtrust.AppConfiguration;
 import org.xdi.oxauth.model.common.User;
@@ -67,8 +70,8 @@ public class PushSnsService {
 
 		return platformEndpointResult.getEndpointArn();
 	}
-	
-	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, Object data, Map<String, Object> customAppMessageMap, Map<String, MessageAttributeValue> messageAttributes) throws IOException {
+
+	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, Map<String, Object> customAppMessageMap, Map<String, MessageAttributeValue> messageAttributes) throws IOException {
 		Map<String, Object> appMessageMap = new HashMap<String, Object>();
 
 		if (platform == PushPlatform.GCM) {
@@ -77,11 +80,11 @@ public class PushSnsService {
 			appMessageMap.put("time_to_live", 30);
 			appMessageMap.put("dry_run", false);
 		}
-		
+
 		if (customAppMessageMap != null) {
 			appMessageMap.putAll(customAppMessageMap);
 		}
-		
+
 		String message = ServerUtil.asJson(appMessageMap);
 
 		return sendPushMessage(snsClient, platform, targetArn, message, messageAttributes);
@@ -107,5 +110,37 @@ public class PushSnsService {
 
 		return publishResult;
 	}
+	private static Map<String, String> getData() throws JsonGenerationException, JsonMappingException, IOException {
+		Map<String, String> pushRequest = new HashMap<String, String>();
+		pushRequest.put("app", "https://ce-release.gluu.org/identity/authentication/authcode");
+		pushRequest.put("method", "authenticate");
+		pushRequest.put("req_ip", "130.180.209.30");
+		pushRequest.put("created", "2017-08-28T09:57:40.665000");
+		pushRequest.put("issuer", "https://ce-release.gluu.org");
+		pushRequest.put("req_loc", "Ukraine%2C%20Odessa%2C%20Odesa%20%28Prymors%5C%27kyi%20district%29");
+		pushRequest.put("state", "bbf58b34-dba2-4a5a-b3b8-464fc56e8649");
 
+		ObjectMapper om = new ObjectMapper();
+		String pushRequestString = om.writeValueAsString(pushRequest);
+
+		Map<String, String> payload = new HashMap<String, String>();
+		payload.put("message", pushRequestString);
+		payload.put("title", "Super-Gluu");
+
+		return payload;
+	}
+
+	public static void main(String[] args) throws JsonGenerationException, JsonMappingException, IOException {
+		Map<String, Object> appMessageMap = new HashMap<String, Object>();
+
+		appMessageMap.put("collapse_key", "single");
+		appMessageMap.put("delay_while_idle", true);
+		appMessageMap.put("time_to_live", 30);
+		appMessageMap.put("dry_run", false);
+		appMessageMap.put("data", getData());
+
+		String message = ServerUtil.asJson(appMessageMap);
+		System.out.println(message);
+
+	}
 }
