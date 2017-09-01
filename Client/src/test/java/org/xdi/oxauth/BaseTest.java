@@ -309,7 +309,7 @@ public abstract class BaseTest {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
         // Skip authorization form if client has persistent authorization 
         if (!authorizationResponseStr.contains("#")) {
-	        WebElement allowButton = currentDriver.findElement(By.name(authorizeFormAllowButton));
+	        WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
 	
 	        final String previousURL = currentDriver.getCurrentUrl();
 	        allowButton.click();
