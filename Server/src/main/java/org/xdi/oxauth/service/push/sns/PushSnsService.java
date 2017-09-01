@@ -13,8 +13,8 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.xdi.config.oxtrust.AppConfiguration;
 import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.oxauth.util.ServerUtil;
 
