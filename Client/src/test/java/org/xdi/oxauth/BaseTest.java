@@ -371,7 +371,7 @@ public abstract class BaseTest {
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
-        WebElement doNotAllowButton = driver.findElement(By.name(authorizeFormDoNotAllowButton));
+        WebElement doNotAllowButton = driver.findElement(By.id(authorizeFormDoNotAllowButton));
 
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
@@ -417,7 +417,7 @@ public abstract class BaseTest {
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
-        WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
+        WebElement allowButton = driver.findElement(By.id(authorizeFormAllowButton));
 
         final String previousURL = driver.getCurrentUrl();
         allowButton.click();
@@ -460,7 +460,7 @@ public abstract class BaseTest {
         startSelenium();
         driver.navigate().to(authorizationRequestUrl);
 
-        WebElement doNotAllowButton = driver.findElement(By.name(authorizeFormDoNotAllowButton));
+        WebElement doNotAllowButton = driver.findElement(By.id(authorizeFormDoNotAllowButton));
 
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
@@ -527,7 +527,7 @@ public abstract class BaseTest {
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
-        /*WebElement allowButton = driver.findElement(By.name(authorizeFormAllowButton));
+        /*WebElement allowButton = driver.findElement(By.id(authorizeFormAllowButton));
 
         final String previousURL = driver.getCurrentUrl();
         allowButton.click();
