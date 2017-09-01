@@ -321,6 +321,7 @@ oxConfigurationProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.
 oxConfigurationProperty: {"value1":"label","value2":"Super Gluu","description":""}
 oxConfigurationProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 oxConfigurationProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
+oxConfigurationProperty: {"value1":"notification_service_mode","value2":"sns","description":""}
 oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
 oxLevel: 15
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
