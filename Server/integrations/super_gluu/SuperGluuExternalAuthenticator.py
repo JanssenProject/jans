@@ -515,9 +515,9 @@ class PersonAuthentication(PersonAuthenticationType):
         if configurationAttributes.containsKey("notification_service_mode"):
             notificationServiceMode = configurationAttributes.get("notification_service_mode").getValue2()
             if StringHelper.equalsIgnoreCase(notificationServiceMode, "sns"):
-                return initSnsPushNotificationService(configurationAttributes)
+                return self.initSnsPushNotificationService(configurationAttributes)
 
-        return initNativePushNotificationService(configurationAttributes)
+        return self.initNativePushNotificationService(configurationAttributes)
 
     def initNativePushNotificationService(self, configurationAttributes):
         print "Super-Gluu. Initialize native notification services"
@@ -732,7 +732,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         user_inum = userService.getUserInum(user_name)
 
-        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData")
+        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData", "oxDeviceNotificationConf")
         if u2f_devices_list.size() > 0:
             for u2f_device in u2f_devices_list:
                 device_data = u2f_device.getDeviceData()
@@ -743,7 +743,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 platform = device_data.getPlatform()
                 push_token = device_data.getPushToken()
-                debug = True
+                debug = False
 
                 if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
@@ -807,6 +807,7 @@ class PersonAuthentication(PersonAuthenticationType):
             notificationConfJson = json.loads(notificationConf)
             targetEndpointArn = notificationConfJson['sns_endpoint_arn']
             if StringHelper.isNotEmpty(targetEndpointArn):
+                print "Super-Gluu. Get target endpoint ARN. There is already created target endpoint ARN"
                 return targetEndpointArn
 
         # Create endpoint ARN        
@@ -824,13 +825,15 @@ class PersonAuthentication(PersonAuthenticationType):
         deviceData = u2fDevice.getDeviceData()
         pushToken = deviceData.getPushToken()
         
-        platformEndpointResult = pushSnsService.createPlatformArn(snsClient, platformApplicationArn, pushToken, user)
-        targetEndpointArn = platformEndpointResult.getEndpointArn()
+        print "Super-Gluu. Get target endpoint ARN. Attempting to create target endpoint ARN for user: '%s'" % user.getUserId()
+        targetEndpointArn = pushSnsService.createPlatformArn(snsClient, platformApplicationArn, pushToken, user)
+        print "Super-Gluu. Get target endpoint ARN. Create target endpoint ARN '%s' for user: '%s'" % (targetEndpointArn, user.getUserId())
         
         # Store created endpoint ARN in device entry
         userInum = user.getAttribute("inum")
-        u2fDevice.setDeviceNotificationConf('{"sns_endpoint_arn" : "%s"}' % targetEndpointArn)
-        deviceRegistrationService.updateDeviceRegistration(userInum, u2fDevice)
+        u2fDeviceUpdate = deviceRegistrationService.findUserDeviceRegistration(userInum, u2fDevice.getId())
+        u2fDeviceUpdate.setDeviceNotificationConf('{"sns_endpoint_arn" : "%s"}' % targetEndpointArn)
+        deviceRegistrationService.updateDeviceRegistration(userInum, u2fDeviceUpdate)
 
         return targetEndpointArn
 
