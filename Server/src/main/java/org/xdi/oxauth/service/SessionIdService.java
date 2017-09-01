@@ -237,7 +237,11 @@ public class SessionIdService {
                 return null;
             }
             final HttpServletRequest request = (HttpServletRequest) externalContext.getRequest();
-            return getSessionIdFromCookie(request);
+            if (request != null) {
+                return getSessionIdFromCookie(request);
+            } else {
+                log.error("Faces context returns null for http request object.");
+            }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
