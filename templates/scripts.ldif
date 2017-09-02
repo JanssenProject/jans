@@ -274,6 +274,20 @@ oxScript::%(user_registration_samplescript)s
 oxScriptType: user_registration
 programmingLanguage: python
 
+dn: inum=%(inumOrg)s!0011!6EA0.8F0D,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Sample Confirm User Registration  script
+displayName: user_registration
+gluuStatus: false
+inum: %(inumOrg)s!0011!6EA0.8F0D
+oxLevel: 100
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript::%(user_registration_confirmregistrationsamplescript)s
+oxScriptType: user_registration
+programmingLanguage: python
+
 dn: inum=%(inumOrg)s!0011!7523.8F2D,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
