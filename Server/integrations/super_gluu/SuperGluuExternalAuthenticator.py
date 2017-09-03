@@ -56,6 +56,14 @@ class PersonAuthentication(PersonAuthenticationType):
         
         self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
 
+        self.androidUrl = None
+        if configurationAttributes.containsKey("supergluu_android_download_url"):
+            self.androidUrl = configurationAttributes.get("supergluu_android_download_url").getValue2()
+
+        self.IOSUrl = None
+        if configurationAttributes.containsKey("supergluu_ios_download_url"):
+            self.IOSUrl = configurationAttributes.get("supergluu_ios_download_url").getValue2()
+
         self.customLabel = None
         if configurationAttributes.containsKey("label"):
             self.customLabel = configurationAttributes.get("label").getValue2()
@@ -125,7 +133,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity)
+        self.setRequestScopedParameters(identity,step)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
         identity.setWorkingParameter("retry_current_step", False)
@@ -290,7 +298,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity)
+        self.setRequestScopedParameters(identity,step)
 
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
@@ -842,10 +850,16 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return session_attributes.get("redirect_uri")
 
-    def setRequestScopedParameters(self, identity):
+    def setRequestScopedParameters(self, identity,step):
         if self.registrationUri != None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
+        if self.androidUrl!= None and step == 1:
+            identity.setWorkingParameter("supergluu_android_download_url", self.androidUrl)
+
+        if self.IOSUrl  != None and step == 1:
+            identity.setWorkingParameter("supergluu_ios_download_url", self.IOSUrl )
+            
         if self.customLabel != None:
             identity.setWorkingParameter("super_gluu_label", self.customLabel)
 
