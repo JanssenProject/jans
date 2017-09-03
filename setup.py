@@ -2807,11 +2807,14 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
-    ### Ganesh Working Here...
+### Ganesh Working Here...
     if 'importLDIFDir' in setupOptions.keys():
-        installObject.render_custom_templates(setupOptions['importLDIFDir'])
-        installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
-        sys.exit(2)
+        if os.path.isdir(installObject.openldapBaseFolder):
+            installObject.logIt("Gluu server already installed. Setup will render and import templates and exit.", True)
+            installObject.render_custom_templates(setupOptions['importLDIFDir'])
+            installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
+            installObject.logIt("Setup is exiting now after import of ldifs generated.", True)
+            sys.exit(2)
 
     # Show to properties for approval
     print '\n%s\n' % `installObject`
@@ -2853,6 +2856,10 @@ if __name__ == '__main__':
             installObject.start_services()
             installObject.change_rc_links()
             installObject.save_properties()
+            if 'importLDIFDir' in setupOptions.keys():
+                installObject.render_custom_templates(setupOptions['importLDIFDir'])
+                installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
+
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
