@@ -20,6 +20,7 @@ from org.xdi.util import StringHelper
 from org.xdi.oxauth.service import EncryptionService
 from org.xdi.service import MailService
 from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService 
+from java.util import Arrays, HashMap, IdentityHashMap
 
 import datetime
 import urllib
@@ -851,18 +852,20 @@ class PersonAuthentication(PersonAuthenticationType):
         return session_attributes.get("redirect_uri")
 
     def setRequestScopedParameters(self, identity,step):
+        downloadMap = HashMap()
         if self.registrationUri != None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
         if self.androidUrl!= None and step == 1:
-            identity.setWorkingParameter("supergluu_android_download_url", self.androidUrl)
+            downloadMap.put("android", self.androidUrl)
 
         if self.IOSUrl  != None and step == 1:
-            identity.setWorkingParameter("supergluu_ios_download_url", self.IOSUrl )
+            downloadMap.put("ios", self.IOSUrl)
             
         if self.customLabel != None:
             identity.setWorkingParameter("super_gluu_label", self.customLabel)
-
+            
+        identity.setWorkingParameter("download_url",downloadMap)
         identity.setWorkingParameter("super_gluu_qr_options", self.customQrOptions)
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
