@@ -53,7 +53,7 @@ class UserRegistration(UserRegistrationType):
         user.setStatus(userStatus)
         self.guid=StringHelper.getRandomString(16)
         user.setGuid(self.guid)
-        return user
+        return True
 
     # User registration post method
     #   user is org.gluu.oxtrust.model.GluuCustomPerson
