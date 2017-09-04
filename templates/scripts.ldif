@@ -339,7 +339,6 @@ oxConfigurationProperty: {"value1":"notification_service_mode","value2":"sns","d
 oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
 oxConfigurationProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.super.gluu","description":""}
 oxConfigurationProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
-
 oxLevel: 15
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
