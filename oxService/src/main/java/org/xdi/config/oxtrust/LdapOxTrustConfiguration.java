@@ -41,8 +41,9 @@ public class LdapOxTrustConfiguration extends Entry {
     @LdapAttribute(name = "oxTrustConfImportPerson")
     private ImportPersonConfig importPersonConfig; //issue 102 - end  : changed by shekhar
     
+	@LdapJsonObject
     @LdapAttribute(name = "oxTrustConfAttributeResolver")
-    private String attributeResolverConfig;
+    private AttributeResolverConfiguration attributeResolverConfig;
 
 	public LdapOxTrustConfiguration() {
 	}
@@ -81,11 +82,11 @@ public class LdapOxTrustConfiguration extends Entry {
 	}//issue 102 - end  : changed by shekhar
 	
 
-	public String getAttributeResolverConfig() {
+	public AttributeResolverConfiguration getAttributeResolverConfig() {
 		return attributeResolverConfig;
 	}
 
-	public void setAttributeResolverConfig(String attributeResolverConfig) {
+	public void setAttributeResolverConfig(AttributeResolverConfiguration attributeResolverConfig) {
 		this.attributeResolverConfig = attributeResolverConfig;
 	}
 
