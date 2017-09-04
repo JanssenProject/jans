@@ -267,7 +267,7 @@ displayName: user_registration
 gluuStatus: false
 inum: %(inumOrg)s!0011!6EA0.8F0C
 oxConfigurationProperty: {"value1":"enable_user","value2":"false","description":""}
-oxLevel: 100
+oxLevel: 90
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
 oxScript::%(user_registration_samplescript)s
@@ -278,7 +278,7 @@ dn: inum=%(inumOrg)s!0011!6EA0.8F0D,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample Confirm User Registration  script
-displayName: user_registration
+displayName: user_confirm_registration
 gluuStatus: false
 inum: %(inumOrg)s!0011!6EA0.8F0D
 oxLevel: 100
