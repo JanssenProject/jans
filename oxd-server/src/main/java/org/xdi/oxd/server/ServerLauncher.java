@@ -16,10 +16,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
-import org.xdi.oxd.server.service.ConfigurationService;
-import org.xdi.oxd.server.service.PersistenceService;
-import org.xdi.oxd.server.service.RpService;
-import org.xdi.oxd.server.service.SocketService;
+import org.xdi.oxd.server.service.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -89,6 +86,7 @@ public class ServerLauncher {
             INJECTOR.getInstance(ConfigurationService.class).load();
             INJECTOR.getInstance(PersistenceService.class).create();
             INJECTOR.getInstance(RpService.class).load();
+            INJECTOR.getInstance(MigrationService.class).migrate();
             INJECTOR.getInstance(SocketService.class).listenSocket();
             LOG.info("oxD Server started successfully.");
         } catch (ShutdownException e) {
