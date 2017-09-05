@@ -2,18 +2,13 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.io.Files;
 import com.google.inject.Inject;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.common.CoreUtils;
 
-import java.io.*;
-import java.util.List;
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -30,19 +25,14 @@ public class RpService {
 
     public static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
 
-    private static final int FILE_NAME_LENGTH = (UUID.randomUUID().toString() + ".json").length();
-
-    private final Map<String, Rp> sites = Maps.newConcurrentMap();
-
-    private ConfigurationService configurationService;
+    private final Map<String, Rp> rpMap = Maps.newConcurrentMap();
 
     private ValidationService validationService;
 
     private PersistenceService persistenceService;
 
     @Inject
-    public RpService(ConfigurationService configurationService, ValidationService validationService, PersistenceService persistenceService) {
-        this.configurationService = configurationService;
+    public RpService(ValidationService validationService, PersistenceService persistenceService) {
         this.validationService = validationService;
         this.persistenceService = persistenceService;
     }
@@ -55,36 +45,10 @@ public class RpService {
         for (Rp rp : persistenceService.getRps()) {
             put(rp);
         }
-
-        final List<File> files = Lists.newArrayList(Files.fileTreeTraverser().children(configurationService.getConfDirectoryFile()));
-        for (File file : files) {
-            if (file.getName().equalsIgnoreCase(DEFAULT_SITE_CONFIG_JSON)) {
-                LOG.trace("Loading site file name: {}", file.getName());
-                Rp rp = parseRp(file);
-                if (rp != null) {
-                    sites.put(DEFAULT_SITE_CONFIG_JSON, rp);
-                }
-            }
-            if (file.getName().length() == FILE_NAME_LENGTH && file.getName().endsWith(".json")) {
-                LOG.trace("Loading site file name: {}", file.getName());
-
-                try {
-                    Rp rp = parseRp(new FileInputStream(file));
-                    create(rp);
-
-                    String path = file.getAbsolutePath();
-                    if (file.delete()) {
-                        LOG.debug("Removed site configuration file : " + path + " and pushed it to database.");
-                    }
-                } catch (Exception e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-        }
     }
 
     public Rp defaultRp() {
-        Rp rp = sites.get(DEFAULT_SITE_CONFIG_JSON);
+        Rp rp = rpMap.get(DEFAULT_SITE_CONFIG_JSON);
         if (rp == null) {
             LOG.error("Failed to load fallback configuration!");
             rp = new Rp();
@@ -96,55 +60,13 @@ public class RpService {
         Preconditions.checkNotNull(id);
         Preconditions.checkState(!Strings.isNullOrEmpty(id));
 
-        Rp site = sites.get(id);
+        Rp site = rpMap.get(id);
         return validationService.validate(site);
     }
 
     public Map<String, Rp> getRps() {
-        return Maps.newHashMap(sites);
+        return Maps.newHashMap(rpMap);
     }
-
-    public static Rp parseRp(InputStream p_stream) {
-        try {
-            try {
-                return CoreUtils.createJsonMapper().readValue(p_stream, Rp.class);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-                return null;
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
-    public static Rp parseRp(File file) {
-        InputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-            return parseRp(fis);
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            IOUtils.closeQuietly(fis);
-        }
-        return null;
-    }
-
-    public static Rp parseRp(String rpAsJson) {
-        try {
-            try {
-                return CoreUtils.createJsonMapper().readValue(rpAsJson, Rp.class);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-                return null;
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
-    }
-
 
     public void update(Rp rp) throws IOException {
         put(rp);
@@ -164,11 +86,15 @@ public class RpService {
             rp.setOxdId(UUID.randomUUID().toString());
         }
 
-        put(rp);
-        persistenceService.create(rp);
+        if (rpMap.get(rp.getOxdId()) == null) {
+            put(rp);
+            persistenceService.create(rp);
+        } else {
+            LOG.error("RP with already exists in database, oxd_id: " + rp.getOxdId());
+        }
     }
 
     public Rp put(Rp rp) {
-        return sites.put(rp.getOxdId(), rp);
+        return rpMap.put(rp.getOxdId(), rp);
     }
 }
