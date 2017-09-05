@@ -4,8 +4,13 @@
 package org.xdi.oxd.server;
 
 import com.google.common.base.Joiner;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Date;
@@ -14,7 +19,6 @@ import java.util.Date;
  * Utility class with static methods.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class Utils {
 
@@ -45,10 +49,13 @@ public class Utils {
     }
 
     public static String getUmaDiscoveryUrl(String p_amHost) {
-        return String.format("https://%s/.well-known/uma-configuration", p_amHost);
+        return String.format("https://%s/.well-known/uma2-configuration", p_amHost);
     }
 
     public static String joinAndUrlEncode(Collection<String> list) throws UnsupportedEncodingException {
+        if (list == null || list.isEmpty()) {
+            return "";
+        }
         return URLEncoder.encode(Joiner.on(" ").join(list), "UTF-8");
     }
 
@@ -63,5 +70,21 @@ public class Utils {
 
     public static long date(Date date) {
         return date != null ? date.getTime() / 1000 : 0;
+    }
+
+    public static String encodeCredentials(String username, String password) throws UnsupportedEncodingException {
+        return Base64.encodeBase64String(Util.getBytes(username + ":" + password));
+    }
+
+    public static boolean isValidUrl(String url) {
+        if (StringUtils.isNotBlank(url)) {
+            try {
+                new URL(url);
+                return true;
+            } catch (MalformedURLException e) {
+                // ignore
+            }
+        }
+        return false;
     }
 }

@@ -7,8 +7,10 @@ import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
+import org.xdi.oxd.rs.protect.RsResource;
 
 import java.io.IOException;
+import java.util.List;
 
 import static junit.framework.Assert.assertNotNull;
 
@@ -28,17 +30,21 @@ public class RsProtectTest {
 
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
-            final RsProtectParams commandParams = new RsProtectParams();
-            commandParams.setOxdId(site.getOxdId());
-            commandParams.setResources(UmaFullTest.resourceList(rsProtect).getResources());
-
-            final Command command = new Command(CommandType.RS_PROTECT)
-                    .setParamsObject(commandParams);
-
-            final RsProtectResponse resp = client.send(command).dataAsResponse(RsProtectResponse.class);
-            assertNotNull(resp);
+            protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
         } finally {
             CommandClient.closeQuietly(client);
         }
+    }
+
+    public static RsProtectResponse protectResources(CommandClient client, RegisterSiteResponse site, List<RsResource> resources) {
+        final RsProtectParams commandParams = new RsProtectParams();
+        commandParams.setOxdId(site.getOxdId());
+        commandParams.setResources(resources);
+
+        final RsProtectResponse resp = client
+                .send(new Command(CommandType.RS_PROTECT).setParamsObject(commandParams))
+                .dataAsResponse(RsProtectResponse.class);
+        assertNotNull(resp);
+        return resp;
     }
 }

@@ -34,6 +34,7 @@ public enum ErrorResponseCode {
     INVALID_ID_TOKEN_UNKNOWN("invalid_id_token_unknown", "Invalid id_token, validation fail due to exception, please check oxd-server.log for details."),
     INVALID_ACCESS_TOKEN_BAD_HASH("invalid_access_token_bad_hash", "access_token is invalid. Hash of access_token does not match hash from id_token (at_hash)."),
     INVALID_AUTHORIZATION_CODE_BAD_HASH("invalid_authorization_code_bad_hash", "Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash)."),
+    INVALID_REGISTRATION_CLIENT_URL("invalid_registration_client_url", "Registration client URL is invalid. Please check registration_client_url response parameter from IDP (http://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse)."),
     INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site or setup_client command for site registration."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     INVALID_REQUEST_SCOPES_REQUIRED("invalid_request", "Request is invalid. Scopes are required parameter in request."),
@@ -49,18 +50,17 @@ public enum ErrorResponseCode {
     INVALID_ACR_VALUES("invalid_acr_values", "Invalid acr_values parameter (empty or blank)."),
     NO_CONNECT_DISCOVERY_RESPONSE("no_connect_discovery_response", "Unable to fetch Connect discovery response /.well-known/openid-configuration"),
     NO_REGISTRATION_ENDPOINT("invalid_request", "OP does not support dynamic client registration. Please register client manually and provide client_id and client_secret to register_site command."),
-    NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma-configuration"),
+    NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma2-configuration"),
     NO_UMA_RESOURCES_TO_PROTECT("invalid_uma_request", "Resources list to protect is empty or blank. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
     NO_UMA_HTTP_METHOD("invalid_http_method", "http_method is not specified or otherwise not GET or POST or PUT or DELETE. Please check it according to protocol definition at https://www.gluu.org/docs-oxd"),
     NO_UMA_PATH_PARAMETER("invalid_path_parameter", "path parameter is not specified or otherwise not valid"),
     NO_UMA_TICKET_PARAMETER("invalid_ticket_parameter", "ticket parameter is not specified or otherwise is not valid"),
+    NO_UMA_CLAIMS_REDIRECT_URI_PARAMETER("invalid_claims_redirect_uri_parameter", "claims_redirect_uri parameter is not specified or otherwise is not valid"),
     NO_UMA_RPT_PARAMETER("invalid_rpt_parameter", "rpt parameter is not specified or otherwise is not valid"),
+    UMA_NEED_INFO("need_info", "The authorization server needs additional information in order to determine whether the client is authorized to have these permissions."),
     FAILED_TO_GET_END_SESSION_ENDPOINT("no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_REVOCATION_ENDPOINT("no_revocation_endpoint_at_op", "Failed to get revocation_endpoint at https://accounts.google.com/.well-known/openid-configuration"),
-    PROVIDED_AAT_IS_INACTIVE("aat_inactive", "AAT provided in parameters is not active (does not exist or otherwise expired)."),
-    PROVIDED_AAT_NO_UMA_AUTHORIZATION_SCOPE("aat_no_uma_scope", "AAT provided in parameters does not have required 'uma_authorization' scope."),
-    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
-    FAILED_TO_GET_GAT("internal_error", "Failed to get GAT.");
+    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT.");
 
     private final String code;
     private final String description;

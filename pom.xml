@@ -5,25 +5,25 @@
     <groupId>org.xdi</groupId>
     <artifactId>oxd</artifactId>
     <packaging>pom</packaging>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.2.0-SNAPSHOT</version>
     <name>oxD</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.min-version>3.0.3</maven.min-version>
-        <oxCore.version>3.1.0-SNAPSHOT</oxCore.version>
+        <oxCore.version>3.2.0-SNAPSHOT</oxCore.version>
         <jackson.version>1.9.9</jackson.version>
-        <slf4j.version>1.7.11</slf4j.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <httpcomponents.version>4.1.2</httpcomponents.version>
-        <oxauth.version>3.1.0-SNAPSHOT</oxauth.version>
+        <oxauth.version>3.2.0-SNAPSHOT</oxauth.version>
         <resteasy.version>2.3.7.Final</resteasy.version>
         <licensing.version>1.1.0</licensing.version>
         <guice.version>3.0</guice.version>
         <guava.version>13.0.1</guava.version>
         <gwt.version>2.6.0</gwt.version>
         <gxt.version>3.1.0</gxt.version>
-        <oxlicense.version>3.1.0-SNAPSHOT</oxlicense.version>
+        <oxlicense.version>3.2.0-SNAPSHOT</oxlicense.version>
     </properties>
 
     <prerequisites>
@@ -73,7 +73,7 @@
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>uma-rs-resteasy</artifactId>
-                <version>3.1.0-SNAPSHOT</version>
+                <version>3.2.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.sencha.gxt</groupId>
@@ -120,6 +120,18 @@
                         <groupId>com.wordnik</groupId>
                         <artifactId>swagger-jaxrs_2.10</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -131,12 +143,50 @@
                         <groupId>com.wordnik</groupId>
                         <artifactId>swagger-jaxrs_2.10</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
-                <artifactId>oxUtil</artifactId>
+                <artifactId>oxcore-util</artifactId>
                 <version>${oxCore.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
@@ -220,6 +270,11 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>2.3</version>
+            </dependency>
+            <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.3.1</version>
@@ -265,11 +320,55 @@
                 <groupId>org.xdi</groupId>
                 <artifactId>oxlicense-client</artifactId>
                 <version>${oxlicense.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
                 <artifactId>oxlicense-validator</artifactId>
                 <version>${oxlicense.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.wordnik</groupId>
+                        <artifactId>swagger-jaxrs_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-1.2-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -370,7 +469,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>3.0.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

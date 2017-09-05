@@ -9,16 +9,13 @@ import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
-import org.xdi.oxd.common.params.HasOxdIdParams;
-import org.xdi.oxd.common.params.HasProtectionAccessTokenParams;
-import org.xdi.oxd.common.params.IParams;
-import org.xdi.oxd.common.params.RegisterSiteParams;
+import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.ServerLauncher;
+import org.xdi.oxd.server.license.LicenseService;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 23/05/2016
  */
 
 public class ValidationService {
@@ -44,20 +41,51 @@ public class ValidationService {
     }
 
     public void validate(IParams params) {
+        Boolean isClientLocal = null;
         notNull(params);
         if (params instanceof HasOxdIdParams) {
             validate((HasOxdIdParams) params);
+            isClientLocal = true;
         }
         if (params instanceof HasProtectionAccessTokenParams) {
-            validate((HasProtectionAccessTokenParams) params);
+            if (validate((HasProtectionAccessTokenParams) params)) {
+                isClientLocal = false;
+            }
+        }
+
+        if (isClientLocal != null && !(params instanceof RegisterSiteParams)) {
+            try {
+                String oxdId = ((HasOxdIdParams) params).getOxdId();
+                if (StringUtils.isNotBlank(oxdId)) {
+                    final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+                    final Rp rp = rpService.getRp(oxdId);
+                    if (rp != null) {
+                        ServerLauncher.getInjector().getInstance(LicenseService.class).notifyClientUsed(rp, isClientLocal);
+                    }
+                }
+            } catch (ErrorResponseException e) {
+                // ignore
+            } catch (Exception e) {
+                LOG.error("Failed to invoke license service client update. Message: " + e.getMessage(), e);
+            }
         }
     }
 
-    private void validate(HasProtectionAccessTokenParams params) {
+    /**
+     * Returns whether has valid token
+     *
+     * @param params params
+     * @return whether has valid token
+     */
+    private boolean validate(HasProtectionAccessTokenParams params) {
+        if (params instanceof SetupClientParams) {
+            return false;
+        }
+
         final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
         if (configuration.getProtectCommandsWithAccessToken() != null && !configuration.getProtectCommandsWithAccessToken()) {
             if (StringUtils.isBlank(params.getProtectionAccessToken())) {
-                return; // skip validation since protectCommandsWithAccessToken=false
+                return false; // skip validation since protectCommandsWithAccessToken=false
             } // otherwise if token is not blank then let it validate it
         }
 
@@ -67,7 +95,7 @@ public class ValidationService {
             throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
         if (params instanceof RegisterSiteParams) {
-            return; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
+            return false; // skip validation for site registration because we have to associate oxd_id with client_id, validation is performed inside operation
         }
 
         final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
@@ -82,7 +110,7 @@ public class ValidationService {
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + rp.getSetupClientId());
 
         if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
-            return;
+            return true;
         }
 
         throw new ErrorResponseException(ErrorResponseCode.INVALID_PROTECTION_ACCESS_TOKEN);
@@ -92,6 +120,13 @@ public class ValidationService {
         if (StringUtils.isBlank(accessToken)) {
             throw new ErrorResponseException(ErrorResponseCode.BLANK_PROTECTION_ACCESS_TOKEN);
         }
+
+        final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+        final Rp rp = rpService.getRp(oxdId);
+        if (StringUtils.isNotBlank(rp.getSetupOxdId())) {
+            oxdId = rp.getSetupOxdId();
+        }
+        LOG.trace("Introspect token with rp: " + rpService.getRp(oxdId));
 
         final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
         final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint();

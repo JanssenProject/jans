@@ -33,7 +33,7 @@ public class LicenseFileUpdateService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LicenseFileUpdateService.class);
 
-    public static final String LICENSE_SERVER_ENDPOINT = "https://license.gluu.org/oxLicense";
+    public static final String LICENSE_SERVER_ENDPOINT = "https://license.gluu.org/oxLicense2"; // todo switch back to /oxLicense
 
     private static final int ONE_HOUR_AS_MILLIS = 3600000;
     private static final int _24_HOURS_AS_MILLIS = 24 * ONE_HOUR_AS_MILLIS;

@@ -14,7 +14,6 @@ import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.server.op.IOperation;
 import org.xdi.oxd.server.op.OperationFactory;
-import org.xdi.oxd.server.service.RpService;
 import org.xdi.oxd.server.service.ValidationService;
 
 import java.io.IOException;
@@ -23,7 +22,6 @@ import java.io.IOException;
  * oxD operation processor.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 28/07/2013
  */
 public class Processor {
 

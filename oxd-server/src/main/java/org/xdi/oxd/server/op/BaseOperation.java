@@ -15,6 +15,7 @@ import org.xdi.oxd.common.params.HasOxdIdParams;
 import org.xdi.oxd.common.params.IParams;
 import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.server.Convertor;
+import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.service.*;
 
 /**
@@ -78,8 +79,12 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return injector.getInstance(type);
     }
 
-    public StateService getStateService(){
+    public StateService getStateService() {
         return getInstance(StateService.class);
+    }
+
+    public LicenseService getLicenseService() {
+        return getInstance(LicenseService.class);
     }
 
     public DiscoveryService getDiscoveryService() {
@@ -98,7 +103,7 @@ public abstract class BaseOperation<T extends IParams> implements IOperation<T> 
         return getInstance(ConfigurationService.class);
     }
 
-    public Rp getSite() {
+    public Rp getRp() {
         if (params instanceof HasOxdIdParams) {
             getValidationService().validate((HasOxdIdParams) params);
             HasOxdIdParams hasOxdId = (HasOxdIdParams) params;

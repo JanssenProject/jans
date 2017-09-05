@@ -1,9 +1,9 @@
 {
+    "server_name":"",
     "port":8099,
     "localhost_only":true,
     "time_out_in_seconds":0,
     "use_client_authentication_for_pat":true,
-    "use_client_authentication_for_aat":true,
     "trust_all_certs":true,
     "trust_store_path":"",
     "trust_store_password":"",
@@ -11,9 +11,11 @@
     "public_key":"",
     "public_password":"",
     "license_password":"",
-    "support-google-logout": true,
+    "support-google-logout":true,
     "state_expiration_in_minutes":5,
     "nonce_expiration_in_minutes":5,
     "public_op_key_cache_expiration_in_minutes":60,
-    "protect_commands_with_access_token": false
+    "protect_commands_with_access_token":false,
+    "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client":true,
+    "migration_source_folder_path":""
 }
