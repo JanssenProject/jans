@@ -9,7 +9,6 @@ import org.xdi.oxd.Tester;
 import org.xdi.oxd.web.TestAppModule;
 
 import java.io.File;
-import java.util.concurrent.ExecutorService;
 
 import static org.testng.Assert.assertNotNull;
 
@@ -18,8 +17,6 @@ import static org.testng.Assert.assertNotNull;
  */
 @Guice(modules = TestAppModule.class)
 public class MigrationServiceTest {
-
-    private static ExecutorService EXECUTOR_SERVICE;
 
     @Inject
     RpService service;
@@ -41,7 +38,7 @@ public class MigrationServiceTest {
         service.removeAllRps();
     }
 
-    @Test
+    @Test(enabled = false)
     public void parse() {
         migrationService.migrateChildren(new File("./oxd-server/src/test/resources/migration"));
 
