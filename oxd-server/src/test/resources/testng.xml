@@ -64,6 +64,11 @@
             <class name="org.xdi.oxd.client.AuthorizationCodeFlowTest"/>
         </classes>
     </test>
+    <test name="Migration Service Test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.server.service.MigrationServiceTest"/>
+        </classes>
+    </test>
 
     <!-- UMA Tests -->
     <test name="UMA - Full Flow Test" enabled="true">
