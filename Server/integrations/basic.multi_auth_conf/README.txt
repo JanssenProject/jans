@@ -3,7 +3,7 @@ This is person authentication module for oxAuth which allows to specify multiple
 This module has only one property:
 1) auth_configuration_file - It's path to file which contains AD LDAP authentication connection details and list of attributes which user can use in order to log in.
    Example: /etc/certs/multi_auth_conf.json
-   Example content of this file:
+   Example content of this file [ 'bindPassword' should be the base64 encoded of password text. You can take the advantage of 'encode.py' script to encode/decode your password. 'encode.py' is available inside Gluu server container ( location: /opt/gluu/bin/ ) ]:
    {
       "ldap_configuration":[
          {
