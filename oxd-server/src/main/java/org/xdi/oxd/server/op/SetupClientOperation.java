@@ -3,6 +3,7 @@ package org.xdi.oxd.server.op;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseException;
@@ -11,6 +12,9 @@ import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.SetupClientResponse;
 import org.xdi.oxd.server.Utils;
 import org.xdi.oxd.server.service.Rp;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -34,7 +38,12 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
     public CommandResponse execute(SetupClientParams params) throws Exception {
         try {
             RegisterSiteOperation registerSiteOperation = new RegisterSiteOperation(getCommand(), getInjector());
+
+            List<String> grantTypes = params.getGrantType();
+            prepareSetupParams(params);
             RegisterSiteResponse setupClient = registerSiteOperation.execute_(params);
+
+            params.setGrantType(grantTypes);
             RegisterSiteResponse registeredClient = registerSiteOperation.execute_(params);
 
             Rp setup = getRpService().getRp(setupClient.getOxdId());
@@ -62,5 +71,14 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
             LOG.error(e.getMessage(), e);
         }
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
+    }
+
+    private void prepareSetupParams(SetupClientParams params) {
+        if (params.getGrantType() == null) {
+            params.setGrantType(new ArrayList<String>());
+        }
+        if (!params.getGrantType().contains(GrantType.CLIENT_CREDENTIALS.getValue())) {
+            params.getGrantType().add(GrantType.CLIENT_CREDENTIALS.getValue());
+        }
     }
 }

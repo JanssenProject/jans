@@ -4,10 +4,8 @@
 package org.xdi.oxd.common;
 
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,19 +69,12 @@ public class CommandResponse implements Serializable {
             final String asString = data.toString();
             try {
                 return CoreUtils.createJsonMapper().readValue(asString, p_class);
-            } catch (JsonMappingException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (JsonParseException e) {
-                LOG.error(e.getMessage(), e);
-            } catch (IOException e) {
-                LOG.error(e.getMessage(), e);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
             }
             LOG.error("Unable to parse string to response, string: {}", asString);
         }
         return null;
-
     }
 
     public static CommandResponse ok() {

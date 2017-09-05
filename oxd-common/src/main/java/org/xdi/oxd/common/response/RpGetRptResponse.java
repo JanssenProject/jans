@@ -12,8 +12,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 public class RpGetRptResponse implements IOpResponse {
 
-    @JsonProperty(value = "rpt")
+    @JsonProperty(value = "access_token")
     private String rpt;
+    @JsonProperty(value = "token_type")
+    private String tokenType;
+    @JsonProperty(value = "pct")
+    private String pct;
+    @JsonProperty(value = "updated")
+    private Boolean updated;
 
     public RpGetRptResponse() {
     }
@@ -26,12 +32,37 @@ public class RpGetRptResponse implements IOpResponse {
         rpt = p_rptToken;
     }
 
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
+    public String getPct() {
+        return pct;
+    }
+
+    public void setPct(String pct) {
+        this.pct = pct;
+    }
+
+    public Boolean getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Boolean updated) {
+        this.updated = updated;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("RpGetRptOpResponse");
-        sb.append("{rpt='").append(rpt).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "RpGetRptResponse{" +
+                "rpt='" + rpt + '\'' +
+                ", tokenType='" + tokenType + '\'' +
+                ", pct='" + pct + '\'' +
+                ", updated=" + updated +
+                '}';
     }
 }

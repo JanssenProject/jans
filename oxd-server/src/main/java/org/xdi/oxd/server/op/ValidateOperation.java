@@ -31,7 +31,7 @@ public class ValidateOperation extends BaseOperation<ValidateParams> {
     public CommandResponse execute(ValidateParams params) throws Exception {
         validateParams(params);
 
-        Rp site = getSite();
+        Rp site = getRp();
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
         final Jwt idToken = Jwt.parse(params.getIdToken());

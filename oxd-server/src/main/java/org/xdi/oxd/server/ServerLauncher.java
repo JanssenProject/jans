@@ -16,10 +16,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
-import org.xdi.oxd.server.service.ConfigurationService;
-import org.xdi.oxd.server.service.PersistenceService;
-import org.xdi.oxd.server.service.RpService;
-import org.xdi.oxd.server.service.SocketService;
+import org.xdi.oxd.server.service.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -31,7 +28,6 @@ import java.util.Properties;
  * Server launcher.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class ServerLauncher {
 
@@ -62,18 +58,26 @@ public class ServerLauncher {
         startOxd();
     }
 
-    private static void printBuildNumber() {
+    public static Properties buildProperties() {
         InputStream is = null;
         try {
             is = ClassLoader.getSystemClassLoader().getResourceAsStream("git.properties");
             Properties properties = new Properties();
             properties.load(is);
-            LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
-                    ", build time:" + properties.getProperty("git.build.time"));
+            return properties;
         } catch (Exception e) {
             LOG.warn("Unable to read git.properties and print build number, " + e.getMessage());
+            return null;
         } finally {
             IOUtils.closeQuietly(is);
+        }
+    }
+
+    private static void printBuildNumber() {
+        Properties properties = buildProperties();
+        if (properties != null) {
+            LOG.info("commit: " + properties.getProperty("git.commit.id") + ", branch: " + properties.getProperty("git.branch") +
+                    ", build time:" + properties.getProperty("git.build.time"));
         }
     }
 
@@ -82,6 +86,7 @@ public class ServerLauncher {
             INJECTOR.getInstance(ConfigurationService.class).load();
             INJECTOR.getInstance(PersistenceService.class).create();
             INJECTOR.getInstance(RpService.class).load();
+            INJECTOR.getInstance(MigrationService.class).migrate();
             INJECTOR.getInstance(SocketService.class).listenSocket();
             LOG.info("oxD Server started successfully.");
         } catch (ShutdownException e) {
@@ -102,7 +107,7 @@ public class ServerLauncher {
             }
         }
         throw new AssertionError("Failed to start oxd, system property " +
-                ConfigurationService.CONF_SYS_PROPERTY_NAME + " is not specified. (Please defined it as -D" +
+                ConfigurationService.CONF_SYS_PROPERTY_NAME + " is not specified. (Please define it as -D" +
                 ConfigurationService.CONF_SYS_PROPERTY_NAME + "=<path to oxd-conf.json>)");
     }
 

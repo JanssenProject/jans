@@ -36,10 +36,7 @@ public class GetClientTokenTest {
             params.setClientId(setup.getClientId());
             params.setClientSecret(setup.getClientSecret());
 
-            final Command command = new Command(CommandType.GET_CLIENT_TOKEN);
-            command.setParamsObject(params);
-
-            GetClientTokenResponse resp = client.send(command).dataAsResponse(GetClientTokenResponse.class);
+            GetClientTokenResponse resp = client.send(new Command(CommandType.GET_CLIENT_TOKEN).setParamsObject(params)).dataAsResponse(GetClientTokenResponse.class);
 
             assertNotNull(resp);
             notEmpty(resp.getAccessToken());

@@ -35,7 +35,7 @@ public class CheckIdTokenOperation extends BaseOperation<CheckIdTokenParams> {
         try {
             OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponseByOxdId(params.getOxdId());
 
-            final Rp site = getSite();
+            final Rp site = getRp();
             final String idToken = params.getIdToken();
             final Jwt jwt = Jwt.parse(idToken);
             final Validator validator = new Validator(jwt, discoveryResponse, getKeyService());

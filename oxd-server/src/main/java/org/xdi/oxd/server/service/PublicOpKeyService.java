@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 20/04/2017
  */
 
 public class PublicOpKeyService {

@@ -16,7 +16,6 @@ import java.io.InputStream;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 29/09/2015
  */
 
 public class ConfigurationService implements Provider<Configuration> {
@@ -58,7 +57,7 @@ public class ConfigurationService implements Provider<Configuration> {
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
 
-            final String workingDirectory = System.getProperty("user.dir") ;
+            final String workingDirectory = System.getProperty("user.dir");
             return workingDirectory + File.separator + ".." + File.separator + "conf";
 //            throw new RuntimeException("System property " + CONF_SYS_PROPERTY_NAME + " must point to valid directory path and must contain "
 //                    + FILE_NAME + " file. Current value: " + confFilePath, e);
@@ -68,6 +67,11 @@ public class ConfigurationService implements Provider<Configuration> {
     public void load() {
         configuration = loadImpl();
         Preconditions.checkNotNull(configuration, "Failed to load configuration.");
+
+        if (StringUtils.isBlank(configuration.getServerName())) {
+            LOG.error("'server_name' configuration property is mandatory. Please provide value for it in oxd-conf.json file.");
+            throw new AssertionError("'server_name' configuration property is mandatory. Please provide value for it in oxd-conf.json file.");
+        }
     }
 
     private Configuration loadImpl() {

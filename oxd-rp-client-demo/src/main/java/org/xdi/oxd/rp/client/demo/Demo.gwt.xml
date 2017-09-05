@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='rp'>
-    <inherits name='com.google.gwt.user.User'/>
-    <inherits name='com.google.gwt.user.theme.standard.Standard'/>
-    <inherits name="com.sencha.gxt.ui.GXT"/>
-    <inherits name="com.google.gwt.i18n.CldrLocales"/>
-    <inherits name='com.google.gwt.i18n.I18N'/>
-    <inherits name="com.google.common.collect.Collect"/>
+  <inherits name='com.google.gwt.user.User'/>
+  <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+  <inherits name="com.sencha.gxt.ui.GXT"/>
+  <inherits name="com.google.gwt.i18n.CldrLocales"/>
+  <inherits name='com.google.gwt.i18n.I18N'/>
+  <inherits name="com.google.common.collect.Collect"/>
 
-    <extend-property name="locale" values="en"/>
+  <extend-property name="locale" values="en"/>
 
-    <entry-point class='org.xdi.oxd.rp.client.demo.client.Demo'/>
+  <entry-point class='org.xdi.oxd.rp.client.demo.client.Demo'/>
 
-    <!-- Specify the paths for translatable code                    -->
-    <source path='client'/>
-    <source path='shared'/>
+  <!-- Specify the paths for translatable code                    -->
+  <source path='client'/>
+  <source path='shared'/>
 
 </module>

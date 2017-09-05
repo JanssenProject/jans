@@ -1,0 +1,51 @@
+package org.xdi.oxd.server.service;
+
+import com.google.inject.Inject;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Guice;
+import org.testng.annotations.Test;
+import org.xdi.oxd.Tester;
+import org.xdi.oxd.web.TestAppModule;
+
+import java.io.File;
+import java.util.concurrent.ExecutorService;
+
+import static org.testng.Assert.assertNotNull;
+
+/**
+ * @author yuriyz
+ */
+@Guice(modules = TestAppModule.class)
+public class MigrationServiceTest {
+
+    private static ExecutorService EXECUTOR_SERVICE;
+
+    @Inject
+    RpService service;
+    @Inject
+    PersistenceService persistenceService;
+    @Inject
+    MigrationService migrationService;
+
+    @BeforeClass
+    public void setUp() {
+        Tester.setSystemConfPath();
+        persistenceService.create();
+        service.removeAllRps();
+        service.load();
+    }
+
+    @AfterSuite
+    public void tearDownSuite() {
+        service.removeAllRps();
+    }
+
+    @Test
+    public void parse() {
+        migrationService.migrateChildren(new File("./oxd-server/src/test/resources/migration"));
+
+        assertNotNull(persistenceService.getRp("0c67e1f0-1fc2-46d6-b237-5e20882ec25c"));
+        assertNotNull(persistenceService.getRp("2c65b0da-4bab-4e09-92bb-b028a04a3fe0"));
+    }
+}

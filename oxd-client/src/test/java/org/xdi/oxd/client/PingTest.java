@@ -10,7 +10,6 @@ import org.xdi.oxd.common.response.RegisterSiteResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
@@ -39,8 +38,9 @@ public class PingTest {
             commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
-            commandParams.setRedirectUris(Arrays.asList(redirectUrl));
+            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+            commandParams.setRedirectUris(Lists.newArrayList(redirectUrl));
+            commandParams.setClaimsRedirectUri(Lists.newArrayList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
