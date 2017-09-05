@@ -4,11 +4,7 @@ import com.google.common.base.Strings;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.ClientUtils;
-import org.xdi.oxauth.client.OpenIdConfigurationResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenRequest;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.jwt.Jwt;
@@ -46,7 +42,7 @@ public class GetTokensByCodeOperation extends BaseOperation<GetTokensByCodeParam
     public CommandResponse execute(GetTokensByCodeParams params) throws Exception {
         validate(params);
 
-        final Rp site = getSite();
+        final Rp site = getRp();
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
 
         final TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);

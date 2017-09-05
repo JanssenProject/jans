@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.RegisterSiteParams;
@@ -13,10 +14,10 @@ import org.xdi.oxd.common.response.UpdateSiteResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 import static org.xdi.oxd.client.TestUtils.notEmpty;
 
 /**
@@ -35,6 +36,8 @@ public class RegisterSiteTest {
         try {
             client = new CommandClient(host, port);
 
+//            final SetupClientResponse setupClient = SetupClientTest.setupClient(client, opHost, redirectUrl);
+
             RegisterSiteResponse resp = registerSite(client, opHost, redirectUrl, postLogoutRedirectUrl, logoutUrl);
             assertNotNull(resp);
 
@@ -42,11 +45,12 @@ public class RegisterSiteTest {
 
             // more specific site registration
             final RegisterSiteParams commandParams = new RegisterSiteParams();
+            //commandParams.setProtectionAccessToken(setupClient.getClientRegistrationAccessToken());
             commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
-            commandParams.setRedirectUris(Arrays.asList(redirectUrl));
+            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
+            commandParams.setRedirectUris(Lists.newArrayList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
@@ -103,14 +107,16 @@ public class RegisterSiteTest {
             commandParams.setAuthorizationRedirectUri("https://gluu.loc/wp-login.php?option=oxdOpenId");
             commandParams.setPostLogoutRedirectUri("https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129");
 
-            commandParams.setRedirectUris(Arrays.asList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
+            commandParams.setRedirectUris(Lists.newArrayList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
+            commandParams.setClaimsRedirectUri(Lists.newArrayList("https://gluu.loc/wp-login.php?option=oxdOpenId", "https://gluu.loc/wp-login.php?action=logout&amp;_wpnonce=1fd6fda129"));
             commandParams.setAcrValues(new ArrayList<String>());
-            commandParams.setContacts(Arrays.asList("vlad.karapetyan.1988@gmail.com"));
+            commandParams.setContacts(Lists.newArrayList("vlad.karapetyan.1988@gmail.com"));
 
 //            commandParams.setClientLogoutUri("https://mag.gluu/index.php/customer/account/logout/");
-            commandParams.setClientLogoutUri(Lists.newArrayList("https://gluu.loc/index.php/customer/account/logout/"));
+            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList("https://gluu.loc/index.php/customer/account/logout/"));
             commandParams.setScope(Lists.newArrayList("openid", "profile", "email"));
             commandParams.setGrantType(Lists.newArrayList("authorization_code"));
+            commandParams.setOxdRpProgrammingLanguage("java");
 
             commandParams.setResponseTypes(Lists.newArrayList("code"));
 
@@ -134,9 +140,14 @@ public class RegisterSiteTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientLogoutUri(Lists.newArrayList(logoutUri));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization", "profile"));
+        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
+        params.setGrantType(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.OXAUTH_UMA_TICKET.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setOxdRpProgrammingLanguage("java");
 
         final Command command = new Command(CommandType.REGISTER_SITE);
         command.setParamsObject(params);

@@ -3,6 +3,7 @@ package org.xdi.oxd.client;
 import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.SetupClientParams;
@@ -37,7 +38,7 @@ public class SetupClientTest {
             commandParams.setOpHost(opHost);
             commandParams.setAuthorizationRedirectUri(redirectUrl);
             commandParams.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-            commandParams.setClientLogoutUri(Lists.newArrayList(logoutUrl));
+            commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUrl));
             commandParams.setRedirectUris(Arrays.asList(redirectUrl));
             commandParams.setAcrValues(new ArrayList<String>());
             commandParams.setScope(Lists.newArrayList("openid", "profile"));
@@ -72,9 +73,13 @@ public class SetupClientTest {
         params.setOpHost(opHost);
         params.setAuthorizationRedirectUri(redirectUrl);
         params.setPostLogoutRedirectUri(postLogoutRedirectUrl);
-        params.setClientLogoutUri(Lists.newArrayList(logoutUri));
-        params.setScope(Lists.newArrayList("openid", "uma_protection", "uma_authorization", "profile"));
+        params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
+        params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
+        params.setGrantType(Lists.newArrayList(
+                GrantType.AUTHORIZATION_CODE.getValue(),
+                GrantType.CLIENT_CREDENTIALS.getValue()));
+        params.setOxdRpProgrammingLanguage("java");
 
         final Command command = new Command(CommandType.SETUP_CLIENT);
         command.setParamsObject(params);

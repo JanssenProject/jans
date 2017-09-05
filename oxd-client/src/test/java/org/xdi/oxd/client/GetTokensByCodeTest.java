@@ -1,13 +1,16 @@
 package org.xdi.oxd.client;
 
+import com.google.common.collect.Lists;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.xdi.oxd.common.params.GetAuthorizationCodeParams;
 import org.xdi.oxd.common.params.GetTokensByCodeParams;
 import org.xdi.oxd.common.response.GetAuthorizationCodeResponse;
+import org.xdi.oxd.common.response.GetClientTokenResponse;
 import org.xdi.oxd.common.response.GetTokensByCodeResponse;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 
@@ -31,10 +34,28 @@ public class GetTokensByCodeTest {
             client = new CommandClient(host, port);
 
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-            tokenByCode(client, site, redirectUrl, userId, userSecret, CoreUtils.secureRandomString());
+            GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, redirectUrl, userId, userSecret, CoreUtils.secureRandomString());
+            refreshToken(tokensResponse, client, site.getOxdId());
         } finally {
             CommandClient.closeQuietly(client);
         }
+    }
+
+    public GetClientTokenResponse refreshToken(GetTokensByCodeResponse resp, CommandClient client, String oxdId) {
+        notEmpty(resp.getRefreshToken());
+
+        // refresh token
+        final GetAccessTokenByRefreshTokenParams refreshParams = new GetAccessTokenByRefreshTokenParams();
+        refreshParams.setOxdId(oxdId);
+        refreshParams.setScope(Lists.newArrayList("openid"));
+        refreshParams.setRefreshToken(resp.getRefreshToken());
+
+        GetClientTokenResponse refreshResponse = client.send(new Command(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN).setParamsObject(refreshParams)).dataAsResponse(GetClientTokenResponse.class);
+
+        assertNotNull(refreshResponse);
+        notEmpty(refreshResponse.getAccessToken());
+        notEmpty(refreshResponse.getRefreshToken());
+        return refreshResponse;
     }
 
     public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String redirectUrl, String userId, String userSecret, String nonce) {
@@ -56,6 +77,7 @@ public class GetTokensByCodeTest {
         assertNotNull(resp);
         notEmpty(resp.getAccessToken());
         notEmpty(resp.getIdToken());
+        notEmpty(resp.getRefreshToken());
         return resp;
     }
 

@@ -16,7 +16,6 @@ import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 16/04/2017
  */
 
 public class PersistenceService {
@@ -119,7 +118,7 @@ public class PersistenceService {
             query.close();
             conn.commit();
 
-            Rp rp = RpService.parseRp(data);
+            Rp rp = MigrationService.parseRp(data);
             if (rp != null) {
                 LOG.debug("Found RP id: " + oxdId + ", RP : " + rp);
                 return rp;
@@ -171,7 +170,7 @@ public class PersistenceService {
                 String id = rs.getString("id");
                 String data = rs.getString("data");
 
-                Rp rp = RpService.parseRp(data);
+                Rp rp = MigrationService.parseRp(data);
                 if (rp != null) {
                     result.add(rp);
                 } else {
@@ -181,7 +180,7 @@ public class PersistenceService {
 
             query.close();
             conn.commit();
-            LOG.error("Loaded " + result.size() + " RPs.");
+            LOG.info("Loaded " + result.size() + " RPs.");
             return result;
         } catch (Exception e) {
             LOG.error("Failed to fetch rps. Error: " + e.getMessage(), e);

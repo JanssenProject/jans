@@ -42,6 +42,8 @@ public class OperationFactory {
                     return new ValidateOperation(command, injector);
                 case IMPLICIT_FLOW:
                     return new ImplicitFlowOperation(command, injector);
+                case GET_ACCESS_TOKEN_BY_REFRESH_TOKEN:
+                    return new GetAccessTokenByRefreshTokenOperation(command, injector);
                 case REGISTER_SITE:
                     return new RegisterSiteOperation(command, injector);
                 case GET_AUTHORIZATION_CODE:
@@ -56,10 +58,8 @@ public class OperationFactory {
                     return new RsCheckAccessOperation(command, injector);
                 case RP_GET_RPT:
                     return new RpGetRptOperation(command, injector);
-                case RP_AUTHORIZE_RPT:
-                    return new RpAuthorizeRptOperation(command, injector);
-                case RP_GET_GAT:
-                    return new RpGetGatOperation(command, injector);
+                case RP_GET_CLAIMS_GATHERING_URL:
+                    return new RpGetGetClaimsGatheringUrlOperation(command, injector);
                 case SETUP_CLIENT:
                     return new SetupClientOperation(command, injector);
                 case GET_CLIENT_TOKEN:

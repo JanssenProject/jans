@@ -1,5 +1,6 @@
 package org.xdi.oxd.common.params;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -28,6 +29,8 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private List<String> redirectUris;
     @JsonProperty(value = "response_types")
     private List<String> responseTypes;
+    @JsonProperty(value = "claims_redirect_uri")
+    private List<String> claimsRedirectUri;
 
     @JsonProperty(value = "client_id")
     private String clientId;
@@ -41,8 +44,8 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String clientTokenEndpointAuthMethod;
     @JsonProperty(value = "client_request_uris")
     private List<String> clientRequestUris;
-    @JsonProperty(value = "client_logout_uris")
-    private List<String> clientLogoutUri;
+    @JsonProperty(value = "client_frontchannel_logout_uris")
+    private List<String> clientFrontchannelLogoutUri;
     @JsonProperty(value = "client_sector_identifier_uri")
     private String clientSectorIdentifierUri;
 
@@ -60,8 +63,18 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private List<String> contacts;
     @JsonProperty(value = "trusted_client")
     private Boolean trustedClient = false;
+    @JsonProperty(value = "oxd_rp_programming_language")
+    private String oxdRpProgrammingLanguage;
 
     public RegisterSiteParams() {
+    }
+
+    public String getOxdRpProgrammingLanguage() {
+        return oxdRpProgrammingLanguage;
+    }
+
+    public void setOxdRpProgrammingLanguage(String oxdRpProgrammingLanguage) {
+        this.oxdRpProgrammingLanguage = oxdRpProgrammingLanguage;
     }
 
     public String getProtectionAccessToken() {
@@ -112,12 +125,12 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.clientSectorIdentifierUri = clientSectorIdentifierUri;
     }
 
-    public List<String> getClientLogoutUri() {
-        return clientLogoutUri;
+    public List<String> getClientFrontchannelLogoutUri() {
+        return clientFrontchannelLogoutUri;
     }
 
-    public void setClientLogoutUri(List<String> clientLogoutUri) {
-        this.clientLogoutUri = clientLogoutUri;
+    public void setClientFrontchannelLogoutUri(List<String> clientFrontchannelLogoutUri) {
+        this.clientFrontchannelLogoutUri = clientFrontchannelLogoutUri;
     }
 
     public List<String> getClientRequestUris() {
@@ -240,6 +253,14 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         this.contacts = contacts;
     }
 
+    public List<String> getClaimsRedirectUri() {
+        return claimsRedirectUri;
+    }
+
+    public void setClaimsRedirectUri(List<String> claimsRedirectUri) {
+        this.claimsRedirectUri = claimsRedirectUri;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
@@ -249,6 +270,7 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         sb.append(", opDiscoveryPath='").append(opDiscoveryPath).append('\'');
         sb.append(", authorizationRedirectUri='").append(authorizationRedirectUri).append('\'');
         sb.append(", redirectUris=").append(redirectUris);
+        sb.append(", claimsRedirectUri=").append(claimsRedirectUri);
         sb.append(", responseTypes=").append(responseTypes);
         sb.append(", clientId='").append(clientId).append('\'');
         sb.append(", clientSecret='").append(clientSecret).append('\'');
@@ -263,9 +285,10 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
         return sb.toString();
     }
 
+    @JsonIgnore
     @Override
     public String getOxdId() {
-        return "";
+        return "no";
     }
 }
 

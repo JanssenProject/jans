@@ -38,7 +38,7 @@ public class GetLogoutUrlOperation extends BaseOperation<GetLogoutUrlParams> {
 
     @Override
     public CommandResponse execute(GetLogoutUrlParams params) throws Exception {
-        final Rp site = getSite();
+        final Rp site = getRp();
 
         OpenIdConfigurationResponse discoveryResponse = getDiscoveryService().getConnectDiscoveryResponse(site);
         String endSessionEndpoint = discoveryResponse.getEndSessionEndpoint();

@@ -1,11 +1,7 @@
 package org.xdi.oxd.server.service;
 
 import com.google.inject.Inject;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Guice;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import org.xdi.oxd.Tester;
 import org.xdi.oxd.web.TestAppModule;
 

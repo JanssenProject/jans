@@ -10,37 +10,38 @@ import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseException;
-import org.xdi.oxd.common.params.GetClientTokenParams;
+import org.xdi.oxd.common.params.GetAccessTokenByRefreshTokenParams;
 import org.xdi.oxd.common.response.GetClientTokenResponse;
 import org.xdi.oxd.server.Utils;
+import org.xdi.oxd.server.service.Rp;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Set;
 
 /**
- * @author Yuriy Zabrovarnyy
- * @version 0.9, 31/03/2017
+ * @author yuriyz
  */
+public class GetAccessTokenByRefreshTokenOperation extends BaseOperation<GetAccessTokenByRefreshTokenParams> {
 
-public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(GetClientTokenOperation.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GetAccessTokenByRefreshTokenOperation.class);
 
     /**
      * Base constructor
      *
      * @param command command
      */
-    protected GetClientTokenOperation(Command command, final Injector injector) {
-        super(command, injector, GetClientTokenParams.class);
+    protected GetAccessTokenByRefreshTokenOperation(Command command, final Injector injector) {
+        super(command, injector, GetAccessTokenByRefreshTokenParams.class);
     }
 
     @Override
-    public CommandResponse execute(GetClientTokenParams params) throws Exception {
+    public CommandResponse execute(GetAccessTokenByRefreshTokenParams params) throws Exception {
         try {
-            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(params.getOpHost(), params.getOpDiscoveryPath()).getTokenEndpoint());
+
+            final Rp rp = getRp();
+            final TokenClient tokenClient = new TokenClient(getDiscoveryService().getConnectDiscoveryResponse(rp).getTokenEndpoint());
             tokenClient.setExecutor(getHttpService().getClientExecutor());
-            final TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant(scopeAsString(params), params.getClientId(), params.getClientSecret());
+            final TokenResponse tokenResponse = tokenClient.execRefreshToken(scopeAsString(params), params.getRefreshToken(), rp.getClientId(), rp.getClientSecret());
             if (tokenResponse != null) {
                 if (Util.allNotBlank(tokenResponse.getAccessToken())) {
                     GetClientTokenResponse response = new GetClientTokenResponse();
@@ -65,7 +66,7 @@ public class GetClientTokenOperation extends BaseOperation<GetClientTokenParams>
         return CommandResponse.INTERNAL_ERROR_RESPONSE;
     }
 
-    private String scopeAsString(GetClientTokenParams params) throws UnsupportedEncodingException {
+    private String scopeAsString(GetAccessTokenByRefreshTokenParams params) throws UnsupportedEncodingException {
         Set<String> scope = Sets.newHashSet();
 
         scope.add("openid");

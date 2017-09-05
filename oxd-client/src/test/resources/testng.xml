@@ -64,14 +64,14 @@
             <class name="org.xdi.oxd.client.RsProtectTest"/>
         </classes>
     </test>
+    <test name="RS - Check Access" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.RsCheckAccessTest"/>
+        </classes>
+    </test>
     <test name="RP - Get RPT" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.RpGetRptTest"/>
-        </classes>
-    </test>
-    <test name="RP - Get GAT" enabled="true">
-        <classes>
-            <class name="org.xdi.oxd.client.RpGetGatTest"/>
         </classes>
     </test>
 

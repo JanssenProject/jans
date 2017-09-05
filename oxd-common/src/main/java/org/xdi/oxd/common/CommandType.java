@@ -9,7 +9,6 @@ import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 09/08/2013
  */
 
 public enum CommandType {
@@ -25,6 +24,7 @@ public enum CommandType {
     GET_TOKENS_BY_CODE("get_tokens_by_code"),
     GET_USER_INFO("get_user_info"),
     GET_LOGOUT_URI("get_logout_uri"),
+    GET_ACCESS_TOKEN_BY_REFRESH_TOKEN("get_access_token_by_refresh_token"),
 
     VALIDATE("validate"),
     CHECK_ID_TOKEN("id_token_status"),
@@ -35,8 +35,7 @@ public enum CommandType {
     RS_PROTECT("uma_rs_protect"),
     RS_CHECK_ACCESS("uma_rs_check_access"),
     RP_GET_RPT("uma_rp_get_rpt"),
-    RP_GET_GAT("uma_rp_get_gat"),
-    RP_AUTHORIZE_RPT("uma_rp_authorize_rpt"),
+    RP_GET_CLAIMS_GATHERING_URL("uma_rp_get_claims_gathering_url"),
 
     // stateless
     AUTHORIZATION_CODE_FLOW("authorization_code_flow"),

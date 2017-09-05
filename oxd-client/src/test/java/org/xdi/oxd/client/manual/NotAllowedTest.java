@@ -13,7 +13,8 @@ import org.xdi.oxd.common.response.RsProtectResponse;
 
 import java.io.IOException;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -55,7 +56,7 @@ public class NotAllowedTest {
         commandParams.setAuthorizationRedirectUri("https://192.168.200.58:5053");
         commandParams.setScope(Lists.newArrayList("openid", "profile", "email", "address", "clientinfo", "mobile_phone", "phone", "uma_protection"));
         commandParams.setPostLogoutRedirectUri("https://192.168.200.58:5053");
-        commandParams.setClientLogoutUri(Lists.newArrayList("https://192.168.200.58:5053/logout"));
+        commandParams.setClientFrontchannelLogoutUri(Lists.newArrayList("https://192.168.200.58:5053/logout"));
         commandParams.setAcrValues(Lists.newArrayList("gplus", "basic", "duo", "u2f"));
         commandParams.setGrantType(Lists.newArrayList("authorization_code"));
 

@@ -9,7 +9,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * oxD configuration.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class Configuration {
 
@@ -23,12 +22,12 @@ public class Configuration {
     private String registerClientAppType = "web";
     //    @JsonProperty(value = "register_client_response_types")
     private String registerClientResponesType = "code";
+    @JsonProperty(value = "server_name")
+    private String serverName;
     @JsonProperty(value = "localhost_only")
     private Boolean localhostOnly;
     @JsonProperty(value = "use_client_authentication_for_pat")
     private Boolean useClientAuthenticationForPat = true;
-    @JsonProperty(value = "use_client_authentication_for_aat")
-    private Boolean useClientAuthenticationForAat = true;
     @JsonProperty(value = "trust_all_certs")
     private Boolean trustAllCerts;
     @JsonProperty(value = "trust_store_path")
@@ -53,6 +52,34 @@ public class Configuration {
     private int publicOpKeyCacheExpirationInMinutes = 60;
     @JsonProperty(value = "protect_commands_with_access_token")
     private Boolean protectCommandsWithAccessToken;
+    @JsonProperty(value = "uma2_auto_register_claims_gathering_endpoint_as_redirect_uri_of_client")
+    private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+    @JsonProperty(value = "migration_source_folder_path")
+    private String migrationSourceFolderPath;
+
+    public String getMigrationSourceFolderPath() {
+        return migrationSourceFolderPath;
+    }
+
+    public void setMigrationSourceFolderPath(String migrationSourceFolderPath) {
+        this.migrationSourceFolderPath = migrationSourceFolderPath;
+    }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public Boolean getUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient() {
+        return uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+    }
+
+    public void setUma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient(Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient) {
+        this.uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient = uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
+    }
 
     public int getStateExpirationInMinutes() {
         return stateExpirationInMinutes;
@@ -158,14 +185,6 @@ public class Configuration {
         this.useClientAuthenticationForPat = useClientAuthenticationForPat;
     }
 
-    public Boolean getUseClientAuthenticationForAat() {
-        return useClientAuthenticationForAat;
-    }
-
-    public void setUseClientAuthenticationForAat(Boolean useClientAuthenticationForAat) {
-        this.useClientAuthenticationForAat = useClientAuthenticationForAat;
-    }
-
     public Boolean getLocalhostOnly() {
         return localhostOnly;
     }
@@ -208,26 +227,28 @@ public class Configuration {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Configuration");
-        sb.append("{port=").append(port);
-        sb.append(", timeOutInSeconds=").append(timeOutInSeconds);
-        sb.append(", localhostOnly=").append(localhostOnly);
-        sb.append(", useClientAuthenticationForPat=").append(useClientAuthenticationForPat);
-        sb.append(", useClientAuthenticationForAat=").append(useClientAuthenticationForAat);
-        sb.append(", trustAllCerts=").append(trustAllCerts);
-        sb.append(", keyStorePath='").append(keyStorePath).append('\'');
-        sb.append(", keyStorePassword='").append(keyStorePassword).append('\'');
-        sb.append(", licenseId='").append(licenseId).append('\'');
-        sb.append(", publicKey='").append(publicKey).append('\'');
-        sb.append(", publicPassword='").append(publicPassword).append('\'');
-        sb.append(", licensePassword='").append(licensePassword).append('\'');
-        sb.append(", supportGoogleLogout='").append(supportGoogleLogout).append('\'');
-        sb.append(", stateExpirationInMinutes='").append(stateExpirationInMinutes).append('\'');
-        sb.append(", nonceExpirationInMinutes='").append(nonceExpirationInMinutes).append('\'');
-        sb.append(", publicOpKeyCacheExpirationInMinutes='").append(publicOpKeyCacheExpirationInMinutes).append('\'');
-        sb.append(", protectCommandsWithAccessToken='").append(protectCommandsWithAccessToken).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "Configuration{" +
+                "port=" + port +
+                ", timeOutInSeconds=" + timeOutInSeconds +
+                ", registerClientAppType='" + registerClientAppType + '\'' +
+                ", registerClientResponesType='" + registerClientResponesType + '\'' +
+                ", serverName='" + serverName + '\'' +
+                ", localhostOnly=" + localhostOnly +
+                ", useClientAuthenticationForPat=" + useClientAuthenticationForPat +
+                ", trustAllCerts=" + trustAllCerts +
+                ", keyStorePath='" + keyStorePath + '\'' +
+                ", keyStorePassword='" + keyStorePassword + '\'' +
+                ", licenseId='" + licenseId + '\'' +
+                ", publicKey='" + publicKey + '\'' +
+                ", publicPassword='" + publicPassword + '\'' +
+                ", licensePassword='" + licensePassword + '\'' +
+                ", supportGoogleLogout=" + supportGoogleLogout +
+                ", stateExpirationInMinutes=" + stateExpirationInMinutes +
+                ", nonceExpirationInMinutes=" + nonceExpirationInMinutes +
+                ", publicOpKeyCacheExpirationInMinutes=" + publicOpKeyCacheExpirationInMinutes +
+                ", protectCommandsWithAccessToken=" + protectCommandsWithAccessToken +
+                ", uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient=" + uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient +
+                ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
+                '}';
     }
 }

@@ -11,18 +11,13 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ReadResult;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 /**
  * Socket processor.
  *
  * @author Yuriy Zabrovarnyy
- * @version 0.9, 27/07/2013
  */
 public class SocketProcessor implements Runnable {
 
