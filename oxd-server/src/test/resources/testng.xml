@@ -64,7 +64,7 @@
             <class name="org.xdi.oxd.client.AuthorizationCodeFlowTest"/>
         </classes>
     </test>
-    <test name="Migration Service Test" enabled="true">
+    <test name="Migration Service Test" enabled="false">
         <classes>
             <class name="org.xdi.oxd.server.service.MigrationServiceTest"/>
         </classes>
