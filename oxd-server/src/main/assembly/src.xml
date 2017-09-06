@@ -27,7 +27,7 @@
             <outputDirectory>/conf</outputDirectory>
         </file>
         <file>
-            <source>${project.build.directory}/oxd-server-jar-with-dependencies.jar</source>
+            <source>${project.build.directory}/oxd-local-jar-with-dependencies.jar</source>
             <outputDirectory>/lib</outputDirectory>
         </file>
     </files>
