@@ -16,7 +16,7 @@ import java.util.Date;
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 5, 2016
+ * @version September 6, 2017
  */
 
 @LdapEntry
@@ -57,6 +57,8 @@ public class TokenLdap {
     private String codeChallenge;
     @LdapAttribute(name = "oxCodeChallengeMethod")
     private String codeChallengeMethod;
+    @LdapAttribute(name = "oxAuthClaims")
+    private String claims;
 
     @LdapAttribute(name = "oxAuthenticationMode")
     private String authMode;
@@ -221,6 +223,14 @@ public class TokenLdap {
 
     public void setCodeChallengeMethod(String codeChallengeMethod) {
         this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    public String getClaims() {
+        return claims;
+    }
+
+    public void setClaims(String claims) {
+        this.claims = claims;
     }
 
     public String getSessionDn() {
