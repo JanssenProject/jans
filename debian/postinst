@@ -1,2 +1,2 @@
 #!/bin/sh -e
-update-rc.d gluu-oxd-server defaults > /dev/null
+update-rc.d gluu-oxd-local defaults > /dev/null

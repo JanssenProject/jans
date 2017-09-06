@@ -1,4 +1,4 @@
-Source: gluu-oxd-server
+Source: gluu-oxd-local
 Section: java
 Priority: optional
 Maintainer: Adrian Alves <adrian@gluu.org>
@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 8.0.0),
 Standards-Version: 3.9.5
 Homepage: http://www.gluu.org
 
-Package: gluu-oxd-server
+Package: gluu-oxd-local
 Architecture: all
 Depends: ${shlibs:Depends},
  ${misc:Depends},

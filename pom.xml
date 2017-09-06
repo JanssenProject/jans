@@ -108,7 +108,7 @@
             </dependency>
             <dependency>
                 <groupId>org.xdi</groupId>
-                <artifactId>oxd-server</artifactId>
+                <artifactId>oxd-local</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
