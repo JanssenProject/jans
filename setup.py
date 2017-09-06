@@ -48,7 +48,7 @@ class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
-        self.oxVersion = '3.1.0-SNAPSHOT'
+        self.oxVersion = '3.2.0-SNAPSHOT'
         self.githubBranchName = 'master'
 
         # Used only if -w (get wars) options is given to setup.py
@@ -2102,6 +2102,25 @@ class Setup(object):
                 self.logIt("Error writing template %s" % fullPath, True)
                 self.logIt(traceback.format_exc(), True)
 
+    def render_custom_templates(self, fullPath):
+        output_dir = fullPath + '.output'
+
+        self.logIt("Rendering custom templates")
+        self.logIt("Rendering custom templates from %s to %s" % (fullPath, output_dir))
+
+        try:
+            self.run([self.cmd_mkdir, '-p', output_dir])
+        except:
+            self.logIt("Error creating output directory %s" % output_dir, True)
+            self.logIt(traceback.format_exc(), True)
+
+        try:
+            for filename in self.get_filepaths(fullPath):
+                self.renderTemplateInOut(filename, fullPath, output_dir)
+        except:
+            self.logIt("Error writing template %s" % fullPath, True)
+            self.logIt(traceback.format_exc(), True)
+
     def render_configuration_template(self):
         self.logIt("Rendering configuration templates")
 
@@ -2521,6 +2540,21 @@ class Setup(object):
             else:
                 self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
+    def import_custom_ldif_openldap(self, fullPath):
+        output_dir = fullPath + '.output'
+
+        self.logIt("Importing Custom LDIF files into OpenLDAP")
+        cmd = os.path.join(self.openldapBinFolder, 'slapadd')
+        config = os.path.join(self.openldapConfFolder, 'slapd.conf')
+        realInstallDir = os.path.realpath(self.install_dir)
+        try:
+            for ldif in self.get_filepaths(fullPath):
+                custom_ldif = output_dir + '/' + ldif
+                self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', custom_ldif])])
+        except:
+            self.logIt("Error importing custom ldif file %s" % ldif, True)
+            self.logIt(traceback.format_exc(), True)
+
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
 
@@ -2638,10 +2672,11 @@ def print_help():
     print "    -e   Download JCE 1.8 and install it"
     print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
+    print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwre", ['allow_pre_released_applications', 'allow_deprecated_applications'])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwre", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -2679,12 +2714,19 @@ def getOpts(argv, setupOptions):
             setupOptions['installOxAuthRP'] = True
         elif opt == '-p':
             setupOptions['installPassport'] = True
-        elif opt == '--allow_pre_released_applications':
+        elif opt == "-e":
+            setupOptions['installJce'] = True
+	elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
             setupOptions['allowDeprecatedApplications'] = True
-        elif opt == "-e":
-            setupOptions['installJce'] = True
+	elif opt == '--import-ldif':
+            if os.path.isdir(arg):
+                setupOptions['importLDIFDir'] = arg
+                print "Found setup LDIF import directory %s\n" % (arg)
+            else:
+                print 'The custom LDIF import directory %s does not exist. Exiting...' % (arg)
+                sys.exit(2)
     return setupOptions
 
 if __name__ == '__main__':
@@ -2765,6 +2807,15 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
+### Ganesh Working Here...
+    if 'importLDIFDir' in setupOptions.keys():
+        if os.path.isdir(installObject.openldapBaseFolder):
+            installObject.logIt("Gluu server already installed. Setup will render and import templates and exit.", True)
+            installObject.render_custom_templates(setupOptions['importLDIFDir'])
+            installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
+            installObject.logIt("Setup is exiting now after import of ldifs generated.", True)
+            sys.exit(2)
+
     # Show to properties for approval
     print '\n%s\n' % `installObject`
     proceed = "NO"
@@ -2805,6 +2856,10 @@ if __name__ == '__main__':
             installObject.start_services()
             installObject.change_rc_links()
             installObject.save_properties()
+            if 'importLDIFDir' in setupOptions.keys():
+                installObject.render_custom_templates(setupOptions['importLDIFDir'])
+                installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
+
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
