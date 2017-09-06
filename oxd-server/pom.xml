@@ -3,10 +3,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>oxd-server</artifactId>
+    <artifactId>oxd-local</artifactId>
     <packaging>jar</packaging>
     <version>3.1.0.Final</version>
-    <name>oxD Server</name>
+    <name>oxd-local</name>
     <url>http://ox.gluu.org</url>
 
     <properties>
@@ -20,7 +20,7 @@
     </parent>
 
     <build>
-        <finalName>oxd-server</finalName>
+        <finalName>oxd-local</finalName>
 
         <resources>
             <resource>
