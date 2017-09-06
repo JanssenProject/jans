@@ -14,18 +14,18 @@ override_dh_auto_build:
 #		mvn clean package -Dmaven.test.skip=true
 		mvn clean install -U -Dmaven.test.skip=true
 override_dh_auto_install:
-		mkdir -p debian/gluu-oxd-server/opt/oxd-server/conf/
-		mkdir -p debian/gluu-oxd-server/opt/oxd-server/bin/
-		mkdir -p debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp oxd-server/src/main/resources/oxd-conf.json debian/gluu-oxd-server/opt/oxd-server/conf/
-		cp oxd-server/src/main/resources/oxd-default-site-config.json debian/gluu-oxd-server/opt/oxd-server/conf/
-		cp oxd-server/src/main/resources/log4j.xml debian/gluu-oxd-server/opt/oxd-server/conf/
-		cp oxd-server/src/main/bin/oxd-start.sh debian/gluu-oxd-server/opt/oxd-server/bin/
-		cp oxd-common/target/oxd-common.jar debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/gluu-oxd-server/opt/oxd-server/lib/
-		cp lib/* debian/gluu-oxd-server/opt/oxd-server/lib/
+		mkdir -p debian/gluu-oxd-local/opt/oxd-local/conf/
+		mkdir -p debian/gluu-oxd-local/opt/oxd-local/bin/
+		mkdir -p debian/gluu-oxd-local/opt/oxd-local/lib/
+		cp oxd-local/src/main/resources/oxd-conf.json debian/gluu-oxd-local/opt/oxd-local/conf/
+		cp oxd-local/src/main/resources/oxd-default-site-config.json debian/gluu-oxd-local/opt/oxd-local/conf/
+		cp oxd-local/src/main/resources/log4j.xml debian/gluu-oxd-local/opt/oxd-local/conf/
+		cp oxd-local/src/main/bin/oxd-start.sh debian/gluu-oxd-local/opt/oxd-local/bin/
+		cp oxd-common/target/oxd-common.jar debian/gluu-oxd-local/opt/oxd-local/lib/
+		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/gluu-oxd-local/opt/oxd-local/lib/
+		cp oxd-local/target/oxd-local-jar-with-dependencies.jar debian/gluu-oxd-local/opt/oxd-local/lib/
+		cp lib/* debian/gluu-oxd-local/opt/oxd-local/lib/
 
 override_dh_fixperms:
 		dh_fixperms
-		chmod 755 debian/gluu-oxd-server/opt/oxd-server/bin/oxd-start.sh
+		chmod 755 debian/gluu-oxd-local/opt/oxd-local/bin/oxd-start.sh
