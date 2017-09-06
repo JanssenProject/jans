@@ -1,4 +1,4 @@
-Name:           gluu-oxd-server
+Name:           gluu-oxd-local
 Version:        3.0.5
 Release:        1%{?dist}
 Summary:        plugins for OpenID and UMA
@@ -29,11 +29,11 @@ install -d %{buildroot}/opt/%{name}
 install -d %{buildroot}/opt/%{name}/conf
 install -d %{buildroot}/opt/%{name}/bin
 install -d %{buildroot}/opt/%{name}/lib
-install -m 755 oxd-server/src/main/bin/oxd-start.sh %{buildroot}/opt/%{name}/bin
-install -m 644 oxd-server/src/main/resources/log4j.xml %{buildroot}/opt/%{name}/conf/
-install -m 644 oxd-server/src/main/resources/oxd-default-site-config.json %{buildroot}/opt/%{name}/conf/
-install -m 655 oxd-server/src/main/resources/oxd-conf.json %{buildroot}/opt/%{name}/conf/
-install -m 644 oxd-server/target/oxd-server-jar-with-dependencies.jar %{buildroot}/opt/%{name}/lib/
+install -m 755 oxd-local/src/main/bin/oxd-start.sh %{buildroot}/opt/%{name}/bin
+install -m 644 oxd-local/src/main/resources/log4j.xml %{buildroot}/opt/%{name}/conf/
+install -m 644 oxd-local/src/main/resources/oxd-default-site-config.json %{buildroot}/opt/%{name}/conf/
+install -m 655 oxd-local/src/main/resources/oxd-conf.json %{buildroot}/opt/%{name}/conf/
+install -m 644 oxd-local/target/oxd-local-jar-with-dependencies.jar %{buildroot}/opt/%{name}/lib/
 install -m 644 oxd-client/target/oxd-client.jar %{buildroot}/opt/%{name}/lib/
 install -m 644 oxd-common/target/oxd-common.jar %{buildroot}/opt/%{name}/lib/
 install -m 644 oxd-ping/target/oxd-ping-jar-with-dependencies.jar %{buildroot}/opt/%{name}/lib/

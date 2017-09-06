@@ -3,10 +3,10 @@
 # Source function library.
 . /etc/init.d/functions
 
-prog="oxd-server"
-script="/opt/oxd-server/bin/oxd-start.sh"
-pidfile="/var/run/oxd-server/oxd-server.pid"
-lockfile="/var/lock/subsys/oxd-server"
+prog="oxd-local"
+script="/opt/oxd-local/bin/oxd-start.sh"
+pidfile="/var/run/oxd-local/oxd-local.pid"
+lockfile="/var/lock/subsys/oxd-local"
 
 start () {
 	echo -n $"Starting $prog: "
