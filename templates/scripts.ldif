@@ -267,10 +267,24 @@ displayName: user_registration
 gluuStatus: false
 inum: %(inumOrg)s!0011!6EA0.8F0C
 oxConfigurationProperty: {"value1":"enable_user","value2":"false","description":""}
-oxLevel: 100
+oxLevel: 90
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxRevision: 1
 oxScript::%(user_registration_samplescript)s
+oxScriptType: user_registration
+programmingLanguage: python
+
+dn: inum=%(inumOrg)s!0011!6EA0.8F0D,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Sample Confirm User Registration  script
+displayName: user_confirm_registration
+gluuStatus: false
+inum: %(inumOrg)s!0011!6EA0.8F0D
+oxLevel: 100
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript::%(user_registration_confirmregistrationsamplescript)s
 oxScriptType: user_registration
 programmingLanguage: python
 
@@ -321,7 +335,10 @@ oxConfigurationProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.
 oxConfigurationProperty: {"value1":"label","value2":"Super Gluu","description":""}
 oxConfigurationProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 oxConfigurationProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
+oxConfigurationProperty: {"value1":"notification_service_mode","value2":"sns","description":""}
 oxConfigurationProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
+oxConfigurationProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.super.gluu","description":""}
+oxConfigurationProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
 oxLevel: 15
 oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
