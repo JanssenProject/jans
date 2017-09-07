@@ -22,8 +22,8 @@
         }
     },
     "sns":{
-        "access_key":"AKIAI6GLLE7NZUWO57OA",
-        "secret_key":"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",
+        "access_key":"encoded_access_key",
+        "secret_key":"encoded_secret_key",
         "region":"us-west-2"
     }
 }
