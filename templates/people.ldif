@@ -5,8 +5,22 @@ objectClass: gluuCustomPerson
 inum: %(inumOrg)s!0000!A8F2.DE1E.D7FB
 uid: admin
 givenName: Admin
+middleName: Admin
+nickname: Admin
+preferredUsername: admin
 sn: User
 userPassword:%(encoded_ldap_pw)s
 gluuStatus: active
 memberOf: inum=%(inumOrg)s!0003!60B7,ou=groups,o=%(inumOrg)s,o=gluu
 displayName: Default Admin User
+mail: admin@%(hostname)s
+emailVerified: true
+telephoneNumber: 555-1212
+phoneNumberVerified: true
+profile: https://www.facebook.com/gluufederation/
+picture: https://www.gluu.org/wp-content/themes/gluu/images/gl.png
+website: https://www.gluu.org/
+gender: male
+birthdate: 20170907123010.485Z
+zoneinfo: America/Los_Angeles
+c: US
