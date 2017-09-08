@@ -4817,7 +4817,7 @@
                 "oxResource",
                 "oxRevision",
                 "oxType",
-                "oxUrl"
+                "description"
             ],
             "must": [
                 "objectclass"
@@ -4840,11 +4840,9 @@
                 "oxFaviconImage",
                 "oxIconUrl",
                 "oxId",
-                "oxPolicyRule",
                 "oxPolicyScriptDn",
                 "oxRevision",
-                "oxType",
-                "oxUrl"
+                "description"
             ],
             "must": [
                 "objectclass"
@@ -4866,7 +4864,8 @@
                 "oxConfigurationCode",
                 "oxResourceSetId",
                 "oxAttributes",
-                "oxTicket"
+                "oxTicket",
+                "oxStatus"
             ],
             "must": [
                 "objectclass"
@@ -4935,7 +4934,6 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxAmHost",
                 "oxAuthAuthenticationTime",
                 "oxAuthClientId",
                 "oxAuthCreation",
