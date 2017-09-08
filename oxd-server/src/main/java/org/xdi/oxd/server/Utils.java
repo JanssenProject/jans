@@ -56,7 +56,11 @@ public class Utils {
         if (list == null || list.isEmpty()) {
             return "";
         }
-        return URLEncoder.encode(Joiner.on(" ").join(list), "UTF-8");
+        return encode(Joiner.on(" ").join(list));
+    }
+
+    public static String encode(String str) throws UnsupportedEncodingException {
+        return URLEncoder.encode(str, "UTF-8");
     }
 
     public static int hoursDiff(Date earlierDate, Date laterDate) {
