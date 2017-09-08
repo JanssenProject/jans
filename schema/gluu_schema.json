@@ -4147,6 +4147,7 @@
                 "oxEnrollmentCode",
                 "gluuIMAPData",
                 "oxPPID",
+                "oxGuid",
                 "userRandomKey"
             ],
             "must": [
