@@ -2887,3 +2887,10 @@ objectclass ( oxObjectClass:49 NAME 'oxShibbolethCASProtocolConfiguration'
 	MUST ( objectclass )
 	MAY ( ou $ friendlyName $ uniqueIdentifier $ inum $ oxConfApplication $ oxRevision )
 	X-ORIGIN 'Gluu created objectclass' )
+
+objectclass ( oxObjectClass:50 NAME 'oxAuthUmaPCT'
+	SUP ( top )
+	STRUCTURAL
+	MUST ( objectclass )
+	MAY ( oxAuthClientId $ oxAuthCreation $ oxAuthExpiration $ oxAuthTokenCode $ oxClaimValues )
+	X-ORIGIN 'Gluu created objectclass' )
