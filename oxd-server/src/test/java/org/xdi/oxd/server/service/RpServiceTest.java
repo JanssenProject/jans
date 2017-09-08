@@ -3,6 +3,7 @@ package org.xdi.oxd.server.service;
 import com.google.inject.Inject;
 import org.testng.annotations.*;
 import org.xdi.oxd.Tester;
+import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.web.TestAppModule;
 
 import java.io.IOException;

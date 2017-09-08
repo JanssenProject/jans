@@ -16,7 +16,11 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.server.guice.GuiceModule;
-import org.xdi.oxd.server.service.*;
+import org.xdi.oxd.server.persistence.PersistenceService;
+import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.MigrationService;
+import org.xdi.oxd.server.service.RpService;
+import org.xdi.oxd.server.service.SocketService;
 
 import java.io.File;
 import java.io.InputStream;

@@ -6,7 +6,7 @@ package org.xdi.oxd.server;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxd.common.CoreUtils;
-import org.xdi.oxd.server.service.PersistenceService;
+import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.server.service.RpService;
 
 /**
