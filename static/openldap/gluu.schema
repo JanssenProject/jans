@@ -2531,15 +2531,29 @@ attributetype ( oxAttribute:369 NAME 'oxRefreshTokenLifetime'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( oxAttribute:370 NAME 'oxAuthPermissionGranted'
+attributetype ( oxAttribute:370 NAME 'oxTrustConfAttributeResolver'
+	DESC 'oxTrust Attribute Resolver '
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu created attribute' )
+
+attributetype ( oxAttribute:371 NAME 'oxAuthPermissionGranted'
 	DESC 'oxAuth Permission Granted'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
-attributetype ( oxAttribute:371 NAME 'oxNickName'
+attributetype ( oxAttribute:372 NAME 'oxNickName'
 	DESC 'oxNickName'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu created attribute' )
+
+attributetype ( oxAttribute:373 NAME 'oxDeviceNotificationConf'
+	DESC 'Extended push notification configuration'
 	EQUALITY caseIgnoreMatch
 	SUBSTR caseIgnoreSubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -2556,7 +2570,7 @@ objectclass ( oxObjectClass:2 NAME 'gluuPerson'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID $ userRandomKey )
+	MAY ( associatedClient $ c $ displayName $ givenName $ gluuManagedOrganizations $ gluuOptOuts $ gluuStatus $ gluuWhitePagesListed $ iname $ inum $ mail $ gluuSLAManager $ memberOf $ o $ oxAuthPersistentJWT $ oxCreationTimestamp $ oxExternalUid $ oxLastLogonTime $ oxTrustActive $ oxTrustAddresses $ oxTrustEmail $ oxTrustEntitlements $ oxTrustExternalId $ oxTrustImsValue $ oxTrustMetaCreated $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion $ oxTrustNameFormatted $ oxTrustPhoneValue $ oxTrustPhotos $ oxTrustProfileURL $ oxTrustRole $ oxTrustTitle $ oxTrustUserType $ oxTrusthonorificPrefix $ oxTrusthonorificSuffix $ oxTrustx509Certificate $ oxPasswordExpirationDate $ persistentId $ middleName $ nickname $ preferredUsername $ profile $ picture $ website $ emailVerified $ gender $ birthdate $ zoneinfo $ locale $ phoneNumberVerified $ address $ updatedAt $ preferredLanguage $ role $ secretAnswer $ secretQuestion $ seeAlso $ sn $ cn $ transientId $ uid $ userPassword $ st $ street $ l $ oxCountInvalidLogin $ oxEnrollmentCode $ gluuIMAPData $ oxPPID $ userRandomKey $ oxGuid)
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:3 NAME 'gluuGroup'
@@ -2689,7 +2703,7 @@ objectclass ( oxObjectClass:21 NAME 'oxTrustConfiguration'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson )
+	MAY ( ou $ oxTrustConfApplication $ oxTrustConfCacheRefresh $ oxRevision $ oxTrustConfImportPerson $ oxTrustConfAttributeResolver )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:22 NAME 'oxApplicationConfiguration'
@@ -2808,7 +2822,7 @@ objectclass ( oxObjectClass:38 NAME 'oxDeviceRegistration'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxId $ displayName $ description $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxNickName $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion )
+	MAY ( oxId $ displayName $ description $ oxDeviceKeyHandle $ oxDeviceHashCode $ oxApplication $ oxDeviceRegistrationConf $ oxDeviceNotificationConf $ oxNickName $ oxDeviceData $ oxCounter $ oxStatus $ creationDate $ oxLastAccessTime $ oxTrustMetaLastModified $ oxTrustMetaLocation $ oxTrustMetaVersion )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:39 NAME 'oxU2fRequest'

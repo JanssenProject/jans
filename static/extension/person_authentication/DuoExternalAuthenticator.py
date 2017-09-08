@@ -86,14 +86,14 @@ class PersonAuthentication(PersonAuthenticationType):
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         identity = CdiUtil.bean(Identity)
-        credentials = identity.getCredentials()
-
-        user_name = credentials.getUsername()
 
         if (step == 1):
             print "Duo. Authenticate for step 1"
 
+            credentials = identity.getCredentials()
+            user_name = credentials.getUsername()
             user_password = credentials.getPassword()
+
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
                 userService = CdiUtil.bean(UserService)
@@ -118,6 +118,12 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif (step == 2):
             print "Duo. Authenticate for step 2"
+            user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                print "Duo. Authenticate for step 2. Failed to determine user name"
+                return False
+
+            user_name = user.getUserId()
 
             sig_response_array = requestParameters.get("sig_response")
             if ArrayHelper.isEmpty(sig_response_array):
@@ -135,7 +141,6 @@ class PersonAuthentication(PersonAuthenticationType):
             if (not StringHelper.equals(user_name, authenticated_username)):
                 return False
 
-            user = authenticationService.getAuthenticatedUser()
             self.processAuditGroup(user)
 
             return True

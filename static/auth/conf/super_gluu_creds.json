@@ -3,6 +3,10 @@
         "gcm":{
             "enabled":false,
             "api_key":""
+        },
+        "sns":{
+            "enabled":true,
+            "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/GCM/super_gluu_gcm"
         }
     },
     "ios":{
@@ -11,6 +15,15 @@
             "p12_file_path":"/etc/certs/SuperGluu-NotificationCertificat.p12",
             "p12_password":"password",
             "production":false
+        },
+        "sns":{
+            "enabled":true,
+            "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/APNS/super_gluu_apns"
         }
+    },
+    "sns":{
+        "access_key":"access_key",
+        "secret_key":"secret_key",
+        "region":"us-west-2"
     }
 }
