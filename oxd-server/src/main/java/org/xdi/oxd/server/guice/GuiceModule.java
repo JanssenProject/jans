@@ -9,6 +9,8 @@ import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.license.LicenseService;
 import org.xdi.oxd.server.persistence.H2PersistenceProvider;
 import org.xdi.oxd.server.persistence.PersistenceProvider;
+import org.xdi.oxd.server.persistence.PersistenceService;
+import org.xdi.oxd.server.persistence.PersistenceServiceImpl;
 import org.xdi.oxd.server.service.*;
 
 /**
@@ -27,7 +29,7 @@ public class GuiceModule extends AbstractModule {
         bind(RpService.class).in(Singleton.class);
         bind(HttpService.class).in(Singleton.class);
         bind(PersistenceProvider.class).to(H2PersistenceProvider.class).in(Singleton.class);
-        bind(PersistenceService.class).in(Singleton.class);
+        bind(PersistenceService.class).to(PersistenceServiceImpl.class).in(Singleton.class);
         bind(MigrationService.class).in(Singleton.class);
         bind(DiscoveryService.class).in(Singleton.class);
         bind(ValidationService.class).in(Singleton.class);

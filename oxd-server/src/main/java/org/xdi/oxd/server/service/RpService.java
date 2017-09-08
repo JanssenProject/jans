@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.oxd.server.persistence.PersistenceService;
 
 import java.io.IOException;
 import java.util.Map;
