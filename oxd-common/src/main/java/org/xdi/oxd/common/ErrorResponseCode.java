@@ -31,7 +31,7 @@ public enum ErrorResponseCode {
     INVALID_ID_TOKEN_EXPIRED("invalid_id_token_expired", "Invalid id_token. id_token expired."),
     INVALID_ID_TOKEN_BAD_ISSUER("invalid_id_token_bad_issuer", "Invalid id_token. Bad issuer."),
     INVALID_ID_TOKEN_BAD_SIGNATURE("invalid_id_token_bad_signature", "Invalid id_token. Bad signature."),
-    INVALID_ID_TOKEN_UNKNOWN("invalid_id_token_unknown", "Invalid id_token, validation fail due to exception, please check oxd-local.log for details."),
+    INVALID_ID_TOKEN_UNKNOWN("invalid_id_token_unknown", "Invalid id_token, validation fail due to exception, please check oxd-server.log for details."),
     INVALID_ACCESS_TOKEN_BAD_HASH("invalid_access_token_bad_hash", "access_token is invalid. Hash of access_token does not match hash from id_token (at_hash)."),
     INVALID_AUTHORIZATION_CODE_BAD_HASH("invalid_authorization_code_bad_hash", "Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash)."),
     INVALID_REGISTRATION_CLIENT_URL("invalid_registration_client_url", "Registration client URL is invalid. Please check registration_client_url response parameter from IDP (http://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse)."),

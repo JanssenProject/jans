@@ -1,5 +1,5 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: gluu-oxd-local
+Upstream-Name: gluu-oxd-server
 Source: http://www.gluu.org
 
 Files: *
