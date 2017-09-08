@@ -1,11 +1,13 @@
-package org.xdi.oxd.server.service;
+package org.xdi.oxd.server.persistence;
 
 import com.google.inject.Inject;
 import org.h2.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.rs.protect.Jackson;
-import org.xdi.oxd.server.persistence.PersistenceProvider;
+import org.xdi.oxd.server.service.ConfigurationService;
+import org.xdi.oxd.server.service.MigrationService;
+import org.xdi.oxd.server.service.Rp;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,15 +20,17 @@ import java.util.Set;
  * @author Yuriy Zabrovarnyy
  */
 
-public class PersistenceService {
+public class PersistenceServiceImpl implements PersistenceService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PersistenceService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PersistenceServiceImpl.class);
 
+    private ConfigurationService configurationService;
     private PersistenceProvider provider;
 
     @Inject
-    public PersistenceService(PersistenceProvider provider) {
+    public PersistenceServiceImpl(PersistenceProvider provider, ConfigurationService configurationService) {
         this.provider = provider;
+        this.configurationService = configurationService;
     }
 
     public void create() {
