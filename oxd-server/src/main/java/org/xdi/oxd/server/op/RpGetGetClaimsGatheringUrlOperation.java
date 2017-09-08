@@ -33,7 +33,7 @@ public class RpGetGetClaimsGatheringUrlOperation extends BaseOperation<RpGetClai
         final String state = getStateService().generateState();
 
         String url = metadata.getClaimsInteractionEndpoint() +
-                "?client_id" + rp.getClientId() +
+                "?client_id=" + rp.getClientId() +
                 "&ticket=" + params.getTicket() +
                 "&claims_redirect_uri=" + params.getClaimsRedirectUri() +
                 "&state=" + state;
