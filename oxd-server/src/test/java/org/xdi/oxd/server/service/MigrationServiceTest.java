@@ -6,6 +6,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 import org.xdi.oxd.Tester;
+import org.xdi.oxd.server.persistence.PersistenceService;
 import org.xdi.oxd.web.TestAppModule;
 
 import java.io.File;
