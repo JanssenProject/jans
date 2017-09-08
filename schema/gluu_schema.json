@@ -5420,6 +5420,27 @@
                 "top"
             ],
             "x_origin": "Gluu created objectclass"
+        },
+        {
+            "kind":"STRUCTURAL",
+            "may":[
+                "oxAuthClientId",
+                "oxAuthCreation",
+                "oxAuthExpiration",
+                "oxAuthTokenCode",
+                "oxClaimValues"
+            ],
+            "must":[
+                "objectclass"
+            ],
+            "names":[
+                "oxAuthUmaPCT"
+            ],
+            "oid":"oxObjectClass:50",
+            "sup":[
+                "top"
+            ],
+            "x_origin":"Gluu created objectclass"
         }
     ],
     "oidMacros": {
