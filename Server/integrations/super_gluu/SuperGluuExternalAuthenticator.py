@@ -417,7 +417,13 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.oneStep:
                 return "/login.xhtml"
             else:
-                return "/auth/super-gluu/login.xhtml"
+            	identity = CdiUtil.bean(Identity)
+				authmethod = identity.getWorkingParameter("super_gluu_auth_method")
+				print "Super-Gluu. authmethod" ,authmethod
+				if authmethod == "enroll":
+					return "/auth/super-gluu/enroll.xhtml"
+				else :
+                	return "/auth/super-gluu/login.xhtml"
 
         return ""
 
