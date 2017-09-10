@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>gluu</title>
+
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="assets/css/style.css"/>
+		<link rel="stylesheet" href="assets/css/responsive-media.css"/>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+	<style>
+	   
+	</style>
+  </head>
+  <body>
+    <header class="bs-docs-nav navbar navbar-static-top" id="top"> 
+		<div class="container">
+			<div class="navbar-header"> 
+				<a target="_blank"  class="navbar-brand"><img src="assets/img/logo.png" alt="logo"/></a> </div>
+			</div>
+		</div>
+	</header>
+	
+	<div class="bs-docs-section">
+		<div class="container">
+		  <div class="row">
+		  	<div class="col-md-12">
+		  		<div class="mid-wrapper">
+		  			<span class="icon_01">
+		  			  <img src="assets/img/tube_1.jpg" alt="">
+		  			</span>
+                   <p>Another device is already registered for this account. <br>
+Please re-authenticate using your registered device.</p>
+
+
+		  		</div>
+
+		  		<div class="button-wrap1">
+		  		
+		  			<a href="https://www.google.com/" target="_blank" class="sigin-a">Sign in again</a>
+		  			<span class="contactadmin">
+		  				If you no longer control the device you registered,<br>
+ <a href="#">contact your Gluu server admin</a> to enroll a new device
+		  			</span>
+		  		</div>
+
+		  	</div>
+
+		  </div>
+
+		</div>
+	</div>
+	
+	<div class="foot_bor">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+				  <div class="padding_spc">
+					<p>Gluu, Inc, | <a target="_blank" href="https://www.google.com/">Use subject to MIT LICENSE</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script>
+		var start = new Date();
+		var maxTime = 835000;
+		var timeoutVal = Math.floor(maxTime/100);
+		animateUpdate();
+
+		function updateProgress(percentage) {
+			$('#pbar_innerdiv').css("width", percentage + "30%");
+			$('#pbar_innertext').text(percentage + "%");
+		}
+
+		function animateUpdate() {
+			var now = new Date();
+			var timeDiff = now.getTime() - start.getTime();
+			var perc = Math.round((timeDiff/maxTime)*100);
+			console.log(perc);
+			  if (perc <= 100) {
+			   updateProgress(perc);
+			   setTimeout(animateUpdate, timeoutVal);
+			  }
+		}
+	</script>
+  </body>
+</html>
