@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-"""export30.py - A script to export all the data from Gluu Server 3.0.x
+"""export3031.py - A script to export all the data from Gluu Server 3.0.x
 
-Usage: python export30.py
+Usage: python export3031.py
 
-Running this creates a folder named `backup_30` which contains all the data
+Running this creates a folder named `backup_3031` which contains all the data
 needed for migration of Gluu Server to a higher version. This script backs up
 the following data:
     1. LDAP data
@@ -234,7 +234,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
 class Exporter(object):
     def __init__(self):
-        self.backupDir = 'backup_30'
+        self.backupDir = 'backup_3031'
         self.foldersToBackup = ['/etc/certs',
                                 '/etc/gluu/conf',
                                 '/opt/shibboleth-idp/conf',
@@ -476,7 +476,7 @@ class Exporter(object):
 
 if __name__ == "__main__":
     if len(sys.argv) != 1:
-        print ("Usage: python export30.py")
+        print ("Usage: python export3031.py")
     else:
         exporter = Exporter()
         exporter.export()
