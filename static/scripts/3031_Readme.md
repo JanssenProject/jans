@@ -62,13 +62,13 @@ The export script will generate a directory called `backup_3031` which will have
 Stop the current version of the gluu-server.
 
 ```
-# service gluu-server-2.4.x stop
+# service gluu-server-3.0.x stop
 ```
 
 Review the [installation docs](../installation-guide/install.md) to install the Gluu Server using the package manager. Once the package manager has installed version `3.0.2`, then execute the following commands:
 
 ```
-# cp -r /opt/gluu-server-2.4.x/root/backup_3031/ /opt/gluu-server-3.1.0/root/
+# cp -r /opt/gluu-server-3.0.x/root/backup_3031/ /opt/gluu-server-3.1.0/root/
 
 # service gluu-server-3.1.0 start
 
