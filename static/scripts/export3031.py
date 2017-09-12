@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-"""export30.py - A script to export all the data from Gluu Server 3.0.x
+"""export3031.py - A script to export all the data from Gluu Server 3.0.x
 
-Usage: python export30.py
+Usage: python export3031.py
 
-Running this creates a folder named `backup_30` which contains all the data
+Running this creates a folder named `backup_3031` which contains all the data
 needed for migration of Gluu Server to a higher version. This script backs up
 the following data:
     1. LDAP data
@@ -126,7 +126,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["code","token","id_token"]'))
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["id_token"]'))
 
-    printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
+    # printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
     # print (printOxAuthConfDynamic)
 
 
@@ -216,14 +216,14 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
     dataOxAuthConfErrors['uma'].append(uma11)
 
-    printOxAuthConfErrors = json.dumps(dataOxAuthConfErrors, indent=4, sort_keys=True)
-    print (printOxAuthConfErrors)
+    # printOxAuthConfErrors = json.dumps(dataOxAuthConfErrors, indent=4, sort_keys=True)
+    # print (printOxAuthConfErrors)
 
     base64Types = ["oxAuthConfStatic", "oxAuthConfWebKeys", "oxAuthConfErrors", "oxAuthConfDynamic"]
 
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
     newfile = oxAuthPath.replace('/oxauth_config.ldif', '/oxauth_config_new.ldif')
-    print (newfile)
+    # print (newfile)
     f = open(newfile, 'w')
     f.write(out)
     f.close()
@@ -234,7 +234,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
 class Exporter(object):
     def __init__(self):
-        self.backupDir = 'backup_30'
+        self.backupDir = 'backup_3031'
         self.foldersToBackup = ['/etc/certs',
                                 '/etc/gluu/conf',
                                 '/opt/shibboleth-idp/conf',
@@ -476,7 +476,7 @@ class Exporter(object):
 
 if __name__ == "__main__":
     if len(sys.argv) != 1:
-        print ("Usage: python export30.py")
+        print ("Usage: python export3031.py")
     else:
         exporter = Exporter()
         exporter.export()
