@@ -289,6 +289,7 @@ inum: %(inumOrg)s!5214.40D1
 owner: inum=%(inumOrg)s!0000!A8F2.DE1E.D7FB,ou=people,o=%(inumOrg)s,o=gluu
 oxRevision: 0
 oxId: http://photoz.example.com/dev/scopes/view
+oxPolicyScriptDn: inum=%(inumOrg)s!0011!2DAF.F995,ou=scripts,o=@!1736.179E.AA60.16B2!0001!8F7C.B9AB,o=gluu
 
 dn: inum=%(inumOrg)s!B6EA.B301,ou=scopes,ou=uma,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthUmaScopeDescription
