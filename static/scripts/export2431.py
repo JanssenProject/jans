@@ -3,7 +3,7 @@
 
 Usage: python export24.py
 
-Running this creates a folder named `backup_30` which contains all the data
+Running this creates a folder named `backup_24` which contains all the data
 needed for migration of Gluu Server to a higher version. This script backs up
 the following data:
     1. LDAP data
@@ -17,6 +17,7 @@ of appropriate version to migrate to that version.
 Read complete migration procedure at:
     https://www.gluu.org/docs/deployment/upgrading/
 """
+
 import getpass
 import json
 import logging
@@ -37,8 +38,8 @@ class MyLDIF(LDIFParser):
         self.targetAttr = None
         self.targetEntry = None
         self.DNs = []
-        self.lastDN = None
         self.lastEntry = None
+        self.lastDN = None
 
     def getResults(self):
         return (self.targetDN, self.targetAttr)
@@ -126,7 +127,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["code","token","id_token"]'))
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["id_token"]'))
 
-    printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
+    # printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
     # print (printOxAuthConfDynamic)
 
 
