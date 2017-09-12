@@ -126,7 +126,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["code","token","id_token"]'))
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["id_token"]'))
 
-    printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
+    # printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
     # print (printOxAuthConfDynamic)
 
 
@@ -216,14 +216,14 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
     dataOxAuthConfErrors['uma'].append(uma11)
 
-    printOxAuthConfErrors = json.dumps(dataOxAuthConfErrors, indent=4, sort_keys=True)
-    print (printOxAuthConfErrors)
+    # printOxAuthConfErrors = json.dumps(dataOxAuthConfErrors, indent=4, sort_keys=True)
+    # print (printOxAuthConfErrors)
 
     base64Types = ["oxAuthConfStatic", "oxAuthConfWebKeys", "oxAuthConfErrors", "oxAuthConfDynamic"]
 
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
     newfile = oxAuthPath.replace('/oxauth_config.ldif', '/oxauth_config_new.ldif')
-    print (newfile)
+    # print (newfile)
     f = open(newfile, 'w')
     f.write(out)
     f.close()
