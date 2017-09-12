@@ -55,13 +55,13 @@ public class RedisProvider extends AbstractCacheProvider<ShardedJedisPool> {
     }
 
     private List<JedisShardInfo> shards(String servers) {
-        final String[] serverWithPorts = StringUtils.split(servers, " ");
+        final String[] serverWithPorts = StringUtils.split(servers.trim(), ",");
 
         List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>();
         for (String serverWithPort : serverWithPorts) {
-            final String[] split = serverWithPort.split(":");
+            final String[] split = serverWithPort.trim().split(":");
             String host = split[0];
-            int port = Integer.parseInt(split[1]);
+            int port = Integer.parseInt(split[1].trim());
             shards.add(new JedisShardInfo(host, port));
         }
         return shards;
