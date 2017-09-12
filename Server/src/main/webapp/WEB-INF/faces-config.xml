@@ -20,5 +20,10 @@
             <var>msgs</var>
         </resource-bundle>
     </application>
+    <factory>
+        <exception-handler-factory>
+            org.xdi.oxauth.exception.GlobalExceptionHandlerFactory
+        </exception-handler-factory>
+    </factory>
 
 </faces-config>
