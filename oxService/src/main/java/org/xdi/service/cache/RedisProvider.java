@@ -1,22 +1,24 @@
 package org.xdi.service.cache;
 
-import java.io.Serializable;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.ShardedJedis;
+import redis.clients.jedis.ShardedJedisPool;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-
-import org.apache.commons.lang.SerializationUtils;
-import org.slf4j.Logger;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author yuriyz on 02/23/2017.
  */
-public class RedisProvider extends AbstractCacheProvider<JedisPool> {
+public class RedisProvider extends AbstractCacheProvider<ShardedJedisPool> {
 
 	@Inject
     private Logger log;
@@ -24,7 +26,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
     @Inject
     private CacheConfiguration cacheConfiguration;
 
-    private JedisPool pool;
+    private ShardedJedisPool pool;
     private RedisConfiguration redisConfiguration;
 
     public RedisProvider() {}
@@ -35,20 +37,34 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
     }
 
     public void create() {
-        log.debug("Starting RedisProvider ...");
-
         try {
+            log.debug("Starting RedisProvider ... configuration:" + redisConfiguration);
+
             JedisPoolConfig poolConfig = new JedisPoolConfig();
             poolConfig.setMaxTotal(1000);
             poolConfig.setMinIdle(2);
 
-            pool = new JedisPool(poolConfig, redisConfiguration.getHost(), redisConfiguration.getPort());
+            pool = new ShardedJedisPool(poolConfig, shards(redisConfiguration.getServers()));
 
             testConnection();
             log.debug("RedisProvider started.");
         } catch (Exception e) {
+            log.error("Failed to start RedisProvider.");
             throw new IllegalStateException("Error starting RedisProvider", e);
         }
+    }
+
+    private List<JedisShardInfo> shards(String servers) {
+        final String[] serverWithPorts = StringUtils.split(servers, " ");
+
+        List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>();
+        for (String serverWithPort : serverWithPorts) {
+            final String[] split = serverWithPort.split(":");
+            String host = split[0];
+            int port = Integer.parseInt(split[1]);
+            shards.add(new JedisShardInfo(host, port));
+        }
+        return shards;
     }
 
     private void testConnection() {
@@ -68,13 +84,13 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
     }
 
     @Override
-    public JedisPool getDelegate() {
+    public ShardedJedisPool getDelegate() {
         return pool;
     }
 
     @Override
     public Object get(String region, String key) {
-        Jedis jedis = pool.getResource();
+        ShardedJedis jedis = pool.getResource();
         try {
             byte[] value = jedis.get(key.getBytes());
             Object deserialized = null;
@@ -89,7 +105,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
 
     @Override // it is so weird but we use as workaround "region" field to pass "expiration" for put operation
     public void put(String expirationInSeconds, String key, Object object) {
-        Jedis jedis = pool.getResource();
+        ShardedJedis jedis = pool.getResource();
         try {
             String status = jedis.setex(key.getBytes(),
                     putExpiration(expirationInSeconds),
@@ -110,7 +126,7 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
 
     @Override
     public void remove(String region, String key) {
-        Jedis jedis = pool.getResource();
+        ShardedJedis jedis = pool.getResource();
         try {
             Long entriesRemoved = jedis.del(key.getBytes());
             log.trace("remove - key: " + key + ", entriesRemoved: " + entriesRemoved);
@@ -121,24 +137,27 @@ public class RedisProvider extends AbstractCacheProvider<JedisPool> {
 
     @Override
     public void clear() {
-        Jedis jedis = pool.getResource();
-        try {
-            jedis.flushAll();
-            log.trace("clear");
-        } finally {
-            jedis.close();
-        }
+//        ShardedJedis jedis = pool.getResource();
+//        try {
+            //jedis.flushAll();
+            log.trace("clear not implemented");
+//        } finally {
+//            jedis.close();
+//        }
     }
 
 //    public static void main(String[] args) throws InterruptedException {
 //        RedisConfiguration config = new RedisConfiguration();
+//        config.setServers("localhost:6379 localhost:6379");
 //
 //        RedisProvider cache = null;
 //        try {
-//            cache = new RedisProvider(config);
+//            cache = new RedisProvider();
+//            cache.log = NOPLogger.NOP_LOGGER;
+//            cache.redisConfiguration = config;
 //            cache.create();
 //
-//            cache.put(Integer.toString(3), "myKey", CacheProviderType.IN_MEMORY);
+//            cache.put(Integer.toString(3), "myKey", "valueInRedis");
 //
 //            System.out.println(cache.get("myKey"));
 //

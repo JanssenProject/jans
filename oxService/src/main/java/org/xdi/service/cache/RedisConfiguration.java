@@ -1,8 +1,8 @@
 package org.xdi.service.cache;
 
-import java.io.Serializable;
-
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import java.io.Serializable;
 
 /**
  * @author yuriyz on 02/23/2017.
@@ -12,26 +12,16 @@ public class RedisConfiguration implements Serializable {
 
 	private static final long serialVersionUID = 5513197227832695470L;
 
-	private String host = "localhost";
-
-    private int port = 6379;
+	private String servers = "localhost:6379"; // server1:11211 server2:11211
 
     private int defaultPutExpiration = 60; // in seconds
 
-    public String getHost() {
-        return host;
+    public String getServers() {
+        return servers;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
+    public void setServers(String servers) {
+        this.servers = servers;
     }
 
     public int getDefaultPutExpiration() {
@@ -45,8 +35,7 @@ public class RedisConfiguration implements Serializable {
     @Override
     public String toString() {
         return "RedisConfiguration{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
+                "servers='" + servers + '\'' +
                 ", defaultPutExpiration=" + defaultPutExpiration +
                 '}';
     }
