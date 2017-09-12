@@ -31,7 +31,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version July 18, 2017
+ * @version September 11, 2017
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -999,9 +999,12 @@ public class RegisterRequest extends BaseRequest {
         if (requestObject.has(RESPONSE_TYPES.toString())) {
             JSONArray responseTypesJsonArray = requestObject.getJSONArray(RESPONSE_TYPES.toString());
             for (int i = 0; i < responseTypesJsonArray.length(); i++) {
-                ResponseType rt = ResponseType.fromString(responseTypesJsonArray.getString(i));
-                if (rt != null) {
-                    responseTypes.add(rt);
+                String[] rts = responseTypesJsonArray.getString(i).split(" ");
+                for (int j = 0; j < rts.length; j++) {
+                    ResponseType rt = ResponseType.fromString(rts[j]);
+                    if (rt != null) {
+                        responseTypes.add(rt);
+                    }
                 }
             }
         }
