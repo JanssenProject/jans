@@ -48,6 +48,7 @@ class MyLDIF(LDIFParser):
         self.DNs = []
         self.lastDN = None
         self.lastEntry = None
+        self.entries = []
 
     def getResults(self):
         return (self.targetDN, self.targetAttr)
@@ -506,7 +507,6 @@ class Migration(object):
         parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
         atr = parser.parse()
         base64Types = ["oxScript"]
-        print (open(self.currentData, 'rb'))
         for idx, val in enumerate(parser.entries):
             if 'displayName' in val:
                 if val['displayName'][0] == 'uma_rpt_policy':
@@ -535,10 +535,10 @@ class Migration(object):
             logging.debug(traceback.format_exc())
 
         output = self.getOutput([self.slapadd, '-c', '-b', 'o=gluu', '-f',
-                                self.slapdConf, '-l', self.o_gluu])
+                                 self.slapdConf, '-l', self.o_gluu])
         logging.debug(output)
         output = self.getOutput([self.slapadd, '-c', '-b', 'o=site', '-f',
-                                self.slapdConf, '-l', self.o_site])
+                                 self.slapdConf, '-l', self.o_site])
         logging.debug(output)
 
     def importDataIntoOpenDJ(self):
@@ -584,7 +584,7 @@ class Migration(object):
             output = self.getOutput([self.service, 'opendj', 'stop'])
 
         if output.find("Directory Server is now stopped") > 0 or \
-                output.strip() == "failed":
+                        output.strip() == "failed":
             logging.info("Directory Server is now stopped")
         else:
             logging.error(
@@ -600,7 +600,7 @@ class Migration(object):
             output = self.getOutput(['systemctl', 'is-active', 'opendj'])
         output = self.getOutput([self.service, 'opendj', 'start'])
         if output.find("Directory Server has started successfully") > 0 or \
-                output.strip() == "active":
+                        output.strip() == "active":
             logging.info("Directory Server has started successfully")
         else:
             logging.error("OpenDJ did not start properly. Check "
