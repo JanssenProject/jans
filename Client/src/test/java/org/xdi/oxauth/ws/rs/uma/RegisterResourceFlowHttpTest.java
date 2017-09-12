@@ -70,30 +70,29 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     /**
      * Add resource
      */
-    @Test(dependsOnMethods = {"init"})
+    @Test
     public void addResource() throws Exception {
         showTitle("addResource");
         registerResource(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
     }
 
     public String registerResource(List<String> scopes) throws Exception {
-        UmaResourceResponse resourceStatus = null;
         try {
             UmaResource resource = new UmaResource();
             resource.setName("Photo Album");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(scopes);
+            resource.setType("myType");
 
-            resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
+            UmaResourceResponse resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
+            UmaTestUtil.assert_(resourceStatus);
+
+            this.resourceId = resourceStatus.getId();
+            return this.resourceId;
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
-
-        UmaTestUtil.assert_(resourceStatus);
-
-        this.resourceId = resourceStatus.getId();
-        return this.resourceId;
     }
 
     /**
@@ -110,6 +109,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setName("Photo Album 2");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+            resource.setType("myType");
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
         } catch (ClientResponseFailure ex) {
@@ -129,20 +129,18 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void modifyNotExistingResource() throws Exception {
         showTitle("modifyNotExistingResource");
 
-        UmaResourceResponse resourceStatus = null;
         try {
             UmaResource resource = new UmaResource();
             resource.setName("Photo Album 3");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-            resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
+            getResourceService().updateResource("Bearer " + pat.getAccessToken(), "fake_resource_id", resource);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
-            assertEquals(ex.getResponse().getStatus(), Response.Status.NOT_FOUND.getStatusCode(), "Unexpected response status");
+            int status = ex.getResponse().getStatus();
+            assertTrue(status != Response.Status.OK.getStatusCode(), "Unexpected response status");
         }
-
-        assertNull(resourceStatus, "Resource status is not null");
     }
 
     /**
@@ -175,15 +173,13 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void getOneResource() throws Exception {
         showTitle("getOneResource");
 
-        UmaResourceWithId resources = null;
         try {
-            resources = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceId);
+            UmaResourceWithId resource = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceId);
+            assertEquals(resource.getType(), "myType");
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
         }
-
-        assertNotNull(resources, "Resource descriptions is null");
     }
 
     /**

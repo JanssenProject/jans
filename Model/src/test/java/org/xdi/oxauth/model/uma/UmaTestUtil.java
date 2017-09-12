@@ -66,6 +66,7 @@ public class UmaTestUtil {
         resource.setName("Server Photo Album");
         resource.setIconUri("http://www.example.com/icons/flower.png");
         resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+        resource.setType("myType");
         return resource;
     }
 
