@@ -216,13 +216,13 @@
         </classes>
     </test>
 
-    <test name="UMA : Obtain PAT token test (HTTP)" enabled="false">
+    <test name="UMA : Obtain PAT token test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.ObtainPatTokenFlowHttpTest"/>
         </classes>
     </test>
 
-    <test name="UMA : Register resource test (HTTP)" enabled="false">
+    <test name="UMA : Register resource test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.RegisterResourceFlowHttpTest"/>
         </classes>
@@ -240,13 +240,13 @@
         </classes>
     </test>
 
-    <test name="UMA : Test for getting access to UMA protected resource (HTTP)" enabled="false">
+    <test name="UMA : Test for getting access to UMA protected resource (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.AccessProtectedResourceFlowHttpTest"/>
         </classes>
     </test>
 
-    <test name="UMA : Test for getting UMA scopes (HTTP)" enabled="false">
+    <test name="UMA : Test for getting UMA scopes (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.uma.ScopeHttpTest"/>
         </classes>

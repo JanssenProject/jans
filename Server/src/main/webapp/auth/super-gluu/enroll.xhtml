@@ -1,0 +1,85 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/template.xhtml">
+<ui:define name="head">
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+
+    <!-- Bootstrap -->
+    <link href="#{oxAuthConfigurationService.cssLocation}/bootstrap.min.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/style.css"/>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</ui:define>
+
+    <ui:define name="pageTitle">oxAuth - Super-Gluu Enroll</ui:define>
+    
+<ui:define name="body">
+    <header class="bs-docs-nav navbar navbar-static-top" id="top"> 
+		<div class="container">
+			<div class="navbar-header"> 
+				<a href="https://super.gluu.org" target="_blank"  class="navbar-brand"><img src="#{oxAuthConfigurationService.getImgLocation()}/logo.png" alt="logo"/></a>
+			</div>
+		</div>
+	</header>
+	
+	<div class="bs-docs-section">
+		<div class="container">
+			<h2>#{msgs['supergluu.enroll.enrollyourdevice']}</h2>
+			<p>#{msgs['supergluu.enroll.scanqrcode']}</p>
+			<div class="qr_bx">
+				<div class="row">
+					<div class="col-md-6 col-sm-5 left_img">
+						<img src= "#{oxAuthConfigurationService.getImgLocation()}/qr_code.png" alt="qr_img"/>
+					</div>
+					<div class="col-md-6 col-sm-7">
+					  <div class="paddin_bx">
+						<h3>#{msgs['supergluu.enroll.downloadsupergluu']}</h3>
+						<div class="button">
+							<h:outputLink target="_blank" value="https://play.google.com/store/apps/details?id=gluu.super.gluu" class="android" ><h:graphicImage value="../../img/android1.png" alt="android"/></h:outputLink>
+							<h:outputLink target="_blank" value="https://itunes.apple.com/us/app/super-gluu/id1093479646?mt=8" class="iphone" ><h:graphicImage value="../../img/iphone.png" alt="iphone"/></h:outputLink>
+							
+						</div>
+						<p>#{msgs['supergluu.enroll.supergluuisfreesecure']}</p>
+						<div class="links">
+						  <a target="_blank" href="#{msgs['supergluu.enroll.website.url']}"><h:outputText value="#{msgs['supergluu.enroll.Website']}"/></a> 
+						  <span class="seprator">|</span>
+						  <a target="_blank" href="#{msgs['supergluu.enroll.Docs.url']}"><h:outputText value="#{msgs['supergluu.enroll.Docs']}"/></a> 
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="foot_bor">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+				  <div class="padding_spc">
+					<p>Gluu, Inc, | <a target="_blank" href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE">Use subject to MIT LICENSE</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</ui:define>
+</ui:composition>

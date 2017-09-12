@@ -124,7 +124,14 @@
                                             <div id="container"></div>
                                             <div id="progressbar"></div>
                                         </div>
+                                        <div align="center">
 
+                                                    <h:outputLink value="#{identity.getWorkingParameter('supergluu_android_download_url')}" title="Android" rendered="#{!empty identity.getWorkingParameter('supergluu_android_download_url')}"><h:graphicImage value="../../img/android.png" /></h:outputLink>
+
+                                                    <h:outputLink value="#{identity.getWorkingParameter('supergluu_ios_download_url')}" title="Android" rendered="#{!empty identity.getWorkingParameter('supergluu_ios_download_url')}"><h:graphicImage value="../../img/ios.png" /></h:outputLink>
+
+
+                                        </div>
                                         <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
                                                 <h:outputText value="#{msgs['common.agreePolicy']}"/>
@@ -133,6 +140,13 @@
                                                 </a>
                                             </p>
                                         </h:panelGroup>
+                                        <div align="center">
+                                            <ui:repeat value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}" var="_entry">
+                                                <ui:param name="app_name" value="#{_entry.key}"/>
+                                                <ui:param name="app_link" value="#{_entry.value}"/>
+                                                <h:outputLink value="#{app_link}" title="#{app_name}"><h:graphicImage value="../../img/#{app_name}.png" /></h:outputLink>
+                                            </ui:repeat>
+                                         </div>
 
                                         <h:panelGroup rendered='#{!empty client.getTosUri()}'>
                                             <p>
