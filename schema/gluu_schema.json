@@ -4147,6 +4147,7 @@
                 "oxEnrollmentCode",
                 "gluuIMAPData",
                 "oxPPID",
+                "oxGuid",
                 "userRandomKey"
             ],
             "must": [
@@ -4817,7 +4818,7 @@
                 "oxResource",
                 "oxRevision",
                 "oxType",
-                "oxUrl"
+                "description"
             ],
             "must": [
                 "objectclass"
@@ -4840,11 +4841,9 @@
                 "oxFaviconImage",
                 "oxIconUrl",
                 "oxId",
-                "oxPolicyRule",
                 "oxPolicyScriptDn",
                 "oxRevision",
-                "oxType",
-                "oxUrl"
+                "description"
             ],
             "must": [
                 "objectclass"
@@ -4866,7 +4865,8 @@
                 "oxConfigurationCode",
                 "oxResourceSetId",
                 "oxAttributes",
-                "oxTicket"
+                "oxTicket",
+                "oxStatus"
             ],
             "must": [
                 "objectclass"
@@ -4935,7 +4935,6 @@
         {
             "kind": "STRUCTURAL",
             "may": [
-                "oxAmHost",
                 "oxAuthAuthenticationTime",
                 "oxAuthClientId",
                 "oxAuthCreation",
@@ -5420,6 +5419,27 @@
                 "top"
             ],
             "x_origin": "Gluu created objectclass"
+        },
+        {
+            "kind":"STRUCTURAL",
+            "may":[
+                "oxAuthClientId",
+                "oxAuthCreation",
+                "oxAuthExpiration",
+                "oxAuthTokenCode",
+                "oxClaimValues"
+            ],
+            "must":[
+                "objectclass"
+            ],
+            "names":[
+                "oxAuthUmaPCT"
+            ],
+            "oid":"oxObjectClass:50",
+            "sup":[
+                "top"
+            ],
+            "x_origin":"Gluu created objectclass"
         }
     ],
     "oidMacros": {

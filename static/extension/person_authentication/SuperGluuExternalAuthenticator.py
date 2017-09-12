@@ -20,6 +20,7 @@ from org.xdi.util import StringHelper
 from org.xdi.oxauth.service import EncryptionService
 from org.xdi.service import MailService
 from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService 
+from java.util import Arrays, HashMap, IdentityHashMap
 
 import datetime
 import urllib
@@ -55,6 +56,14 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
         
         self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
+
+        self.androidUrl = None
+        if configurationAttributes.containsKey("supergluu_android_download_url"):
+            self.androidUrl = configurationAttributes.get("supergluu_android_download_url").getValue2()
+
+        self.IOSUrl = None
+        if configurationAttributes.containsKey("supergluu_ios_download_url"):
+            self.IOSUrl = configurationAttributes.get("supergluu_ios_download_url").getValue2()
 
         self.customLabel = None
         if configurationAttributes.containsKey("label"):
@@ -125,7 +134,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity)
+        self.setRequestScopedParameters(identity,step)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
         identity.setWorkingParameter("retry_current_step", False)
@@ -290,7 +299,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity)
+        self.setRequestScopedParameters(identity,step)
 
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
@@ -842,13 +851,21 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return session_attributes.get("redirect_uri")
 
-    def setRequestScopedParameters(self, identity):
+    def setRequestScopedParameters(self, identity,step):
+        downloadMap = HashMap()
         if self.registrationUri != None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
 
+        if self.androidUrl!= None and step == 1:
+            downloadMap.put("android", self.androidUrl)
+
+        if self.IOSUrl  != None and step == 1:
+            downloadMap.put("ios", self.IOSUrl)
+            
         if self.customLabel != None:
             identity.setWorkingParameter("super_gluu_label", self.customLabel)
-
+            
+        identity.setWorkingParameter("download_url",downloadMap)
         identity.setWorkingParameter("super_gluu_qr_options", self.customQrOptions)
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
