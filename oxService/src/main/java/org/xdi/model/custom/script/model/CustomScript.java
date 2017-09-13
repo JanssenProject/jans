@@ -19,6 +19,7 @@ import org.xdi.ldap.model.BaseEntry;
 import org.xdi.model.ProgrammingLanguage;
 import org.xdi.model.ScriptLocationType;
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.SimpleExtendedCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.util.StringHelper;
 
@@ -58,7 +59,7 @@ public class CustomScript extends BaseEntry {
     
     @LdapJsonObject
     @LdapAttribute(name = "oxConfigurationProperty")
-	private List<SimpleCustomProperty> configurationProperties;
+	private List<SimpleExtendedCustomProperty> configurationProperties;
 
     @LdapAttribute(name = "oxLevel")
     private int level;
@@ -152,11 +153,12 @@ public class CustomScript extends BaseEntry {
 		this.moduleProperties = moduleProperties;
 	}
 
-	public List<SimpleCustomProperty> getConfigurationProperties() {
+	
+	public List<SimpleExtendedCustomProperty> getConfigurationProperties() {
 		return configurationProperties;
 	}
 
-	public void setConfigurationProperties(List<SimpleCustomProperty> properties) {
+	public void setConfigurationProperties(List<SimpleExtendedCustomProperty> properties) {
 		this.configurationProperties = properties;
 	}
 

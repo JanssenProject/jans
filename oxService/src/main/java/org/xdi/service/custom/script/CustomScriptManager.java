@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.xdi.exception.PythonException;
 import org.xdi.model.ScriptLocationType;
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.model.SimpleExtendedCustomProperty;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
@@ -218,9 +219,10 @@ public class CustomScriptManager implements Serializable {
 				// Prepare configuration attributes
 				Map<String, SimpleCustomProperty> newConfigurationAttributes = new HashMap<String, SimpleCustomProperty>();
 
-				List<SimpleCustomProperty> simpleCustomProperties = loadedCustomScript.getConfigurationProperties();
+				List<SimpleExtendedCustomProperty> simpleCustomProperties = loadedCustomScript.getConfigurationProperties();
 				if (simpleCustomProperties == null) {
-					simpleCustomProperties = new ArrayList<SimpleCustomProperty>(0);
+					simpleCustomProperties = new ArrayList<SimpleExtendedCustomProperty>(0);
+					
 				}
 
 				for (SimpleCustomProperty simpleCustomProperty : simpleCustomProperties) {
