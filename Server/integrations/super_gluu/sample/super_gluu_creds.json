@@ -23,7 +23,7 @@
     },
     "sns":{
         "access_key":"",
-        "secret_key":""
+        "secret_key":"",
         "region":"us-west-2"
-    },
+    }
 }

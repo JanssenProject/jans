@@ -181,6 +181,14 @@
 						  </div>
 						  </h:panelGroup>
 						</h:form>
+						<div align="center">
+                                                    <ui:repeat value="#{identity.getWorkingParameter('download_url').entrySet().toArray()}" var="_entry">
+                                                        <ui:param name="app_name" value="#{_entry.key}"/>
+                                                        <ui:param name="app_link" value="#{_entry.value}"/>
+                                                        <h:outputLink value="#{app_link}" title="#{app_name}"><h:graphicImage value="img/#{app_name}.png" /></h:outputLink>
+                                                    </ui:repeat>
+                                                </div>
+
 						</div>
 						<h:panelGroup layout="block" rendered="#{external_registration_uri != Null}">
 						 <div class="reg_link">
