@@ -109,7 +109,11 @@ public class UmaGatheringWS {
 
                 context.persist();
 
-                String fullUri = StringUtils.removeEnd(appConfiguration.getIssuer(), "/") + page;
+                String baseEndpoint = StringUtils.removeEnd(appConfiguration.getBaseEndpoint(), "/");
+                baseEndpoint = StringUtils.removeEnd(baseEndpoint, "restv1");
+                baseEndpoint = StringUtils.removeEnd(baseEndpoint, "/");
+
+                String fullUri = baseEndpoint + page;
                 fullUri = StringUtils.removeEnd(fullUri, ".xhtml");
                 log.trace("Redirecting to page: '{}', fullUri: {}", page, fullUri);
                 return Response.status(FOUND).location(new URI(fullUri)).build();
