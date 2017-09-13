@@ -7,7 +7,9 @@
 package org.xdi.oxauth.ws.rs.uma;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.client.ClientResponseFailure;
+import org.openqa.selenium.By;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -114,11 +116,11 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
             return;
         }
 
-        // todo throw new AssertionError("need_info error was not returned");
+        throw new AssertionError("need_info error was not returned");
     }
 
 
-    @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"}, enabled = false)
+    @Test(dependsOnMethods = {"requestRptAndGetNeedsInfo"})
     @Parameters({"umaPatClientId", "umaClaimsRedirectUri"})
     public void claimsGathering(String umaPatClientId, String umaClaimsRedirectUri) throws Exception {
         String gatheringUrl = needInfo.buildClaimsGatheringUrl(umaPatClientId, umaClaimsRedirectUri);
@@ -127,15 +129,22 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
         System.out.println();
         try {
             startSelenium();
-//            driver.navigate().to(gatheringUrl);
+            driver.navigate().to(gatheringUrl);
+            System.out.println(driver.getCurrentUrl());
 
-            // todo for Gene : claims-gathering method - interaction with Selenium (emulate user behavior)
-//            WebElement elem = driver.findElement(By.xpath(""));
-//            assertNotNull(elem);
+            driver.findElement(By.id("loginForm:country")).sendKeys("US");
+            driver.findElement(By.id("loginForm:gather")).click();
+
+            Thread.sleep(1000);
+            System.out.println(driver.getCurrentUrl());
+
+            driver.findElement(By.id("loginForm:city")).sendKeys("NY");
+            driver.findElement(By.id("loginForm:gather")).click();
 
             // Finally after claims-redirect flow user gets redirect with new ticket
             // Sample: https://client.example.com/cb?ticket=e8e7bc0b-75de-4939-a9b1-2425dab3d5ec
-            // todo set correct value of claimsGatheringTicket after redirect
+            System.out.println(driver.getCurrentUrl());
+            claimsGatheringTicket = StringUtils.substringAfter(driver.getCurrentUrl(), "ticket=");
         } finally {
             stopSelenium();
         }
@@ -144,11 +153,10 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     /**
      * Request RPT with all claims provided
      */
-    @Test(dependsOnMethods = {"claimsGathering"}, enabled = false)
+    @Test(dependsOnMethods = {"claimsGathering"})
     @Parameters({"umaPatClientId", "umaPatClientSecret"})
     public void successfulRptRequest(String umaPatClientId, String umaPatClientSecret) throws Exception {
         showTitle("successfulRptRequest");
-        claimsGatheringTicket = "a60de9ba-872a-42a8-90f7-1b615af22db2"; // todo remove this line ! after claims-gathering automation with selenium
 
         UmaTokenResponse response = tokenService.requestRpt(
                 "Basic " + encodeCredentials(umaPatClientId, umaPatClientSecret),
@@ -163,7 +171,7 @@ public class AccessProtectedResourceFlowHttpTest extends BaseTest {
     /**
      * RPT status request
      */
-    @Test(dependsOnMethods = {"successfulRptRequest"}, enabled = false)
+    @Test(dependsOnMethods = {"successfulRptRequest"})
     @Parameters()
     public void rptStatus() throws Exception {
         showTitle("rptStatus");
