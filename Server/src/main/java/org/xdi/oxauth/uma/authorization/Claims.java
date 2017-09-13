@@ -13,12 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Claims {
 
     private Jwt claimsToken;
+    private String claimsTokenAsString;
     private UmaPCT pct;
     private Map<String, Object> claims = new ConcurrentHashMap<String, Object>();
 
-    public Claims(Jwt claimsToken, UmaPCT pct) {
+    public Claims(Jwt claimsToken, UmaPCT pct, String claimsTokenAsString) {
         this.claimsToken = claimsToken;
         this.pct = pct;
+        this.claimsTokenAsString = claimsTokenAsString;
+    }
+
+    public String getClaimsTokenAsString() {
+        return claimsTokenAsString;
     }
 
     public Set<String> keys() {
@@ -35,6 +41,20 @@ public class Claims {
         } else if (claimsToken != null && claimsToken.getClaims() != null && claimsToken.getClaims().hasClaim(key)) {
             return claimsToken.getClaims().getClaim(key);
         } else if (pct != null && pct.getClaims() != null && pct.getClaims().hasClaim(key)) {
+            return pct.getClaims().getClaim(key);
+        }
+        return null;
+    }
+
+    public Object getClaimTokenClaim(String key) {
+        if (claimsToken != null && claimsToken.getClaims() != null && claimsToken.getClaims().hasClaim(key)) {
+            return claimsToken.getClaims().getClaim(key);
+        }
+        return null;
+    }
+
+    public Object getPctClaim(String key) {
+        if (pct != null && pct.getClaims() != null && pct.getClaims().hasClaim(key)) {
             return pct.getClaims().getClaim(key);
         }
         return null;
