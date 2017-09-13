@@ -9,9 +9,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.xdi.config.oxtrust.AppConfiguration;
 import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.EncryptionService;
 import org.xdi.oxauth.util.ServerUtil;
 
@@ -59,7 +62,7 @@ public class PushSnsService {
 		platformEndpointRequest.setPlatformApplicationArn(platformApplicationArn);
 		platformEndpointRequest.setToken(token);
 		
-		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getOxAuthIssuer(), user.getUserId(),
+		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
 				ldapEntryManager.encodeGeneralizedTime(new Date()));
 		platformEndpointRequest.setCustomUserData(customUserData);
 		
@@ -67,8 +70,8 @@ public class PushSnsService {
 
 		return platformEndpointResult.getEndpointArn();
 	}
-	
-	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, Object data, Map<String, Object> customAppMessageMap, Map<String, MessageAttributeValue> messageAttributes) throws IOException {
+
+	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, Map<String, Object> customAppMessageMap, Map<String, MessageAttributeValue> messageAttributes) throws IOException {
 		Map<String, Object> appMessageMap = new HashMap<String, Object>();
 
 		if (platform == PushPlatform.GCM) {
@@ -77,11 +80,11 @@ public class PushSnsService {
 			appMessageMap.put("time_to_live", 30);
 			appMessageMap.put("dry_run", false);
 		}
-		
+
 		if (customAppMessageMap != null) {
 			appMessageMap.putAll(customAppMessageMap);
 		}
-		
+
 		String message = ServerUtil.asJson(appMessageMap);
 
 		return sendPushMessage(snsClient, platform, targetArn, message, messageAttributes);
@@ -107,5 +110,4 @@ public class PushSnsService {
 
 		return publishResult;
 	}
-
 }
