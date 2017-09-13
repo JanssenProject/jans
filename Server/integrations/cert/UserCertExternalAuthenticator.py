@@ -353,6 +353,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def certToString(self, x509Certificate):
+        if x509Certificate == None:
+            return None
         return base64.b64encode(x509Certificate.getEncoded())
 
     def certFromString(self, x509CertificateEncoded):
