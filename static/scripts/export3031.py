@@ -126,14 +126,15 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["code","token","id_token"]'))
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["id_token"]'))
 
-    # printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
+    printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
     # print (printOxAuthConfDynamic)
 
 
     parser.lastEntry['oxAuthConfDynamic'][0] = printOxAuthConfDynamic
 
     dataOxAuthConfErrors = json.loads(parser.lastEntry['oxAuthConfErrors'][0])
-    grant = {'id': ("invalid_grant_and_session"), 'description': ("he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
+    grant = {'id': ("invalid_grant_and_session"), 'description': (
+    "he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
 
     session = {'id': ("session_not_passed"), 'description': ("The provided session state is empty."), 'uri': (None)}
 
