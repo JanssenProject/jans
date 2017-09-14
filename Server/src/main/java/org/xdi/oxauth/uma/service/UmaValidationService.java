@@ -248,7 +248,11 @@ public class UmaValidationService {
 
             try {
                 final Jwt idToken = Jwt.parse(claimToken);
-                if (idToken != null && isIdTokenValid(idToken)) {
+                if (idToken != null) {
+                    if (ServerUtil.isTrue(appConfiguration.getUmaValidateClaimToken()) && !isIdTokenValid(idToken)) {
+                        log.error("claim_token validation failed.");
+                        errorResponseFactory.throwUmaWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN);
+                    }
                     return idToken;
                 }
             } catch (Exception e) {
@@ -266,8 +270,8 @@ public class UmaValidationService {
     public boolean isIdTokenValid(Jwt idToken) {
         try {
             final String issuer = idToken.getClaims().getClaimAsString(JwtClaimName.ISSUER);
-            final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
-            final String audienceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.AUDIENCE);
+            //final String nonceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.NONCE);
+            //final String audienceFromToken = idToken.getClaims().getClaimAsString(JwtClaimName.AUDIENCE);
 
             final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             final Date now = new Date();
