@@ -50,6 +50,7 @@ public class AppConfiguration implements Configuration {
     private int umaRptLifetime;
     private int umaPctLifetime;
     private Boolean umaAddScopesAutomatically;
+    private Boolean umaValidateClaimToken = false;
 
     private String openidSubAttribute;
     private Set<Set<ResponseType>> responseTypesSupported;
@@ -205,6 +206,14 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaAddScopesAutomatically(Boolean p_umaAddScopesAutomatically) {
         umaAddScopesAutomatically = p_umaAddScopesAutomatically;
+    }
+
+    public Boolean getUmaValidateClaimToken() {
+        return umaValidateClaimToken;
+    }
+
+    public void setUmaValidateClaimToken(Boolean umaValidateClaimToken) {
+        this.umaValidateClaimToken = umaValidateClaimToken;
     }
 
     /**
