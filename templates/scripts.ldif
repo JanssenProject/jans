@@ -160,7 +160,7 @@ dn: inum=%(inumOrg)s!0011!2DAF.F996,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
 description: Sample UMA Claims Gathering
-displayName: uma_claims_gathering
+displayName: sampleClaimsGathering
 gluuStatus: false
 inum: %(inumOrg)s!0011!2DAF.F996
 oxLevel: 1
