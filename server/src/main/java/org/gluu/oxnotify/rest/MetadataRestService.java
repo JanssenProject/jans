@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
  * @author Yuriy Movchan
  * @version Septempber 15, 2017
  */
-@Path("/notify-configuration")
 public interface MetadataRestService {
 
 	@GET

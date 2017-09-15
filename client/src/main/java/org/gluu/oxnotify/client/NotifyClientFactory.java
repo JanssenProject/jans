@@ -31,11 +31,9 @@ public class NotifyClientFactory {
 		return instance;
 	}
 
-	public NotifyMetadata createMetaDataConfigurationService(String metaDataUri) {
+	public NotifyMetadataClientService createMetaDataConfigurationService(String metaDataUri) {
 		ResteasyWebTarget target = client.target(UriBuilder.fromPath(metaDataUri));
-		NotifyMetadataClientService proxy = target.proxy(NotifyMetadataClientService.class);
-
-		return proxy.getMetadataConfiguration();
+		return target.proxy(NotifyMetadataClientService.class);
 	}
 
 	public NotifyClientService createNotifyService(NotifyMetadata notifyMetadata) {

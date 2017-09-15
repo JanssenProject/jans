@@ -1,46 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
 
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+<Configuration packages="org.gluu.log">
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+		</Console>
 
-    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
-        <layout class="org.apache.log4j.PatternLayout">
-            <!-- The default pattern: Date Priority [Category] Message\n -->
-            <param name="ConversionPattern" value="%d %-5p [%c{6}] %m%n"/>
-        </layout>
-    </appender>
+		<RollingFile name="FILE" fileName="${sys:log.base}/logs/oxnotify.log" filePattern="${sys:log.base}/logs/oxnotify-%d{yyyy-MM-dd}-%i.log">
 
-    <appender name="FILE" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="${catalina.base}/logs/oxnotify.log"/>
-        <param name="DatePattern" value="'.'yyyy-MM-dd"/>
-        <param name="BufferSize" value="1000"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <!-- The default pattern: Date Priority [Category] Message\n -->
-            <param name="ConversionPattern" value="%d %-5p [%c{6}] %m%n"/>
-        </layout>
-    </appender>
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
-    <!-- ############### oxNotify #################  -->
-    <category name="org.gluu.oxnotify">
-        <priority value="${log4j.default.log.level}"/>
-    </category>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+	</Appenders>
 
-    <category name="org.xdi">
-        <priority value="${log4j.default.log.level}"/>
-    </category>
+	<Loggers>
+		<!-- ############### oxnotify ################# -->
+		<Logger name="org.xdi.oxnotify" level="${log4j.default.log.level}" />
+		<Logger name="org.xdi.service" level="${log4j.default.log.level}" />
 
-    <!-- ############### Seam logging ################### -->
-    <category name="org.jboss.seam">
-        <priority value="INFO"/>
-    </category>
+		<!-- ############### Gluu ################# -->
+		<Logger name="org.gluu" level="${log4j.default.log.level}" />
 
-    <!-- ================ -->
-    <!-- OX loggers       -->
-    <!-- ================ -->
-
-    <root>
-        <priority value="INFO"/>
-        <appender-ref ref="FILE"/>
-        <appender-ref ref="CONSOLE"/>
-    </root>
-
-</log4j:configuration>
+		<Root level="info">
+			<AppenderRef ref="FILE" />
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+</Configuration>

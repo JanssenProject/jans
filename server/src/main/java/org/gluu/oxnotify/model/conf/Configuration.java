@@ -8,10 +8,13 @@ package org.gluu.oxnotify.model.conf;
 
 import java.util.List;
 
+import javax.enterprise.inject.Vetoed;
+
 /**
  * @author Yuriy Movchan
  * @version September 15, 2017
  */
+@Vetoed
 public class Configuration {
 
 	private String issuer;

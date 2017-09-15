@@ -6,10 +6,13 @@
 
 package org.gluu.oxnotify.model.conf;
 
+import javax.enterprise.inject.Vetoed;
+
 /**
  * @author Yuriy Movchan
  * @version September 15, 2017
  */
+@Vetoed
 public class AccessConfiguration {
 
 }

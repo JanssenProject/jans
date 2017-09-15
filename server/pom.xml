@@ -22,6 +22,16 @@
 			<groupId>org.gluu</groupId>
 			<artifactId>oxnotify-model</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-util</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<!-- Weld -->
 		<dependency>
@@ -31,13 +41,16 @@
 
 		<!-- Loggining -->
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
-
 		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-1.2-api</artifactId>
 		</dependency>
 
 		<!-- RestEasy -->
@@ -54,10 +67,22 @@
 			<artifactId>resteasy-jackson-provider</artifactId>
 		</dependency>
 
+		<!-- Commons -->
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+		</dependency>
+
 		<!-- AWS SNS -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-sns</artifactId>
+		</dependency>
+
+		<!-- Other -->
+		<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>jsr305</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -90,6 +115,7 @@
 									<filtering>false</filtering>
 									<includes>
 										<include>**/*.html</include>
+										<include>**/*.jsp</include>
 									</includes>
 								</resource>
 

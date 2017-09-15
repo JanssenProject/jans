@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Initialized;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 /**
@@ -18,12 +19,16 @@ import javax.inject.Named;
 @ApplicationScoped
 @Named
 public class AppInitializer {
+	
+	@Inject
+	private ConfigurationFactory configurationFactory;
 
 	@PostConstruct
 	public void createApplicationComponents() {
 	}
 
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
+        configurationFactory.create();
 	}
 
 }

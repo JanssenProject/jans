@@ -7,6 +7,7 @@
 package org.gluu.oxnotify.rest;
 
 import javax.inject.Inject;
+import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan
  * @version Septempber 15, 2017
  */
+@Path("/notify-configuration")
 public class MetadataRestServiceImpl implements MetadataRestService {
 
 	@Inject
@@ -37,7 +39,7 @@ public class MetadataRestServiceImpl implements MetadataRestService {
 			notifyMetadata.setVersion("1.0");
 			notifyMetadata.setIssuer(issuer);
 
-			notifyMetadata.setNotifyEndpoint(baseEndpointUri);
+			notifyMetadata.setNotifyEndpoint(baseEndpointUri + "/restv1");
 			
 			log.trace("Notify metadata: {0}", notifyMetadata);
 

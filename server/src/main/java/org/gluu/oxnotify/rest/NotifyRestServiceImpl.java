@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
@@ -31,6 +32,7 @@ import com.amazonaws.services.sns.model.PublishResult;
  * @author Yuriy Movchan
  * @version Septempber 15, 2017
  */
+@Path("/")
 public class NotifyRestServiceImpl implements NotifyRestService {
 
 	@Inject

@@ -6,12 +6,15 @@
 
 package org.gluu.oxnotify.model.conf;
 
+import javax.enterprise.inject.Vetoed;
+
 import org.gluu.oxnotify.model.PushPlatform;
 
 /**
  * @author Yuriy Movchan
  * @version September 15, 2017
  */
+@Vetoed
 public class PlatformConfiguration {
 
 	private PushPlatform platform;
@@ -20,8 +23,7 @@ public class PlatformConfiguration {
 	private String accessKeyId;
 	private String secretAccessKey;
 
-	public PlatformConfiguration(PushPlatform platform, String platformArn, String accessKeyId,
-			String secretAccessKey) {
+	public PlatformConfiguration(PushPlatform platform, String platformArn, String accessKeyId, String secretAccessKey) {
 		this.platform = platform;
 		this.platformArn = platformArn;
 		this.accessKeyId = accessKeyId;
