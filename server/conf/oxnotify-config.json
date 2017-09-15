@@ -1,0 +1,4 @@
+{
+    "issuer":"${config.oxnotify.issuer}",
+    "baseEndpoint":"${config.oxnotify.context-path}/resource/rest",
+}
