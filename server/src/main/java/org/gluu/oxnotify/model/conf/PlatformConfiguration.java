@@ -17,17 +17,21 @@ import org.gluu.oxnotify.model.PushPlatform;
 @Vetoed
 public class PlatformConfiguration {
 
+	private String platformId;
 	private PushPlatform platform;
 	private String platformArn;
 
 	private String accessKeyId;
 	private String secretAccessKey;
 
-	public PlatformConfiguration(PushPlatform platform, String platformArn, String accessKeyId, String secretAccessKey) {
-		this.platform = platform;
-		this.platformArn = platformArn;
-		this.accessKeyId = accessKeyId;
-		this.secretAccessKey = secretAccessKey;
+	private boolean enabled;
+
+	public String getPlatformId() {
+		return platformId;
+	}
+
+	public void setPlatformId(String platformId) {
+		this.platformId = platformId;
 	}
 
 	public PushPlatform getPlatform() {
@@ -60,6 +64,14 @@ public class PlatformConfiguration {
 
 	public void setSecretAccessKey(String secretAccessKey) {
 		this.secretAccessKey = secretAccessKey;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }

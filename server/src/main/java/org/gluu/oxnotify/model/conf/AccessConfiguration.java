@@ -6,6 +6,8 @@
 
 package org.gluu.oxnotify.model.conf;
 
+import java.util.List;
+
 import javax.enterprise.inject.Vetoed;
 
 /**
@@ -14,5 +16,15 @@ import javax.enterprise.inject.Vetoed;
  */
 @Vetoed
 public class AccessConfiguration {
+
+	private List<ClientConfiguration> clientConfigurations;
+
+	public List<ClientConfiguration> getClientConfigurations() {
+		return clientConfigurations;
+	}
+
+	public void setClientConfigurations(List<ClientConfiguration> clientConfigurations) {
+		this.clientConfigurations = clientConfigurations;
+	}
 
 }

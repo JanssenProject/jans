@@ -19,7 +19,7 @@ public class Configuration {
 
 	private String issuer;
 	private String baseEndpoint;
-	private List<PlatformConfiguration> platform;
+	private List<PlatformConfiguration> platformConfigurations;
 
 	public String getIssuer() {
 		return issuer;
@@ -37,12 +37,12 @@ public class Configuration {
 		this.baseEndpoint = baseEndpoint;
 	}
 
-	public List<PlatformConfiguration> getPlatform() {
-		return platform;
+	public List<PlatformConfiguration> getPlatformConfigurations() {
+		return platformConfigurations;
 	}
 
-	public void setPlatform(List<PlatformConfiguration> platform) {
-		this.platform = platform;
+	public void setPlatformConfigurations(List<PlatformConfiguration> platformConfigurations) {
+		this.platformConfigurations = platformConfigurations;
 	}
 
 }
