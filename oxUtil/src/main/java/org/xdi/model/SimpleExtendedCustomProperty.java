@@ -1,9 +1,16 @@
 package org.xdi.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
+
+@JsonPropertyOrder({ "value1", "value2", "hide", "description" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleExtendedCustomProperty extends SimpleCustomProperty {
 
 	private static final long serialVersionUID = 7413216569115979793L;
 
+	@JsonProperty("hide")
 	private boolean hideValue;
 	
 	public SimpleExtendedCustomProperty() {
