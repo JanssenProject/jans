@@ -57,7 +57,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version September 30, 2016
+ * @version August 28, 2017
  */
 public class OxAuthCryptoProvider extends AbstractCryptoProvider {
 
@@ -103,11 +103,11 @@ public class OxAuthCryptoProvider extends AbstractCryptoProvider {
         if (signatureAlgorithm == null) {
             throw new RuntimeException("The signature algorithm parameter cannot be null");
         } else if (SignatureAlgorithmFamily.RSA.equals(signatureAlgorithm.getFamily())) {
-            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily(), "BC");
+            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily().toString(), "BC");
             keyGen.initialize(2048, new SecureRandom());
         } else if (SignatureAlgorithmFamily.EC.equals(signatureAlgorithm.getFamily())) {
             ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
-            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily(), "BC");
+            keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getFamily().toString(), "BC");
             keyGen.initialize(eccgen, new SecureRandom());
         } else {
             throw new RuntimeException("The provided signature algorithm parameter is not supported");
