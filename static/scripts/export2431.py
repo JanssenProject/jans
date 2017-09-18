@@ -1,13 +1,13 @@
-#!/usr/bin/env python
-"""export3031.py - A script to export all the data from Gluu Server 3.0.x
+﻿#!/usr/bin/env python
+"""export24.py - A script to export all the data from Gluu Server 2.4.x
 
-Usage: python export3031.py
+Usage: python export24.py
 
-Running this creates a folder named `backup_3031` which contains all the data
+Running this creates a folder named `backup_24` which contains all the data
 needed for migration of Gluu Server to a higher version. This script backs up
 the following data:
     1. LDAP data
-    2. Configurations of various components installed inside Gluu Server
+    2. Configurations of Tomcat and OpenDJ
     3. CA certificates in /etc/certs
     4. Webapp Customization files
 
@@ -17,17 +17,18 @@ of appropriate version to migrate to that version.
 Read complete migration procedure at:
     https://www.gluu.org/docs/deployment/upgrading/
 """
+
+import getpass
+import json
+import logging
 import os
 import os.path
 import sys
-import logging
-import traceback
-import subprocess
 import tempfile
-import getpass
-from ldif import LDIFParser, LDIFWriter, CreateLDIF
+import traceback
 from distutils.dir_util import copy_tree
-import json
+
+from ldif import LDIFParser, CreateLDIF
 
 
 class MyLDIF(LDIFParser):
@@ -37,8 +38,8 @@ class MyLDIF(LDIFParser):
         self.targetAttr = None
         self.targetEntry = None
         self.DNs = []
-        self.lastDN = None
         self.lastEntry = None
+        self.lastDN = None
 
     def getResults(self):
         return (self.targetDN, self.targetAttr)
@@ -102,10 +103,10 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['persistIdTokenInLdap'] = False
     dataOxAuthConfDynamic['persistRefreshTokenInLdap'] = True
 
-    del dataOxAuthConfDynamic['sessionStateHttpOnly']
-    del dataOxAuthConfDynamic['shortLivedAccessTokenLifetime']
-    del dataOxAuthConfDynamic['validateTokenEndpoint']
-    del dataOxAuthConfDynamic['longLivedAccessTokenLifetime']
+    # del dataOxAuthConfDynamic['sessionStateHttpOnly']
+    # del dataOxAuthConfDynamic['shortLivedAccessTokenLifetime']
+    # del dataOxAuthConfDynamic['validateTokenEndpoint']
+    # del dataOxAuthConfDynamic['longLivedAccessTokenLifetime']
 
     dataOxAuthConfDynamic['corsConfigurationFilters'] = []
     dataCross = {
@@ -126,9 +127,6 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["code","token","id_token"]'))
     dataOxAuthConfDynamic['responseTypesSupported'].append(json.loads('["id_token"]'))
 
-    dataOxAuthConfDynamic['dynamicRegistrationCustomObjectClass'] = ""
-    dataOxAuthConfDynamic['dynamicRegistrationCustomAttributes'] = ['oxAuthTrustedClient']
-
     printOxAuthConfDynamic = json.dumps(dataOxAuthConfDynamic, indent=4, sort_keys=True)
     # print (printOxAuthConfDynamic)
 
@@ -137,7 +135,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
     dataOxAuthConfErrors = json.loads(parser.lastEntry['oxAuthConfErrors'][0])
     grant = {'id': ("invalid_grant_and_session"), 'description': (
-    "he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
+        "he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
 
     session = {'id': ("session_not_passed"), 'description': ("The provided session state is empty."), 'uri': (None)}
 
@@ -150,7 +148,6 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     invalid_logout_uri = {'id': ("invalid_logout_uri"), 'description': ("The provided logout_uri is invalid."),
                           'uri': (None)}
 
-    dataOxAuthConfErrors['endSession'].append(grant)
     dataOxAuthConfErrors['endSession'].append(session)
     dataOxAuthConfErrors['endSession'].append(post_logout)
     dataOxAuthConfErrors['endSession'].append(post_logout_uri)
@@ -238,16 +235,14 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
 class Exporter(object):
     def __init__(self):
-        self.backupDir = 'backup_3031'
-        self.foldersToBackup = ['/etc/certs',
-                                '/etc/gluu/conf',
-                                '/opt/shibboleth-idp/conf',
-                                '/opt/shibboleth-idp/metadata',
-                                '/opt/gluu/jetty/identity/custom',
-                                '/opt/gluu/jetty/identity/lib',
-                                '/opt/gluu/jetty/oxauth/custom',
-                                '/opt/gluu/jetty/oxauth/lib',
-                                ]
+        self.backupDir = 'backup_2431'
+        self.foldersToBackup = ['/opt/tomcat/conf',
+                                '/opt/tomcat/endorsed',
+                                '/opt/opendj/config',
+                                '/etc/certs',
+                                '/opt/idp/conf',
+                                '/opt/idp/metadata',
+                                '/var/gluu/webapps']
         self.passwordFile = tempfile.mkstemp()[1]
 
         self.ldapsearch = '/opt/opendj/bin/ldapsearch'
@@ -257,9 +252,9 @@ class Exporter(object):
         self.grep = '/bin/grep'
         self.hostname = '/bin/hostname'
 
-        self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D',
-                          'cn=directory manager,o=gluu', '-j',
+        self.ldapCreds = ['-h', 'localhost', '-p', '1636', '-Z', '-X', '-D', '"cn=directory manager"', '-j',
                           self.passwordFile]
+
         self.base_dns = ['ou=people',
                          'ou=groups',
                          'ou=attributes',
@@ -269,21 +264,18 @@ class Exporter(object):
                          'ou=uma',
                          'ou=hosts',
                          'ou=u2f']
+
         self.propertiesFn = os.path.join(self.backupDir, 'setup.properties')
 
     def getOutput(self, args):
         try:
-            logging.debug("Running command : %s" % " ".join(args))
-            p = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
-            output, error = p.communicate()
-            if error:
-                logging.error(error)
-                logging.debug(output)
+            logging.debug("Running command : %s", " ".join(args))
+            output = None
+            output = os.popen(" ".join(args)).read().strip()
             return output
         except:
-            logging.error("Error running command : %s" % " ".join(args))
-            logging.error(traceback.format_exc())
+            logging.error("Error running command : %s", " ".join(args))
+            logging.debug(traceback.format_exc())
             sys.exit(1)
 
     def makeFolders(self):
@@ -297,11 +289,13 @@ class Exporter(object):
                 logging.debug(traceback.format_exc())
                 sys.exit(1)
 
+
     def getOrgInum(self):
-        args = [self.ldapsearch] + self.ldapCreds + ['-s', 'one', '-b',
-                                                     'o=gluu', 'o=*', 'dn']
+        args = [self.ldapsearch] + self.ldapCreds + ['-s', 'one', '-b', 'o=gluu',
+                                                     'o=*', 'dn']
         output = self.getOutput(args)
         return output.split(",")[0].split("o=")[-1]
+
 
     def prepareLdapPW(self):
         ldap_pass = None
@@ -322,6 +316,7 @@ class Exporter(object):
             with open(self.passwordFile, 'w') as pfile:
                 pfile.write(ldap_pass)
 
+
     def backupFiles(self):
         logging.info('Creating backup of files')
         for folder in self.foldersToBackup:
@@ -330,6 +325,7 @@ class Exporter(object):
             except:
                 logging.error("Failed to backup %s", folder)
                 logging.debug(traceback.format_exc())
+
 
     def getLdif(self):
         logging.info('Creating backup of LDAP data')
@@ -408,8 +404,10 @@ class Exporter(object):
         f.write(output)
         f.close()
 
+
     def clean(self, s):
         return s.replace('@', '').replace('!', '').replace('.', '')
+
 
     def getProp(self, prop):
         with open('/install/community-edition-setup/setup.properties.last',
@@ -417,6 +415,7 @@ class Exporter(object):
             for line in sf:
                 if "{0}=".format(prop) in line:
                     return line.split('=')[-1].strip()
+
 
     def genProperties(self):
         logging.info('Creating setup.properties backup file')
@@ -431,7 +430,7 @@ class Exporter(object):
         props['inumOrgFN'] = self.clean(props['inumOrg'])
         props['baseInum'] = props['inumOrg'][:21]
         props['encode_salt'] = self.getOutput(
-            [self.cat, "%s/etc/gluu/conf/salt" % self.backupDir]
+            [self.cat, "%s/opt/tomcat/conf/salt" % self.backupDir]
         ).split("=")[-1].strip()
 
         props['oxauth_client_id'] = self.getProp('oxauth_client_id')
@@ -446,25 +445,31 @@ class Exporter(object):
         props['asimbaJksPass'] = self.getProp('asimbaJksPass')
 
         # Preferences for installation of optional components
-        props['installSaml'] = os.path.isfile(
-            '/opt/shibboleth-idp/conf/idp.properties')
-        props['shibboleth_version'] = 'v3'
+        installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (y/N): [N]") or "N"
+        props['installSaml'] = 'y' in installSaml.lower()
+        if installSaml:
+            shibv = raw_input("\tAre you migrating to Gluu Server v3.x? (y/N): [y]") or "y"
+        if shibv:
+            props['shibboleth_version'] = 'v3'
         props['installAsimba'] = os.path.isfile(
-            '/opt/gluu/jetty/asimba/webapps/asimba.war')
+            'opt/tomcat/webapps/asimba.war')
         props['installOxAuthRP'] = os.path.isfile(
-            '/opt/gluu/jetty/oxauth-rp/webapps/oxauth-rp.war')
-        props['installPassport'] = os.path.isfile(
-            '/opt/gluu/node/passport/server/app.js')
+            '/opt/tomcat/webapps/oxauth-rp.war')
+        installPassport = raw_input("\tInstall passport in new version? (y/N): [N]") or "N"
+        props['installPassport'] = 'y' in installPassport.lower()
+     
 
         f = open(self.propertiesFn, 'w')
         for key in props.keys():
-            f.write("%s=%s\n" % (key, props[key]))
+                if props[key]:
+                     f.write("%s=%s\n" % (key, props[key]))
         f.close()
+
 
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
-        print("            Gluu Server Data Export Tool For v3.x            ")
+        print("            Gluu Server Data Export Tool For v2.4x to v3.1x           ")
         print("-------------------------------------------------------------")
         print("")
         self.prepareLdapPW()
@@ -480,7 +485,7 @@ class Exporter(object):
 
 if __name__ == "__main__":
     if len(sys.argv) != 1:
-        print ("Usage: python export3031.py")
+        print ("Usage: python export30.py")
     else:
         exporter = Exporter()
         exporter.export()
