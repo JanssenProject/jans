@@ -11,6 +11,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -21,7 +22,7 @@ import java.util.Date;
 
 @LdapEntry
 @LdapObjectClass(values = {"top", "oxAuthToken"})
-public class TokenLdap {
+public class TokenLdap implements Serializable {
 
     @LdapDN
     private String dn;
