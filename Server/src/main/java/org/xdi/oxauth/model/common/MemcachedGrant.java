@@ -8,7 +8,8 @@ import java.util.Date;
 import java.util.Set;
 
 /**
- * @author yuriyz on 02/14/2017.
+ * @author yuriyz
+ * @version September 6, 2017
  */
 public class MemcachedGrant implements Serializable {
 
@@ -24,6 +25,7 @@ public class MemcachedGrant implements Serializable {
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String claims;
 
     private String acrValues;
     private String sessionDn;
@@ -44,6 +46,7 @@ public class MemcachedGrant implements Serializable {
         acrValues = codeGrant.getAcrValues();
         codeChallenge = codeGrant.getCodeChallenge();
         codeChallengeMethod = codeGrant.getCodeChallengeMethod();
+        claims = codeGrant.getClaims();
         sessionDn = codeGrant.getSessionDn();
     }
 
@@ -119,6 +122,14 @@ public class MemcachedGrant implements Serializable {
         this.codeChallengeMethod = codeChallengeMethod;
     }
 
+    public String getClaims() {
+        return claims;
+    }
+
+    public void setClaims(String claims) {
+        this.claims = claims;
+    }
+
     public String getAcrValues() {
         return acrValues;
     }
@@ -136,8 +147,8 @@ public class MemcachedGrant implements Serializable {
     }
 
     public AuthorizationCodeGrant asCodeGrant(Instance<AbstractAuthorizationGrant> grantInstance) {
-    	AuthorizationCodeGrant grant =  grantInstance.select(AuthorizationCodeGrant.class).get();
-    	grant.init(user, client, authenticationTime);
+        AuthorizationCodeGrant grant = grantInstance.select(AuthorizationCodeGrant.class).get();
+        grant.init(user, client, authenticationTime);
 
         grant.setAuthorizationCode(new AuthorizationCode(authorizationCodeString, authorizationCodeCreationDate, authorizationCodeExpirationDate));
         grant.setScopes(scopes);
@@ -147,6 +158,7 @@ public class MemcachedGrant implements Serializable {
         grant.setCodeChallengeMethod(codeChallengeMethod);
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
+        grant.setClaims(claims);
 
         return grant;
     }

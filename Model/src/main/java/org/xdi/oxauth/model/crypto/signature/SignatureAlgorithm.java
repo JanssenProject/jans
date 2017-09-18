@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version August 28, 2017
  */
 public enum SignatureAlgorithm {
 
@@ -31,12 +31,12 @@ public enum SignatureAlgorithm {
     ES512("ES512", SignatureAlgorithmFamily.EC, "SHA512WITHECDSA", ECEllipticCurve.P_521);
 
     private final String name;
-    private final String family;
+    private final SignatureAlgorithmFamily family;
     private final String algorithm;
     private final ECEllipticCurve curve;
     private final JwtType jwtType;
 
-    private SignatureAlgorithm(String name, String family, String algorithm, ECEllipticCurve curve) {
+    SignatureAlgorithm(String name, SignatureAlgorithmFamily family, String algorithm, ECEllipticCurve curve) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
@@ -44,7 +44,7 @@ public enum SignatureAlgorithm {
         this.jwtType = JwtType.JWT;
     }
 
-    private SignatureAlgorithm(String name, String family, String algorithm) {
+    SignatureAlgorithm(String name, SignatureAlgorithmFamily family, String algorithm) {
         this.name = name;
         this.family = family;
         this.algorithm = algorithm;
@@ -52,7 +52,7 @@ public enum SignatureAlgorithm {
         this.jwtType = JwtType.JWT;
     }
 
-    private SignatureAlgorithm(String name) {
+    SignatureAlgorithm(String name) {
         this.name = name;
         this.family = null;
         this.algorithm = null;
@@ -64,7 +64,7 @@ public enum SignatureAlgorithm {
         return name;
     }
 
-    public String getFamily() {
+    public SignatureAlgorithmFamily getFamily() {
         return family;
     }
 
