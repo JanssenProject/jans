@@ -18,7 +18,8 @@
         },
         "sns":{
             "enabled":true,
-            "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/APNS/super_gluu_apns"
+            "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/APNS/super_gluu_apns",
+            "production":false
         }
     },
     "sns":{
