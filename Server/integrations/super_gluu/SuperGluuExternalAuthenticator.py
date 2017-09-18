@@ -417,13 +417,13 @@ class PersonAuthentication(PersonAuthenticationType):
             if self.oneStep:
                 return "/login.xhtml"
             else:
-            	identity = CdiUtil.bean(Identity)
-				authmethod = identity.getWorkingParameter("super_gluu_auth_method")
-				print "Super-Gluu. authmethod" ,authmethod
-				if authmethod == "enroll":
-					return "/auth/super-gluu/enroll.xhtml"
-				else :
-                	return "/auth/super-gluu/login.xhtml"
+                identity = CdiUtil.bean(Identity)
+                authmethod = identity.getWorkingParameter("super_gluu_auth_method")
+                print "Super-Gluu. authmethod '%s'" % authmethod
+                if authmethod == "enroll":
+                    return "/auth/super-gluu/enroll.xhtml"
+                else:
+                    return "/auth/super-gluu/login.xhtml"
 
         return ""
 
@@ -572,6 +572,8 @@ class PersonAuthentication(PersonAuthenticationType):
             else:
                 self.pushAppleService = apnsServiceBuilder.withSandboxDestination().build()
 
+            self.pushAppleServiceProduction = ios_creads["production"]
+
             print "Super-Gluu. Initialize native notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
@@ -628,6 +630,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if ios_creads["enabled"]:
             self.pushAppleService = snsClient 
+            self.pushAppleServiceProduction = ios_creads["production"]
             self.pushApplePlatformArn = ios_creads["platform_arn"]
             print "Super-Gluu. Initialize SNS notification services. Created iOS notification service"
 
@@ -782,10 +785,13 @@ class PersonAuthentication(PersonAuthenticationType):
                         }
                         push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
 
-#                        msgBuilder.forNewsstand()
-                        send_notification_result = pushSnsService.sendPushMessage(self.pushAppleService, PushPlatform.APNS, targetEndpointArn, push_message, None)
+                        apple_push_platform = PushPlatform.APNS
+                        if not self.pushAppleServiceProduction:
+                            apple_push_platform = PushPlatform.APNS_SANDBOX
+
+                        send_notification_result = pushSnsService.sendPushMessage(self.pushAppleService, apple_push_platform, targetEndpointArn, push_message, None)
                         if debug:
-                            print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                            print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s', apple_push_platform: '%s'" % (push_token, push_message, send_notification_result, apple_push_platform)
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
