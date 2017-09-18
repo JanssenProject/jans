@@ -50,7 +50,7 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version August 16, 2017
+ * @version September 6, 2017
  */
 @Stateless
 @Named
@@ -78,7 +78,8 @@ public class AuthenticationService {
             AuthorizeRequestParam.ORIGIN_HEADERS,
             AuthorizeRequestParam.CODE_CHALLENGE,
             AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
-            AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS));
+            AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
+            AuthorizeRequestParam.CLAIMS));
     private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
 
     @Inject

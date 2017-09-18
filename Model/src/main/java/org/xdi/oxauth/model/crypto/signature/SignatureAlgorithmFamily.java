@@ -8,10 +8,37 @@ package org.xdi.oxauth.model.crypto.signature;
 
 /**
  * @author Javier Rojas Blum
- * @version 0.9 December 9, 2014
+ * @version August 28, 2017
  */
-    public interface SignatureAlgorithmFamily {
-    public static final String HMAC = "HMAC";
-    public static final String RSA = "RSA";
-    public static final String EC = "EC";
+public enum SignatureAlgorithmFamily {
+    HMAC("HMAC"),
+    RSA("RSA"),
+    EC("EC");
+
+    private final String value;
+
+    SignatureAlgorithmFamily(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
+
+    public static SignatureAlgorithmFamily fromString(String param) {
+        if (param != null) {
+            for (SignatureAlgorithmFamily gt : SignatureAlgorithmFamily.values()) {
+                if (param.equals(gt.value)) {
+                    return gt;
+                }
+            }
+        }
+
+        return null;
+    }
 }
