@@ -16,6 +16,7 @@
 
 		<oxcore.version>3.1.1-SNAPSHOT</oxcore.version>
 		<oxeleven.version>3.1.1-SNAPSHOT</oxeleven.version>
+ 		<oxnotify.version>3.1.1-SNAPSHOT</oxnotify.version>
 
 		<jackson.version>2.8.10</jackson.version>
 		<jackson.databind.version>2.8.10</jackson.databind.version>
