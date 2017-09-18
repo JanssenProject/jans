@@ -29,6 +29,11 @@ public enum AuthorizeErrorResponseType implements IErrorType {
     UNAUTHORIZED_CLIENT("unauthorized_client"),
 
     /**
+     * The client is disabled and can't request an access token using this method.
+     */
+    DISABLED_CLIENT("disabled_client"),
+
+    /**
      * The resource owner or authorization server denied the request.
      */
     ACCESS_DENIED("access_denied"),
