@@ -64,6 +64,7 @@ class MyLDIF(LDIFParser):
             self.targetDN = dn
         self.lastDN = dn
         self.DNs.append(dn)
+        self.entries.append(entry)
         self.lastEntry = entry
         if dn.lower().strip() == self.targetDN.lower().strip():
             self.targetEntry = entry
@@ -195,7 +196,7 @@ class Migration(object):
         # import all the keys into the keystore
         for key in keys:
             alias = "{0}_{1}".format(hostname, key)
-            filename = os.path.join(self.certsDir, key+".crt")
+            filename = os.path.join(self.certsDir, key + ".crt")
             if not os.path.isfile(filename):
                 logging.debug("Missing file: %s", filename)
                 continue  # skip the non-existant certs
@@ -312,14 +313,14 @@ class Migration(object):
             # Change the keyword for attributetype
             elif atypeRegex.match(line):
                 line = atypeRegex.sub('\nattributetype ', line, 1)
-                oid = 'oxAttribute:' + str(self.attrs+1)
+                oid = 'oxAttribute:' + str(self.attrs + 1)
                 oidregex = re.compile('\s[\d]+\s', re.IGNORECASE)
-                line = oidregex.sub(' '+oid+' ', line, 1)
+                line = oidregex.sub(' ' + oid + ' ', line, 1)
                 self.attrs += 1
             # Change the keyword for objectclass
             elif obclassRegex.match(line):
                 line = obclassRegex.sub('\nobjectclass ', line, 1)
-                oid = 'oxObjectClass:' + str(self.objclasses+1)
+                oid = 'oxObjectClass:' + str(self.objclasses + 1)
                 oidregex = re.compile('ox-[\w]+-oid', re.IGNORECASE)
                 line = oidregex.sub(oid, line, 1)
                 self.objclasses += 1
@@ -409,7 +410,8 @@ class Migration(object):
             dateString = time.strftime("%Y%m%d%H%M%S", time.gmtime(dateTimestamp))
             ts = time.time()
             utc_offset = (datetime.datetime.fromtimestamp(ts) - datetime.datetime.utcfromtimestamp(ts)).total_seconds()
-            dateString = "%s.%03dZ" % (time.strftime("%Y%m%d%H%M%S", time.localtime(dateTimestamp)), int(utc_offset//60))
+            dateString = "%s.%03dZ" % (
+                time.strftime("%Y%m%d%H%M%S", time.localtime(dateTimestamp)), int(utc_offset // 60))
         except ValueError:
             # Data from OpenLDAP would already be in the expected format.
             # The above parsing would happen only for data from OpenDJ.
