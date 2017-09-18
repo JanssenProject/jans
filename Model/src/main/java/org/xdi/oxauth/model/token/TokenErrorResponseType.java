@@ -30,6 +30,12 @@ public enum TokenErrorResponseType implements IErrorType {
      * authentication scheme used by the client.
      */
     INVALID_CLIENT("invalid_client"),
+
+    /**
+     * The client is disabled and can't request an access token using this method.
+     */
+    DISABLED_CLIENT("disabled_client"),
+
     /**
      * The provided authorization grant is invalid, expired, revoked, does not
      * match the redirection URI used in the authorization request, or was
