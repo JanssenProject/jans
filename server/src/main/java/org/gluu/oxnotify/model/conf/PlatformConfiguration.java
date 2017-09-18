@@ -24,6 +24,8 @@ public class PlatformConfiguration {
 	private String accessKeyId;
 	private String secretAccessKey;
 
+	private String region;
+
 	private boolean enabled;
 
 	public String getPlatformId() {
@@ -64,6 +66,14 @@ public class PlatformConfiguration {
 
 	public void setSecretAccessKey(String secretAccessKey) {
 		this.secretAccessKey = secretAccessKey;
+	}
+
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
 	}
 
 	public boolean isEnabled() {

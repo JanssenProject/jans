@@ -106,9 +106,11 @@ public class ApplicationService {
 		}
 
 		for (PlatformConfiguration platformConfiguration : platformConfigurations) {
-			ClientData clientData = createClientData(platformConfiguration);
-			if (clientData != null) {
-				this.platormClients.put(platformConfiguration.getPlatformId().toLowerCase(), clientData);
+			if (platformConfiguration.isEnabled()) {
+				ClientData clientData = createClientData(platformConfiguration);
+				if (clientData != null) {
+					this.platormClients.put(platformConfiguration.getPlatformId().toLowerCase(), clientData);
+				}
 			}
 		}
 
@@ -123,7 +125,9 @@ public class ApplicationService {
 		}
 
 		for (ClientConfiguration clientConfiguration : clientConfiguratios) {
-			this.accessClients.put(clientConfiguration.getAccessKeyId().toLowerCase(), clientConfiguration);
+			if (clientConfiguration.isEnabled()) {
+				this.accessClients.put(clientConfiguration.getAccessKeyId().toLowerCase(), clientConfiguration);
+			}
 		}
 
 		log.info("Loaded configurations for '{}' access clients", this.accessClients.size());
@@ -136,7 +140,7 @@ public class ApplicationService {
 					platformConfiguration.getSecretAccessKey());
 			AmazonSNSClientBuilder snsClientBuilder = AmazonSNSClientBuilder.standard();
 			AmazonSNS amazonSNS = snsClientBuilder.withCredentials(new AWSStaticCredentialsProvider(credentials))
-					.build();
+					.withRegion(platformConfiguration.getRegion()).build();
 			clientData = new ClientData(amazonSNS, platformConfiguration.getPlatform(),
 					platformConfiguration.getPlatformArn());
 		} catch (Exception ex) {

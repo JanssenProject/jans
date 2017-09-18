@@ -8,6 +8,7 @@
          "platformArn":"arn_to_gcm_enpoint",
          "accessKeyId":"access_key_id",
          "secretAccessKey":"encoded_secret_access_key",
+         "region":"region",
          "enabled":true
       },
       {
@@ -16,6 +17,7 @@
          "platformArn":"arn_to_apns_enpoint",
          "accessKeyId":"access_key_id",
          "secretAccessKey":"encoded_secret_access_key",
+         "region":"region",
          "enabled":true
       }
    ]
