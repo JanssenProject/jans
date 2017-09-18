@@ -6,18 +6,16 @@
 
 package org.gluu.oxnotify.service;
 
+import java.io.UnsupportedEncodingException;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxnotify.model.PushPlatform;
+import org.apache.commons.codec.binary.Base64;
+import org.gluu.oxnotify.model.conf.ClientConfiguration;
 import org.gluu.oxnotify.model.conf.Configuration;
 import org.gluu.oxnotify.model.sns.ClientData;
 import org.slf4j.Logger;
-
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.sns.AmazonSNSAsync;
-import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder;
 
 /**
  * @author Yuriy Movchan
@@ -30,20 +28,44 @@ public class NotifyService {
 	private Logger log;
 
 	@Inject
+	private ApplicationService applicationService;
+
+	@Inject
 	private Configuration configuration;
 
-	public boolean processAuthorization(String authorization) {
-		return true;
+	public ClientConfiguration processAuthorization(String authorization) {
+        if ((authorization == null) || !authorization.startsWith("Basic ")) {
+			log.error("Client authorization header is invalid");
+        	return null;
+        }
+        String base64Token = authorization.substring(6);
+        String token;
+		try {
+			token = new String(Base64.decodeBase64(base64Token), "utf-8");
+		} catch (UnsupportedEncodingException ex) {
+			log.error("Failed to parse client authorization header", ex);
+			return null;
+		}
+
+        String accessKeyId = "";
+        String secretAccessKey = "";
+        int delim = token.indexOf(":");
+
+        if (delim != -1) {
+        	accessKeyId = token.substring(0, delim);
+        	secretAccessKey = token.substring(delim + 1);
+        }
+
+        ClientConfiguration clientConfiguration = applicationService.getAccessClient(accessKeyId, secretAccessKey);
+
+		return clientConfiguration;
 	}
 
-	public ClientData getClientData(String authorization) {
-		BasicAWSCredentials credentials = new BasicAWSCredentials("", "");
-		AmazonSNSAsyncClientBuilder snsClientBuilder = AmazonSNSAsyncClientBuilder.standard();
+	public ClientData getClientData(ClientConfiguration clientConfiguration) {
+		String platformId = clientConfiguration.getPlatformId().toLowerCase();
+		ClientData clientData = applicationService.getClientDataByPlatformId(platformId);
 
-		AmazonSNSAsync snsClient = snsClientBuilder.withCredentials(new AWSStaticCredentialsProvider(credentials))
-				.build();
-
-		return new ClientData(snsClient, PushPlatform.GCM, "");
+		return clientData;
 	}
 
 }

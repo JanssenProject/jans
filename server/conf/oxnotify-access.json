@@ -3,14 +3,14 @@
       {
          "clientId":"ce_gcm_client",
          "platformId":"ce_gcm",
-         "accessKeyId":"encoded_client_access_key_id",
+         "accessKeyId":"client_access_key_id",
          "secretAccessKey":"encoded_client_secret_access_key",
          "enabled":true
       },
       {
          "clientId":"ce_apns_client",
          "platformId":"ce_apns",
-         "accessKeyId":"encoded_client_access_key_id",
+         "accessKeyId":"client_access_key_id",
          "secretAccessKey":"encoded_client_secret_access_key",
          "enabled":true
       }

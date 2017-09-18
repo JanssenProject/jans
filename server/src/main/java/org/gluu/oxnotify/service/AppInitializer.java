@@ -23,12 +23,16 @@ public class AppInitializer {
 	@Inject
 	private ConfigurationFactory configurationFactory;
 
+	@Inject
+	private ApplicationService applicationService;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 	}
 
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         configurationFactory.create();
+        applicationService.init();
 	}
 
 }

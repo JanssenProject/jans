@@ -6,7 +6,7 @@
          "platformId":"ce_gcm",
          "platform":"GCM",
          "platformArn":"arn_to_gcm_enpoint",
-         "accessKeyId":"encoded_access_key_id",
+         "accessKeyId":"access_key_id",
          "secretAccessKey":"encoded_secret_access_key",
          "enabled":true
       },
@@ -14,7 +14,7 @@
          "platformId":"ce_apns",
          "platform":"APNS",
          "platformArn":"arn_to_apns_enpoint",
-         "accessKeyId":"encoded_access_key_id",
+         "accessKeyId":"access_key_id",
          "secretAccessKey":"encoded_secret_access_key",
          "enabled":true
       }

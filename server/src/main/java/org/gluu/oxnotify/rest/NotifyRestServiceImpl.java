@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxnotify.model.NotificationResponse;
 import org.gluu.oxnotify.model.PushPlatform;
 import org.gluu.oxnotify.model.RegisterDeviceResponse;
+import org.gluu.oxnotify.model.conf.ClientConfiguration;
 import org.gluu.oxnotify.model.sns.ClientData;
 import org.gluu.oxnotify.service.NotifyService;
 import org.slf4j.Logger;
@@ -45,15 +46,15 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 	public Response registerDevice(String authorization, String token, String userData) {
 		log.debug("Registering new user '{}' device with token '{}'", userData, token);
 
-		boolean authorized = notifyService.processAuthorization(authorization);
-		if (!authorized) {
+		ClientConfiguration clientConfiguration = notifyService.processAuthorization(authorization);
+		if (clientConfiguration == null) {
 			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to authorize client");
 			return response;
 		}
 
-		ClientData clientData = notifyService.getClientData(authorization);
-		if (!authorized) {
-			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to prepare client");
+		ClientData clientData = notifyService.getClientData(clientConfiguration);
+		if (clientData == null) {
+			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to find client");
 			return response;
 		}
 
@@ -102,15 +103,15 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 	public Response sendNotification(String authorization, String endpoint, String message) {
 		log.debug("Sending notification '{}' to endpoint '{}'", message, endpoint);
 
-		boolean authorized = notifyService.processAuthorization(authorization);
-		if (!authorized) {
+		ClientConfiguration clientConfiguration = notifyService.processAuthorization(authorization);
+		if (clientConfiguration == null) {
 			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to authorize client");
 			return response;
 		}
 
-		ClientData clientData = notifyService.getClientData(authorization);
-		if (!authorized) {
-			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to prepare client");
+		ClientData clientData = notifyService.getClientData(clientConfiguration);
+		if (clientData == null) {
+			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to find client");
 			return response;
 		}
 
