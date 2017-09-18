@@ -5,8 +5,13 @@
             "api_key":""
         },
         "sns":{
-            "enabled":true,
+            "enabled":false,
             "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/GCM/super_gluu_gcm"
+        },
+        "gluu":{
+            "enabled":true,
+            "access_key_id":"access_key_id",
+            "secret_access_key":"encoded_secret_access_key"
         }
     },
     "ios":{
@@ -17,13 +22,21 @@
             "production":false
         },
         "sns":{
-            "enabled":true,
+            "enabled":false,
             "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/APNS/super_gluu_apns"
+        },
+        "gluu":{
+            "enabled":true,
+            "access_key_id":"access_key_id",
+            "secret_access_key":"encoded_secret_access_key"
         }
     },
     "sns":{
-        "access_key":"encoded_access_key",
+        "access_key":"access_key",
         "secret_key":"encoded_secret_key",
         "region":"us-west-2"
+    },
+    "gluu":{
+        "server_uri":"server_uri"
     }
 }
