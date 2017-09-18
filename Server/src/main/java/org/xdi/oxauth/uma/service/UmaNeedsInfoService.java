@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.uma.ClaimDefinition;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
@@ -45,7 +46,8 @@ public class UmaNeedsInfoService {
     private ExternalUmaRptPolicyService policyService;
 
     public Map<CustomScriptConfiguration, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<UmaScopeDescription, Boolean> requestedScopes,
-                                                                                  List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest) {
+                                                                                  List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest,
+                                                                                  Client client) {
         Set<String> scriptDNs = getScriptDNs(new ArrayList<UmaScopeDescription>(requestedScopes.keySet()));
 
         Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = new HashMap<CustomScriptConfiguration, UmaAuthorizationContext>();
@@ -90,7 +92,7 @@ public class UmaNeedsInfoService {
             UmaNeedInfoResponse needInfoResponse = new UmaNeedInfoResponse();
             needInfoResponse.setTicket(newTicket);
             needInfoResponse.setError("need_info");
-            needInfoResponse.setRedirectUser(buildClaimsGatheringRedirectUri(scriptMap.values()));
+            needInfoResponse.setRedirectUser(buildClaimsGatheringRedirectUri(scriptMap.values(), client, newTicket));
             needInfoResponse.setRequiredClaims(missedClaims);
 
             throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).entity(ServerUtil.asJsonSilently(needInfoResponse)).build());
@@ -106,7 +108,7 @@ public class UmaNeedsInfoService {
         return existingValue + " " + claimsGatheringScriptName;
     }
 
-    private String buildClaimsGatheringRedirectUri(Collection<UmaAuthorizationContext> contexts) {
+    private String buildClaimsGatheringRedirectUri(Collection<UmaAuthorizationContext> contexts, Client client, String newTicket) {
         String queryParameters = "";
 
         for (UmaAuthorizationContext context : contexts) {
@@ -118,6 +120,7 @@ public class UmaNeedsInfoService {
         if (StringUtils.isNotBlank(queryParameters)) {
             result += "?" + queryParameters;
         }
+        result += "&client_id=" + client.getClientId() + "&ticket=" + newTicket;
         return result;
     }
 

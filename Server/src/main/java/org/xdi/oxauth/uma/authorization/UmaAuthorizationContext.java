@@ -54,6 +54,10 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         this.configurationAttributes = configurationAttributes != null ? configurationAttributes : new HashMap<String, SimpleCustomProperty>();
     }
 
+    public String getClaimToken() {
+        return getClaims().getClaimsTokenAsString();
+    }
+
     public String getIssuer() {
         return configuration.getIssuer();
     }
