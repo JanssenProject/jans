@@ -62,7 +62,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version September 6, 2017
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -119,12 +119,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String requestSessionId, String sessionId, String accessToken, String originHeaders,
-            String codeChallenge, String codeChallengeMethod, String customResponseHeaders,
+            String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
                 requestSessionId, sessionId, accessToken, HttpMethod.GET, originHeaders, codeChallenge,
-                codeChallengeMethod, customResponseHeaders, httpRequest, httpResponse, securityContext);
+                codeChallengeMethod, customResponseHeaders, claims, httpRequest, httpResponse, securityContext);
     }
 
     @Override
@@ -133,12 +133,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String nonce, String display, String prompt, Integer maxAge, String uiLocales, String idTokenHint,
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String requestSessionId, String sessionId, String accessToken, String originHeaders,
-            String codeChallenge, String codeChallengeMethod, String customResponseHeaders,
+            String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         return requestAuthorization(scope, responseType, clientId, redirectUri, state, responseMode, nonce, display,
                 prompt, maxAge, uiLocales, idTokenHint, loginHint, acrValues, amrValues, request, requestUri,
                 requestSessionId, sessionId, accessToken, HttpMethod.POST, originHeaders, codeChallenge,
-                codeChallengeMethod, customResponseHeaders, httpRequest, httpResponse, securityContext);
+                codeChallengeMethod, customResponseHeaders, claims, httpRequest, httpResponse, securityContext);
     }
 
     public Response requestAuthorization(
@@ -146,7 +146,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String nonce, String display, String prompt, Integer maxAge, String uiLocalesStr, String idTokenHint,
             String loginHint, String acrValuesStr, String amrValuesStr, String request, String requestUri, String requestSessionId,
             String sessionId, String accessToken, String method, String originHeaders,
-            String codeChallenge, String codeChallengeMethod, String customRespHeaders,
+            String codeChallenge, String codeChallengeMethod, String customRespHeaders, String claims,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
@@ -163,8 +163,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 state, request, securityContext.isSecure(), requestSessionId, sessionId);
 
         log.debug("Attempting to request authorization: "
-                        + "acrValues = {}, amrValues = {}, originHeaders = {}, codeChallenge = {}, codeChallengeMethod = {}",
-                acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod);
+                        + "acrValues = {}, amrValues = {}, originHeaders = {}, codeChallenge = {}, codeChallengeMethod = {}, "
+                        + "customRespHeaders = {}, claims = {}",
+                acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customRespHeaders, claims);
 
         ResponseBuilder builder = Response.ok();
 
@@ -416,7 +417,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                                 redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                                 idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                                codeChallenge, codeChallengeMethod, sessionId);
+                                                codeChallenge, codeChallengeMethod, sessionId, claims);
                                         builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                         applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                         return builder.build();
@@ -442,7 +443,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId);
+                                            codeChallenge, codeChallengeMethod, sessionId, claims);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
@@ -454,7 +455,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId);
+                                            codeChallenge, codeChallengeMethod, sessionId, claims);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
@@ -487,7 +488,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
                                             loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId);
+                                            codeChallenge, codeChallengeMethod, sessionId, claims);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
@@ -502,6 +503,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     authorizationGrant.setScopes(scopes);
                                     authorizationGrant.setCodeChallenge(codeChallenge);
                                     authorizationGrant.setCodeChallengeMethod(codeChallengeMethod);
+                                    authorizationGrant.setClaims(claims);
 
                                     // Store acr_values
                                     authorizationGrant.setAcrValues(acrValuesStr);
@@ -521,6 +523,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
                                         authorizationGrant.setScopes(scopes);
+                                        authorizationGrant.setClaims(claims);
 
                                         // Store acr_values
                                         authorizationGrant.setAcrValues(acrValuesStr);
@@ -543,6 +546,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setNonce(nonce);
                                         authorizationGrant.setJwtAuthorizationRequest(jwtAuthorizationRequest);
                                         authorizationGrant.setScopes(scopes);
+                                        authorizationGrant.setClaims(claims);
 
                                         // Store authentication acr values
                                         authorizationGrant.setAcrValues(acrValuesStr);
@@ -682,7 +686,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String redirectUri, String state, ResponseMode responseMode, String nonce, String display,
             List<Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
             List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
-            String codeChallenge, String codeChallengeMethod, String sessionId) {
+            String codeChallenge, String codeChallengeMethod, String sessionId, String claims) {
 
         redirectUriResponse.setBaseRedirectUri(appConfiguration.getAuthorizationPage());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
@@ -754,6 +758,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
         if (StringUtils.isNotBlank(sessionId)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.SESSION_ID, sessionId);
+        }
+        if (StringUtils.isNotBlank(claims)) {
+            redirectUriResponse.addResponseParameter(AuthorizeRequestParam.CLAIMS, claims);
         }
 
         // mod_ox param

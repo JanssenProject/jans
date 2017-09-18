@@ -28,7 +28,7 @@ import javax.ws.rs.core.SecurityContext;
  * </p>
  *
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version September 6, 2017
  */
 @Api(value = "/", description = "The Authorization Endpoint performs Authentication of the End-User. This is done by sending the User Agent to the Authorization Server's Authorization Endpoint for Authentication and Authorization, using request parameters defined by OAuth 2.0 and additional parameters and parameter values defined by OpenID Connect.")
 public interface AuthorizeRestWebService {
@@ -230,6 +230,9 @@ public interface AuthorizeRestWebService {
             @QueryParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS)
             @ApiParam(value = "Custom Response Headers.", required = false)
                     String customResponseHeaders,
+            @QueryParam("claims")
+            @ApiParam(value = "Requested Claims.", required = false)
+                    String claims,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
@@ -336,6 +339,9 @@ public interface AuthorizeRestWebService {
             @QueryParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS)
             @ApiParam(value = "Custom Response Headers.", required = false)
                     String customResponseHeaders,
+            @QueryParam("claims")
+            @ApiParam(value = "Requested Claims.", required = false)
+                    String claims,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);

@@ -53,7 +53,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 9, 2017
+ * @version September 6, 2017
  */
 @RequestScoped
 @Named
@@ -109,7 +109,7 @@ public class AuthorizeAction {
 
     @Inject
     private FacesService facesService;
-    
+
     @Inject
     private FacesMessages facesMessages;
 
@@ -141,6 +141,7 @@ public class AuthorizeAction {
     private String requestUri;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String claims;
 
     // custom oxAuth parameters
     private String sessionId;
@@ -695,10 +696,10 @@ public class AuthorizeAction {
     public void permissionDenied() {
         log.trace("permissionDenied");
         final SessionId session = getSession();
-        
+
         if (session == null) {
-        	authenticationFailedSessionInvalid();
-        	return;
+            authenticationFailedSessionInvalid();
+            return;
         }
 
         StringBuilder sb = new StringBuilder();
@@ -722,7 +723,7 @@ public class AuthorizeAction {
     }
 
     private void authenticationFailedSessionInvalid() {
-    	facesMessages.add(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
+        facesMessages.add(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
         facesService.redirect("/error.xhtml");
     }
 
@@ -770,6 +771,14 @@ public class AuthorizeAction {
 
     public void setCodeChallengeMethod(String codeChallengeMethod) {
         this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    public String getClaims() {
+        return claims;
+    }
+
+    public void setClaims(String claims) {
+        this.claims = claims;
     }
 
     public String encodeParameters(String url, Map<String, Object> parameters) {
