@@ -6,9 +6,14 @@
             "uri":null
         },
         {
-            "id":"unauthorized_client",
-            "description":"The client is not authorized to request an access token using this method.",
+            "id": "disabled_client",
+            "description": "The client is disabled and can't request an access token using this method.",
             "uri":null
+        },
+        {
+            "id": "unauthorized_client",
+            "description": "The client is not authorized to request an access token using this method.",
+            "uri": null
         },
         {
             "id":"access_denied",
@@ -154,6 +159,11 @@
             "uri":null
         },
         {
+            "id": "disabled_client",
+            "description": "The client is disabled and can't request an access token using this method.",
+            "uri": null
+        },
+        {
             "id":"invalid_grant",
             "description":"The provided authorization grant is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.",
             "uri":null
@@ -184,6 +194,11 @@
             "id":"unauthorized_client",
             "description":"The client is not authorized to request an access token using this method.",
             "uri":null
+        },
+        {
+            "id": "disabled_client",
+            "description": "The client is disabled and can't request an access token using this method.",
+            "uri": null
         },
         {
             "id":"access_denied",
