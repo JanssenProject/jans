@@ -5,26 +5,39 @@
             "api_key":""
         },
         "sns":{
+            "enabled":false,
+            "platform_arn":"platform_arn"
+        },
+        "gluu":{
             "enabled":true,
-            "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/GCM/super_gluu_gcm"
+            "access_key_id":"access_key_id",
+            "secret_access_key":"encoded_secret_access_key"
         }
     },
     "ios":{
         "apns":{
             "enabled":false,
-            "p12_file_path":"/etc/certs/SuperGluu-NotificationCertificat.p12",
+            "p12_file_path":"/etc/certs/SuperGluuertificate.p12",
             "p12_password":"password",
             "production":false
         },
         "sns":{
-            "enabled":true,
-            "platform_arn":"arn:aws:sns:us-west-2:989705443609:app/APNS/super_gluu_apns",
+            "enabled":false,
+            "platform_arn":"platform_arn",
             "production":false
+        },
+        "gluu":{
+            "enabled":true,
+            "access_key_id":"access_key_id",
+            "secret_access_key":"encoded_secret_access_key"
         }
     },
     "sns":{
         "access_key":"access_key",
-        "secret_key":"secret_key",
-        "region":"us-west-2"
+        "secret_key":"encoded_secret_key",
+        "region":"region"
+    },
+    "gluu":{
+        "server_uri":"server_uri"
     }
 }
