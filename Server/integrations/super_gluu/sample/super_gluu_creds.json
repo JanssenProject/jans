@@ -18,7 +18,8 @@
         },
         "sns":{
             "enabled":false,
-            "platform_arn":"arn:aws:sns:..."
+            "platform_arn":"arn:aws:sns:...",
+            "production":false
         }
     },
     "sns":{
