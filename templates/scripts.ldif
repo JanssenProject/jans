@@ -425,7 +425,7 @@ description: Twilio SMS authentication module
 displayName: twilio_sms
 gluuStatus: false
 inum: %(inumOrg)s!0011!09A0.93D6
-oxConfigurationProperty: {"value1":"_sidtwilio","value2":"Twilio account","description":""}
+oxConfigurationProperty: {"value1":"twilio_sid","value2":"Twilio account","description":""}
 oxConfigurationProperty: {"value1":"twilio_token","value2":"Twilio API secret","description":""}
 oxConfigurationProperty: {"value1":"from_number","value2":"Phone number fomatting","description":""}
 oxLevel: 60
