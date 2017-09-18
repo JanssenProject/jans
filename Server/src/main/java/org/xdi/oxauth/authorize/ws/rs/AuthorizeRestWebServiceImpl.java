@@ -212,6 +212,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 JwtAuthorizationRequest jwtAuthorizationRequest = null;
 
                 if (client != null) {
+                    if (client.isDisabled()) {
+                        builder = Response.status(Response.Status.FORBIDDEN.getStatusCode()); // 403
+                        builder.entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.DISABLED_CLIENT, state));
+
+                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+
+                        return builder.build();
+                    }
+
                     List<String> scopes = new ArrayList<String>();
                     if (StringHelper.isNotEmpty(scope)) {
                         Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
