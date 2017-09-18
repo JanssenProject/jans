@@ -191,7 +191,7 @@ public class LicenseService {
     private static AppMetadata appMetadata(String programmingLanguage, String serverName) {
         AppMetadata appMetadata = new AppMetadata();
         appMetadata.setAppName("oxd");
-        appMetadata.setAppVersion("3.1.0");
+        appMetadata.setAppVersion("3.1.1");
         appMetadata.setProgrammingLanguage(programmingLanguage);
 
         Properties buildProperties = ServerLauncher.buildProperties();
