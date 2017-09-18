@@ -63,7 +63,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version May 12, 2017
+ * @version September 6, 2017
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -506,6 +506,40 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             }
 
             jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getUser().getAttribute("inum"));
+        }
+
+        if (authorizationGrant.getClaims() != null) {
+            JSONObject claimsObj = new JSONObject(authorizationGrant.getClaims());
+            if (claimsObj.has("userinfo")) {
+                JSONObject userInfoObj = claimsObj.getJSONObject("userinfo");
+                for (Iterator<String> it = userInfoObj.keys(); it.hasNext(); ) {
+                    String claimName = it.next();
+                    boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
+                    GluuAttribute gluuAttribute = attributeService.getByClaimName(claimName);
+
+                    if (gluuAttribute != null) {
+                        String ldapClaimName = gluuAttribute.getName();
+
+                        Object attribute = user.getAttribute(ldapClaimName, optional);
+                        if (attribute != null) {
+                            if (attribute instanceof JSONArray) {
+                                JSONArray jsonArray = (JSONArray) attribute;
+                                List<String> values = new ArrayList<String>();
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    String value = jsonArray.optString(i);
+                                    if (value != null) {
+                                        values.add(value);
+                                    }
+                                }
+                                jsonWebResponse.getClaims().setClaim(claimName, values);
+                            } else {
+                                String value = (String) attribute;
+                                jsonWebResponse.getClaims().setClaim(claimName, value);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         if (authorizationGrant.getJwtAuthorizationRequest() != null
