@@ -11,6 +11,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.oxeleven.model.JwksRequestParam;
 import org.gluu.oxeleven.model.KeyRequestParam;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.crypto.signature.ECEllipticCurve;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
@@ -34,7 +35,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 17, 2016
+ * @version August 28, 2017
  */
 public abstract class AbstractCryptoProvider {
 
@@ -130,23 +131,29 @@ public abstract class AbstractCryptoProvider {
         for (int i = 0; i < webKeys.length(); i++) {
             JSONObject key = webKeys.getJSONObject(i);
             if (alias.equals(key.getString(KEY_ID))) {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(key.getString(ALGORITHM));
-                if (signatureAlgorithm != null) {
-                    if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.RSA)) {
-                        publicKey = new RSAPublicKeyImpl(
-                                new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
-                                new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
-                    } else if (signatureAlgorithm.getFamily().equals(SignatureAlgorithmFamily.EC)) {
-                        AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC);
-                        parameters.init(new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias()));
-                        ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
+                SignatureAlgorithmFamily family = null;
+                if (key.has(ALGORITHM)) {
+                    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(key.optString(ALGORITHM));
+                    family = signatureAlgorithm.getFamily();
+                } else if (key.has(KEY_TYPE)) {
+                    family = SignatureAlgorithmFamily.fromString(key.getString(KEY_TYPE));
+                }
 
-                        publicKey = KeyFactory.getInstance(SignatureAlgorithmFamily.EC).generatePublic(new ECPublicKeySpec(
-                                new ECPoint(
-                                        new BigInteger(1, Base64Util.base64urldecode(key.getString(X))),
-                                        new BigInteger(1, Base64Util.base64urldecode(key.getString(Y)))
-                                ), ecParameters));
-                    }
+                if (SignatureAlgorithmFamily.RSA.equals(family)) {
+                    publicKey = new RSAPublicKeyImpl(
+                            new BigInteger(1, Base64Util.base64urldecode(key.getString(MODULUS))),
+                            new BigInteger(1, Base64Util.base64urldecode(key.getString(EXPONENT))));
+                } else if (SignatureAlgorithmFamily.EC.equals(family)) {
+                    ECEllipticCurve curve = ECEllipticCurve.fromString(key.optString(CURVE));
+                    AlgorithmParameters parameters = AlgorithmParameters.getInstance(SignatureAlgorithmFamily.EC.toString());
+                    parameters.init(new ECGenParameterSpec(curve.getAlias()));
+                    ECParameterSpec ecParameters = parameters.getParameterSpec(ECParameterSpec.class);
+
+                    publicKey = KeyFactory.getInstance(SignatureAlgorithmFamily.EC.toString()).generatePublic(new ECPublicKeySpec(
+                            new ECPoint(
+                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(X))),
+                                    new BigInteger(1, Base64Util.base64urldecode(key.getString(Y)))
+                            ), ecParameters));
                 }
             }
         }

@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 28, 2017
+ * @version September 6, 2017
  */
 
 public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant {
@@ -53,6 +53,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String claims;
 
     private String acrValues;
     private String sessionDn;
@@ -132,6 +133,14 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     public void setCodeChallengeMethod(String codeChallengeMethod) {
         this.codeChallengeMethod = codeChallengeMethod;
+    }
+
+    public String getClaims() {
+        return claims;
+    }
+
+    public void setClaims(String claims) {
+        this.claims = claims;
     }
 
     /**
@@ -445,6 +454,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
                 + client + ", grantId='" + grantId + '\'' + ", nonce='" + nonce + '\'' + ", acrValues='" + acrValues
                 + '\'' + ", sessionDn='" + sessionDn + '\'' + ", codeChallenge='" + codeChallenge + '\''
                 + ", codeChallengeMethod='" + codeChallengeMethod + '\'' + ", authenticationTime=" + authenticationTime
-                + ", scopes=" + scopes + ", authorizationGrantType=" + authorizationGrantType + '}';
+                + ", scopes=" + scopes + ", authorizationGrantType=" + authorizationGrantType
+                + ", claims=" + claims + '}';
     }
 }

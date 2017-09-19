@@ -288,6 +288,16 @@
 			<artifactId>oxeleven-client</artifactId>
 		</dependency>
 
+		<!-- oxNotify -->
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxnotify-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.gluu</groupId>
+			<artifactId>oxnotify-client</artifactId>
+		</dependency>
+
 		<!-- Weld -->
 		<dependency>
 			<groupId>javax.enterprise</groupId>

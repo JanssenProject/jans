@@ -177,6 +177,9 @@ public class Client implements Serializable {
     @LdapCustomObjectClass
     private String[] customObjectClasses;
 
+    @LdapAttribute(name = "oxDisabled")
+    private boolean disabled;
+
     public AuthenticationMethod getAuthenticationMethod() {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
     }
@@ -1075,6 +1078,14 @@ public class Client implements Serializable {
 
     public void setCustomObjectClasses(String[] p_customObjectClasses) {
         customObjectClasses = p_customObjectClasses;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 
     public static Client instance() {

@@ -6,9 +6,6 @@
 
 package org.xdi.oxauth.service.fido.u2f.util;
 
-import java.util.Date;
-import java.util.UUID;
-
 import org.codehaus.jettison.json.JSONObject;
 import org.python.icu.util.Calendar;
 import org.xdi.oxauth.model.crypto.Certificate;
@@ -20,10 +17,13 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 
+import java.util.Date;
+import java.util.UUID;
+
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version June 15, 2016
+ * @version August 28, 2017
  */
 public class KeyGenerator {
     public static void main(String[] args) throws Exception {
@@ -48,7 +48,7 @@ public class KeyGenerator {
         Certificate certificate = keyFactory.generateV3Certificate(startDate, expirationDate, dnName);
         key.setCertificate(certificate);
 
-        key.setKeyType(SignatureAlgorithm.ES256.getFamily());
+        key.setKeyType(SignatureAlgorithm.ES256.getFamily().getValue());
         key.setUse(Use.SIGNATURE.toString());
         key.setAlgorithm(SignatureAlgorithm.ES256.getName());
         key.setKeyId(UUID.randomUUID().toString());
