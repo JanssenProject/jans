@@ -42,7 +42,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version March 23, 2017
+ * @version August 28, 2017
  */
 public class KeyGenerator {
 
@@ -126,7 +126,7 @@ public class KeyGenerator {
                                 key.setKid(result.getString(KEY_ID));
                                 key.setUse(Use.SIGNATURE);
                                 key.setAlg(signatureAlgorithm);
-                                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
+                                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily().toString()));
                                 key.setExp(result.optLong(EXPIRATION_TIME));
                                 key.setCrv(signatureAlgorithm.getCurve());
                                 key.setN(result.optString(MODULUS));
@@ -176,7 +176,7 @@ public class KeyGenerator {
                                 key.setKid(result.getString(KEY_ID));
                                 key.setUse(Use.SIGNATURE);
                                 key.setAlg(signatureAlgorithm);
-                                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily()));
+                                key.setKty(KeyType.fromString(signatureAlgorithm.getFamily().toString()));
                                 key.setExp(result.optLong(EXPIRATION_TIME));
                                 key.setCrv(signatureAlgorithm.getCurve());
                                 key.setN(result.optString(MODULUS));

@@ -134,14 +134,16 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 if (client != null) {
                     log.debug("Get client from session: '{}'", client.getClientId());
+                    if (client.isDisabled()) {
+                        return response(error(Response.Status.FORBIDDEN.getStatusCode(), TokenErrorResponseType.DISABLED_CLIENT), oAuth2AuditLog);
+                    }
+                } else {
+                    return response(error(401, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
                 }
 
                 if (gt == GrantType.AUTHORIZATION_CODE) {
-                    if (client == null) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT));
-                    }
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT));
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
                     }
 
                     log.debug("Attempting to find authorizationCodeGrant by clinetId: '{}', code: '{}'", client.getClientId(), code);
@@ -149,7 +151,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     log.trace("AuthorizationCodeGrant : '{}'", authorizationCodeGrant);
 
                     if (authorizationCodeGrant != null) {
-                        validatePKCE(authorizationCodeGrant, codeVerifier);
+                        validatePKCE(authorizationCodeGrant, codeVerifier, oAuth2AuditLog);
 
                         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
                         authorizationCodeGrant.save();
@@ -194,11 +196,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(400, TokenErrorResponseType.INVALID_GRANT);
                     }
                 } else if (gt == GrantType.REFRESH_TOKEN) {
-                    if (client == null) {
-                        return response(error(401, TokenErrorResponseType.INVALID_GRANT));
-                    }
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT));
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
                     }
 
                     AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(client.getClientId(), refreshToken);
@@ -229,11 +228,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         builder = error(401, TokenErrorResponseType.INVALID_GRANT);
                     }
                 } else if (gt == GrantType.CLIENT_CREDENTIALS) {
-                    if (client == null) {
-                        return response(error(401, TokenErrorResponseType.INVALID_GRANT));
-                    }
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT));
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
                     }
 
                     ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client); // TODO: fix the user arg
@@ -260,12 +256,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                             scope,
                             idToken));
                 } else if (gt == GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) {
-                    if (client == null) {
-                        log.error("Invalid client", new RuntimeException("Client is empty"));
-                        return response(error(401, TokenErrorResponseType.INVALID_CLIENT));
-                    }
                     if (!TokenParamsValidator.validateGrantType(gt, client.getGrantTypes(), appConfiguration.getGrantTypesSupported())) {
-                        return response(error(400, TokenErrorResponseType.INVALID_GRANT));
+                        return response(error(400, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog);
                     }
 
                     User user = null;
@@ -332,11 +324,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             log.error(e.getMessage(), e);
         }
 
-        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-        return response(builder);
+        return response(builder, oAuth2AuditLog);
     }
 
-    private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier) {
+    private void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog) {
         log.trace("PKCE validation, code_verifier: {}, code_challenge: {}, method: {}",
                 codeVerifier, grant.getCodeChallenge(), grant.getCodeChallengeMethod());
 
@@ -347,16 +338,19 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         if (!CodeVerifier.matched(grant.getCodeChallenge(), grant.getCodeChallengeMethod(), codeVerifier)) {
             log.error("PKCE check fails. Code challenge does not match to request code verifier, " +
                     "grantId:" + grant.getGrantId() + ", codeVerifier: " + codeVerifier);
-            throw new WebApplicationException(response(error(401, TokenErrorResponseType.INVALID_GRANT)));
+            throw new WebApplicationException(response(error(401, TokenErrorResponseType.INVALID_GRANT), oAuth2AuditLog));
         }
     }
 
-    private Response response(ResponseBuilder builder) {
+    private Response response(ResponseBuilder builder, OAuth2AuditLog oAuth2AuditLog) {
         CacheControl cacheControl = new CacheControl();
         cacheControl.setNoTransform(false);
         cacheControl.setNoStore(true);
         builder.cacheControl(cacheControl);
         builder.header("Pragma", "no-cache");
+
+        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+
         return builder.build();
     }
 
