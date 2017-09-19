@@ -50,7 +50,7 @@ public class NotifyClientFactory {
 	}
 
 	public NotifyMetadataClientService createMetaDataConfigurationService(String issuer) {
-		ResteasyWebTarget target = client.target(UriBuilder.fromPath(issuer + "/oxnotify/restv1/notify-configuration"));
+		ResteasyWebTarget target = client.target(UriBuilder.fromPath(issuer + "/.well-known/notify-configuration"));
 		return target.proxy(NotifyMetadataClientService.class);
 	}
 
