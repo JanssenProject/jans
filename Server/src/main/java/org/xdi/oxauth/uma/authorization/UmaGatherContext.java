@@ -6,7 +6,6 @@
 
 package org.xdi.oxauth.uma.authorization;
 
-import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.oxauth.model.common.SessionId;
@@ -14,6 +13,7 @@ import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
 import org.xdi.oxauth.model.jwt.JwtClaims;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
@@ -72,11 +72,16 @@ public class UmaGatherContext extends ExternalScriptContext {
     }
 
     public User getUser(String... returnAttributes) {
-        String userDn = getUserDn();
-        if (StringUtils.isNotBlank(userDn)) {
-            return userService.getUserByDn(userDn, returnAttributes);
-        }
-        return null;
+        return sessionService.getUser(httpRequest, returnAttributes);
+    }
+
+    public String getUserDn() {
+        return sessionService.getUserDn(httpRequest);
+    }
+
+
+    public Client getClient() {
+        return sessionService.getClient(session);
     }
 
     public Map<String, String> getConnectSessionAttributes() {
@@ -85,14 +90,6 @@ public class UmaGatherContext extends ExternalScriptContext {
             return new HashMap<String, String>(connectSession.getSessionAttributes());
         }
         return new HashMap<String, String>();
-    }
-
-    public String getUserDn() {
-        SessionId connectSession = sessionService.getConnectSession(httpRequest);
-        if (connectSession != null) {
-            return connectSession.getUserDn();
-        }
-        return null;
     }
 
     public boolean isAuthenticated() {
