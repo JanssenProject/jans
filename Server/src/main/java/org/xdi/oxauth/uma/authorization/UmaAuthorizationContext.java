@@ -165,6 +165,10 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
         return sessionService.getUser(httpRequest, returnAttributes);
     }
 
+    public boolean isAuthenticated() {
+        return getUser() != null;
+    }
+
     public String getUserDn() {
         return sessionService.getUserDn(httpRequest);
     }
