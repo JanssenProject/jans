@@ -278,7 +278,7 @@ class Setup(object):
         self.loadLdifCommand = self.ldapModifyCommand
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
-        self.redhat_services = ['memcached', 'httpd']
+        self.redhat_services = ['memcached', 'httpd', 'rsyslog']
         self.debian_services = ['memcached', 'apache2', 'rsyslog']
 
         self.apache_start_script = '/etc/init.d/httpd'

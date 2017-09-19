@@ -69,6 +69,7 @@
         "A256GCM"
     ],
     "idTokenSigningAlgValuesSupported":[
+        "none",
         "HS256",
         "HS384",
         "HS512",
@@ -170,6 +171,7 @@
     "sessionAsJwt":false,
     "umaRequesterPermissionTokenLifetime":3600,
     "umaAddScopesAutomatically":true,
+    "umaValidateClaimToken":false,
     "umaKeepClientDuringResourceSetRegistration":true,
     "umaRptAsJwt":false,
     "cleanServiceInterval":600,
