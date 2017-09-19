@@ -10,10 +10,14 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -38,6 +42,10 @@ public class UmaSessionService {
     private SessionIdService sessionIdService;
     @Inject
     private ExternalUmaClaimsGatheringService external;
+    @Inject
+    private UserService userService;
+    @Inject
+    private ClientService clientService;
 
     public SessionId getConnectSession(HttpServletRequest httpRequest) {
         String cookieId = sessionIdService.getSessionIdFromCookie(httpRequest);
@@ -214,5 +222,33 @@ public class UmaSessionService {
         }
 
         setStep(overridenNextStep, session);
+    }
+
+    public User getUser(HttpServletRequest httpRequest, String... returnAttributes) {
+        String userDn = getUserDn(httpRequest);
+        if (StringUtils.isNotBlank(userDn)) {
+            return userService.getUserByDn(userDn, returnAttributes);
+        }
+
+        return null;
+    }
+
+    public String getUserDn(HttpServletRequest httpRequest) {
+        SessionId connectSession = getConnectSession(httpRequest);
+        if (connectSession != null) {
+            return connectSession.getUserDn();
+        }
+
+        log.trace("No logged in user.");
+        return null;
+    }
+
+    public Client getClient(SessionId session) {
+        String clientId = getClientId(session);
+        if (StringUtils.isNotBlank(clientId)) {
+            return clientService.getClient(clientId);
+        }
+        log.trace("client_id is not in session.");
+        return null;
     }
 }
