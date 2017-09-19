@@ -33,7 +33,7 @@ import java.util.Set;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version June 28, 2017
+ * @version September 6, 2017
  */
 public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
@@ -108,6 +108,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                     t.setAuthenticationTime(getAuthenticationTime());
                     t.setCodeChallenge(getCodeChallenge());
                     t.setCodeChallengeMethod(getCodeChallengeMethod());
+                    t.setClaims(getClaims());
 
                     final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
                     if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
