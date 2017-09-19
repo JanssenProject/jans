@@ -9,7 +9,9 @@ package org.xdi.config.oxtrust;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
+import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.config.oxauth.WebKeysSettings;
 import org.xdi.ldap.model.Entry;
 
 /**
@@ -36,13 +38,26 @@ public class LdapOxAuthConfiguration extends Entry {
 
 	@LdapAttribute(name = "oxAuthConfWebKeys")
     private String oxAuthConfWebKeys;
+	
+    @LdapJsonObject
+    @LdapAttribute(name = "oxWebKeysSettings")
+    private WebKeysSettings oxWebKeysSettings;
 
-    @LdapAttribute(name = "oxRevision")
+	@LdapAttribute(name = "oxRevision")
     private long revision;
 
 	public LdapOxAuthConfiguration() {
 	}
 
+
+	public WebKeysSettings getOxWebKeysSettings() {
+		return oxWebKeysSettings;
+	}
+
+
+	public void setOxWebKeysSettings(WebKeysSettings oxWebKeysSettings) {
+		this.oxWebKeysSettings = oxWebKeysSettings;
+	}
 	
 	public String getOxAuthConfigDynamic() {
 		return oxAuthConfigDynamic;
@@ -83,6 +98,7 @@ public class LdapOxAuthConfiguration extends Entry {
 	public void setRevision(long revision) {
 		this.revision = revision;
 	}
+	
 
 	@Override
 	public String toString() {
