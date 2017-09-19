@@ -10,14 +10,14 @@
         },
         "gluu":{
             "enabled":true,
-            "access_key_id":"access_key_id",
-            "secret_access_key":"encoded_secret_access_key"
+            "access_key_id":"36WH2JiexBOoAIBP",
+            "secret_access_key":"ueqsU2Dc7m3r4HmLz4M79DpzzCNqTfek"
         }
     },
     "ios":{
         "apns":{
             "enabled":false,
-            "p12_file_path":"/etc/certs/SuperGluuertificate.p12",
+            "p12_file_path":"/etc/certs/SuperGluuCertificate.p12",
             "p12_password":"password",
             "production":false
         },
@@ -28,8 +28,8 @@
         },
         "gluu":{
             "enabled":true,
-            "access_key_id":"access_key_id",
-            "secret_access_key":"encoded_secret_access_key"
+            "access_key_id":"auONAdePWoYFBX6V",
+            "secret_access_key":"f050aW0nnihym0GwktWd7O15jGSQcoei"
         }
     },
     "sns":{
@@ -38,6 +38,6 @@
         "region":"region"
     },
     "gluu":{
-        "server_uri":"server_uri"
+        "server_uri":"https://s1.gluu.org"
     }
 }
