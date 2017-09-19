@@ -8,12 +8,16 @@ package org.xdi.oxauth.uma.authorization;
 
 import com.google.common.collect.Maps;
 import org.xdi.model.SimpleCustomProperty;
+import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.context.ExternalScriptContext;
 import org.xdi.oxauth.uma.service.RedirectParameters;
+import org.xdi.oxauth.uma.service.UmaSessionService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -25,7 +29,6 @@ import java.util.Set;
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version 0.9 February 12, 2015
  */
 
 public class UmaAuthorizationContext extends ExternalScriptContext {
@@ -38,15 +41,22 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     private final RedirectParameters redirectUserParameters = new RedirectParameters();
     private final AppConfiguration configuration;
 
-    private AttributeService attributeService;
+    private final AttributeService attributeService;
+    private final UmaSessionService sessionService;
+    private final UserService userService;
+    private final Client client;
 
     public UmaAuthorizationContext(AppConfiguration configuration, AttributeService attributeService, Map<UmaScopeDescription, Boolean> scopes,
                                    Set<UmaResource> resources, Claims claims, String scriptDn, HttpServletRequest httpRequest,
-                                   Map<String, SimpleCustomProperty> configurationAttributes) {
+                                   Map<String, SimpleCustomProperty> configurationAttributes, UmaSessionService sessionService,
+                                   UserService userService, Client client) {
     	super(httpRequest);
 
         this.configuration = configuration;
     	this.attributeService = attributeService;
+        this.sessionService = sessionService;
+        this.userService = userService;
+        this.client = client;
         this.scopes = new HashMap<UmaScopeDescription, Boolean>(scopes);
         this.resources = resources;
         this.claims = claims;
@@ -56,6 +66,14 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
 
     public String getClaimToken() {
         return getClaims().getClaimsTokenAsString();
+    }
+
+    public Object getClaimTokenClaim(String key) {
+        return getClaims().getClaimTokenClaim(key);
+    }
+
+    public Object getPctClaim(String key) {
+        return getClaims().getPctClaim(key);
     }
 
     public String getIssuer() {
@@ -142,7 +160,20 @@ public class UmaAuthorizationContext extends ExternalScriptContext {
     public Map<String, Set<String>> getRedirectUserParametersMap() {
         return redirectUserParameters.map();
     }
-//    public String getClientClaim(String p_claimName) {
+
+    public User getUser(String... returnAttributes) {
+        return sessionService.getUser(httpRequest, returnAttributes);
+    }
+
+    public String getUserDn() {
+        return sessionService.getUserDn(httpRequest);
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    //    public String getClientClaim(String p_claimName) {
 //        return getEntryAttributeValue(getGrant().getClientDn(), p_claimName);
 //    }
 //
