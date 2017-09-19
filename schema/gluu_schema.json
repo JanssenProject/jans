@@ -4941,6 +4941,7 @@
                 "uniqueIdentifier",
                 "oxCodeChallenge",
                 "oxCodeChallengeMethod",
+                "oxAuthClaims",
                 "oxAuthSessionDn"
             ],
             "must": [
