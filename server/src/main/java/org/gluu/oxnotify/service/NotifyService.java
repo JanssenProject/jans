@@ -39,9 +39,9 @@ public class NotifyService {
         	return null;
         }
         String base64Token = authorization.substring(6);
-        String token;
+        String credentials;
 		try {
-			token = new String(Base64.decodeBase64(base64Token), "utf-8");
+			credentials = new String(Base64.decodeBase64(base64Token), "utf-8");
 		} catch (UnsupportedEncodingException ex) {
 			log.error("Failed to parse client authorization header", ex);
 			return null;
@@ -49,11 +49,11 @@ public class NotifyService {
 
         String accessKeyId = "";
         String secretAccessKey = "";
-        int delim = token.indexOf(":");
+        int delim = credentials.indexOf(":");
 
         if (delim != -1) {
-        	accessKeyId = token.substring(0, delim);
-        	secretAccessKey = token.substring(delim + 1);
+        	accessKeyId = credentials.substring(0, delim);
+        	secretAccessKey = credentials.substring(delim + 1);
         }
 
         ClientConfiguration clientConfiguration = applicationService.getAccessClient(accessKeyId, secretAccessKey);

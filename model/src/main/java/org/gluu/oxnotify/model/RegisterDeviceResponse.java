@@ -31,6 +31,9 @@ public class RegisterDeviceResponse implements Serializable {
 	@JsonProperty
 	private int statusCode;
 
+	public RegisterDeviceResponse() {
+	}
+
 	public RegisterDeviceResponse(@JsonProperty String requestId, @JsonProperty int statusCode,
 			@JsonProperty String endpointArn) {
 		this.requestId = requestId;

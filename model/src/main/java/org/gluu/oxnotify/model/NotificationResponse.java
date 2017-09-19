@@ -31,6 +31,9 @@ public class NotificationResponse implements Serializable {
 	@JsonProperty
 	private int statusCode;
 
+	public NotificationResponse() {
+	}
+
 	public NotificationResponse(@JsonProperty String requestId, @JsonProperty int statusCode,
 			@JsonProperty String messageId) {
 		this.requestId = requestId;

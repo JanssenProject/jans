@@ -6,6 +6,8 @@
 
 package org.gluu.oxnotify.client;
 
+import java.util.Base64;
+
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -47,8 +49,8 @@ public class NotifyClientFactory {
 		return instance;
 	}
 
-	public NotifyMetadataClientService createMetaDataConfigurationService(String metaDataUri) {
-		ResteasyWebTarget target = client.target(UriBuilder.fromPath(metaDataUri));
+	public NotifyMetadataClientService createMetaDataConfigurationService(String issuer) {
+		ResteasyWebTarget target = client.target(UriBuilder.fromPath(issuer + "/oxnotify/restv1/notify-configuration"));
 		return target.proxy(NotifyMetadataClientService.class);
 	}
 
@@ -57,9 +59,16 @@ public class NotifyClientFactory {
 		return target.proxy(NotifyClientService.class);
 	}
 
-	public NotifyClientService createPoolledgNotifyService(NotifyMetadata notifyMetadata) {
+	public NotifyClientService createPoolledNotifyService(NotifyMetadata notifyMetadata) {
 		ResteasyWebTarget target = pooledClient.target(UriBuilder.fromPath(notifyMetadata.getNotifyEndpoint()));
 		return target.proxy(NotifyClientService.class);
+	}
+
+	public static String getAuthorization(String accessKeyId,  String secretAccessKey) {
+		String credentials = accessKeyId + ":" + secretAccessKey;
+		String authorization = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes());
+
+		return authorization;
 	}
 
 }

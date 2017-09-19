@@ -89,7 +89,7 @@ public class ApplicationService {
 			return null;
 		}
 
-		ClientData clientData = this.platormClients.get(platformId);
+		ClientData clientData = this.platormClients.get(platformId.toLowerCase());
 		if (clientData == null) {
 			log.error("Failed to find client data for platform '{}'", platformId);
 			return null;
@@ -126,7 +126,7 @@ public class ApplicationService {
 
 		for (ClientConfiguration clientConfiguration : clientConfiguratios) {
 			if (clientConfiguration.isEnabled()) {
-				this.accessClients.put(clientConfiguration.getAccessKeyId().toLowerCase(), clientConfiguration);
+				this.accessClients.put(clientConfiguration.getAccessKeyId(), clientConfiguration);
 			}
 		}
 

@@ -48,19 +48,19 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 
 		ClientConfiguration clientConfiguration = notifyService.processAuthorization(authorization);
 		if (clientConfiguration == null) {
-			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to authorize client");
+			Response response = buildErrorResponse(Response.Status.UNAUTHORIZED, "Failed to authorize client");
 			return response;
 		}
 
 		ClientData clientData = notifyService.getClientData(clientConfiguration);
 		if (clientData == null) {
-			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to find client");
+			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
 			return response;
 		}
 
 		RegisterDeviceResponse registerDeviceResponse = registerDeviceImpl(clientData, token, userData);
 		if (registerDeviceResponse == null) {
-			Response response = buildErrorResponse(Response.Status.SERVICE_UNAVAILABLE, "Failed to register device");
+			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to register device");
 			return response;
 		}
 
@@ -69,7 +69,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		return builder.entity(registerDeviceResponse).build();
 	}
 
-	public RegisterDeviceResponse registerDeviceImpl(ClientData clientData, String token, String userData) {
+	private RegisterDeviceResponse registerDeviceImpl(ClientData clientData, String token, String userData) {
 		try {
 
 			log.debug("Preparing for new user '{}' device with token '{}' registration", userData, token);
@@ -105,19 +105,19 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 
 		ClientConfiguration clientConfiguration = notifyService.processAuthorization(authorization);
 		if (clientConfiguration == null) {
-			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to authorize client");
+			Response response = buildErrorResponse(Response.Status.UNAUTHORIZED, "Failed to authorize client");
 			return response;
 		}
 
 		ClientData clientData = notifyService.getClientData(clientConfiguration);
 		if (clientData == null) {
-			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to find client");
+			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
 			return response;
 		}
 
 		NotificationResponse notificationResponse = sendNotificationImpl(clientData, endpoint, message);
 		if (notificationResponse == null) {
-			Response response = buildErrorResponse(Response.Status.SERVICE_UNAVAILABLE, "Failed to send notification");
+			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to send notification");
 			return response;
 		}
 
@@ -127,7 +127,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		return builder.entity(notificationResponse).build();
 	}
 
-	public NotificationResponse sendNotificationImpl(ClientData clientData, String endpoint, String message) {
+	private NotificationResponse sendNotificationImpl(ClientData clientData, String endpoint, String message) {
 		try {
 			log.debug("Preparing to send to device endpoint '{}'", endpoint);
 			AmazonSNS snsClient = clientData.getSnsClient();

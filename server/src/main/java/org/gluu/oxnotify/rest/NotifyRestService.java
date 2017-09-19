@@ -26,7 +26,7 @@ public interface NotifyRestService {
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/register")
 	Response registerDevice(@HeaderParam("Authorization") String authorization, @FormParam("token") String token,
-			String userData);
+			@FormParam("user_data") String userData);
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
