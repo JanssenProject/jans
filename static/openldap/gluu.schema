@@ -2559,6 +2559,13 @@ attributetype ( oxAttribute:373 NAME 'oxDeviceNotificationConf'
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
 	X-ORIGIN 'Gluu created attribute' )
 
+attributetype ( oxAttribute:374 NAME 'oxAuthClaims'
+	DESC 'oxAuth Claims'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	X-ORIGIN 'Gluu created attribute' )
+
 attributetype ( oxAttribute:375 NAME 'oxDisabled'
 	DESC 'Status of client'
 	EQUALITY caseIgnoreMatch
@@ -2752,7 +2759,7 @@ objectclass ( oxObjectClass:27 NAME 'oxAuthToken'
 	SUP ( top )
 	STRUCTURAL
 	MUST ( objectclass )
-	MAY ( oxAuthAuthenticationTime $ oxAuthAuthorizationCode $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthSessionDn )
+	MAY ( oxAuthAuthenticationTime $ oxAuthAuthorizationCode $ oxAuthCreation $ oxAuthExpiration $ oxAuthGrantId $ oxAuthGrantType $ oxAuthJwtRequest $ oxAuthNonce $ oxAuthScope $ oxAuthTokenCode $ oxAuthTokenType $ oxAuthUserId $ oxAuthClientId $ oxAuthenticationMode $ uniqueIdentifier $ oxCodeChallenge $ oxCodeChallengeMethod $ oxAuthClaims $ oxAuthSessionDn )
 	X-ORIGIN 'Gluu created objectclass' )
 
 objectclass ( oxObjectClass:28 NAME 'oxAuthUmaRPT'
