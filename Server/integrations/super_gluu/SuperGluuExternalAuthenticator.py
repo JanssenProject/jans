@@ -20,6 +20,7 @@ from org.xdi.util import StringHelper
 from org.xdi.oxauth.service import EncryptionService
 from org.xdi.service import MailService
 from org.xdi.oxauth.service.push.sns import PushPlatform, PushSnsService 
+from org.gluu.oxnotify.client import NotifyClientFactory 
 from java.util import Arrays, HashMap, IdentityHashMap
 
 import datetime
@@ -526,11 +527,13 @@ class PersonAuthentication(PersonAuthenticationType):
         return session_device_status
 
     def initPushNotificationService(self, configurationAttributes):
-        print "Super-Gluu. Initialize Native/SNS notification services"
+        print "Super-Gluu. Initialize Native/SNS/Gluu notification services"
         if configurationAttributes.containsKey("notification_service_mode"):
             notificationServiceMode = configurationAttributes.get("notification_service_mode").getValue2()
             if StringHelper.equalsIgnoreCase(notificationServiceMode, "sns"):
                 return self.initSnsPushNotificationService(configurationAttributes)
+            elif StringHelper.equalsIgnoreCase(notificationServiceMode, "gluu"):
+                return self.initGluuPushNotificationService(configurationAttributes)
 
         return self.initNativePushNotificationService(configurationAttributes)
 
@@ -638,6 +641,71 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return enabled
 
+    def initGluuPushNotificationService(self, configurationAttributes):
+        print "Super-Gluu. Initialize Gluu notification services"
+#        notifyMetadataClientService = NotifyClientFactory.instance().createMetaDataConfigurationService("https://localhost:8463");
+#        notifyMetadata = notifyMetadataClientService.getMetadataConfiguration();
+#        System.out.println(notifyMetadata);
+        
+#        notifyClientService = NotifyClientFactory.instance().createPoolledNotifyService(notifyMetadata);
+#        String authorization = NotifyClientFactory.getAuthorization("key", "key_secret");
+
+        self.pushSnsMode = True
+
+        creds = self.loadPushNotificationCreds(configurationAttributes)
+        if creds == None:
+            return False
+        
+        try:
+            sns_creds = creds["sns"]
+            android_creds = creds["android"]["sns"]
+            ios_creads = creds["ios"]["sns"]
+        except:
+            print "Super-Gluu. Initialize Gluu notification services. Invalid credentials file format"
+            return False
+        
+        self.pushAndroidService = None
+        self.pushAppleService = None
+        if not (android_creds["enabled"] or ios_creads["enabled"]):
+            print "Super-Gluu. Initialize Gluu notification services. SNS disabled for all platforms"
+            return False
+
+        sns_access_key = sns_creds["access_key"]
+        sns_secret_key = sns_creds["secret_key"]
+        sns_region = sns_creds["region"]
+
+        encryptionService = CdiUtil.bean(EncryptionService)
+
+        try:
+            sns_access_key = encryptionService.decrypt(sns_access_key)
+        except:
+            # Ignore exception. Password is not encrypted
+            print "Super-Gluu. Initialize Gluu notification services. Assuming that 'sns_access_key' in not encrypted"
+
+        try:
+            sns_secret_key = encryptionService.decrypt(sns_secret_key)
+        except:
+            # Ignore exception. Password is not encrypted
+            print "Super-Gluu. Initialize Gluu notification services. Assuming that 'sns_secret_key' in not encrypted"
+        
+        pushSnsService = CdiUtil.bean(PushSnsService)
+        snsClient = pushSnsService.createSnsClient(sns_access_key, sns_secret_key, sns_region)
+
+        if android_creds["enabled"]:
+            self.pushAndroidService = snsClient 
+            self.pushAndroidPlatformArn = android_creds["platform_arn"]
+            print "Super-Gluu. Initialize Gluu notification services. Created Android notification service"
+
+        if ios_creads["enabled"]:
+            self.pushAppleService = snsClient 
+            self.pushAppleServiceProduction = ios_creads["production"]
+            self.pushApplePlatformArn = ios_creads["platform_arn"]
+            print "Super-Gluu. Initialize Gluu notification services. Created iOS notification service"
+
+        enabled = self.pushAndroidService != None or self.pushAppleService != None
+
+        return enabled
+
     def loadPushNotificationCreds(self, configurationAttributes):
         print "Super-Gluu. Initialize notification services"
         if not configurationAttributes.containsKey("credentials_file"):
@@ -703,6 +771,13 @@ class PersonAuthentication(PersonAuthenticationType):
                         
                         title = "Super-Gluu"
                         message = "Super-Gluu login request to: %s" % client_redirect_uri
+#        RegisterDeviceResponse response = client.registerDevice(authorization, "nPkgqXNm6EUDkEdBDNeLTQ2FLvp3ZGjh0dZV98PolOUapqPaI9e2D-i_QDsq-Kb-HbCb2tJ5aSc4if7Rk0-Iww", "Test!!!");
+#        System.out.println(response);
+        
+#        String deviceArn = "arn:aws:sns:us-west-2:989705443609:endpoint/GCM/super_gluu_gcm/6bf94ccc-bcc5-3dc3-b4fa-55e27e0bf221";
+        
+#        NotificationResponse response2 = client.sendNotification(authorization, deviceArn, "Test");
+#        System.out.println(response2);
 
                         additional_fields = { "request" : super_gluu_request }
 
