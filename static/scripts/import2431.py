@@ -505,11 +505,9 @@ class Migration(object):
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
                     outfile.write(line)
-        print ('reading current data');
         parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
         atr = parser.parse()
         base64Types = ["oxScript"]
-        print (open(self.currentData, 'rb'))
         for idx, val in enumerate(parser.entries):
             if 'displayName' in val:
                 if val['displayName'][0] == 'uma_rpt_policy':
