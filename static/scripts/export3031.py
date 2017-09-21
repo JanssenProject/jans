@@ -28,6 +28,7 @@ import getpass
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from distutils.dir_util import copy_tree
 import json
+from shutil import copyfile
 
 
 class MyLDIF(LDIFParser):
@@ -39,6 +40,7 @@ class MyLDIF(LDIFParser):
         self.DNs = []
         self.lastDN = None
         self.lastEntry = None
+        self.entries = []
 
     def getResults(self):
         return (self.targetDN, self.targetAttr)
@@ -58,6 +60,7 @@ class MyLDIF(LDIFParser):
         self.lastDN = dn
         self.DNs.append(dn)
         self.lastEntry = entry
+        self.entries.append(entry)
         if dn.lower().strip() == self.targetDN.lower().strip():
             self.targetEntry = entry
             if self.targetAttr in entry:
@@ -137,7 +140,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
     dataOxAuthConfErrors = json.loads(parser.lastEntry['oxAuthConfErrors'][0])
     grant = {'id': ("invalid_grant_and_session"), 'description': (
-    "he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
+        "he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
 
     session = {'id': ("session_not_passed"), 'description': ("The provided session state is empty."), 'uri': (None)}
 
@@ -236,6 +239,22 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     os.rename(newfile, oxAuthPath)
 
 
+def removeDeprecatedScripts(self, oxScriptPath):
+    parser = MyLDIF(open(oxScriptPath, 'rb'), sys.stdout)
+    parser.parse()
+    base64Types = ["oxScript"]
+    newfile = oxScriptPath.replace('/scripts.ldif', '/scripts_new.ldif')
+    f = open(newfile, 'a')
+    for idx, val in enumerate(parser.entries):
+        if 'displayName' in val:
+            if val['displayName'][0] != 'uma_authorization_policy':
+                out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
+                f.write(out)
+    f.close()
+
+    os.remove(oxScriptPath)
+    os.rename(newfile, oxScriptPath)
+
 class Exporter(object):
     def __init__(self):
         self.backupDir = 'backup_3031'
@@ -330,6 +349,8 @@ class Exporter(object):
             except:
                 logging.error("Failed to backup %s", folder)
                 logging.debug(traceback.format_exc())
+        copyfile('/opt/gluu/schema/openldap/custom.schema', self.backupDir+"/custom.schema")
+
 
     def getLdif(self):
         logging.info('Creating backup of LDAP data')
@@ -346,6 +367,7 @@ class Exporter(object):
             f.write(output)
             f.close()
 
+        removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
         # Backup the appliance config
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
