@@ -22,20 +22,20 @@ public abstract class AbstractRedisProvider {
         }
     }
 
-    abstract void create();
+    public abstract void create();
 
-    abstract void destroy();
+    public abstract void destroy();
 
-    abstract Object getDelegate();
+    public abstract Object getDelegate();
 
-    abstract Object get(String key);
+    public abstract Object get(String key);
 
-    abstract void remove(String key);
+    public abstract void remove(String key);
 
-    abstract void clear();
+    public abstract void clear();
 
-    abstract void put(int expirationInSeconds, String key, Object object);
+    public abstract void put(int expirationInSeconds, String key, Object object);
 
-    abstract void put(String key, Object object);
+    public abstract void put(String key, Object object);
 
 }
