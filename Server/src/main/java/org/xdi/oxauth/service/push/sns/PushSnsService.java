@@ -62,13 +62,18 @@ public class PushSnsService {
 		platformEndpointRequest.setPlatformApplicationArn(platformApplicationArn);
 		platformEndpointRequest.setToken(token);
 		
-		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
-				ldapEntryManager.encodeGeneralizedTime(new Date()));
+		String customUserData = getCustomUserData(user);
 		platformEndpointRequest.setCustomUserData(customUserData);
 		
 		CreatePlatformEndpointResult platformEndpointResult = snsClient.createPlatformEndpoint(platformEndpointRequest);
 
 		return platformEndpointResult.getEndpointArn();
+	}
+
+	public String getCustomUserData(User user) {
+		String customUserData = String.format("Issuer: %s, user: %s, date: %s", appConfiguration.getIssuer(), user.getUserId(),
+				ldapEntryManager.encodeGeneralizedTime(new Date()));
+		return customUserData;
 	}
 
 	public PublishResult sendPushMessage(AmazonSNS snsClient, PushPlatform platform, String targetArn, Map<String, Object> customAppMessageMap, Map<String, MessageAttributeValue> messageAttributes) throws IOException {
