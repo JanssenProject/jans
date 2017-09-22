@@ -89,7 +89,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 					platformEndpointResult.getSdkHttpMetadata().getHttpStatusCode(),
 					platformEndpointResult.getEndpointArn());
 
-			log.info("Registered user '{}' device with status '{}'", registerDeviceResponse);
+			log.info("Registered user '{}' device with status '{}'", userData, registerDeviceResponse);
 
 			return registerDeviceResponse;
 		} catch (Exception ex) {
