@@ -96,6 +96,12 @@ public class RedisClusterProvider extends AbstractRedisProvider {
     }
 
     @Override
+    public void put(String key, Object object) {
+        String status = pool.set(key.getBytes(), SerializationUtils.serialize((Serializable) object));
+        LOG.trace("put - key: " + key + ", status: " + status);
+    }
+
+    @Override
     public void remove(String key) {
         Long entriesRemoved = pool.del(key.getBytes());
         LOG.trace("remove - key: " + key + ", entriesRemoved: " + entriesRemoved);

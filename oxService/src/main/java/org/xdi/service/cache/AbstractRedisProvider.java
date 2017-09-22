@@ -36,4 +36,6 @@ public abstract class AbstractRedisProvider {
 
     abstract void put(int expirationInSeconds, String key, Object object);
 
+    abstract void put(String key, Object object);
+
 }

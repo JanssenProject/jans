@@ -87,6 +87,17 @@ public class RedisStandaloneProvider extends AbstractRedisProvider {
     }
 
     @Override
+    public void put(String key, Object object) {
+        Jedis jedis = pool.getResource();
+        try {
+            String status = jedis.set(key.getBytes(), SerializationUtils.serialize((Serializable) object));
+            LOG.trace("put - key: " + key + ", status: " + status);
+        } finally {
+            jedis.close();
+        }
+    }
+
+    @Override
     public void remove(String key) {
         Jedis jedis = pool.getResource();
         try {
