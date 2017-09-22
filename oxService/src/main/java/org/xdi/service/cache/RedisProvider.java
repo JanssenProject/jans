@@ -9,7 +9,7 @@ import javax.inject.Inject;
 /**
  * @author yuriyz on 02/23/2017.
  */
-public class RedisProvider extends AbstractCacheProvider<Object> {
+public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> {
 
     public static final int DEFAULT_PUT_EXPIRATION_IN_SECONDS = 60;
 
@@ -54,8 +54,8 @@ public class RedisProvider extends AbstractCacheProvider<Object> {
     }
 
     @Override
-    public Object getDelegate() {
-        return redisProvider.getDelegate();
+    public AbstractRedisProvider getDelegate() {
+        return redisProvider;
     }
 
     @Override
