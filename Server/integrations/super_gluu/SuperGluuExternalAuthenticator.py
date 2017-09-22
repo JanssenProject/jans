@@ -606,33 +606,27 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         sns_access_key = sns_creds["access_key"]
-        sns_secret_key = sns_creds["secret_key"]
+        sns_secret_access_key = sns_creds["secret_access_key"]
         sns_region = sns_creds["region"]
 
         encryptionService = CdiUtil.bean(EncryptionService)
 
         try:
-            sns_access_key = encryptionService.decrypt(sns_access_key)
+            sns_secret_access_key = encryptionService.decrypt(sns_secret_access_key)
         except:
             # Ignore exception. Password is not encrypted
-            print "Super-Gluu. Initialize SNS notification services. Assuming that 'sns_access_key' in not encrypted"
-
-        try:
-            sns_secret_key = encryptionService.decrypt(sns_secret_key)
-        except:
-            # Ignore exception. Password is not encrypted
-            print "Super-Gluu. Initialize SNS notification services. Assuming that 'sns_secret_key' in not encrypted"
+            print "Super-Gluu. Initialize SNS notification services. Assuming that 'sns_secret_access_key' in not encrypted"
         
         pushSnsService = CdiUtil.bean(PushSnsService)
-        snsClient = pushSnsService.createSnsClient(sns_access_key, sns_secret_key, sns_region)
+        pushClient = pushSnsService.createSnsClient(sns_access_key, sns_secret_access_key, sns_region)
 
         if android_creds["enabled"]:
-            self.pushAndroidService = snsClient 
+            self.pushAndroidService = pushClient
             self.pushAndroidPlatformArn = android_creds["platform_arn"]
             print "Super-Gluu. Initialize SNS notification services. Created Android notification service"
 
         if ios_creads["enabled"]:
-            self.pushAppleService = snsClient 
+            self.pushAppleService = pushClient 
             self.pushAppleServiceProduction = ios_creads["production"]
             self.pushApplePlatformArn = ios_creads["platform_arn"]
             print "Super-Gluu. Initialize SNS notification services. Created iOS notification service"
@@ -643,23 +637,17 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def initGluuPushNotificationService(self, configurationAttributes):
         print "Super-Gluu. Initialize Gluu notification services"
-#        notifyMetadataClientService = NotifyClientFactory.instance().createMetaDataConfigurationService("https://localhost:8463");
-#        notifyMetadata = notifyMetadataClientService.getMetadataConfiguration();
-#        System.out.println(notifyMetadata);
-        
-#        notifyClientService = NotifyClientFactory.instance().createPoolledNotifyService(notifyMetadata);
-#        String authorization = NotifyClientFactory.getAuthorization("key", "key_secret");
 
-        self.pushSnsMode = True
+        self.pushGluuMode = True
 
         creds = self.loadPushNotificationCreds(configurationAttributes)
         if creds == None:
             return False
         
         try:
-            sns_creds = creds["sns"]
-            android_creds = creds["android"]["sns"]
-            ios_creads = creds["ios"]["sns"]
+            gluu_conf = creds["gluu"]
+            android_creds = creds["android"]["gluu"]
+            ios_creads = creds["ios"]["gluu"]
         except:
             print "Super-Gluu. Initialize Gluu notification services. Invalid credentials file format"
             return False
@@ -667,39 +655,47 @@ class PersonAuthentication(PersonAuthenticationType):
         self.pushAndroidService = None
         self.pushAppleService = None
         if not (android_creds["enabled"] or ios_creads["enabled"]):
-            print "Super-Gluu. Initialize Gluu notification services. SNS disabled for all platforms"
+            print "Super-Gluu. Initialize Gluu notification services. Gluu disabled for all platforms"
             return False
 
-        sns_access_key = sns_creds["access_key"]
-        sns_secret_key = sns_creds["secret_key"]
-        sns_region = sns_creds["region"]
+        gluu_server_uri = gluu_conf["server_uri"]
+        notifyClientFactory = NotifyClientFactory.instance()
+        metadataConfiguration = None
+        try:
+            metadataConfiguration = notifyClientFactory.createMetaDataConfigurationService(gluu_server_uri).getMetadataConfiguration()
+        except:
+            print "Super-Gluu. Initialize Gluu notification services. Failed to load metadata. Exception: ", sys.exc_info()[1]
+            return False
 
+        gluuClient = notifyClientFactory.createPoolledNotifyService(metadataConfiguration)
         encryptionService = CdiUtil.bean(EncryptionService)
 
-        try:
-            sns_access_key = encryptionService.decrypt(sns_access_key)
-        except:
-            # Ignore exception. Password is not encrypted
-            print "Super-Gluu. Initialize Gluu notification services. Assuming that 'sns_access_key' in not encrypted"
-
-        try:
-            sns_secret_key = encryptionService.decrypt(sns_secret_key)
-        except:
-            # Ignore exception. Password is not encrypted
-            print "Super-Gluu. Initialize Gluu notification services. Assuming that 'sns_secret_key' in not encrypted"
-        
-        pushSnsService = CdiUtil.bean(PushSnsService)
-        snsClient = pushSnsService.createSnsClient(sns_access_key, sns_secret_key, sns_region)
-
         if android_creds["enabled"]:
-            self.pushAndroidService = snsClient 
-            self.pushAndroidPlatformArn = android_creds["platform_arn"]
+            gluu_access_key = android_creds["access_key"]
+            gluu_secret_access_key = android_creds["secret_access_key"]
+    
+            try:
+                gluu_secret_access_key = encryptionService.decrypt(gluu_secret_access_key)
+            except:
+                # Ignore exception. Password is not encrypted
+                print "Super-Gluu. Initialize Gluu notification services. Assuming that 'gluu_secret_access_key' in not encrypted"
+            
+            self.pushAndroidService = gluuClient 
+            self.pushAndroidServiceAuth = notifyClientFactory.getAuthorization(gluu_access_key, gluu_secret_access_key);
             print "Super-Gluu. Initialize Gluu notification services. Created Android notification service"
 
         if ios_creads["enabled"]:
-            self.pushAppleService = snsClient 
-            self.pushAppleServiceProduction = ios_creads["production"]
-            self.pushApplePlatformArn = ios_creads["platform_arn"]
+            gluu_access_key = ios_creds["access_key"]
+            gluu_secret_access_key = ios_creds["secret_access_key"]
+    
+            try:
+                gluu_secret_access_key = encryptionService.decrypt(gluu_secret_access_key)
+            except:
+                # Ignore exception. Password is not encrypted
+                print "Super-Gluu. Initialize Gluu notification services. Assuming that 'gluu_secret_access_key' in not encrypted"
+            
+            self.pushAppleService = gluuClient 
+            self.pushAppleServiceAuth = notifyClientFactory.getAuthorization(gluu_access_key, gluu_secret_access_key);
             print "Super-Gluu. Initialize Gluu notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
@@ -727,19 +723,16 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def sendPushNotification(self, client_redirect_uri, user, super_gluu_request):
         try:
-            if self.pushSnsMode:
-                self.sendSnsPushNotificationImpl(client_redirect_uri, user, super_gluu_request)
-            else:
-                self.sendNativePushNotificationImpl(client_redirect_uri, user, super_gluu_request)
+            self.sendPushNotificationImpl(client_redirect_uri, user, super_gluu_request)
         except:
             print "Super-Gluu. Send push notification. Failed to send push notification: ", sys.exc_info()[1]
 
-    def sendNativePushNotificationImpl(self, client_redirect_uri, user, super_gluu_request):
+    def sendPushNotificationImpl(self, client_redirect_uri, user, super_gluu_request):
         if not self.enabledPushNotifications:
             return
 
         user_name = user.getUserId()
-        print "Super-Gluu. Send native push notification. Loading user '%s' devices" % user_name
+        print "Super-Gluu. Send push notification. Loading user '%s' devices" % user_name
 
         send_notification = False
         send_notification_result = True
@@ -765,31 +758,52 @@ class PersonAuthentication(PersonAuthenticationType):
                 if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
                     if self.pushAppleService == None:
-                        print "Super-Gluu. Send native push notification. Apple native push notification service is not enabled"
+                        print "Super-Gluu. Send push notification. Apple native push notification service is not enabled"
                     else:
                         send_notification = True
                         
                         title = "Super-Gluu"
                         message = "Super-Gluu login request to: %s" % client_redirect_uri
-#        RegisterDeviceResponse response = client.registerDevice(authorization, "nPkgqXNm6EUDkEdBDNeLTQ2FLvp3ZGjh0dZV98PolOUapqPaI9e2D-i_QDsq-Kb-HbCb2tJ5aSc4if7Rk0-Iww", "Test!!!");
-#        System.out.println(response);
+
+                        if self.pushSnsMode or self.pushGluuMode:
+                            targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.APNS, user, u2f_device)
+                            send_notification = True
+    
+                            sns_push_request_dictionary = { "sound": 'default',
+                                                            "aps": 
+                                                                { "badge": 9,
+                                                                  "title" : title,
+                                                                  "alert" : {"body": message} },
+                                                           "category": "ACTIONABLE",
+                                                           "content-available": "1",
+                                                           "request" : super_gluu_request
+                            }
+                            push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
+    
+                            if self.pushSnsMode:
+                                apple_push_platform = PushPlatform.APNS
+                                if not self.pushAppleServiceProduction:
+                                    apple_push_platform = PushPlatform.APNS_SANDBOX
         
-#        String deviceArn = "arn:aws:sns:us-west-2:989705443609:endpoint/GCM/super_gluu_gcm/6bf94ccc-bcc5-3dc3-b4fa-55e27e0bf221";
-        
-#        NotificationResponse response2 = client.sendNotification(authorization, deviceArn, "Test");
-#        System.out.println(response2);
-
-                        additional_fields = { "request" : super_gluu_request }
-
-                        msgBuilder = APNS.newPayload().alertBody(message).alertTitle(title).sound("default")
-                        msgBuilder.category('ACTIONABLE').badge(0)
-                        msgBuilder.forNewsstand()
-                        msgBuilder.customFields(additional_fields)
-                        push_message = msgBuilder.build()
-
-                        send_notification_result = self.pushAppleService.push(push_token, push_message)
-                        if debug:
-                            print "Super-Gluu. Send iOS native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                                send_notification_result = pushSnsService.sendPushMessage(self.pushAppleService, apple_push_platform, targetEndpointArn, push_message, None)
+                                if debug:
+                                    print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s', apple_push_platform: '%s'" % (push_token, push_message, send_notification_result, apple_push_platform)
+                            elif self.pushGluuMode:
+                                send_notification_result = self.pushAppleService.sendNotification(selg.pushAppleServiceAuth, targetEndpointArn, push_message)
+                                if debug:
+                                    print "Super-Gluu. Send iOS Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                        else:
+                            additional_fields = { "request" : super_gluu_request }
+    
+                            msgBuilder = APNS.newPayload().alertBody(message).alertTitle(title).sound("default")
+                            msgBuilder.category('ACTIONABLE').badge(0)
+                            msgBuilder.forNewsstand()
+                            msgBuilder.customFields(additional_fields)
+                            push_message = msgBuilder.build()
+    
+                            send_notification_result = self.pushAppleService.push(push_token, push_message)
+                            if debug:
+                                print "Super-Gluu. Send iOS Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
@@ -799,103 +813,42 @@ class PersonAuthentication(PersonAuthenticationType):
                         send_notification = True
 
                         title = "Super-Gluu"
-                        msgBuilder = Message.Builder().addData("message", super_gluu_request).addData("title", title).collapseKey("single").contentAvailable(True)
-                        push_message = msgBuilder.build()
-
-                        send_notification_result = self.pushAndroidService.send(push_message, push_token, 3)
-                        if debug:
-                            print "Super-Gluu. Send Android native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
-
-
-        print "Super-Gluu. Send native push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
-
-    def sendSnsPushNotificationImpl(self, client_redirect_uri, user, super_gluu_request):
-        if not self.enabledPushNotifications:
-            return
-
-        user_name = user.getUserId()
-        print "Super-Gluu. Send SNS push notification. Loading user '%s' devices" % user_name
-
-        send_notification = False
-        send_notification_result = True
-
-        pushSnsService = CdiUtil.bean(PushSnsService)
-        userService = CdiUtil.bean(UserService)
-        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
-
-        user_inum = userService.getUserInum(user_name)
-
-        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData", "oxDeviceNotificationConf")
-        if u2f_devices_list.size() > 0:
-            for u2f_device in u2f_devices_list:
-                device_data = u2f_device.getDeviceData()
-
-                # Device data which Super-Gluu gets during enrollment
-                if device_data == None:
-                    continue
-
-                platform = device_data.getPlatform()
-                push_token = device_data.getPushToken()
-                debug = False
-
-                if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
-                    # Sending notification to iOS user's device
-                    if self.pushAppleService == None:
-                        print "Super-Gluu. Send SNS push notification. Apple SNS push notification service is not enabled"
-                    else:
-                        targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.APNS, user, u2f_device)
-                        send_notification = True
-
-                        title = "Super-Gluu"
-                        message = {"body": "Super-Gluu login request to: %s" % client_redirect_uri}
-
-                        sns_push_request_dictionary = { "sound": 'default',
-                                                        "aps": 
-                                                            { "badge": 9,
-                                                              "title" : title,
-                                                              "alert" : message },
-                                                       "category": "ACTIONABLE",
-                                                       "content-available": "1",
-                                                       "request" : super_gluu_request
-                        }
-                        push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
-
-                        apple_push_platform = PushPlatform.APNS
-                        if not self.pushAppleServiceProduction:
-                            apple_push_platform = PushPlatform.APNS_SANDBOX
-
-                        send_notification_result = pushSnsService.sendPushMessage(self.pushAppleService, apple_push_platform, targetEndpointArn, push_message, None)
-                        if debug:
-                            print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s', apple_push_platform: '%s'" % (push_token, push_message, send_notification_result, apple_push_platform)
-
-                if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
-                    # Sending notification to Android user's device
-                    if self.pushAndroidService == None:
-                        print "Super-Gluu. Send SNS push notification. Android SNS push notification service is not enabled"
-                    else:
-                        targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.GCM, user, u2f_device)
-                        send_notification = True
-
-                        title = "Super-Gluu"
-                        sns_push_request_dictionary = { "collapse_key": "single",
-                                                        "content_available": True,
-                                                        "time_to_live": 60,
-                                                        "data": 
-                                                            { "message" : super_gluu_request,
-                                                              "title" : title }
-                        }
-                        push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
-
-                        send_notification_result = pushSnsService.sendPushMessage(self.pushAndroidService, PushPlatform.GCM, targetEndpointArn, push_message, None)
-                        if debug:
-                            print "Super-Gluu. Send Android SNS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                        if self.pushSnsMode or self.pushGluuMode:
+                            targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.GCM, user, u2f_device)
+                            send_notification = True
+    
+                            sns_push_request_dictionary = { "collapse_key": "single",
+                                                            "content_available": True,
+                                                            "time_to_live": 60,
+                                                            "data": 
+                                                                { "message" : super_gluu_request,
+                                                                  "title" : title }
+                            }
+                            push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
+    
+                            if self.pushSnsMode:
+                                send_notification_result = pushSnsService.sendPushMessage(self.pushAndroidService, PushPlatform.GCM, targetEndpointArn, push_message, None)
+                                if debug:
+                                    print "Super-Gluu. Send Android SNS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                            elif self.pushGluuMode:
+                                send_notification_result = self.pushAndroidService.sendNotification(selg.pushAndroidServiceAuth, targetEndpointArn, push_message)
+                                if debug:
+                                    print "Super-Gluu. Send Android Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                        else:
+                            msgBuilder = Message.Builder().addData("message", super_gluu_request).addData("title", title).collapseKey("single").contentAvailable(True)
+                            push_message = msgBuilder.build()
+    
+                            send_notification_result = self.pushAndroidService.send(push_message, push_token, 3)
+                            if debug:
+                                print "Super-Gluu. Send Android Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
 
 
-        print "Super-Gluu. Send SNS push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
+        print "Super-Gluu. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
+
 
     def getTargetEndpointArn(self, deviceRegistrationService, pushSnsService, platform, user, u2fDevice):
         targetEndpointArn = None
-        
+                             
         # Return endpoint ARN if it created already
         notificationConf = u2fDevice.getDeviceNotificationConf()
         if StringHelper.isNotEmpty(notificationConf):
@@ -906,14 +859,21 @@ class PersonAuthentication(PersonAuthenticationType):
                 return targetEndpointArn
 
         # Create endpoint ARN        
-        snsClient = None
+        pushClient = None
+        pushClientAuth = None
         platformApplicationArn = None
         if platform == PushPlatform.GCM:
-            snsClient = self.pushAndroidService
-            platformApplicationArn = self.pushAndroidPlatformArn
+            pushClient = self.pushAndroidService
+            if self.pushSnsMode:
+                platformApplicationArn = self.pushAndroidPlatformArn
+            if self.pushGluuMode:
+                pushClientAuth = self.pushAndroidServiceAuth
         elif platform == PushPlatform.APNS:
-            snsClient = self.pushAppleService
-            platformApplicationArn = self.pushApplePlatformArn
+            pushClient = self.pushAppleService
+            if self.pushSnsMode:
+                platformApplicationArn = self.pushApplePlatformArn
+            if self.pushGluuMode:
+                pushClientAuth = self.pushAppleServiceAuth
         else:
             return None
 
@@ -921,7 +881,13 @@ class PersonAuthentication(PersonAuthenticationType):
         pushToken = deviceData.getPushToken()
         
         print "Super-Gluu. Get target endpoint ARN. Attempting to create target endpoint ARN for user: '%s'" % user.getUserId()
-        targetEndpointArn = pushSnsService.createPlatformArn(snsClient, platformApplicationArn, pushToken, user)
+        if self.pushSnsMode:
+            targetEndpointArn = pushSnsService.createPlatformArn(pushClient, platformApplicationArn, pushToken, user)
+        else:
+            customUserData = pushSnsService.getCustomUserData()
+            registerDeviceResponse = pushClient.registerDevice(pushClientAuth, pushToken, customUserData);
+            if registerDeviceResponse != None and registerDeviceResponse.getStatusCode() == 200:
+                targetEndpointArn = registerDeviceResponse.getEndpointArn()
         print "Super-Gluu. Get target endpoint ARN. Create target endpoint ARN '%s' for user: '%s'" % (targetEndpointArn, user.getUserId())
         
         # Store created endpoint ARN in device entry
