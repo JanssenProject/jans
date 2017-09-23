@@ -8,17 +8,13 @@ package org.gluu.oxnotify.client;
 
 import java.util.Base64;
 
-import javax.ws.rs.core.UriBuilder;
-
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.gluu.oxnotify.model.NotifyMetadata;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
-
+import org.jboss.resteasy.client.ClientExecutor;
+import org.jboss.resteasy.client.ProxyFactory;
+import org.jboss.resteasy.client.core.executors.ApacheHttpClient4Executor;
 /**
  * Helper class which creates proxy
  *
@@ -28,22 +24,16 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 public class NotifyClientFactory {
 
 	private final static NotifyClientFactory instance = new NotifyClientFactory();
-	private ResteasyClient client;
-	private ResteasyClient pooledClient;
+	private ClientExecutor pooledClientExecutor;
 
 	private NotifyClientFactory() {
-		// Create single connection client
-		this.client = new ResteasyClientBuilder().build();
-
 		// Create polled client
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		cm.setMaxTotal(200); // Increase max total connection to 200
 		cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
 
 		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
-		ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-		 
-		this.pooledClient = new ResteasyClientBuilder().httpEngine(engine).build();
+		this.pooledClientExecutor = new ApacheHttpClient4Executor(httpClient);
 	}
 
 	public static NotifyClientFactory instance() {
@@ -51,13 +41,13 @@ public class NotifyClientFactory {
 	}
 
 	public NotifyMetadataClientService createMetaDataConfigurationService(String issuer) {
-		ResteasyWebTarget target = client.target(UriBuilder.fromPath(issuer + "/.well-known/notify-configuration"));
-		return target.proxy(NotifyMetadataClientService.class);
+		String metadataUri = issuer + "/.well-known/notify-configuration";
+		return ProxyFactory.create(NotifyMetadataClientService.class, metadataUri);
 	}
 
-	public NotifyClientService createdNotifyService(NotifyMetadata notifyMetadata) {
-		ResteasyWebTarget target = pooledClient.target(UriBuilder.fromPath(notifyMetadata.getNotifyEndpoint()));
-		return target.proxy(NotifyClientService.class);
+	public NotifyClientService createNotifyService(NotifyMetadata notifyMetadata) {
+		String targetUri = notifyMetadata.getNotifyEndpoint();
+		return ProxyFactory.create(NotifyClientService.class, targetUri, pooledClientExecutor);
 	}
 
 	public static String getAuthorization(String accessKeyId,  String secretAccessKey) {
