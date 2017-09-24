@@ -5,6 +5,12 @@
 
   <display-name>RP Demo</display-name>
 
+  <!-- Jetty -->
+  <context-param>
+    <param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
   <!--
 
   1. First of all you need to register your own client for your RP (Client):
