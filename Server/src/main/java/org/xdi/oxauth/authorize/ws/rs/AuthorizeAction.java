@@ -268,7 +268,8 @@ public class AuthorizeAction {
                         requestParameterMap.get(AuthorizeRequestParam.LOGIN_HINT));
             }
 
-            facesService.redirect(redirectTo, loginParameters);
+            facesService.redirectWithExternal(redirectTo, loginParameters);
+
             return;
         }
 
