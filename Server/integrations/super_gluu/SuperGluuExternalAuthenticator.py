@@ -630,8 +630,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if ios_creds["enabled"]:
             self.pushAppleService = pushClient 
-            self.pushAppleServiceProduction = ios_creds["production"]
             self.pushApplePlatformArn = ios_creds["platform_arn"]
+            self.pushAppleServiceProduction = ios_creds["production"]
             print "Super-Gluu. Initialize SNS notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
