@@ -324,8 +324,9 @@ public class Authenticator {
                 }
 
                 log.trace("Redirect to page: '{}'", redirectTo);
-                facesService.redirect(redirectTo);
-                return true;
+    			facesService.redirectWithExternal(redirectTo, null);
+
+    			return true;
             }
 
             if (this.authStep == countAuthenticationSteps) {
@@ -517,11 +518,7 @@ public class Authenticator {
                     }
                 }
 
-                if (redirectTo.startsWith("https") || redirectTo.startsWith("http")) {
-                	facesService.redirectToExternalURL(redirectTo);
-                } else {
-                	facesService.redirect(redirectTo);
-                }
+    			facesService.redirectWithExternal(redirectTo, null);
 
                 return Constants.RESULT_SUCCESS;
             }
