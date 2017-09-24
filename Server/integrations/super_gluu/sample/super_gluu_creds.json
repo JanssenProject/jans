@@ -7,12 +7,17 @@
         "sns":{
             "enabled":false,
             "platform_arn":"arn:aws:sns:..."
+        },
+        "gluu":{
+            "enabled":true,
+            "access_key":"36WH2JiexBOoAIBP",
+            "secret_access_key":"ueqsU2Dc7m3r4HmLz4M79DpzzCNqTfek"
         }
     },
     "ios":{
         "apns":{
             "enabled":false,
-            "p12_file_path":"/etc/certs/SuperGluu-NotificationCertificat.p12",
+            "p12_file_path":"/etc/certs/SuperGluu-NotificationCertificate.p12",
             "p12_password":"password",
             "production":false
         },
@@ -20,11 +25,19 @@
             "enabled":false,
             "platform_arn":"arn:aws:sns:...",
             "production":false
+        },
+        "gluu":{
+            "enabled":true,
+            "access_key":"auONAdePWoYFBX6V",
+            "secret_access_key":"f050aW0nnihym0GwktWd7O15jGSQcoei"
         }
     },
     "sns":{
         "access_key":"",
         "secret_key":"",
-        "region":"us-west-2"
+        "region":""
+    },
+    "gluu":{
+        "server_uri":"https://api.gluu.org"
     }
 }
