@@ -9,7 +9,6 @@ Read complete migration procedure at:
     https://www.gluu.org/docs/deployment/upgrading/
 """
 
-
 import os
 import os.path
 import sys
@@ -132,8 +131,9 @@ class Migration(object):
                     os.mkdir(targetFn)
             else:
                 try:
-                    logging.debug("copying %s", targetFn)
-                    shutil.copyfile(fn, targetFn)
+                    if targetFn != '/etc/gluu/conf/passport-config.json':
+                        logging.debug("copying %s", targetFn)
+                        shutil.copyfile(fn, targetFn)
                 except:
                     logging.error("Error copying %s", targetFn)
 
@@ -243,12 +243,12 @@ class Migration(object):
         if self.version < 300:
             custom = '/var/gluu/webapps/'
             folder_map = [
-                (custom+'oxauth/pages', self.jettyDir+'oxauth/custom/pages'),
-                (custom+'oxauth/resources', self.jettyDir+'oxauth/custom/static'),
-                (custom+'oxauth/libs', self.jettyDir+'oxauth/lib/ext'),
-                (custom+'oxtrust/pages', self.jettyDir+'identity/custom/pages'),
-                (custom+'oxtrust/resources', self.jettyDir+'identity/custom/static'),
-                (custom+'oxtrust/libs', self.jettyDir+'identity/lib/ext'),
+                (custom + 'oxauth/pages', self.jettyDir + 'oxauth/custom/pages'),
+                (custom + 'oxauth/resources', self.jettyDir + 'oxauth/custom/static'),
+                (custom + 'oxauth/libs', self.jettyDir + 'oxauth/lib/ext'),
+                (custom + 'oxtrust/pages', self.jettyDir + 'identity/custom/pages'),
+                (custom + 'oxtrust/resources', self.jettyDir + 'identity/custom/static'),
+                (custom + 'oxtrust/libs', self.jettyDir + 'identity/lib/ext'),
             ]
 
         for pair in folder_map:
@@ -342,34 +342,11 @@ class Migration(object):
                     newuser.write(line)
 
     def copyCustomSchema(self):
-        logging.info("Converting Schema files of custom attributes.")
-        loc = os.path.join(self.backupDir, 'opt', 'opendj', 'config', 'schema')
-        schema_99 = os.path.join(loc, '99-user.ldif')
-        schema_100 = os.path.join(loc, '100-user.ldif')
 
-        if self.ldap_type == 'opendj':
-            if os.path.isfile(schema_99):
-                shutil.copyfile(
-                    schema_99, '/opt/opendj/config/schema/99-user.ldif')
-            if os.path.isfile(schema_100):
-                shutil.copyfile(
-                    schema_100, '/opt/opendj/config/schema/100-user.ldif')
-            return
-
-        # Process for openldap and then append the contents to custom schema
-        new_user = os.path.join(self.workingDir, 'new_99.ldif')
         custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
-        outfile = open(custom_schema, 'a')
-        output = ""
+        outfile = open(custom_schema, 'w')
+        output = self.readFile(self.backupDir+"/custom.schema")
 
-        if os.path.isfile(schema_99):
-            output = self.convertSchema(schema_100)
-            self.updateUserSchema(schema_99, new_user)
-            output = output + "\n" + self.convertSchema(new_user)
-        else:
-            # If there is no 99-user file, then the schema def is in 100-user
-            self.updateUserSchema(schema_100, new_user)
-            output = self.convertSchema(new_user)
 
         outfile.write("\n")
         outfile.write(output)
@@ -459,8 +436,12 @@ class Migration(object):
                             new_json = merge(new_json, old_json)
                             new_entry[attr] = [json.dumps(new_json)]
                         except:
-                            new_entry[attr] = old_entry[attr]
-                            logging.debug("Keeping old value for %s", attr)
+                            if attr == 'oxScript':
+                                new_entry[attr] = new_entry[attr]
+                                logging.debug("Keeping new value for %s", attr)
+                            else:
+                                new_entry[attr] = old_entry[attr]
+                                logging.debug("Keeping old value for %s", attr)
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
@@ -499,25 +480,22 @@ class Migration(object):
             with open(self.o_gluu, 'w') as outfile:
                 for line in infile:
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
-                    if "cn=directory manager" in line and "cn=directory manager,o=gluu" not in line:
-                        line = line.replace("cn=directory manager", "cn=directory manager,o=gluu")
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
                     outfile.write(line)
-        parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
-        atr = parser.parse()
-        base64Types = ["oxScript"]
-        for idx, val in enumerate(parser.entries):
-            if 'displayName' in val:
-                if val['displayName'][0] == 'uma_rpt_policy':
-                    out = CreateLDIF(parser.getDNs()[idx].replace('!2DAF.F995', '!2DAF.F9B5'), val,
-                                     base64_attrs=base64Types)
-                    out.replace('!2DAF.F995', '!2DAF.F9B5')
-                    f = open(self.o_gluu, "a")
-                    f.write('\n')
-                    f.write(out)
+                    # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
+                    # atr = parser.parse()
+                    # base64Types = ["oxScript"]
+                    # for idx, val in enumerate(parser.entries):
+                    #     if 'displayName' in val:
+                    #         if val['displayName'][0] == 'uma_rpt_policy':
+                    #             out = CreateLDIF(parser.getDNs()[idx], val,
+                    #                              base64_attrs=base64Types)
+                    #             f = open(self.o_gluu, "a")
+                    #             f.write('\n')
+                    #             f.write(out)
 
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
@@ -545,11 +523,11 @@ class Migration(object):
 
     def importDataIntoOpenDJ(self):
         command = [self.ldif_import, '-n', 'userRoot',
-                   '-l', self.o_gluu, '-R', self.o_gluu+'.rejects']
+                   '-l', self.o_gluu, '-R', self.o_gluu + '.rejects']
         output = self.getOutput(command)
         logging.debug(output)
         command = [self.ldif_import, '-n', 'userRoot',
-                   '-l', self.o_site, '-R', self.o_site+'.rejects']
+                   '-l', self.o_site, '-R', self.o_site + '.rejects']
         logging.debug(output)
 
     def importProcessedData(self):
@@ -660,8 +638,7 @@ class Migration(object):
         self.copyCertificates()
         self.copyCustomFiles()
         self.copyIDPFiles()
-        if self.version < 300 or self.ldap_type == 'opendj':
-            self.copyCustomSchema()
+        self.copyCustomSchema()
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()

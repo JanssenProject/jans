@@ -4074,6 +4074,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuth Web Keys Configuration",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxWebKeysSettings"
+            ],
+            "oid": "oxAttribute:376",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4772,7 +4783,8 @@
                 "oxAuthConfErrors",
                 "oxAuthConfStatic",
                 "oxAuthConfWebKeys",
-                "oxRevision"
+                "oxRevision",
+                "oxWebKeysSettings"
             ],
             "must": [
                 "objectclass"
