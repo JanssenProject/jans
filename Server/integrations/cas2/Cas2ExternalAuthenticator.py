@@ -290,7 +290,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if (step == 1):
-            return "/auth/cas2/cas2login.xhtml"
+            if identity.isSetWorkingParameter("cas_service_request_uri"):
+                return identity.getWorkingParameter("cas_service_request_uri")
+            else:
+                return "/auth/cas2/cas2login.xhtml"
         return "/auth/cas2/cas2postlogin.xhtml"
 
     def parse_tag(self, str, tag):
