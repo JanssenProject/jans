@@ -38,6 +38,6 @@
         "region":"region"
     },
     "gluu":{
-        "server_uri":"https://s1.gluu.org"
+        "server_uri":"https://api.gluu.org"
     }
 }
