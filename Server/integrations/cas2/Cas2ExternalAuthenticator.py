@@ -289,6 +289,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return 2
 
     def getPageForStep(self, configurationAttributes, step):
+        identity = CdiUtil.bean(Identity)
         if (step == 1):
             if identity.isSetWorkingParameter("cas_service_request_uri"):
                 return identity.getWorkingParameter("cas_service_request_uri")
