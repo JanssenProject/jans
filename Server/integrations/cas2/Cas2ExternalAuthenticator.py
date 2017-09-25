@@ -291,10 +291,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getPageForStep(self, configurationAttributes, step):
         identity = CdiUtil.bean(Identity)
         if (step == 1):
-            if identity.isSetWorkingParameter("cas_service_request_uri"):
-                return identity.getWorkingParameter("cas_service_request_uri")
-            else:
-                return "/auth/cas2/cas2login.xhtml"
+            return "/auth/cas2/cas2login.xhtml"
         return "/auth/cas2/cas2postlogin.xhtml"
 
     def parse_tag(self, str, tag):
