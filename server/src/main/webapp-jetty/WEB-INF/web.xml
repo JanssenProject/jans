@@ -5,10 +5,11 @@
 
 	<display-name>oxNotify Server</display-name>
 
-    <context-param>
-        <param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
-        <param-value>false</param-value>
-    </context-param>
+	<!-- Jetty -->
+	<context-param>
+		<param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
+		<param-value>false</param-value>
+	</context-param>
     
 	<!-- Weld -->
 	<context-param>
