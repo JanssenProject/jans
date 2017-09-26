@@ -131,9 +131,17 @@ class Migration(object):
                     os.mkdir(targetFn)
             else:
                 try:
-                    if targetFn != '/etc/gluu/conf/passport-config.json':
-                        logging.debug("copying %s", targetFn)
-                        shutil.copyfile(fn, targetFn)
+                    # if targetFn == '/etc/gluu/conf/passport-config.json':
+                    #     logging.debug("Skipping %s", targetFn)
+                    # elif targetFn == '/etc/certs/passport-rp.jks':
+                    #     logging.debug("Skipping %s", targetFn)
+                    # elif targetFn == '/etc/certs/passport-rp.pem':
+                    #     logging.debug("Skipping %s", targetFn)
+                    # elif targetFn == '/etc/certs/passport-rs.jkss':
+                    #     logging.debug("Skipping %s", targetFn)
+                    # else:
+                    logging.debug("copying %s", targetFn)
+                    shutil.copyfile(fn, targetFn)
                 except:
                     logging.error("Error copying %s", targetFn)
 
@@ -345,8 +353,7 @@ class Migration(object):
 
         custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
         outfile = open(custom_schema, 'w')
-        output = self.readFile(self.backupDir+"/custom.schema")
-
+        output = self.readFile(self.backupDir + "/custom.schema")
 
         outfile.write("\n")
         outfile.write(output)
@@ -480,6 +487,7 @@ class Migration(object):
             with open(self.o_gluu, 'w') as outfile:
                 for line in infile:
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
+                    line = line.replace('oxAuthUmaResourceSet','oxUmaResource')
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
@@ -487,15 +495,15 @@ class Migration(object):
                     outfile.write(line)
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
-                    # base64Types = ["oxScript"]
+                    base64Types = [""]
                     # for idx, val in enumerate(parser.entries):
-                    #     if 'displayName' in val:
-                    #         if val['displayName'][0] == 'uma_rpt_policy':
-                    #             out = CreateLDIF(parser.getDNs()[idx], val,
-                    #                              base64_attrs=base64Types)
-                    #             f = open(self.o_gluu, "a")
-                    #             f.write('\n')
-                    #             f.write(out)
+                    # if 'displayName' in val:
+                    #     if val['displayName'][0] == 'SCIM Resource Set':
+                    #         out = CreateLDIF(parser.getDNs()[idx], val,
+                    #                          base64_attrs=base64Types)
+                    #         f = open(self.o_gluu, "a")
+                    #         f.write('\n')
+                    #         f.write(out)
 
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
