@@ -773,13 +773,13 @@ class PersonAuthentication(PersonAuthenticationType):
                             targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.APNS, user, u2f_device)
                             send_notification = True
     
-                            sns_push_request_dictionary = { "sound": 'default',
-                                                            "aps": 
-                                                                { "badge": 9,
-                                                                  "title" : title,
-                                                                  "alert" : {"body": message} },
-                                                           "category": "ACTIONABLE",
-                                                           "content-available": "1",
+                            sns_push_request_dictionary = { "aps": 
+                                                                { "badge": 0,
+                                                                  "alert" : {"body": message, "title" : title},
+                                                                  "category": "ACTIONABLE",
+                                                                  "content-available": "1",
+                                                                  "sound": 'default'
+                                                           },
                                                            "request" : super_gluu_request
                             }
                             push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
