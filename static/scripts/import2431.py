@@ -458,8 +458,12 @@ class Migration(object):
                             new_json = merge(new_json, old_json)
                             new_entry[attr] = [json.dumps(new_json)]
                         except:
-                            new_entry[attr] = old_entry[attr]
-                            logging.debug("Keeping old value for %s", attr)
+                            if attr == 'oxScript':
+                                new_entry[attr] = new_entry[attr]
+                                logging.debug("Keeping new value for %s", attr)
+                            else:
+                                new_entry[attr] = old_entry[attr]
+                                logging.debug("Keeping old value for %s", attr)
                     else:
                         new_entry[attr] = old_entry[attr]
                         logging.debug("Keep multiple old values for %s", attr)
@@ -498,25 +502,23 @@ class Migration(object):
             with open(self.o_gluu, 'w') as outfile:
                 for line in infile:
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
-                    if "cn=directory manager" in line and "cn=directory manager,o=gluu" not in line:
-                        line = line.replace("cn=directory manager", "cn=directory manager,o=gluu")
+                    line = line.replace('oxAuthUmaResourceSet','oxUmaResource')
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
                     outfile.write(line)
-        parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
-        atr = parser.parse()
-        base64Types = ["oxScript"]
-        for idx, val in enumerate(parser.entries):
-            if 'displayName' in val:
-                if val['displayName'][0] == 'uma_rpt_policy':
-                    out = CreateLDIF(parser.getDNs()[idx].replace('!2DAF.F995', '!2DAF.F9B5'), val,
-                                     base64_attrs=base64Types)
-                    out.replace('!2DAF.F995', '!2DAF.F9B5')
-                    f = open(self.o_gluu, "a")
-                    f.write('\n')
-                    f.write(out)
+                    # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
+                    # atr = parser.parse()
+                    base64Types = [""]
+                    # for idx, val in enumerate(parser.entries):
+                    # if 'displayName' in val:
+                    #     if val['displayName'][0] == 'SCIM Resource Set':
+                    #         out = CreateLDIF(parser.getDNs()[idx], val,
+                    #                          base64_attrs=base64Types)
+                    #         f = open(self.o_gluu, "a")
+                    #         f.write('\n')
+                    #         f.write(out)
 
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
@@ -559,22 +561,23 @@ class Migration(object):
             self.importDataIntoOpenDJ()
 
     def getLDAPServerType(self):
-        choice = 1
-        try:
-            choice = int(raw_input(
-                "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
-        except ValueError:
-            logging.error("You entered non-interger value. Cannot decide LDAP"
-                          "server type. Quitting.")
-            sys.exit(1)
-
-        if choice == 1:
-            self.ldap_type = 'openldap'
-        elif choice == 2:
-            self.ldap_type = 'opendj'
-        else:
-            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-            sys.exit(1)
+        # choice = 1
+        # try:
+        #     choice = int(raw_input(
+        #         "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
+        # except ValueError:
+        #     logging.error("You entered non-interger value. Cannot decide LDAP"
+        #                   "server type. Quitting.")
+        #     sys.exit(1)
+        #
+        # if choice == 1:
+        #     self.ldap_type = 'openldap'
+        # elif choice == 2:
+        #     self.ldap_type = 'opendj'
+        # else:
+        #     logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+        #     sys.exit(1)
+        self.ldap_type = 'openldap'
 
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')
