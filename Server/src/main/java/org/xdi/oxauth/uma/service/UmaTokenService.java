@@ -86,6 +86,10 @@ public class UmaTokenService {
             Map<UmaScopeDescription, Boolean> scopes = umaValidationService.validateScopes(scope, permissions);
             Client client = identity.getSessionClient().getClient();
 
+            if (client != null && client.isDisabled()) {
+                throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.DISABLED_CLIENT);
+            }
+
             pct = pctService.updateClaims(pct, idToken, client.getClientId(), permissions); // creates new pct if pct is null in request
             Claims claims = new Claims(idToken, pct, claimToken);
 

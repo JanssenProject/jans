@@ -289,6 +289,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return 2
 
     def getPageForStep(self, configurationAttributes, step):
+        identity = CdiUtil.bean(Identity)
         if (step == 1):
             return "/auth/cas2/cas2login.xhtml"
         return "/auth/cas2/cas2postlogin.xhtml"
