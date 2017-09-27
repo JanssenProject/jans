@@ -12,6 +12,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
+import org.xdi.model.GluuAttributeDataType;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -63,7 +64,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version September 27, 2017
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -499,6 +500,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
                     if (value instanceof List) {
                         jsonWebResponse.getClaims().setClaim(key, (List<String>) value);
+                    } else if (value instanceof Boolean) {
+                        jsonWebResponse.getClaims().setClaim(key, (Boolean) value);
                     } else {
                         jsonWebResponse.getClaims().setClaim(key, (String) value);
                     }
@@ -622,6 +625,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 if (StringUtils.isNotBlank(claimName) && StringUtils.isNotBlank(ldapName)) {
                     if (ldapName.equals("uid")) {
                         attribute = user.getUserId();
+                    } else if (GluuAttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
+                        attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
                     } else {
                         attribute = user.getAttribute(gluuAttribute.getName(), true);
                     }
