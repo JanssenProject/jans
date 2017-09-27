@@ -6,7 +6,7 @@
 
 package org.gluu.oxnotify.client;
 
-import java.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -52,7 +52,7 @@ public class NotifyClientFactory {
 
 	public static String getAuthorization(String accessKeyId,  String secretAccessKey) {
 		String credentials = accessKeyId + ":" + secretAccessKey;
-		String authorization = "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes());
+		String authorization = "Basic " + Base64.encodeBase64String(credentials.getBytes());
 
 		return authorization;
 	}
