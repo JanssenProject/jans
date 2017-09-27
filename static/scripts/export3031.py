@@ -28,6 +28,8 @@ import getpass
 from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from distutils.dir_util import copy_tree
 import json
+from shutil import copyfile
+import os.path
 
 
 class MyLDIF(LDIFParser):
@@ -39,6 +41,7 @@ class MyLDIF(LDIFParser):
         self.DNs = []
         self.lastDN = None
         self.lastEntry = None
+        self.entries = []
 
     def getResults(self):
         return (self.targetDN, self.targetAttr)
@@ -58,6 +61,7 @@ class MyLDIF(LDIFParser):
         self.lastDN = dn
         self.DNs.append(dn)
         self.lastEntry = entry
+        self.entries.append(entry)
         if dn.lower().strip() == self.targetDN.lower().strip():
             self.targetEntry = entry
             if self.targetAttr in entry:
@@ -137,7 +141,7 @@ def dooxAuthChangesFor31(self, oxAuthPath):
 
     dataOxAuthConfErrors = json.loads(parser.lastEntry['oxAuthConfErrors'][0])
     grant = {'id': ("invalid_grant_and_session"), 'description': (
-    "he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
+        "he provided access token and session state are invalid or were issued to another client."), 'uri': (None)}
 
     session = {'id': ("session_not_passed"), 'description': ("The provided session state is empty."), 'uri': (None)}
 
@@ -236,6 +240,127 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     os.rename(newfile, oxAuthPath)
 
 
+def removeDeprecatedScripts(self, oxScriptPath):
+    parser = MyLDIF(open(oxScriptPath, 'rb'), sys.stdout)
+    parser.parse()
+    base64Types = ["oxScript"]
+    newfile = oxScriptPath.replace('/scripts.ldif', '/scripts_new.ldif')
+    f = open(newfile, 'a')
+    for idx, val in enumerate(parser.entries):
+        if 'displayName' in val:
+            if val['displayName'][0] != 'uma_authorization_policy':
+                out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
+                f.write(out)
+    f.close()
+
+    os.remove(oxScriptPath)
+    os.rename(newfile, oxScriptPath)
+
+
+def doClientsChangesForUMA2(self, clientPath):
+    parser = MyLDIF(open(clientPath, 'rb'), sys.stdout)
+    parser.parse()
+    atr = parser.parse()
+    newfile = clientPath.replace('/clients.ldif', '/clients_new.ldif')
+    f = open(newfile, 'w')
+    base64Types = []
+    for idx, val in enumerate(parser.entries):
+        if 'displayName' in val:
+            if val['displayName'][0] == 'Pasport Resource Server Client':
+                parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
+            elif val['displayName'][0] == 'SCIM Resource Server Client':
+                parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
+            elif val['displayName'][0] == 'Passport Requesting Party Client':
+                parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
+            elif val['displayName'][0] == 'SCIM Requesting Party Client':
+                parser.entries[idx]["oxAuthGrantType"] = ['client_credentials']
+            out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
+            f.write(out)
+    f.close()
+    os.remove(clientPath)
+    os.rename(newfile, clientPath)
+
+
+def doUmaResourcesChangesForUma2(self, UmaPath):
+    scimClient = ''
+    passportClient = ''
+    inumOrg = ''
+    with open('/install/community-edition-setup/setup.properties.last', 'r') as f:
+        content = f.readlines()
+        for line in content:
+            if 'scim_rp_client_id' in line:
+                scimClient = line.replace("scim_rp_client_id=", "")
+            elif 'passport_rp_client_id' in line:
+                passportClient = line.replace("passport_rp_client_id=", "")
+            elif 'inumOrg' in line:
+                inumOrg = line.replace("inumOrg=", "")
+
+    parser = MyLDIF(open(UmaPath, 'rb'), sys.stdout)
+    parser.parse()
+    atr = parser.parse()
+    newfile = UmaPath.replace('/uma.ldif', '/uma_new.ldif')
+    f = open(newfile, 'w')
+    base64Types = []
+    for idx, val in enumerate(parser.entries):
+        if 'displayName' in val:
+            if len(val['oxId'][0]) > 1 and 'ou=resource_sets' in parser.getDNs()[idx]:
+                parser.getDNs()[idx] = parser.getDNs()[idx].replace('inum=' + val['inum'][0],
+                                                                    'oxId=' + val['oxId'][0]).replace('resource_sets',
+                                                                                                      'resources')
+            if val['oxId'][0] == 'scim_access':
+                parser.entries[idx]["oxId"] = ['https://gluu.local.org/oxauth/restv1/uma/scopes/scim_access']
+            elif val['oxId'][0] == 'passport_access':
+                parser.entries[idx]["oxId"] = ['https://gluu.local.org/oxauth/restv1/uma/scopes/passport_access']
+            if val['displayName'][0] == 'SCIM Resource Set':
+                parser.entries[idx]["oxResource"] = ['https://gluu.local.org/identity/restv1/scim/v1']
+                parser.entries[idx]['oxAssociatedClient'] = [
+                    ('inum=' + scimClient + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
+            elif val['displayName'][0] == 'Passport Resource Set':
+                parser.entries[idx]["oxResource"] = ['https://gluu.local.org/identity/restv1/passport/config']
+                parser.entries[idx]['oxAssociatedClient'] = [
+                    ('inum=' + passportClient + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
+
+        out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
+        f.write(out)
+    f.close()
+    os.remove(UmaPath)
+    os.rename(newfile, UmaPath)
+
+
+def doOxTrustChanges(self, oxTrustPath):
+    parser = MyLDIF(open(oxTrustPath, 'rb'), sys.stdout)
+    parser.targetAttr = "oxTrustConfApplication"
+    atr = parser.parse()
+    oxTrustConfApplication = parser.lastEntry['oxTrustConfApplication'][0]
+    oxTrustConfApplication = oxTrustConfApplication.replace('seam/resource/', '')
+    parser.lastEntry['oxTrustConfApplication'][0] = oxTrustConfApplication;
+    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh"]
+
+    out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
+    newfile = oxTrustPath.replace('/oxtrust_config.ldif', '/oxtrust_config_new.ldif')
+    # print (newfile)
+    f = open(newfile, 'w')
+    f.write(out)
+    f.close()
+
+    os.remove(oxTrustPath)
+    os.rename(newfile, oxTrustPath)
+
+
+def changePassportConfigJson(self, param):
+    # Read in the file
+    if os.path.exists(param):
+        with open(param, 'r') as file:
+            filedata = file.read()
+
+        # Replace the target string
+        filedata = filedata.replace('seam/resource/', '')
+
+        # Write the file out again
+        with open(param, 'w') as file:
+            file.write(filedata)
+
+
 class Exporter(object):
     def __init__(self):
         self.backupDir = 'backup_3031'
@@ -330,6 +455,7 @@ class Exporter(object):
             except:
                 logging.error("Failed to backup %s", folder)
                 logging.debug(traceback.format_exc())
+        copyfile('/opt/gluu/schema/openldap/custom.schema', self.backupDir + "/custom.schema")
 
     def getLdif(self):
         logging.info('Creating backup of LDAP data')
@@ -339,12 +465,15 @@ class Exporter(object):
             args = [self.ldapsearch] + self.ldapCreds + [
                 '-b', '%s,o=%s,o=gluu' % (basedn, orgInum), 'objectclass=*']
             output = self.getOutput(args)
-            if basedn == 'ou=uma':
-                output = output.replace('oxAuthUmaResourceSet', 'oxUmaResource')
             ou = basedn.split("=")[-1]
             f = open("%s/ldif/%s.ldif" % (self.backupDir, ou), 'w')
             f.write(output)
             f.close()
+
+        removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
+        doClientsChangesForUMA2(self, "%s/ldif/clients.ldif" % self.backupDir)
+        doUmaResourcesChangesForUma2(self, "%s/ldif/uma.ldif" % self.backupDir)
+        changePassportConfigJson(self, "%s/etc/gluu/conf/passport-config.json" % self.backupDir)
 
         # Backup the appliance config
         args = [self.ldapsearch] + self.ldapCreds + \
@@ -370,6 +499,7 @@ class Exporter(object):
         f = open("%s/ldif/oxtrust_config.ldif" % self.backupDir, 'w')
         f.write(output)
         f.close()
+        doOxTrustChanges(self, "%s/ldif/oxtrust_config.ldif" % self.backupDir)
 
         # Backup the oxauth config
         args = [self.ldapsearch] + self.ldapCreds + \
@@ -464,7 +594,7 @@ class Exporter(object):
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
-        print("            Gluu Server Data Export Tool For v3.x            ")
+        print("            Gluu Server Data Export Tool For v3.1.x            ")
         print("-------------------------------------------------------------")
         print("")
         self.prepareLdapPW()

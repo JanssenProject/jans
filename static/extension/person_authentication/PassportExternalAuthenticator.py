@@ -49,6 +49,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (self.attributesMapping == None):
                 print "Passport: Initialization. The attributes mapping isn't valid"
                 return False
+
         if (configurationAttributes.containsKey("extension_module")):
             extensionModuleName = configurationAttributes.get("extension_module").getValue2()
             try:
@@ -86,6 +87,10 @@ class PersonAuthentication(PersonAuthenticationType):
             print("Passport: Exception inside getUserValueFromAuth " + str(err))
 
     def authenticate(self, configurationAttributes, requestParameters, step):
+        extensionResult = self.extensionAuthenticate(configurationAttributes, requestParameters, step)
+        if extensionResult != None:
+            return extensionResult
+
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         try:
@@ -175,8 +180,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 print ("Passport: Error occurred during request parameter fetching " + str(err))
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
+        extensionResult = self.extensionPrepareForStep(configurationAttributes, requestParameters, step)
+        if extensionResult != None:
+            return extensionResult
+
         if (step == 1):
-            print "Passport: Basic. Prepare for Step 1 method call"
+            print "Passport. Prepare for Step 1 method call"
             return True
         else:
             return True
@@ -188,6 +197,10 @@ class PersonAuthentication(PersonAuthenticationType):
         return 1
 
     def getPageForStep(self, configurationAttributes, step):
+        extensionResult = self.extensionGetPageForStep(configurationAttributes, step)
+        if extensionResult != None:
+            return extensionResult
+
         if (step == 1):
             return "/auth/passport/passportlogin.xhtml"
         return "/auth/passport/passportpostlogin.xhtml"
@@ -243,3 +256,57 @@ class PersonAuthentication(PersonAuthenticationType):
                 return "Not Get UID related remote attribute"
         except Exception, err:
             print("Passport: Exception inside getUidRemoteAttr " + str(err))
+
+    def extensionAuthenticate(self, configurationAttributes, requestParameters, step):
+        if (self.extensionModule == None):
+            return None
+
+        try:
+            result = self.extensionModule.authenticate(configurationAttributes, requestParameters, step)
+            print "Passport. Extension. Authenticate: '%s'" % result
+
+            return result
+        except Exception, ex:
+            print "Passport. Extension. Authenticate. Failed to execute postLogin method"
+            print "Passport. Extension. Authenticate. Unexpected error:", ex
+        except java.lang.Throwable, ex:
+            print "Passport. Extension. Authenticate. Failed to execute postLogin method"
+            ex.printStackTrace() 
+                    
+        return True
+
+    def extensionGetPageForStep(self, configurationAttributes, step):
+        if (self.extensionModule == None):
+            return None
+
+        try:
+            result = self.extensionModule.getPageForStep(configurationAttributes, step)
+            print "Passport. Extension. Get page for Step: '%s'" % result
+
+            return result
+        except Exception, ex:
+            print "Passport. Extension. Get page for Step. Failed to execute postLogin method"
+            print "Passport. Extension. Get page for Step. Unexpected error:", ex
+        except java.lang.Throwable, ex:
+            print "Passport. Extension. Get page for Step. Failed to execute postLogin method"
+            ex.printStackTrace() 
+                    
+        return None
+
+    def extensionPrepareForStep(self, configurationAttributes, requestParameters, step):
+        if (self.extensionModule == None):
+            return None
+
+        try:
+            result = self.extensionModule.prepareForStep(configurationAttributes, requestParameters, step)
+            print "Passport. Extension. Prepare for Step: '%s'" % result
+
+            return result
+        except Exception, ex:
+            print "Passport. Extension. Prepare for Step. Failed to execute postLogin method"
+            print "Passport. Extension. Prepare for Step. Unexpected error:", ex
+        except java.lang.Throwable, ex:
+            print "Passport. Extension. Prepare for Step. Failed to execute postLogin method"
+            ex.printStackTrace() 
+
+        return None
