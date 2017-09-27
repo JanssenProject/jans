@@ -542,7 +542,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def initNativePushNotificationService(self, configurationAttributes):
         print "Super-Gluu. Initialize native notification services"
-        self.pushSnsMode = False
         
         creds = self.loadPushNotificationCreds(configurationAttributes)
         if creds == None:
@@ -670,7 +669,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Initialize Gluu notification services. Failed to load metadata. Exception: ", sys.exc_info()[1]
             return False
 
-        gluuClient = notifyClientFactory.createPoolledNotifyService(metadataConfiguration)
+        gluuClient = notifyClientFactory.createNotifyService(metadataConfiguration)
         encryptionService = CdiUtil.bean(EncryptionService)
 
         if android_creds["enabled"]:
@@ -847,9 +846,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             if debug:
                                 print "Super-Gluu. Send Android Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
 
-
         print "Super-Gluu. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
-
 
     def getTargetEndpointArn(self, deviceRegistrationService, pushSnsService, platform, user, u2fDevice):
         targetEndpointArn = None
