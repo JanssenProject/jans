@@ -5,7 +5,7 @@ This module has only one property:
    Example: /etc/certs/multi_auth_conf.json
    Example content of this file [ 'bindPassword' should be the base64 encoded of password text. You can take the advantage of 'encode.py' script to encode/decode your password. 'encode.py' is available inside Gluu server container ( location: /opt/gluu/bin/ ) ]:
 
-```
+
 {
   "ldap_configuration":
   [
@@ -33,5 +33,6 @@ This module has only one property:
      }
   ]
 }
-```   
+
+
    The names/values of properties are similar to oxAuth/oxTrust ldap configuration files.
