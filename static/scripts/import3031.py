@@ -487,7 +487,7 @@ class Migration(object):
             with open(self.o_gluu, 'w') as outfile:
                 for line in infile:
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
-                    line = line.replace('oxAuthUmaResourceSet','oxUmaResource')
+                    line = line.replace('oxAuthUmaResourceSet', 'oxUmaResource')
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
@@ -546,22 +546,23 @@ class Migration(object):
             self.importDataIntoOpenDJ()
 
     def getLDAPServerType(self):
-        choice = 1
-        try:
-            choice = int(raw_input(
-                "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
-        except ValueError:
-            logging.error("You entered non-interger value. Cannot decide LDAP"
-                          "server type. Quitting.")
-            sys.exit(1)
-
-        if choice == 1:
-            self.ldap_type = 'openldap'
-        elif choice == 2:
-            self.ldap_type = 'opendj'
-        else:
-            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-            sys.exit(1)
+        # choice = 1
+        # try:
+        #     choice = int(raw_input(
+        #         "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
+        # except ValueError:
+        #     logging.error("You entered non-interger value. Cannot decide LDAP"
+        #                   "server type. Quitting.")
+        #     sys.exit(1)
+        #
+        # if choice == 1:
+        #     self.ldap_type = 'openldap'
+        # elif choice == 2:
+        #     self.ldap_type = 'opendj'
+        # else:
+        #     logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+        #     sys.exit(1)
+        self.ldap_type = 'openldap'
 
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')
