@@ -7,7 +7,7 @@
 package org.gluu.oxnotify.client;
 
 import org.apache.commons.codec.binary.Base64;
-
+import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -27,12 +27,13 @@ public class NotifyClientFactory {
 	private ClientExecutor pooledClientExecutor;
 
 	private NotifyClientFactory() {
-		// Create polled client
+        // Create polled client
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		cm.setMaxTotal(200); // Increase max total connection to 200
 		cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
 
-		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).setSslcontext(SSLContexts.createSystemDefault()).build();
+
 		this.pooledClientExecutor = new ApacheHttpClient4Executor(httpClient);
 	}
 
@@ -42,7 +43,7 @@ public class NotifyClientFactory {
 
 	public NotifyMetadataClientService createMetaDataConfigurationService(String issuer) {
 		String metadataUri = issuer + "/.well-known/notify-configuration";
-		return ProxyFactory.create(NotifyMetadataClientService.class, metadataUri);
+		return ProxyFactory.create(NotifyMetadataClientService.class, metadataUri, pooledClientExecutor);
 	}
 
 	public NotifyClientService createNotifyService(NotifyMetadata notifyMetadata) {
