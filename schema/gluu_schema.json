@@ -4063,6 +4063,28 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Status of client",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxDisabled"
+            ],
+            "oid": "oxAttribute:375",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "oxAuth Web Keys Configuration",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "oxWebKeysSettings"
+            ],
+            "oid": "oxAttribute:376",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
@@ -4685,6 +4707,7 @@
                 "oxPersistClientAuthorizations",
                 "oxIncludeClaimsInIdToken",
                 "oxRefreshTokenLifetime",
+                "oxDisabled",
                 "oxAuthLogoutURI",
                 "oxAuthLogoutSessionRequired"
             ],
@@ -4760,7 +4783,8 @@
                 "oxAuthConfErrors",
                 "oxAuthConfStatic",
                 "oxAuthConfWebKeys",
-                "oxRevision"
+                "oxRevision",
+                "oxWebKeysSettings"
             ],
             "must": [
                 "objectclass"
@@ -5464,3 +5488,4 @@
         "oxSyntax": "oxPublished:1"
     }
 }
+
