@@ -11,6 +11,7 @@ import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.uma.authorization.Claims;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContextBuilder;
@@ -44,6 +45,10 @@ public class UmaNeedsInfoService {
     private UmaResourceService resourceService;
     @Inject
     private ExternalUmaRptPolicyService policyService;
+    @Inject
+    private UmaSessionService sessionService;
+    @Inject
+    private UserService userService;
 
     public Map<CustomScriptConfiguration, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<UmaScopeDescription, Boolean> requestedScopes,
                                                                                   List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest,
@@ -56,7 +61,8 @@ public class UmaNeedsInfoService {
         List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
 
         UmaAuthorizationContextBuilder contextBuilder = new UmaAuthorizationContextBuilder(appConfiguration,
-                attributeService, resourceService, permissions, requestedScopes, claims, httpRequest);
+                attributeService, resourceService, permissions, requestedScopes, claims, httpRequest,
+                sessionService, userService, client);
 
         for (String scriptDN : scriptDNs) {
             CustomScriptConfiguration script = policyService.getScriptByDn(scriptDN);
