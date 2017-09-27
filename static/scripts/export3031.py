@@ -29,6 +29,7 @@ from ldif import LDIFParser, LDIFWriter, CreateLDIF
 from distutils.dir_util import copy_tree
 import json
 from shutil import copyfile
+import os.path
 
 
 class MyLDIF(LDIFParser):
@@ -348,15 +349,16 @@ def doOxTrustChanges(self, oxTrustPath):
 
 def changePassportConfigJson(self, param):
     # Read in the file
-    with open(param, 'r') as file:
-        filedata = file.read()
+    if os.path.exists(param):
+        with open(param, 'r') as file:
+            filedata = file.read()
 
-    # Replace the target string
-    filedata = filedata.replace('seam/resource/', '')
+        # Replace the target string
+        filedata = filedata.replace('seam/resource/', '')
 
-    # Write the file out again
-    with open(param, 'w') as file:
-        file.write(filedata)
+        # Write the file out again
+        with open(param, 'w') as file:
+            file.write(filedata)
 
 
 class Exporter(object):
@@ -592,7 +594,7 @@ class Exporter(object):
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
-        print("            Gluu Server Data Export Tool For v3.x            ")
+        print("            Gluu Server Data Export Tool For v3.1.x            ")
         print("-------------------------------------------------------------")
         print("")
         self.prepareLdapPW()
