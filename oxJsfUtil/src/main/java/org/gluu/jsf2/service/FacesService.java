@@ -35,6 +35,14 @@ public class FacesService {
 		redirect(viewId, null);
 	}
 
+	public void redirectWithExternal(String redirectTo, Map<String, Object> parameters) {
+		if (redirectTo.startsWith("https") || redirectTo.startsWith("http")) {
+			redirectToExternalURL(redirectTo);
+		} else {
+			redirect(redirectTo, parameters);
+		}
+	}
+
 	public void redirect(String viewId, Map<String, Object> parameters) {
 		if (viewId == null) {
 			throw new RedirectException("cannot redirect to a null viewId");

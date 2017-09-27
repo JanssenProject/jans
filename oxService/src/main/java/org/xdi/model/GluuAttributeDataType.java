@@ -12,11 +12,18 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 /**
  * Attribute Data Type
  * 
- * @author Yuriy Movchan Date: 10.07.2010
+ * @author Yuriy Movchan
+ * @author Javier Rojas Blum
+ *
+ * @version September 27, 2017
  */
 public enum GluuAttributeDataType implements LdapEnum {
 
-	STRING("string", "Text"), NUMERIC("numeric", "Numeric"), PHOTO("photo", "Photo"), DATE("generalizedTime", "Date");
+	STRING("string", "Text"),
+	NUMERIC("numeric", "Numeric"),
+	BOOLEAN("boolean", "Boolean"),
+	PHOTO("photo", "Photo"),
+	DATE("generalizedTime", "Date");
 
 	private String value;
 	private String displayName;
