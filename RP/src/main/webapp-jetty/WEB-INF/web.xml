@@ -5,6 +5,12 @@
 
 	<display-name>oxAuth RP</display-name>
 
+	<!-- Jetty -->
+	<context-param>
+		<param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
+		<param-value>false</param-value>
+	</context-param>
+
 	<!-- Weld -->
 	<context-param>
 		<param-name>org.jboss.weld.development</param-name>
