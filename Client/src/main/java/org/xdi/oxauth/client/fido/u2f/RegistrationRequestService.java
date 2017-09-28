@@ -10,6 +10,7 @@ import org.xdi.oxauth.model.fido.u2f.protocol.RegisterRequestMessage;
 import org.xdi.oxauth.model.fido.u2f.protocol.RegisterStatus;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 
 /**
  * Еhe endpoint allows to start and finish U2F registration process
@@ -22,6 +23,10 @@ public interface RegistrationRequestService {
     @GET
     @Produces({"application/json"})
     public RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId);
+
+    @GET
+    @Produces({"application/json"})
+    public RegisterRequestMessage startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode);
 
     @POST
     @Produces({"application/json"})
