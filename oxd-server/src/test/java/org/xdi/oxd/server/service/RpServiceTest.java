@@ -23,6 +23,8 @@ public class RpServiceTest {
     private static ExecutorService EXECUTOR_SERVICE;
 
     @Inject
+    ConfigurationService configurationService;
+    @Inject
     RpService service;
     @Inject
     PersistenceService persistenceService;
@@ -68,7 +70,7 @@ public class RpServiceTest {
     @Test(invocationCount = 10, threadPoolSize = 10)
     public void stressTest() throws IOException {
 
-        final Rp rp = service.defaultRp();
+        final Rp rp = configurationService.defaultRp();
         rp.setOxdId(UUID.randomUUID().toString());
         rp.setPat(UUID.randomUUID().toString());
 
@@ -91,7 +93,7 @@ public class RpServiceTest {
     }
 
     public Rp newRp() {
-        Rp rp = new Rp(service.defaultRp());
+        Rp rp = new Rp(configurationService.defaultRp());
         rp.setOxdId(UUID.randomUUID().toString());
         rp.setOpHost("test.gluu.org");
         return rp;

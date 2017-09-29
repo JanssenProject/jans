@@ -8,7 +8,7 @@ import java.sql.SQLException;
  * @version 0.9, 17/04/2017
  */
 
-public interface PersistenceProvider {
+public interface SqlPersistenceProvider {
 
     void onCreate();
 
