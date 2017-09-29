@@ -24,8 +24,6 @@ public class RpService {
      */
     private static final Logger LOG = LoggerFactory.getLogger(RpService.class);
 
-    public static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
-
     private final Map<String, Rp> rpMap = Maps.newConcurrentMap();
 
     private ValidationService validationService;
@@ -48,21 +46,18 @@ public class RpService {
         }
     }
 
-    public Rp defaultRp() {
-        Rp rp = rpMap.get(DEFAULT_SITE_CONFIG_JSON);
+    public Rp getRp(String oxdId) {
+        Preconditions.checkNotNull(oxdId);
+        Preconditions.checkState(!Strings.isNullOrEmpty(oxdId));
+
+        Rp rp = rpMap.get(oxdId);
         if (rp == null) {
-            LOG.error("Failed to load fallback configuration!");
-            rp = new Rp();
+            rp = persistenceService.getRp(oxdId);
+            if (rp != null) {
+                rpMap.put(oxdId, rp);
+            }
         }
-        return rp;
-    }
-
-    public Rp getRp(String id) {
-        Preconditions.checkNotNull(id);
-        Preconditions.checkState(!Strings.isNullOrEmpty(id));
-
-        Rp site = rpMap.get(id);
-        return validationService.validate(site);
+        return validationService.validate(rp);
     }
 
     public Map<String, Rp> getRps() {
@@ -95,7 +90,7 @@ public class RpService {
         }
     }
 
-    public Rp put(Rp rp) {
+    private Rp put(Rp rp) {
         return rpMap.put(rp.getOxdId(), rp);
     }
 }

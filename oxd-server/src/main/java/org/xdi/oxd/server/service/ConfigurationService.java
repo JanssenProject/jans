@@ -32,12 +32,15 @@ public class ConfigurationService implements Provider<Configuration> {
 
     public static final String TEST_FILE_NAME = "oxd-conf-test.json";
 
+    public static final String DEFAULT_SITE_CONFIG_JSON = "oxd-default-site-config.json";
+
     /**
      * Configuration file name.
      */
     public static final String FILE_NAME = Utils.isTestMode() ? TEST_FILE_NAME : "oxd-conf.json";
 
     private Configuration configuration = null;
+    private Rp defaultRp = null;
 
     public File getConfDirectoryFile() {
         final String path = getConfDirectoryPath();
@@ -65,7 +68,7 @@ public class ConfigurationService implements Provider<Configuration> {
     }
 
     public void load() {
-        configuration = loadImpl();
+        loadImpl();
         Preconditions.checkNotNull(configuration, "Failed to load configuration.");
 
         if (StringUtils.isBlank(configuration.getServerName())) {
@@ -74,43 +77,67 @@ public class ConfigurationService implements Provider<Configuration> {
         }
     }
 
-    private Configuration loadImpl() {
+    private void loadImpl() {
         // 1. try system property "oxd.server.config"
-        Configuration conf = tryToLoadFromSysProperty(ConfigurationService.CONF_SYS_PROPERTY_NAME);
-        if (conf != null) {
+        configuration = tryToLoadFromSysProperty(ConfigurationService.CONF_SYS_PROPERTY_NAME);
+        if (configuration != null) {
             LOG.trace("Configuration loaded successfully from system property: {}.", ConfigurationService.CONF_SYS_PROPERTY_NAME);
-            LOG.trace("Configuration: {}", conf);
-            return conf;
+            LOG.trace("Configuration: {}", configuration);
+            loadDefaultRp(System.getProperty(ConfigurationService.CONF_SYS_PROPERTY_NAME));
+            return;
         }
 
         // 2. catalina.base
         String property = System.getProperty("catalina.base") + File.separator + "conf" + File.separator + ConfigurationService.FILE_NAME;
-        conf = tryToLoadFromSysProperty(property);
-        if (conf != null) {
+        configuration = tryToLoadFromSysProperty(property);
+        if (configuration != null) {
             LOG.trace("Configuration loaded successfully from system property: {}.", property);
-            LOG.trace("Configuration: {}", conf);
-            return conf;
+            LOG.trace("Configuration: {}", configuration);
+            loadDefaultRp(property);
+            return;
         }
 
         // 2. catalina.home
         property = System.getProperty("catalina.home") + File.separator + "conf" + File.separator + ConfigurationService.FILE_NAME;
-        conf = tryToLoadFromSysProperty(property);
-        if (conf != null) {
+        configuration = tryToLoadFromSysProperty(property);
+        if (configuration != null) {
             LOG.trace("Configuration loaded successfully from system property: {}.", property);
-            LOG.trace("Configuration: {}", conf);
-            return conf;
+            LOG.trace("Configuration: {}", configuration);
+            loadDefaultRp(property);
+            return;
         }
 
 
         final InputStream stream = ClassLoader.getSystemClassLoader().getResourceAsStream(ConfigurationService.FILE_NAME);
-        final Configuration c = createConfiguration(stream);
-        if (c != null) {
+        final Configuration configuration = createConfiguration(stream);
+        if (configuration != null) {
             LOG.trace("Configuration loaded successfully.");
-            LOG.trace("Configuration: {}", c);
-        } else {
-            LOG.error("Failed to load configuration.");
+            LOG.trace("Configuration: {}", configuration);
         }
-        return c;
+    }
+
+    private void loadDefaultRp(String propertyName) {
+        try {
+            String configurationFolder = StringUtils.substringBeforeLast(propertyName, File.separator);
+            File file = new File(configurationFolder + File.separator + DEFAULT_SITE_CONFIG_JSON);
+            LOG.trace("Trying to read " + DEFAULT_SITE_CONFIG_JSON + ", path: " + file.getAbsolutePath());
+            if (file.exists()) {
+                defaultRp = MigrationService.parseRp(file);
+                LOG.info("Default RP configuration loaded successfully: " + defaultRp);
+            } else {
+                LOG.error("File does not exist at path: " + file.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to read " + DEFAULT_SITE_CONFIG_JSON, e);
+        }
+    }
+
+    public Rp defaultRp() {
+        if (defaultRp == null) {
+            LOG.error("Failed to load fallback configuration!");
+            defaultRp = new Rp();
+        }
+        return defaultRp;
     }
 
     private static Configuration tryToLoadFromSysProperty(String propertyName) {
@@ -136,17 +163,11 @@ public class ConfigurationService implements Provider<Configuration> {
         return null;
     }
 
-
-    private static Configuration createConfiguration(InputStream p_stream) {
+    public static Configuration createConfiguration(InputStream p_stream) {
         try {
-            try {
-                return CoreUtils.createJsonMapper().readValue(p_stream, Configuration.class);
-            } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
-            }
-            return null;
+            return CoreUtils.createJsonMapper().readValue(p_stream, Configuration.class);
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to parse oxd configuration.", e);
             return null;
         }
     }

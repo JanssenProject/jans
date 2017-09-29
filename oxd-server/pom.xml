@@ -11,6 +11,7 @@
 
     <properties>
         <h2.version>1.4.194</h2.version>
+        <jedis.version>2.9.0</jedis.version>
     </properties>
 
     <parent>
@@ -166,6 +167,11 @@
             <version>${h2.version}</version>
         </dependency>
         <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>uma-rs-resteasy</artifactId>
         </dependency>
@@ -221,6 +227,10 @@
         <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxcore-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.xdi</groupId>
+            <artifactId>oxcore-service</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

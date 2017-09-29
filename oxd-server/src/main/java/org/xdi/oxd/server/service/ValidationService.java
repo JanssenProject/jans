@@ -147,13 +147,13 @@ public class ValidationService {
         notBlankOxdId(params.getOxdId());
     }
 
-    public Rp validate(Rp site) {
-        if (site == null) {
+    public Rp validate(Rp rp) {
+        if (rp == null) {
             throw new ErrorResponseException(ErrorResponseCode.INVALID_OXD_ID);
         }
 
-        notBlankOxdId(site.getOxdId());
-        notBlankOpHost(site.getOpHost());
-        return site;
+        notBlankOxdId(rp.getOxdId());
+        notBlankOpHost(rp.getOpHost());
+        return rp;
     }
 }
