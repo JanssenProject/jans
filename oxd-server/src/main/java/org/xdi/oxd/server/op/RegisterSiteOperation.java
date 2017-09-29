@@ -26,8 +26,8 @@ import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.Utils;
+import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
-import org.xdi.oxd.server.service.RpService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,11 +60,11 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         String oxdId = UUID.randomUUID().toString();
 
-        LOG.info("Creating site configuration ...");
+        LOG.info("Creating RP ...");
         persistRp(oxdId, params);
         validateAccessToken(oxdId, params);
 
-        LOG.info("Site configuration created: " + rp);
+        LOG.info("RP created: " + rp);
 
         RegisterSiteResponse opResponse = new RegisterSiteResponse();
         opResponse.setOxdId(oxdId);
@@ -104,16 +104,16 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
     }
 
     private void validateParametersAndFallbackIfNeeded(RegisterSiteParams params) {
-        Rp fallback = getRpService().defaultRp();
+        Rp fallback = getConfigurationService().defaultRp();
 
         // op_host
         if (Strings.isNullOrEmpty(params.getOpHost())) {
-            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + RpService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
+            LOG.warn("op_host is not set for parameter: " + params + ". Look up at " + ConfigurationService.DEFAULT_SITE_CONFIG_JSON + " for fallback op_host");
             String fallbackOpHost = fallback.getOpHost();
             if (Strings.isNullOrEmpty(fallbackOpHost)) {
                 throw new ErrorResponseException(ErrorResponseCode.INVALID_OP_HOST);
             }
-            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + RpService.DEFAULT_SITE_CONFIG_JSON);
+            LOG.warn("Fallback to op_host: " + fallbackOpHost + ", from " + ConfigurationService.DEFAULT_SITE_CONFIG_JSON);
             params.setOpHost(fallbackOpHost);
         }
 
@@ -332,7 +332,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
 
         Preconditions.checkState(!Strings.isNullOrEmpty(params.getOpHost()), "op_host contains blank value. Please specify valid OP public address.");
 
-        final Rp rp = new Rp(getRpService().defaultRp());
+        final Rp rp = new Rp(getConfigurationService().defaultRp());
         rp.setOxdId(siteId);
         rp.setOpHost(params.getOpHost());
         rp.setOpDiscoveryPath(params.getOpDiscoveryPath());

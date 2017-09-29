@@ -10,7 +10,7 @@ import java.sql.SQLException;
  * @version 0.9, 16/04/2017
  */
 
-public class H2PersistenceProvider implements PersistenceProvider {
+public class H2PersistenceProvider implements SqlPersistenceProvider {
 
     private JdbcConnectionPool pool = null;
 
