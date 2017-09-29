@@ -5,6 +5,7 @@
 #
 
 from org.xdi.model.custom.script.type.scope import DynamicScopeType
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import UserService
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList
@@ -38,7 +39,7 @@ class DynamicScope(DynamicScopeType):
         jsonWebResponse = dynamicScopeContext.getJsonWebResponse()
         claims = jsonWebResponse.getClaims()
 
-        userService = UserService.instance()
+        userService = CdiUtil.bean(UserService)
         roles = userService.getCustomAttribute(user, "role")
         if roles != None:
             claims.setClaim("role", roles.getValues())
