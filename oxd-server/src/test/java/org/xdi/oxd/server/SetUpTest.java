@@ -7,6 +7,7 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.server.persistence.PersistenceService;
+import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.RpService;
 
 /**
@@ -24,7 +25,7 @@ public class SetUpTest {
         CoreUtils.createExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                removeExistingSiteConfigurations();
+                removeExistingRps();
 
                 ServerLauncher.start();
             }
@@ -34,10 +35,16 @@ public class SetUpTest {
         CoreUtils.sleep(10);
     }
 
-    private static void removeExistingSiteConfigurations() {
-        ServerLauncher.getInjector().getInstance(PersistenceService.class).create();
-        ServerLauncher.getInjector().getInstance(RpService.class).removeAllRps();
-        ServerLauncher.getInjector().getInstance(RpService.class).load();
+    private static void removeExistingRps() {
+        try {
+            ServerLauncher.getInjector().getInstance(ConfigurationService.class).load();
+            ServerLauncher.getInjector().getInstance(PersistenceService.class).create();
+            ServerLauncher.getInjector().getInstance(RpService.class).removeAllRps();
+            ServerLauncher.getInjector().getInstance(RpService.class).load();
+        } catch (Exception e) {
+            System.out.println("Failed to removed existing RPs.");
+            e.printStackTrace();
+        }
     }
 
     @AfterSuite
