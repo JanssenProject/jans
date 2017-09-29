@@ -42,7 +42,7 @@ public class PersistenceServiceImpl implements PersistenceService {
     }
 
     public boolean update(Rp rp) {
-        return persistenceService.create(rp);
+        return persistenceService.update(rp);
     }
 
     public Rp getRp(String oxdId) {
