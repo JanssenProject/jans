@@ -80,6 +80,9 @@ public class MigrationService {
 
     public static Rp parseRp(String rpAsJson) {
         try {
+            if (StringUtils.isBlank(rpAsJson)) {
+                return null;
+            }
             try {
                 return CoreUtils.createJsonMapper().readValue(rpAsJson, Rp.class);
             } catch (Exception e) {

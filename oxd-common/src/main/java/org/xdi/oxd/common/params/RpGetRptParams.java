@@ -11,7 +11,6 @@ import java.util.List;
 /**
  * @author Yuriy Zabrovarnyy
  */
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RpGetRptParams implements HasProtectionAccessTokenParams {
 

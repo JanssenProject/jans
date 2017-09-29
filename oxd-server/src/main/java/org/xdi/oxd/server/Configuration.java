@@ -3,6 +3,7 @@
  */
 package org.xdi.oxd.server;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -56,6 +57,10 @@ public class Configuration {
     private Boolean uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient;
     @JsonProperty(value = "migration_source_folder_path")
     private String migrationSourceFolderPath;
+    @JsonProperty(value = "storage")
+    private String storage;
+    @JsonProperty(value = "storage_configuration")
+    private JsonNode storageConfiguration;
 
     public String getMigrationSourceFolderPath() {
         return migrationSourceFolderPath;
@@ -225,6 +230,22 @@ public class Configuration {
         this.timeOutInSeconds = timeOutInSeconds;
     }
 
+    public String getStorage() {
+        return storage;
+    }
+
+    public void setStorage(String storage) {
+        this.storage = storage;
+    }
+
+    public JsonNode getStorageConfiguration() {
+        return storageConfiguration;
+    }
+
+    public void setStorageConfiguration(JsonNode storageConfiguration) {
+        this.storageConfiguration = storageConfiguration;
+    }
+
     @Override
     public String toString() {
         return "Configuration{" +
@@ -249,6 +270,8 @@ public class Configuration {
                 ", protectCommandsWithAccessToken=" + protectCommandsWithAccessToken +
                 ", uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient=" + uma2AuthRegisterClaimsGatheringEndpointAsRedirectUriOfClient +
                 ", migrationSourceFolderPath='" + migrationSourceFolderPath + '\'' +
+                ", storage='" + storage + '\'' +
+                ", storageConfiguration='" + storageConfiguration + '\'' +
                 '}';
     }
 }
