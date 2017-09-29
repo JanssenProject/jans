@@ -37,7 +37,7 @@ public class RedisPersistenceService implements PersistenceService {
         try {
             RedisConfiguration redisConfiguration = asRedisConfiguration(configuration.getStorageConfiguration());
 
-            AbstractRedisProvider redisProvider = RedisProviderFactory.create(redisConfiguration);
+            redisProvider = RedisProviderFactory.create(redisConfiguration);
             redisProvider.create();
             LOG.debug("RedisPersistenceService started.");
         } catch (Exception e) {
