@@ -22,10 +22,10 @@ server:
 #  hardNofileLimit: 1000
   applicationConnectors:
     - type: http
-      port: 8080
+      port: 8082
     - type: https
-      port: 8443
-      keyStorePath: oxd-to-http.keystore
+      port: 8445
+      keyStorePath: oxd-https-extension/oxd-to-http.keystore
       keyStorePassword: example
       validateCerts: false
     #  keyStorePath: oxd-to-http.keystore
@@ -35,7 +35,7 @@ server:
       port: 8081
     - type: https
       port: 8444
-      keyStorePath: oxd-to-http.keystore
+      keyStorePath: oxd-https-extension/oxd-to-http.keystore
       keyStorePassword: example
       validateCerts: false
 
