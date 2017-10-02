@@ -15,6 +15,12 @@
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery.qrcode-0.12.0.min.js"/>
         <script src="#{oxAuthConfigurationService.jsLocation}/jquery-ui-1.12.1.min.js"/>
         <script src="../../js/gluu-auth.js"/>
+        <link href="#{oxAuthConfigurationService.cssLocation}/bootstrap.min.css" rel="stylesheet"/>
+		<link rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/style.css"/>
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
+	
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
         <script>
             var helper = (function() {
@@ -49,15 +55,30 @@
             var request = '${identity.getWorkingParameter('super_gluu_request')}';
             var label = '${identity.getWorkingParameter('super_gluu_label')}';
             var qr_options = ${identity.getWorkingParameter('super_gluu_qr_options')};
+            
+            var obj = jQuery.parseJSON(request);
+            var authmethod = obj.method;
+            alert( obj.method );
             $(document).ready(function() {
+            	if (authmethod == "enroll"){
+            		alert(authmethod);
+            		document.getElementById("login").style.display = "none";
+            		document.getElementById("enroll").style.display = "";  
+            		
+            		gluu_auth.renderQrCode('#enrollcontainer', request, qr_options, label);
+                    gluu_auth.startProgressBar('#enrollprogressbar', 60, onSignInCallback);
+                    gluu_auth.startSessionChecker(onSignInCallback, 60);
+            	}else{
+            		document.getElementById("login").style.display = "";
+            		document.getElementById("enroll").style.display = "none";
+            		gluu_auth.renderQrCode('#container', request, qr_options, label);
+                    gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
+                    gluu_auth.startSessionChecker(onSignInCallback, 60);
+            	}
 
                 if (request == '') {
                     onSignInCallback('error');
                 }
-
-                gluu_auth.renderQrCode('#container', request, qr_options, label);
-                gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
-                gluu_auth.startSessionChecker(onSignInCallback, 60);
             });
 
         </script>
@@ -92,12 +113,30 @@
                 font-family: Arial, Verdana, sans-serif;
                 font-size: 11px;
             }
+            .qr_bx {
+			    padding: 26px;
+			    border: 1px solid #f4f4f4;
+			    max-width: 1500px;
+			    margin: 0 auto;
+			}			
+			
+			.container {
+			    width: 1160px;
+			}
+			
+			.enrollbody {
+			    width: 1560px;
+			    margin: 0 auto;
+			}
+            
+			
         </style>
     </ui:define>
 
     <ui:define name="pageTitle">oxAuth - Super-Gluu Login</ui:define>
 
     <ui:define name="body">
+    <h:panelGroup id="login">
         <form method="post" id="response" action="#{request.contextPath}/postlogin">
             <input type="hidden" id="auth_result" name="auth_result" />
         </form>
@@ -164,6 +203,62 @@
                 </td>
             </tr>
         </table>
+        </h:panelGroup>
+        
+   <h:panelGroup id="enroll">
+        <div id="enrollbody">
+       <header class="bs-docs-nav navbar navbar-static-top" id="top"> 
+		<div class="container">
+			<div class="navbar-header"> 
+				<a href="https://super.gluu.org" target="_blank"  class="navbar-brand"><img src="#{oxAuthConfigurationService.getImgLocation()}/logo.png" alt="logo"/></a>
+			</div>
+		</div>
+	</header>
+	
+	<div class="bs-docs-section">
+		<div class="container">
+			<h2 style="font-size: 30px;font-weight: 500;">#{msgs['supergluu.enroll.enrollyourdevice']}</h2>
+			<p>#{msgs['supergluu.enroll.scanqrcode']}</p>
+			<div class="qr_bx">
+				<div class="row">
+					<div class="col-md-6 col-sm-5 left_img">
+						<div id="enrollcontainer"></div>
+                        <div id="enrollprogressbar"></div>
+					</div>
+					<div class="col-md-6 col-sm-7">
+					  <div class="paddin_bx">
+						<h3>#{msgs['supergluu.enroll.downloadsupergluu']}</h3>
+						<div class="button">
+							<h:outputLink target="_blank" value="https://play.google.com/store/apps/details?id=gluu.super.gluu" class="android" ><h:graphicImage value="../../img/android1.png" alt="android"/></h:outputLink>
+							<h:outputLink target="_blank" value="https://itunes.apple.com/us/app/super-gluu/id1093479646?mt=8" class="iphone" ><h:graphicImage value="../../img/iphone.png" alt="iphone"/></h:outputLink>
+							
+						</div>
+						<p>#{msgs['supergluu.enroll.supergluuisfreesecure']}</p>
+						<div class="links">
+						  <a target="_blank" href="#{msgs['supergluu.enroll.website.url']}"><h:outputText value="#{msgs['supergluu.enroll.Website']}"/></a> 
+						  <span class="seprator">|</span>
+						  <a target="_blank" href="#{msgs['supergluu.enroll.Docs.url']}"><h:outputText value="#{msgs['supergluu.enroll.Docs']}"/></a> 
+						</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="foot_bor">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+				  <div class="padding_spc">
+					<p>Gluu, Inc, | <a target="_blank" href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE">Use subject to MIT LICENSE</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+    </h:panelGroup>
     </ui:define>
 
 </ui:composition>
