@@ -160,6 +160,7 @@
                     <version>2.18.1</version>
                     <configuration>
                         <printSummary>true</printSummary>
+                        <skipTests>true</skipTests>
                     </configuration>
                 </plugin>
                 <plugin>
