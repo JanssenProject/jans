@@ -6,8 +6,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 import org.xdi.oxd.Tester;
+import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.persistence.PersistenceService;
-import org.xdi.oxd.web.TestAppModule;
 
 import java.io.File;
 
@@ -16,7 +16,7 @@ import static org.testng.Assert.assertNotNull;
 /**
  * @author yuriyz
  */
-@Guice(modules = TestAppModule.class)
+@Guice(modules = GuiceModule.class)
 public class MigrationServiceTest {
 
     @Inject

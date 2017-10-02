@@ -3,8 +3,8 @@ package org.xdi.oxd.server.service;
 import com.google.inject.Inject;
 import org.testng.annotations.*;
 import org.xdi.oxd.Tester;
+import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.persistence.PersistenceService;
-import org.xdi.oxd.web.TestAppModule;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import static junit.framework.Assert.assertEquals;
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 05/10/2015
  */
-@Guice(modules = TestAppModule.class)
+@Guice(modules = GuiceModule.class)
 public class RpServiceTest {
 
     private static ExecutorService EXECUTOR_SERVICE;
