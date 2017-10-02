@@ -1,6 +1,6 @@
 defaultHost: localhost
 defaultPort: 8099
-defaultOpHost: https://ce-dev3.gluu.org
+defaultOpHost: https://sample.gluu.org
 defaultAuthorizationRedirectUrl: https://client.example.com/cb
 defaultRedirectUrl: https://client.example.com/cb
 defaultLogoutUrl: https://client.example.com/logout
@@ -12,7 +12,7 @@ defaultLogoutUrl: https://client.example.com/logout
 defaultPostLogoutRedirectUrl: https://client.example.com/cb/logout
 defaultUserID: test_user
 defaultUserSecret: test_user_password
-defaultIntrospectionEndPointHTTP: https://ce-dev3.gluu.org/oxauth/seam/resource/restv1/introspection
+defaultIntrospectionEndPointHTTP: https://sample.gluu.org/oxauth/seam/resource/restv1/introspection
 
 
 # use the simple server factory if you only want to run on a single port
@@ -28,9 +28,6 @@ server:
       keyStorePath: oxd-to-http.keystore
       keyStorePassword: example
       validateCerts: false
-    #this requires the alpn-boot library on the JVM's boot classpath
-    #- type: h2
-    #  port: 8445
     #  keyStorePath: oxd-to-http.keystore
     #  keyStorePassword: example
   adminConnectors:
@@ -50,13 +47,8 @@ logging:
 
   # Logger-specific levels.
   loggers:
-
-    # Sets the level for 'com.example.app' to DEBUG.
-    com.example.app: DEBUG
-
-    # Redirects SQL logs to a separate file
-    org.hibernate.SQL:
-      level: DEBUG
+    org.gluu.oxd: DEBUG
+    org.xdi.oxd: DEBUG
 
 # Logback's Time Based Rolling Policy - archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}.log.gz
 # Logback's Size and Time Based Rolling Policy -  archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
