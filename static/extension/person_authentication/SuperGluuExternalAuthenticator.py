@@ -135,7 +135,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity,step)
+        self.setRequestScopedParameters(identity, step)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
         identity.setWorkingParameter("retry_current_step", False)
@@ -300,7 +300,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity,step)
+        self.setRequestScopedParameters(identity, step)
 
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
@@ -322,8 +322,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Super-Gluu. Prepare for step 1. Prepared super_gluu_request:", super_gluu_request
     
                 identity.setWorkingParameter("super_gluu_request", super_gluu_request)
-#            elif self.twoStep:
-#                identity.setWorkingParameter("display_register_action", True)
+            elif self.twoStep:
+                identity.setWorkingParameter("display_register_action", True)
 
             return True
         elif step == 2:
@@ -369,6 +369,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step 2. Prepared super_gluu_request:", super_gluu_request
 
             identity.setWorkingParameter("super_gluu_request", super_gluu_request)
+            identity.setWorkingParameter("super_gluu_auth_method", auth_method)
 
             if auth_method in ['authenticate']:
                 self.sendPushNotification(client_redirect_uri, user, super_gluu_request)
@@ -542,7 +543,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def initNativePushNotificationService(self, configurationAttributes):
         print "Super-Gluu. Initialize native notification services"
-        self.pushSnsMode = False
         
         creds = self.loadPushNotificationCreds(configurationAttributes)
         if creds == None:
@@ -670,7 +670,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Initialize Gluu notification services. Failed to load metadata. Exception: ", sys.exc_info()[1]
             return False
 
-        gluuClient = notifyClientFactory.createPoolledNotifyService(metadataConfiguration)
+        gluuClient = notifyClientFactory.createNotifyService(metadataConfiguration)
         encryptionService = CdiUtil.bean(EncryptionService)
 
         if android_creds["enabled"]:
@@ -773,13 +773,13 @@ class PersonAuthentication(PersonAuthenticationType):
                             targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.APNS, user, u2f_device)
                             send_notification = True
     
-                            sns_push_request_dictionary = { "sound": 'default',
-                                                            "aps": 
-                                                                { "badge": 9,
-                                                                  "title" : title,
-                                                                  "alert" : {"body": message} },
-                                                           "category": "ACTIONABLE",
-                                                           "content-available": "1",
+                            sns_push_request_dictionary = { "aps": 
+                                                                { "badge": 0,
+                                                                  "alert" : {"body": message, "title" : title},
+                                                                  "category": "ACTIONABLE",
+                                                                  "content-available": "1",
+                                                                  "sound": 'default'
+                                                           },
                                                            "request" : super_gluu_request
                             }
                             push_message = json.dumps(sns_push_request_dictionary, separators=(',',':'))
@@ -847,9 +847,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             if debug:
                                 print "Super-Gluu. Send Android Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
 
-
         print "Super-Gluu. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
-
 
     def getTargetEndpointArn(self, deviceRegistrationService, pushSnsService, platform, user, u2fDevice):
         targetEndpointArn = None
@@ -910,7 +908,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return session_attributes.get("redirect_uri")
 
-    def setRequestScopedParameters(self, identity,step):
+    def setRequestScopedParameters(self, identity, step):
         downloadMap = HashMap()
         if self.registrationUri != None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
