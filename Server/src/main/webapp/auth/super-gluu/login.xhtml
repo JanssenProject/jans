@@ -55,26 +55,22 @@
             var request = '${identity.getWorkingParameter('super_gluu_request')}';
             var label = '${identity.getWorkingParameter('super_gluu_label')}';
             var qr_options = ${identity.getWorkingParameter('super_gluu_qr_options')};
+            var authmethod = '${identity.getWorkingParameter('super_gluu_auth_method')}';
             
-            var obj = jQuery.parseJSON(request);
-            var authmethod = obj.method;
-            alert( obj.method );
             $(document).ready(function() {
-            	if (authmethod == "enroll"){
+            	if (authmethod == "enroll") {
             		alert(authmethod);
             		document.getElementById("login").style.display = "none";
             		document.getElementById("enroll").style.display = "";  
             		
             		gluu_auth.renderQrCode('#enrollcontainer', request, qr_options, label);
-                    gluu_auth.startProgressBar('#enrollprogressbar', 60, onSignInCallback);
-                    gluu_auth.startSessionChecker(onSignInCallback, 60);
-            	}else{
+            	} else {
             		document.getElementById("login").style.display = "";
             		document.getElementById("enroll").style.display = "none";
             		gluu_auth.renderQrCode('#container', request, qr_options, label);
-                    gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
-                    gluu_auth.startSessionChecker(onSignInCallback, 60);
             	}
+                gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
+                gluu_auth.startSessionChecker(onSignInCallback, 60);
 
                 if (request == '') {
                     onSignInCallback('error');
