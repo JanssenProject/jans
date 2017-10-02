@@ -745,6 +745,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         user_inum = userService.getUserInum(user_name)
 
+        send_android = 0
+        send_ios = 0
         u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData", "oxDeviceNotificationConf")
         if u2f_devices_list.size() > 0:
             for u2f_device in u2f_devices_list:
@@ -808,6 +810,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             send_notification_result = self.pushAppleService.push(push_token, push_message)
                             if debug:
                                 print "Super-Gluu. Send iOS Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                        send_ios = send_ios + 1
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
@@ -846,8 +849,9 @@ class PersonAuthentication(PersonAuthenticationType):
                             send_notification_result = self.pushAndroidService.send(push_message, push_token, 3)
                             if debug:
                                 print "Super-Gluu. Send Android Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                        send_android = send_android + 1
 
-        print "Super-Gluu. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
+        print "Super-Gluu. Send push notification. send_android: '%s', send_ios: '%s'" % (send_android, send_ios)
 
     def getTargetEndpointArn(self, deviceRegistrationService, pushSnsService, platform, user, u2fDevice):
         targetEndpointArn = None
