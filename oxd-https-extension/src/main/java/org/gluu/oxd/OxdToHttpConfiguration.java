@@ -7,42 +7,32 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OxdToHttpConfiguration extends Configuration {
+
     @NotEmpty
     private String defaultName = "Stranger";
-
     @NotEmpty
     private String defaultHost = "localhost";
-
     @NotEmpty
     private String defaultPort = "8099";
-
     @NotEmpty
     private String defaultOpHost = "https://ce-dev3.gluu.org";
-
-
     @NotEmpty
     private String defaultAuthorizationRedirectUrl = "https://client.example.com/cb";
-
     @NotEmpty
     private String defaultRedirectUrl = "https://client.example.com/cb";
-
     @NotEmpty
     private String defaultLogoutUrl = "https://client.example.com/logout";
-
     @NotEmpty
     private String defaultPostLogoutRedirectUrl = "https://client.example.com/cb/logout";
-
     @NotEmpty
     private String defaultUserID = "test_user";
-
     @NotEmpty
     private String defaultUserSecret = "test_user_password";
-
-
     @JsonProperty
     public String getDefaultHost() {
         return defaultHost;
     }
+
     @NotEmpty
     private String defaultIntrospectionEndPointHTTP = defaultOpHost + "/oxauth/seam/resource/restv1/introspection";
 
@@ -81,6 +71,7 @@ public class OxdToHttpConfiguration extends Configuration {
     public void setDefaultAuthorizationRedirectUrl(String defaultAuthorizationRedirectUrl) {
         this.defaultAuthorizationRedirectUrl = defaultAuthorizationRedirectUrl;
     }
+
     @JsonProperty
     public String getDefaultRedirectUrl() {
         return defaultRedirectUrl;
@@ -94,8 +85,8 @@ public class OxdToHttpConfiguration extends Configuration {
     @JsonProperty
     public String getDefaultLogoutUrl() {
         return defaultLogoutUrl;
+    }
 
-}
     @JsonProperty
     public void setDefaultLogoutUrl(String defaultLogoutUrl) {
         this.defaultLogoutUrl = defaultLogoutUrl;
