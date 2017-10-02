@@ -5,13 +5,13 @@ import com.google.inject.Inject;
 import junit.framework.Assert;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
-import org.xdi.oxd.web.TestAppModule;
+import org.xdi.oxd.server.guice.GuiceModule;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @version 0.9, 12/09/2016
  */
-@Guice(modules = TestAppModule.class)
+@Guice(modules = GuiceModule.class)
 public class StateServiceTest {
 
     @Inject
