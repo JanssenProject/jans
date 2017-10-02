@@ -22,10 +22,10 @@ public class Oxd {
             return client.send(command).dataAsResponse(SetupClientResponse.class);
         } finally {
             CommandClient.closeQuietly(client);
-    }
+        }
     }
 
-    public static RegisterSiteResponse registerSite(RegisterSiteParams params,String p_authorization) throws IOException {
+    public static RegisterSiteResponse registerSite(RegisterSiteParams params, String p_authorization) throws IOException {
         CommandClient client = null;
 
         try {
@@ -42,7 +42,7 @@ public class Oxd {
         }
     }
 
-    public static UpdateSiteResponse updateSite(UpdateSiteParams params,String p_authorization) throws IOException {
+    public static UpdateSiteResponse updateSite(UpdateSiteParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -57,7 +57,7 @@ public class Oxd {
         }
     }
 
-    public static GetAuthorizationUrlResponse getAuthorizationUrl(GetAuthorizationUrlParams params,String p_authorization) throws IOException {
+    public static GetAuthorizationUrlResponse getAuthorizationUrl(GetAuthorizationUrlParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -72,7 +72,7 @@ public class Oxd {
         }
     }
 
-    public static GetTokensByCodeResponse getTokenByCode(GetTokensByCodeParams params,String p_authorization) throws IOException {
+    public static GetTokensByCodeResponse getTokenByCode(GetTokensByCodeParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -87,7 +87,7 @@ public class Oxd {
         }
     }
 
-    public static GetUserInfoResponse getUserInfo(GetUserInfoParams params,String p_authorization) throws IOException {
+    public static GetUserInfoResponse getUserInfo(GetUserInfoParams params, String p_authorization) throws IOException {
         CommandClient client = null;
 
         try {
@@ -103,7 +103,7 @@ public class Oxd {
         }
     }
 
-    public static LogoutResponse getLogoutUri(GetLogoutUrlParams params,String p_authorization) throws IOException {
+    public static LogoutResponse getLogoutUri(GetLogoutUrlParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -118,7 +118,7 @@ public class Oxd {
         }
     }
 
-    public static RsProtectResponse umaRsProtect(RsProtectParams params,String p_authorization) throws IOException {
+    public static RsProtectResponse umaRsProtect(RsProtectParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -136,7 +136,7 @@ public class Oxd {
         }
     }
 
-    public static RsCheckAccessResponse umaRsCheckAccess(RsCheckAccessParams params,String p_authorization) throws IOException {
+    public static RsCheckAccessResponse umaRsCheckAccess(RsCheckAccessParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -154,7 +154,7 @@ public class Oxd {
         }
     }
 
-    public static RpGetRptResponse umaRpGetRpt(RpGetRptParams params,String p_authorization) throws IOException {
+    public static RpGetRptResponse umaRpGetRpt(RpGetRptParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -172,7 +172,7 @@ public class Oxd {
         }
     }
 
-    public static RpGetClaimsGatheringUrlResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams params,String p_authorization) throws IOException {
+    public static RpGetClaimsGatheringUrlResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
@@ -190,7 +190,7 @@ public class Oxd {
         }
     }
 
-    public static GetClientTokenResponse  getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params) throws IOException {
+    public static GetClientTokenResponse getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
