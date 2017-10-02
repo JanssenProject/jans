@@ -323,7 +323,6 @@ public class OxdResourceTest {
         RsCheckAccessResponse rsCheckAccessResponse = umaRsCheckAccess(rsCheckAccessParams);
         assertNotNull(rsCheckAccessResponse);
 
-
         RpGetRptParams rpGetRptParams = new RpGetRptParams();
         rpGetRptParams.setOxdId(oxdId);
         rpGetRptParams.setTicket(rsCheckAccessResponse.getTicket());
@@ -445,13 +444,14 @@ public class OxdResourceTest {
     }
 
     private CommandResponse httpClient(String endpoint, Object para) throws IOException {
-        final String httpClientResponse = client.target("http://localhost:" + RULE.getLocalPort() + "/" + endpoint)
+        final String entity = client.target("http://localhost:" + RULE.getLocalPort() + "/" + endpoint)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, accessToken)
                 .post(Entity.json(para))
                 .readEntity(String.class);
 
-        return RestResource.read(httpClientResponse, CommandResponse.class);
+        System.out.println("Plain string: " + entity);
+        return RestResource.read(entity, CommandResponse.class);
     }
 
     private static void output(String testCase, Object response) {
