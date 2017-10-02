@@ -369,6 +369,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step 2. Prepared super_gluu_request:", super_gluu_request
 
             identity.setWorkingParameter("super_gluu_request", super_gluu_request)
+            identity.setWorkingParameter("super_gluu_auth_method", auth_method)
 
             if auth_method in ['authenticate']:
                 self.sendPushNotification(client_redirect_uri, user, super_gluu_request)
