@@ -4,8 +4,8 @@ import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.persistence.RedisPersistenceService;
-import org.xdi.oxd.web.TestAppModule;
 import org.xdi.service.cache.RedisConfiguration;
 import org.xdi.service.cache.RedisProviderType;
 
@@ -18,7 +18,7 @@ import static junit.framework.Assert.assertNotNull;
 /**
  * @author yuriyz
  */
-@Guice(modules = TestAppModule.class)
+@Guice(modules = GuiceModule.class)
 public class RedisConfigurationTest {
 
     @Test
