@@ -3,7 +3,6 @@ package org.gluu.oxd.resources;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import freemarker.template.utility.StringUtil;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.testing.junit.ResourceTestRule;
@@ -27,15 +26,13 @@ import org.xdi.oxd.rs.protect.RsResourceList;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 
 public class OxdResourceTest {
 
-    public static final String TMP_FILE = createTempFile();
-    public static final String CONFIG_PATH = ResourceHelpers.resourceFilePath("oxd-to-http-test.yml");
+    public static final String CONFIG_PATH = ResourceHelpers.resourceFilePath("oxd-https-extension-ce-dev3.yml");
 
     private RegisterSiteParams registerSiteParams;
     private String userId = null;
@@ -48,8 +45,7 @@ public class OxdResourceTest {
 
     @ClassRule
     public static final DropwizardAppRule<OxdToHttpConfiguration> RULE = new DropwizardAppRule<>(
-            OxdToHttpApplication.class, CONFIG_PATH,
-            ConfigOverride.config("database.url", "jdbc:h2:" + TMP_FILE));
+            OxdToHttpApplication.class, CONFIG_PATH);
 
     @Before
     public void setUp() throws Exception {
@@ -359,14 +355,6 @@ public class OxdResourceTest {
             CommandClient.closeQuietly(client);
         }
         return null;
-    }
-
-    private static String createTempFile() {
-        try {
-            return File.createTempFile("oxd-to-http-test", null).getAbsolutePath();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     private Object getParameterJson(Object para) throws IOException {

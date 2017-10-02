@@ -8,6 +8,7 @@ import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 public class OxdToHttpApplication extends Application<OxdToHttpConfiguration> {
+
     public static void main(String[] args) throws Exception {
         new OxdToHttpApplication().run(args);
     }
