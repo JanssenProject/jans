@@ -11,6 +11,7 @@ import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.*;
 import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.rs.protect.Jackson;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -48,11 +49,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String registerSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.registerSite(read(params, RegisterSiteParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.registerSite(read(params, RegisterSiteParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -61,12 +61,11 @@ public class RestResource {
     @Path("/update-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String updateSite(@HeaderParam("Authorization") String p_authorization ,String params) throws IOException , JSONException{
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.updateSite(read(params, UpdateSiteParams.class),accessToken));
-        }
-        else {
+    public String updateSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.updateSite(read(params, UpdateSiteParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -76,11 +75,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getAuthorizationUrl(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken!= null) {
-            return okResponse(Oxd.getAuthorizationUrl(read(params, GetAuthorizationUrlParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.getAuthorizationUrl(read(params, GetAuthorizationUrlParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -90,11 +88,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getTokenByCode(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.getTokenByCode(read(params, GetTokensByCodeParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.getTokenByCode(read(params, GetTokensByCodeParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -104,11 +101,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getUserInfo(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.getUserInfo(read(params, GetUserInfoParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.getUserInfo(read(params, GetUserInfoParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -118,11 +114,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getLogoutUri(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.getLogoutUri(read(params, GetLogoutUrlParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.getLogoutUri(read(params, GetLogoutUrlParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -141,11 +136,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsProtect(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.umaRsProtect(read(params, RsProtectParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.umaRsProtect(read(params, RsProtectParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -155,11 +149,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsCheckAccess(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.umaRsCheckAccess(read(params, RsCheckAccessParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.umaRsCheckAccess(read(params, RsCheckAccessParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -169,11 +162,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetRpt(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.umaRpGetRpt(read(params, RpGetRptParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.umaRpGetRpt(read(params, RpGetRptParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -183,11 +175,10 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken= validateAccessToken(p_authorization);
-        if(accessToken != null) {
-            return okResponse(Oxd.umaRpGetClaimsGatheringUrl(read(params, RpGetClaimsGatheringUrlParams.class),accessToken));
-        }
-        else {
+        String accessToken = validateAccessToken(p_authorization);
+        if (accessToken != null) {
+            return okResponse(Oxd.umaRpGetClaimsGatheringUrl(read(params, RpGetClaimsGatheringUrlParams.class), accessToken));
+        } else {
             return errorResponse();
         }
     }
@@ -231,8 +222,7 @@ public class RestResource {
         if (commandResponse != null) {
             final String json = CoreUtils.asJson(commandResponse);
             return json;
-        }
-        else{
+        } else {
             return null;
         }
     }
