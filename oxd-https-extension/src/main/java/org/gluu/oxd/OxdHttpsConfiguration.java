@@ -9,8 +9,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 public class OxdHttpsConfiguration extends Configuration {
 
     @NotEmpty
-    private String defaultName = "Stranger";
-    @NotEmpty
     private String defaultHost = "localhost";
     @NotEmpty
     private String defaultPort = "8099";
@@ -133,20 +131,9 @@ public class OxdHttpsConfiguration extends Configuration {
         this.defaultIntrospectionEndPointHTTP = defaultIntrospectionEndPointHTTP;
     }
 
-    @JsonProperty
-    public String getDefaultName() {
-        return defaultName;
-    }
-
-    @JsonProperty
-    public void setDefaultName(String defaultName) {
-        this.defaultName = defaultName;
-    }
-
     @Override
     public String toString() {
         return "OxdHttpsConfiguration{" +
-                "defaultName='" + defaultName + '\'' +
                 ", defaultHost='" + defaultHost + '\'' +
                 ", defaultPort='" + defaultPort + '\'' +
                 ", defaultOpHost='" + defaultOpHost + '\'' +
