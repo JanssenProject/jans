@@ -7,11 +7,11 @@ import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.gluu.oxd.OxdToHttpApplication;
+import org.gluu.oxd.OxdHttpsApplication;
 import org.gluu.oxd.OxdHttpsConfiguration;
 import org.gluu.oxd.RestResource;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.xdi.oxd.client.CommandClient;
@@ -30,35 +30,27 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertNotNull;
 
-public class OxdResourceTest {
+public class RestResourceTest {
 
     public static final String CONFIG_PATH = ResourceHelpers.resourceFilePath("oxd-https-extension-ce-dev3.yml");
 
-    private RegisterSiteParams registerSiteParams;
-    private String userId = null;
-    private String userSecret = null;
-    private int oxdPort = 0;
-    private String oxdHost = null;
-    private String accessToken = null;
-    private Client client;
-    private String oxdId = null;
+    private static RegisterSiteParams registerSiteParams;
+    private static String userId = null;
+    private static String userSecret = null;
+    private static int oxdPort = 0;
+    private static String oxdHost = null;
+    private static String accessToken = null;
+    private static Client client;
+    private static String oxdId = null;
 
     @ClassRule
-    public static final DropwizardAppRule<OxdHttpsConfiguration> RULE = new DropwizardAppRule<>(
-            OxdToHttpApplication.class, CONFIG_PATH);
+    public static final DropwizardAppRule<OxdHttpsConfiguration> RULE = new DropwizardAppRule<>(OxdHttpsApplication.class, CONFIG_PATH);
+    @ClassRule
+    public static final ResourceTestRule RESOURCES = ResourceTestRule.builder().build();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUp() throws Exception {
         client = ClientBuilder.newClient();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        client.close();
-    }
-
-    @Before
-    public void initializedParameter() throws IOException {
         OxdHttpsConfiguration configuration = new OxdHttpsConfiguration();
 
         registerSiteParams = new RegisterSiteParams();
@@ -88,8 +80,10 @@ public class OxdResourceTest {
         oxdId = setupClientResponse.getOxdId();
     }
 
-    @ClassRule
-    public static final ResourceTestRule RESOURCES = ResourceTestRule.builder().build();
+    @AfterClass
+    public static void tearDown() throws Exception {
+        client.close();
+    }
 
     @Test
     public void testSetupClient() throws IOException {
@@ -355,23 +349,23 @@ public class OxdResourceTest {
         return null;
     }
 
-    private Object getParameterJson(Object para) throws IOException {
+    private static Object getParameterJson(Object para) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(para);
     }
 
-    private RsResourceList resourceList(String rsProtect) throws IOException {
+    private static RsResourceList resourceList(String rsProtect) throws IOException {
         rsProtect = StringUtil.replace(rsProtect, "'", "\"");
         return Jackson.createJsonMapper().readValue(rsProtect, RsResourceList.class);
     }
 
-    private SetupClientResponse setupClient(RegisterSiteParams siteParams) throws IOException {
+    private static SetupClientResponse setupClient(RegisterSiteParams siteParams) throws IOException {
         Object para = getParameterJson(siteParams);
         CommandResponse commandResponse = httpClient("setup-client", para);
         return RestResource.read(commandResponse.getData().toString(), SetupClientResponse.class);
     }
 
-    private GetClientTokenResponse getClientToken(GetClientTokenParams siteParams) throws IOException {
+    private static GetClientTokenResponse getClientToken(GetClientTokenParams siteParams) throws IOException {
         Object para = getParameterJson(siteParams);
         CommandResponse commandResponse = httpClient("get-client-token", para);
         return RestResource.read(commandResponse.getData().toString(), GetClientTokenResponse.class);
@@ -442,7 +436,7 @@ public class OxdResourceTest {
         return RestResource.read(commandResponse.getData().toString(), RpGetClaimsGatheringUrlResponse.class);
     }
 
-    private CommandResponse httpClient(String endpoint, Object para) throws IOException {
+    private static CommandResponse httpClient(String endpoint, Object para) throws IOException {
         final String entity = client.target("http://localhost:" + RULE.getLocalPort() + "/" + endpoint)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
