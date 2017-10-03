@@ -7,6 +7,7 @@
 import java
 import json
 from java.lang import StringBuilder
+from javax.faces.context import FacesContext
 from java.util import Arrays, ArrayList, HashMap, IdentityHashMap
 from javax.faces.application import FacesMessage
 from org.gluu.jsf2.message import FacesMessages
