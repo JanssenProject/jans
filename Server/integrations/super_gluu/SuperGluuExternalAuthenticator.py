@@ -135,7 +135,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity,step)
+        self.setRequestScopedParameters(identity, step)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
         identity.setWorkingParameter("retry_current_step", False)
@@ -300,7 +300,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step. redirect_uri is not set"
             return False
 
-        self.setRequestScopedParameters(identity,step)
+        self.setRequestScopedParameters(identity, step)
 
         if step == 1:
             print "Super-Gluu. Prepare for step 1"
@@ -322,8 +322,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Super-Gluu. Prepare for step 1. Prepared super_gluu_request:", super_gluu_request
     
                 identity.setWorkingParameter("super_gluu_request", super_gluu_request)
-#            elif self.twoStep:
-#                identity.setWorkingParameter("display_register_action", True)
+            elif self.twoStep:
+                identity.setWorkingParameter("display_register_action", True)
 
             return True
         elif step == 2:
@@ -369,6 +369,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Prepare for step 2. Prepared super_gluu_request:", super_gluu_request
 
             identity.setWorkingParameter("super_gluu_request", super_gluu_request)
+            identity.setWorkingParameter("super_gluu_auth_method", auth_method)
 
             if auth_method in ['authenticate']:
                 self.sendPushNotification(client_redirect_uri, user, super_gluu_request)
@@ -744,6 +745,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
         user_inum = userService.getUserInum(user_name)
 
+        send_android = 0
+        send_ios = 0
         u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData", "oxDeviceNotificationConf")
         if u2f_devices_list.size() > 0:
             for u2f_device in u2f_devices_list:
@@ -807,6 +810,7 @@ class PersonAuthentication(PersonAuthenticationType):
                             send_notification_result = self.pushAppleService.push(push_token, push_message)
                             if debug:
                                 print "Super-Gluu. Send iOS Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                        send_ios = send_ios + 1
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
@@ -845,8 +849,9 @@ class PersonAuthentication(PersonAuthenticationType):
                             send_notification_result = self.pushAndroidService.send(push_message, push_token, 3)
                             if debug:
                                 print "Super-Gluu. Send Android Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
+                        send_android = send_android + 1
 
-        print "Super-Gluu. Send push notification. send_notification: '%s', send_notification_result: '%s'" % (send_notification, send_notification_result)
+        print "Super-Gluu. Send push notification. send_android: '%s', send_ios: '%s'" % (send_android, send_ios)
 
     def getTargetEndpointArn(self, deviceRegistrationService, pushSnsService, platform, user, u2fDevice):
         targetEndpointArn = None
@@ -907,7 +912,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return session_attributes.get("redirect_uri")
 
-    def setRequestScopedParameters(self, identity,step):
+    def setRequestScopedParameters(self, identity, step):
         downloadMap = HashMap()
         if self.registrationUri != None:
             identity.setWorkingParameter("external_registration_uri", self.registrationUri)
