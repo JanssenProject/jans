@@ -19,8 +19,6 @@ server:
       keyStorePath: oxd-https-extension/oxd-https.keystore
       keyStorePassword: example
       validateCerts: false
-    #  keyStorePath: oxd-to-http.keystore
-    #  keyStorePassword: example
   adminConnectors:
     - type: http
       port: 8081
