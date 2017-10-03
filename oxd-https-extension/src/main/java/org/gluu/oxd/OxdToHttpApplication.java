@@ -7,20 +7,20 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
-public class OxdToHttpApplication extends Application<OxdToHttpConfiguration> {
+public class OxdToHttpApplication extends Application<OxdHttpsConfiguration> {
 
     public static void main(String[] args) throws Exception {
         new OxdToHttpApplication().run(args);
     }
 
     @Override
-    public void initialize(Bootstrap<OxdToHttpConfiguration> bootstrap) {
+    public void initialize(Bootstrap<OxdHttpsConfiguration> bootstrap) {
         bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(
                 bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(false)));
     }
 
     @Override
-    public void run(OxdToHttpConfiguration configuration, Environment environment) {
+    public void run(OxdHttpsConfiguration configuration, Environment environment) {
         environment.jersey().register(RolesAllowedDynamicFeature.class);
         environment.jersey().register(new RestResource());
     }
