@@ -8,7 +8,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.testing.junit.ResourceTestRule;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxd.OxdToHttpApplication;
-import org.gluu.oxd.OxdToHttpConfiguration;
+import org.gluu.oxd.OxdHttpsConfiguration;
 import org.gluu.oxd.RestResource;
 import org.junit.After;
 import org.junit.Before;
@@ -44,7 +44,7 @@ public class OxdResourceTest {
     private String oxdId = null;
 
     @ClassRule
-    public static final DropwizardAppRule<OxdToHttpConfiguration> RULE = new DropwizardAppRule<>(
+    public static final DropwizardAppRule<OxdHttpsConfiguration> RULE = new DropwizardAppRule<>(
             OxdToHttpApplication.class, CONFIG_PATH);
 
     @Before
@@ -59,7 +59,7 @@ public class OxdResourceTest {
 
     @Before
     public void initializedParameter() throws IOException {
-        OxdToHttpConfiguration configuration = new OxdToHttpConfiguration();
+        OxdHttpsConfiguration configuration = new OxdHttpsConfiguration();
 
         registerSiteParams = new RegisterSiteParams();
         registerSiteParams.setOpHost(configuration.getDefaultOpHost()); // your locally hosted gluu server can work

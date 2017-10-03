@@ -1,8 +1,8 @@
 package org.gluu.oxd;
 
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.node.POJONode;
 import org.codehaus.jettison.json.JSONException;
-import org.hibernate.annotations.common.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CommandResponse;
@@ -14,12 +14,13 @@ import org.xdi.oxd.rs.protect.Jackson;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 
 @Path("/")
 public class RestResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Oxd.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RestResource.class);
 
     @GET
     @Path("/health-check")
@@ -49,12 +50,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String registerSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.registerSite(read(params, RegisterSiteParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -62,12 +58,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String updateSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.updateSite(read(params, UpdateSiteParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -75,12 +66,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getAuthorizationUrl(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.getAuthorizationUrl(read(params, GetAuthorizationUrlParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.getAuthorizationUrl(read(params, GetAuthorizationUrlParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -88,12 +74,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getTokenByCode(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.getTokenByCode(read(params, GetTokensByCodeParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.getTokenByCode(read(params, GetTokensByCodeParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -101,12 +82,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getUserInfo(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.getUserInfo(read(params, GetUserInfoParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.getUserInfo(read(params, GetUserInfoParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -114,12 +90,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getLogoutUri(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.getLogoutUri(read(params, GetLogoutUrlParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.getLogoutUri(read(params, GetLogoutUrlParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -130,18 +101,12 @@ public class RestResource {
         return okResponse(Oxd.getAccessTokenByRefreshToken(read(params, GetAccessTokenByRefreshTokenParams.class)));
     }
 
-
     @POST
     @Path("/uma-rs-protect")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsProtect(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.umaRsProtect(read(params, RsProtectParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.umaRsProtect(read(params, RsProtectParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -149,12 +114,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsCheckAccess(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.umaRsCheckAccess(read(params, RsCheckAccessParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.umaRsCheckAccess(read(params, RsCheckAccessParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -162,69 +122,51 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetRpt(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.umaRpGetRpt(read(params, RpGetRptParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+        return okResponse(Oxd.umaRpGetRpt(read(params, RpGetRptParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
     @Path("/uma-rp-get-claims-gathering-url")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        String accessToken = validateAccessToken(p_authorization);
-        if (accessToken != null) {
-            return okResponse(Oxd.umaRpGetClaimsGatheringUrl(read(params, RpGetClaimsGatheringUrlParams.class), accessToken));
-        } else {
-            return errorResponse();
-        }
+    public String umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
+        return okResponse(Oxd.umaRpGetClaimsGatheringUrl(read(params, RpGetClaimsGatheringUrlParams.class), validateAccessToken(authorization)));
     }
 
-    //region Common Methods
     public static <T> T read(String params, Class<T> clazz) throws IOException {
         return Jackson.createJsonMapper().readValue(params, clazz);
     }
 
     public static String okResponse(IOpResponse p_data) throws IOException {
-        String nullResponse = "There is no response produced by Processor. Please check oxd server logs";
         if (p_data == null) {
+            String nullResponse = "There is no response produced by Processor. Please check oxd server logs";
             LOG.error(nullResponse);
             return nullResponse;
         }
 
         CommandResponse commandResponse = CommandResponse.ok().setData(new POJONode(p_data));
-        if (commandResponse != null) {
-            final String json = CoreUtils.asJson(commandResponse);
-            LOG.trace("Send back response: {}", json);
-            return json;
-        } else {
-            LOG.error("There is no response produced by Processor.Please check oxd server logs");
-            return nullResponse;
-        }
+        final String json = CoreUtils.asJson(commandResponse);
+        LOG.trace("Send back response: {}", json);
+        return json;
     }
 
-    public String validateAccessToken(String authorizationParameter) {
+    public static String validateAccessToken(String authorizationParameter) {
         final String prefix = "Bearer ";
-        if (StringHelper.isNotEmpty(authorizationParameter) && authorizationParameter.startsWith(prefix)) {
-            return authorizationParameter.substring(prefix.length());
+        if (StringUtils.isNotEmpty(authorizationParameter) && authorizationParameter.startsWith(prefix)) {
+            String accessToken = authorizationParameter.substring(prefix.length());
+            if (StringUtils.isNotBlank(accessToken)) {
+                return accessToken;
+            }
+
         }
-        return null;
+        throw new ServerErrorException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
     }
 
-    public static String errorResponse() throws IOException, JSONException {
+    public static String forbiddenErrorResponse() {
         final ErrorResponse error = new ErrorResponse("403");
         error.setErrorDescription("Forbidden Access");
 
         CommandResponse commandResponse = CommandResponse.error().setData(new POJONode(error));
-        if (commandResponse != null) {
-            final String json = CoreUtils.asJson(commandResponse);
-            return json;
-        } else {
-            return null;
-        }
+        return CoreUtils.asJsonSilently(commandResponse);
     }
-    //endregion
 }
