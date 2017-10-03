@@ -62,16 +62,16 @@ public class OxdResourceTest {
         OxdHttpsConfiguration configuration = new OxdHttpsConfiguration();
 
         registerSiteParams = new RegisterSiteParams();
-        registerSiteParams.setOpHost(configuration.getDefaultOpHost()); // your locally hosted gluu server can work
-        registerSiteParams.setAuthorizationRedirectUri(configuration.getDefaultAuthorizationRedirectUrl());//Your client application auth redirect url
+        registerSiteParams.setOpHost(configuration.getOpHost()); // your locally hosted gluu server can work
+        registerSiteParams.setAuthorizationRedirectUri(configuration.getAuthorizationRedirectUrl());//Your client application auth redirect url
         registerSiteParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection", "uma_authorization"));  //Scope
         registerSiteParams.setTrustedClient(true);
         registerSiteParams.setGrantType(Lists.newArrayList("authorization_code", "client_credentials"));
 
-        userId = configuration.getDefaultUserID();
-        userSecret = configuration.getDefaultUserSecret();
-        oxdPort = Integer.parseInt(configuration.getDefaultPort());
-        oxdHost = configuration.getDefaultHost();
+        userId = configuration.getUserID();
+        userSecret = configuration.getUserSecret();
+        oxdPort = Integer.parseInt(configuration.getOxdPort());
+        oxdHost = configuration.getOxdHost();
 
         //Get AccessToken
         SetupClientResponse setupClientResponse = setupClient(registerSiteParams);
@@ -79,11 +79,11 @@ public class OxdResourceTest {
         GetClientTokenParams clientTokenParams = new GetClientTokenParams();
         clientTokenParams.setClientId(setupClientResponse.getClientId());
         clientTokenParams.setClientSecret(setupClientResponse.getClientSecret());
-        clientTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection", "uma_authorization"));   //Scope
-        clientTokenParams.setOpHost(configuration.getDefaultOpHost());
+        clientTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection"));
+        clientTokenParams.setOpHost(configuration.getOpHost());
 
         GetClientTokenResponse clientTokenResponse = getClientToken(clientTokenParams);
-        accessToken = "Bearer " + clientTokenResponse.getAccessToken();
+        accessToken = clientTokenResponse.getAccessToken();
 
         oxdId = setupClientResponse.getOxdId();
     }
@@ -244,7 +244,6 @@ public class OxdResourceTest {
         getAccessTokenByRefreshTokenParams.setOxdId(oxdId);
         getAccessTokenByRefreshTokenParams.setRefreshToken(getTokenByCodeResponse.getRefreshToken());
         getAccessTokenByRefreshTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection", "uma_authorization"));   //Scope
-
 
         GetClientTokenResponse getClientTokenResponse = getAccessTokenByRefreshToken(getAccessTokenByRefreshTokenParams);
         assertNotNull(getClientTokenResponse);
@@ -446,7 +445,7 @@ public class OxdResourceTest {
     private CommandResponse httpClient(String endpoint, Object para) throws IOException {
         final String entity = client.target("http://localhost:" + RULE.getLocalPort() + "/" + endpoint)
                 .request()
-                .header(HttpHeaders.AUTHORIZATION, accessToken)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .post(Entity.json(para))
                 .readEntity(String.class);
 
