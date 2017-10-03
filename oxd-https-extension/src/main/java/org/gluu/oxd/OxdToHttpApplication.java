@@ -22,6 +22,6 @@ public class OxdToHttpApplication extends Application<OxdHttpsConfiguration> {
     @Override
     public void run(OxdHttpsConfiguration configuration, Environment environment) {
         environment.jersey().register(RolesAllowedDynamicFeature.class);
-        environment.jersey().register(new RestResource());
+        environment.jersey().register(new RestResource(configuration));
     }
 }
