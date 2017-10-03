@@ -1,8 +1,8 @@
-# oxd-to-http
+# oxd-https-extension
 
 ## overview
 
-oxd-to-http is the bridge between the oxd-server and the client application. It is secure translator for https to socket and vice versa. The following documentation demonstrates how to use this application to use Gluu's commercial OAuth 2.0 client software,
+oxd-https-extension is the bridge between the oxd-server and the client application. It is secure translator for https to socket and vice versa. The following documentation demonstrates how to use this application to use Gluu's commercial OAuth 2.0 client software,
 [oxd](http://oxd.gluu.org), to send users from this app to oxd to OpenID Connect Provider (OP) for login. 
 You can securely send users to any standard OP for login, including Google and the [free open source Gluu Server](http://gluu.org/gluu-server).
 
@@ -27,7 +27,7 @@ Read the docs.*
 
 ## Configuration
 
-oxd-server must run on localhost and be bound to port: 8099 and oxd-https-extension configuration you can go ahead anc change settings in `oxd-to-http.yml` file
+oxd-server must run on localhost and be bound to port: 8099 and oxd-https-extension configuration you can go ahead anc change settings in `oxd-https.yml` file
 
 ## Running Test Cases
 
@@ -44,7 +44,7 @@ mvn package
 
 To run the server : 
 ```sh
-java -jar target/oxd-to-http-1.2.0-SNAPSHOT.jar server oxd-to-http.yml
+java -jar target/oxd-https-extension-3.1.1-SNAPSHOT.jar server oxd-https.yml
 ```
 
 Open this URL in browser:
