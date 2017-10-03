@@ -6,7 +6,7 @@ import io.dropwizard.Configuration;
 import org.hibernate.validator.constraints.NotEmpty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OxdToHttpConfiguration extends Configuration {
+public class OxdHttpsConfiguration extends Configuration {
 
     @NotEmpty
     private String defaultName = "Stranger";
@@ -141,5 +141,22 @@ public class OxdToHttpConfiguration extends Configuration {
     @JsonProperty
     public void setDefaultName(String defaultName) {
         this.defaultName = defaultName;
+    }
+
+    @Override
+    public String toString() {
+        return "OxdHttpsConfiguration{" +
+                "defaultName='" + defaultName + '\'' +
+                ", defaultHost='" + defaultHost + '\'' +
+                ", defaultPort='" + defaultPort + '\'' +
+                ", defaultOpHost='" + defaultOpHost + '\'' +
+                ", defaultAuthorizationRedirectUrl='" + defaultAuthorizationRedirectUrl + '\'' +
+                ", defaultRedirectUrl='" + defaultRedirectUrl + '\'' +
+                ", defaultLogoutUrl='" + defaultLogoutUrl + '\'' +
+                ", defaultPostLogoutRedirectUrl='" + defaultPostLogoutRedirectUrl + '\'' +
+                ", defaultUserID='" + defaultUserID + '\'' +
+                ", defaultUserSecret='" + defaultUserSecret + '\'' +
+                ", defaultIntrospectionEndPointHTTP='" + defaultIntrospectionEndPointHTTP + '\'' +
+                "} " + super.toString();
     }
 }

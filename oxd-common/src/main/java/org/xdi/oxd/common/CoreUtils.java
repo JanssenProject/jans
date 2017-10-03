@@ -117,6 +117,16 @@ public class CoreUtils {
         return mapper.writeValueAsString(p_object);
     }
 
+    public static String asJsonSilently(Object p_object) {
+        try {
+            final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+            return mapper.writeValueAsString(p_object);
+        } catch (Exception e) {
+            LOG.error("Failed to serialize object into json.", e);
+            return "";
+        }
+    }
+
     /**
      * Creates json mapper for json object serialization/deserialization.
      *
