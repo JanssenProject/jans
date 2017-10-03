@@ -218,7 +218,7 @@ public class Oxd {
     }
 
     private static CommandClient newClient() throws IOException {
-        OxdToHttpConfiguration configuration = new OxdToHttpConfiguration();
+        OxdHttpsConfiguration configuration = new OxdHttpsConfiguration();
         return new CommandClient(configuration.getDefaultHost(), Integer.parseInt(configuration.getDefaultPort()));
     }
 }
