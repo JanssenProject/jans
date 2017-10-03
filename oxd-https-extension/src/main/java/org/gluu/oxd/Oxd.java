@@ -193,6 +193,6 @@ public class Oxd {
     }
 
     private CommandClient newClient() throws IOException {
-        return new CommandClient(configuration.getDefaultHost(), Integer.parseInt(configuration.getDefaultPort()));
+        return new CommandClient(configuration.getOxdHost(), Integer.parseInt(configuration.getOxdPort()));
     }
 }
