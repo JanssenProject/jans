@@ -8,142 +8,118 @@ import org.hibernate.validator.constraints.NotEmpty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OxdHttpsConfiguration extends Configuration {
 
+    @JsonProperty
     @NotEmpty
-    private String defaultHost = "localhost";
+    private String oxdHost = "localhost";
+    @JsonProperty
     @NotEmpty
-    private String defaultPort = "8099";
+    private String oxdPort = "8099";
+    @JsonProperty
     @NotEmpty
-    private String defaultOpHost = "https://ce-dev3.gluu.org";
+    private String opHost = "https://ce-dev3.gluu.org";
+    @JsonProperty
     @NotEmpty
-    private String defaultAuthorizationRedirectUrl = "https://client.example.com/cb";
+    private String authorizationRedirectUrl = "https://client.example.com/cb";
+    @JsonProperty
     @NotEmpty
-    private String defaultRedirectUrl = "https://client.example.com/cb";
+    private String redirectUrl = "https://client.example.com/cb";
+    @JsonProperty
     @NotEmpty
-    private String defaultLogoutUrl = "https://client.example.com/logout";
+    private String logoutUrl = "https://client.example.com/logout";
+    @JsonProperty
     @NotEmpty
-    private String defaultPostLogoutRedirectUrl = "https://client.example.com/cb/logout";
+    private String postLogoutRedirectUrl = "https://client.example.com/cb/logout";
+    @JsonProperty
     @NotEmpty
-    private String defaultUserID = "test_user";
+    private String userID = "test_user";
+    @JsonProperty
     @NotEmpty
-    private String defaultUserSecret = "test_user_password";
-    @JsonProperty
-    public String getDefaultHost() {
-        return defaultHost;
+    private String userSecret = "test_user_password";
+
+    public String getOxdHost() {
+        return oxdHost;
     }
 
-    @NotEmpty
-    private String defaultIntrospectionEndPointHTTP = defaultOpHost + "/oxauth/seam/resource/restv1/introspection";
-
-    @JsonProperty
-    public void setDefaultHost(String defaultHost) {
-        this.defaultHost = defaultHost;
+    public void setOxdHost(String oxdHost) {
+        this.oxdHost = oxdHost;
     }
 
-    @JsonProperty
-    public String getDefaultPort() {
-        return defaultPort;
+    public String getOxdPort() {
+        return oxdPort;
     }
 
-    @JsonProperty
-    public void setDefaultPort(String defaultPort) {
-        this.defaultPort = defaultPort;
+    public void setOxdPort(String oxdPort) {
+        this.oxdPort = oxdPort;
     }
 
-    @JsonProperty
-    public String getDefaultOpHost() {
-        return defaultOpHost;
+    public String getOpHost() {
+        return opHost;
     }
 
-    @JsonProperty
-    public void setDefaultOpHost(String defaultOpHost) {
-        this.defaultOpHost = defaultOpHost;
+    public void setOpHost(String opHost) {
+        this.opHost = opHost;
     }
 
-    @JsonProperty
-    public String getDefaultAuthorizationRedirectUrl() {
-        return defaultAuthorizationRedirectUrl;
+    public String getAuthorizationRedirectUrl() {
+        return authorizationRedirectUrl;
     }
 
-
-    @JsonProperty
-    public void setDefaultAuthorizationRedirectUrl(String defaultAuthorizationRedirectUrl) {
-        this.defaultAuthorizationRedirectUrl = defaultAuthorizationRedirectUrl;
+    public void setAuthorizationRedirectUrl(String authorizationRedirectUrl) {
+        this.authorizationRedirectUrl = authorizationRedirectUrl;
     }
 
-    @JsonProperty
-    public String getDefaultRedirectUrl() {
-        return defaultRedirectUrl;
+    public String getRedirectUrl() {
+        return redirectUrl;
     }
 
-    @JsonProperty
-    public void setDefaultRedirectUrl(String defaultRedirectUrl) {
-        this.defaultRedirectUrl = defaultRedirectUrl;
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
     }
 
-    @JsonProperty
-    public String getDefaultLogoutUrl() {
-        return defaultLogoutUrl;
+    public String getLogoutUrl() {
+        return logoutUrl;
     }
 
-    @JsonProperty
-    public void setDefaultLogoutUrl(String defaultLogoutUrl) {
-        this.defaultLogoutUrl = defaultLogoutUrl;
+    public void setLogoutUrl(String logoutUrl) {
+        this.logoutUrl = logoutUrl;
     }
 
-    @JsonProperty
-    public String getDefaultPostLogoutRedirectUrl() {
-        return defaultPostLogoutRedirectUrl;
+    public String getPostLogoutRedirectUrl() {
+        return postLogoutRedirectUrl;
     }
 
-    @JsonProperty
-    public void setDefaultPostLogoutRedirectUrl(String defaultPostLogoutRedirectUrl) {
-        this.defaultPostLogoutRedirectUrl = defaultPostLogoutRedirectUrl;
+    public void setPostLogoutRedirectUrl(String postLogoutRedirectUrl) {
+        this.postLogoutRedirectUrl = postLogoutRedirectUrl;
     }
 
-
-    @JsonProperty
-    public String getDefaultUserID() {
-        return defaultUserID;
+    public String getUserID() {
+        return userID;
     }
 
-    @JsonProperty
-    public void setDefaultUserID(String defaultUserID) {
-        this.defaultUserID = defaultUserID;
+    public void setUserID(String userID) {
+        this.userID = userID;
     }
 
-    @JsonProperty
-    public String getDefaultUserSecret() {
-        return defaultUserSecret;
+    public String getUserSecret() {
+        return userSecret;
     }
 
-    @JsonProperty
-    public void setDefaultUserSecret(String defaultUserSecret) {
-        this.defaultUserSecret = defaultUserSecret;
-    }
-
-    @JsonProperty
-    public String getDefaultIntrospectionEndPointHTTP() {
-        return defaultIntrospectionEndPointHTTP;
-    }
-
-    @JsonProperty
-    public void setDefaultIntrospectionEndPointHTTP(String defaultIntrospectionEndPointHTTP) {
-        this.defaultIntrospectionEndPointHTTP = defaultIntrospectionEndPointHTTP;
+    public void setUserSecret(String userSecret) {
+        this.userSecret = userSecret;
     }
 
     @Override
     public String toString() {
         return "OxdHttpsConfiguration{" +
-                ", defaultHost='" + defaultHost + '\'' +
-                ", defaultPort='" + defaultPort + '\'' +
-                ", defaultOpHost='" + defaultOpHost + '\'' +
-                ", defaultAuthorizationRedirectUrl='" + defaultAuthorizationRedirectUrl + '\'' +
-                ", defaultRedirectUrl='" + defaultRedirectUrl + '\'' +
-                ", defaultLogoutUrl='" + defaultLogoutUrl + '\'' +
-                ", defaultPostLogoutRedirectUrl='" + defaultPostLogoutRedirectUrl + '\'' +
-                ", defaultUserID='" + defaultUserID + '\'' +
-                ", defaultUserSecret='" + defaultUserSecret + '\'' +
-                ", defaultIntrospectionEndPointHTTP='" + defaultIntrospectionEndPointHTTP + '\'' +
+                "oxdHost='" + oxdHost + '\'' +
+                ", oxdPort='" + oxdPort + '\'' +
+                ", opHost='" + opHost + '\'' +
+                ", authorizationRedirectUrl='" + authorizationRedirectUrl + '\'' +
+                ", redirectUrl='" + redirectUrl + '\'' +
+                ", logoutUrl='" + logoutUrl + '\'' +
+                ", postLogoutRedirectUrl='" + postLogoutRedirectUrl + '\'' +
+                ", userID='" + userID + '\'' +
+                ", userSecret='" + userSecret + '\'' +
                 "} " + super.toString();
     }
 }

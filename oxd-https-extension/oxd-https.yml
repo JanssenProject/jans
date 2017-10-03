@@ -1,22 +1,16 @@
-defaultHost: localhost
-defaultPort: 8099
-defaultOpHost: https://sample.gluu.org
-defaultAuthorizationRedirectUrl: https://client.example.com/cb
-defaultRedirectUrl: https://client.example.com/cb
-defaultLogoutUrl: https://client.example.com/logout
+oxdHost: localhost
+oxdPort: 8099
 
-#  type: simple
-#  connector:
-#    type: http
-#    port: 8080
-defaultPostLogoutRedirectUrl: https://client.example.com/cb/logout
-defaultUserID: test_user
-defaultUserSecret: test_user_password
-defaultIntrospectionEndPointHTTP: https://sample.gluu.org/oxauth/seam/resource/restv1/introspection
+# Fallbacks
+opHost: https://sample.gluu.org
+authorizationRedirectUrl: https://client.example.com/cb
+redirectUrl: https://client.example.com/cb
+logoutUrl: https://client.example.com/logout
+postLogoutRedirectUrl: https://client.example.com/cb/logout
+userID: test_user
+userSecret: test_user_password
+introspectionEndPointHTTP: https://sample.gluu.org/oxauth/seam/resource/restv1/introspection
 
-
-# use the simple server factory if you only want to run on a single port
-#server:
 server:
 #  softNofileLimit: 1000
 #  hardNofileLimit: 1000
@@ -25,17 +19,15 @@ server:
       port: 8080
     - type: https
       port: 8443
-      keyStorePath: oxd-to-http.keystore
+      keyStorePath: oxd-https.keystore
       keyStorePassword: example
       validateCerts: false
-    #  keyStorePath: oxd-to-http.keystore
-    #  keyStorePassword: example
   adminConnectors:
     - type: http
       port: 8081
     - type: https
       port: 8444
-      keyStorePath: oxd-to-http.keystore
+      keyStorePath: oxd-https.keystore
       keyStorePassword: example
       validateCerts: false
 
@@ -59,8 +51,8 @@ logging:
     - type: file
       threshold: INFO
       logFormat: "%-6level [%d{HH:mm:ss.SSS}] [%t] %logger{5} - %X{code} %msg %n"
-      currentLogFilename: /tmp/application.log
-      archivedLogFilenamePattern: /tmp/application-%d{yyyy-MM-dd}-%i.log.gz
+      currentLogFilename: /tmp/oxd-https.log
+      archivedLogFilenamePattern: /tmp/oxd-https-%d{yyyy-MM-dd}-%i.log.gz
       archivedFileCount: 7
       timeZone: UTC
       maxFileSize: 10MB
