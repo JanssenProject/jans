@@ -1,19 +1,7 @@
 oxdHost: localhost
 oxdPort: 8099
 
-# Fallbacks
-opHost: https://sample.gluu.org
-authorizationRedirectUrl: https://client.example.com/cb
-redirectUrl: https://client.example.com/cb
-logoutUrl: https://client.example.com/logout
-postLogoutRedirectUrl: https://client.example.com/cb/logout
-userID: test_user
-userSecret: test_user_password
-introspectionEndPointHTTP: https://sample.gluu.org/oxauth/seam/resource/restv1/introspection
-
 server:
-#  softNofileLimit: 1000
-#  hardNofileLimit: 1000
   applicationConnectors:
     - type: http
       port: 8080
