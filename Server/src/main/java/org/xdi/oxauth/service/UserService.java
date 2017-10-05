@@ -199,13 +199,13 @@ public class UserService {
         }
     }
 
-    public User getUserBySample(User user, int limit) {
+    public List<User> getUsersBySample(User user, int limit) {
         log.debug("Getting user by sample");
 
         List<User> entries = ldapEntryManager.findEntries(user, limit, limit);
         log.debug("Found '{}' entries", entries.size());
 
-        return (User) entries;
+        return entries;
     }
 
     public User addUserAttributeByUserInum(String userInum, String attributeName, String attributeValue) {
