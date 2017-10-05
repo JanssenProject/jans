@@ -9,7 +9,6 @@ import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CoreUtils;
 import org.xdi.oxd.common.ErrorResponse;
 import org.xdi.oxd.common.params.*;
-import org.xdi.oxd.common.response.IOpResponse;
 import org.xdi.oxd.rs.protect.Jackson;
 
 import javax.ws.rs.*;
@@ -40,7 +39,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String setupClient(String params) throws IOException, JSONException {
-        return okResponse(oxd.setupClient(read(params, SetupClientParams.class)));
+        return response(oxd.setupClient(read(params, SetupClientParams.class)));
     }
 
     @POST
@@ -48,7 +47,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getClientToken(String params) throws IOException {
-        return okResponse(oxd.getClientToken(read(params, GetClientTokenParams.class)));
+        return response(oxd.getClientToken(read(params, GetClientTokenParams.class)));
     }
 
     @POST
@@ -56,7 +55,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String registerSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -64,7 +63,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String updateSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -72,7 +71,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getAuthorizationUrl(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.getAuthorizationUrl(read(params, GetAuthorizationUrlParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.getAuthorizationUrl(read(params, GetAuthorizationUrlParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -80,7 +79,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getTokenByCode(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.getTokenByCode(read(params, GetTokensByCodeParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.getTokenByCode(read(params, GetTokensByCodeParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -88,7 +87,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getUserInfo(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.getUserInfo(read(params, GetUserInfoParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.getUserInfo(read(params, GetUserInfoParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -96,7 +95,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getLogoutUri(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.getLogoutUri(read(params, GetLogoutUrlParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.getLogoutUri(read(params, GetLogoutUrlParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -104,7 +103,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String getAccessTokenByRefreshToken(String params) throws IOException, JSONException {
-        return okResponse(oxd.getAccessTokenByRefreshToken(read(params, GetAccessTokenByRefreshTokenParams.class)));
+        return response(oxd.getAccessTokenByRefreshToken(read(params, GetAccessTokenByRefreshTokenParams.class)));
     }
 
     @POST
@@ -112,7 +111,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsProtect(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.umaRsProtect(read(params, RsProtectParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.umaRsProtect(read(params, RsProtectParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -120,7 +119,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRsCheckAccess(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.umaRsCheckAccess(read(params, RsCheckAccessParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.umaRsCheckAccess(read(params, RsCheckAccessParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -128,7 +127,7 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetRpt(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.umaRpGetRpt(read(params, RpGetRptParams.class), validateAccessToken(p_authorization)));
+        return response(oxd.umaRpGetRpt(read(params, RpGetRptParams.class), validateAccessToken(p_authorization)));
     }
 
     @POST
@@ -136,21 +135,14 @@ public class RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public String umaRpGetClaimsGatheringUrl(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
-        return okResponse(oxd.umaRpGetClaimsGatheringUrl(read(params, RpGetClaimsGatheringUrlParams.class), validateAccessToken(authorization)));
+        return response(oxd.umaRpGetClaimsGatheringUrl(read(params, RpGetClaimsGatheringUrlParams.class), validateAccessToken(authorization)));
     }
 
     public static <T> T read(String params, Class<T> clazz) throws IOException {
         return Jackson.createJsonMapper().readValue(params, clazz);
     }
 
-    public static String okResponse(IOpResponse p_data) throws IOException {
-        if (p_data == null) {
-            String nullResponse = "There is no response produced by Processor. Please check oxd server logs";
-            LOG.error(nullResponse);
-            return nullResponse;
-        }
-
-        CommandResponse commandResponse = CommandResponse.ok().setData(new POJONode(p_data));
+    public static String response(CommandResponse commandResponse) throws IOException {
         final String json = CoreUtils.asJson(commandResponse);
         LOG.trace("Send back response: {}", json);
         return json;
