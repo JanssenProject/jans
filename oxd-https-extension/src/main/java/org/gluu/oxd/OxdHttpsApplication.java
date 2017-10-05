@@ -1,5 +1,6 @@
 package org.gluu.oxd;
 
+import com.codahale.metrics.health.HealthCheck;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -21,6 +22,12 @@ public class OxdHttpsApplication extends Application<OxdHttpsConfiguration> {
 
     @Override
     public void run(OxdHttpsConfiguration configuration, Environment environment) {
+        environment.healthChecks().register("dummy", new HealthCheck() {
+            @Override
+            protected Result check() throws Exception {
+                return Result.healthy();
+            }
+        });
         environment.jersey().register(RolesAllowedDynamicFeature.class);
         environment.jersey().register(new RestResource(configuration));
     }
