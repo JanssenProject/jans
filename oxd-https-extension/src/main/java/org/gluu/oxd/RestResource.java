@@ -143,6 +143,10 @@ public class RestResource {
     }
 
     public static String response(CommandResponse commandResponse) throws IOException {
+        if (commandResponse == null) {
+            LOG.error("Command response is null, please check oxd-server.log file of oxd-server application.");
+            return "Command response is null, please check oxd-server.log file of oxd-server application.";
+        }
         final String json = CoreUtils.asJson(commandResponse);
         LOG.trace("Send back response: {}", json);
         return json;
