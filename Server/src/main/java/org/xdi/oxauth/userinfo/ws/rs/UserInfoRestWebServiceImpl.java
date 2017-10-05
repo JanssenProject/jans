@@ -58,13 +58,15 @@ import javax.ws.rs.core.SecurityContext;
 import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version September 27, 2017
+ * @version October 4, 2017
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -502,6 +504,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         jsonWebResponse.getClaims().setClaim(key, (List<String>) value);
                     } else if (value instanceof Boolean) {
                         jsonWebResponse.getClaims().setClaim(key, (Boolean) value);
+                    } else if (value instanceof Date) {
+                        jsonWebResponse.getClaims().setClaim(key, ((Date) value).getTime());
                     } else {
                         jsonWebResponse.getClaims().setClaim(key, (String) value);
                     }
@@ -611,7 +615,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         return jsonWebResponse.toString();
     }
 
-    public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException {
+    public Map<String, Object> getClaims(User user, Scope scope) throws InvalidClaimException, ParseException {
         Map<String, Object> claims = new HashMap<String, Object>();
 
         if (scope != null && scope.getOxAuthClaims() != null) {
@@ -627,6 +631,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         attribute = user.getUserId();
                     } else if (GluuAttributeDataType.BOOLEAN.equals(gluuAttribute.getDataType())) {
                         attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
+                    } else if (GluuAttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
+                        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
+                        attribute = format.parse(user.getAttribute(gluuAttribute.getName(), true).toString());
                     } else {
                         attribute = user.getAttribute(gluuAttribute.getName(), true);
                     }
