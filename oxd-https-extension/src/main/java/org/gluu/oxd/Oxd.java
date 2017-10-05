@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.client.CommandClient;
 import org.xdi.oxd.common.Command;
+import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.CommandType;
 import org.xdi.oxd.common.params.*;
-import org.xdi.oxd.common.response.*;
 
 import java.io.IOException;
 
@@ -20,102 +20,98 @@ public class Oxd {
         this.configuration = configuration;
     }
 
-    public SetupClientResponse setupClient(SetupClientParams params) throws IOException {
+    public CommandResponse setupClient(SetupClientParams params) throws IOException {
         CommandClient client = null;
 
         try {
             client = newClient();
-
-            final Command command = new Command(CommandType.SETUP_CLIENT);
-            command.setParamsObject(params);
-
-            return client.send(command).dataAsResponse(SetupClientResponse.class);
+            return client.send(new Command(CommandType.SETUP_CLIENT).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public RegisterSiteResponse registerSite(RegisterSiteParams params, String accessToken) throws IOException {
+    public CommandResponse registerSite(RegisterSiteParams params, String accessToken) throws IOException {
         CommandClient client = null;
 
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.REGISTER_SITE).setParamsObject(params)).dataAsResponse(RegisterSiteResponse.class);
+            return client.send(new Command(CommandType.REGISTER_SITE).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public UpdateSiteResponse updateSite(UpdateSiteParams params, String accessToken) throws IOException {
+    public CommandResponse updateSite(UpdateSiteParams params, String accessToken) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.UPDATE_SITE).setParamsObject(params)).dataAsResponse(UpdateSiteResponse.class);
+            return client.send(new Command(CommandType.UPDATE_SITE).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public GetAuthorizationUrlResponse getAuthorizationUrl(GetAuthorizationUrlParams params, String p_authorization) throws IOException {
+    public CommandResponse getAuthorizationUrl(GetAuthorizationUrlParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(p_authorization);
 
-            return client.send(new Command(CommandType.GET_AUTHORIZATION_URL).setParamsObject(params)).dataAsResponse(GetAuthorizationUrlResponse.class);
+            return client.send(new Command(CommandType.GET_AUTHORIZATION_URL).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public GetTokensByCodeResponse getTokenByCode(GetTokensByCodeParams params, String accessToken) throws IOException {
+    public CommandResponse getTokenByCode(GetTokensByCodeParams params, String accessToken) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(params)).dataAsResponse(GetTokensByCodeResponse.class);
+            return client.send(new Command(CommandType.GET_TOKENS_BY_CODE).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public GetUserInfoResponse getUserInfo(GetUserInfoParams params, String accessToken) throws IOException {
+    public CommandResponse getUserInfo(GetUserInfoParams params, String accessToken) throws IOException {
         CommandClient client = null;
 
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.GET_USER_INFO).setParamsObject(params)).dataAsResponse(GetUserInfoResponse.class);
+            return client.send(new Command(CommandType.GET_USER_INFO).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public LogoutResponse getLogoutUri(GetLogoutUrlParams params, String accessToken) throws IOException {
+    public CommandResponse getLogoutUri(GetLogoutUrlParams params, String accessToken) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.GET_LOGOUT_URI).setParamsObject(params)).dataAsResponse(LogoutResponse.class);
+            return client.send(new Command(CommandType.GET_LOGOUT_URI).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
     }
 
-    public RsProtectResponse umaRsProtect(RsProtectParams params, String accessToken) throws IOException {
+    public CommandResponse umaRsProtect(RsProtectParams params, String accessToken) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.RS_PROTECT).setParamsObject(params)).dataAsResponse(RsProtectResponse.class);
+            return client.send(new Command(CommandType.RS_PROTECT).setParamsObject(params));
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             return null;
@@ -124,13 +120,13 @@ public class Oxd {
         }
     }
 
-    public RsCheckAccessResponse umaRsCheckAccess(RsCheckAccessParams params, String accessToken) throws IOException {
+    public CommandResponse umaRsCheckAccess(RsCheckAccessParams params, String accessToken) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.RS_CHECK_ACCESS).setParamsObject(params)).dataAsResponse(RsCheckAccessResponse.class);
+            return client.send(new Command(CommandType.RS_CHECK_ACCESS).setParamsObject(params));
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             return null;
@@ -139,13 +135,13 @@ public class Oxd {
         }
     }
 
-    public RpGetRptResponse umaRpGetRpt(RpGetRptParams params, String accessToken) throws IOException {
+    public CommandResponse umaRpGetRpt(RpGetRptParams params, String accessToken) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.RP_GET_RPT).setParamsObject(params)).dataAsResponse(RpGetRptResponse.class);
+            return client.send(new Command(CommandType.RP_GET_RPT).setParamsObject(params));
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             return null;
@@ -154,13 +150,13 @@ public class Oxd {
         }
     }
 
-    public RpGetClaimsGatheringUrlResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams params, String accessToken) throws IOException {
+    public CommandResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams params, String accessToken) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
             params.setProtectionAccessToken(accessToken);
 
-            return client.send(new Command(CommandType.RP_GET_CLAIMS_GATHERING_URL).setParamsObject(params)).dataAsResponse(RpGetClaimsGatheringUrlResponse.class);
+            return client.send(new Command(CommandType.RP_GET_CLAIMS_GATHERING_URL).setParamsObject(params));
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             return null;
@@ -169,11 +165,11 @@ public class Oxd {
         }
     }
 
-    public GetClientTokenResponse getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params) throws IOException {
+    public CommandResponse getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
-            return client.send(new Command(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN).setParamsObject(params)).dataAsResponse(GetClientTokenResponse.class);
+            return client.send(new Command(CommandType.GET_ACCESS_TOKEN_BY_REFRESH_TOKEN).setParamsObject(params));
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             return null;
@@ -182,11 +178,11 @@ public class Oxd {
         }
     }
 
-    public GetClientTokenResponse getClientToken(GetClientTokenParams params) throws IOException {
+    public CommandResponse getClientToken(GetClientTokenParams params) throws IOException {
         CommandClient client = null;
         try {
             client = newClient();
-            return client.send(new Command(CommandType.GET_CLIENT_TOKEN).setParamsObject(params)).dataAsResponse(GetClientTokenResponse.class);
+            return client.send(new Command(CommandType.GET_CLIENT_TOKEN).setParamsObject(params));
         } finally {
             CommandClient.closeQuietly(client);
         }
