@@ -20,7 +20,7 @@ from org.xdi.oxauth.service import UserService, ClientService, AuthenticationSer
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper, ArrayHelper, Util
-
+from org.gluu.jsf2.service import FacesService
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -448,8 +448,7 @@ class PersonAuthentication(PersonAuthenticationType):
             external_auth_request_uri = currentSamlConfiguration.getIdpSsoTargetUrl() + "?SAMLRequest=" + samlAuthRequest.getRequest(True, assertionConsumerServiceUrl)
 
             print "Asimba. Prepare for step 1. external_auth_request_uri: '%s'" % external_auth_request_uri
-            
-            identity.setWorkingParameter("external_auth_request_uri", external_auth_request_uri)
+            facesService.redirectToExternalURL(external_auth_request_uri)
 
             return True
         elif (step == 2):
@@ -660,9 +659,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if (attribute_values_list != None) and (attribute_values_list.size() > 0):
                 userToSearch.setAttribute(userAttributeName, attribute_values_list)
 
-        ldapEntryManager = CdiUtil.bean("ldapEntryManager")
-
-        users = userService.getUserBySample(userToSearch, 1)
+        users = userService.getUsersBySample(userToSearch, 1)
         if users.size() > 0:
             return False
 
