@@ -448,6 +448,7 @@ class PersonAuthentication(PersonAuthenticationType):
             external_auth_request_uri = currentSamlConfiguration.getIdpSsoTargetUrl() + "?SAMLRequest=" + samlAuthRequest.getRequest(True, assertionConsumerServiceUrl)
 
             print "Asimba. Prepare for step 1. external_auth_request_uri: '%s'" % external_auth_request_uri
+            facesService = CdiUtil.bean(FacesService)
             facesService.redirectToExternalURL(external_auth_request_uri)
 
             return True
