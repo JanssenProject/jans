@@ -405,7 +405,7 @@ oxScriptType: person_authentication
 programmingLanguage: python
 
 dn: inum=%(inumOrg)s!0011!DAA9.B788,ou=scripts,o=%(inumOrg)s,o=gluu
-objectClass: top  
+objectClass: top
 objectClass: oxCustomScript
 description: Sample Client Registration script
 displayName: client_registration
