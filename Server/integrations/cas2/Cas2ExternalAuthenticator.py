@@ -265,6 +265,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
 
             print "CAS2. Prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
+            facesService = CdiUtil.bean(FacesService)
             facesService.redirectToExternalURL(cas_service_request_uri)
 
             return True
