@@ -5,8 +5,6 @@
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 template="/WEB-INF/incl/layout/template.xhtml">
     <f:metadata>
-        <f:param name="redirectUri" value="#{identity.getWorkingParameter('external_auth_request_uri')}"/>
-        <f:viewAction action="#{facesContext.externalContext.redirect(redirectUri)}"
-                      if="#{not identity.loggedIn and authenticator.prepareAuthenticationForStep() eq 'success'}"/>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
     </f:metadata>
 </ui:composition>
