@@ -15,6 +15,7 @@ from org.xdi.oxauth.service import UserService, AuthenticationService
 from org.xdi.oxauth.service.net import HttpService
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper, ArrayHelper
+from org.gluu.jsf2.service import FacesService
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -264,8 +265,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 cas_service_request_uri = cas_service_request_uri + "&" + cas_extra_opts
 
             print "CAS2. Prepare for step 1. cas_service_request_uri: " + cas_service_request_uri
-
-            identity.setWorkingParameter("cas_service_request_uri", cas_service_request_uri)
+            facesService.redirectToExternalURL(cas_service_request_uri)
 
             return True
         elif (step == 2):
