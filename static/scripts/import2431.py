@@ -502,12 +502,13 @@ class Migration(object):
             with open(self.o_gluu, 'w') as outfile:
                 for line in infile:
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
-                    line = line.replace('oxAuthUmaResourceSet','oxUmaResource')
+                    line = line.replace('oxAuthUmaResourceSet', 'oxUmaResource')
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
-                    outfile.write(line)
+                    if 'oxType' not in line:
+                        outfile.write(line)
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
