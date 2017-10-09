@@ -94,9 +94,9 @@ public class GrantService {
         }
     }
 
-    private boolean shouldPutInCache(TokenType tokenType) {
-        if (tokenType == TokenType.ID_TOKEN || tokenType == TokenType.REFRESH_TOKEN || tokenType == TokenType.ACCESS_TOKEN) {
-            if (BooleanUtils.isFalse(appConfiguration.getPersistAuthorizationFlowInLdap()))
+    private boolean shouldPutInCache(TokenType tokenType, boolean isImplicitFlow) {
+        if (isImplicitFlow && (tokenType == TokenType.ID_TOKEN || tokenType == TokenType.REFRESH_TOKEN || tokenType == TokenType.ACCESS_TOKEN)) {
+            if (BooleanUtils.isFalse(appConfiguration.getPersistIntoLdapImplicitFlowObject()))
                 return true;
         }
 
@@ -115,11 +115,11 @@ public class GrantService {
         return false;
     }
 
-    public void persist(TokenLdap token) {
+    public void persist(TokenLdap token, boolean isImplicitFlow) {
         String hashedToken = TokenHashUtil.getHashedToken(token.getTokenCode());
         token.setTokenCode(hashedToken);
 
-        if (shouldPutInCache(token.getTokenTypeEnum())) {
+        if (shouldPutInCache(token.getTokenTypeEnum(), isImplicitFlow)) {
             ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
             clientTokens.getTokenHashes().add(hashedToken);
 
@@ -133,7 +133,7 @@ public class GrantService {
                     break;
                 case ACCESS_TOKEN:
                     expiration = Integer.toString(appConfiguration.getAccessTokenLifetime());
-                    prepareGrantBranch(token.getGrantId(), token.getClientId());
+                    prepareGrantBranch(token.getGrantId(), token.getClientId(), isImplicitFlow);
                     break;
             }
 
@@ -150,7 +150,7 @@ public class GrantService {
             return;
         }
 
-        prepareGrantBranch(token.getGrantId(), token.getClientId());
+        prepareGrantBranch(token.getGrantId(), token.getClientId(), isImplicitFlow);
         ldapEntryManager.persist(token);
     }
 
@@ -258,16 +258,7 @@ public class GrantService {
     }
 
     public TokenLdap getGrantsByCode(String p_code) {
-        if (appConfiguration.getPersistAuthorizationFlowInLdap()) {
-            return load(baseDn(), p_code);
-        } else {
-            Object grant = cacheService.get(null, TokenHashUtil.getHashedToken(p_code));
-            if (grant instanceof TokenLdap) {
-                return (TokenLdap) grant;
-            } else {
-                return null;
-            }
-        }
+        return load(baseDn(), p_code);
     }
 
     private TokenLdap load(String p_baseDn, String p_code) {
@@ -450,22 +441,22 @@ public class GrantService {
         oldGrantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
     }
 
-    private void addGrantBranch(final String p_grantId, final String p_clientId) {
+    private void addGrantBranch(final String p_grantId, final String p_clientId, boolean isImplicitFlow) {
         Grant grant = new Grant();
         grant.setDn(getBaseDnForGrant(p_grantId, p_clientId));
         grant.setId(p_grantId);
         grant.setCreationDate(new Date());
 
-        if (appConfiguration.getPersistAuthorizationFlowInLdap())
-            ldapEntryManager.persist(grant);
-        else
+        if (isImplicitFlow && BooleanUtils.isFalse(appConfiguration.getPersistIntoLdapImplicitFlowObject()))
             cacheService.put(null, grant.getId(), grant);
+        else
+            ldapEntryManager.persist(grant);
     }
 
-    private void prepareGrantBranch(final String p_grantId, final String p_clientId) {
+    private void prepareGrantBranch(final String p_grantId, final String p_clientId, boolean isImplicitFlow) {
         // Create ocAuthGrant branch if needed
         if (!containsGrantBranch(p_grantId, p_clientId)) {
-            addGrantBranch(p_grantId, p_clientId);
+            addGrantBranch(p_grantId, p_clientId, isImplicitFlow);
         }
     }
 
