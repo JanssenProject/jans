@@ -34,7 +34,7 @@
     },
     "sns":{
         "access_key":"access_key",
-        "secret_key":"encoded_secret_key",
+        "secret_access_key":"encoded_secret_access_key",
         "region":"region"
     },
     "gluu":{
