@@ -55,7 +55,7 @@ public class NotifyClientFactory {
 		return target.proxy(NotifyMetadataClientService.class);
 	}
 
-	public NotifyClientService createdNotifyService(NotifyMetadata notifyMetadata) {
+	public NotifyClientService createNotifyService(NotifyMetadata notifyMetadata) {
 		ResteasyWebTarget target = pooledClient.target(UriBuilder.fromPath(notifyMetadata.getNotifyEndpoint()));
 		return target.proxy(NotifyClientService.class);
 	}
