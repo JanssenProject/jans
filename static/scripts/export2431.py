@@ -3,7 +3,7 @@
 
 Usage: python export24.py
 
-Running this creates a folder named `backup_24` which contains all the data
+Running this creates a folder named `backup_2431` which contains all the data
 needed for migration of Gluu Server to a higher version. This script backs up
 the following data:
     1. LDAP data
