@@ -6,6 +6,7 @@
 
 package org.gluu.oxnotify.service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +16,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.oxnotify.exception.ConfigurationException;
-import org.gluu.oxnotify.model.PushPlatform;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.gluu.oxnotify.model.conf.AccessConfiguration;
 import org.gluu.oxnotify.model.conf.ClientConfiguration;
 import org.gluu.oxnotify.model.conf.Configuration;
@@ -27,8 +28,6 @@ import org.slf4j.Logger;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.sns.AmazonSNS;
-import com.amazonaws.services.sns.AmazonSNSAsync;
-import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 
 /**
@@ -149,5 +148,27 @@ public class ApplicationService {
 
 		return clientData;
 	}
+
+    public String asJsonSilently(Object obj) {
+        try {
+            return asJson(obj);
+        } catch (IOException ex) {
+            log.trace("Failed to convert object to JSON", ex);
+            return "";
+        }
+    }
+
+    public String asPrettyJson(Object obj) throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+    }
+
+    public String asJson(Object obj) throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+
+        return mapper.writeValueAsString(obj);
+    }
 
 }
