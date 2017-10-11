@@ -39,7 +39,7 @@ info = {
         "key_export": True
     },
     "client": {
-        "redirect_uris": ["https://${test.server.name}/oxauth-rp/home.seam?foo=bar"],
+        "redirect_uris": ["https://${test.server.name}/oxauth-rp/home.htm?foo=bar"],
         "contact": ["yuriy@gluu.com"],
         "application_type": "web",
         "application_name": "OIC test tool",
