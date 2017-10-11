@@ -187,7 +187,10 @@
     "trustedClientEnabled":true,
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
-    "personCustomObjectClassList":[],
+    "personCustomObjectClassList":[
+        "gluuCustomPerson",
+        "gluuPerson"
+    ],
     "persistIdTokenInLdap":false,
     "persistRefreshTokenInLdap":true,
     "authenticationFiltersEnabled":false,

@@ -492,7 +492,8 @@ class Migration(object):
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
-                    outfile.write(line)
+                    if 'oxType' not in line:
+                        outfile.write(line)
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
