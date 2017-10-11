@@ -155,7 +155,7 @@ public class UserService {
 		
 		return getUser(uid);
 	}
-    
+
     public User addUser(User user, boolean active) {
         String peopleBaseDN = staticConfiguration.getBaseDn().getPeople();
 
@@ -163,7 +163,7 @@ public class UserService {
 
         user.setDn("inum=" + inum + "," + peopleBaseDN);
         user.setAttribute("inum", inum);
-        
+
         GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
         user.setAttribute("gluuStatus",  status.getValue());
 
@@ -173,17 +173,16 @@ public class UserService {
     	}
 
     	ldapEntryManager.persist(user);
-		
+
 		return getUserByDn(user.getDn());
 	}
-
 
     public User getUserByAttribute(String attributeName, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = new User();
         user.setDn(staticConfiguration.getBaseDn().getPeople());
-        
+
         List<CustomAttribute> customAttributes =  new ArrayList<CustomAttribute>();
         customAttributes.add(new CustomAttribute(attributeName, attributeValue));
 
@@ -199,13 +198,13 @@ public class UserService {
         }
     }
 
-    public User getUserBySample(User user, int limit) {
+    public List<User> getUsersBySample(User user, int limit) {
         log.debug("Getting user by sample");
 
         List<User> entries = ldapEntryManager.findEntries(user, limit, limit);
         log.debug("Found '{}' entries", entries.size());
 
-        return (User) entries;
+        return entries;
     }
 
     public User addUserAttributeByUserInum(String userInum, String attributeName, String attributeValue) {
