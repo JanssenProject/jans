@@ -14,6 +14,7 @@ import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.model.CustomScript;
 import org.xdi.model.custom.script.model.auth.AuthenticationCustomScript;
+import org.xdi.model.custom.script.type.BaseExternalType;
 import org.xdi.model.custom.script.type.auth.PersonAuthenticationType;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.oxauth.service.AppInitializer;
@@ -315,8 +316,14 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
 		for (String acrValue : acrValues) {
 			if (StringHelper.isNotEmpty(acrValue)) {
-				if (customScriptConfigurationsNameMap.containsKey(StringHelper.toLowerCase(acrValue))) {
-					authModes.add(acrValue);
+				String customScriptName = StringHelper.toLowerCase(acrValue);
+				if (customScriptConfigurationsNameMap.containsKey(customScriptName)) {
+					CustomScriptConfiguration customScriptConfiguration = customScriptConfigurationsNameMap.get(customScriptName);
+					BaseExternalType defaultImplementation = customScriptConfiguration.getCustomScript().getScriptType().getDefaultImplementation();
+					BaseExternalType pythonImplementation = customScriptConfiguration.getExternalType();
+					if ((pythonImplementation != null) && (defaultImplementation != pythonImplementation)) {
+						authModes.add(acrValue);
+					}
 				}
 			}
 		}
