@@ -392,7 +392,13 @@ public class AuthenticationService {
 
         CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
-        customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
+
+    	List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
+    	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
+    		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+    	} else {
+            customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
+    	}
 
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
         customEntry.getCustomAttributes().add(customAttribute);
@@ -400,7 +406,7 @@ public class AuthenticationService {
         try {
             ldapEntryManager.merge(customEntry);
         } catch (EntryPersistenceException epe) {
-            log.error("Failed to update oxLastLoginTime of user '{}'", user.getUserId());
+            log.error("Failed to update oxLastLogonTime of user '{}'", user.getUserId());
         }
     }
 
