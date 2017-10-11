@@ -315,7 +315,7 @@ public class ClientService {
         try {
             ldapEntryManager.merge(customEntry);
         } catch (EntryPersistenceException epe) {
-            log.error("Failed to update oxLastAccessTime and oxLastLoginTime of client '{}'", clientDn);
+            log.error("Failed to update oxLastAccessTime and oxLastLogonTime of client '{}'", clientDn);
         }
 
         removeFromCache(client);
