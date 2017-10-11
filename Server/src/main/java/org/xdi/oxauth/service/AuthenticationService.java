@@ -406,7 +406,7 @@ public class AuthenticationService {
         try {
             ldapEntryManager.merge(customEntry);
         } catch (EntryPersistenceException epe) {
-            log.error("Failed to update oxLastLoginTime of user '{}'", user.getUserId());
+            log.error("Failed to update oxLastLogonTime of user '{}'", user.getUserId());
         }
     }
 
