@@ -4085,6 +4085,17 @@
             "substr": "caseIgnoreSubstringsMatch",
             "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
             "x_origin": "Gluu created attribute"
+        },
+        {
+            "desc": "Trust SMTP server",
+            "equality": "caseIgnoreMatch",
+            "names": [
+                "gluuSmtpServerTrust"
+            ],
+            "oid": "oxAttribute:377",
+            "substr": "caseIgnoreSubstringsMatch",
+            "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+            "x_origin": "Gluu created attribute"
         }
     ],
     "objectClasses": [
