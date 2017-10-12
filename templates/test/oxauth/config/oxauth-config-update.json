@@ -1,0 +1,9 @@
+1)
+    "dynamicRegistrationCustomObjectClass":"oxAuthClientCustomAttributes",
+
+2)
+    "dynamicRegistrationCustomAttributes":[
+        "oxAuthTrustedClient",
+        "myCustomAttr1",
+        "myCustomAttr2"
+    ],
