@@ -1,0 +1,49 @@
+
+@media(min-width: 1024px)and (max-width: 1280px) {
+
+
+}
+
+@media(min-width: 992px)and (max-width: 1023px) {
+
+
+}
+
+@media(min-width: 768px)and (max-width: 991px) {
+
+}
+
+@media(max-width: 767px){
+
+	.bs-docs-section {
+    padding: 50px 0px;
+}
+.padding_spc {
+    border-top: 1px solid #f3f3f3;
+    padding-top: 23px;
+    padding-bottom: 20px;
+    position: static;
+    bottom: 0;
+    max-width: 1170px;
+    width: 100%;
+    margin: 0 0 -11px 0;
+}
+}
+
+@media(max-width: 480px){
+.padding_spc {
+    border-top: 1px solid #f3f3f3;
+    padding-top: 23px;
+    padding-bottom: 20px;
+    position: static;
+    bottom: 0;
+    max-width: 1170px;
+    width: 100%;
+    margin: 0 0 -11px 0;
+}
+}
+
+@media(max-width: 320px){
+
+
+}

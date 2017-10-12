@@ -297,6 +297,20 @@
 			<groupId>org.gluu</groupId>
 			<artifactId>oxnotify-client</artifactId>
 		</dependency>
+		
+				<!-- Richfaces -->
+		<dependency>
+			<groupId>org.richfaces</groupId>
+			<artifactId>richfaces-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.richfaces</groupId>
+			<artifactId>richfaces</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.richfaces</groupId>
+			<artifactId>richfaces-a4j</artifactId>
+		</dependency>
 
 		<!-- Weld -->
 		<dependency>
