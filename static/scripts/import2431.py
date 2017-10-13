@@ -373,6 +373,41 @@ class Migration(object):
         outfile.write("\n")
         outfile.write(output)
         outfile.close()
+        eduperson = ""
+        eduPath = os.path.join("/opt", "symas", "etc", "openldap", "schema","eduperson.schema");
+        input_file = open(eduPath)
+        try:
+            for i, line in enumerate(input_file):
+                if i == 62:
+                    line = line + "\n" + "attributetype ( 1.3.6.1.4.1.5923.1.1.1.9"
+                    line = line + "\n" + "\t\tNAME 'eduPersonScopedAffiliation'"
+                    line = line + "\n" + "\t\tDESC 'eduPerson per Internet2 and EDUCAUSE'"
+                    line = line + "\n" + "\t\tEQUALITY caseIgnoreMatch"
+                    line = line + "\n" + "\t\tSYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )"
+                    line = line + "\n"
+                    line = line + "\n" + "attributetype ( 1.3.6.1.4.1.5923.1.1.1.10"
+                    line = line + "\n" + "\t\tNAME 'eduPersonTargetedID'"
+                    line = line + "\n" + "\t\tDESC 'eduPerson per Internet2 and EDUCAUSE'"
+                    line = line + "\n" + "\t\tEQUALITY caseIgnoreMatch"
+                    line = line + "\n" + "\t\tSYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )"
+                    line = line + "\n"
+                    line = line + "\n" + "attributetype ( 1.3.6.1.4.1.5923.1.1.1.11"
+                    line = line + "\n" + "\t\tNAME 'eduPersonAssurance'"
+                    line = line + "\n" + "\t\tDESC 'eduPerson per Internet2 and EDUCAUSE'"
+                    line = line + "\n" + "\t\tEQUALITY caseIgnoreMatch"
+                    line = line + "\n" + "\t\tSYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )"
+                    line = line + "\n\n"
+                if i == 63:
+                    line = "\n" + line
+                if i == 67:
+                    line = line + "\t\teduPersonScopedAffiliation $ eduPersonTargetedID $ eduPersonAssurance $\n"
+                eduperson = eduperson + line
+        except Exception, e:
+            logging.log(e)
+        finally:
+            input_file.close()
+            f = open(eduPath, "w")
+            f.write(eduperson)
 
     def getEntry(self, fn, dn):
         parser = MyLDIF(open(fn, 'rb'), sys.stdout)
