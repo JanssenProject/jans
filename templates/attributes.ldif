@@ -111,7 +111,7 @@ objectClass: gluuAttribute
 displayName: Email Verified
 gluuAttributeName: emailVerified
 gluuAttributeOrigin: gluuPerson
-gluuAttributeType: string
+gluuAttributeType: boolean
 gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -128,7 +128,7 @@ objectClass: gluuAttribute
 displayName: Phone Number Verified
 gluuAttributeName: phoneNumberVerified
 gluuAttributeOrigin: gluuPerson
-gluuAttributeType: string
+gluuAttributeType: boolean
 gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
@@ -161,7 +161,7 @@ objectClass: gluuAttribute
 displayName: Last Updated
 gluuAttributeName: updatedAt
 gluuAttributeOrigin: gluuPerson
-gluuAttributeType: string
+gluuAttributeType: generalizedTime
 gluuAttributeEditType: admin
 gluuAttributeViewType: user
 gluuAttributeViewType: admin
