@@ -374,7 +374,7 @@ class Migration(object):
         outfile.write(output)
         outfile.close()
         eduperson = ""
-        eduPath = os.path.join("/opt", "symas", "etc", "openldap", "schema","eduperson.schema");
+        eduPath = os.path.join("/opt", "symas", "etc", "openldap", "schema","eduperson.schema")
         input_file = open(eduPath)
         try:
             for i, line in enumerate(input_file):
