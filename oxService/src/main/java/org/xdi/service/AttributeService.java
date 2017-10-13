@@ -56,8 +56,10 @@ public abstract class AttributeService implements Serializable {
 		attributeNames.add(name);
 		List<AttributeTypeDefinition> attributeTypes = schemaService.getAttributeTypeDefinitions(schemaEntry, attributeNames);
 		AttributeTypeDefinition attributeTypeDefinition = schemaService.getAttributeTypeDefinition(attributeTypes, name);
-
-		return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
+		if (attributeTypeDefinition != null)
+			return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
+		
+		return "";
     }
 
 	/**

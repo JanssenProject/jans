@@ -94,6 +94,10 @@ public abstract class CacheProvider<T> {
 	 */
 	public abstract void put(String region, String key, Object object);
 
+    public void put(int expiration, String key, Object object) { // remove this method in future after cache refactoring
+        put(Integer.toString(expiration), key, object);
+    }
+
 	/**
 	 * Removes an object from the cache. The object is removed from the default
 	 * cache region under the given key.
