@@ -18,7 +18,7 @@
         <link href="#{oxAuthConfigurationService.cssLocation}/bootstrap.min.css" rel="stylesheet"/>
 		<link rel="stylesheet" href="#{oxAuthConfigurationService.cssLocation}/style.css"/>
 		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
-	
+		
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
@@ -60,16 +60,25 @@
             $(document).ready(function() {
             	if (authmethod == "enroll") {
             		document.getElementById("login").style.display = "none";
+            		document.getElementById("subsequent").style.display = "none";
             		document.getElementById("enroll").style.display = "";  
             		
             		gluu_auth.renderQrCode('#enrollcontainer', request, qr_options, label);
                     gluu_auth.startProgressBar('#enrollprogressbar', 60, onSignInCallback);
-            	} else {
+            	} else if (authmethod == "login"){
             		document.getElementById("login").style.display = "";
+            		document.getElementById("subsequent").style.display = "none";
             		document.getElementById("enroll").style.display = "none";
 
             		gluu_auth.renderQrCode('#container', request, qr_options, label);
                     gluu_auth.startProgressBar('#progressbar', 60, onSignInCallback);
+            	}else{
+            		document.getElementById("login").style.display = "none";
+            		document.getElementById("subsequent").style.display = "";
+            		document.getElementById("enroll").style.display = "none";
+
+            		gluu_auth.renderQrCode('#susequentcontainer', request, qr_options, label);
+                    gluu_auth.startProgressBar('#susequentprogressbar', 60, onSignInCallback);
             	}
                 gluu_auth.startSessionChecker(onSignInCallback, 60);
 
@@ -125,7 +134,51 @@
 			    width: 1560px;
 			    margin: 0 auto;
 			}
+			a.sigin-a {
+			    background: #00b170;
+			    padding: 10px 33px;
+			    margin: 0 0 20px;
+			    color: #fff;
+			    font-weight: 600;
+			    text-transform: uppercase;
+			    font-size: 13px;
+			    text-decoration: none;
+			    border-radius: 4px;
+			}
+			.mid-wrapper {
+			    width: 100%;
+			    text-align: center;
+			}
+			
+            .button-wrap1 {
+			    width: 100%;
+			    text-align: center;
+			}
             
+			span.contactadmin {
+			    display: block;
+			    margin: 30px 0 0;
+			    line-height:20px;
+			    color: black;
+			}
+			
+			.mid-wrapper p {
+			    font-size: 18px;
+			    margin-top: 20px;			    
+			    color: black;
+			}
+			.bs-docs-section p {
+			    text-align: center;
+			    margin-bottom: 36px;
+			    color: black;
+			}
+			p {
+			    margin: 0 0 10px;
+			        margin-top: 0px;
+			        margin-bottom: 10px;
+			}
+
+			
 			
         </style>
     </ui:define>
@@ -226,7 +279,7 @@
 					  <div class="paddin_bx">
 						<h3>#{msgs['supergluu.enroll.downloadsupergluu']}</h3>
 						<div class="button">
-							<h:outputLink target="_blank" value="https://play.google.com/store/apps/details?id=gluu.super.gluu" class="android" ><h:graphicImage value="../../img/android1.png" alt="android"/></h:outputLink>
+							<h:outputLink target="_blank" value="https://play.google.com/store/apps/details?id=gluu.org.super.gluu" class="android" ><h:graphicImage value="../../img/android1.png" alt="android"/></h:outputLink>
 							<h:outputLink target="_blank" value="https://itunes.apple.com/us/app/super-gluu/id1093479646?mt=8" class="iphone" ><h:graphicImage value="../../img/iphone.png" alt="iphone"/></h:outputLink>
 							
 						</div>
@@ -256,6 +309,62 @@
 	</div>
 	</div>
     </h:panelGroup>
-    </ui:define>
+    <h:panelGroup id="subsequent">
+     <header class="bs-docs-nav navbar navbar-static-top" id="top"> 
+		<div class="container">
+			<div class="navbar-header"> 
+				<a target="_blank"  class="navbar-brand"><img src="#{oxAuthConfigurationService.getImgLocation()}/logo.png" alt="logo"/></a>
+			</div>
+		</div>
+	</header>
+	
+	<div class="bs-docs-section">
+		<div class="container">
+		  <div class="row">
+		  	<div class="col-md-12">
+		  		<div class="mid-wrapper">
+		  			<span class="icon_01">
+		  			  <img src="#{oxAuthConfigurationService.getImgLocation()}/tube_1.jpg" alt=""/>
+		  			</span>
+                   <p style="line-height:30px;">A Super Gluu push notification has been sent to your <br/>
+                    registered device. Approve the push to login.</p>
+		  		</div>
+
+		  		<div class="button-wrap1">
+		  			<p>Didn't receive the push notification?</p>
+		  			<a onclick="$( '#dialog' ).dialog({ width: 550 });" target="_blank" class="sigin-a">Scan QR code instead</a>
+		  			<span class="contactadmin">
+		  				If you no longer control the device you registered,<br/>
+ <a href="#">contact your Gluu server admin</a> to enroll a new device
+		  			</span>
+		  		</div>
+
+		  	</div>
+
+		  </div>
+
+		</div>
+	</div>
+	
+	<div class="foot_bor">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+				  <div class="padding_spc">
+					<p>Gluu, Inc, | <a target="_blank" href="https://www.google.com/">Use subject to MIT LICENSE</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+    </h:panelGroup>
+    
+     <div id="dialog" style="display: none;" title="QR Code">
+        <div id="susequentcontainer"></div>
+        <div id="susequentprogressbar"></div>
+        
+   </div>
+    </ui:define>  
 
 </ui:composition>
