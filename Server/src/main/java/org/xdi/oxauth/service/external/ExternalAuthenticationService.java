@@ -319,7 +319,14 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 				String customScriptName = StringHelper.toLowerCase(acrValue);
 				if (customScriptConfigurationsNameMap.containsKey(customScriptName)) {
 					CustomScriptConfiguration customScriptConfiguration = customScriptConfigurationsNameMap.get(customScriptName);
-					BaseExternalType defaultImplementation = customScriptConfiguration.getCustomScript().getScriptType().getDefaultImplementation();
+					CustomScriptType customScriptType = customScriptConfiguration.getCustomScript().getScriptType();
+					// Handle LDAP auth method
+					if (customScriptType == null) {
+						authModes.add(acrValue);
+						continue;
+					}
+
+					BaseExternalType defaultImplementation = customScriptType.getDefaultImplementation();
 					BaseExternalType pythonImplementation = customScriptConfiguration.getExternalType();
 					if ((pythonImplementation != null) && (defaultImplementation != pythonImplementation)) {
 						authModes.add(acrValue);
