@@ -375,6 +375,16 @@
             <class name="org.xdi.oxauth.interop.IncludesCHashInIdTokenWhenCodeFlowUsed"/>
         </classes>
     </test>
+    <test name="OPRegistrationJwks" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.interop.OPRegistrationJwks"/>
+        </classes>
+    </test>
+    <test name="ProvidingAcrValues" enabled="false">
+        <classes>
+            <class name="org.xdi.oxauth.interop.ProvidingAcrValues"/>
+        </classes>
+    </test>
     <test name="OC5. FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingIdTokenWithEssentialAuthTimeClaim"/>
