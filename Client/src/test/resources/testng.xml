@@ -380,7 +380,7 @@
             <class name="org.xdi.oxauth.interop.OPRegistrationJwks"/>
         </classes>
     </test>
-    <test name="ProvidingAcrValues" enabled="false">
+    <test name="ProvidingAcrValues" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.ProvidingAcrValues"/>
         </classes>
