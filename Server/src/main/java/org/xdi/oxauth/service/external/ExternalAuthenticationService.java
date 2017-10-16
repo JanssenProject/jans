@@ -452,6 +452,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		for (CustomScriptConfiguration script : getCustomScriptConfigurationsMap()) {
 			if (script.getCustomScript().isInternal()) {
 				map.put(script.getName(), -1);
+				continue;
 			}
 			map.put(script.getName(), script.getLevel());
 		}
