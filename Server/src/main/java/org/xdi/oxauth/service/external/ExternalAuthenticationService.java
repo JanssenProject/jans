@@ -462,7 +462,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	private CustomScriptConfiguration getInternalCustomScriptConfiguration(GluuLdapConfiguration ldapAuthConfig) {
 		CustomScriptConfiguration customScriptConfiguration = getInternalCustomScriptConfiguration();
 		customScriptConfiguration.getCustomScript().setName(ldapAuthConfig.getConfigId());
-		customScriptConfiguration.getCustomScript().setInternal(true);
 		
 		return customScriptConfiguration;
 	}
@@ -477,9 +476,12 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		};
 		customScript.setName(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 		customScript.setLevel(-1);
+		customScript.setInternal(true);
 
-		return new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType,
+		CustomScriptConfiguration customScriptConfiguration = new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType,
 				new HashMap<String, SimpleCustomProperty>(0));
+		
+		return customScriptConfiguration;
 	}
 
 }
