@@ -73,6 +73,9 @@ public class CustomScript extends BaseEntry {
     @Transient
     private boolean modified;
 
+    @Transient
+    private boolean internal;
+
 	public CustomScript() {}
 
 	public CustomScript(String dn, String inum, String name) {
@@ -95,6 +98,7 @@ public class CustomScript extends BaseEntry {
 		this.revision = customScript.revision;
 		this.enabled = customScript.enabled;
 		this.modified = customScript.modified;
+		this.internal = customScript.internal;
 	}
 
 	public String getInum() {
@@ -192,6 +196,14 @@ public class CustomScript extends BaseEntry {
 
 	public void setModified(boolean modified) {
 		this.modified = modified;
+	}
+
+	public boolean isInternal() {
+		return internal;
+	}
+
+	public void setInternal(boolean internal) {
+		this.internal = internal;
 	}
 
 	public ScriptLocationType getLocationType() {
