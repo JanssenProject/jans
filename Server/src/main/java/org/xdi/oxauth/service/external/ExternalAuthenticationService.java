@@ -319,13 +319,15 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 				String customScriptName = StringHelper.toLowerCase(acrValue);
 				if (customScriptConfigurationsNameMap.containsKey(customScriptName)) {
 					CustomScriptConfiguration customScriptConfiguration = customScriptConfigurationsNameMap.get(customScriptName);
-					CustomScriptType customScriptType = customScriptConfiguration.getCustomScript().getScriptType();
-					// Handle LDAP auth method
-					if (customScriptType == null) {
+					CustomScript customScript = customScriptConfiguration.getCustomScript();
+
+					// Handle internal authentication method
+					if (customScript.isInternal()) {
 						authModes.add(acrValue);
 						continue;
 					}
 
+					CustomScriptType customScriptType = customScriptConfiguration.getCustomScript().getScriptType();
 					BaseExternalType defaultImplementation = customScriptType.getDefaultImplementation();
 					BaseExternalType pythonImplementation = customScriptConfiguration.getExternalType();
 					if ((pythonImplementation != null) && (defaultImplementation != pythonImplementation)) {
@@ -448,6 +450,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	public Map<String, Integer> acrToLevelMapping() {
 		Map<String, Integer> map = Maps.newHashMap();
 		for (CustomScriptConfiguration script : getCustomScriptConfigurationsMap()) {
+			if (script.getCustomScript().isInternal()) {
+				map.put(script.getName(), -1);
+				continue;
+			}
 			map.put(script.getName(), script.getLevel());
 		}
 		return map;
@@ -456,6 +462,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	private CustomScriptConfiguration getInternalCustomScriptConfiguration(GluuLdapConfiguration ldapAuthConfig) {
 		CustomScriptConfiguration customScriptConfiguration = getInternalCustomScriptConfiguration();
 		customScriptConfiguration.getCustomScript().setName(ldapAuthConfig.getConfigId());
+		customScriptConfiguration.getCustomScript().setInternal(true);
 		
 		return customScriptConfiguration;
 	}
