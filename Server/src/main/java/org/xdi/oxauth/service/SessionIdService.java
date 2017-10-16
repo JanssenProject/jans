@@ -126,7 +126,7 @@ public class SessionIdService {
 
                 log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
                         "current acr: " + acrValuesStr + "(level: " + currentAcrLevel + ")");
-                if ((sessionAcrLevel != null) && (sessionAcrLevel < currentAcrLevel)) {
+                if (sessionAcrLevel < currentAcrLevel) {
                     throw new AcrChangedException();
                 } else { // https://github.com/GluuFederation/oxAuth/issues/291
                     return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
