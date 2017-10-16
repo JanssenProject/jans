@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
-"""export24.py - A script to export all the data from Gluu Server 2.4.x
+"""export2431.py - A script to export all the data from Gluu Server 2.4.x
 
-Usage: python export24.py
+Usage: python export2431.py
 
 Running this creates a folder named `backup_2431` which contains all the data
 needed for migration of Gluu Server to a higher version. This script backs up
@@ -17,7 +17,6 @@ of appropriate version to migrate to that version.
 Read complete migration procedure at:
     https://www.gluu.org/docs/deployment/upgrading/
 """
-
 import getpass
 import json
 import logging
@@ -577,10 +576,10 @@ class Exporter(object):
         # Preferences for installation of optional components
         installSaml = raw_input("\tIs Shibboleth SAML IDP installed? (y/N): [N]") or "N"
         props['installSaml'] = 'y' in installSaml.lower()
-        if installSaml:
-            shibv = raw_input("\tAre you migrating to Gluu Server v3.x? (y/N): [y]") or "y"
-        if shibv:
-            props['shibboleth_version'] = 'v3'
+        # if installSaml:
+        #     shibv = raw_input("\tAre you migrating to Gluu Server v3.x? (y/N): [y]") or "y"
+        # if shibv:
+        props['shibboleth_version'] = 'v3'
         props['installAsimba'] = os.path.isfile(
             'opt/tomcat/webapps/asimba.war')
         props['installOxAuthRP'] = os.path.isfile(
