@@ -72,7 +72,7 @@ public class RedirectionUriService {
                     }
                 }
 
-                if (StringUtils.isNotBlank(redirectionUri)) {
+                if (StringUtils.isNotBlank(redirectionUri) && redirectUris != null) {
                     log.debug("Validating redirection URI: clientIdentifier = {}, redirectionUri = {}, found = {}",
                             clientIdentifier, redirectionUri, redirectUris.length);
 
