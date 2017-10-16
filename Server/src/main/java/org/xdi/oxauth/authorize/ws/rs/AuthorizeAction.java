@@ -213,7 +213,7 @@ public class AuthorizeAction {
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
-                List<String> acrValuesList = acrValuesList();
+                List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
                 if (acrValuesList.isEmpty()) {
                     if (StringHelper.isNotEmpty(defaultAuthenticationMode.getName())) {
                         acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
@@ -322,23 +322,6 @@ public class AuthorizeAction {
             }
         }
         return session;
-    }
-
-    /**
-     * By definition we expects space separated acr values as it is defined in spec. But we also try maybe some client
-     * sent it to us as json array. So we try both.
-     *
-     * @return acr value list
-     */
-    private List<String> acrValuesList() {
-        List<String> acrs;
-        try {
-            acrs = Util.jsonArrayStringAsList(this.acrValues);
-        } catch (JSONException ex) {
-            acrs = Util.splittedStringAsList(acrValues, " ");
-        }
-
-        return acrs;
     }
 
     private SessionId getSession() {
