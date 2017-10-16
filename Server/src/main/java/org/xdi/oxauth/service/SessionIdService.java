@@ -9,6 +9,7 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
@@ -118,23 +119,28 @@ public class SessionIdService {
                 return session;
             }
 
-            boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAcr);
+            List<String> acrValuesList = acrValuesList(acrValuesStr);
+            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr);
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
                 Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
-                Integer currentAcrLevel = acrToLevel.get(acrValuesStr);
 
-                log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
-                        "current acr: " + acrValuesStr + "(level: " + currentAcrLevel + ")");
-                if (sessionAcrLevel < currentAcrLevel) {
-                    throw new AcrChangedException();
-                } else { // https://github.com/GluuFederation/oxAuth/issues/291
-                    return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
+                for (String acrValue : acrValuesList) {
+	                Integer currentAcrLevel = acrToLevel.get(acrValue);
+	
+	                log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
+	                        "current acr: " + acrValue + "(level: " + currentAcrLevel + ")");
+	                if (sessionAcrLevel < currentAcrLevel) {
+	                    throw new AcrChangedException();
+	                }
                 }
+                // https://github.com/GluuFederation/oxAuth/issues/291
+                return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
             }
 
             reinitLogin(session, false);
         }
+
         return session;
     }
 
@@ -681,6 +687,23 @@ public class SessionIdService {
 
     public boolean isNotSessionIdAuthenticated() {
         return !isSessionIdAuthenticated();
+    }
+
+    /**
+     * By definition we expects space separated acr values as it is defined in spec. But we also try maybe some client
+     * sent it to us as json array. So we try both.
+     *
+     * @return acr value list
+     */
+    public List<String> acrValuesList(String acrValues) {
+        List<String> acrs;
+        try {
+            acrs = Util.jsonArrayStringAsList(acrValues);
+        } catch (JSONException ex) {
+            acrs = Util.splittedStringAsList(acrValues, " ");
+        }
+
+        return acrs;
     }
 
     private void auditLogging(SessionId sessionId) {
