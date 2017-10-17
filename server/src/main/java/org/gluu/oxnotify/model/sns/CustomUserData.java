@@ -7,6 +7,7 @@
 package org.gluu.oxnotify.model.sns;
 
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,10 +30,13 @@ public class CustomUserData {
 	@JsonProperty(value = "creation_date")
 	private Date creationDate;
 
-	@JsonProperty(value = "app_user_data")
-	private String appUserData;
+	@JsonProperty(value = "modification_date")
+	private Date modificationDate;
 
-	public CustomUserData(String clientId, String clientIp, Date creationDate, String appUserData) {
+	@JsonProperty(value = "app_user_data")
+	private List<String> appUserData;
+
+	public CustomUserData(String clientId, String clientIp, Date creationDate, List<String> appUserData) {
 		this.clientId = clientId;
 		this.clientIp = clientIp;
 		this.creationDate = creationDate;
@@ -63,18 +67,26 @@ public class CustomUserData {
 		this.creationDate = creationDate;
 	}
 
-	public String getAppUserData() {
+	public Date getModificationDate() {
+		return modificationDate;
+	}
+
+	public void setModificationDate(Date modificationDate) {
+		this.modificationDate = modificationDate;
+	}
+
+	public List<String> getAppUserData() {
 		return appUserData;
 	}
 
-	public void setAppUserData(String appUserData) {
+	public void setAppUserData(List<String> appUserData) {
 		this.appUserData = appUserData;
 	}
 
 	@Override
 	public String toString() {
-		return "CustomUserData [clientId=" + clientId + ", clientIp=" + clientIp + ", creationDate=" + creationDate + ", appUserData="
-				+ appUserData + "]";
+		return "CustomUserData [clientId=" + clientId + ", clientIp=" + clientIp + ", creationDate=" + creationDate
+				+ ", modificationDate=" + modificationDate + ", appUserData=" + appUserData + "]";
 	}
 
 }
