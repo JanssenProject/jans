@@ -16,7 +16,7 @@ case $1 in
     start)
         echo "Starting $SERVICE_NAME ..."
         if [ ! -f $PID_PATH_NAME ]; then
-            nohup java -jar $LIB 2>>/dev/null>>/dev/null&
+            nohup java -jar $LIB server oxd-https.yml 2>>/dev/null>>/dev/null&
                         echo $! > $PID_PATH_NAME
         else
             echo "$SERVICE_NAME is already running ..."
