@@ -16,8 +16,11 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.gluu.oxnotify.model.conf.AccessConfiguration;
 import org.gluu.oxnotify.model.conf.ClientConfiguration;
 import org.gluu.oxnotify.model.conf.Configuration;
@@ -161,14 +164,24 @@ public class ApplicationService {
     public String asPrettyJson(Object obj) throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        mapper.setSerializationInclusion(Inclusion.NON_EMPTY);
+
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
     public String asJson(Object obj) throws IOException {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+        mapper.setSerializationInclusion(Inclusion.NON_EMPTY);
 
         return mapper.writeValueAsString(obj);
     }
+
+    public <T> T jsonToObject(String json, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper mapper = new ObjectMapper();
+        T clazzObject = mapper.readValue(json, clazz);
+
+		return clazzObject;
+	}
 
 }

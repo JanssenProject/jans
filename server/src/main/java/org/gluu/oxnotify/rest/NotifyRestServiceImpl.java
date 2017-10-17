@@ -6,9 +6,15 @@
 
 package org.gluu.oxnotify.rest;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +22,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.gluu.oxnotify.model.NotificationResponse;
 import org.gluu.oxnotify.model.PushPlatform;
@@ -31,8 +39,12 @@ import org.slf4j.Logger;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointRequest;
 import com.amazonaws.services.sns.model.CreatePlatformEndpointResult;
+import com.amazonaws.services.sns.model.GetEndpointAttributesRequest;
+import com.amazonaws.services.sns.model.GetEndpointAttributesResult;
+import com.amazonaws.services.sns.model.InvalidParameterException;
 import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
+import com.amazonaws.services.sns.model.SetEndpointAttributesRequest;
 
 /**
  * @author Yuriy Movchan
@@ -87,22 +99,45 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 			
 			// Build custom user data
 			CustomUserData customUserData = new CustomUserData(clientConfiguration.getClientId(),
-					networkService.getIpAddress(httpRequest), new Date(), userData); 
+					networkService.getIpAddress(httpRequest), new Date(), Arrays.asList(userData)); 
 			log.info("Prepared custom user data for device registration: '{}' ", customUserData);
 
-			// Create endpoint for mobile device
-			CreatePlatformEndpointRequest platformEndpointRequest = new CreatePlatformEndpointRequest();
-			platformEndpointRequest.setCustomUserData(applicationService.asJson(customUserData));
-			platformEndpointRequest.setToken(token);
-			platformEndpointRequest.setPlatformApplicationArn(clientData.getPlatformApplicationArn());
+			CreatePlatformEndpointResult platformEndpointResult;
+			String endpointArn = null;
+			String requestId = null;
+			int statusCode = -1;
+			try {
+				// Create endpoint for mobile device
+				CreatePlatformEndpointRequest platformEndpointRequest = new CreatePlatformEndpointRequest();
+				platformEndpointRequest.setCustomUserData(applicationService.asJson(customUserData));
+				platformEndpointRequest.setToken(token);
+				platformEndpointRequest.setPlatformApplicationArn(clientData.getPlatformApplicationArn());
+				platformEndpointResult = snsClient.createPlatformEndpoint(platformEndpointRequest);
+				
+				endpointArn = platformEndpointResult.getEndpointArn();
+				requestId = platformEndpointResult.getSdkResponseMetadata().getRequestId();
+				statusCode = platformEndpointResult.getSdkHttpMetadata().getHttpStatusCode();
+			} catch (InvalidParameterException ipe) {
+				String message = ipe.getErrorMessage();
+				Pattern p = Pattern
+	                    .compile(".*Endpoint (arn:aws:sns[^ ]+) already exists " +
+	                            "with the same Token.*");
+	            Matcher m = p.matcher(message);
+	            if (m.matches()) {
+	                // The endpoint already exists for this token, but with additional custom data that
+	                // CreateEndpoint doesn't want to overwrite. Just use the existing endpoint.
+	                endpointArn = m.group(1);
+	                requestId = ipe.getRequestId();
+	                statusCode = ipe.getStatusCode();
 
-			CreatePlatformEndpointResult platformEndpointResult = snsClient
-					.createPlatformEndpoint(platformEndpointRequest);
+	                updateCustomUserData(snsClient, endpointArn, customUserData);
+	            } else {
+	                // Re-throw exception, the input is actually bad
+	                throw ipe;
+	            }
+			}
 
-			RegisterDeviceResponse registerDeviceResponse = new RegisterDeviceResponse(
-					platformEndpointResult.getSdkResponseMetadata().getRequestId(),
-					platformEndpointResult.getSdkHttpMetadata().getHttpStatusCode(),
-					platformEndpointResult.getEndpointArn());
+			RegisterDeviceResponse registerDeviceResponse = new RegisterDeviceResponse(requestId, statusCode, endpointArn);
 
 			log.info("Registered user '{}' device with status '{}'", userData, registerDeviceResponse);
 
@@ -112,6 +147,43 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		}
 
 		return null;
+	}
+
+	private void updateCustomUserData(AmazonSNS snsClient, String endpointArn, CustomUserData newCustomUserData) throws IOException {
+		// Load existing attributes
+		GetEndpointAttributesRequest getEndpointAttributesRequest = new GetEndpointAttributesRequest().withEndpointArn(endpointArn);
+
+		GetEndpointAttributesResult getEndpointAttributesResult = snsClient.getEndpointAttributes(getEndpointAttributesRequest);
+
+		// Parse loaded custom user data
+		CustomUserData customUserData;
+		try {
+			String customUserDataString = getEndpointAttributesResult.getAttributes().get("CustomUserData");
+			customUserData = applicationService.jsonToObject(customUserDataString, CustomUserData.class);
+		} catch (Exception ex) {
+			log.warn("Failed to add new app data '{}'", newCustomUserData.getAppUserData());
+			log.warn("Failed to convert JSON to object", ex);
+
+			return;
+		}
+
+		// Union existing app data with new app data
+		List<String> newAppUserData = new ArrayList<String>();
+		newAppUserData.addAll(customUserData.getAppUserData());
+		newAppUserData.addAll(newCustomUserData.getAppUserData());
+		customUserData.setAppUserData(newAppUserData);
+		
+		// Update modification date
+		customUserData.setModificationDate(newCustomUserData.getCreationDate());
+
+		// Update custom user data
+		Map<String, String> attributes = new HashMap<String, String>();
+		attributes.put("CustomUserData ", applicationService.asJson(customUserData));
+
+		SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
+				.withEndpointArn(endpointArn).withAttributes(attributes);
+
+		snsClient.setEndpointAttributes(setEndpointAttributesRequest);
 	}
 
 	@Override
