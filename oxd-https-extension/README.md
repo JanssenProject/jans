@@ -62,7 +62,7 @@ POST /setup-client
 {
     "op_host" : "https://ce-dev3.gluu.org",
     "authorization_redirect_uri": "https://client.example.org/",
-    "scope" : ["openid","profile","email","uma_protection","uma_authorization"],
+    "scope" : ["openid","profile","email","uma_protection"],
     "grant_types":["authorization_code","client_credentials"]
 }
 ```
@@ -91,7 +91,7 @@ POST /setup-client
 POST /get-client-token
 {
 	"op_host" : "https://ce-dev3.gluu.org",
-	"scope" : ["openid","profile","email","uma_protection","uma_authorization"],
+	"scope" : ["openid","profile","email","uma_protection"],
 	"op_host": "https://ce-dev3.gluu.org",
 	"client_id": "@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!A2BB.9AE6.5F14.B387",
 	"client_secret": "f436b936-03fc-433f-9772-53c2bc9e1c74"
@@ -103,7 +103,7 @@ POST /get-client-token
 {
     "status": "ok",
     "data": {
-        "scope": "openid profile uma_protection uma_authorization email",
+        "scope": "openid profile uma_protection email",
         "access_token": "b75434ff-f465-4b70-92e4-b7ba6b6c58f2",
         "expires_in": 299,
         "refresh_token": null
@@ -120,7 +120,7 @@ Authorization: Bearer b75434ff-f465-4b70-92e4-b7ba6b6c58f2
 {
 	"op_host" : "https://ce-dev3.gluu.org",
 	"authorization_redirect_uri": "https://client.example.org/",
-	"scope" : ["openid","profile","email","uma_protection","uma_authorization"],
+	"scope" : ["openid","profile","email","uma_protection"],
 	"grant_types":["authorization_code","client_credentials"]
 }
 ```
@@ -144,7 +144,7 @@ POST /update-site
 Authorization: Bearer b75434ff-f465-4b70-92e4-b7ba6b6c58f2
 {
 	"oxd_id": "bcad760f-91ba-46e1-a020-05e4281d91b6",
-	"scope" : ["openid","profile","email","uma_protection","uma_authorization"]
+	"scope" : ["openid","profile","email","uma_protection"]
 }
 ```
 
@@ -166,7 +166,7 @@ POST /get-authorization-url
 Authorization: Bearer b75434ff-f465-4b70-92e4-b7ba6b6c58f2
 {
 	"oxd_id": "bcad760f-91ba-46e1-a020-05e4281d91b6",
-	"scope" : ["openid","profile","email","uma_protection","uma_authorization"]
+	"scope" : ["openid","profile","email","uma_protection"]
 }
 ```
 
@@ -175,7 +175,7 @@ Authorization: Bearer b75434ff-f465-4b70-92e4-b7ba6b6c58f2
 {
     "status": "ok",
     "data": {
-        "authorization_url": "https://ce-dev3.gluu.org/oxauth/restv1/authorize?response_type=code&client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!8A36.24E1.97DE.F4EF&redirect_uri=https://192.168.200.95/&scope=openid+profile+email+uma_protection+uma_authorization&state=473ot4nuqb4ubeokc139raur13&nonce=lbrdgorr974q66q6q9g454iccm"
+        "authorization_url": "https://ce-dev3.gluu.org/oxauth/restv1/authorize?response_type=code&client_id=@!1736.179E.AA60.16B2!0001!8F7C.B9AB!0008!8A36.24E1.97DE.F4EF&redirect_uri=https://192.168.200.95/&scope=openid+profile+email+uma_protection&state=473ot4nuqb4ubeokc139raur13&nonce=lbrdgorr974q66q6q9g454iccm"
     }
 }
 ```

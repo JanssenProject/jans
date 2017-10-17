@@ -56,7 +56,7 @@ public class RestResourceTest {
         registerSiteParams = new RegisterSiteParams();
         registerSiteParams.setOpHost(configuration.getOpHost()); // your locally hosted gluu server can work
         registerSiteParams.setAuthorizationRedirectUri(configuration.getAuthorizationRedirectUrl());//Your client application auth redirect url
-        registerSiteParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection", "uma_authorization"));  //Scope
+        registerSiteParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection"));  //Scope
         registerSiteParams.setTrustedClient(true);
         registerSiteParams.setGrantType(Lists.newArrayList("authorization_code", "client_credentials"));
 
@@ -101,7 +101,7 @@ public class RestResourceTest {
         GetClientTokenParams clientTokenParams = new GetClientTokenParams();
         clientTokenParams.setClientId(setupclientResponse.getClientId());
         clientTokenParams.setClientSecret(setupclientResponse.getClientSecret());
-        clientTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection", "uma_authorization"));   //Scope
+        clientTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection"));
         clientTokenParams.setOpHost(registerSiteParams.getOpHost());
 
         GetClientTokenResponse clientTokenResponse = getClientToken(clientTokenParams);
@@ -125,7 +125,7 @@ public class RestResourceTest {
 
         UpdateSiteParams updateSiteParams = new UpdateSiteParams();
         updateSiteParams.setOxdId(oxdId);
-        updateSiteParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection", "uma_authorization"));
+        updateSiteParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection"));
 
         CommandResponse commandResponse = updateSite(updateSiteParams);
         assertNotNull(commandResponse);
@@ -237,7 +237,7 @@ public class RestResourceTest {
         GetAccessTokenByRefreshTokenParams getAccessTokenByRefreshTokenParams = new GetAccessTokenByRefreshTokenParams();
         getAccessTokenByRefreshTokenParams.setOxdId(oxdId);
         getAccessTokenByRefreshTokenParams.setRefreshToken(getTokenByCodeResponse.getRefreshToken());
-        getAccessTokenByRefreshTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection", "uma_authorization"));   //Scope
+        getAccessTokenByRefreshTokenParams.setScope(Lists.newArrayList("openid", "profile", "email", "uma_protection"));
 
         GetClientTokenResponse getClientTokenResponse = getAccessTokenByRefreshToken(getAccessTokenByRefreshTokenParams);
         assertNotNull(getClientTokenResponse);
@@ -349,7 +349,7 @@ public class RestResourceTest {
         return null;
     }
 
-    private static Object getParameterJson(Object para) throws IOException {
+    private static String getParameterJson(Object para) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(para);
     }
@@ -359,88 +359,68 @@ public class RestResourceTest {
         return Jackson.createJsonMapper().readValue(rsProtect, RsResourceList.class);
     }
 
-    private static SetupClientResponse setupClient(RegisterSiteParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("setup-client", para);
-        return RestResource.read(commandResponse.getData().toString(), SetupClientResponse.class);
+    private static SetupClientResponse setupClient(RegisterSiteParams params) throws IOException {
+        return httpClient("setup-client", params, SetupClientResponse.class);
     }
 
-    private static GetClientTokenResponse getClientToken(GetClientTokenParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("get-client-token", para);
-        return RestResource.read(commandResponse.getData().toString(), GetClientTokenResponse.class);
+    private static GetClientTokenResponse getClientToken(GetClientTokenParams params) throws IOException {
+        return httpClient("get-client-token", params, GetClientTokenResponse.class);
     }
 
-    private RegisterSiteResponse registerSite(RegisterSiteParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("register-site", para);
-        return RestResource.read(commandResponse.getData().toString(), RegisterSiteResponse.class);
+    private RegisterSiteResponse registerSite(RegisterSiteParams params) throws IOException {
+        return httpClient("register-site", params, RegisterSiteResponse.class);
     }
 
     private CommandResponse updateSite(UpdateSiteParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        return httpClient("update-site", para);
+        return httpClient("update-site", siteParams);
     }
 
-    private GetAuthorizationUrlResponse getAuthorizationUrl(GetAuthorizationUrlParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("get-authorization-url", para);
-        return RestResource.read(commandResponse.getData().toString(), GetAuthorizationUrlResponse.class);
+    private GetAuthorizationUrlResponse getAuthorizationUrl(GetAuthorizationUrlParams params) throws IOException {
+        return httpClient("get-authorization-url", params, GetAuthorizationUrlResponse.class);
     }
 
-    private GetTokensByCodeResponse getTokenByCode(GetTokensByCodeParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("get-tokens-by-code", para);
-        return RestResource.read(commandResponse.getData().toString(), GetTokensByCodeResponse.class);
+    private GetTokensByCodeResponse getTokenByCode(GetTokensByCodeParams params) throws IOException {
+        return httpClient("get-tokens-by-code", params, GetTokensByCodeResponse.class);
     }
 
-    private GetUserInfoResponse getUserInfo(GetUserInfoParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("get-user-info", para);
-        return RestResource.read(commandResponse.getData().toString(), GetUserInfoResponse.class);
+    private GetUserInfoResponse getUserInfo(GetUserInfoParams params) throws IOException {
+        return httpClient("get-user-info", params, GetUserInfoResponse.class);
     }
 
-    private LogoutResponse getLogoutUri(GetLogoutUrlParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("get-logout-uri", para);
-        return RestResource.read(commandResponse.getData().toString(), LogoutResponse.class);
+    private LogoutResponse getLogoutUri(GetLogoutUrlParams params) throws IOException {
+        return httpClient("get-logout-uri", params, LogoutResponse.class);
     }
 
-    private GetClientTokenResponse getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("get-access-token-by-refresh-token", para);
-        return RestResource.read(commandResponse.getData().toString(), GetClientTokenResponse.class);
+    private GetClientTokenResponse getAccessTokenByRefreshToken(GetAccessTokenByRefreshTokenParams params) throws IOException {
+        return httpClient("get-access-token-by-refresh-token", params, GetClientTokenResponse.class);
     }
 
-    private RsProtectResponse umaRsProtect(RsProtectParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("uma-rs-protect", para);
-        return RestResource.read(commandResponse.getData().toString(), RsProtectResponse.class);
+    private RsProtectResponse umaRsProtect(RsProtectParams params) throws IOException {
+        return httpClient("uma-rs-protect", params, RsProtectResponse.class);
     }
 
-    private RsCheckAccessResponse umaRsCheckAccess(RsCheckAccessParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("uma-rs-check-access", para);
-        return RestResource.read(commandResponse.getData().toString(), RsCheckAccessResponse.class);
+    private RsCheckAccessResponse umaRsCheckAccess(RsCheckAccessParams params) throws IOException {
+        return httpClient("uma-rs-check-access", params, RsCheckAccessResponse.class);
     }
 
-    private RpGetRptResponse umaRpGetRpt(RpGetRptParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("uma-rp-get-rpt", para);
-        return RestResource.read(commandResponse.getData().toString(), RpGetRptResponse.class);
+    private RpGetRptResponse umaRpGetRpt(RpGetRptParams params) throws IOException {
+        return httpClient("uma-rp-get-rpt", params, RpGetRptResponse.class);
     }
 
-    private RpGetClaimsGatheringUrlResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams siteParams) throws IOException {
-        Object para = getParameterJson(siteParams);
-        CommandResponse commandResponse = httpClient("uma-rp-get-claims-gathering-url", para);
-        return RestResource.read(commandResponse.getData().toString(), RpGetClaimsGatheringUrlResponse.class);
+    private RpGetClaimsGatheringUrlResponse umaRpGetClaimsGatheringUrl(RpGetClaimsGatheringUrlParams params) throws IOException {
+        return httpClient("uma-rp-get-claims-gathering-url", params, RpGetClaimsGatheringUrlResponse.class);
     }
 
-    private static CommandResponse httpClient(String endpoint, Object para) throws IOException {
+    public static <T extends IOpResponse> T httpClient(String endpoint, IParams params, Class<T> responseClazz) throws IOException {
+        CommandResponse commandResponse = httpClient(endpoint, params);
+        return RestResource.read(commandResponse.getData().toString(), responseClazz);
+    }
+
+    private static CommandResponse httpClient(String endpoint, IParams params) throws IOException {
         final String entity = client.target("http://localhost:" + RULE.getLocalPort() + "/" + endpoint)
                 .request()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-                .post(Entity.json(para))
+                .post(Entity.json(getParameterJson(params)))
                 .readEntity(String.class);
 
         System.out.println("Plain string: " + entity);
