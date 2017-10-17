@@ -1,0 +1,9 @@
+880e856d737b9469495e3cda4480ad32  opt/oxd-server/bin/oxd-start.sh
+13c7bd1feb96d452857e55ef4cbe35dc  opt/oxd-server/conf/log4j.xml
+4f15e4b07e9a2f7ab63a57abe9b5d91b  opt/oxd-server/conf/oxd-conf.json
+e10016811c9779de489eb0a2e4281c88  opt/oxd-server/conf/oxd-default-site-config.json
+df26e12e124f32014634e5661e7c448f  opt/oxd-server/lib/oxd-common.jar
+94f42ddaf0b7e50d09f2fa3e5870afea  opt/oxd-server/lib/oxd-server-jar-with-dependencies.jar
+7f968ba78b51bee889217756a4aee508  usr/share/doc/oxd-server/README.md
+1ecc98b094e466dd6a5b95672662b2e9  usr/share/doc/oxd-server/changelog.Debian.gz
+a1c123df6ee254bf89caab227e00eca3  usr/share/doc/oxd-server/copyright

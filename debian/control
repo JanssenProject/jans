@@ -1,4 +1,4 @@
-Source: gluu-oxd-server
+Source: oxd-server
 Section: java
 Priority: optional
 Maintainer: Adrian Alves <adrian@gluu.org>
@@ -8,11 +8,11 @@ Build-Depends: debhelper (>= 8.0.0),
 Standards-Version: 3.9.5
 Homepage: http://www.gluu.org
 
-Package: gluu-oxd-server
+Package: oxd-server
 Architecture: all
 Depends: ${shlibs:Depends},
  ${misc:Depends},
- default-jdk
+ default-jdk,
 Description: plugins for OpenID and UMA
  oxd - OpenID Connect and UMA plugins for
  Apache and nginx web containers
