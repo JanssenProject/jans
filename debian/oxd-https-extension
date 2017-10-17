@@ -10,7 +10,7 @@
 
 SERVICE_NAME=oxd-web
 PID_PATH_NAME=/var/run/oxd-web.pid
-LIB=/opt/oxd-web/lib/oxd-to-http-1.2.0-SNAPSHOT.jar
+LIB=/opt/oxd-web/lib/oxd-https-extension-3.1.1.Final.jar
 
 case $1 in
     start)
