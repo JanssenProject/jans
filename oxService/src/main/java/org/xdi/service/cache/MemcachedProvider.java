@@ -1,18 +1,13 @@
 package org.xdi.service.cache;
 
+import net.spy.memcached.*;
+import net.spy.memcached.internal.OperationFuture;
+import net.spy.memcached.ops.OperationStatus;
+import org.slf4j.Logger;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-
-import net.spy.memcached.AddrUtil;
-import net.spy.memcached.BinaryConnectionFactory;
-import net.spy.memcached.ConnectionFactory;
-import net.spy.memcached.DefaultConnectionFactory;
-import net.spy.memcached.MemcachedClient;
-import net.spy.memcached.internal.OperationFuture;
-import net.spy.memcached.ops.OperationStatus;
 
 /**
  * @author yuriyz on 02/02/2017.
@@ -81,6 +76,9 @@ public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
     @Override
     public Object get(String region, String key) {
         try {
+            if (key == null) {
+                return null;
+            }
             Object o = client.get(key);
             log.trace("get - key: " + key + ", value:" + o);
             return o;

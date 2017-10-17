@@ -60,6 +60,9 @@ public class RedisProvider extends AbstractCacheProvider<AbstractRedisProvider> 
 
     @Override
     public Object get(String region, String key) {
+        if (key == null) {
+            return null;
+        }
         return redisProvider.get(key);
     }
 
