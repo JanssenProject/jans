@@ -1,4 +1,4 @@
 #!/bin/sh -e
-#mv /etc/init.d/oxd-https-extension.init.d /etc/init.d/oxd-http-extension
+#mv /etc/init.d/oxd-https-extension.init.d /etc/init.d/oxd-https-extension
 #update-rc.d oxd-server defaults > /dev/null
 #update-rc.d oxd-https-extension defaults > /dev/null
