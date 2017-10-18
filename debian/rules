@@ -21,7 +21,7 @@ override_dh_auto_install:
 		mkdir -p debian/oxd-server/opt/oxd-server/conf/
 		mkdir -p debian/oxd-server/opt/oxd-server/bin/
 		mkdir -p debian/oxd-server/opt/oxd-server/lib/
-	    mkdir -p debian/oxd-https-extension/opt/oxd-https-extension/lib/
+	    	mkdir -p debian/oxd-server/opt/oxd-https-extension/lib/
 		cp oxd-server/src/main/resources/oxd-conf.json debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/oxd-default-site-config.json debian/oxd-server/opt/oxd-server/conf/
 		cp oxd-server/src/main/resources/log4j.xml debian/oxd-server/opt/oxd-server/conf/
@@ -29,9 +29,9 @@ override_dh_auto_install:
 		cp oxd-common/target/oxd-common.jar debian/oxd-server/opt/oxd-server/lib/
 #		cp oxd-ping/target/oxd-ping-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
 		cp oxd-server/target/oxd-server-jar-with-dependencies.jar debian/oxd-server/opt/oxd-server/lib/
-		cp oxd-https-extension/target/oxd-https-extension-3.1.1.Final.jar debian/oxd-https-extension/opt/oxd-https-extension/lib/
-		cp oxd-https-extension/oxd-https.keystore debian/oxd-https-extension/opt/oxd-https-extension/lib/
-		cp oxd-https-extension/oxd-https.yml debian/oxd-https-extension/opt/oxd-https-extension/lib/
+		cp oxd-https-extension/target/oxd-https-extension-3.1.1.Final.jar debian/oxd-server/opt/oxd-https-extension/lib/
+		cp oxd-https-extension/oxd-https.keystore debian/oxd-server/opt/oxd-https-extension/lib/
+		cp oxd-https-extension/oxd-https.yml debian/oxd-server/opt/oxd-https-extension/lib/
 #		cp lib/* debian/oxd-server/opt/oxd-server/lib/
 
 override_dh_fixperms:
