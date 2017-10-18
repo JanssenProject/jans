@@ -14,42 +14,45 @@ BASEDIR=/opt/oxd-server/bin/
 CONF=/opt/oxd-server/conf
 LIB=/opt/oxd-server/lib
 
+do_start () {        
+        if [ ! -f $PID_PATH_NAME ]; then                
+                echo "Starting $SERVICE_NAME ..."                
+                nohup java -Doxd.server.config=$CONF/oxd-conf.json -Dlog4j.configuration=$CONF/log4j.xml -cp $LIB/bcprov-jdk15on-1.54.jar:$LIB/resteasy-jaxrs-2.3.7.Final.jar:$LIB/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher 2>>/dev/null>>/dev/null&                
+                echo $! > $PID_PATH_NAME        
+        else                
+                echo "$SERVICE_NAME is already running ..."        
+        fi        
+        PID_NUM=$(cat $PID_PATH_NAME)        
+        echo "PID: [$PID_NUM]"
+}
+
+do_stop () {        
+        if [ -f $PID_PATH_NAME ]; then            
+                PID=$(cat $PID_PATH_NAME);            
+                echo "$SERVICE_NAME stoping ..."            
+                kill $PID;            
+                rm $PID_PATH_NAME        
+        else            
+                echo "$SERVICE_NAME is not running ..."        
+        fi
+}
+
 case $1 in
     start)
-        echo "Starting $SERVICE_NAME ..."
-        if [ ! -f $PID_PATH_NAME ]; then
-            nohup java -Doxd.server.config=$CONF/oxd-conf.json -Dlog4j.configuration=$CONF/log4j.xml -cp $LIB/bcprov-jdk15on-1.54.jar:$LIB/resteasy-jaxrs-2.3.7.Final.jar:$LIB/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher 2>>/dev/null>>/dev/null&
-                        echo $! > $PID_PATH_NAME
-        else
-            echo "$SERVICE_NAME is already running ..."
-        fi
+            do_start
     ;;
     stop)
-        if [ -f $PID_PATH_NAME ]; then
-            PID=$(cat $PID_PATH_NAME);
-            echo "$SERVICE_NAME stoping ..."
-            kill $PID;
-            rm $PID_PATH_NAME
-        else
-            echo "$SERVICE_NAME is not running ..."
-        fi
+            do_stop
     ;;
     restart)
-        if [ -f $PID_PATH_NAME ]; then
-            PID=$(cat $PID_PATH_NAME);
-            echo "$SERVICE_NAME stopping ...";
-            kill $PID;
-            rm $PID_PATH_NAME
-            echo "$SERVICE_NAME starting ..."
-            nohup java -Doxd.server.config=$CONF/oxd-conf.json -Dlog4j.configuration=$CONF/log4j.xml -cp $LIB/bcprov-jdk15on-1.54.jar:$LIB/resteasy-jaxrs-2.3.7.Final.jar:$LIB/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher 2>>/dev/null>>/dev/null&
-                        echo $! > $PID_PATH_NAME
-        else
-            echo "$SERVICE_NAME is not running ..."
-        fi
+            do_stop
+            do_start
     ;;
     status)
         if [ -f $PID_PATH_NAME ]; then
             echo "$SERVICE_NAME is running ...";
+            PID_NUM=$(cat $PID_PATH_NAME)                
+            echo "PID: [$PID_NUM]"
         else
            echo "$SERVICE_NAME is not running ..."
         fi
