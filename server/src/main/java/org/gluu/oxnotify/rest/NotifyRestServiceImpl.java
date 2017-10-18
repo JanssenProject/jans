@@ -183,12 +183,9 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		customUserData.setModificationDate(newCustomUserData.getCreationDate());
 
 		// Update custom user data
-		Map<String, String> attributes = new HashMap<String, String>();
-		attributes.put("CustomUserData ", applicationService.asJson(customUserData));
-
 		SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
 				.withEndpointArn(endpoint);
-		setEndpointAttributesRequest.setAttributes(attributes);
+		setEndpointAttributesRequest.addAttributesEntry("CustomUserData", applicationService.asJson(customUserData));
 
 		snsClient.setEndpointAttributes(setEndpointAttributesRequest);
 
