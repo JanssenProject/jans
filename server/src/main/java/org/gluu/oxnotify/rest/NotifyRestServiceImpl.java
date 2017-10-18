@@ -130,7 +130,10 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 	                requestId = ipe.getRequestId();
 	                statusCode = ipe.getStatusCode();
 
-	                updateCustomUserData(snsClient, endpointArn, customUserData);
+	                boolean result = updateCustomUserData(snsClient, endpointArn, customUserData);
+	                if (!result) {
+	                	throw ipe;
+	                }
 	            } else {
 	                // Re-throw exception, the input is actually bad
 	                throw ipe;
@@ -149,7 +152,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		return null;
 	}
 
-	private void updateCustomUserData(AmazonSNS snsClient, String endpoint, CustomUserData newCustomUserData) throws IOException {
+	private boolean updateCustomUserData(AmazonSNS snsClient, String endpoint, CustomUserData newCustomUserData) throws IOException {
 		log.debug("Adding custom user data '{}' to endpoint '{}'", newCustomUserData, endpoint);
 
 		// Load existing attributes
@@ -167,7 +170,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 			log.warn("Failed to add new app data '{}'", newCustomUserData.getAppUserData());
 			log.warn("Failed to convert JSON to object", ex);
 
-			return;
+			return false;
 		}
 
 		// Union existing app data with new app data
@@ -184,11 +187,14 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		attributes.put("CustomUserData ", applicationService.asJson(customUserData));
 
 		SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
-				.withEndpointArn(endpoint).withAttributes(attributes);
+				.withEndpointArn(endpoint);
+		setEndpointAttributesRequest.setAttributes(attributes);
 
 		snsClient.setEndpointAttributes(setEndpointAttributesRequest);
 
-		log.debug("Added custom user data '{}' to endpoint '{}'", newCustomUserData, endpoint);
+		log.info("Added custom user data '{}' to endpoint '{}'", newCustomUserData, endpoint);
+		
+		return true;
 	}
 
 	@Override
