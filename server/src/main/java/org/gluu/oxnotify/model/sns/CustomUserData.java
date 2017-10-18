@@ -36,6 +36,9 @@ public class CustomUserData {
 	@JsonProperty(value = "app_user_data")
 	private List<String> appUserData;
 
+	public CustomUserData() {
+	}
+
 	public CustomUserData(String clientId, String clientIp, Date creationDate, List<String> appUserData) {
 		this.clientId = clientId;
 		this.clientIp = clientIp;

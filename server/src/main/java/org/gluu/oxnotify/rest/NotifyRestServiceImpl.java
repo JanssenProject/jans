@@ -149,9 +149,12 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		return null;
 	}
 
-	private void updateCustomUserData(AmazonSNS snsClient, String endpointArn, CustomUserData newCustomUserData) throws IOException {
+	private void updateCustomUserData(AmazonSNS snsClient, String endpoint, CustomUserData newCustomUserData) throws IOException {
+		log.debug("Adding custom user data '{}' to endpoint '{}'", newCustomUserData, endpoint);
+
 		// Load existing attributes
-		GetEndpointAttributesRequest getEndpointAttributesRequest = new GetEndpointAttributesRequest().withEndpointArn(endpointArn);
+		GetEndpointAttributesRequest getEndpointAttributesRequest = new GetEndpointAttributesRequest()
+				.withEndpointArn(endpoint);
 
 		GetEndpointAttributesResult getEndpointAttributesResult = snsClient.getEndpointAttributes(getEndpointAttributesRequest);
 
@@ -181,9 +184,11 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		attributes.put("CustomUserData ", applicationService.asJson(customUserData));
 
 		SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
-				.withEndpointArn(endpointArn).withAttributes(attributes);
+				.withEndpointArn(endpoint).withAttributes(attributes);
 
 		snsClient.setEndpointAttributes(setEndpointAttributesRequest);
+
+		log.debug("Added custom user data '{}' to endpoint '{}'", newCustomUserData, endpoint);
 	}
 
 	@Override
