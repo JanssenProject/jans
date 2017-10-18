@@ -22,6 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
+import org.apache.http.HttpStatus;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -128,7 +129,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 	                // CreateEndpoint doesn't want to overwrite. Just use the existing endpoint.
 	                endpointArn = m.group(1);
 	                requestId = ipe.getRequestId();
-	                statusCode = ipe.getStatusCode();
+	                statusCode = HttpStatus.SC_OK;
 
 	                boolean result = updateCustomUserData(snsClient, endpointArn, customUserData);
 	                if (!result) {
