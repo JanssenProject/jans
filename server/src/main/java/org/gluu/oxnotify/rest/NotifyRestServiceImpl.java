@@ -184,8 +184,7 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 
 		// Update custom user data
 		SetEndpointAttributesRequest setEndpointAttributesRequest = new SetEndpointAttributesRequest()
-				.withEndpointArn(endpoint);
-		setEndpointAttributesRequest.addAttributesEntry("CustomUserData", applicationService.asJson(customUserData));
+				.withEndpointArn(endpoint).addAttributesEntry("CustomUserData", applicationService.asJson(customUserData));
 
 		snsClient.setEndpointAttributes(setEndpointAttributesRequest);
 
