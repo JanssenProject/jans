@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.gluu.site.ldap.persistence.exception.InvalidConfigurationException;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
@@ -99,7 +100,11 @@ public class LDAPConnectionProvider {
 		this.ports = new int[this.servers.length];
 		for (int i = 0; i < this.servers.length; i++) {
 			String str = this.servers[i];
-			this.addresses[i] = str.substring(0, str.indexOf(":")).trim();
+			int idx = str.indexOf(":");
+			if (idx == -1) {
+				throw new InvalidConfigurationException("Ldap server settings should be in format server:port");
+			}
+			this.addresses[i] = str.substring(0, idx).trim();
 			this.ports[i] = Integer.parseInt(str.substring(str.indexOf(":") + 1, str.length()));
 		}
 
