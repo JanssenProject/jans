@@ -7,7 +7,7 @@ server:
       port: 8080
     - type: https
       port: 8443
-      keyStorePath: oxd-https.keystore
+      keyStorePath: /opt/oxd-https-extension/lib/oxd-https.keystore
       keyStorePassword: example
       validateCerts: false
   adminConnectors:
