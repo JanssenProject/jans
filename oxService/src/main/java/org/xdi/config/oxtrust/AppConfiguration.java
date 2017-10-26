@@ -147,7 +147,6 @@ public class AppConfiguration implements Configuration, Serializable {
 	private String recaptchaSecretKey;
 
 	private boolean scimTestMode;
-	private String scimTestModeAccessToken;
 
 	private boolean rptConnectionPoolUseConnectionPooling;
 	private int rptConnectionPoolMaxTotal;
@@ -773,14 +772,6 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setScimTestMode(boolean scimTestMode) {
 		this.scimTestMode = scimTestMode;
-	}
-
-	public String getScimTestModeAccessToken() {
-		return scimTestModeAccessToken;
-	}
-
-	public void setScimTestModeAccessToken(String scimTestModeAccessToken) {
-		this.scimTestModeAccessToken = scimTestModeAccessToken;
 	}
 
 	public boolean isRptConnectionPoolUseConnectionPooling() {
