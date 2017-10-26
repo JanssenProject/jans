@@ -60,7 +60,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 15, 2017
+ * @version October 26, 2017
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -652,6 +652,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (StringHelper.equalsIgnoreCase("oxAuthTrustedClient", attr)) {
             boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
             p_client.setTrustedClient(trustedClient);
+
+            return true;
+        } else if (StringHelper.equalsIgnoreCase("oxIncludeClaimsInIdToken", attr)) {
+            boolean includeClaimsInIdToken = StringHelper.toBoolean(parameterValues.get(0), false);
+            p_client.setIncludeClaimsInIdToken(includeClaimsInIdToken);
 
             return true;
         }
