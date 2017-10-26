@@ -112,6 +112,12 @@
         </classes>
     </test>
 
+    <test name="Multivalued claims" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.MultivaluedClaims"/>
+        </classes>
+    </test>
+
     <!-- OpenID Request Object test -->
     <test name="OpenID Request Object test (HTTP)" enabled="true">
         <classes>
