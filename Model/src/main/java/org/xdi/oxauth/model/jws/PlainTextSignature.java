@@ -6,13 +6,14 @@
 
 package org.xdi.oxauth.model.jws;
 
-import java.security.SignatureException;
-
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.security.SignatureException;
+
 /**
- * @author Javier Rojas Blum Date: 11.12.2012
+ * @author Javier Rojas Blum
+ * @version October 26, 2017
  */
 public class PlainTextSignature extends AbstractJwsSigner {
 
@@ -27,6 +28,6 @@ public class PlainTextSignature extends AbstractJwsSigner {
 
     @Override
     public boolean validateSignature(String signingInput, String signature) throws SignatureException {
-        return false;
+        return StringUtils.EMPTY_STRING.equals(signature);
     }
 }
