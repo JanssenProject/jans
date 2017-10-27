@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.token.PersistentJwt;
 import org.xdi.oxauth.model.util.Util;
+import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
 import javax.annotation.Nullable;
@@ -25,7 +26,9 @@ import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides operations with users.
@@ -169,7 +172,15 @@ public class UserService {
 
         List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
     	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-    		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+    		Set<String> allObjectClasses = new HashSet<String>();
+    		allObjectClasses.addAll(personCustomObjectClassList);
+
+    		String currentObjectClasses[] = user.getCustomObjectClasses();
+    		if (ArrayHelper.isNotEmpty(currentObjectClasses)) {
+        		allObjectClasses.addAll(Arrays.asList(currentObjectClasses));
+    		}
+
+    		user.setCustomObjectClasses(allObjectClasses.toArray(new String[allObjectClasses.size()]));
     	}
 
     	ldapEntryManager.persist(user);
