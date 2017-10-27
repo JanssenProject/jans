@@ -259,9 +259,9 @@ public class AppInitializer {
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
 			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
 			event.select(ReloadAuthScript.Literal.INSTANCE).fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
-
-			setDefaultAuthenticationMethod(localLdapEntryManager);
 		}
+
+		setDefaultAuthenticationMethod(localLdapEntryManager);
 	}
 
 	/*
@@ -506,14 +506,31 @@ public class AppInitializer {
 	}
 
 	private void setDefaultAuthenticationMethod(LdapEntryManager localLdapEntryManager) {
-		GluuAppliance appliance = loadAppliance(localLdapEntryManager, "oxAuthenticationMode");
-
-		authenticationMode = null;
-		if (appliance != null) {
-			this.authenticationMode = new AuthenticationMode(appliance.getAuthenticationMode());
+		String currentAuthMethod = null;
+		if (this.authenticationMode != null) {
+			currentAuthMethod = this.authenticationMode.getName();
 		}
 
-		authenticationModeInstance.destroy(authenticationModeInstance.get());
+		String actualAuthMethod = getActualDefaultAuthenticationMethod(localLdapEntryManager);
+		
+		if (!StringHelper.equals(currentAuthMethod, actualAuthMethod)) {
+			authenticationMode = null;
+			if (actualAuthMethod != null) {
+				this.authenticationMode = new AuthenticationMode(actualAuthMethod);
+			}
+
+			authenticationModeInstance.destroy(authenticationModeInstance.get());
+		}
+	}
+
+	private String getActualDefaultAuthenticationMethod(LdapEntryManager localLdapEntryManager) {
+		GluuAppliance appliance = loadAppliance(localLdapEntryManager, "oxAuthenticationMode");
+
+		if (appliance == null) {
+			return null;
+		}
+
+		return appliance.getAuthenticationMode();
 	}
 	
 	@Produces @ApplicationScoped
