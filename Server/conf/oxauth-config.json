@@ -135,6 +135,7 @@
     ],
     "dynamicRegistrationCustomAttributes":[
         "oxAuthTrustedClient",
+        "oxIncludeClaimsInIdToken",
         "myCustomAttr1",
         "myCustomAttr2"
     ],
