@@ -17,7 +17,6 @@ from org.xdi.oxauth.service import UserService, ClientService, AuthenticationSer
 from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.util import StringHelper, ArrayHelper
 
-
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
@@ -225,6 +224,21 @@ class PersonAuthentication(PersonAuthenticationType):
  
                     if (newUser.getAttribute("cn") == None):
                         newUser.setAttribute("cn", gplusUserUid)
+
+                    # Add mail to oxTrustEmail so that the user's
+                    # email is available through the SCIM interface
+                    # too.
+                    if (newUser.getAttribute("oxTrustEmail") is None and
+                        newUser.getAttribute("mail") is not None):
+                        oxTrustEmail = {
+                            "value": newUser.getAttribute("mail"),
+                            "display": newUser.getAttribute("mail"),
+                            "primary": True,
+                            "operation": None,
+                            "reference": None,
+                            "type": "other"
+                        }
+                        newUser.setAttribute("oxTrustEmail", json.dumps(oxTrustEmail))
 
                     newUser.setAttribute("oxExternalUid", "gplus:" + gplusUserUid)
                     print "Google+ Authenticate for step 1. Attempting to add user '%s' with next attributes '%s'" % (gplusUserUid, newUser.getCustomAttributes())
