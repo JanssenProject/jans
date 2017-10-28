@@ -20,7 +20,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 3, 2017
+ * @version October 26, 2017
  */
 public abstract class JwtClaimSet {
 
@@ -254,6 +254,13 @@ public abstract class JwtClaimSet {
                 } else if (claim.getValue() instanceof JwtSubClaimObject) {
                     JwtSubClaimObject subClaimObject = (JwtSubClaimObject) claim.getValue();
                     jsonObject.put(subClaimObject.getName(), subClaimObject.toJsonObject());
+                } else if (claim.getValue() instanceof List) {
+                    List<String> claimObjectList = (List<String>) claim.getValue();
+                    JSONArray claimsJSONArray = new JSONArray();
+                    for (String claimObj : claimObjectList) {
+                        claimsJSONArray.put(claimObj);
+                    }
+                    jsonObject.put(claim.getKey(), claimsJSONArray);
                 } else {
                     jsonObject.put(claim.getKey(), claim.getValue());
                 }
