@@ -216,6 +216,7 @@ gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuStatus: active
+oxAuthClaimName: member_of
 inum: %(inumOrg)s!0005!D2E0
 objectClass: top
 objectClass: gluuAttribute
