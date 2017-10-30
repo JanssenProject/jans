@@ -4795,7 +4795,8 @@
                 "oxAuthConfStatic",
                 "oxAuthConfWebKeys",
                 "oxRevision",
-                "oxWebKeysSettings"
+                "oxWebKeysSettings",
+                "gluuSmtpServerTrust"
             ],
             "must": [
                 "objectclass"
