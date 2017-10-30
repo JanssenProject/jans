@@ -1,6 +1,13 @@
 package org.xdi.oxd.server.persistence;
 
+import com.google.inject.Inject;
+import org.codehaus.jackson.JsonNode;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xdi.oxd.common.CoreUtils;
+import org.xdi.oxd.server.Configuration;
+import org.xdi.oxd.server.service.ConfigurationService;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,11 +19,21 @@ import java.sql.SQLException;
 
 public class H2PersistenceProvider implements SqlPersistenceProvider {
 
+    private static final Logger LOG = LoggerFactory.getLogger(H2PersistenceProvider.class);
+
+    private ConfigurationService configurationService;
     private JdbcConnectionPool pool = null;
+
+    @Inject
+    public H2PersistenceProvider(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
 
     @Override
     public void onCreate() {
-        pool = JdbcConnectionPool.create("jdbc:h2:./oxd_db", "oxd", "oxd");
+        H2Configuration h2Configuration = asH2Configuration(configurationService.getConfiguration());
+
+        pool = JdbcConnectionPool.create("jdbc:h2:file:" + h2Configuration.getDbFileLocation(), "oxd", "oxd");
     }
 
     @Override
@@ -27,5 +44,17 @@ public class H2PersistenceProvider implements SqlPersistenceProvider {
     @Override
     public Connection getConnection() throws SQLException {
         return pool.getConnection();
+    }
+
+    public static H2Configuration asH2Configuration(Configuration configuration) {
+        try {
+            JsonNode node = configuration.getStorageConfiguration();
+            if (node != null) {
+                return CoreUtils.createJsonMapper().readValue(node, H2Configuration.class);
+            }
+        } catch (Exception e) {
+            LOG.error("Failed to parse H2Configuration.", e);
+        }
+        return new H2Configuration();
     }
 }
