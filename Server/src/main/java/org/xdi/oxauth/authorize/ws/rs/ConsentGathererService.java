@@ -4,20 +4,10 @@
  * Copyright (c) 2015, Gluu
  */
 
-package org.xdi.oxauth.uma.service;
+package org.xdi.oxauth.authorize.ws.rs;
 
-import org.apache.commons.lang.StringUtils;
-import org.gluu.jsf2.service.FacesService;
-import org.slf4j.Logger;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.i18n.LanguageBean;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.config.Constants;
-import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.service.UserService;
-import org.xdi.oxauth.service.external.ExternalUmaClaimsGatheringService;
-import org.xdi.oxauth.uma.authorization.UmaGatherContext;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -27,70 +17,82 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.gluu.jsf2.service.FacesService;
+import org.slf4j.Logger;
+import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
+import org.xdi.oxauth.i18n.LanguageBean;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.config.Constants;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.external.ExternalConsentGatheringService;
+import org.xdi.oxauth.service.external.context.ConsentGatheringContext;
 
 /**
- * @author yuriyz
- * @version August 9, 2017
+ * @author Yuriy Movchan Date: 10/30/2017
  */
 @RequestScoped
-@Named(value = "gatherer")
-public class UmaGatherer {
+@Named(value = "consentGatherer")
+public class ConsentGathererService {
 
     @Inject
     private Logger log;
+
     @Inject
-    private ExternalUmaClaimsGatheringService external;
+    private ExternalConsentGatheringService external;
+
     @Inject
     private AppConfiguration appConfiguration;
+
     @Inject
     private FacesContext facesContext;
+
     @Inject
     private ExternalContext externalContext;
+
     @Inject
     private FacesService facesService;
+
     @Inject
     private LanguageBean languageBean;
+
     @Inject
-    private UmaSessionService umaSessionService;
-    @Inject
-    private UmaPermissionService umaPermissionService;
-    @Inject
-    private UmaPctService umaPctService;
+    private ConsentGatheringSessionService sessionService;
+
     @Inject
     private UserService userService;
 
     private final Map<String, String> pageClaims = new HashMap<String, String>();
 
-    public boolean gather() {
+    public boolean authorize() {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
-            final SessionId session = umaSessionService.getSession(httpRequest, httpResponse);
+            final SessionId session = sessionService.getSession(httpRequest, httpResponse);
 
             CustomScriptConfiguration script = getScript(session);
-            UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
-                    umaPctService, pageClaims, userService, facesService, appConfiguration);
+            ConsentGatheringContext context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, session, sessionService,
+                    pageClaims, null, userService, facesService, appConfiguration);
 
-            int step = umaSessionService.getStep(session);
-            if (!umaSessionService.isPassedPreviousSteps(session, step)) {
+            int step = sessionService.getStep(session);
+            if (!sessionService.isPassedPreviousSteps(session, step)) {
                 log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
                 return false;
             }
 
-            boolean gatheredResult = external.gather(script, step, context);
-            log.debug("Claims-gathering result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, gatheredResult);
+            boolean authorizeResult = external.authorize(script, step, context);
+            log.debug("Claims-gathering result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, authorizeResult);
 
             int overridenNextStep = external.getNextStep(script, step, context);
 
-            if (!gatheredResult && overridenNextStep == -1) {
+            if (!authorizeResult && overridenNextStep == -1) {
                 return false;
             }
 
             if (overridenNextStep != -1) {
-                umaSessionService.resetToStep(session, overridenNextStep, step);
+                sessionService.resetToStep(session, overridenNextStep, step);
                 step = overridenNextStep;
             }
 
@@ -102,10 +104,10 @@ public class UmaGatherer {
                     nextStep = overridenNextStep;
                 } else {
                     nextStep = step + 1;
-                    umaSessionService.markStep(session, step, true);
+                    sessionService.markStep(session, step, true);
                 }
 
-                umaSessionService.setStep(nextStep, session);
+                sessionService.setStep(nextStep, session);
                 context.persist();
 
                 String page = external.getPageForStep(script, nextStep, context);
@@ -128,20 +130,18 @@ public class UmaGatherer {
         return false;
     }
 
-    private void onSuccess(SessionId session, UmaGatherContext context) {
-        List<UmaPermission> permissions = context.getPermissions();
-        String newTicket = umaPermissionService.changeTicket(permissions, permissions.get(0).getAttributes());
-
-        facesService.redirectToExternalURL(constructRedirectUri(session, context, newTicket));
+    private void onSuccess(SessionId session, ConsentGatheringContext context) {
+        facesService.redirectToExternalURL(/*constructRedirectUri(session, context, newTicket)*/ /*resume authorization flow*/"");
     }
 
-    private String constructRedirectUri(SessionId session, UmaGatherContext context, String newTicket) {
-        String claimsRedirectUri = umaSessionService.getClaimsRedirectUri(session);
-
-        claimsRedirectUri = addQueryParameters(claimsRedirectUri, context.getRedirectUserParameters().buildQueryString().trim());
-        claimsRedirectUri = addQueryParameter(claimsRedirectUri, "state", umaSessionService.getState(session));
-        claimsRedirectUri = addQueryParameter(claimsRedirectUri, "ticket", newTicket);
-        return claimsRedirectUri;
+    private String constructRedirectUri(SessionId session, ConsentGatheringContext context, String newTicket) {
+//        String claimsRedirectUri = sessionService.getClaimsRedirectUri(session);
+//
+//        claimsRedirectUri = addQueryParameters(claimsRedirectUri, context.getRedirectUserParameters().buildQueryString().trim());
+//        claimsRedirectUri = addQueryParameter(claimsRedirectUri, "state", sessionService.getState(session));
+//        claimsRedirectUri = addQueryParameter(claimsRedirectUri, "ticket", newTicket);
+//        return claimsRedirectUri;
+    	return "";
     }
 
     public static String addQueryParameters(String url, String parameters) {
@@ -170,7 +170,7 @@ public class UmaGatherer {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
-            final SessionId session = umaSessionService.getSession(httpRequest, httpResponse);
+            final SessionId session = sessionService.getSession(httpRequest, httpResponse);
 
             if (session == null || session.getSessionAttributes().isEmpty()) {
                 log.error("Invalid session.");
@@ -178,10 +178,10 @@ public class UmaGatherer {
             }
 
             CustomScriptConfiguration script = getScript(session);
-            UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
-                    umaPctService, pageClaims, userService, facesService, appConfiguration);
+            ConsentGatheringContext context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, session, sessionService,
+                    pageClaims, null, userService, facesService, appConfiguration);
 
-            int step = umaSessionService.getStep(session);
+            int step = sessionService.getStep(session);
             if (step < 1) {
                 log.error("Invalid step: {}", step);
                 return result(Constants.RESULT_INVALID_STEP);
@@ -191,7 +191,7 @@ public class UmaGatherer {
                 return result(Constants.RESULT_FAILURE);
             }
 
-            if (!umaSessionService.isPassedPreviousSteps(session, step)) {
+            if (!sessionService.isPassedPreviousSteps(session, step)) {
                 log.error("There are claims-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
                 return result(Constants.RESULT_FAILURE);
             }
@@ -221,11 +221,11 @@ public class UmaGatherer {
 
     public String result(String resultCode) {
         if (Constants.RESULT_FAILURE.equals(resultCode)) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "uma2.gather.failed");
+            addMessage(FacesMessage.SEVERITY_ERROR, "consent.gather.failed");
         } else if (Constants.RESULT_INVALID_STEP.equals(resultCode)) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "uma2.invalid.step");
+            addMessage(FacesMessage.SEVERITY_ERROR, "consent.gather.invalid.step");
         } else if (Constants.RESULT_EXPIRED.equals(resultCode)) {
-            addMessage(FacesMessage.SEVERITY_ERROR, "uma2.invalid.session");
+            addMessage(FacesMessage.SEVERITY_ERROR, "consent.gather.invalid.session");
         }
         return resultCode;
     }
@@ -241,7 +241,7 @@ public class UmaGatherer {
     }
 
     protected CustomScriptConfiguration getScript(final SessionId session) {
-		String scriptName = umaSessionService.getScriptName(session);
+		String scriptName = sessionService.getScriptName(session);
 		CustomScriptConfiguration script = external.getCustomScriptConfigurationByName(scriptName);
 
 		return script;
