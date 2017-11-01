@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.xdi.oxauth.uma.service;
+package org.xdi.oxauth.service.external;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;

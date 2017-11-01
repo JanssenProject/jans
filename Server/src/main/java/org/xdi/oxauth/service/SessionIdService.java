@@ -61,6 +61,7 @@ public class SessionIdService {
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
     public static final String SESSION_ID_COOKIE_NAME = "session_id";
     public static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
+    public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
     @Inject
@@ -224,6 +225,10 @@ public class SessionIdService {
 
     public String getUmaSessionIdFromCookie(HttpServletRequest request) {
         return getSessionIdFromCookie(request, UMA_SESSION_ID_COOKIE_NAME);
+    }
+
+    public String getConsentSessionIdFromCookie(HttpServletRequest request) {
+        return getSessionIdFromCookie(request, CONSENT_SESSION_ID_COOKIE_NAME);
     }
 
     public String getSessionIdFromCookie(HttpServletRequest request, String cookieName) {
