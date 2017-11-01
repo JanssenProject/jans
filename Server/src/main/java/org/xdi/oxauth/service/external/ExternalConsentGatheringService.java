@@ -1,10 +1,10 @@
-package org.xdi.oxauth.openid.service;
+package org.xdi.oxauth.service.external;
 
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.custom.script.type.authz.AuthorizationType;
-import org.xdi.oxauth.openid.model.AuthorizationContext;
+import org.xdi.model.custom.script.type.authz.ConsentGatheringType;
+import org.xdi.oxauth.service.external.context.ConsentGatheringContext;
 import org.xdi.service.LookupService;
 import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.custom.script.ExternalScriptService;
@@ -22,7 +22,7 @@ import java.util.*;
 @ApplicationScoped
 @DependsOn("appInitializer")
 @Named
-public class ExternalAuthorizationService extends ExternalScriptService {
+public class ExternalConsentGatheringService extends ExternalScriptService {
 
     @Inject
     private Logger log;
@@ -35,8 +35,8 @@ public class ExternalAuthorizationService extends ExternalScriptService {
 
     protected Map<String, CustomScriptConfiguration> scriptInumMap;
 
-    public ExternalAuthorizationService() {
-        super(CustomScriptType.OPENID_AUTHORIZATION);
+    public ExternalConsentGatheringService() {
+        super(CustomScriptType.CONSENT_GATHERING);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ExternalAuthorizationService extends ExternalScriptService {
     }
 
     public CustomScriptConfiguration determineScript(String[] scriptNames) {
-        log.trace("Trying to determine openid-authorization script, scriptNames: {} ...", Arrays.toString(scriptNames));
+        log.trace("Trying to determine consent gathering script, scriptNames: {} ...", Arrays.toString(scriptNames));
 
         List<CustomScriptConfiguration> scripts = new ArrayList<CustomScriptConfiguration>();
 
@@ -54,7 +54,7 @@ public class ExternalAuthorizationService extends ExternalScriptService {
             if (script != null) {
                 scripts.add(script);
             } else {
-                log.error("Failed to load openid-authorization script with name: {}", scriptName);
+                log.error("Failed to load consent gathering script with name: {}", scriptName);
             }
         }
 
@@ -68,7 +68,7 @@ public class ExternalAuthorizationService extends ExternalScriptService {
                 return Integer.compare(o1.getLevel(), o2.getLevel());
             }
         });
-        log.trace("Determined openid-authorization script successfully. Name: {}, inum: {}", highestPriority.getName(), highestPriority.getInum());
+        log.trace("Determined consent gathering script successfully. Name: {}, inum: {}", highestPriority.getName(), highestPriority.getInum());
         return highestPriority;
     }
 
@@ -83,9 +83,9 @@ public class ExternalAuthorizationService extends ExternalScriptService {
     }
 
     public CustomScriptConfiguration getScriptByDn(String scriptDn) {
-        String authorizationPolicyInum = lookupService.getInumFromDn(scriptDn);
+        String consentScriptInum = lookupService.getInumFromDn(scriptDn);
 
-        return getScriptByInum(authorizationPolicyInum);
+        return getScriptByInum(consentScriptInum);
     }
 
     public CustomScriptConfiguration getScriptByInum(String inum) {
@@ -96,26 +96,26 @@ public class ExternalAuthorizationService extends ExternalScriptService {
         return this.scriptInumMap.get(inum);
     }
 
-    private AuthorizationType authorizeScript(CustomScriptConfiguration script) {
-        return (AuthorizationType) script.getExternalType();
+    private ConsentGatheringType consentScript(CustomScriptConfiguration script) {
+        return (ConsentGatheringType) script.getExternalType();
     }
 
-    public boolean authorize(CustomScriptConfiguration script, int step, AuthorizationContext context) {
+    public boolean authorize(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
-            log.debug("Executing python 'authorize' method, script: " + script.getName());
-            boolean result = authorizeScript(script).authorize(step, context);
-            log.debug("python 'authorize' result: " + result);
+            log.debug("Executing python 'consent' method, script: " + script.getName());
+            boolean result = consentScript(script).authorize(step, context);
+            log.debug("python 'consent' result: " + result);
             return result;
         } catch (Exception ex) {
-            log.error("Failed to execute python 'authorize' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            log.error("Failed to execute python 'consent' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
             return false;
         }
     }
 
-    public int getNextStep(CustomScriptConfiguration script, int step, AuthorizationContext context) {
+    public int getNextStep(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
             log.debug("Executing python 'getNextStep' method, script: " + script.getName());
-            int result = authorizeScript(script).getNextStep(step, context);
+            int result = consentScript(script).getNextStep(step, context);
             log.debug("python 'getNextStep' result: " + result);
             return result;
         } catch (Exception ex) {
@@ -124,10 +124,10 @@ public class ExternalAuthorizationService extends ExternalScriptService {
         }
     }
 
-    public boolean prepareForStep(CustomScriptConfiguration script, int step, AuthorizationContext context) {
+    public boolean prepareForStep(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
             log.debug("Executing python 'prepareForStep' method, script: " + script.getName());
-            boolean result = authorizeScript(script).prepareForStep(step, context);
+            boolean result = consentScript(script).prepareForStep(step, context);
             log.debug("python 'prepareForStep' result: " + result);
             return result;
         } catch (Exception ex) {
@@ -136,10 +136,10 @@ public class ExternalAuthorizationService extends ExternalScriptService {
         }
     }
 
-    public int getStepsCount(CustomScriptConfiguration script, AuthorizationContext context) {
+    public int getStepsCount(CustomScriptConfiguration script, ConsentGatheringContext context) {
         try {
             log.debug("Executing python 'getStepsCount' method, script: " + script.getName());
-            int result = authorizeScript(script).getStepsCount(context);
+            int result = consentScript(script).getStepsCount(context);
             log.debug("python 'getStepsCount' result: " + result);
             return result;
         } catch (Exception ex) {
@@ -148,10 +148,10 @@ public class ExternalAuthorizationService extends ExternalScriptService {
         }
     }
 
-    public String getPageForStep(CustomScriptConfiguration script, int step, AuthorizationContext context) {
+    public String getPageForStep(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
             log.debug("Executing python 'getPageForStep' method, script: " + script.getName());
-            String result = authorizeScript(script).getPageForStep(step, context);
+            String result = consentScript(script).getPageForStep(step, context);
             log.debug("python 'getPageForStep' result: " + result);
             return result;
         } catch (Exception ex) {
