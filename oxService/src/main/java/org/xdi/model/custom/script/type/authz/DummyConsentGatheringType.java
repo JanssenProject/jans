@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * @author Yuriy Movchan Date: 10/30/2017
  */
-public class DummyAuthorizationType implements AuthorizationType {
+public class DummyConsentGatheringType implements ConsentGatheringType {
 
 	@Override
 	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {

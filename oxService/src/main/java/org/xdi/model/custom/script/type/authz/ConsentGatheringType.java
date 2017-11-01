@@ -7,7 +7,7 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  *
  * @author Yuriy Movchan Date: 10/30/2017
  */
-public interface AuthorizationType extends BaseExternalType {
+public interface ConsentGatheringType extends BaseExternalType {
 
     boolean authorize(int step, Object consentContext);
 
