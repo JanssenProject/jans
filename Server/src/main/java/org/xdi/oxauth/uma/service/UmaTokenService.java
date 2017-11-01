@@ -19,6 +19,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.service.token.TokenService;
 import org.xdi.oxauth.uma.authorization.*;
 import org.xdi.oxauth.util.ServerUtil;

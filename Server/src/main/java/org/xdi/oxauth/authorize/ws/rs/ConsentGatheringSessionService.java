@@ -4,9 +4,7 @@
  * Copyright (c) 2015, Gluu
  */
 
-package org.xdi.oxauth.uma.service;
-
-import java.util.List;
+package org.xdi.oxauth.authorize.ws.rs;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -19,26 +17,27 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
 
 /**
- * @author yuriyz
- * @version August 9, 2017
+ * @author Yuriy Movchan Date: 10/30/2017
  */
 @Stateless
 @Named
-public class UmaSessionService {
+public class ConsentGatheringSessionService {
 
     @Inject
     private Logger log;
+
     @Inject
     private SessionIdService sessionIdService;
+
     @Inject
     private UserService userService;
+
     @Inject
     private ClientService clientService;
 
@@ -52,26 +51,26 @@ public class UmaSessionService {
     }
 
     public SessionId getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        String cookieId = sessionIdService.getUmaSessionIdFromCookie(httpRequest);
-        log.trace("Cookie - uma_session_id: " + cookieId);
+        String cookieId = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
+        log.trace("Cookie - consent_session_id: " + cookieId);
 
         if (StringUtils.isNotBlank(cookieId)) {
             SessionId sessionId = sessionIdService.getSessionId(cookieId);
             if (sessionId != null) {
-                log.trace("Loaded uma_session_id from cookie, session: " + sessionId);
+                log.trace("Loaded consent_session_id from cookie, session: " + sessionId);
                 return sessionId;
             } else {
-                log.error("Failed to load uma_session_id from cookie: " + cookieId);
+                log.error("Failed to load consent_session_id from cookie: " + cookieId);
             }
         } else {
-            log.error("uma_session_id cookie is not set.");
+            log.error("consent_session_id cookie is not set.");
         }
 
-        log.trace("Generating new uma_session_id ...");
+        log.trace("Generating new consent_session_id ...");
         SessionId session = sessionIdService.generateAuthenticatedSessionId("no");
 
         sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), httpResponse, true);
-        log.trace("uma_session_id cookie created.");
+        log.trace("consent_session_id cookie created.");
         return session;
     }
 
@@ -101,40 +100,17 @@ public class UmaSessionService {
         session.getSessionAttributes().put("step", Integer.toString(step));
     }
 
-    public void configure(SessionId session, String scriptName, Boolean reset, List<UmaPermission> permissions,
-                          String clientId, String claimRedirectUri, String state) {
-//        if (reset != null && reset) {
+    public void configure(SessionId session, String scriptName, Boolean reset, String clientId, String state) {
         setStep(1, session);
-//        }
         setState(session, state);
-        setClaimsRedirectUri(session, claimRedirectUri);
-        setTicket(session, permissions.get(0).getTicket());
-
-//        if (StringUtils.isBlank(getScriptName(session))) {
         setScriptName(session, scriptName);
-//        }
 
-//        if (StringUtils.isBlank(getPct(session))) {
-        String pct = permissions.get(0).getAttributes().get("pct");
-
-        if (StringUtils.isBlank(pct)) {
-            log.error("PCT code is null or blank in permission object.");
-            throw new RuntimeException("PCT code is null or blank in permission object.");
-        }
-
-        setPct(session, pct);
-//        }
-
-//        if (StringUtils.isBlank(getClientId(session))) {
         setClientId(session, clientId);
-//        }
-
-//        getStep(session); // init step
         persist(session);
     }
 
     public boolean isStepPassed(SessionId session, Integer step) {
-        return Boolean.parseBoolean(session.getSessionAttributes().get(String.format("uma_step_passed_%d", step)));
+        return Boolean.parseBoolean(session.getSessionAttributes().get(String.format("consent_step_passed_%d", step)));
     }
 
     public boolean isPassedPreviousSteps(SessionId session, Integer step) {
@@ -147,7 +123,7 @@ public class UmaSessionService {
     }
 
     public void markStep(SessionId session, Integer step, boolean value) {
-        String key = String.format("uma_step_passed_%d", step);
+        String key = String.format("consent_step_passed_%d", step);
         if (value) {
             session.getSessionAttributes().put(key, Boolean.TRUE.toString());
         } else {
@@ -163,14 +139,6 @@ public class UmaSessionService {
         session.getSessionAttributes().put("gather_script_name", scriptName);
     }
 
-    public String getPct(SessionId session) {
-        return session.getSessionAttributes().get("pct");
-    }
-
-    public void setPct(SessionId session, String pct) {
-        session.getSessionAttributes().put("pct", pct);
-    }
-
     public String getClientId(SessionId session) {
         return session.getSessionAttributes().get("client_id");
     }
@@ -179,28 +147,12 @@ public class UmaSessionService {
         session.getSessionAttributes().put("client_id", clientId);
     }
 
-    public String getClaimsRedirectUri(SessionId session) {
-        return session.getSessionAttributes().get("claims_redirect_uri");
-    }
-
-    public void setClaimsRedirectUri(SessionId session, String claimsRedirectUri) {
-        session.getSessionAttributes().put("claims_redirect_uri", claimsRedirectUri);
-    }
-
     public String getState(SessionId session) {
         return session.getSessionAttributes().get("state");
     }
 
     public void setState(SessionId session, String state) {
         session.getSessionAttributes().put("state", state);
-    }
-
-    public String getTicket(SessionId session) {
-        return session.getSessionAttributes().get("ticket");
-    }
-
-    public void setTicket(SessionId session, String ticket) {
-        session.getSessionAttributes().put("ticket", ticket);
     }
 
     public void resetToStep(SessionId session, int overridenNextStep, int step) {
@@ -238,4 +190,5 @@ public class UmaSessionService {
         log.trace("client_id is not in session.");
         return null;
     }
+
 }
