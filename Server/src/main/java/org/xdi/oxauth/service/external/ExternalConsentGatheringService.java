@@ -1,20 +1,22 @@
 package org.xdi.oxauth.service.external;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.model.custom.script.type.authz.ConsentGatheringType;
 import org.xdi.oxauth.service.external.context.ConsentGatheringContext;
 import org.xdi.service.LookupService;
-import org.xdi.service.custom.script.CustomScriptManager;
 import org.xdi.service.custom.script.ExternalScriptService;
 import org.xdi.util.StringHelper;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -24,14 +26,13 @@ import java.util.*;
 @Named
 public class ExternalConsentGatheringService extends ExternalScriptService {
 
-    @Inject
+	private static final long serialVersionUID = 1741073794567832914L;
+
+	@Inject
     private Logger log;
 
     @Inject
     private LookupService lookupService;
-
-    @Inject
-    private CustomScriptManager scriptManager;
 
     protected Map<String, CustomScriptConfiguration> scriptInumMap;
 
@@ -42,34 +43,6 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
     @Override
     protected void reloadExternal() {
         this.scriptInumMap = buildExternalConfigurationsInumMap(this.customScriptConfigurations);
-    }
-
-    public CustomScriptConfiguration determineScript(String[] scriptNames) {
-        log.trace("Trying to determine consent gathering script, scriptNames: {} ...", Arrays.toString(scriptNames));
-
-        List<CustomScriptConfiguration> scripts = new ArrayList<CustomScriptConfiguration>();
-
-        for (String scriptName : scriptNames) {
-            CustomScriptConfiguration script = getCustomScriptConfigurationByName(scriptName);
-            if (script != null) {
-                scripts.add(script);
-            } else {
-                log.error("Failed to load consent gathering script with name: {}", scriptName);
-            }
-        }
-
-        if (scripts.isEmpty()) {
-            return null;
-        }
-
-        CustomScriptConfiguration highestPriority = Collections.max(scripts, new Comparator<CustomScriptConfiguration>() {
-            @Override
-            public int compare(CustomScriptConfiguration o1, CustomScriptConfiguration o2) {
-                return Integer.compare(o1.getLevel(), o2.getLevel());
-            }
-        });
-        log.trace("Determined consent gathering script successfully. Name: {}, inum: {}", highestPriority.getName(), highestPriority.getInum());
-        return highestPriority;
     }
 
     private Map<String, CustomScriptConfiguration> buildExternalConfigurationsInumMap(List<CustomScriptConfiguration> customScriptConfigurations) {
