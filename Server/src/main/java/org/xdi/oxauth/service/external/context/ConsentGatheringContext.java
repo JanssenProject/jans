@@ -6,28 +6,20 @@
 
 package org.xdi.oxauth.service.external.context;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.gluu.jsf2.service.FacesService;
 import org.xdi.model.SimpleCustomProperty;
 import org.xdi.oxauth.authorize.ws.rs.ConsentGatheringSessionService;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
-import org.xdi.oxauth.model.exception.InvalidJwtException;
-import org.xdi.oxauth.model.jwt.JwtClaims;
 import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.UserService;
-import org.xdi.oxauth.uma.service.RedirectParameters;
-import org.xdi.oxauth.uma.service.UmaPctService;
-import org.xdi.oxauth.uma.service.UmaPermissionService;
-import org.xdi.oxauth.uma.service.UmaSessionService;
-import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -41,22 +33,18 @@ public class ConsentGatheringContext extends ExternalScriptContext {
     private final Map<String, SimpleCustomProperty> configurationAttributes;
     private final AppConfiguration appConfiguration;
     private final SessionId session;
-    private final RedirectParameters redirectUserParameters = new RedirectParameters();
-    private final JwtClaims claims;
-    private final Map<String, String> pageClaims;
-    private String redirectToExternalUrl = null;
+    private final Map<String, String> pageAttributes;
 
-    public ConsentGatheringContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, SessionId session, ConsentGatheringSessionService sessionService,
-                            Map<String, String> pageClaims, JwtClaims claims,
-                            UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
-        super(httpRequest);
+    public ConsentGatheringContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId session,
+                            ConsentGatheringSessionService sessionService,
+                            Map<String, String> pageAttributes, UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
+        super(httpRequest, httpResponse);
         this.configurationAttributes = configurationAttributes;
         this.session = session;
         this.sessionService = sessionService;
         this.userService = userService;
         this.facesService = facesService;
-        this.claims = claims;
-        this.pageClaims = pageClaims;
+        this.pageAttributes = pageAttributes;
         this.appConfiguration = appConfiguration;
     }
 
@@ -89,8 +77,8 @@ public class ConsentGatheringContext extends ExternalScriptContext {
         return getUser() != null;
     }
 
-    public Map<String, String> getPageClaims() {
-        return pageClaims;
+    public Map<String, String> getPageAttributes() {
+        return pageAttributes;
     }
 
     public Map<String, String[]> getRequestParameters() {
@@ -117,62 +105,25 @@ public class ConsentGatheringContext extends ExternalScriptContext {
         return session.getSessionAttributes();
     }
 
-    public void addRedirectUserParam(String paramName, String paramValue) {
-        redirectUserParameters.add(paramName, paramValue);
-    }
-
-    public void removeRedirectUserParameter(String paramName) {
-        redirectUserParameters.remove(paramName);
-    }
-
-    public RedirectParameters getRedirectUserParameters() {
-        return redirectUserParameters;
-    }
-
-    public Map<String, Set<String>> getRedirectUserParametersMap() {
-        return redirectUserParameters.map();
-    }
-
-    public JwtClaims getClaims() {
-        return claims;
-    }
-
-    public Object getClaim(String claimName) {
-        return claims.getClaim(claimName);
-    }
-
-    public void putClaim(String claimName, Object claimValue) {
-        claims.setClaimObject(claimName, claimValue, true);
-    }
-
-    public void removeClaim(String claimName) {
-        claims.removeClaim(claimName);
-    }
-
-    public boolean hasClaim(String claimName) {
-        return getClaim(claimName) != null;
-    }
-
     /**
      * Must not take any parameters
      */
     public void persist() {
-//        try {
-//            pct.setClaims(claims);
-//        } catch (InvalidJwtException e) {
-//            getLog().error("Failed to persist claims", e);
-//        }
-//
-        sessionService.persist(session);
-//        pctService.merge(pct);
+    	session.getSessionAttributes().putAll(this.pageAttributes);
+
+    	sessionService.persist(session);
     }
 
-    public void redirectToExternalUrl(String url) {
-        redirectToExternalUrl = url;
-    }
+	public UserService getUserService() {
+		return userService;
+	}
 
-    public String getRedirectToExternalUrl() {
-        return redirectToExternalUrl;
-    }
+	public FacesService getFacesService() {
+		return facesService;
+	}
+
+	public AppConfiguration getAppConfiguration() {
+		return appConfiguration;
+	}
 
 }
