@@ -49,7 +49,7 @@ public enum CustomScriptType implements LdapEnum {
 	ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator", new DummyIdGeneratorType()),
 	UMA_RPT_POLICY("uma_rpt_policy", "UMA RPT Policies", UmaRptPolicyType.class, CustomScript.class, "UmaRptPolicy", new UmaDummyRptPolicyType()),
 	UMA_CLAIMS_GATHERING("uma_claims_gathering", "UMA Claims Gathering", UmaClaimsGatheringType.class, CustomScript.class, "UmaClaimsGathering", new UmaDummyClaimsGatheringType()),
-	CONSENT_GATHERING("consent_gathering", "Consent gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering", new DummyConsentGatheringType()),
+	CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering", new DummyConsentGatheringType()),
 	DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope", new DummyDynamicScopeType()),
 	SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
 
