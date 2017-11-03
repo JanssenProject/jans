@@ -9,6 +9,7 @@ package org.xdi.oxauth.service.external.context;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.net.util.SubnetUtils;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -29,13 +30,19 @@ public class ExternalScriptContext {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
-    private LdapEntryManager ldapEntryManager;
+    private final LdapEntryManager ldapEntryManager;
     protected HttpServletRequest httpRequest;
+    protected final HttpServletResponse httpResponse;
 
     public ExternalScriptContext(HttpServletRequest httpRequest) {
+    	this(httpRequest, null);
+    }
+
+    public ExternalScriptContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
     	this.ldapEntryManager = ServerUtil.getLdapManager();
     	this.httpRequest = httpRequest;
-    	
+    	this.httpResponse = httpResponse;
+
     	if (this.httpRequest == null) {
     		FacesContext facesContext = FacesContext.getCurrentInstance();
 		    if (facesContext != null) {
@@ -47,16 +54,23 @@ public class ExternalScriptContext {
     	}
     }
 
-    public Logger getLog() {
+	public Logger getLog() {
         return log;
     }
+
+    public LdapEntryManager getLdapEntryManager() {
+		return ldapEntryManager;
+	}
 
     public HttpServletRequest getHttpRequest() {
         return httpRequest;
     }
 
+	public HttpServletResponse getHttpResponse() {
+		return httpResponse;
+	}
 
-    public String getIpAddress() {
+	public String getIpAddress() {
         return httpRequest != null ? httpRequest.getRemoteAddr() : "";
     }
 

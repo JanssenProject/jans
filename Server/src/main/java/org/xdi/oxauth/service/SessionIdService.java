@@ -266,8 +266,7 @@ public class SessionIdService {
         return null;
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, boolean isUma) {
-        String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
+    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, String  cookieName) {
         String header = cookieName + "=" + sessionId;
         header += "; Path=/";
         header += "; Secure";
@@ -284,6 +283,11 @@ public class SessionIdService {
         httpResponse.addHeader("Set-Cookie", header);
 
         createSessionStateCookie(sessionState, httpResponse);
+    }
+
+    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, boolean isUma) {
+        String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
+        createSessionIdCookie(sessionId, sessionState, httpResponse, cookieName);
     }
 
     public void createSessionIdCookie(String sessionId, String sessionState, boolean isUma) {
@@ -362,6 +366,11 @@ public class SessionIdService {
 
     public SessionId generateAuthenticatedSessionId(String userDn, Map<String, String> sessionIdAttributes) {
         return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+    }
+
+    public SessionId generateUnauthenticatedSessionId(String userDn) {
+        Map<String, String> sessionIdAttributes = new HashMap<String, String>();
+        return generateSessionId(userDn, new Date(), SessionIdState.UNAUTHENTICATED, sessionIdAttributes, true);
     }
 
     public SessionId generateUnauthenticatedSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
@@ -683,7 +692,11 @@ public class SessionIdService {
     public boolean isSessionIdAuthenticated() {
         SessionId sessionId = getSessionId();
 
-        if (sessionId == null) {
+        return isSessionIdAuthenticated(sessionId);
+    }
+
+	public boolean isSessionIdAuthenticated(SessionId sessionId) {
+		if (sessionId == null) {
             return false;
         }
 
@@ -694,7 +707,7 @@ public class SessionIdService {
         }
 
         return false;
-    }
+	}
 
     public boolean isNotSessionIdAuthenticated() {
         return !isSessionIdAuthenticated();

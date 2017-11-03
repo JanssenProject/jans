@@ -50,7 +50,7 @@ public class ConsentGatheringSessionService {
         return null;
     }
 
-    public SessionId getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    public SessionId getSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String userDn, boolean create) {
         String cookieId = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
         log.trace("Cookie - consent_session_id: " + cookieId);
 
@@ -65,13 +65,29 @@ public class ConsentGatheringSessionService {
         } else {
             log.error("consent_session_id cookie is not set.");
         }
+        
+        if (!create) {
+        	return null;
+        }
 
         log.trace("Generating new consent_session_id ...");
-        SessionId session = sessionIdService.generateAuthenticatedSessionId("no");
+        SessionId session = sessionIdService.generateUnauthenticatedSessionId(userDn);
 
-        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), httpResponse, true);
+        sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), httpResponse, SessionIdService.CONSENT_SESSION_ID_COOKIE_NAME);
         log.trace("consent_session_id cookie created.");
+
         return session;
+    }
+
+    public void setAuthenticatedSessionState(HttpServletRequest httpRequest, SessionId sessionId) {
+    	SessionId connectSession = getConnectSession(httpRequest);
+    	sessionIdService.setSessionIdStateAuthenticated(sessionId, connectSession.getDn());
+    }
+
+    public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest) {
+        final SessionId session = getSession(httpRequest, null, null, false);
+
+        return sessionIdService.isSessionIdAuthenticated(session);
     }
 
     public boolean persist(SessionId session) {
@@ -100,9 +116,8 @@ public class ConsentGatheringSessionService {
         session.getSessionAttributes().put("step", Integer.toString(step));
     }
 
-    public void configure(SessionId session, String scriptName, Boolean reset, String clientId, String state) {
+    public void configure(SessionId session, String scriptName, String clientId, String state) {
         setStep(1, session);
-        setState(session, state);
         setScriptName(session, scriptName);
 
         setClientId(session, clientId);
@@ -145,14 +160,6 @@ public class ConsentGatheringSessionService {
 
     public void setClientId(SessionId session, String clientId) {
         session.getSessionAttributes().put("client_id", clientId);
-    }
-
-    public String getState(SessionId session) {
-        return session.getSessionAttributes().get("state");
-    }
-
-    public void setState(SessionId session, String state) {
-        session.getSessionAttributes().put("state", state);
     }
 
     public void resetToStep(SessionId session, int overridenNextStep, int step) {
