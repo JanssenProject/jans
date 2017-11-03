@@ -293,7 +293,6 @@ public class AuthorizeAction {
         log.trace("checkPermissionGranted, user = " + user);
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
-
             if (appConfiguration.getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                 if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
                     permissionGranted(session);
