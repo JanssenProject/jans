@@ -13,12 +13,27 @@ PID_PATH_NAME=/var/run/oxd-server.pid
 BASEDIR=/opt/oxd-server/bin/
 CONF=/opt/oxd-server/conf
 LIB=/opt/oxd-server/lib
+OXD_INIT_LOG=/var/log/oxd-server.log
 
 do_start () {        
         if [ ! -f $PID_PATH_NAME ]; then                
                 echo "Starting $SERVICE_NAME ..."                
                 nohup java -Doxd.server.config=$CONF/oxd-conf.json -Dlog4j.configuration=$CONF/log4j.xml -cp $LIB/bcprov-jdk15on-1.54.jar:$LIB/resteasy-jaxrs-2.3.7.Final.jar:$LIB/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher 2>>/dev/null>>/dev/null&                
+                sleep 10
                 echo $! > $PID_PATH_NAME        
+                ERROR_STATUS=`tail -n 20 $OXD_INIT_LOG|grep -i 'error'`
+                if [ "x$ERROR_STATUS" != "x" ]; then
+                        ### Since error occurred, we should remove the PID file at this point itself.                        
+                        rm -f $PID_PATH_NAME                        
+                        echo "Some error encountered..."                        
+                        echo "See log below: "                        
+                        echo ""                        
+                        echo "$ERROR_STATUS"                        
+                        echo ""                        
+                        echo "For details please check $OXD_INIT_LOG ."                        
+                        echo "Exiting..."                        
+                        exit 255
+                fi
         else                
                 echo "$SERVICE_NAME is already running ..."        
         fi        
