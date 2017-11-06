@@ -30,6 +30,7 @@ import org.xdi.oxauth.service.AuthorizeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalConsentGatheringService;
 import org.xdi.oxauth.service.external.context.ConsentGatheringContext;
+import org.xdi.util.StringHelper;
 
 /**
  * @author Yuriy Movchan Date: 10/30/2017
@@ -69,6 +70,7 @@ public class ConsentGathererService {
     private AuthorizeService authorizeService;
 
     private final Map<String, String> pageAttributes = new HashMap<String, String>();
+    private ConsentGatheringContext context;
     
     public boolean configure(String userDn, String clientId, String state) {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
@@ -83,12 +85,16 @@ public class ConsentGathererService {
 
         sessionService.configure(session, script.getName(), clientId, state);
 
-        ConsentGatheringContext context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, null, session,
-        		sessionService, pageAttributes, userService, facesService, appConfiguration);
+        this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, null, session,
+        		pageAttributes, sessionService, userService, facesService, appConfiguration);
         log.debug("Configuring consent-gathering script '{}'", script.getName());
 
         int step = sessionService.getStep(session);
         String redirectTo = external.getPageForStep(script, step, context);
+        if (StringHelper.isEmpty(redirectTo)) {
+            log.error("Failed to determine page for consent-gathering script");
+        	return false;
+        }
 
         context.persist();
 
@@ -105,28 +111,33 @@ public class ConsentGathererService {
             final SessionId session = sessionService.getSession(httpRequest, httpResponse, null, false);
             if (session == null) {
                 log.error("Failed to restore claim-gathering session state");
+            	errorPage("consent.gather.invalid.session");
                 return false;
             }
 
             CustomScriptConfiguration script = getScript(session);
             if (script == null) {
                 log.error("Failed to find script '{}' in session:", sessionService.getScriptName(session));
+            	errorPage("consent.gather.failed");
                 return false;
             }
 
             int step = sessionService.getStep(session);
             if (!sessionService.isPassedPreviousSteps(session, step)) {
                 log.error("There are consent-gathering steps not marked as passed. scriptName: '{}', step: '{}'", script.getName(), step);
+            	errorPage("consent.gather.invalid.step");
                 return false;
             }
 
-            ConsentGatheringContext context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, httpResponse, session,
-                    sessionService, pageAttributes, userService, facesService, appConfiguration);
+            this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, httpResponse, session,
+                    pageAttributes, sessionService, userService, facesService, appConfiguration);
             boolean authorizeResult = external.authorize(script, step, context);
             log.debug("Consent-gathering result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, authorizeResult);
 
             int overridenNextStep = external.getNextStep(script, step, context);
             if (!authorizeResult && overridenNextStep == -1) {
+            	SessionId connectSession = sessionService.getConnectSession(httpRequest);
+            	authorizeService.permissionDenied(connectSession);
                 return false;
             }
 
@@ -166,6 +177,7 @@ public class ConsentGathererService {
         }
 
         log.error("Failed to perform gather() method successfully.");
+    	errorPage("consent.gather.failed");
         return false;
     }
 
@@ -205,8 +217,8 @@ public class ConsentGathererService {
                 return result(Constants.RESULT_FAILURE);
             }
 
-            ConsentGatheringContext context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, null, session,
-            		sessionService, pageAttributes, userService, facesService, appConfiguration);
+            this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, null, session,
+            		pageAttributes, sessionService, userService, facesService, appConfiguration);
             boolean result = external.prepareForStep(script, step, context);
             log.debug("Consent-gathering prepare for step result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, result);
             if (result) {
@@ -256,6 +268,10 @@ public class ConsentGathererService {
 	public boolean isConsentGathered() {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
         return sessionService.isSessionStateAuthenticated(httpRequest);
+	}
+
+	public ConsentGatheringContext getContext() {
+		return context;
 	}
 
 }
