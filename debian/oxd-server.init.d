@@ -22,8 +22,7 @@ do_start () {
                 sleep 10
                 echo $! > $PID_PATH_NAME        
                 ERROR_STATUS=`tail -n 20 $OXD_INIT_LOG|grep -i 'error'`
-                START_STATUS=`tail -n 20 $OXD_INIT_LOG|grep -i 'Start listening for notifications'`
-                if [ "x$START_STATUS" = "x" ]; then
+                if [ "x$ERROR_STATUS" != "x" ]; then
                         ### Since error occurred, we should remove the PID file at this point itself.                        
                         rm -f $PID_PATH_NAME                        
                         echo "Some error encountered..."                        
@@ -48,12 +47,12 @@ do_stop () {
                 echo "$SERVICE_NAME stoping ..."            
                 kill $PID;            
                 rm $PID_PATH_NAME        
-        else            
+        else   
                 ###For one more possible bug, find and kill oxd                
-                REMAINING_PID="`ps -eaf|grep -i java|grep -v grep|grep -i oxd|awk '{print $2}'`"
+                REMAINING_PID="`ps -eaf|grep -i java|grep -v grep|grep -i oxd|awk '{print $2}'`"                
                 if [ "x$REMAINING_PID" != "x" ]; then
                         kill -s 9 $REMAINING_PID                
-                fi                
+                fi
                 echo "$SERVICE_NAME is not running ..."        
         fi
 }
