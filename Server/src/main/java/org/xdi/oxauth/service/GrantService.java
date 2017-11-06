@@ -20,7 +20,7 @@ import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.ClientTokens;
-import org.xdi.oxauth.model.common.MemcachedGrant;
+import org.xdi.oxauth.model.common.CacheGrant;
 import org.xdi.oxauth.model.common.SessionTokens;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -95,9 +95,10 @@ public class GrantService {
     }
 
     private boolean shouldPutInCache(TokenType tokenType, boolean isImplicitFlow) {
-        if (isImplicitFlow && (tokenType == TokenType.ID_TOKEN || tokenType == TokenType.REFRESH_TOKEN || tokenType == TokenType.ACCESS_TOKEN)) {
-            if (BooleanUtils.isFalse(appConfiguration.getPersistIntoLdapImplicitFlowObject()))
-                return true;
+        if (isImplicitFlow &&
+                BooleanUtils.isFalse(appConfiguration.getPersistIntoLdapImplicitFlowObject()) &&
+                (tokenType == TokenType.ID_TOKEN || tokenType == TokenType.REFRESH_TOKEN || tokenType == TokenType.ACCESS_TOKEN)) {
+            return true;
         }
 
         switch (tokenType) {
@@ -115,11 +116,11 @@ public class GrantService {
         return false;
     }
 
-    public void persist(TokenLdap token, boolean isImplicitFlow) {
+    public void persist(TokenLdap token) {
         String hashedToken = TokenHashUtil.getHashedToken(token.getTokenCode());
         token.setTokenCode(hashedToken);
 
-        if (shouldPutInCache(token.getTokenTypeEnum(), isImplicitFlow)) {
+        if (shouldPutInCache(token.getTokenTypeEnum(), token.isImplicitFlow())) {
             ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
             clientTokens.getTokenHashes().add(hashedToken);
 
@@ -133,7 +134,7 @@ public class GrantService {
                     break;
                 case ACCESS_TOKEN:
                     expiration = Integer.toString(appConfiguration.getAccessTokenLifetime());
-                    prepareGrantBranch(token.getGrantId(), token.getClientId(), isImplicitFlow);
+                    prepareGrantBranch(token.getGrantId(), token.getClientId(), token.isImplicitFlow());
                     break;
             }
 
@@ -150,7 +151,7 @@ public class GrantService {
             return;
         }
 
-        prepareGrantBranch(token.getGrantId(), token.getClientId(), isImplicitFlow);
+        prepareGrantBranch(token.getGrantId(), token.getClientId(), token.isImplicitFlow());
         ldapEntryManager.persist(token);
     }
 
@@ -194,7 +195,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(null, MemcachedGrant.cacheKey(token.getClientId(), token.getAuthorizationCode()));
+                cacheService.remove(null, CacheGrant.cacheKey(token.getClientId(), token.getAuthorizationCode()));
             }
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
@@ -258,7 +259,12 @@ public class GrantService {
     }
 
     public TokenLdap getGrantsByCode(String p_code) {
-        return load(baseDn(), p_code);
+        Object grant = cacheService.get(null, TokenHashUtil.getHashedToken(p_code));
+        if (grant instanceof TokenLdap) {
+            return (TokenLdap) grant;
+        } else {
+            return load(baseDn(), p_code);
+        }
     }
 
     private TokenLdap load(String p_baseDn, String p_code) {
@@ -354,7 +360,7 @@ public class GrantService {
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(null, MemcachedGrant.cacheKey(p_clientId, p_code));
+        cacheService.remove(null, CacheGrant.cacheKey(p_clientId, p_code));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
