@@ -190,7 +190,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(null, CacheGrant.cacheKey(token.getClientId(), token.getAuthorizationCode()));
+                cacheService.remove(null, CacheGrant.cacheKey(token.getClientId(), token.getAuthorizationCode(), token.getGrantId()));
             }
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
@@ -363,7 +363,7 @@ public class GrantService {
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(null, CacheGrant.cacheKey(p_clientId, p_code));
+        cacheService.remove(null, CacheGrant.cacheKey(p_clientId, p_code, null));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
