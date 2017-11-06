@@ -151,6 +151,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             //see https://github.com/GluuFederation/oxAuth/issues/575
             return new Pair<SessionId, AuthorizationGrant>(null, null);
         }
+        
+        // Clean up authorization session
+        removeConsentSessionId(httpRequest, httpResponse);
 
         boolean isExternalLogoutPresent;
         boolean externalLogoutResult = false;
@@ -245,6 +248,31 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             log.error(e.getMessage(), e);
         } finally {
             sessionIdService.removeSessionIdCookie(httpResponse);
+        }
+        return ldapSessionId;
+    }
+
+    private SessionId removeConsentSessionId(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        SessionId ldapSessionId = null;
+
+        try {
+            String id = sessionIdService.getConsentSessionIdFromCookie(httpRequest);
+
+            if (StringHelper.isNotEmpty(id)) {
+                ldapSessionId = sessionIdService.getSessionId(id);
+                if (ldapSessionId != null) {
+                    boolean result = sessionIdService.remove(ldapSessionId);
+                    if (!result) {
+                        log.error("Failed to remove session_id '{}' from LDAP", id);
+                    }
+                } else {
+                    log.error("Failed to load session from LDAP by session_id: '{}'", id);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            sessionIdService.removeConsentSessionIdCookie(httpResponse);
         }
         return ldapSessionId;
     }
