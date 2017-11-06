@@ -155,7 +155,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken) {
-        final TokenLdap tokenLdap = grantService.getGrantsByCode(accessToken);
+        return getAuthorizationGrantByAccessToken(accessToken, false);
+    }
+
+    public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken, boolean onlyFromCache) {
+        final TokenLdap tokenLdap = grantService.getGrantsByCode(accessToken, onlyFromCache);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.ACCESS_TOKEN || tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
             return asGrant(tokenLdap);
         }
@@ -164,13 +168,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByIdToken(String idToken) {
-        final TokenLdap tokenLdap;
-        if (ServerUtil.isTrue(appConfiguration.getPersistIdTokenInLdap())) {
-            tokenLdap = grantService.getGrantsByCode(idToken);
-        } else {
-            tokenLdap = (TokenLdap) cacheService.get(null, TokenHashUtil.getHashedToken(idToken));
-        }
-
+        final TokenLdap tokenLdap = grantService.getGrantsByCode(idToken);
         if (tokenLdap != null && (tokenLdap.getTokenTypeEnum() == org.xdi.oxauth.model.ldap.TokenType.ID_TOKEN)) {
             return asGrant(tokenLdap);
         }
