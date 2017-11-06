@@ -150,6 +150,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
+        boolean isImplicitFlow = responseType.equals(ResponseType.ID_TOKEN + " " + ResponseType.TOKEN) || responseType.equals(ResponseType.ID_TOKEN);
+
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.USER_AUTHORIZATION);
         oAuth2AuditLog.setClientId(clientId);
         oAuth2AuditLog.setScope(scope);
@@ -539,6 +541,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setSessionDn(sessionUser.getDn());
                                         authorizationGrant.save(); // call save after object modification!!!
                                     }
+                                    authorizationGrant.setImplicitFlow(isImplicitFlow);
                                     newAccessToken = authorizationGrant.createAccessToken();
 
                                     redirectUriResponse.addResponseParameter(AuthorizeResponseParam.ACCESS_TOKEN, newAccessToken.getCode());
@@ -562,6 +565,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         authorizationGrant.setSessionDn(sessionUser.getDn());
                                         authorizationGrant.save(); // call save after object modification, call is asynchronous!!!
                                     }
+                                    authorizationGrant.setImplicitFlow(isImplicitFlow);
                                     IdToken idToken = authorizationGrant.createIdToken(
                                             nonce, authorizationCode, newAccessToken, authorizationGrant, includeIdTokenClaims);
 
