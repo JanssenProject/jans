@@ -83,7 +83,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public void save() {
         if (isCachedWithNoPersistence) {
             if (getAuthorizationGrantType() == AuthorizationGrantType.AUTHORIZATION_CODE) {
-                MemcachedGrant memcachedGrant = new MemcachedGrant(this);
+                CacheGrant memcachedGrant = new CacheGrant(this);
                 cacheService.put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(),
                         memcachedGrant);
             } else {
@@ -167,10 +167,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
                 persist(tokenLdap);
             }
 
-            // is it really neccessary to propagate to all tokens?
             setAcrValues(acrValues);
             setSessionDn(sessionDn);
-            save(); // asynchronous save
+            save();
             return idToken;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -179,7 +178,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public void persist(TokenLdap p_token) {
-        grantService.persist(p_token, isImplicitFlow);
+        grantService.persist(p_token);
     }
 
     public void persist(AuthorizationCode p_code) {
@@ -289,9 +288,5 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     public void setIsCachedWithNoPersistence(boolean isCachedWithNoPersistence) {
         this.isCachedWithNoPersistence = isCachedWithNoPersistence;
-    }
-
-    public void setImplicitFlow(boolean implicitFlow) {
-        isImplicitFlow = implicitFlow;
     }
 }

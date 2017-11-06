@@ -84,7 +84,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         AuthorizationCodeGrant grant = grantInstance.select(AuthorizationCodeGrant.class).get();
         grant.init(user, client, authenticationTime);
 
-        MemcachedGrant memcachedGrant = new MemcachedGrant(grant);
+        CacheGrant memcachedGrant = new CacheGrant(grant);
         cacheService.put(Integer.toString(grant.getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
         log.trace("Put authorization grant in cache, code: " + grant.getAuthorizationCode().getCode() + ", clientId: " + grant.getClientId());
         return grant;
@@ -116,13 +116,13 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode) {
-        Object cachedGrant = cacheService.get(null, MemcachedGrant.cacheKey(clientId, authorizationCode));
+        Object cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode));
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedGrant = cacheService.get(null, MemcachedGrant.cacheKey(clientId, authorizationCode));
+            cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode));
             log.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode + ", clientId: " + clientId);
         }
-        return cachedGrant instanceof MemcachedGrant ? ((MemcachedGrant) cachedGrant).asCodeGrant(grantInstance) : null;
+        return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCodeGrant(grantInstance) : null;
     }
 
     @Override
