@@ -50,6 +50,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private boolean isCachedWithNoPersistence = false;
 
+    private boolean isImplicitFlow = false;
+
     public AuthorizationGrant() {
     }
 
@@ -177,7 +179,7 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public void persist(TokenLdap p_token) {
-        grantService.persist(p_token);
+        grantService.persist(p_token, isImplicitFlow);
     }
 
     public void persist(AuthorizationCode p_code) {
@@ -287,5 +289,9 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     public void setIsCachedWithNoPersistence(boolean isCachedWithNoPersistence) {
         this.isCachedWithNoPersistence = isCachedWithNoPersistence;
+    }
+
+    public void setImplicitFlow(boolean implicitFlow) {
+        isImplicitFlow = implicitFlow;
     }
 }
