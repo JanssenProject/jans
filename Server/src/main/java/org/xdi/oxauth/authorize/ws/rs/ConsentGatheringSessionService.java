@@ -99,6 +99,7 @@ public class ConsentGatheringSessionService {
         } catch (Exception e) {
             log.error("Failed to persist session, id: " + session.getId(), e);
         }
+
         return false;
     }
 

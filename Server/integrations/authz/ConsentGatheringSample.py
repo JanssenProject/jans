@@ -25,11 +25,11 @@ class ConsentGathering(ConsentGatheringType):
     def destroy(self, configurationAttributes):
         print "Consent-Gathering. Destroying ..."
         print "Consent-Gathering. Destroyed successfully"
+
         return True
 
     def getApiVersion(self):
         return 1
-
 
     # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
     # All user entered values can be access via Map<String, String> context.getPageAttributes()
@@ -37,24 +37,19 @@ class ConsentGathering(ConsentGatheringType):
         print "Consent-Gathering. Authorizing..."
 
         if step == 1:
-            if (context.getPageAttributes().containsKey("country")):
-                country = context.getPageAttributes().get("country")
-                print "Country: " + country
-
-                context.addSessionAttribute("country", country)
+            allowButton = context.getRequestParameters().get("authorizeForm:allowButton")
+            if (allowButton != None) and (len(allowButton) > 0):
+                print "Consent-Gathering. Authorization success for step 1"
                 return True
 
-            print "Claims-Gathering. 'country' is not provided on step 1."
-            return False
-
+            print "Consent-Gathering. Authorization declined for step 1"
         elif step == 2:
-            if (context.getPageAttributes().containsKey("city")):
-                city = context.getPageAttributes().get("city")
-                print "City: " + city
-
-                context.addSessionAttribute("city", city)
-                print "Claims-Gathering. 'city' is not provided on step 2."
+            allowButton = context.getRequestParameters().get("authorizeForm:allowButton")
+            if (allowButton != None) and (len(allowButton) > 0):
+                print "Consent-Gathering. Authorization success for step 2"
                 return True
+
+            print "Consent-Gathering. Authorization declined for step 2"
 
         return False
 
@@ -75,7 +70,7 @@ class ConsentGathering(ConsentGatheringType):
 
     def getPageForStep(self, step, context):
         if step == 1:
-            return "/authz/sample/country.xhtml"
+            return "/authz/authorize.xhtml"
         elif step == 2:
             return "/authz/sample/city.xhtml"
         return ""
