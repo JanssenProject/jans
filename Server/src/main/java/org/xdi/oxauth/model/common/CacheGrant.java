@@ -1,6 +1,7 @@
 package org.xdi.oxauth.model.common;
 
 import org.apache.commons.lang.StringUtils;
+import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 
 import javax.enterprise.inject.Instance;
@@ -30,27 +31,46 @@ public class CacheGrant implements Serializable {
 
     private String acrValues;
     private String sessionDn;
+    private int expiresIn = 1;
 
     public CacheGrant() {
     }
 
-    public CacheGrant(AuthorizationGrant codeGrant) {
-        if (codeGrant.getAuthorizationCode() != null) {
-            authorizationCodeString = codeGrant.getAuthorizationCode().getCode();
-            authorizationCodeCreationDate = codeGrant.getAuthorizationCode().getCreationDate();
-            authorizationCodeExpirationDate = codeGrant.getAuthorizationCode().getExpirationDate();
+    public CacheGrant(AuthorizationGrant grant, AppConfiguration appConfiguration) {
+        if (grant.getAuthorizationCode() != null) {
+            authorizationCodeString = grant.getAuthorizationCode().getCode();
+            authorizationCodeCreationDate = grant.getAuthorizationCode().getCreationDate();
+            authorizationCodeExpirationDate = grant.getAuthorizationCode().getExpirationDate();
         }
-        user = codeGrant.getUser();
-        client = codeGrant.getClient();
-        authenticationTime = codeGrant.getAuthenticationTime();
-        scopes = codeGrant.getScopes();
-        grantId = codeGrant.getGrantId();
-        nonce = codeGrant.getNonce();
-        acrValues = codeGrant.getAcrValues();
-        codeChallenge = codeGrant.getCodeChallenge();
-        codeChallengeMethod = codeGrant.getCodeChallengeMethod();
-        claims = codeGrant.getClaims();
-        sessionDn = codeGrant.getSessionDn();
+        initExpiresIn(grant, appConfiguration);
+
+        user = grant.getUser();
+        client = grant.getClient();
+        authenticationTime = grant.getAuthenticationTime();
+        scopes = grant.getScopes();
+        grantId = grant.getGrantId();
+        nonce = grant.getNonce();
+        acrValues = grant.getAcrValues();
+        codeChallenge = grant.getCodeChallenge();
+        codeChallengeMethod = grant.getCodeChallengeMethod();
+        claims = grant.getClaims();
+        sessionDn = grant.getSessionDn();
+    }
+
+    private void initExpiresIn(AuthorizationGrant grant, AppConfiguration appConfiguration) {
+        if (grant.getAuthorizationCode() != null) {
+            expiresIn = grant.getAuthorizationCode().getExpiresIn();
+        } else {
+            expiresIn = appConfiguration.getAccessTokenLifetime();
+        }
+    }
+
+    public int getExpiresIn() {
+        return expiresIn;
+    }
+
+    public Date getAuthorizationCodeCreationDate() {
+        return authorizationCodeCreationDate;
     }
 
     public User getUser() {
