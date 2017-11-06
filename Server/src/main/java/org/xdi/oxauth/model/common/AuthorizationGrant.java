@@ -99,8 +99,8 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private void saveInCache() {
-        CacheGrant memcachedGrant = new CacheGrant(this);
-        cacheService.put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+        CacheGrant cachedGrant = new CacheGrant(this, appConfiguration);
+        cacheService.put(Integer.toString(cachedGrant.getExpiresIn()), cachedGrant.cacheKey(), cachedGrant);
     }
 
     public boolean isImplicitFlow() {
