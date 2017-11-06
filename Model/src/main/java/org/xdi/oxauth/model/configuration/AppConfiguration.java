@@ -103,7 +103,7 @@ public class AppConfiguration implements Configuration {
     private Boolean persistIdTokenInLdap = false;
     private Boolean persistRefreshTokenInLdap = true;
 
-    private Boolean persistIntoLdapImplicitFlowObject = false;
+    private Boolean useCacheForAllImplicitFlowObjects = false;
 
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
@@ -866,12 +866,12 @@ public class AppConfiguration implements Configuration {
         this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
     }
 
-    public Boolean getPersistIntoLdapImplicitFlowObject() {
-        return persistIntoLdapImplicitFlowObject;
+    public Boolean getUseCacheForAllImplicitFlowObjects() {
+        return useCacheForAllImplicitFlowObjects;
     }
 
-    public void setPersistIntoLdapImplicitFlowObject(Boolean persistIntoLdapImplicitFlowObject) {
-        this.persistIntoLdapImplicitFlowObject = persistIntoLdapImplicitFlowObject;
+    public void setUseCacheForAllImplicitFlowObjects(Boolean useCacheForAllImplicitFlowObjects) {
+        this.useCacheForAllImplicitFlowObjects = useCacheForAllImplicitFlowObjects;
     }
 
     public String getDynamicRegistrationCustomObjectClass() {
