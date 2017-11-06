@@ -5,7 +5,7 @@
 				xmlns:f="http://xmlns.jcp.org/jsf/core"
 				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
-				template="/WEB-INF/incl/layout/authorize-template.xhtml">
+				template="/WEB-INF/incl/layout/authorize-scope-template.xhtml">
 
 	<f:metadata>
 		<f:viewAction action="#{authorizeAction.checkUiLocales}" />
@@ -39,105 +39,16 @@
 		<f:viewParam name="session_id" value="#{authorizeAction.sessionId}" />
 	</f:metadata>
 
-	<ui:define name="head">
-		<style type="text/css">
+	<ui:param name="_client" value="#{clientService.getClient(request.getParameter('client_id'))}" />
+	<ui:param name="_scopes" value="#{authorizeAction.scopes}" />
 
-
-		</style>
+    <ui:define name="controlButttons">
+		<h:commandLink id="doNotAllowButton"  class="button button-default"
+					   value="#{msgs['authorize.doNotAllow']}"
+					   action="#{authorizeAction.permissionDenied}" />&nbsp;
+		<h:commandLink id="allowButton" class="button button-primary"
+					   value="#{msgs['authorize.allow']}"
+					   action="#{authorizeAction.permissionGranted}" />
 	</ui:define>
 
-	<ui:define name="pageTitle">
-		<h:outputText value="#{msgs['authorize.pageTitle']}" />
-	</ui:define>
-
-	<ui:define name="body" class="notification_cls">
-		<h:form id="authorizeForm" >
-			<h:inputHidden id="session_id"
-						   value="#{authorizeAction.sessionId}" />
-
-			<div class="notification_popup">
-				<div class="not_header">
-
-				</div>
-				<div class="not_header">
-					<div class="row">
-						<div class="col-md-5">
-							<h:panelGroup layout="block" rendered='#{empty client.logoUri}'>
-								<a href="http://www.gluu.org/"> <h:graphicImage
-										url="img/logo.png" />
-								</a>
-							</h:panelGroup>
-						</div>
-
-
-					</div>
-				</div>
-				<div class="not_body">
-					<h3><h:outputText value="#{msgs['authorize.requestForPermission']}" /></h3>
-					<ui:param name="client"
-							  value='#{clientService.getClient(request.getParameter("client_id"))}' />
-
-					<h:panelGroup layout="block" class="border_rad"
-								  rendered='#{!empty client.getLogoUri()}'>
-						<h:graphicImage url='#{client.getLogoUri()}' width="65px" height="65px" />
-					</h:panelGroup>
-
-					<h3>
-						<p class="info">
-							<h:outputFormat value="#{msgs['authorize.requestingPermissionForScopes']}">
-								<f:param value="#{empty client.getClientName()? client.getClientId() : client.getClientName()}" />
-							</h:outputFormat>
-						</p></h3>
-
-					<ul>
-						<ui:repeat var="_scope" value="#{authorizeAction.scopes}">
-							<li><table><tr><td><span class="user"><i class="fa fa-user-circle"></i></span></td>
-								<td><h:outputText value="#{_scope.description}" /></td></tr></table>
-								<!-- i id="tog3" class="fa fa-info-circle" aria-hidden="true"></i>
-								<div class="clearfix"></div>
-								<div class="pop_tog" id="pop_tog2">
-								<p>more details can be show here but currently we have description field only </p>
-							<p>Compose and send new email</p>
-						</div> -->
-							</li>
-						</ui:repeat>
-					</ul>
-
-					<h:panelGroup layout="block"
-								  rendered='#{!empty client.getPolicyUri()}'>
-						<p>
-							<h:outputText value="#{msgs['common.agreePolicy']}" />
-							<a target="_blank" href='#{client.getPolicyUri()}'> <h:outputText
-									value="#{msgs['common.privacyPolicy']}" />
-							</a>
-						</p>
-					</h:panelGroup>
-
-					<h:panelGroup layout="block"
-								  rendered='#{!empty client.getTosUri()}'>
-						<p>
-							<h:outputText value="#{msgs['common.pleaseReadTheTos']}" />
-							<a target="_blank" href='#{client.getTosUri()}'> <h:outputText
-									value="#{msgs['common.termsOfService']}" />
-							</a>
-						</p>
-					</h:panelGroup>
-
-					<div class="btn_rw">
-
-						<h:commandLink id="doNotAllowButton"  class="button button-default"
-									   value="#{msgs['authorize.doNotAllow']}"
-									   action="#{authorizeAction.permissionDenied}" />&nbsp;
-						<h:commandLink id="allowButton" class="button button-primary"
-									   value="#{msgs['authorize.allow']}"
-									   action="#{authorizeAction.permissionGranted}" />
-					</div>
-				</div>
-				<center>
-					Powered by <a href="http://www.gluu.org">Gluu</a>. Free and open
-					source access management.
-				</center>
-			</div>
-		</h:form>
-	</ui:define>
 </ui:composition>

@@ -75,12 +75,12 @@ public class ExternalConsentGatheringService extends ExternalScriptService {
 
     public boolean authorize(CustomScriptConfiguration script, int step, ConsentGatheringContext context) {
         try {
-            log.debug("Executing python 'consent' method, script: " + script.getName());
+            log.debug("Executing python 'authorize' method, script: " + script.getName());
             boolean result = consentScript(script).authorize(step, context);
-            log.debug("python 'consent' result: " + result);
+            log.debug("python 'authorize' result: " + result);
             return result;
         } catch (Exception ex) {
-            log.error("Failed to execute python 'consent' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
+            log.error("Failed to execute python 'authorize' method, script: " + script.getName() + ", message: " + ex.getMessage(), ex);
             return false;
         }
     }

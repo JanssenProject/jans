@@ -335,6 +335,13 @@ public class SessionIdService {
         httpResponse.addCookie(cookie);
     }
 
+    public void removeConsentSessionIdCookie(HttpServletResponse httpResponse) {
+        final Cookie cookie = new Cookie(CONSENT_SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
+        httpResponse.addCookie(cookie);
+    }
+
     public SessionId getSessionId() {
         String sessionId = getSessionIdFromCookie();
 
