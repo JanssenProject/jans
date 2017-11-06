@@ -6,10 +6,12 @@
 
 package org.xdi.oxauth.model.ldap;
 
+import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
+import org.xdi.oxauth.model.common.GrantType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -248,6 +250,10 @@ public class TokenLdap implements Serializable {
 
     public void setIsFromCache(boolean isFromCache) {
         this.isFromCache = isFromCache;
+    }
+
+    public boolean isImplicitFlow() {
+        return grantType.equals(GrantType.IMPLICIT.getValue()) || StringUtils.isBlank(grantType);
     }
 
     @Override

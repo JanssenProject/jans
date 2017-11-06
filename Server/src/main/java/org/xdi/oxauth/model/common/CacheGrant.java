@@ -11,7 +11,7 @@ import java.util.Set;
  * @author yuriyz
  * @version September 6, 2017
  */
-public class MemcachedGrant implements Serializable {
+public class CacheGrant implements Serializable {
 
     private String authorizationCodeString;
     private Date authorizationCodeCreationDate;
@@ -30,10 +30,10 @@ public class MemcachedGrant implements Serializable {
     private String acrValues;
     private String sessionDn;
 
-    public MemcachedGrant() {
+    public CacheGrant() {
     }
 
-    public MemcachedGrant(AuthorizationGrant codeGrant) {
+    public CacheGrant(AuthorizationGrant codeGrant) {
         authorizationCodeString = codeGrant.getAuthorizationCode().getCode();
         authorizationCodeCreationDate = codeGrant.getAuthorizationCode().getCreationDate();
         authorizationCodeExpirationDate = codeGrant.getAuthorizationCode().getExpirationDate();
