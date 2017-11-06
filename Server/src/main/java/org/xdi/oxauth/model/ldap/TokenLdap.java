@@ -253,7 +253,7 @@ public class TokenLdap implements Serializable {
     }
 
     public boolean isImplicitFlow() {
-        return grantType.equals(GrantType.IMPLICIT.getValue()) || StringUtils.isBlank(grantType);
+        return StringUtils.isBlank(grantType) || grantType.equals(GrantType.IMPLICIT.getValue());
     }
 
     @Override
