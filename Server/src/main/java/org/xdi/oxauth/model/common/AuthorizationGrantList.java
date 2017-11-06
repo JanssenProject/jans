@@ -84,7 +84,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         AuthorizationCodeGrant grant = grantInstance.select(AuthorizationCodeGrant.class).get();
         grant.init(user, client, authenticationTime);
 
-        CacheGrant memcachedGrant = new CacheGrant(grant);
+        CacheGrant memcachedGrant = new CacheGrant(grant, appConfiguration);
         cacheService.put(Integer.toString(grant.getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
         log.trace("Put authorization grant in cache, code: " + grant.getAuthorizationCode().getCode() + ", clientId: " + grant.getClientId());
         return grant;
