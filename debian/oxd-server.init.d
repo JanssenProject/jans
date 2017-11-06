@@ -49,6 +49,11 @@ do_stop () {
                 kill $PID;            
                 rm $PID_PATH_NAME        
         else            
+                ###For one more possible bug, find and kill oxd                
+                REMAINING_PID="`ps -eaf|grep -i java|grep -v grep|grep -i oxd|awk '{print $2}'`"
+                if [ "x$REMAINING_PID" != "x" ]; then
+                        kill -s 9 $REMAINING_PID                
+                fi                
                 echo "$SERVICE_NAME is not running ..."        
         fi
 }
