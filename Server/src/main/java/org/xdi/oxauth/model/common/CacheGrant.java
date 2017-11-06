@@ -1,5 +1,6 @@
 package org.xdi.oxauth.model.common;
 
+import org.apache.commons.lang.StringUtils;
 import org.xdi.oxauth.model.registration.Client;
 
 import javax.enterprise.inject.Instance;
@@ -34,9 +35,11 @@ public class CacheGrant implements Serializable {
     }
 
     public CacheGrant(AuthorizationGrant codeGrant) {
-        authorizationCodeString = codeGrant.getAuthorizationCode().getCode();
-        authorizationCodeCreationDate = codeGrant.getAuthorizationCode().getCreationDate();
-        authorizationCodeExpirationDate = codeGrant.getAuthorizationCode().getExpirationDate();
+        if (codeGrant.getAuthorizationCode() != null) {
+            authorizationCodeString = codeGrant.getAuthorizationCode().getCode();
+            authorizationCodeCreationDate = codeGrant.getAuthorizationCode().getCreationDate();
+            authorizationCodeExpirationDate = codeGrant.getAuthorizationCode().getExpirationDate();
+        }
         user = codeGrant.getUser();
         client = codeGrant.getClient();
         authenticationTime = codeGrant.getAuthenticationTime();
@@ -164,10 +167,13 @@ public class CacheGrant implements Serializable {
     }
 
     public String cacheKey() {
-        return cacheKey(client.getClientId(), authorizationCodeString);
+        return cacheKey(client.getClientId(), authorizationCodeString, grantId);
     }
 
-    public static String cacheKey(String clientId, String code) {
+    public static String cacheKey(String clientId, String code, String grantId ) {
+        if (StringUtils.isBlank(code)) {
+            return grantId;
+        }
         return clientId + "_" + code;
     }
 
