@@ -66,7 +66,7 @@ public class ServerUtil {
     }
 
     public static boolean isFalse(Boolean booleanObject) {
-        return booleanObject == null || !booleanObject;
+        return !isTrue(booleanObject);
     }
 
     public static String asPrettyJson(Object p_object) throws IOException {
