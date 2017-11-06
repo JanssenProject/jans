@@ -116,10 +116,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationCodeGrant getAuthorizationCodeGrant(String clientId, String authorizationCode) {
-        Object cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode));
+        Object cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode, null));
         if (cachedGrant == null) {
             // retry one time : sometimes during high load cache client may be not fast enough
-            cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode));
+            cachedGrant = cacheService.get(null, CacheGrant.cacheKey(clientId, authorizationCode, null));
             log.trace("Failed to fetch authorization grant from cache, code: " + authorizationCode + ", clientId: " + clientId);
         }
         return cachedGrant instanceof CacheGrant ? ((CacheGrant) cachedGrant).asCodeGrant(grantInstance) : null;
