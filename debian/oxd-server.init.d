@@ -22,7 +22,8 @@ do_start () {
                 sleep 10
                 echo $! > $PID_PATH_NAME        
                 ERROR_STATUS=`tail -n 20 $OXD_INIT_LOG|grep -i 'error'`
-                if [ "x$ERROR_STATUS" != "x" ]; then
+                START_STATUS=`tail -n 20 $OXD_INIT_LOG|grep -i 'Start listening for notifications'`
+                if [ "x$START_STATUS" = "x" ]; then
                         ### Since error occurred, we should remove the PID file at this point itself.                        
                         rm -f $PID_PATH_NAME                        
                         echo "Some error encountered..."                        
