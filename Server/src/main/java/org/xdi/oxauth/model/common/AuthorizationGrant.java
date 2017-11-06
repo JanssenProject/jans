@@ -6,6 +6,7 @@
 
 package org.xdi.oxauth.model.common;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,16 +84,27 @@ public class AuthorizationGrant extends AbstractAuthorizationGrant {
     public void save() {
         if (isCachedWithNoPersistence) {
             if (getAuthorizationGrantType() == AuthorizationGrantType.AUTHORIZATION_CODE) {
-                CacheGrant memcachedGrant = new CacheGrant(this);
-                cacheService.put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(),
-                        memcachedGrant);
+                saveInCache();
             } else {
                 throw new UnsupportedOperationException(
                         "Grant caching is not supported for : " + getAuthorizationGrantType());
             }
         } else {
+            if (BooleanUtils.isTrue(appConfiguration.getUseCacheForAllImplicitFlowObjects()) && isImplicitFlow()) {
+                saveInCache();
+                return;
+            }
             saveImpl();
         }
+    }
+
+    private void saveInCache() {
+        CacheGrant memcachedGrant = new CacheGrant(this);
+        cacheService.put(Integer.toString(getAuthorizationCode().getExpiresIn()), memcachedGrant.cacheKey(), memcachedGrant);
+    }
+
+    public boolean isImplicitFlow() {
+        return getAuthorizationGrantType() == null || getAuthorizationGrantType() == AuthorizationGrantType.IMPLICIT;
     }
 
     private void saveImpl() {
