@@ -103,6 +103,8 @@ public class AppConfiguration implements Configuration {
     private Boolean persistIdTokenInLdap = false;
     private Boolean persistRefreshTokenInLdap = true;
 
+    private Boolean persistIntoLdapImplicitFlowObject = false;
+
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
@@ -122,7 +124,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean enableClientGrantTypeUpdate;
     private Set<GrantType> dynamicGrantTypeDefault;
-    
+
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
@@ -864,6 +866,14 @@ public class AppConfiguration implements Configuration {
         this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
     }
 
+    public Boolean getPersistIntoLdapImplicitFlowObject() {
+        return persistIntoLdapImplicitFlowObject;
+    }
+
+    public void setPersistIntoLdapImplicitFlowObject(Boolean persistIntoLdapImplicitFlowObject) {
+        this.persistIntoLdapImplicitFlowObject = persistIntoLdapImplicitFlowObject;
+    }
+
     public String getDynamicRegistrationCustomObjectClass() {
         return dynamicRegistrationCustomObjectClass;
     }
@@ -1236,7 +1246,7 @@ public class AppConfiguration implements Configuration {
 	public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
 		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
 	}
-	
+
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
     }
@@ -1268,5 +1278,5 @@ public class AppConfiguration implements Configuration {
     public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
-    
+
 }
