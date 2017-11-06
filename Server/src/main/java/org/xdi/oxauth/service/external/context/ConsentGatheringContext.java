@@ -29,22 +29,22 @@ public class ConsentGatheringContext extends ExternalScriptContext {
     private final ConsentGatheringSessionService sessionService;
     private final UserService userService;
     private final FacesService facesService;
+    private final AppConfiguration appConfiguration;
 
     private final Map<String, SimpleCustomProperty> configurationAttributes;
-    private final AppConfiguration appConfiguration;
     private final SessionId session;
     private final Map<String, String> pageAttributes;
 
     public ConsentGatheringContext(Map<String, SimpleCustomProperty> configurationAttributes, HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId session,
-                            ConsentGatheringSessionService sessionService,
-                            Map<String, String> pageAttributes, UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
+                            Map<String, String> pageAttributes,
+                            ConsentGatheringSessionService sessionService, UserService userService, FacesService facesService, AppConfiguration appConfiguration) {
         super(httpRequest, httpResponse);
         this.configurationAttributes = configurationAttributes;
         this.session = session;
+        this.pageAttributes = pageAttributes;
         this.sessionService = sessionService;
         this.userService = userService;
         this.facesService = facesService;
-        this.pageAttributes = pageAttributes;
         this.appConfiguration = appConfiguration;
     }
 
@@ -59,7 +59,6 @@ public class ConsentGatheringContext extends ExternalScriptContext {
     public String getUserDn() {
         return sessionService.getUserDn(httpRequest);
     }
-
 
     public Client getClient() {
         return sessionService.getClient(session);
