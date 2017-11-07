@@ -21,7 +21,7 @@ get_pid() {
 		PID_NUM=$(cat $PID_PATH_NAME)
 		echo "$PID_NUM"
 	else
-		REMAINING_PID="`ps -eaf|grep -i java|grep -v grep|grep -i oxd|awk '{print $2}'`"                
+		REMAINING_PID="`ps -eaf|grep -i java|grep -v grep|grep -i 'oxd-conf.json'|awk '{print $2}'`"                
 		###For one more possible bug, find and kill oxd                
 		if [ "x$REMAINING_PID" != "x" ]; then
 			echo "$REMAINING_PID"
