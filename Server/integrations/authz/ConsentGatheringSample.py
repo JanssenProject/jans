@@ -72,5 +72,6 @@ class ConsentGathering(ConsentGatheringType):
         if step == 1:
             return "/authz/authorize.xhtml"
         elif step == 2:
-            return "/authz/sample/city.xhtml"
+            return "/authz/transaction.xhtml"
+
         return ""
