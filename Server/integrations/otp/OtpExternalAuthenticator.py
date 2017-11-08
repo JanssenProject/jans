@@ -555,7 +555,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     # Utility methods
     def toBase32(self, bytes):
-        return BaseEncoding.base32().encode(bytes)
+        return BaseEncoding.base32().omitPadding().encode(bytes)
 
     def toBase64Url(self, bytes):
         return BaseEncoding.base64Url().encode(bytes)
