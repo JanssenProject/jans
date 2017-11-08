@@ -11,7 +11,7 @@
 	</f:metadata>
 
 	<ui:param name="_client" value="#{consentGatherer.context.client}" />
-	<ui:param name="_request" value="Requested transaction #1234565 approval for the amount of sum $ 123.23" />
+	<ui:param name="_request" value="#{consentGatherer.context.pageAttributes['consent_request']}" />
 
     <ui:define name="controlButttons">
     	<h:commandLink id="doNotAllowButton" class="button button-default"
