@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
 import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.service.AuthorizeService;
@@ -75,6 +74,7 @@ public class ConsentGathererService {
     public boolean configure(String userDn, String clientId, String state) {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
         final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
+
         final SessionId session = sessionService.getSession(httpRequest, httpResponse, userDn, true);
 
         CustomScriptConfiguration script = external.getDefaultExternalCustomScript();
@@ -85,7 +85,7 @@ public class ConsentGathererService {
 
         sessionService.configure(session, script.getName(), clientId, state);
 
-        this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, null, session,
+        this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, httpResponse, session,
         		pageAttributes, sessionService, userService, facesService, appConfiguration);
         log.debug("Configuring consent-gathering script '{}'", script.getName());
 
@@ -108,6 +108,7 @@ public class ConsentGathererService {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
+
             final SessionId session = sessionService.getSession(httpRequest, httpResponse, null, false);
             if (session == null) {
                 log.error("Failed to restore claim-gathering session state");
@@ -193,8 +194,8 @@ public class ConsentGathererService {
         try {
             final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
-            final SessionId session = sessionService.getSession(httpRequest, httpResponse, null, false);
 
+            final SessionId session = sessionService.getSession(httpRequest, httpResponse, null, false);
             if (session == null || session.getSessionAttributes().isEmpty()) {
             	log.error("Failed to restore claim-gathering session state");
                 return result(Constants.RESULT_EXPIRED);
@@ -217,7 +218,7 @@ public class ConsentGathererService {
                 return result(Constants.RESULT_FAILURE);
             }
 
-            this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, null, session,
+            this.context = new ConsentGatheringContext(script.getConfigurationAttributes(), httpRequest, httpResponse, session,
             		pageAttributes, sessionService, userService, facesService, appConfiguration);
             boolean result = external.prepareForStep(script, step, context);
             log.debug("Consent-gathering prepare for step result for script '{}', step: '{}', gatheredResult: '{}'", script.getName(), step, result);
