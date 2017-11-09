@@ -143,7 +143,6 @@ public class RegisterSiteTest {
         params.setClientFrontchannelLogoutUri(Lists.newArrayList(logoutUri));
         params.setScope(Lists.newArrayList("openid", "uma_protection", "profile"));
         params.setTrustedClient(true);
-        params.setClaimsRedirectUri(Lists.newArrayList(redirectUrl));
         params.setGrantType(Lists.newArrayList(
                 GrantType.AUTHORIZATION_CODE.getValue(),
                 GrantType.OXAUTH_UMA_TICKET.getValue(),
