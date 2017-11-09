@@ -353,3 +353,4 @@ class PersonAuthentication(PersonAuthenticationType):
             ex.printStackTrace() 
 
         return None
+
