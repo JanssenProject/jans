@@ -62,7 +62,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version November 10, 2017
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -440,9 +440,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
                                         Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
                                     sessionUser.addPermission(clientId, true);
-                                }
-                                if (prompts.contains(Prompt.NONE) && client.getTrustedClient()) {
+                                } else if (client.getTrustedClient()) {
                                     sessionUser.addPermission(clientId, true);
+                                } else {
+                                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                            codeChallenge, codeChallengeMethod, sessionId, claims);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                    return builder.build();
                                 }
 
                                 if (prompts.contains(Prompt.LOGIN)) {
@@ -451,8 +458,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     prompts.remove(Prompt.LOGIN);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
-                                            loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                                             codeChallenge, codeChallengeMethod, sessionId, claims);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
@@ -463,8 +470,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     prompts.remove(Prompt.CONSENT);
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
-                                            loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                                             codeChallenge, codeChallengeMethod, sessionId, claims);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
@@ -496,8 +503,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     sessionId = null;
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales, idTokenHint,
-                                            loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
                                             codeChallenge, codeChallengeMethod, sessionId, claims);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
