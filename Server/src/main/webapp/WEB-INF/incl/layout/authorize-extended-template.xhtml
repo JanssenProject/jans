@@ -53,17 +53,24 @@
 						</p></h3>
 
 					<ul>
-						<ui:repeat var="_scope" value="#{_scopes}">
-							<li><table><tr><td><span class="user"><i class="fa fa-user-circle"></i></span></td>
-								<td><h:outputText value="#{_scope.description}" /></td></tr></table>
-								<!-- i id="tog3" class="fa fa-info-circle" aria-hidden="true"></i>
-								<div class="clearfix"></div>
-								<div class="pop_tog" id="pop_tog2">
-								<p>more details can be show here but currently we have description field only </p>
-							<p>Compose and send new email</p>
-						</div> -->
-							</li>
-						</ui:repeat>
+						<ui:fragment rendered="#{_scopes != null or _request != null}">
+							<ui:repeat var="_scope" value="#{_scopes}">
+								<li><table><tr><td><span class="user"><i class="fa fa-user-circle"></i></span></td>
+									<td><h:outputText value="#{_scope.description}" /></td></tr></table>
+									<!-- i id="tog3" class="fa fa-info-circle" aria-hidden="true"></i>
+									<div class="clearfix"></div>
+									<div class="pop_tog" id="pop_tog2">
+									<p>more details can be show here but currently we have description field only </p>
+								<p>Compose and send new email</p>
+							</div> -->
+								</li>
+							</ui:repeat>
+							<ui:fragment rendered="#{_request != null}">
+								<li><table><tr><td><span class="user"><i class="fa fa-user-circle"></i></span></td>
+									<td><h:outputText value="#{_request}" /></td></tr></table>
+								</li>
+							</ui:fragment>
+						</ui:fragment>
 					</ul>
 
 					<h:panelGroup layout="block"

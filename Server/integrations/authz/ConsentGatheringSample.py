@@ -10,6 +10,7 @@ from org.xdi.model.custom.script.type.authz import ConsentGatheringType
 from org.xdi.util import StringHelper
 
 import java
+import random
 
 class ConsentGathering(ConsentGatheringType):
 
@@ -61,7 +62,13 @@ class ConsentGathering(ConsentGatheringType):
             print "User is not authenticated. Aborting authorization flow ..."
             return False
 
-            return False
+        if step == 2:
+            pageAttributes = context.getPageAttributes()
+            
+            # Generate random consent gathering request
+            consentRequest = "Requested transaction #%s approval for the amount of sum $ %s.00" % ( random.randint(100000, 1000000), random.randint(1, 100) )
+            pageAttributes.put("consent_request", consentRequest)
+            return True
 
         return True
 
@@ -72,5 +79,6 @@ class ConsentGathering(ConsentGatheringType):
         if step == 1:
             return "/authz/authorize.xhtml"
         elif step == 2:
-            return "/authz/sample/city.xhtml"
+            return "/authz/transaction.xhtml"
+
         return ""
