@@ -62,7 +62,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version November 10, 2017
+ * @version November 11, 2017
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -437,19 +437,20 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                 oAuth2AuditLog.setUsername(user.getUserId());
 
                                 ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                                if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                                        Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
-                                    sessionUser.addPermission(clientId, true);
-                                } else if (client.getTrustedClient()) {
-                                    sessionUser.addPermission(clientId, true);
-                                } else {
-                                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                    return builder.build();
+                                if (scopes.size() > 0) {
+                                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null && Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
+                                        sessionUser.addPermission(clientId, true);
+                                    } else if (client.getTrustedClient()) {
+                                        sessionUser.addPermission(clientId, true);
+                                    } else {
+                                        redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                                                redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                                idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                                codeChallenge, codeChallengeMethod, sessionId, claims);
+                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                        return builder.build();
+                                    }
                                 }
 
                                 if (prompts.contains(Prompt.LOGIN)) {
