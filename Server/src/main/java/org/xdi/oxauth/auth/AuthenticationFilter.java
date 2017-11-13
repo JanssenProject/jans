@@ -161,9 +161,7 @@ public class AuthenticationFilter implements Filter {
                     identity.getCredentials().setUsername(client.getClientId());
                     identity.getCredentials().setPassword(client.getClientSecret());
 
-                    authenticator.authenticateWebService();
-
-                    if (authenticator.authenticateWebService()) {
+                    if (authenticator.clientAuthentication(identity.getCredentials(), false, true)) {
                         filterChain.doFilter(httpRequest, httpResponse);
                     }
                 }
