@@ -37,6 +37,11 @@ public enum AuthenticationMethod {
     PRIVATE_KEY_JWT("private_key_jwt"),
 
     /**
+     * Authenticates client by access token.
+     */
+    ACCESS_TOKEN("access_token"),
+
+    /**
      * The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow
      * (and so does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other
      * authentication mechanism.
