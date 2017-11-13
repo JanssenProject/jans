@@ -158,12 +158,11 @@ public class AuthenticationFilter implements Filter {
                 AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
                 if (grant != null && grant.getAccessToken(accessToken).isValid()) {
                     Client client = grant.getClient();
-                    identity.getCredentials().setUsername(client.getClientId());
-                    identity.getCredentials().setPassword(client.getClientSecret());
 
-                    if (authenticator.clientAuthentication(identity.getCredentials(), false, true)) {
-                        filterChain.doFilter(httpRequest, httpResponse);
-                    }
+                    authenticator.configureSessionClient(client);
+
+                    filterChain.doFilter(httpRequest, httpResponse);
+                    return;
                 }
             }
         } catch (Exception ex) {
