@@ -167,6 +167,8 @@ public class AppInitializer {
     	createConnectionProvider();
         configurationFactory.create();
 
+        loggerService.updateLoggerConfigLocation();
+
         LdapEntryManager localLdapEntryManager = ldapEntryManagerInstance.get();
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
         createAuthConnectionProviders(ldapAuthConfigs);
@@ -192,8 +194,6 @@ public class AppInitializer {
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
-
-		loggerService.updateLoggerConfigLocation();
 	}
 
     @Produces @ApplicationScoped
@@ -623,7 +623,7 @@ public class AppInitializer {
 
 		for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
 			String loggerName = logger.getName();
-			if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu")) {
+			if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu") || level == Level.OFF) {
 				logger.setLevel(level);
 			}
 		}
