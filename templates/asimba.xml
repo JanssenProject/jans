@@ -161,6 +161,7 @@
 						<!-- Indicate whether logout is supported by the SAML-SP profile -->
 						<logout enabled="false" />
 
+                        <!-- SAML2 TimestampWindow parameters. Configures the timewindow for validating the timestamp of SAML messages -->
 						<authnstmt>
 							<window before_offset="1800" after_offset="60" />
 						</authnstmt>
