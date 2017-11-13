@@ -156,14 +156,14 @@ public class AuthenticationFilter implements Filter {
             String accessToken = httpRequest.getHeader("Authorization").substring(ACCESS_TOKEN_PREFIX.length());
             if (StringUtils.isNotBlank(accessToken)) {
                 AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
-                if (grant != null) {
+                if (grant != null && grant.getAccessToken(accessToken).isValid()) {
                     Client client = grant.getClient();
                     identity.getCredentials().setUsername(client.getClientId());
                     identity.getCredentials().setPassword(client.getClientSecret());
 
                     authenticator.authenticateWebService();
 
-                    if (identity.isLoggedIn()) {
+                    if (authenticator.authenticateWebService()) {
                         filterChain.doFilter(httpRequest, httpResponse);
                     }
                 }
@@ -172,9 +172,7 @@ public class AuthenticationFilter implements Filter {
             log.error("Failed to authenticate by access_token session authentication", ex);
         }
 
-        if (!identity.isLoggedIn()) {
-            sendError(httpResponse);
-        }
+        sendError(httpResponse);
     }
 
     private void processSessionAuth(ErrorResponseFactory errorResponseFactory, String p_sessionId,
