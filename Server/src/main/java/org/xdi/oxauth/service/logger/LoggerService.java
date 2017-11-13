@@ -2,6 +2,7 @@ package org.xdi.oxauth.service.logger;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.service.cdi.event.ConfigurationUpdate;
 
@@ -17,6 +18,9 @@ import java.io.File;
 @Stateless
 @Named
 public class LoggerService {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private Event<AppConfiguration> configurationUpdateEvent;
@@ -37,12 +41,15 @@ public class LoggerService {
     }
 
     private boolean setExternalLoggerConfig() {
+        log.info("External log configuration: " + appConfiguration.getExternalLoggerConfiguration());
         if (StringUtils.isEmpty(appConfiguration.getExternalLoggerConfiguration())) {
             return false;
         }
         File log4jFile = new File(appConfiguration.getExternalLoggerConfiguration());
-        if (!log4jFile.exists())
+        if (!log4jFile.exists()) {
+            log.info("External log configuration does not exist.");
             return false;
+        }
         LoggerContext loggerContext = LoggerContext.getContext(false);
         loggerContext.setConfigLocation(log4jFile.toURI());
         loggerContext.reconfigure();
