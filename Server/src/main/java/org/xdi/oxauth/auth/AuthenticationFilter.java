@@ -97,7 +97,7 @@ public class AuthenticationFilter implements Filter {
 				log.debug("Starting token endpoint authentication");
 
                 // #686 : allow authenticated client via user access_token
-                if (umaTokenEndpoint && StringUtils.isNotBlank(authorizationHeader) && authorizationHeader.startsWith(ACCESS_TOKEN_PREFIX)) {
+                if (StringUtils.isNotBlank(authorizationHeader) && authorizationHeader.startsWith(ACCESS_TOKEN_PREFIX)) {
                     processAuthByAccessToken(httpRequest, httpResponse, filterChain);
                     return;
                 }
