@@ -167,6 +167,8 @@ public class AppInitializer {
     	createConnectionProvider();
         configurationFactory.create();
 
+        loggerService.updateLoggerConfigLocation();
+
         LdapEntryManager localLdapEntryManager = ldapEntryManagerInstance.get();
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
         createAuthConnectionProviders(ldapAuthConfigs);
@@ -192,8 +194,6 @@ public class AppInitializer {
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
-
-		loggerService.updateLoggerConfigLocation();
 	}
 
     @Produces @ApplicationScoped
