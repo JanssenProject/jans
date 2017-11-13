@@ -1321,6 +1321,19 @@ class Setup(object):
                               '%s/openldap.key' % self.certFolder,
                               '%s/openldap.crt' % self.certFolder,
                               'jetty')
+            # samp.pem from asimba.crt for asimba scrypt input
+            self.run([self.opensslCommand,
+                  'x509',
+                  '-inform',
+                  'pem',
+                  '-outform',
+                  'pem',
+                  '-in',
+                  '%s/asimba.crt' % self.certFolder,
+                  '-out',
+                  '%s/saml.pem' % self.certFolder
+                  ])
+            # permissions
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])
             # oxTrust UI can add key to asimba's keystore
