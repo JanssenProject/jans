@@ -69,7 +69,7 @@
             <!-- Storage cleaner interval in seconds. 0 = cleaning is disabled. -->
             <interval>60</interval>
             <!-- Maximum count of unexpired Session objects in memory, 0=infinity.  -->
-            <max>10000</max>
+            <max>1000</max>
         </sessionfactory>
 
         <!-- Configure the TicketGrantingTicket-factory implemententation and behavior. The baseline
@@ -80,7 +80,7 @@
             <!-- Storage cleaner interval in seconds. 0 = cleaning is disabled. -->
             <interval>60</interval>
             <!-- Maximum count of unexpired TGT objects in memory, 0=infinity  -->
-            <max>10000</max>
+            <max>1000</max>
         </tgtfactory>
 	
 	<!-- 
