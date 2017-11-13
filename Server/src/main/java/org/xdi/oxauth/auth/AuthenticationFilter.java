@@ -11,10 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.model.security.Identity;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.common.AuthenticationMethod;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.InvalidJwtException;
@@ -46,6 +43,8 @@ import java.util.List;
 @WebFilter(asyncSupported = true, urlPatterns = {"/restv1/authorize", "/restv1/token", "/restv1/userinfo"}, displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
 
+    public static final String ACCESS_TOKEN_PREFIX = "AccessToken ";
+
     @Inject
     private Logger log;
 
@@ -70,6 +69,9 @@ public class AuthenticationFilter implements Filter {
     @Inject
     private Identity identity;
 
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+
     private String realm;
     public static final String REALM = "oxAuth";
 
@@ -88,16 +90,23 @@ public class AuthenticationFilter implements Filter {
 			log.trace("Get request to: '{}'", requestUrl);
 
 			boolean tokenEndpoint = ServerUtil.isSameRequestPath(requestUrl, appConfiguration.getTokenEndpoint());
-			boolean umatTokenEndpoint = requestUrl.endsWith("/uma/token");
+			boolean umaTokenEndpoint = requestUrl.endsWith("/uma/token");
+            String authorizationHeader = httpRequest.getHeader("Authorization");
 
-			if (tokenEndpoint || umatTokenEndpoint) {
+            if (tokenEndpoint || umaTokenEndpoint) {
 				log.debug("Starting token endpoint authentication");
+
+                // #686 : allow authenticated client via user access_token
+                if (StringUtils.isNotBlank(authorizationHeader) && authorizationHeader.startsWith(ACCESS_TOKEN_PREFIX)) {
+                    processAuthByAccessToken(httpRequest, httpResponse, filterChain);
+                    return;
+                }
+
 				if (httpRequest.getParameter("client_assertion") != null
 						&& httpRequest.getParameter("client_assertion_type") != null) {
 					log.debug("Starting JWT token endpoint authentication");
 					processJwtAuth(httpRequest, httpResponse, filterChain);
-				} else if (httpRequest.getHeader("Authorization") != null
-						&& httpRequest.getHeader("Authorization").startsWith("Basic ")) {
+				} else if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
 					log.debug("Starting Basic Auth token endpoint authentication");
 					processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
 				} else {
@@ -105,11 +114,10 @@ public class AuthenticationFilter implements Filter {
 					processPostAuth(clientService, clientFilterService, errorResponseFactory, httpRequest, httpResponse,
 							filterChain, tokenEndpoint);
 				}
-			} else if (httpRequest.getHeader("Authorization") != null) {
-				String header = httpRequest.getHeader("Authorization");
-				if (header.startsWith("Bearer ")) {
+			} else if (authorizationHeader != null) {
+				if (authorizationHeader.startsWith("Bearer ")) {
 					processBearerAuth(httpRequest, httpResponse, filterChain);
-				} else if (header.startsWith("Basic ")) {
+				} else if (authorizationHeader.startsWith("Basic ")) {
 					processBasicAuth(clientService, errorResponseFactory, httpRequest, httpResponse, filterChain);
 				} else {
 					httpResponse.addHeader("WWW-Authenticate", "Basic realm=\"" + getRealm() + "\"");
@@ -121,8 +129,7 @@ public class AuthenticationFilter implements Filter {
                 List<Prompt> prompts = Prompt.fromString(httpRequest.getParameter(AuthorizeRequestParam.PROMPT), " ");
 
                 if (StringUtils.isBlank(sessionId)) {
-                    // OXAUTH-297 : check whether session_id is present in
-                    // cookie
+                    // OXAUTH-297 : check whether session_id is present in cookie
                     sessionId = sessionIdService.getSessionIdFromCookie(httpRequest);
                 }
 
@@ -142,6 +149,27 @@ public class AuthenticationFilter implements Filter {
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
+    }
+
+    private void processAuthByAccessToken(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain) {
+        try {
+            String accessToken = httpRequest.getHeader("Authorization").substring(ACCESS_TOKEN_PREFIX.length());
+            if (StringUtils.isNotBlank(accessToken)) {
+                AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
+                if (grant != null && grant.getAccessToken(accessToken).isValid()) {
+                    Client client = grant.getClient();
+
+                    authenticator.configureSessionClient(client);
+
+                    filterChain.doFilter(httpRequest, httpResponse);
+                    return;
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Failed to authenticate client by access_token", ex);
+        }
+
+        sendError(httpResponse);
     }
 
     private void processSessionAuth(ErrorResponseFactory errorResponseFactory, String p_sessionId,
@@ -222,12 +250,8 @@ public class AuthenticationFilter implements Filter {
             log.info("Basic authentication failed", ex);
         }
 
-        try {
-            if (requireAuth && !identity.isLoggedIn()) {
-                sendError(servletResponse);
-            }
-        } catch (IOException ex) {
-            log.error(ex.getMessage(), ex);
+        if (requireAuth && !identity.isLoggedIn()) {
+            sendError(servletResponse);
         }
     }
 
@@ -369,15 +393,12 @@ public class AuthenticationFilter implements Filter {
 			log.info("JWT authentication failed: {}", ex);
 		}
 
-		try {
-			if (!authorized) {
-				sendError(servletResponse);
-			}
-		} catch (IOException ex) {
-		}
-	}
+        if (!authorized) {
+            sendError(servletResponse);
+        }
+    }
 
-	private void sendError(HttpServletResponse servletResponse) throws IOException {
+	private void sendError(HttpServletResponse servletResponse) {
 		PrintWriter out = null;
 		try {
 			out = servletResponse.getWriter();
