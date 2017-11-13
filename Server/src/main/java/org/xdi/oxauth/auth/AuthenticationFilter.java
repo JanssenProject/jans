@@ -166,7 +166,7 @@ public class AuthenticationFilter implements Filter {
                 }
             }
         } catch (Exception ex) {
-            log.error("Failed to authenticate by access_token session authentication", ex);
+            log.error("Failed to authenticate client by access_token", ex);
         }
 
         sendError(httpResponse);
