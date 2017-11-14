@@ -418,12 +418,15 @@ class Migration(object):
                            'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
                            'oxTrustEntitlements', 'oxTrustx509Certificate']
 
+        if self.oxIDPAuthentication == 1:
+            ignoreList.remove('oxIDPAuthentication')
+
         # Rewriting all the new DNs in the new installation to ldif file
         for dn in currentDNs:
             new_entry = self.getEntry(self.currentData, dn)
             if "o=site" in dn:
-                continue  # skip all the o=site DNs
-            elif dn not in old_dn_map.keys():
+                 continue  # skip all the o=site DNs
+            if dn not in old_dn_map.keys():
                 #  Write to the file if there is no matching old DN data
                 ldif_writer.unparse(dn, new_entry)
                 continue
@@ -455,11 +458,23 @@ class Migration(object):
             ldif_writer.unparse(dn, new_entry)
 
         # Pick all the left out DNs from the old DN map and write them to the LDIF
+
+        siteInums = []
+        for line in open(os.path.join(self.ldifDir,"site.ldif")):
+            if 'inum:' in line:
+                siteInums.append(line.replace("inum: ",""))
+                print (siteInums)
         for dn in sorted(old_dn_map, key=len):
+            if "o=site" in dn:
+                continue  # skip all the o=site DNs
             if dn in currentDNs:
                 continue  # Already processed
 
             entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
+            if 'ou=people' in dn and 'inum' in entry.keys():
+                if entry['inum'][0] in siteInums:
+                    print "passed :" + entry['inum'][0]
+                    continue
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -492,7 +507,9 @@ class Migration(object):
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
-                    if 'oxType' not in line:
+                    if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
+                        line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
+                    if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
@@ -546,7 +563,7 @@ class Migration(object):
         else:
             self.importDataIntoOpenDJ()
 
-    def getLDAPServerType(self):
+    # def getLDAPServerType(self):
         # choice = 1
         # try:
         #     choice = int(raw_input(
@@ -564,6 +581,24 @@ class Migration(object):
         #     logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
         #     sys.exit(1)
         self.ldap_type = 'openldap'
+
+    def getLDAPServerType(self):
+        self.oxIDPAuthentication = 2
+        try:
+            choice = int(raw_input(
+                "\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: "))
+        except ValueError:
+            logging.error('You entered non-interger value. Cannot decide LDAP migration'
+                          'server type. Quitting.')
+            sys.exit(1)
+
+        if choice == 1:
+            self.oxIDPAuthentication = 1
+        elif choice == 2:
+            self.oxIDPAuthentication = 2
+        else:
+            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+            sys.exit(1)
 
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')

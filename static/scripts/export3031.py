@@ -82,6 +82,47 @@ console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
 
+def doOxTrustChanges(oxTrustPath):
+    parser = MyLDIF(open(oxTrustPath, 'rb'), sys.stdout)
+    parser.targetAttr = "oxTrustConfApplication"
+    atr = parser.parse()
+    oxTrustConfApplication = parser.lastEntry['oxTrustConfApplication'][0]
+    oxTrustConfApplication = oxTrustConfApplication.replace('seam/resource/', '')
+    parser.lastEntry['oxTrustConfApplication'][0] = oxTrustConfApplication
+    oxTrustConfApplicationJson = json.loads(oxTrustConfApplication)
+    oxTrustConfApplicationJson['ScimProperties'] = json.loads('{"maxCount": "200"}')
+
+    del oxTrustConfApplicationJson['loggingLevel']
+    del oxTrustConfApplicationJson['oxIncommonFlag']
+    del oxTrustConfApplicationJson['recaptchaSiteKey']
+    del oxTrustConfApplicationJson['recaptchaSecretKey']
+
+    parser.lastEntry['oxTrustConfApplication'][0] = json.dumps(oxTrustConfApplicationJson, indent=4, sort_keys=True)
+
+    oxTrustConfCacheRefresh = parser.lastEntry['oxTrustConfCacheRefresh'][0]
+    oxTrustConfCacheRefreshJson = json.loads(oxTrustConfCacheRefresh)
+    oxTrustConfCacheRefreshJson['inumConfig']['bindDN'] = oxTrustConfCacheRefreshJson['inumConfig']['bindDN'].replace(
+        'cn=directory manager', 'cn=directory manager,o=site')
+    oxTrustConfCacheRefreshJson['snapshotFolder'] = '/var/ox/identity/cr-snapshots/'
+    parser.lastEntry['oxTrustConfCacheRefresh'][0] = json.dumps(oxTrustConfCacheRefreshJson, indent=4, sort_keys=True)
+
+    oxTrustConfImportPerson = []
+    oxTrustConfImportPerson[0] = json.dumps(json.loads('{	"mappings": [{		"ldapName": "uid",		"displayName": "Username",		"dataType": "string",		"required": "true"	},	{		"ldapName": "givenName",		"displayName": "First Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "sn",		"displayName": "Last Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "mail",		"displayName": "Email",		"dataType": "string",		"required": "true"	},	{		"ldapName": "userPassword",		"displayName": "Password",		"dataType": "string",		"required": "false"	}]}'))
+    parser.lastEntry.append[oxTrustConfImportPerson]
+    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh","oxTrustConfImportPerson"]
+
+    out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
+    newfile = oxTrustPath.replace('/oxtrust_config.ldif', '/oxtrust_config_new.ldif')
+    # print (newfile)
+    f = open(newfile, 'w')
+    f.write(out)
+    f.close()
+
+    os.remove(oxTrustPath)
+    os.rename(newfile, oxTrustPath)
+
+
+
 def dooxAuthChangesFor31(self, oxAuthPath):
     parser = MyLDIF(open(oxAuthPath, 'rb'), sys.stdout)
     parser.targetAttr = "oxAuthConfDynamic"
@@ -105,6 +146,9 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['logClientNameOnClientAuthentication'] = False
     dataOxAuthConfDynamic['persistIdTokenInLdap'] = False
     dataOxAuthConfDynamic['persistRefreshTokenInLdap'] = True
+    dataOxAuthConfDynamic['personCustomObjectClassList'] = ["gluuCustomPerson", "gluuPerson"]
+    dataOxAuthConfDynamic['idTokenSigningAlgValuesSupported'].append("ES512")
+    dataOxAuthConfDynamic['idTokenSigningAlgValuesSupported'].append("none")
 
     del dataOxAuthConfDynamic['sessionStateHttpOnly']
     del dataOxAuthConfDynamic['shortLivedAccessTokenLifetime']
@@ -255,6 +299,29 @@ def removeDeprecatedScripts(self, oxScriptPath):
 
     os.remove(oxScriptPath)
     os.rename(newfile, oxScriptPath)
+
+def doApplinceChanges(oxappliancesPath):
+    parser = MyLDIF(open(oxappliancesPath, 'rb'), sys.stdout)
+    parser.parse()
+    base64Types = []
+
+    idpConfig = json.loads(parser.entries[0]['oxIDPAuthentication'][0])
+    del idpConfig['version']
+    del idpConfig['level']
+    idpConfigJson = json.loads(idpConfig['config'])
+
+    idpConfig['config'] = json.dumps(idpConfigJson, indent=4, sort_keys=True)
+    parser.entries[0]['oxIDPAuthentication'][0] = json.dumps(idpConfig, indent=4, sort_keys=True)
+    parser.entries[0]['oxTrustAuthenticationMode'][0] = 'auth_ldap_server'
+    out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
+    newfile = oxappliancesPath.replace('/appliance.ldif', '/appliancenew.ldif')
+    # print (newfile)
+    f = open(newfile, 'w')
+    f.write(out)
+    f.close()
+
+    os.remove(oxappliancesPath)
+    os.rename(newfile, oxappliancesPath)
 
 
 def doClientsChangesForUMA2(self, clientPath):
@@ -500,7 +567,7 @@ class Exporter(object):
         f.write(output)
         f.close()
         doOxTrustChanges(self, "%s/ldif/oxtrust_config.ldif" % self.backupDir)
-
+        doApplinceChanges("%s/ldif/appliance.ldif" % self.backupDir)
         # Backup the oxauth config
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
