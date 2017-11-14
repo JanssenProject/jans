@@ -410,7 +410,11 @@ def doOxTrustChanges(oxTrustPath):
     oxTrustConfCacheRefreshJson['snapshotFolder'] = '/var/ox/identity/cr-snapshots/'
     parser.lastEntry['oxTrustConfCacheRefresh'][0] = json.dumps(oxTrustConfCacheRefreshJson, indent=4, sort_keys=True)
 
-    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh"]
+
+    oxTrustConfImportPerson = []
+    oxTrustConfImportPerson[0] = json.dumps(json.loads('{	"mappings": [{		"ldapName": "uid",		"displayName": "Username",		"dataType": "string",		"required": "true"	},	{		"ldapName": "givenName",		"displayName": "First Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "sn",		"displayName": "Last Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "mail",		"displayName": "Email",		"dataType": "string",		"required": "true"	},	{		"ldapName": "userPassword",		"displayName": "Password",		"dataType": "string",		"required": "false"	}]}'))
+    parser.lastEntry.append[oxTrustConfImportPerson]
+    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh","oxTrustConfImportPerson"]
 
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
     newfile = oxTrustPath.replace('/oxtrust_config.ldif', '/oxtrust_config_new.ldif')
