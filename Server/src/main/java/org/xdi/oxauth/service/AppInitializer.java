@@ -167,7 +167,7 @@ public class AppInitializer {
     	createConnectionProvider();
         configurationFactory.create();
 
-        loggerService.updateLoggerConfigLocation();
+        loggerService.configure();
 
         LdapEntryManager localLdapEntryManager = ldapEntryManagerInstance.get();
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
