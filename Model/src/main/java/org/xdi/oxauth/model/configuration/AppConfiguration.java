@@ -161,6 +161,15 @@ public class AppConfiguration implements Configuration {
     private Boolean updateClientAccessTime;
     private Boolean logClientIdOnClientAuthentication;
     private Boolean logClientNameOnClientAuthentication;
+    private Boolean disableJdkLogger = true;
+
+    public Boolean getDisableJdkLogger() {
+        return disableJdkLogger;
+    }
+
+    public void setDisableJdkLogger(Boolean disableJdkLogger) {
+        this.disableJdkLogger = disableJdkLogger;
+    }
 
     /**
      * Used in ServletLoggingFilter to enable http request/response logging.
