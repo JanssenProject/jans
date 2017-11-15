@@ -62,7 +62,7 @@ import static org.xdi.oxauth.model.util.StringUtils.implode;
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version November 11, 2017
+ * @version November 15, 2017
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -434,6 +434,39 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     }
                                 }
 
+                                // OXAUTH-37 : Validate authentication max age
+                                boolean validAuthenticationMaxAge = true;
+                                Integer authenticationMaxAge = null;
+                                if (maxAge != null) {
+                                    authenticationMaxAge = maxAge;
+                                } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
+                                        && jwtAuthorizationRequest.getIdTokenMember() != null
+                                        && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
+                                    authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
+                                }
+                                GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                                GregorianCalendar userAuthenticationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+                                userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
+                                if (authenticationMaxAge != null) {
+                                    userAuthenticationTime.add(Calendar.SECOND, authenticationMaxAge);
+                                    validAuthenticationMaxAge = userAuthenticationTime.after(now);
+                                } else if (client.getDefaultMaxAge() != null) {
+                                    userAuthenticationTime.add(Calendar.SECOND, client.getDefaultMaxAge());
+                                    validAuthenticationMaxAge = userAuthenticationTime.after(now);
+                                }
+                                if (!validAuthenticationMaxAge) {
+                                    endSession(sessionId, httpRequest, httpResponse);
+                                    sessionId = null;
+
+                                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                            codeChallenge, codeChallengeMethod, sessionId, claims);
+                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                    return builder.build();
+                                }
+
                                 oAuth2AuditLog.setUsername(user.getUserId());
 
                                 ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
@@ -469,39 +502,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                 if (prompts.contains(Prompt.CONSENT) || !sessionUser.isPermissionGrantedForClient(clientId)) {
                                     prompts.remove(Prompt.CONSENT);
-
-                                    redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                            redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                            idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims);
-                                    builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                    applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                    return builder.build();
-                                }
-
-                                // OXAUTH-37 : Validate authentication max age
-                                boolean validAuthenticationMaxAge = true;
-                                Integer authenticationMaxAge = null;
-                                if (maxAge != null) {
-                                    authenticationMaxAge = maxAge;
-                                } else if (!invalidOpenidRequestObject && jwtAuthorizationRequest != null
-                                        && jwtAuthorizationRequest.getIdTokenMember() != null
-                                        && jwtAuthorizationRequest.getIdTokenMember().getMaxAge() != null) {
-                                    authenticationMaxAge = jwtAuthorizationRequest.getIdTokenMember().getMaxAge();
-                                }
-                                GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                                GregorianCalendar userAuthenticationTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-                                userAuthenticationTime.setTime(sessionUser.getAuthenticationTime());
-                                if (authenticationMaxAge != null) {
-                                    userAuthenticationTime.add(Calendar.SECOND, authenticationMaxAge);
-                                    validAuthenticationMaxAge = userAuthenticationTime.after(now);
-                                } else if (client.getDefaultMaxAge() != null) {
-                                    userAuthenticationTime.add(Calendar.SECOND, client.getDefaultMaxAge());
-                                    validAuthenticationMaxAge = userAuthenticationTime.after(now);
-                                }
-                                if (!validAuthenticationMaxAge) {
-                                    endSession(sessionId, httpRequest, httpResponse);
-                                    sessionId = null;
 
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
