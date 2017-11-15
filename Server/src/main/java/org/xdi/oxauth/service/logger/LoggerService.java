@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
+import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.cdi.event.ConfigurationUpdate;
 
 import javax.ejb.Stateless;
@@ -11,6 +12,7 @@ import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
+import java.util.logging.LogManager;
 
 /**
  * Created by eugeniuparvan on 8/3/17.
@@ -40,6 +42,14 @@ public class LoggerService {
         loggerContext.reconfigure();
     }
 
+    public void disableJdkLogger() {
+        LogManager.getLogManager().reset();
+        java.util.logging.Logger globalLogger = java.util.logging.Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);
+        if (globalLogger != null) {
+            globalLogger.setLevel(java.util.logging.Level.OFF);
+        }
+    }
+
     private boolean setExternalLoggerConfig() {
         log.info("External log configuration: " + appConfiguration.getExternalLoggerConfiguration());
         if (StringUtils.isEmpty(appConfiguration.getExternalLoggerConfiguration())) {
@@ -56,5 +66,12 @@ public class LoggerService {
 
         configurationUpdateEvent.select(ConfigurationUpdate.Literal.INSTANCE).fire(this.appConfiguration);
         return true;
+    }
+
+    public void configure() {
+        if (ServerUtil.isTrue(appConfiguration.getDisableJdkLogger())) {
+            disableJdkLogger();
+        }
+        updateLoggerConfigLocation();
     }
 }
