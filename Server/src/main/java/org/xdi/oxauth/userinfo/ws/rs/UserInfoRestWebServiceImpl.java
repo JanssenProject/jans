@@ -663,7 +663,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         attribute = Boolean.parseBoolean((String) user.getAttribute(gluuAttribute.getName(), true));
                     } else if (GluuAttributeDataType.DATE.equals(gluuAttribute.getDataType())) {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
-                        attribute = format.parse(user.getAttribute(gluuAttribute.getName(), true).toString());
+                        Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
+                        if (attributeValue != null) {
+                        	attribute = format.parse(attributeValue.toString());
+                        }
                     } else {
                         attribute = user.getAttribute(gluuAttribute.getName(), true);
                     }
