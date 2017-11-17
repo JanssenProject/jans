@@ -3,7 +3,6 @@ package org.xdi.service.el;
 import javax.el.ArrayELResolver;
 import javax.el.BeanELResolver;
 import javax.el.CompositeELResolver;
-import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.FunctionMapper;
 import javax.el.ListELResolver;
@@ -13,6 +12,8 @@ import javax.el.VariableMapper;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
 
 import com.sun.el.lang.FunctionMapperImpl;
 import com.sun.el.lang.VariableMapperImpl;
@@ -22,21 +23,28 @@ import com.sun.el.lang.VariableMapperImpl;
  */
 public class ContextProducer {
 
+	@Inject
+    private BeanManager beanManager;
+    
 	@Produces @RequestScoped
-	public  ELContext createELContext(BeanManager beanManager) {
-		// Create default resovler
-		CompositeELResolver resolver = createELResolver(beanManager);
-		
-		// Add constant resolver
+	public ExtendedELContext createELContext() {
 		ConstantResolver constantResolver = new ConstantResolver();
-        resolver.add(constantResolver);
+
+		CompositeELResolver resolver = createELResolver(constantResolver);
 
 		return createELContext(resolver, new FunctionMapperImpl(), new VariableMapperImpl(), constantResolver);
 	}
 
-	private CompositeELResolver createELResolver(BeanManager beanManager) {
+	private CompositeELResolver createELResolver(ConstantResolver constantResolver) {
         CompositeELResolver resolver = new CompositeELResolver();
+        resolver.add(constantResolver);
 		resolver.add(beanManager.getELResolver());
+
+		FacesContext facesContext = FacesContext.getCurrentInstance();
+		if (facesContext != null) {
+			resolver.add(facesContext.getELContext().getELResolver());
+		}
+
 		resolver.add(new MapELResolver());
 		resolver.add(new ListELResolver());
 		resolver.add(new ArrayELResolver());
