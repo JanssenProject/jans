@@ -38,6 +38,7 @@ console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 logging.getLogger('jsonmerge').setLevel(logging.WARNING)
 
+
 class MyLDIF(LDIFParser):
     def __init__(self, input, output):
         LDIFParser.__init__(self, input)
@@ -99,7 +100,8 @@ class Migration(object):
         self.currentData = os.path.join(self.workingDir, 'current.ldif')
         self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
         self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
-        self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
+        self.o_site_static = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
+        self.o_site = os.path.join(self.workingDir, "o_site.ldif")
         self.attrs = 2000
         self.objclasses = 2000
         self.ldap_type = 'openldap'
@@ -393,14 +395,13 @@ class Migration(object):
         print temp_schema
         custArrtributes = ''
         for indx, line in enumerate(self.customAttrs):
-            if (indx < len(self.customAttrs) - 1):
-                custArrtributes = custArrtributes + line + " $ "
-            else:
-                custArrtributes = custArrtributes + line
-        customAttrs = set(custArrtributes.split(' $ '))
+            custArrtributes = custArrtributes + ' $ ' + line
+        self.customAttrs = set(custArrtributes.split(' $ '))
         custArrtributes = ""
-        for indx, line in enumerate(customAttrs):
-            if (indx < len(customAttrs) - 1):
+        for indx, line in enumerate(self.customAttrs):
+            if indx ==0 :
+                custArrtributes = custArrtributes + " $ " +line
+            elif (indx < len(self.customAttrs) - 1):
                 custArrtributes = custArrtributes + line + " $ "
             else:
                 custArrtributes = custArrtributes + line
@@ -529,7 +530,7 @@ class Migration(object):
         for dn in currentDNs:
             new_entry = self.getEntry(self.currentData, dn)
             if "o=site" in dn:
-                 continue  # skip all the o=site DNs
+                continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
                 #  Write to the file if there is no matching old DN data
                 ldif_writer.unparse(dn, new_entry)
@@ -562,12 +563,6 @@ class Migration(object):
             ldif_writer.unparse(dn, new_entry)
 
         # Pick all the left out DNs from the old DN map and write them to the LDIF
-
-        siteInums = []
-        for line in open(os.path.join(self.ldifDir,"site.ldif")):
-            if 'inum:' in line:
-                siteInums.append(line.replace("inum: ",""))
-                print (siteInums)
         for dn in sorted(old_dn_map, key=len):
             if "o=site" in dn:
                 continue  # skip all the o=site DNs
@@ -575,10 +570,6 @@ class Migration(object):
                 continue  # Already processed
 
             entry = self.getEntry(os.path.join(self.ldifDir, old_dn_map[dn]), dn)
-            if 'ou=people' in dn and 'inum' in entry.keys():
-                if entry['inum'][0] in siteInums:
-                    print "passed :" + entry['inum'][0]
-                    continue
 
             for attr in entry.keys():
                 if attr not in multivalueAttrs:
@@ -615,7 +606,6 @@ class Migration(object):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
-
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
                     base64Types = [""]
@@ -627,7 +617,14 @@ class Migration(object):
                     #         f = open(self.o_gluu, "a")
                     #         f.write('\n')
                     #         f.write(out)
-
+        data="".join(open( os.path.join(self.backupDir, 'ldif','site.ldif')).readlines()[4:-1])
+        open(os.path.join(self.backupDir, 'ldif','site.ldif'),"wb").write(data)
+        filenames = [self.o_site_static, os.path.join(self.backupDir, 'ldif','site.ldif')]
+        with open(self.o_site, 'w') as outfile:
+            for fname in filenames:
+                with open(fname) as infile:
+                    for line in infile:
+                        outfile.write(line)
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
@@ -659,6 +656,7 @@ class Migration(object):
         logging.debug(output)
         command = [self.ldif_import, '-n', 'userRoot',
                    '-l', self.o_site, '-R', self.o_site + '.rejects']
+        output = self.getOutput(command)
         logging.debug(output)
 
     def importProcessedData(self):
@@ -691,7 +689,7 @@ class Migration(object):
         self.oxIDPAuthentication = 2
         try:
             choice = int(raw_input(
-                "\nMigrate LDAP Server details for IDP Authentication ?- 1.yes, 2.no (default or localhost) [2]: "))
+                "\nMigrate LDAP server's configuration used for authentication at the source instance?- 1.yes, 2.no [2]: "))
         except ValueError:
             logging.error('You entered non-interger value. Cannot decide LDAP migration'
                           'server type. Quitting.')
@@ -810,3 +808,4 @@ if __name__ == "__main__":
     else:
         migrator = Migration(sys.argv[1])
         migrator.migrate()
+
