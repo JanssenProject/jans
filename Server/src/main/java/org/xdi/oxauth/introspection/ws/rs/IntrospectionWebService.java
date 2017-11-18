@@ -78,6 +78,7 @@ public class IntrospectionWebService {
                         final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(p_token);
                         if (grantOfIntrospectionToken != null) {
                             final AbstractToken tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(p_token);
+                            final User user = grantOfIntrospectionToken.getUser();
 
                             response.setActive(tokenToIntrospect.isValid());
                             response.setExpiresAt(dateToSeconds(tokenToIntrospect.getExpirationDate()));
@@ -85,7 +86,8 @@ public class IntrospectionWebService {
                             response.setAcrValues(tokenToIntrospect.getAuthMode());
                             response.setScopes(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
                             response.setClientId(grantOfIntrospectionToken.getClientId());
-                            response.setUsername(grantOfIntrospectionToken.getUserId());
+                            response.setSubject(grantOfIntrospectionToken.getUserId());
+                            response.setUsername(user != null ? user.getAttribute("displayName") : null);
                             response.setIssuer(appConfiguration.getIssuer());
                             response.setAudience(grantOfIntrospectionToken.getClientId());
 
