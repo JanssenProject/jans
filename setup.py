@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 # The MIT License (MIT)
 #
 # Copyright (c) 2014 Gluu
@@ -48,8 +47,8 @@ class Setup(object):
     def __init__(self, install_dir=None):
         self.install_dir = install_dir
 
-        self.oxVersion = '3.2.0-SNAPSHOT'
-        self.githubBranchName = 'master'
+        self.oxVersion = '3.1.1.Final'
+        self.githubBranchName = 'version_3.1.1'
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -297,6 +296,14 @@ class Setup(object):
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
         self.openldapJksPass = None
         self.openldapJksFn = '%s/openldap.jks' % self.certFolder
+
+        self.passportSpKeyPass = None
+        self.passportSpTLSCACert = '%s/passport-sp.pem' % self.certFolder
+        self.passportSpTLSCert = '%s/passport-sp.crt' % self.certFolder
+        self.passportSpTLSKey = '%s/passport-sp.key' % self.certFolder
+        self.passportSpJksPass = None
+        self.passportSpJksFn = '%s/passport-sp.jks' % self.certFolder        
+
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.openldapRootSchemaFolder = "%s/schema" % self.gluuOptFolder
@@ -604,6 +611,9 @@ class Setup(object):
         if not self.openldapKeyPass:
             self.openldapKeyPass = self.getPW()
             self.openldapJksPass = self.getPW()
+        if not self.passportSpKeyPass:
+            self.passportSpKeyPass = self.getPW()
+            self.passportSpJksPass = self.getPW()    
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.baseInum:
@@ -930,7 +940,6 @@ class Setup(object):
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/super_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
-	    self.copyFile("%s/static/auth/conf/vericloud_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/cert_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
 
@@ -1302,6 +1311,7 @@ class Setup(object):
             self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
             self.gen_cert('asimba', self.asimbaJksPass, 'jetty')
             self.gen_cert('openldap', self.openldapKeyPass, 'ldap', self.ldap_hostname)
+            self.gen_cert('passport-sp', self.passportSpKeyPass, 'ldap', self.ldap_hostname)
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
@@ -1321,19 +1331,12 @@ class Setup(object):
                               '%s/openldap.key' % self.certFolder,
                               '%s/openldap.crt' % self.certFolder,
                               'jetty')
-            # samp.pem from asimba.crt for asimba scrypt input
-            self.run([self.opensslCommand,
-                  'x509',
-                  '-inform',
-                  'pem',
-                  '-outform',
-                  'pem',
-                  '-in',
-                  '%s/asimba.crt' % self.certFolder,
-                  '-out',
-                  '%s/saml.pem' % self.certFolder
-                  ])
-            # permissions
+            self.gen_keystore('passport-sp',
+                              self.passportSpJksFn,
+                              self.passportSpJksPass,
+                              '%s/passport-sp.key' % self.certFolder,
+                              '%s/passport-sp.crt' % self.certFolder,
+                              'jetty')
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])
             # oxTrust UI can add key to asimba's keystore
@@ -2533,6 +2536,13 @@ class Setup(object):
                 pem.write(crt.read())
             with open(self.openldapTLSKey, 'r') as key:
                 pem.write(key.read())
+                
+        with open(self.passportSpTLSCACert, 'w') as pem:
+            with open(self.passportSpTLSCert, 'r') as crt:
+                pem.write(crt.read())
+            with open(self.passportSpTLSKey, 'r') as key:
+                pem.write(key.read())
+
 
         # 6. Setup Logging
         self.run([self.cmd_mkdir, '-m', '775', '-p', self.openldapLogDir])
