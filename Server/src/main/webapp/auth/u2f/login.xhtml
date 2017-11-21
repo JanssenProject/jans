@@ -9,6 +9,9 @@
         <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
     </f:metadata>
     <ui:define name="head">
+  	<link href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap.min.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/style.css"/>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
 
         <script src="./scripts/u2f-api.js"/>
 
@@ -54,35 +57,30 @@
         </script>
 
         <style type="text/css">
-            .login-panel {
-                border-style: solid;
-                border-width: 1px;
-                padding: 1px;
-                background-color: #FFFFFF;
-                border-color: #C4C0B9;
-            }
-
-            .login-panel-header {
-                background-color: #D4CFC7;
-                background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
-                background-position: left top;
-                background-repeat: repeat-x;
-                border-style: solid;
-                border-width: 1px;
-                padding: 2px;
-                border-color: #D4CFC7;
-                color: #000000;
-                font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
-                font-weight: bold;
-            }
-
-            .login-panel-body {
-                padding: 10px;
-                color: #000000;
-                font-family: Arial, Verdana, sans-serif;
-                font-size: 11px;
-            }
+            
+			.h4, .h5, .h6, h4, h5, h6 {
+			    margin-top: 10px;
+			    margin-bottom: 10px;
+			    color:black;
+			}
+			p {
+			    margin: 0 0 15px !important;
+			    margin: 0 !important;
+				padding: 10,10 !important;
+			}
+			
+			p {
+			    display: block;
+			    -webkit-margin-before: 1em !important;
+			    -webkit-margin-after: 1em !important;
+			    -webkit-margin-start: 0px !important;
+			    -webkit-margin-end: 0px !important;
+			}
+			
+			body{
+				font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+				line-height: 1.42857143;
+			}
         </style>
     </ui:define>
 
@@ -94,28 +92,33 @@
             <input type="hidden" name="authMethod" id="authMethod"/>
             <input type="hidden" name="tokenResponse" id="tokenResponse"/>
         </form>
+        <header class="bs-docs-nav navbar navbar-static-top" id="top"> 
+			<div class="container">
+				<div class="navbar-header"> 
+					<a target="_blank"  class="navbar-brand"><img src="#{oxAuthConfigurationService.getImgLocation()}/logo.png" alt="logo"/></a> 
+				</div>
+			</div>
+		</header>
 
-        <table border="0" align="center">
-            <tr>
-                <td>
-                    <div>
+
                         <h:form id="loginForm">
                             <h:panelGroup rendered="#{not identity.loggedIn}">
-                                <div class="login-panel">
-                                    <div class="login-panel-header">
-                                        <h:outputText value="#{msgs['login.login']}"/>
-                                    </div>
-                                    <div class="login-panel-body">
                                         <ui:param name="client" value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
 
                                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                                             <h:graphicImage url='#{client.getLogoUri()}'/>
                                         </h:panelGroup>
-
-                                        <div class="dialog">
-                                            <p>Touch your U2F token.</p>
-                                        </div>
-
+										<div class="bs-docs-section">
+											<div class="container">
+												<div class="step_bx">
+													<h2>#{msgs['u2f.verification.stepverification']}</h2>
+													<p>#{msgs['u2f.verification.usedevice']} </p>
+													<img src="#{oxAuthConfigurationService.getImgLocation()}/step_ver.png" alt="step_ver"/>
+													<h4>#{msgs['u2f.verification.insertkey']}</h4>
+													<p>#{msgs['u2f.verification.useit']}</p>
+												</div>
+											</div>
+										</div>
                                         <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                                             <p>
                                                 <h:outputText value="#{msgs['common.agreePolicy']}"/>
@@ -133,18 +136,12 @@
                                                 </a>
                                             </p>
                                         </h:panelGroup>
-                                    </div>
-                                </div>
                                 <div class="login-panel">
                                     <h:panelGroup rendered="#{fido_u2f_authentication_request != 'null'}">
                                     </h:panelGroup>
                                 </div>
                             </h:panelGroup>
-                        </h:form>
-                    </div>
-                </td>
-            </tr>
-        </table>
+                        </h:form>                    
     </ui:define>
 
 </ui:composition>
