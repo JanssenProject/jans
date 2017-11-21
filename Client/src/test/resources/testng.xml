@@ -258,6 +258,12 @@
         </classes>
     </test>
 
+    <test name="Client authentication by Access Token" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.uma.ClientAuthenticationByAccessTokenHttpTest"/>
+        </classes>
+    </test>
+
     <test name="Introspection test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWsHttpTest"/>
