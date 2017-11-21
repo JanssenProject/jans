@@ -52,6 +52,10 @@ public class MailService {
 		return sendMail(smtpConfiguration, null, null, to, null, subject, message, htmlMessage);
 	}
 
+	public boolean sendMail(String from, String fromDisplayName, String to, String toDisplayName, String subject, String message, String htmlMessage) {
+		return sendMail(smtpConfiguration, from, fromDisplayName, to, null, subject, message, htmlMessage);
+	}
+
 	public boolean sendMail(SmtpConfiguration mailSmtpConfiguration, String from, String fromDisplayName, String to, String toDisplayName, String subject, String message, String htmlMessage) {
 		if (mailSmtpConfiguration == null) {
 			log.error("Failed to send message from '{}' to '{}' because the SMTP configuration isn't valid!", from, to);

@@ -1,6 +1,7 @@
 package org.gluu.jsf2.message;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.el.ELContext;
@@ -63,6 +64,16 @@ public class FacesMessages implements Serializable {
 		String result = (String) valueExpression.getValue(elContext);
 
 		return result;
+	}
+
+	public String evalResourceAsString(String resource) {
+		// Get resource message
+		String resourceMessage = evalAsString(resource);
+
+		// Evaluate resource message
+		String message = evalAsString(resourceMessage);
+
+		return message;
 	}
 
 	public String evalAsString(String expression, Map<String, Object> parameters) {
