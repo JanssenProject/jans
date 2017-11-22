@@ -228,7 +228,11 @@ public class OperationsFacade {
 			}
 			LDAPConnection ldapConnection = null;
 			try {
-				ldapConnection = getConnectionPool().getConnection();
+				if (batchOperation != null) {
+					ldapConnection = batchOperation.getLdapConnection();
+				} else {
+					ldapConnection = getConnectionPool().getConnection();
+				}
 				ASN1OctetString cookie = null;
 				if (startIndex > 0) {
 					try {
@@ -247,14 +251,16 @@ public class OperationsFacade {
 				do {
 					searchRequest.setControls(new Control[]{new SimplePagedResultsControl(searchLimit, cookie)});
 					setControls(searchRequest, controls);
-					if (batchOperation != null) {
-						searchResult = batchOperation.getLdapConnection().search(searchRequest);
-					} else {
-						searchResult = ldapConnection.search(searchRequest);
+					searchResult = ldapConnection.search(searchRequest);
+					if ((batchOperation == null) || batchOperation.collectSearchResult(searchResult)) {
+						searchResultList.add(searchResult);
+						searchResultEntries.addAll(searchResult.getSearchEntries());
+						searchResultReferences.addAll(searchResult.getSearchReferences());
 					}
-					searchResultList.add(searchResult);
-					searchResultEntries.addAll(searchResult.getSearchEntries());
-					searchResultReferences.addAll(searchResult.getSearchReferences());
+
+					if (batchOperation != null) {
+						batchOperation.processSearchResult(searchResult);
+					}
 					cookie = null;
 					try {
 						SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
@@ -277,7 +283,11 @@ public class OperationsFacade {
 				throw new LDAPSearchException(e.getResultCode(), "Failed to scroll to specified startIndex", e);
 			} finally {
 				if (ldapConnection != null) {
-					getConnectionPool().releaseConnection(ldapConnection);
+					if (batchOperation != null) {
+						batchOperation.releaseConnection();
+					} else {
+						getConnectionPool().releaseConnection(ldapConnection);
+					}
 				}
 			}
 

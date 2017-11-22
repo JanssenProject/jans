@@ -4,6 +4,8 @@ import com.unboundid.asn1.ASN1OctetString;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.SearchResult;
+
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
@@ -15,56 +17,68 @@ import static com.unboundid.util.Debug.debugException;
  */
 public abstract class BatchOperation<T> {
 
-    private ASN1OctetString cookie;
+	private ASN1OctetString cookie;
 
-    private LDAPConnection ldapConnection;
+	private LDAPConnection ldapConnection;
 
-    private LDAPConnectionPool ldapConnectionPool;
+	private LDAPConnectionPool ldapConnectionPool;
 
-    private boolean moreResultsToReturn;
+	private boolean moreResultsToReturn;
 
-    protected abstract List<T> getChunkOrNull(int batchSize);
+	protected abstract List<T> getChunkOrNull(int batchSize);
 
-    protected abstract void performAction(List<T> objects);
+	protected abstract void performAction(List<T> objects);
 
-    public BatchOperation(LdapEntryManager ldapEntryManager) {
-        this.ldapConnectionPool = ldapEntryManager.getLdapOperationService().getConnectionPool();
-        try {
-            this.ldapConnection = ldapConnectionPool.getConnection();
-        } catch (LDAPException e) {
-            debugException(e);
-            this.ldapConnection = null;
-        }
-    }
+	public BatchOperation(LdapEntryManager ldapEntryManager) {
+		this.ldapConnectionPool = ldapEntryManager.getLdapOperationService().getConnectionPool();
+		try {
+			this.ldapConnection = ldapConnectionPool.getConnection();
+		} catch (LDAPException e) {
+			debugException(e);
+			this.ldapConnection = null;
+		}
+	}
 
-    public void iterateAllByChunks(int batchSize) {
-        if (ldapConnection == null)
-            return;
-        try {
-            List<T> objects;
-            while (!CollectionUtils.isEmpty(objects = getChunkOrNull(batchSize))) {
-                performAction(objects);
-                if (objects.size() < batchSize || !moreResultsToReturn)
-                    break;
-            }
-        }finally {
-            ldapConnectionPool.releaseConnection(ldapConnection);
-        }
-    }
+	public void iterateAllByChunks(int batchSize) {
+		if (ldapConnection == null)
+			return;
+		try {
+			List<T> objects;
+			while (!CollectionUtils.isEmpty(objects = getChunkOrNull(batchSize))) {
+				performAction(objects);
+				if (objects.size() < batchSize || !moreResultsToReturn)
+					break;
+			}
+		} finally {
+			releaseConnection();
+		}
+	}
 
-    public ASN1OctetString getCookie() {
-        return cookie;
-    }
+	public boolean collectSearchResult(SearchResult searchResult) {
+		return true;
+	}
 
-    public void setCookie(ASN1OctetString cookie) {
-        this.cookie = cookie;
-    }
+	public void processSearchResult(SearchResult searchResult) {
+	}
 
-    public void setMoreResultsToReturn(boolean moreResultsToReturn) {
-        this.moreResultsToReturn = moreResultsToReturn;
-    }
+	public ASN1OctetString getCookie() {
+		return cookie;
+	}
 
-    public LDAPConnection getLdapConnection() {
-        return ldapConnection;
-    }
+	public void setCookie(ASN1OctetString cookie) {
+		this.cookie = cookie;
+	}
+
+	public void setMoreResultsToReturn(boolean moreResultsToReturn) {
+		this.moreResultsToReturn = moreResultsToReturn;
+	}
+
+	public LDAPConnection getLdapConnection() {
+		return ldapConnection;
+	}
+
+	public void releaseConnection() {
+		ldapConnectionPool.releaseConnection(ldapConnection);
+	}
+
 }

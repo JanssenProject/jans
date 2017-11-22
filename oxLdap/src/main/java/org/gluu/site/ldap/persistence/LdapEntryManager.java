@@ -708,40 +708,16 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		} else {
 			searchFilter = filter;
 		}
+		
+		CountBatchOperation<T> batchOperation = new CountBatchOperation<T>(this);
 
-		int countEntries = 0;
-		ASN1OctetString cookie = null;
-		SearchResult searchResult = null;
-		do {
-			Control[] controls = new Control[] { new SimplePagedResultsControl(100, cookie) };
-			try {
-				searchResult = this.ldapOperationService.search(baseDN, searchFilter, 0, 0, controls, ldapReturnAttributes);
-				if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-					throw new EntryPersistenceException(String.format("Failed to calculate count entries with baseDN: %s, filter: %s",
-							baseDN, searchFilter));
-				}
-			} catch (Exception ex) {
-				throw new EntryPersistenceException(String.format("Failed to calculate count entries with baseDN: %s, filter: %s", baseDN,
-						searchFilter), ex);
-			}
+		try {
+			ldapOperationService.search(baseDN, searchFilter, SearchScope.SUB, batchOperation, 0, 100, 0, null, ldapReturnAttributes);
+		} catch (Exception ex) {
+			throw new EntryPersistenceException(String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+		}
 
-			countEntries += searchResult.getEntryCount();
-			// Break infinite loop since cookie isn't empty after reaches end of
-			// list
-			if ((countEntries == 0) || ((countEntries % 100) != 0)) {
-				break;
-			}
-
-			cookie = null;
-			for (Control control : searchResult.getResponseControls()) {
-				if (control instanceof SimplePagedResultsControl) {
-					cookie = ((SimplePagedResultsControl) control).getCookie();
-					break;
-				}
-			}
-		} while (cookie != null);
-
-		return countEntries;
+		return batchOperation.getCountEntries();
 	}
 
 	private <T> Filter createFilterByEntry(Object entry, Class<T> entryClass, List<AttributeData> attributes) {
@@ -1123,5 +1099,36 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			}
 		}
 	}
+	
+	private static final class CountBatchOperation<T> extends BatchOperation<T> {
+
+		private int countEntries = 0;
+
+		public CountBatchOperation(LdapEntryManager ldapEntryManager) {
+			super(ldapEntryManager);
+		}
+
+		@Override
+		protected List<T> getChunkOrNull(int batchSize) {
+			return null;
+		}
+
+		@Override
+		protected void performAction(List<T> objects) {
+			
+		}
+		public boolean collectSearchResult(SearchResult searchResult) {
+			return false;
+		}
+
+		public void processSearchResult(SearchResult searchResult) {
+			countEntries += searchResult.getEntryCount();
+		}
+
+		public int getCountEntries() {
+			return countEntries;
+		}
+	};
+
 
 }
