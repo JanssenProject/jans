@@ -1105,3 +1105,20 @@ gluuAttributeViewType: admin
 gluuStatus: active
 inum: %(inumOrg)s!0005!6049
 urn: urn:gluu:dir:attribute-def:role
+
+dn: inum=%(inumOrg)s!0005!CACA,ou=attributes,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: gluuAttribute
+inum: %(inumOrg)s!0005!CACA
+displayName: User certificate
+gluuAttributeOrigin: gluuPerson
+gluuAttributeName: userCertificate
+description: User certificate
+gluuAttributeViewType: admin
+gluuAttributeViewType: user
+gluuAttributeEditType: admin
+gluuAttributeEditType: user
+gluuAttributeType: string
+gluuStatus: active
+urn: urn:mace:dir:attribute-def:userCertificate
+oxValidation: {"minLength":null,"maxLength":2048,"regexp":""}
