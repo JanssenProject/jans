@@ -144,17 +144,16 @@ public class UmaTokenService {
     }
 
     private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes) {
+        log.trace("Updating permissions with requested scopes ...");
         for (UmaPermission permission : permissions) {
             Set<String> scopeDns = new HashSet<String>(permission.getScopeDns());
 
             for (Map.Entry<UmaScopeDescription, Boolean> entry : scopes.entrySet()) {
-                if (entry.getValue()) {
-                    scopeDns.add(entry.getKey().getDn());
-                }
+                log.trace("Updating permissions with scope: " + entry.getKey().getId() + ", isRequestedScope: " + entry.getValue() + ", permisson: " + permission.getDn());
+                scopeDns.add(entry.getKey().getDn());
             }
 
             permission.setScopeDns(new ArrayList<String>(scopeDns));
         }
     }
-
 }
