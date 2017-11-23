@@ -289,7 +289,7 @@ public abstract class BaseTest {
         do {
             authorizationResponseStr = acceptAuthorization(currentDriver);
             remainAuthzSteps--;
-		} while (remainAuthzSteps > 1);
+		} while (remainAuthzSteps >= 1);
 
         AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest, useNewDriver,
 				currentDriver, authorizeClient, authorizationResponseStr);
@@ -354,7 +354,8 @@ public abstract class BaseTest {
 	}
 
 	private String acceptAuthorization(WebDriver currentDriver) {
-		String authorizationResponseStr = currentDriver.getCurrentUrl();
+        String authorizationResponseStr = currentDriver.getCurrentUrl();
+
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
             WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
@@ -372,7 +373,6 @@ public abstract class BaseTest {
         } else {
             fail("The authorization form was expected to be shown.");
         }
-        System.out.println("acceptAuthorization: authorizationResponseStr:" + authorizationResponseStr);
 
         return authorizationResponseStr;
 	}
