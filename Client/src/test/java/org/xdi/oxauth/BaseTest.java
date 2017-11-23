@@ -621,8 +621,7 @@ public abstract class BaseTest {
             showTitle("OpenID Connect Discovery");
 
             OpenIdConnectDiscoveryClient openIdConnectDiscoveryClient = new OpenIdConnectDiscoveryClient(resource);
-            OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(
-                    new ApacheHttpClient4Executor(createHttpClient(HostnameVerifierType.ALLOW_ALL)));
+            OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(clientExecutor(true));
 
             showClient(openIdConnectDiscoveryClient);
             assertEquals(openIdConnectDiscoveryResponse.getStatus(), 200, "Unexpected response code");
@@ -635,6 +634,7 @@ public abstract class BaseTest {
             System.out.println("OpenID Connect Configuration");
 
             OpenIdConfigurationClient client = new OpenIdConfigurationClient(configurationEndpoint);
+            client.setExecutor(clientExecutor(true));
             OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
 
             showClient(client);
