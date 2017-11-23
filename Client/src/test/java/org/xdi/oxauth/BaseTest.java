@@ -372,6 +372,7 @@ public abstract class BaseTest {
         } else {
             fail("The authorization form was expected to be shown.");
         }
+        System.out.println("acceptAuthorization: authorizationResponseStr:" + authorizationResponseStr);
 
         return authorizationResponseStr;
 	}
