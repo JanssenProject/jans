@@ -181,7 +181,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
 
-        Map<String, String> customParameters = AuthenticationService.getCustomParameters(
+        Map<String, String> customParameters = authenticationService.getCustomParameters(
                 QueryStringDecoder.decode(httpRequest.getQueryString()));
 
         SessionId sessionUser = identity.getSessionId();
