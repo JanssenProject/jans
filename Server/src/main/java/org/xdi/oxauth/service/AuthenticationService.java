@@ -533,8 +533,12 @@ public class AuthenticationService {
         }
     }
 
-    public static Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
-        Set<String> authorizationRequestCustomAllowedParameters = CdiUtil.bean(AppConfiguration.class).getAuthorizationRequestCustomAllowedParameters();
+    public Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
+        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
+        if (authorizationRequestCustomAllowedParameters == null) {
+        	authorizationRequestCustomAllowedParameters = new HashSet<String>(0);
+        }
+
         final Map<String, String> result = new HashMap<String, String>();
         if (!requestParameterMap.isEmpty()) {
             final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
@@ -548,9 +552,14 @@ public class AuthenticationService {
         return result;
     }
 
-    public static Map<String, String> getCustomParameters(@Nonnull final Map<String, String> requestParameterMap) {
-        Set<String> authorizationRequestCustomAllowedParameters = CdiUtil.bean(AppConfiguration.class).getAuthorizationRequestCustomAllowedParameters();
+    public Map<String, String> getCustomParameters(@Nonnull final Map<String, String> requestParameterMap) {
+        Set<String> authorizationRequestCustomAllowedParameters = appConfiguration.getAuthorizationRequestCustomAllowedParameters();
+
         final Map<String, String> result = new HashMap<String, String>();
+        if (authorizationRequestCustomAllowedParameters == null) {
+        	return result;
+        }
+
         if (!requestParameterMap.isEmpty()) {
             final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
             for (Map.Entry<String, String> entry : set) {
