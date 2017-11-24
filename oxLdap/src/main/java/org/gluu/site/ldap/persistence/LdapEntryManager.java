@@ -6,17 +6,26 @@
 
 package org.gluu.site.ldap.persistence;
 
-import com.unboundid.asn1.ASN1OctetString;
-import com.unboundid.ldap.sdk.*;
-import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.util.StaticUtils;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.persistence.AttributeDataModification.AttributeModificationType;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
-import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
 import org.gluu.site.ldap.persistence.exception.MappingException;
@@ -31,9 +40,16 @@ import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.*;
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPSearchException;
+import com.unboundid.ldap.sdk.Modification;
+import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.util.StaticUtils;
 
 /**
  * LDAP Entry Manager
@@ -84,8 +100,12 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	protected void persist(String dn, List<AttributeData> attributes) {
 		List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
 		for (AttributeData attribute : attributes) {
+			String attributeName = attribute.getName();
+			if (ldapOperationService.isCertificateAttribute(attributeName)) {
+				attributeName += ";binary";
+			}
 			if (ArrayHelper.isNotEmpty(attribute.getValues()) && StringHelper.isNotEmpty(attribute.getValues()[0])) {
-				ldapAttributes.add(new Attribute(attribute.getName(), attribute.getValues()));
+				ldapAttributes.add(new Attribute(attributeName, attribute.getValues()));
 			}
 		}
 
@@ -110,14 +130,20 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			for (AttributeDataModification attributeDataModification : attributeDataModifications) {
 				AttributeData attribute = attributeDataModification.getAttribute();
 				AttributeData oldAttribute = attributeDataModification.getOldAttribute();
+
+				String attributeName = attribute.getName();
+				if (ldapOperationService.isCertificateAttribute(attributeName)) {
+					attributeName += ";binary";
+				}
+
 				Modification modification = null;
 				if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-					modification = new Modification(ModificationType.ADD, attribute.getName(), attribute.getValues());
+					modification = new Modification(ModificationType.ADD, attributeName, attribute.getValues());
 				} else if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
 					modification = new Modification(ModificationType.DELETE, oldAttribute.getName(), oldAttribute.getValues());
 				} else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
 					if (attribute.getValues().length == 1) {
-						modification = new Modification(ModificationType.REPLACE, attribute.getName(), attribute.getValues());
+						modification = new Modification(ModificationType.REPLACE, attributeName, attribute.getValues());
 					} else {
 						String[] oldValues = ArrayHelper.arrayClone(oldAttribute.getValues());
 						String[] newValues = ArrayHelper.arrayClone(attribute.getValues());
@@ -157,13 +183,13 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 						}
 
 						if (removeValues.size() > 0) {
-							Modification removeModification = new Modification(ModificationType.DELETE, attribute.getName(),
+							Modification removeModification = new Modification(ModificationType.DELETE, attributeName,
 									removeValues.toArray(new String[removeValues.size()]));
 							modifications.add(removeModification);
 						}
 
 						if (addValues.size() > 0) {
-							Modification addModification = new Modification(ModificationType.ADD, attribute.getName(),
+							Modification addModification = new Modification(ModificationType.ADD, attributeName,
 									addValues.toArray(new String[addValues.size()]));
 							modifications.add(addModification);
 						}
