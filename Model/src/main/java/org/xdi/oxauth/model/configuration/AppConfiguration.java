@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version August 9, 2017
+ * @version November 23, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -162,6 +162,7 @@ public class AppConfiguration implements Configuration {
     private Boolean logClientIdOnClientAuthentication;
     private Boolean logClientNameOnClientAuthentication;
     private Boolean disableJdkLogger = true;
+    private Set<String> authorizationRequestCustomAllowedParameters;
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -891,15 +892,15 @@ public class AppConfiguration implements Configuration {
         dynamicRegistrationCustomObjectClass = p_dynamicRegistrationCustomObjectClass;
     }
 
-	public List<String> getPersonCustomObjectClassList() {
-		return personCustomObjectClassList;
-	}
+    public List<String> getPersonCustomObjectClassList() {
+        return personCustomObjectClassList;
+    }
 
-	public void setPersonCustomObjectClassList(List<String> personCustomObjectClassList) {
-		this.personCustomObjectClassList = personCustomObjectClassList;
-	}
+    public void setPersonCustomObjectClassList(List<String> personCustomObjectClassList) {
+        this.personCustomObjectClassList = personCustomObjectClassList;
+    }
 
-	public Boolean getAuthenticationFiltersEnabled() {
+    public Boolean getAuthenticationFiltersEnabled() {
         return authenticationFiltersEnabled;
     }
 
@@ -1240,21 +1241,21 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
-	public Boolean getEnableClientGrantTypeUpdate() {
-		return enableClientGrantTypeUpdate;
-	}
+    public Boolean getEnableClientGrantTypeUpdate() {
+        return enableClientGrantTypeUpdate;
+    }
 
-	public void setEnableClientGrantTypeUpdate(Boolean enableClientGrantTypeUpdate) {
-		this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
-	}
+    public void setEnableClientGrantTypeUpdate(Boolean enableClientGrantTypeUpdate) {
+        this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
+    }
 
-	public Set<GrantType> getDynamicGrantTypeDefault() {
-		return dynamicGrantTypeDefault;
-	}
+    public Set<GrantType> getDynamicGrantTypeDefault() {
+        return dynamicGrantTypeDefault;
+    }
 
-	public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
-		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
-	}
+    public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
+        this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
+    }
 
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
@@ -1288,4 +1289,11 @@ public class AppConfiguration implements Configuration {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
 
+    public Set<String> getAuthorizationRequestCustomAllowedParameters() {
+        return authorizationRequestCustomAllowedParameters;
+    }
+
+    public void setAuthorizationRequestCustomAllowedParameters(Set<String> authorizationRequestCustomAllowedParameters) {
+        this.authorizationRequestCustomAllowedParameters = authorizationRequestCustomAllowedParameters;
+    }
 }
