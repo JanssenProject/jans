@@ -30,6 +30,7 @@ import org.xdi.oxauth.model.session.SessionClient;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.util.StringHelper;
 
 import javax.annotation.Nonnull;
@@ -50,7 +51,7 @@ import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version November 23, 2017
  */
 @Stateless
 @Named
@@ -393,12 +394,12 @@ public class AuthenticationService {
         CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
 
-    	List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
-    	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-    		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
-    	} else {
+        List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
+        if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
+            user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+        } else {
             customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
-    	}
+        }
 
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
         customEntry.getCustomAttributes().add(customAttribute);
@@ -533,11 +534,27 @@ public class AuthenticationService {
     }
 
     public static Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
+        Set<String> authorizationRequestCustomAllowedParameters = CdiUtil.bean(AppConfiguration.class).getAuthorizationRequestCustomAllowedParameters();
         final Map<String, String> result = new HashMap<String, String>();
         if (!requestParameterMap.isEmpty()) {
             final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
             for (Map.Entry<String, String> entry : set) {
-                if (ALLOWED_PARAMETER.contains(entry.getKey())) {
+                if (ALLOWED_PARAMETER.contains(entry.getKey()) || authorizationRequestCustomAllowedParameters.contains(entry.getKey())) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static Map<String, String> getCustomParameters(@Nonnull final Map<String, String> requestParameterMap) {
+        Set<String> authorizationRequestCustomAllowedParameters = CdiUtil.bean(AppConfiguration.class).getAuthorizationRequestCustomAllowedParameters();
+        final Map<String, String> result = new HashMap<String, String>();
+        if (!requestParameterMap.isEmpty()) {
+            final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
+            for (Map.Entry<String, String> entry : set) {
+                if (authorizationRequestCustomAllowedParameters.contains(entry.getKey())) {
                     result.put(entry.getKey(), entry.getValue());
                 }
             }
