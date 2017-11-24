@@ -101,11 +101,21 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
 		for (AttributeData attribute : attributes) {
 			String attributeName = attribute.getName();
-			if (ldapOperationService.isCertificateAttribute(attributeName)) {
-				attributeName += ";binary";
-			}
-			if (ArrayHelper.isNotEmpty(attribute.getValues()) && StringHelper.isNotEmpty(attribute.getValues()[0])) {
-				ldapAttributes.add(new Attribute(attributeName, attribute.getValues()));
+			String attributeValues[] = attribute.getValues();
+
+            if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
+
+                if (ldapOperationService.isCertificateAttribute(attributeName)) {
+
+                    byte binaryValues[][] = new byte[attributeValues.length][];
+
+                    for (int i=0;i<attributeValues.length;i++)
+                        binaryValues[i]=Base64.decodeBase64(attributeValues[i]);
+
+                    ldapAttributes.add(new Attribute(attributeName + ";binary", binaryValues));
+                }
+                else
+                    ldapAttributes.add(new Attribute(attributeName, attributeValues));
 			}
 		}
 
@@ -664,10 +674,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 					attributeValueStrings = new String[attributeValues.length];
 					for (int i = 0; i < attributeValues.length; i++) {
 						attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
-						if (log.isTraceEnabled()) {
-							log.trace("Binary attribute: " + attribute.getName() + " value (hex): " + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) +
-									 " value (base64): " + attributeValueStrings[i]);
-						}
+                        log.trace("Binary attribute: " + attribute.getName() + " value (hex): " + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) +
+                                 " value (base64): " + attributeValueStrings[i]);
 					}
 				}
 			} else {
