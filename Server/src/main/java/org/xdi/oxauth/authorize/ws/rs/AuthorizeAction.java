@@ -50,11 +50,11 @@ import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AuthenticationService;
 import org.xdi.oxauth.service.AuthorizeService;
 import org.xdi.oxauth.service.ClientAuthorizationsService;
 import org.xdi.oxauth.service.ClientService;
 import org.xdi.oxauth.service.RedirectionUriService;
+import org.xdi.oxauth.service.RequestParameterService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
@@ -88,9 +88,6 @@ public class AuthorizeAction {
 
     @Inject
     private RedirectionUriService redirectionUriService;
-
-    @Inject
-    private AuthenticationService authenticationService;
 
     @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
@@ -130,6 +127,9 @@ public class AuthorizeAction {
 
     @Inject
     private AuthorizeService authorizeService;
+
+    @Inject
+    private RequestParameterService requestParameterService;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -219,7 +219,7 @@ public class AuthorizeAction {
 
         if (session == null || StringUtils.isBlank(session.getUserDn()) || SessionIdState.AUTHENTICATED != session.getState()) {
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
 
