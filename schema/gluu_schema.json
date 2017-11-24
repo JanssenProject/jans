@@ -4385,7 +4385,8 @@
                 "softwareVersion",
                 "userPassword",
                 "oxTrustCacheRefreshServerIpAddress",
-                "gluuPassportEnabled"
+                "gluuPassportEnabled",
+                "gluuSmtpServerTrust"
             ],
             "must": [
                 "objectclass"
@@ -4795,8 +4796,7 @@
                 "oxAuthConfStatic",
                 "oxAuthConfWebKeys",
                 "oxRevision",
-                "oxWebKeysSettings",
-                "gluuSmtpServerTrust"
+                "oxWebKeysSettings"
             ],
             "must": [
                 "objectclass"
