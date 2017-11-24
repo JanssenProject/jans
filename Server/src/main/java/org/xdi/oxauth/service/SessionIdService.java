@@ -91,6 +91,9 @@ public class SessionIdService {
     @Inject
     private CacheService cacheService;
 
+    @Inject
+    private AuthenticationService authenticationService;
+
     public String getAcr(SessionId session) {
         if (session == null || session.getSessionAttributes() == null) {
             return null;
@@ -205,7 +208,7 @@ public class SessionIdService {
             final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
 
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, String> newRequestParameterMap = AuthenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> newRequestParameterMap = authenticationService.getAllowedParameters(parameterMap);
             for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
                 String name = newRequestParameterMapEntry.getKey();
                 if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
