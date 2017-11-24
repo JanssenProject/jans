@@ -104,18 +104,13 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			String attributeValues[] = attribute.getValues();
 
             if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
-
                 if (ldapOperationService.isCertificateAttribute(attributeName)) {
+					byte[][] binaryValues = toBinaryValues(attributeValues);
 
-                    byte binaryValues[][] = new byte[attributeValues.length][];
-
-                    for (int i=0;i<attributeValues.length;i++)
-                        binaryValues[i]=Base64.decodeBase64(attributeValues[i]);
-
-                    ldapAttributes.add(new Attribute(attributeName + ";binary", binaryValues));
-                }
-                else
-                    ldapAttributes.add(new Attribute(attributeName, attributeValues));
+					ldapAttributes.add(new Attribute(attributeName + ";binary", binaryValues));
+				} else {
+					ldapAttributes.add(new Attribute(attributeName, attributeValues));
+				}
 			}
 		}
 
@@ -142,66 +137,69 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 				AttributeData oldAttribute = attributeDataModification.getOldAttribute();
 
 				String attributeName = attribute.getName();
-				if (ldapOperationService.isCertificateAttribute(attributeName)) {
-					attributeName += ";binary";
-				}
+				String oldAttributeName = oldAttribute.getName();
+
+				String[] attributeValues = attribute.getValues();
+				String[] oldAttributeValues = oldAttribute.getValues();
 
 				Modification modification = null;
 				if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-					modification = new Modification(ModificationType.ADD, attributeName, attribute.getValues());
-				} else if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-					modification = new Modification(ModificationType.DELETE, oldAttribute.getName(), oldAttribute.getValues());
-				} else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-					if (attribute.getValues().length == 1) {
-						modification = new Modification(ModificationType.REPLACE, attributeName, attribute.getValues());
-					} else {
-						String[] oldValues = ArrayHelper.arrayClone(oldAttribute.getValues());
-						String[] newValues = ArrayHelper.arrayClone(attribute.getValues());
+					modification = createModification(ModificationType.ADD, attributeName, attributeValues);
+				} else {
+					if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
+						modification = createModification(ModificationType.DELETE, oldAttributeName, oldAttributeValues);
+					} else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
+						if (attributeValues.length == 1) {
+							modification = createModification(ModificationType.REPLACE, attributeName, attributeValues);
+						} else {
+							String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
+							String[] newValues = ArrayHelper.arrayClone(attributeValues);
 
-						Arrays.sort(oldValues);
-						Arrays.sort(newValues);
+							Arrays.sort(oldValues);
+							Arrays.sort(newValues);
 
-						boolean[] retainOldValues = new boolean[oldValues.length];
-						Arrays.fill(retainOldValues, false);
+							boolean[] retainOldValues = new boolean[oldValues.length];
+							Arrays.fill(retainOldValues, false);
 
-						List<String> addValues = new ArrayList<String>();
-						List<String> removeValues = new ArrayList<String>();
+							List<String> addValues = new ArrayList<String>();
+							List<String> removeValues = new ArrayList<String>();
 
-						// Add new values
-						for (String value : newValues) {
-							int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
-								@Override
-								public int compare(String o1, String o2) {
-									return o1.toLowerCase().compareTo(o2.toLowerCase());
+							// Add new values
+							for (String value : newValues) {
+								int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
+									@Override
+									public int compare(String o1, String o2) {
+										return o1.toLowerCase().compareTo(o2.toLowerCase());
+									}
+								});
+								if (idx >= 0) {
+									// Old values array contains new value. Retain
+									// old value
+									retainOldValues[idx] = true;
+								} else {
+									// This is new value
+									addValues.add(value);
 								}
-							});
-							if (idx >= 0) {
-								// Old values array contains new value. Retain
-								// old value
-								retainOldValues[idx] = true;
-							} else {
-								// This is new value
-								addValues.add(value);
 							}
-						}
 
-						// Remove values which we don't have in new values
-						for (int i = 0; i < oldValues.length; i++) {
-							if (!retainOldValues[i]) {
-								removeValues.add(oldValues[i]);
+							// Remove values which we don't have in new values
+							for (int i = 0; i < oldValues.length; i++) {
+								if (!retainOldValues[i]) {
+									removeValues.add(oldValues[i]);
+								}
 							}
-						}
 
-						if (removeValues.size() > 0) {
-							Modification removeModification = new Modification(ModificationType.DELETE, attributeName,
-									removeValues.toArray(new String[removeValues.size()]));
-							modifications.add(removeModification);
-						}
+							if (removeValues.size() > 0) {
+								Modification removeModification = createModification(ModificationType.DELETE, attributeName,
+										removeValues.toArray(new String[removeValues.size()]));
+								modifications.add(removeModification);
+							}
 
-						if (addValues.size() > 0) {
-							Modification addModification = new Modification(ModificationType.ADD, attributeName,
-									addValues.toArray(new String[addValues.size()]));
-							modifications.add(addModification);
+							if (addValues.size() > 0) {
+								Modification addModification = createModification(ModificationType.ADD, attributeName,
+										addValues.toArray(new String[addValues.size()]));
+								modifications.add(addModification);
+							}
 						}
 					}
 				}
@@ -1044,6 +1042,28 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 	public int getSupportedLDAPVersion() {
 		return this.ldapOperationService.getSupportedLDAPVersion();
+	}
+
+	private byte[][] toBinaryValues(String[] attributeValues) {
+		byte binaryValues[][] = new byte[attributeValues.length][];
+
+		for (int i = 0; i < attributeValues.length; i++) {
+			binaryValues[i] = Base64.decodeBase64(attributeValues[i]);
+		}
+		return binaryValues;
+	}
+
+	private Modification createModification(final ModificationType modificationType, final String attributeName,
+			final String... attributeValues) {
+		String realAttributeName = attributeName;
+		if (ldapOperationService.isCertificateAttribute(realAttributeName)) {
+			realAttributeName += ";binary";
+			byte[][] binaryValues = toBinaryValues(attributeValues);
+
+			return new Modification(modificationType, realAttributeName, binaryValues);
+		}
+
+		return new Modification(modificationType, realAttributeName, attributeValues);
 	}
 
 	private static final class PropertyComparator<T> implements Comparator<T>, Serializable {
