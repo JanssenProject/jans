@@ -136,16 +136,17 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 				AttributeData attribute = attributeDataModification.getAttribute();
 				AttributeData oldAttribute = attributeDataModification.getOldAttribute();
 
-				String attributeName = attribute.getName();
-				String oldAttributeName = oldAttribute.getName();
-
-				String[] attributeValues = attribute.getValues();
-				String[] oldAttributeValues = oldAttribute.getValues();
+				String attributeName = attribute==null ? null : attribute.getName();
+				String[] attributeValues = attribute==null ? null : attribute.getValues();
 
 				Modification modification = null;
 				if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
 					modification = createModification(ModificationType.ADD, attributeName, attributeValues);
 				} else {
+
+                    String oldAttributeName = oldAttribute.getName();
+                    String[] oldAttributeValues = oldAttribute.getValues();
+
 					if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
 						modification = createModification(ModificationType.DELETE, oldAttributeName, oldAttributeValues);
 					} else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
