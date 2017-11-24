@@ -6,6 +6,17 @@
 
 package org.xdi.oxauth.auth;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
@@ -22,20 +33,12 @@ import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.AuthorizeService;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.RequestParameterService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Authenticator component
@@ -83,6 +86,9 @@ public class Authenticator {
 
     @Inject
     private LanguageBean languageBean;
+
+    @Inject
+    private RequestParameterService requestParameterService;
 
     private String authAcr;
 
@@ -421,7 +427,7 @@ public class Authenticator {
         if (extraParameters != null) {
             for (String extraParameter : extraParameters) {
                 if (authenticationService.isParameterExists(extraParameter)) {
-                    String extraParameterValue = authenticationService.getParameterValue(extraParameter);
+                    String extraParameterValue = requestParameterService.getParameterValue(extraParameter);
                     sessionIdAttributes.put(extraParameter, extraParameterValue);
                 }
             }
