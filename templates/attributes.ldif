@@ -1118,7 +1118,7 @@ gluuAttributeViewType: admin
 gluuAttributeViewType: user
 gluuAttributeEditType: admin
 gluuAttributeEditType: user
-gluuAttributeType: string
+gluuAttributeType: certificate
 gluuStatus: active
 urn: urn:mace:dir:attribute-def:userCertificate
 oxValidation: {"minLength":null,"maxLength":2048,"regexp":""}
