@@ -23,6 +23,7 @@ public enum GluuAttributeDataType implements LdapEnum {
 	NUMERIC("numeric", "Numeric"),
 	BOOLEAN("boolean", "Boolean"),
 	PHOTO("photo", "Photo"),
+	CERTIFICATE("certificate", "Certificate"),
 	DATE("generalizedTime", "Date");
 
 	private String value;
