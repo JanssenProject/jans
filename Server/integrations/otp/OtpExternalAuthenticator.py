@@ -242,7 +242,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getCountAuthenticationSteps(self, configurationAttributes):
         identity = CdiUtil.bean(Identity)
 
-        if identity..isSetWorkingParameter("otp_count_login_steps"):
+        if identity.isSetWorkingParameter("otp_count_login_steps"):
             return StringHelper.toInteger(identity.getWorkingParameter("otp_count_login_steps"))
         else:
             return 2
