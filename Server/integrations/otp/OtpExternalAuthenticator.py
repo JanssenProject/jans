@@ -243,7 +243,7 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
 
         if identity.isSetWorkingParameter("otp_count_login_steps"):
-            return StringHelper.toInteger(identity.getWorkingParameter("otp_count_login_steps"))
+            return StringHelper.toInteger("%s" % identity.getWorkingParameter("otp_count_login_steps"))
         else:
             return 2
 
@@ -366,7 +366,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return result
 
-    def validateSessionId(self):
+    def validateSessionId(self, identity):
         session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
         if StringHelper.isEmpty(session_id):
             print "OTP. Validate session id. Failed to determine session_id"
