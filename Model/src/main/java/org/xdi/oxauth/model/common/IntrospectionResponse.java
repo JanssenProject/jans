@@ -12,7 +12,6 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,9 +34,9 @@ public class IntrospectionResponse {
     @JsonProperty(value = "token_type")
     private String tokenType;
     @JsonProperty(value = "exp")
-    private Date expiresAt;
+    private Integer expiresAt;
     @JsonProperty(value = "iat")
-    private Date issuedAt;
+    private Integer issuedAt;
     @JsonProperty(value = "sub")
     private String subject;
     @JsonProperty(value = "aud")
@@ -80,20 +79,20 @@ public class IntrospectionResponse {
         this.scopes = scopes != null ? new ArrayList<String>(scopes) : new ArrayList<String>();
     }
 
-    public Date getExpiresAt() {
-        return expiresAt != null ? new Date(expiresAt.getTime()) : null;
+    public Integer getExpiresAt() {
+        return expiresAt;
     }
 
-    public void setExpiresAt(Date p_expiresAt) {
-        expiresAt = p_expiresAt != null ? new Date(p_expiresAt.getTime()) : null;
+    public void setExpiresAt(Integer expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
-    public Date getIssuedAt() {
-        return issuedAt != null ? new Date(issuedAt.getTime()) : null;
+    public Integer getIssuedAt() {
+        return issuedAt;
     }
 
-    public void setIssuedAt(Date p_issuedAt) {
-        issuedAt = p_issuedAt;
+    public void setIssuedAt(Integer issuedAt) {
+        this.issuedAt = issuedAt;
     }
 
     public String getClientId() {

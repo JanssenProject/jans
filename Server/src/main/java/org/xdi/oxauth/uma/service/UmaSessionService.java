@@ -6,25 +6,24 @@
 
 package org.xdi.oxauth.uma.service;
 
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.User;
-import org.xdi.oxauth.model.error.ErrorResponseFactory;
-import org.xdi.oxauth.model.registration.Client;
-import org.xdi.oxauth.model.uma.persistence.UmaPermission;
-import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserService;
+import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.xdi.oxauth.model.common.SessionId;
+import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.uma.persistence.UmaPermission;
+import org.xdi.oxauth.model.util.Util;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserService;
 
 /**
  * @author yuriyz
@@ -37,11 +36,7 @@ public class UmaSessionService {
     @Inject
     private Logger log;
     @Inject
-    private ErrorResponseFactory errorResponseFactory;
-    @Inject
     private SessionIdService sessionIdService;
-    @Inject
-    private ExternalUmaClaimsGatheringService external;
     @Inject
     private UserService userService;
     @Inject
@@ -104,14 +99,6 @@ public class UmaSessionService {
 
     public void setStep(int step, SessionId session) {
         session.getSessionAttributes().put("step", Integer.toString(step));
-    }
-
-    public CustomScriptConfiguration getScript(SessionId session) {
-        String scriptName = getScriptName(session);
-        if (StringUtils.isNotBlank(scriptName)) {
-            return external.getCustomScriptConfigurationByName(scriptName);
-        }
-        return null;
     }
 
     public void configure(SessionId session, String scriptName, Boolean reset, List<UmaPermission> permissions,

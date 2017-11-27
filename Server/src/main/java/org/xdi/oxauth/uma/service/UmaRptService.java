@@ -172,6 +172,7 @@ public class UmaRptService {
 
         try {
             ldapEntryManager.merge(rpt);
+            log.trace("Persisted RPT: " + rpt);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version August 9, 2017
+ * @version November 23, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -103,6 +103,8 @@ public class AppConfiguration implements Configuration {
     private Boolean persistIdTokenInLdap = false;
     private Boolean persistRefreshTokenInLdap = true;
 
+    private Boolean useCacheForAllImplicitFlowObjects = false;
+
     private Boolean authenticationFiltersEnabled;
     private Boolean clientAuthenticationFiltersEnabled;
     private List<AuthenticationFilter> authenticationFilters;
@@ -122,7 +124,7 @@ public class AppConfiguration implements Configuration {
 
     private Boolean enableClientGrantTypeUpdate;
     private Set<GrantType> dynamicGrantTypeDefault;
-    
+
     private String cssLocation;
     private String jsLocation;
     private String imgLocation;
@@ -159,6 +161,16 @@ public class AppConfiguration implements Configuration {
     private Boolean updateClientAccessTime;
     private Boolean logClientIdOnClientAuthentication;
     private Boolean logClientNameOnClientAuthentication;
+    private Boolean disableJdkLogger = true;
+    private Set<String> authorizationRequestCustomAllowedParameters;
+
+    public Boolean getDisableJdkLogger() {
+        return disableJdkLogger;
+    }
+
+    public void setDisableJdkLogger(Boolean disableJdkLogger) {
+        this.disableJdkLogger = disableJdkLogger;
+    }
 
     /**
      * Used in ServletLoggingFilter to enable http request/response logging.
@@ -864,6 +876,14 @@ public class AppConfiguration implements Configuration {
         this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
     }
 
+    public Boolean getUseCacheForAllImplicitFlowObjects() {
+        return useCacheForAllImplicitFlowObjects;
+    }
+
+    public void setUseCacheForAllImplicitFlowObjects(Boolean useCacheForAllImplicitFlowObjects) {
+        this.useCacheForAllImplicitFlowObjects = useCacheForAllImplicitFlowObjects;
+    }
+
     public String getDynamicRegistrationCustomObjectClass() {
         return dynamicRegistrationCustomObjectClass;
     }
@@ -872,15 +892,15 @@ public class AppConfiguration implements Configuration {
         dynamicRegistrationCustomObjectClass = p_dynamicRegistrationCustomObjectClass;
     }
 
-	public List<String> getPersonCustomObjectClassList() {
-		return personCustomObjectClassList;
-	}
+    public List<String> getPersonCustomObjectClassList() {
+        return personCustomObjectClassList;
+    }
 
-	public void setPersonCustomObjectClassList(List<String> personCustomObjectClassList) {
-		this.personCustomObjectClassList = personCustomObjectClassList;
-	}
+    public void setPersonCustomObjectClassList(List<String> personCustomObjectClassList) {
+        this.personCustomObjectClassList = personCustomObjectClassList;
+    }
 
-	public Boolean getAuthenticationFiltersEnabled() {
+    public Boolean getAuthenticationFiltersEnabled() {
         return authenticationFiltersEnabled;
     }
 
@@ -1221,22 +1241,22 @@ public class AppConfiguration implements Configuration {
         this.loggingLevel = loggingLevel;
     }
 
-	public Boolean getEnableClientGrantTypeUpdate() {
-		return enableClientGrantTypeUpdate;
-	}
+    public Boolean getEnableClientGrantTypeUpdate() {
+        return enableClientGrantTypeUpdate;
+    }
 
-	public void setEnableClientGrantTypeUpdate(Boolean enableClientGrantTypeUpdate) {
-		this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
-	}
+    public void setEnableClientGrantTypeUpdate(Boolean enableClientGrantTypeUpdate) {
+        this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
+    }
 
-	public Set<GrantType> getDynamicGrantTypeDefault() {
-		return dynamicGrantTypeDefault;
-	}
+    public Set<GrantType> getDynamicGrantTypeDefault() {
+        return dynamicGrantTypeDefault;
+    }
 
-	public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
-		this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
-	}
-	
+    public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
+        this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
+    }
+
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
     }
@@ -1268,5 +1288,12 @@ public class AppConfiguration implements Configuration {
     public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
-    
+
+    public Set<String> getAuthorizationRequestCustomAllowedParameters() {
+        return authorizationRequestCustomAllowedParameters;
+    }
+
+    public void setAuthorizationRequestCustomAllowedParameters(Set<String> authorizationRequestCustomAllowedParameters) {
+        this.authorizationRequestCustomAllowedParameters = authorizationRequestCustomAllowedParameters;
+    }
 }

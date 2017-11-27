@@ -123,6 +123,10 @@ public enum ResponseType implements HasParamName, LdapEnum {
         return responseTypes;
     }
 
+    public static boolean isImplicitFlow(String responseTypes) {
+        return !responseTypes.contains("code") && (responseTypes.contains("id_token") || responseTypes.contains("token"));
+    }
+
     public static String[] toStringArray(ResponseType[] responseTypes) {
         if (responseTypes == null) {
             return null;

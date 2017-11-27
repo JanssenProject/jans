@@ -62,7 +62,7 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 26, 2017
+ * @version November 10, 2017
  */
 public abstract class BaseTest {
 
@@ -259,7 +259,7 @@ public abstract class BaseTest {
      */
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies) {
-    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, cleanupCookies, false);
+        return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, cleanupCookies, false);
     }
 
     /**
@@ -267,30 +267,74 @@ public abstract class BaseTest {
      * and establishes whether the resource owner grants or denies the client's access request.
      */
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
-            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret, boolean cleanupCookies, boolean useNewDriver) {
-    	
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret,
+            boolean cleanupCookies, boolean useNewDriver) {
+    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, cleanupCookies, useNewDriver, 1);
+    }
+    /**
+     * The authorization server authenticates the resource owner (via the user-agent)
+     * and establishes whether the resource owner grants or denies the client's access request.
+     */
+    public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret,
+            boolean cleanupCookies, boolean useNewDriver, int authzSteps) {
+        WebDriver currentDriver = initWebDriver(useNewDriver, cleanupCookies);
 
-    	String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        AuthorizeClient authorizeClient = processAuthentication(currentDriver, authorizeUrl, authorizationRequest,
+				userId, userSecret);
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
-        authorizeClient.setRequest(authorizationRequest);
+        int remainAuthzSteps = authzSteps;
 
-        System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
+        String authorizationResponseStr = null;
+        do {
+            authorizationResponseStr = acceptAuthorization(currentDriver);
+            remainAuthzSteps--;
+		} while (remainAuthzSteps >= 1);
 
-        // Allow to run test in multi thread mode
-    	WebDriver currentDriver;
-    	if (useNewDriver) {
-    		currentDriver = new HtmlUnitDriver();
-    	} else {
+        AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest, useNewDriver,
+				currentDriver, authorizeClient, authorizationResponseStr);
+
+        stopWebDriver(useNewDriver, currentDriver);
+
+        return authorizationResponse;
+    }
+
+	private WebDriver initWebDriver(boolean useNewDriver, boolean cleanupCookies) {
+		// Allow to run test in multi thread mode
+        WebDriver currentDriver;
+        if (useNewDriver) {
+            currentDriver = new HtmlUnitDriver();
+        } else {
             startSelenium();
             currentDriver = driver;
             if (cleanupCookies) {
                 System.out.println("authenticateResourceOwnerAndGrantAccess: Cleaning cookies");
                 deleteAllCookies();
             }
-    	}
+        }
 
-    	currentDriver.navigate().to(authorizationRequestUrl);
+        return currentDriver;
+	}
+
+	private void stopWebDriver(boolean useNewDriver, WebDriver currentDriver) {
+		if (useNewDriver) {
+            currentDriver.close();
+            currentDriver.quit();
+        } else {
+            stopSelenium();
+        }
+	}
+
+	private AuthorizeClient processAuthentication(WebDriver currentDriver, String authorizeUrl,
+			AuthorizationRequest authorizationRequest, String userId, String userSecret) {
+		String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
+        authorizeClient.setRequest(authorizationRequest);
+
+        System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
+
+        currentDriver.navigate().to(authorizationRequestUrl);
 
         if (userSecret != null) {
             if (userId != null) {
@@ -306,37 +350,42 @@ public abstract class BaseTest {
             loginButton.click();
         }
 
-        String authorizationResponseStr = currentDriver.getCurrentUrl();
-        // Skip authorization form if client has persistent authorization 
-        if (!authorizationResponseStr.contains("#")) {
-	        WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
-	
-	        final String previousURL = currentDriver.getCurrentUrl();
-	        allowButton.click();
-	        WebDriverWait wait = new WebDriverWait(currentDriver, 10);
-	        wait.until(new ExpectedCondition<Boolean>() {
-	            public Boolean apply(WebDriver d) {
-	                return (d.getCurrentUrl() != previousURL);
-	            }
-	        });
+        return authorizeClient;
+	}
 
-	        authorizationResponseStr = currentDriver.getCurrentUrl();
+	private String acceptAuthorization(WebDriver currentDriver) {
+        String authorizationResponseStr = currentDriver.getCurrentUrl();
+
+        // Check for authorization form if client has no persistent authorization
+        if (!authorizationResponseStr.contains("#")) {
+            WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
+
+            final String previousURL = currentDriver.getCurrentUrl();
+            allowButton.click();
+            WebDriverWait wait = new WebDriverWait(currentDriver, 10);
+            wait.until(new ExpectedCondition<Boolean>() {
+                public Boolean apply(WebDriver d) {
+                    return (d.getCurrentUrl() != previousURL);
+                }
+            });
+
+            authorizationResponseStr = currentDriver.getCurrentUrl();
+        } else {
+            fail("The authorization form was expected to be shown.");
         }
 
+        return authorizationResponseStr;
+	}
 
-        Cookie sessionStateCookie = currentDriver.manage().getCookieNamed("session_state");
+	private AuthorizationResponse buildAuthorizationResponse(AuthorizationRequest authorizationRequest,
+			boolean useNewDriver, WebDriver currentDriver, AuthorizeClient authorizeClient,
+			String authorizationResponseStr) {
+		Cookie sessionStateCookie = currentDriver.manage().getCookieNamed("session_state");
         String sessionState = null;
         if (sessionStateCookie != null) {
             sessionState = sessionStateCookie.getValue();
         }
         System.out.println("authenticateResourceOwnerAndGrantAccess: sessionState:" + sessionState);
-
-    	if (useNewDriver) {
-    		currentDriver.close();
-    		currentDriver.quit();
-    	} else {
-    		stopSelenium();
-    	}
 
         AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
         if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
@@ -346,7 +395,7 @@ public abstract class BaseTest {
         showClientUserAgent(authorizeClient);
 
         return authorizationResponse;
-    }
+	}
 
     public AuthorizationResponse authenticateResourceOwnerAndDenyAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
@@ -527,19 +576,6 @@ public abstract class BaseTest {
 
         String authorizationResponseStr = driver.getCurrentUrl();
 
-        /*WebElement allowButton = driver.findElement(By.id(authorizeFormAllowButton));
-
-        final String previousURL = driver.getCurrentUrl();
-        allowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return (d.getCurrentUrl() != previousURL);
-            }
-        });
-
-        authorizationResponseStr = driver.getCurrentUrl();*/
-
         Cookie sessionStateCookie = driver.manage().getCookieNamed("session_state");
         String sessionState = null;
         if (sessionStateCookie != null) {
@@ -631,8 +667,7 @@ public abstract class BaseTest {
             showTitle("OpenID Connect Discovery");
 
             OpenIdConnectDiscoveryClient openIdConnectDiscoveryClient = new OpenIdConnectDiscoveryClient(resource);
-            OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(
-                    new ApacheHttpClient4Executor(createHttpClient(HostnameVerifierType.ALLOW_ALL)));
+            OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(clientExecutor(true));
 
             showClient(openIdConnectDiscoveryClient);
             assertEquals(openIdConnectDiscoveryResponse.getStatus(), 200, "Unexpected response code");
@@ -645,6 +680,7 @@ public abstract class BaseTest {
             System.out.println("OpenID Connect Configuration");
 
             OpenIdConfigurationClient client = new OpenIdConfigurationClient(configurationEndpoint);
+            client.setExecutor(clientExecutor(true));
             OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
 
             showClient(client);

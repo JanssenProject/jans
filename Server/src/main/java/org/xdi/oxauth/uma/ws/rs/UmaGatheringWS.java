@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.uma.UmaConstants;
 import org.xdi.oxauth.model.uma.UmaErrorResponseType;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.service.*;

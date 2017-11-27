@@ -319,13 +319,15 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 				String customScriptName = StringHelper.toLowerCase(acrValue);
 				if (customScriptConfigurationsNameMap.containsKey(customScriptName)) {
 					CustomScriptConfiguration customScriptConfiguration = customScriptConfigurationsNameMap.get(customScriptName);
-					CustomScriptType customScriptType = customScriptConfiguration.getCustomScript().getScriptType();
-					// Handle LDAP auth method
-					if (customScriptType == null) {
+					CustomScript customScript = customScriptConfiguration.getCustomScript();
+
+					// Handle internal authentication method
+					if (customScript.isInternal()) {
 						authModes.add(acrValue);
 						continue;
 					}
 
+					CustomScriptType customScriptType = customScriptConfiguration.getCustomScript().getScriptType();
 					BaseExternalType defaultImplementation = customScriptType.getDefaultImplementation();
 					BaseExternalType pythonImplementation = customScriptConfiguration.getExternalType();
 					if ((pythonImplementation != null) && (defaultImplementation != pythonImplementation)) {
@@ -388,6 +390,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public List<CustomScriptConfiguration> getCustomScriptConfigurationsMap() {
+		if (this.customScriptConfigurationsNameMap == null) {
+			return new ArrayList<CustomScriptConfiguration>(0);
+		}
+
 		List<CustomScriptConfiguration> configurations = new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurationsNameMap.values());
 		return configurations;
 	}
@@ -448,6 +454,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	public Map<String, Integer> acrToLevelMapping() {
 		Map<String, Integer> map = Maps.newHashMap();
 		for (CustomScriptConfiguration script : getCustomScriptConfigurationsMap()) {
+			if (script.getCustomScript().isInternal()) {
+				map.put(script.getName(), -1);
+				continue;
+			}
 			map.put(script.getName(), script.getLevel());
 		}
 		return map;
@@ -470,9 +480,12 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 		};
 		customScript.setName(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 		customScript.setLevel(-1);
+		customScript.setInternal(true);
 
-		return new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType,
+		CustomScriptConfiguration customScriptConfiguration = new CustomScriptConfiguration(customScript, internalDefaultPersonAuthenticationType,
 				new HashMap<String, SimpleCustomProperty>(0));
+		
+		return customScriptConfiguration;
 	}
 
 }
