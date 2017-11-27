@@ -22,6 +22,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
+import org.apache.http.HttpStatus;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
