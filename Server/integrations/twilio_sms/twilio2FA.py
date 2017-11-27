@@ -113,6 +113,9 @@ class PersonAuthentication(PersonAuthenticationType):
             # Get code and save it in LDAP temporarily with special session entry 
             identity.setWorkingParameter("code", code)
 
+            # Store user phone number in authentication session 
+            identity.setWorkingParameter("mobile_number", mobile_number)
+
             client = TwilioRestClient(self.ACCOUNT_SID, self.AUTH_TOKEN)
             bodyParam = BasicNameValuePair("Body", str(code))
             toParam = BasicNameValuePair("To", mobile_number)
@@ -176,7 +179,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getExtraParametersForStep(self, configurationAttributes, step):
         if step == 2:
-            return Arrays.asList("code")
+            return Arrays.asList("code", "mobile_number")
 
         return None
 
