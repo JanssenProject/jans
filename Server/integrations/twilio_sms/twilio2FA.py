@@ -178,10 +178,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        if step == 2:
-            return Arrays.asList("code", "mobile_number")
-
-        return None
+        return Arrays.asList("code", "mobile_number")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
