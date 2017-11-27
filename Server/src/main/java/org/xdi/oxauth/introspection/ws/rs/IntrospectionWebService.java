@@ -22,6 +22,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -77,14 +78,16 @@ public class IntrospectionWebService {
                         final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(p_token);
                         if (grantOfIntrospectionToken != null) {
                             final AbstractToken tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(p_token);
+                            final User user = grantOfIntrospectionToken.getUser();
 
                             response.setActive(tokenToIntrospect.isValid());
-                            response.setExpiresAt(tokenToIntrospect.getExpirationDate());
-                            response.setIssuedAt(tokenToIntrospect.getCreationDate());
+                            response.setExpiresAt(dateToSeconds(tokenToIntrospect.getExpirationDate()));
+                            response.setIssuedAt(dateToSeconds(tokenToIntrospect.getCreationDate()));
                             response.setAcrValues(tokenToIntrospect.getAuthMode());
                             response.setScopes(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
                             response.setClientId(grantOfIntrospectionToken.getClientId());
-                            response.setUsername(grantOfIntrospectionToken.getUserId());
+                            response.setSubject(grantOfIntrospectionToken.getUserId());
+                            response.setUsername(user != null ? user.getAttribute("displayName") : null);
                             response.setIssuer(appConfiguration.getIssuer());
                             response.setAudience(grantOfIntrospectionToken.getClientId());
 
@@ -111,5 +114,9 @@ public class IntrospectionWebService {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
+    }
+
+    public static Integer dateToSeconds(Date date) {
+        return date != null ? (int) (date.getTime() / 1000) : null;
     }
 }

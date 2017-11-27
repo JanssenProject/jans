@@ -84,4 +84,15 @@ public class UmaRPT extends AbstractToken {
     public void setPermissions(List<String> p_permissions) {
         permissions = p_permissions;
     }
+
+    @Override
+    public String toString() {
+        return "UmaRPT{" +
+                "dn='" + dn + '\'' +
+                ", id='" + id + '\'' +
+                ", userId='" + userId + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", permissions=" + permissions +
+                "} " + super.toString();
+    }
 }

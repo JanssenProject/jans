@@ -12,6 +12,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
 import org.xdi.oxauth.uma.authorization.Claims;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
 import org.xdi.oxauth.uma.authorization.UmaAuthorizationContextBuilder;

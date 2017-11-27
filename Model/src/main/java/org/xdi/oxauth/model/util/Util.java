@@ -6,6 +6,18 @@
 
 package org.xdi.oxauth.model.util;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.map.AnnotationIntrospector;
@@ -18,12 +30,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.xdi.oxauth.model.common.HasParamName;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -189,6 +195,14 @@ public class Util {
         }
 
         return result;
+    }
+
+    public static JSONArray listToJsonArray(Collection<String> list) {
+        if (list == null) {
+        	return new JSONArray();
+        }
+
+        return new JSONArray(list);
     }
 
     /**
