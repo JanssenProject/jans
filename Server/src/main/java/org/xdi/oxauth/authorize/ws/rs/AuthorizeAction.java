@@ -6,17 +6,32 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import com.google.common.collect.Sets;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jettison.json.JSONException;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
-import org.xdi.model.security.Identity;
-import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.i18n.LanguageBean;
 import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
@@ -35,20 +50,17 @@ import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.*;
+import org.xdi.oxauth.service.AuthorizeService;
+import org.xdi.oxauth.service.ClientAuthorizationsService;
+import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.RedirectionUriService;
+import org.xdi.oxauth.service.RequestParameterService;
+import org.xdi.oxauth.service.SessionIdService;
+import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
+import org.xdi.oxauth.service.external.ExternalConsentGatheringService;
 import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.*;
 
 /**
  * @author Javier Rojas Blum
@@ -63,13 +75,7 @@ public class AuthorizeAction {
     private Logger log;
 
     @Inject
-    private Authenticator authenticator;
-
-    @Inject
     private ClientService clientService;
-
-    @Inject
-    private ScopeService scopeService;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -84,13 +90,13 @@ public class AuthorizeAction {
     private RedirectionUriService redirectionUriService;
 
     @Inject
-    private AuthenticationService authenticationService;
-
-    @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
 
     @Inject
     private ExternalAuthenticationService externalAuthenticationService;
+
+    @Inject
+    private ExternalConsentGatheringService externalConsentGatheringService;
 
     @Inject
     private AuthenticationMode defaultAuthenticationMode;
@@ -100,9 +106,6 @@ public class AuthorizeAction {
 
     @Inject
     private NetworkService networkService;
-
-    @Inject
-    private Identity identity;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -118,6 +121,15 @@ public class AuthorizeAction {
 
     @Inject
     private ExternalContext externalContext;
+    
+    @Inject
+    private ConsentGathererService consentGatherer;
+
+    @Inject
+    private AuthorizeService authorizeService;
+
+    @Inject
+    private RequestParameterService requestParameterService;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -207,13 +219,13 @@ public class AuthorizeAction {
 
         if (session == null || StringUtils.isBlank(session.getUserDn()) || SessionIdState.AUTHENTICATED != session.getState()) {
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
 
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
             if (useExternalAuthenticator) {
-                List<String> acrValuesList = acrValuesList();
+                List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
                 if (acrValuesList.isEmpty()) {
                     if (StringHelper.isNotEmpty(defaultAuthenticationMode.getName())) {
                         acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
@@ -281,14 +293,12 @@ public class AuthorizeAction {
         log.trace("checkPermissionGranted, user = " + user);
 
         if (AuthorizeParamsValidator.noNonePrompt(prompts)) {
-
             if (appConfiguration.getTrustedClientEnabled()) { // if trusted client = true, then skip authorization page and grant access directly
                 if (client.getTrustedClient() && !prompts.contains(Prompt.CONSENT)) {
                     permissionGranted(session);
                     return;
                 }
             }
-
 
             if (client.getPersistClientAuthorizations()) {
                 ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
@@ -302,6 +312,23 @@ public class AuthorizeAction {
 
         } else {
             invalidRequest();
+        }
+
+        if (externalConsentGatheringService.isEnabled()) {
+        	if (consentGatherer.isConsentGathered()) {
+            	log.trace("Consent-gathered flow passed successfully");
+                permissionGranted(session);
+                return;
+        	}
+
+        	log.trace("Starting external consent-gathering flow");
+
+        	boolean result = consentGatherer.configure(session.getUserDn(), clientId, state);
+        	if (!result) {
+                log.error("Failed to initialize external consent-gathering flow.");
+                permissionDenied();
+                return;
+        	}
         }
 
         return;
@@ -324,57 +351,12 @@ public class AuthorizeAction {
         return session;
     }
 
-    /**
-     * By definition we expects space separated acr values as it is defined in spec. But we also try maybe some client
-     * sent it to us as json array. So we try both.
-     *
-     * @return acr value list
-     */
-    private List<String> acrValuesList() {
-        List<String> acrs;
-        try {
-            acrs = Util.jsonArrayStringAsList(this.acrValues);
-        } catch (JSONException ex) {
-            acrs = Util.splittedStringAsList(acrValues, " ");
-        }
-
-        return acrs;
-    }
-
     private SessionId getSession() {
-        if (StringUtils.isBlank(sessionId)) {
-            sessionId = sessionIdService.getSessionIdFromCookie();
-            if (StringUtils.isBlank(this.sessionId)) {
-                return null;
-            }
-        }
-
-        if (!identity.isLoggedIn()) {
-            authenticator.authenticateBySessionId(sessionId);
-        }
-
-        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
-        if (ldapSessionId == null) {
-            identity.logout();
-        }
-
-        return ldapSessionId;
+        return authorizeService.getSession(sessionId);
     }
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
-        List<org.xdi.oxauth.model.common.Scope> scopes = new ArrayList<org.xdi.oxauth.model.common.Scope>();
-
-        if (scope != null && !scope.isEmpty()) {
-            String[] scopesName = scope.split(" ");
-            for (String scopeName : scopesName) {
-                org.xdi.oxauth.model.common.Scope s = scopeService.getScopeByDisplayName(scopeName);
-                if (s != null && s.getDescription() != null) {
-                    scopes.add(s);
-                }
-            }
-        }
-
-        return scopes;
+    	return authorizeService.getScopes(scope);
     }
 
     /**
@@ -644,83 +626,13 @@ public class AuthorizeAction {
     }
 
     public void permissionGranted(SessionId session) {
-        try {
-            final User user = userService.getUserByDn(session.getUserDn());
-            if (user == null) {
-                log.error("Permission denied. Failed to find session user: userDn = " + session.getUserDn() + ".");
-                permissionDenied();
-                return;
-            }
-
-            if (clientId == null) {
-                clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
-            }
-            final Client client = clientService.getClient(clientId);
-
-            if (scope == null) {
-                scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
-            }
-
-            // oxAuth #441 Pre-Authorization + Persist Authorizations... don't write anything
-            // If a client has pre-authorization=true, there is no point to create the entry under
-            // ou=clientAuthorizations it will negatively impact performance, grow the size of the
-            // ldap database, and serve no purpose.
-            if (client.getPersistClientAuthorizations() && !client.getTrustedClient()) {
-                final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
-                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
-            }
-
-            session.addPermission(clientId, true);
-            sessionIdService.updateSessionId(session);
-
-            // OXAUTH-297 - set session_id cookie
-            sessionIdService.createSessionIdCookie(sessionId, session.getSessionState(), false);
-
-            Map<String, String> sessionAttribute = authenticationService.getAllowedParameters(session.getSessionAttributes());
-
-            if (sessionAttribute.containsKey(AuthorizeRequestParam.PROMPT)) {
-                List<Prompt> prompts = Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
-                prompts.remove(Prompt.CONSENT);
-                sessionAttribute.put(AuthorizeRequestParam.PROMPT, org.xdi.oxauth.model.util.StringUtils.implodeEnum(prompts, " "));
-            }
-
-            final String parametersAsString = authenticationService.parametersAsString(sessionAttribute);
-            final String uri = "restv1/authorize?" + parametersAsString;
-            log.trace("permissionGranted, redirectTo: {}", uri);
-
-            facesService.redirectToExternalURL(uri);
-        } catch (UnsupportedEncodingException e) {
-            log.trace(e.getMessage(), e);
-        }
+        final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
+    	authorizeService.permissionGranted(httpRequest, session);
     }
 
     public void permissionDenied() {
-        log.trace("permissionDenied");
         final SessionId session = getSession();
-
-        if (session == null) {
-            authenticationFailedSessionInvalid();
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        if (redirectUri == null) {
-            redirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
-        }
-        if (state == null) {
-            state = session.getSessionAttributes().get(AuthorizeRequestParam.STATE);
-        }
-
-        sb.append(redirectUri);
-        if (redirectUri != null && redirectUri.contains("?")) {
-            sb.append("&");
-        } else {
-            sb.append("?");
-        }
-        sb.append(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED,
-                getState()));
-
-        facesService.redirectToExternalURL(sb.toString());
+    	authorizeService.permissionDenied(session);
     }
 
     private void authenticationFailedSessionInvalid() {

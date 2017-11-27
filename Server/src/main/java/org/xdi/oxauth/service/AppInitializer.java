@@ -167,6 +167,8 @@ public class AppInitializer {
     	createConnectionProvider();
         configurationFactory.create();
 
+        loggerService.configure();
+
         LdapEntryManager localLdapEntryManager = ldapEntryManagerInstance.get();
         List<GluuLdapConfiguration> ldapAuthConfigs = loadLdapAuthConfigs(localLdapEntryManager);
         createAuthConnectionProviders(ldapAuthConfigs);
@@ -177,8 +179,8 @@ public class AppInitializer {
         pythonService.initPythonInterpreter(configurationFactory.getLdapConfiguration().getString("pythonModulesDir", null));
 
 		// Initialize script manager
-        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CLIENT_REGISTRATION,
-				CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING,
+        List<CustomScriptType> supportedCustomScriptTypes = Arrays.asList(CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CONSENT_GATHERING,
+        		CustomScriptType.CLIENT_REGISTRATION, CustomScriptType.ID_GENERATOR, CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING,
 				CustomScriptType.APPLICATION_SESSION, CustomScriptType.DYNAMIC_SCOPE);
 
         // Start timer
@@ -192,8 +194,6 @@ public class AppInitializer {
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         initTimer();
-
-		loggerService.updateLoggerConfigLocation();
 	}
 
     @Produces @ApplicationScoped
@@ -259,9 +259,9 @@ public class AppInitializer {
 		if (!this.ldapAuthConfigs.equals(newLdapAuthConfigs)) {
 			recreateLdapAuthEntryManagers(newLdapAuthConfigs);
 			event.select(ReloadAuthScript.Literal.INSTANCE).fire(ExternalAuthenticationService.MODIFIED_INTERNAL_TYPES_EVENT_TYPE);
-
-			setDefaultAuthenticationMethod(localLdapEntryManager);
 		}
+
+		setDefaultAuthenticationMethod(localLdapEntryManager);
 	}
 
 	/*
@@ -506,14 +506,31 @@ public class AppInitializer {
 	}
 
 	private void setDefaultAuthenticationMethod(LdapEntryManager localLdapEntryManager) {
-		GluuAppliance appliance = loadAppliance(localLdapEntryManager, "oxAuthenticationMode");
-
-		authenticationMode = null;
-		if (appliance != null) {
-			this.authenticationMode = new AuthenticationMode(appliance.getAuthenticationMode());
+		String currentAuthMethod = null;
+		if (this.authenticationMode != null) {
+			currentAuthMethod = this.authenticationMode.getName();
 		}
 
-		authenticationModeInstance.destroy(authenticationModeInstance.get());
+		String actualAuthMethod = getActualDefaultAuthenticationMethod(localLdapEntryManager);
+		
+		if (!StringHelper.equals(currentAuthMethod, actualAuthMethod)) {
+			authenticationMode = null;
+			if (actualAuthMethod != null) {
+				this.authenticationMode = new AuthenticationMode(actualAuthMethod);
+			}
+
+			authenticationModeInstance.destroy(authenticationModeInstance.get());
+		}
+	}
+
+	private String getActualDefaultAuthenticationMethod(LdapEntryManager localLdapEntryManager) {
+		GluuAppliance appliance = loadAppliance(localLdapEntryManager, "oxAuthenticationMode");
+
+		if (appliance == null) {
+			return null;
+		}
+
+		return appliance.getAuthenticationMode();
 	}
 	
 	@Produces @ApplicationScoped
@@ -606,7 +623,7 @@ public class AppInitializer {
 
 		for (org.apache.logging.log4j.core.Logger logger : loggerContext.getLoggers()) {
 			String loggerName = logger.getName();
-			if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu")) {
+			if (loggerName.startsWith("org.xdi.service") || loggerName.startsWith("org.xdi.oxauth") || loggerName.startsWith("org.gluu") || level == Level.OFF) {
 				logger.setLevel(level);
 			}
 		}

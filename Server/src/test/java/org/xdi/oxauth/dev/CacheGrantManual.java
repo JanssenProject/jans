@@ -12,7 +12,7 @@ import net.spy.memcached.DefaultConnectionFactory;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
 import net.spy.memcached.ops.OperationStatus;
-import org.xdi.oxauth.model.common.MemcachedGrant;
+import org.xdi.oxauth.model.common.CacheGrant;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.registration.Client;
@@ -31,7 +31,7 @@ import java.util.concurrent.ThreadFactory;
  * @author yuriyz
  * @version August 9, 2017
  */
-public class MemcacheManual {
+public class CacheGrantManual {
 
     private static final int CLIENT_COUNT = 10;
     private static final Random RANDOM = new Random();
@@ -151,8 +151,8 @@ public class MemcacheManual {
         return user;
     }
 
-    private static MemcachedGrant testGrant() {
-        MemcachedGrant grant = new MemcachedGrant();
+    private static CacheGrant testGrant() {
+        CacheGrant grant = new CacheGrant();
         grant.setAcrValues("basic");
         grant.setAuthenticationTime(new Date());
         grant.setAuthorizationCodeString(UUID.randomUUID().toString());

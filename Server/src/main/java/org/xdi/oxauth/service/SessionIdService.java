@@ -6,9 +6,29 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.ResultCode;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
@@ -33,19 +53,8 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -60,6 +69,7 @@ public class SessionIdService {
     public static final String SESSION_STATE_COOKIE_NAME = "session_state";
     public static final String SESSION_ID_COOKIE_NAME = "session_id";
     public static final String UMA_SESSION_ID_COOKIE_NAME = "uma_session_id";
+    public static final String CONSENT_SESSION_ID_COOKIE_NAME = "consent_session_id";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
     @Inject
@@ -88,6 +98,9 @@ public class SessionIdService {
 
     @Inject
     private CacheService cacheService;
+
+    @Inject
+    private RequestParameterService requestParameterService;
 
     public String getAcr(SessionId session) {
         if (session == null || session.getSessionAttributes() == null) {
@@ -118,23 +131,34 @@ public class SessionIdService {
                 return session;
             }
 
-            boolean isAcrChanged = acrValuesStr != null && !acrValuesStr.equals(sessionAcr);
+            List<String> acrValuesList = acrValuesList(acrValuesStr);
+            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr);
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
                 Integer sessionAcrLevel = acrToLevel.get(sessionAcr);
-                Integer currentAcrLevel = acrToLevel.get(acrValuesStr);
 
-                log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
-                        "current acr: " + acrValuesStr + "(level: " + currentAcrLevel + ")");
-                if (sessionAcrLevel < currentAcrLevel) {
-                    throw new AcrChangedException();
-                } else { // https://github.com/GluuFederation/oxAuth/issues/291
-                    return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
+                for (String acrValue : acrValuesList) {
+	                Integer currentAcrLevel = acrToLevel.get(acrValue);
+	
+	                log.info("Acr is changed. Session acr: " + sessionAcr + "(level: " + sessionAcrLevel + "), " +
+	                        "current acr: " + acrValue + "(level: " + currentAcrLevel + ")");
+	                
+	                // Requested acr method which not enabled
+	                if (currentAcrLevel == null) {
+	                    throw new AcrChangedException();
+	                }
+
+	                if (sessionAcrLevel < currentAcrLevel) {
+	                    throw new AcrChangedException();
+	                }
                 }
+                // https://github.com/GluuFederation/oxAuth/issues/291
+                return session; // we don't want to reinit login because we have stronger acr (avoid overriding)
             }
 
             reinitLogin(session, false);
         }
+
         return session;
     }
 
@@ -192,7 +216,7 @@ public class SessionIdService {
             final Map<String, String> currentSessionAttributes = new HashMap<String, String>(sessionAttributes);
 
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, String> newRequestParameterMap = AuthenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
             for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
                 String name = newRequestParameterMapEntry.getKey();
                 if (!StringHelper.equalsIgnoreCase(name, "auth_step")) {
@@ -212,6 +236,10 @@ public class SessionIdService {
 
     public String getUmaSessionIdFromCookie(HttpServletRequest request) {
         return getSessionIdFromCookie(request, UMA_SESSION_ID_COOKIE_NAME);
+    }
+
+    public String getConsentSessionIdFromCookie(HttpServletRequest request) {
+        return getSessionIdFromCookie(request, CONSENT_SESSION_ID_COOKIE_NAME);
     }
 
     public String getSessionIdFromCookie(HttpServletRequest request, String cookieName) {
@@ -249,8 +277,7 @@ public class SessionIdService {
         return null;
     }
 
-    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, boolean isUma) {
-        String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
+    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, String  cookieName) {
         String header = cookieName + "=" + sessionId;
         header += "; Path=/";
         header += "; Secure";
@@ -267,6 +294,11 @@ public class SessionIdService {
         httpResponse.addHeader("Set-Cookie", header);
 
         createSessionStateCookie(sessionState, httpResponse);
+    }
+
+    public void createSessionIdCookie(String sessionId, String sessionState, HttpServletResponse httpResponse, boolean isUma) {
+        String cookieName = isUma ? UMA_SESSION_ID_COOKIE_NAME : SESSION_ID_COOKIE_NAME;
+        createSessionIdCookie(sessionId, sessionState, httpResponse, cookieName);
     }
 
     public void createSessionIdCookie(String sessionId, String sessionState, boolean isUma) {
@@ -314,6 +346,13 @@ public class SessionIdService {
         httpResponse.addCookie(cookie);
     }
 
+    public void removeConsentSessionIdCookie(HttpServletResponse httpResponse) {
+        final Cookie cookie = new Cookie(CONSENT_SESSION_ID_COOKIE_NAME, null); // Not necessary, but saves bandwidth.
+        cookie.setPath("/");
+        cookie.setMaxAge(0); // Don't set to -1 or it will become a session cookie!
+        httpResponse.addCookie(cookie);
+    }
+
     public SessionId getSessionId() {
         String sessionId = getSessionIdFromCookie();
 
@@ -345,6 +384,11 @@ public class SessionIdService {
 
     public SessionId generateAuthenticatedSessionId(String userDn, Map<String, String> sessionIdAttributes) {
         return generateSessionId(userDn, new Date(), SessionIdState.AUTHENTICATED, sessionIdAttributes, true);
+    }
+
+    public SessionId generateUnauthenticatedSessionId(String userDn) {
+        Map<String, String> sessionIdAttributes = new HashMap<String, String>();
+        return generateSessionId(userDn, new Date(), SessionIdState.UNAUTHENTICATED, sessionIdAttributes, true);
     }
 
     public SessionId generateUnauthenticatedSessionId(String userDn, Date authenticationDate, SessionIdState state, Map<String, String> sessionIdAttributes, boolean persist) {
@@ -666,7 +710,11 @@ public class SessionIdService {
     public boolean isSessionIdAuthenticated() {
         SessionId sessionId = getSessionId();
 
-        if (sessionId == null) {
+        return isSessionIdAuthenticated(sessionId);
+    }
+
+	public boolean isSessionIdAuthenticated(SessionId sessionId) {
+		if (sessionId == null) {
             return false;
         }
 
@@ -677,10 +725,27 @@ public class SessionIdService {
         }
 
         return false;
-    }
+	}
 
     public boolean isNotSessionIdAuthenticated() {
         return !isSessionIdAuthenticated();
+    }
+
+    /**
+     * By definition we expects space separated acr values as it is defined in spec. But we also try maybe some client
+     * sent it to us as json array. So we try both.
+     *
+     * @return acr value list
+     */
+    public List<String> acrValuesList(String acrValues) {
+        List<String> acrs;
+        try {
+            acrs = Util.jsonArrayStringAsList(acrValues);
+        } catch (JSONException ex) {
+            acrs = Util.splittedStringAsList(acrValues, " ");
+        }
+
+        return acrs;
     }
 
     private void auditLogging(SessionId sessionId) {

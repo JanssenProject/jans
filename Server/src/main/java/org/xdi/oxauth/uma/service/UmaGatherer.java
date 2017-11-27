@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.external.ExternalUmaClaimsGatheringService;
 import org.xdi.oxauth.uma.authorization.UmaGatherContext;
 
 import javax.enterprise.context.RequestScoped;
@@ -69,7 +70,7 @@ public class UmaGatherer {
             final HttpServletResponse httpResponse = (HttpServletResponse) externalContext.getResponse();
             final SessionId session = umaSessionService.getSession(httpRequest, httpResponse);
 
-            CustomScriptConfiguration script = umaSessionService.getScript(session);
+            CustomScriptConfiguration script = getScript(session);
             UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
                     umaPctService, pageClaims, userService, facesService, appConfiguration);
 
@@ -176,7 +177,7 @@ public class UmaGatherer {
                 return result(Constants.RESULT_EXPIRED);
             }
 
-            CustomScriptConfiguration script = umaSessionService.getScript(session);
+            CustomScriptConfiguration script = getScript(session);
             UmaGatherContext context = new UmaGatherContext(script.getConfigurationAttributes(), httpRequest, session, umaSessionService, umaPermissionService,
                     umaPctService, pageClaims, userService, facesService, appConfiguration);
 
@@ -238,4 +239,12 @@ public class UmaGatherer {
     public Map<String, String> getPageClaims() {
         return pageClaims;
     }
+
+    protected CustomScriptConfiguration getScript(final SessionId session) {
+		String scriptName = umaSessionService.getScriptName(session);
+		CustomScriptConfiguration script = external.getCustomScriptConfigurationByName(scriptName);
+
+		return script;
+	}
+
 }
