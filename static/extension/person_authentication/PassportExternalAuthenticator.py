@@ -18,6 +18,11 @@ from org.xdi.oxauth.service import UserService, ClientService, AuthenticationSer
 from org.xdi.oxauth.model.common import User
 from org.xdi.util import StringHelper
 from org.xdi.oxauth.util import ServerUtil
+from org.gluu.jsf2.service import FacesService
+from org.xdi.oxauth.model.util import Base64Util
+from org.python.core.util import StringUtil
+from org.xdi.oxauth.service.net import HttpService
+from javax.faces.context import FacesContext
 
 import json
 import java
@@ -186,6 +191,44 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if (step == 1):
             print "Passport. Prepare for Step 1 method call"
+            identity = CdiUtil.bean(Identity)
+            sessionId =  identity.getSessionId()
+            sessionAttribute = sessionId.getSessionAttributes()
+            print "session %s" % sessionAttribute
+            oldState = sessionAttribute.get("state")
+            if(oldState == None):
+                print "old state is none"
+                return True
+            else:
+                print "state is obtained"
+                try:
+                    stateBytes = Base64Util.base64urldecode(oldState)
+                    state = StringUtil.fromBytes(stateBytes)
+		    stateObj = json.loads(state)    
+		    print stateObj["provider"]
+		    for y in stateObj:
+		        print (y,':',stateObj[y])
+		    httpService = CdiUtil.bean(HttpService)
+		    facesService = CdiUtil.bean(FacesService)
+                    facesContext = CdiUtil.bean(FacesContext)
+		    httpclient = httpService.getHttpsClient()
+		    headersMap = HashMap()
+		    headersMap.put("Accept", "text/json")
+		    host = facesContext.getExternalContext().getRequest().getServerName()
+                    url = "https://"+host+"/passport/token"
+                    print "url %s" %url
+                    resultResponse = httpService.executeGet(httpclient, url , headersMap)
+		    http_response = resultResponse.getHttpResponse()
+		    response_bytes = httpService.getResponseContent(http_response)
+		    szResponse = httpService.convertEntityToString(response_bytes)
+		    print "szResponse %s" % szResponse
+		    tokenObj = json.loads(szResponse)
+		    print "/passport/auth/saml/"+stateObj["provider"]+"/"+tokenObj["token_"]
+                    facesService.redirectToExternalURL("/passport/auth/saml/"+stateObj["provider"]+"/"+tokenObj["token_"])
+
+		except Exception, err:
+                    print str(err)
+                    return True
             return True
         else:
             return True
