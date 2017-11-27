@@ -60,22 +60,28 @@
 		</signing>
 	</crypto>  
 		
-	<!-- Configure sessionfactory implementation and behavior. The baseline server configures
-	     an in-memory session store.
-	 -->
-	<sessionfactory class="com.alfaariss.oa.engine.session.memory.MemorySessionFactory">
-		<expire>900</expire>
-	    <interval>60</interval>
-	    <max>100</max>
-	</sessionfactory>
+        <!-- Configure sessionfactory implementation and behavior. The baseline server configures
+             an in-memory session store.
+         -->
+        <sessionfactory class="com.alfaariss.oa.engine.session.memory.MemorySessionFactory">
+            <!-- Expiration interval in seconds. -->
+            <expire>3600</expire>
+            <!-- Storage cleaner interval in seconds. 0 = cleaning is disabled. -->
+            <interval>60</interval>
+            <!-- Maximum count of unexpired Session objects in memory, 0=infinity.  -->
+            <max>1000</max>
+        </sessionfactory>
 
-	<!-- Configure the TicketGrantingTicket-factory implemententation and behavior. The baseline
-	     server configures an in-memory TGT store  -->
-	<tgtfactory class="com.alfaariss.oa.engine.tgt.memory.MemoryTGTFactory">
-		<expire>3600</expire>
-	    <interval>60</interval>
-	    <max>100</max>
-	</tgtfactory>  
+        <!-- Configure the TicketGrantingTicket-factory implemententation and behavior. The baseline
+             server configures an in-memory TGT store  -->
+        <tgtfactory class="com.alfaariss.oa.engine.tgt.memory.MemoryTGTFactory">
+            <!-- Expiration interval in seconds -->
+            <expire>3600</expire>
+            <!-- Storage cleaner interval in seconds. 0 = cleaning is disabled. -->
+            <interval>60</interval>
+            <!-- Maximum count of unexpired TGT objects in memory, 0=infinity  -->
+            <max>1000</max>
+        </tgtfactory>
 	
 	<!-- 
 		RequestorPoolFactory defines how requestors (sp's) are defined; they can be defined in this configuration file,
@@ -155,6 +161,7 @@
 						<!-- Indicate whether logout is supported by the SAML-SP profile -->
 						<logout enabled="false" />
 
+                        <!-- SAML2 TimestampWindow parameters. Configures the timewindow for validating the timestamp of SAML messages -->
 						<authnstmt>
 							<window before_offset="1800" after_offset="60" />
 						</authnstmt>
@@ -401,17 +408,18 @@
 	
 	<attributerelease class="com.alfaariss.oa.engine.attribute.release.configuration.ConfigurationFactory">
 		<policy id="asimba.releasepolicy.1" friendlyname="Default Attribute Release policy" enabled="true">
-			<attribute name="firstname" />
+			<!-- <attribute name="firstname" />
 			<attribute name="lastname" />
 			<attribute name="email" />
 			<attribute name="role" />
-			<attribute name="country" />	<!-- country is defined in <global ..> attribute section -->
+            <attribute name="country" /> -->
 			<!-- when all available attributes can be released, use the wildcard "*" for name,
 				like:
 				<attribute name="*" />
 				Asimba Baseline keeps the password in the same format as the attributes, so
 				allowing all attributes to be released, would expose the password as well!
 			 -->
+            <attribute name="*" />
 		</policy>
 	</attributerelease>
 	

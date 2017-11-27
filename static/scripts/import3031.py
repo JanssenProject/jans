@@ -99,7 +99,8 @@ class Migration(object):
         self.currentData = os.path.join(self.workingDir, 'current.ldif')
         self.o_gluu = os.path.join(self.workingDir, "o_gluu.ldif")
         self.processTempFile = os.path.join(self.workingDir, "temp.ldif")
-        self.o_site = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
+        self.o_site_static = "/install/community-edition-setup/static/cache-refresh/o_site.ldif"
+        self.o_site = os.path.join(self.workingDir, "o_site.ldif")
         self.attrs = 2000
         self.objclasses = 2000
         self.ldap_type = 'openldap'
@@ -307,7 +308,15 @@ class Migration(object):
         atypeRegex = re.compile('^attributeTypes:\s', re.IGNORECASE)
         obclassRegex = re.compile('^objectClasses:\s', re.IGNORECASE)
 
+        isOCcontinue = False
+
         for line in infile:
+            if isOCcontinue:
+                if line[-1:] == ')':
+                    isOCcontinue = False
+                else:
+                    isOCcontinue = True
+                continue
             if re.match('^dn:', line) or re.match('^objectClass:', line) or \
                     re.match('^cn:', line):
                 continue
@@ -327,11 +336,20 @@ class Migration(object):
                 self.attrs += 1
             # Change the keyword for objectclass
             elif obclassRegex.match(line):
-                line = obclassRegex.sub('\nobjectclass ', line, 1)
-                oid = 'oxObjectClass:' + str(self.objclasses + 1)
-                oidregex = re.compile('ox-[\w]+-oid', re.IGNORECASE)
-                line = oidregex.sub(oid, line, 1)
-                self.objclasses += 1
+                if 'SUP gluuPerson' in line and 'objectClass MAY' in line:
+                    att = re.search(r'\((.*?)\)', line.split('objectClass MAY')[1]).group(1)
+                    self.customAttrs.append(att)
+                    continue
+                elif 'SUP gluuPerson' in line and 'objectClass MUST' in line:
+                    att = re.search(r'\((.*?)\)', line.split('objectClass MUST')[1]).group(1)
+                    self.customAttrs.append(att)
+                    continue
+                else:
+                    if line[-1:] == ')':
+                        isOCcontinue = False
+                    else:
+                        isOCcontinue = True
+                continue
             else:
                 logging.debug("Skipping Line: {}".format(line.strip()))
                 line = ""
@@ -418,12 +436,15 @@ class Migration(object):
                            'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
                            'oxTrustEntitlements', 'oxTrustx509Certificate']
 
+        if self.oxIDPAuthentication == 1:
+            ignoreList.remove('oxIDPAuthentication')
+
         # Rewriting all the new DNs in the new installation to ldif file
         for dn in currentDNs:
             new_entry = self.getEntry(self.currentData, dn)
             if "o=site" in dn:
-                continue  # skip all the o=site DNs
-            elif dn not in old_dn_map.keys():
+                 continue  # skip all the o=site DNs
+            if dn not in old_dn_map.keys():
                 #  Write to the file if there is no matching old DN data
                 ldif_writer.unparse(dn, new_entry)
                 continue
@@ -456,6 +477,8 @@ class Migration(object):
 
         # Pick all the left out DNs from the old DN map and write them to the LDIF
         for dn in sorted(old_dn_map, key=len):
+            if "o=site" in dn:
+                continue  # skip all the o=site DNs
             if dn in currentDNs:
                 continue  # Already processed
 
@@ -492,7 +515,9 @@ class Migration(object):
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
-                    if 'oxType' not in line:
+                    if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
+                        line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
+                    if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
                         outfile.write(line)
                     # parser = MyLDIF(open(self.currentData, 'rb'), sys.stdout)
                     # atr = parser.parse()
@@ -505,7 +530,14 @@ class Migration(object):
                     #         f = open(self.o_gluu, "a")
                     #         f.write('\n')
                     #         f.write(out)
-
+        data="".join(open( os.path.join(self.backupDir, 'ldif','site.ldif')).readlines()[4:-1])
+        open(os.path.join(self.backupDir, 'ldif','site.ldif'),"wb").write(data)
+        filenames = [self.o_site_static, os.path.join(self.backupDir, 'ldif','site.ldif')]
+        with open(self.o_site, 'w') as outfile:
+            for fname in filenames:
+                with open(fname) as infile:
+                    for line in infile:
+                        outfile.write(line)
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
@@ -537,6 +569,7 @@ class Migration(object):
         logging.debug(output)
         command = [self.ldif_import, '-n', 'userRoot',
                    '-l', self.o_site, '-R', self.o_site + '.rejects']
+        output = self.getOutput(command)
         logging.debug(output)
 
     def importProcessedData(self):
@@ -546,24 +579,26 @@ class Migration(object):
         else:
             self.importDataIntoOpenDJ()
 
+
+
     def getLDAPServerType(self):
-        # choice = 1
-        # try:
-        #     choice = int(raw_input(
-        #         "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
-        # except ValueError:
-        #     logging.error("You entered non-interger value. Cannot decide LDAP"
-        #                   "server type. Quitting.")
-        #     sys.exit(1)
-        #
-        # if choice == 1:
-        #     self.ldap_type = 'openldap'
-        # elif choice == 2:
-        #     self.ldap_type = 'opendj'
-        # else:
-        #     logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-        #     sys.exit(1)
         self.ldap_type = 'openldap'
+        self.oxIDPAuthentication = 2
+        try:
+            choice = int(raw_input(
+                "\nMigrate LDAP Server details for IDP Authentication?- 1.yes, 2.no [2]: "))
+        except ValueError:
+            logging.error('You entered non-interger value. Cannot decide LDAP migration'
+                          'server type. Quitting.')
+            sys.exit(1)
+
+        if choice == 1:
+            self.oxIDPAuthentication = 1
+        elif choice == 2:
+            self.oxIDPAuthentication = 2
+        else:
+            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+            sys.exit(1)
 
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')
@@ -625,6 +660,8 @@ class Migration(object):
         logging.info('Fixing permissions for files.')
         self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
         self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+        self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
+        self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
 
     def getProp(self, prop):
         with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:

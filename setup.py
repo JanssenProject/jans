@@ -103,9 +103,9 @@ class Setup(object):
         self.allowPreReleasedApplications = False
         self.allowDeprecatedApplications = False
 
-	self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
+        self.jreDestinationPath = '/opt/jdk1.8.0_%s' % self.jre_version
 
-	self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os_type = None
         self.os_initdaemon = None
 
@@ -152,59 +152,59 @@ class Setup(object):
         self.jetty_user_home = '/home/jetty'
         self.jetty_user_home_lib = '%s/lib' % self.jetty_user_home
         self.jetty_app_configuration = {
-                'oxauth' : {'name' : 'oxauth',
-                            'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded,websocket'},
-                            'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
-                            'installed' : False
-            },
-                'identity' : {'name' : 'identity',
-                              'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,http-forwarded,websocket'},
-                              'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
-                              'installed' : False
-            },
-                'idp' : {'name' : 'idp',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
-                         'installed' : False
-            },
-                'asimba' : {'name' : 'asimba',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
-                         'installed' : False
-            },
-                'oxauth-rp' : {'name' : 'oxauth-rp',
-                         'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded,websocket'},
-                         'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
-                         'installed' : False
-            },
-                'passport' : {'name' : 'passport',
-                         'node' : {},
-                         'memory' : {'ratio' : 0.05, "max_allowed_mb" : 1024},
-                         'installed' : False
-            }
+            'oxauth' : {'name' : 'oxauth',
+                        'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded,websocket'},
+                        'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
+                        'installed' : False
+                        },
+            'identity' : {'name' : 'identity',
+                          'jetty' : {'modules' : 'deploy,http,logging,jsp,ext,http-forwarded,websocket'},
+                          'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 2048},
+                          'installed' : False
+                          },
+            'idp' : {'name' : 'idp',
+                     'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
+                     'memory' : {'ratio' : 0.2, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
+                     'installed' : False
+                     },
+            'asimba' : {'name' : 'asimba',
+                        'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
+                        'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 1024},
+                        'installed' : False
+                        },
+            'oxauth-rp' : {'name' : 'oxauth-rp',
+                           'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded,websocket'},
+                           'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
+                           'installed' : False
+                           },
+            'passport' : {'name' : 'passport',
+                          'node' : {},
+                          'memory' : {'ratio' : 0.05, "max_allowed_mb" : 1024},
+                          'installed' : False
+                          }
         }
 
         self.app_custom_changes = {
             'jetty' : {
-                'name' : 'jetty', 
+                'name' : 'jetty',
                 'files' : [{
-                       'path' : '%s/etc/webdefault.xml' % self.jetty_home,
-                       'replace' : [
-                           {
-                               'pattern' : r'(\<param-name\>dirAllowed<\/param-name\>)(\s*)(\<param-value\>)true(\<\/param-value\>)',
-                               'update' : r'\1\2\3false\4'
-                            }
-                        ]
+                    'path' : '%s/etc/webdefault.xml' % self.jetty_home,
+                    'replace' : [
+                        {
+                            'pattern' : r'(\<param-name\>dirAllowed<\/param-name\>)(\s*)(\<param-value\>)true(\<\/param-value\>)',
+                            'update' : r'\1\2\3false\4'
+                        }
+                    ]
                 },
-                {
-                       'path' : '%s/etc/jetty.xml' % self.jetty_home,
-                       'replace' : [
-                           {
-                               'pattern' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
-                               'update' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>'
+                    {
+                        'path' : '%s/etc/jetty.xml' % self.jetty_home,
+                        'replace' : [
+                            {
+                                'pattern' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
+                                'update' : '<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>'
                             }
                         ]
-                }]
+                    }]
             }
         }
 
@@ -297,6 +297,14 @@ class Setup(object):
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
         self.openldapJksPass = None
         self.openldapJksFn = '%s/openldap.jks' % self.certFolder
+
+        self.passportSpKeyPass = None
+        self.passportSpTLSCACert = '%s/passport-sp.pem' % self.certFolder
+        self.passportSpTLSCert = '%s/passport-sp.crt' % self.certFolder
+        self.passportSpTLSKey = '%s/passport-sp.key' % self.certFolder
+        self.passportSpJksPass = None
+        self.passportSpJksFn = '%s/passport-sp.jks' % self.certFolder
+
         self.openldapSlapdConf = '%s/slapd.conf' % self.outputFolder
         self.openldapSymasConf = '%s/symas-openldap.conf' % self.outputFolder
         self.openldapRootSchemaFolder = "%s/schema" % self.gluuOptFolder
@@ -344,7 +352,7 @@ class Setup(object):
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.network = "/etc/sysconfig/network"
         self.system_profile_update = '%s/system_profile' % self.outputFolder
-        
+
         self.asimba_conf_folder = '%s/asimba' % self.configFolder
         self.asimba_configuration_xml = '%s/asimba.xml' % self.asimba_conf_folder
         self.asimba_configuration = '%s/asimba.xml' % self.outputFolder
@@ -423,40 +431,40 @@ class Setup(object):
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
-                     self.gluu_python_readme: True,
-                     self.oxtrust_config_json: False,
-                     self.oxtrust_cache_refresh_json: False,
-                     self.oxtrust_import_person_json: False,
-                     self.oxidp_config_json: False,
-                     self.oxasimba_config_json: False,
-                     self.ox_ldap_properties: True,
-                     self.oxauth_static_conf_json: False,
-                     self.oxTrust_log_rotation_configuration: True,
-                     self.ldap_setup_properties: False,
-                     self.apache2_conf: False,
-                     self.apache2_ssl_conf: False,
-                     self.apache2_24_conf: False,
-                     self.apache2_ssl_24_conf: False,
-                     self.etc_hosts: False,
-                     self.etc_hostname: False,
-                     self.ldif_base: False,
-                     self.ldif_appliance: False,
-                     self.ldif_attributes: False,
-                     self.ldif_scopes: False,
-                     self.ldif_clients: False,
-                     self.ldif_people: False,
-                     self.ldif_groups: False,
-                     self.ldif_scripts: False,
-                     self.ldif_scim: False,
-                     self.ldif_asimba: False,
-                     self.ldif_passport: False,
-                     self.ldif_passport_config: False,
-                     self.ldif_idp: False,
-                     self.asimba_configuration: False,
-                     self.asimba_properties: False,
-                     self.asimba_selector_configuration: False,
-                     self.network: False,
-                     }
+                             self.gluu_python_readme: True,
+                             self.oxtrust_config_json: False,
+                             self.oxtrust_cache_refresh_json: False,
+                             self.oxtrust_import_person_json: False,
+                             self.oxidp_config_json: False,
+                             self.oxasimba_config_json: False,
+                             self.ox_ldap_properties: True,
+                             self.oxauth_static_conf_json: False,
+                             self.oxTrust_log_rotation_configuration: True,
+                             self.ldap_setup_properties: False,
+                             self.apache2_conf: False,
+                             self.apache2_ssl_conf: False,
+                             self.apache2_24_conf: False,
+                             self.apache2_ssl_24_conf: False,
+                             self.etc_hosts: False,
+                             self.etc_hostname: False,
+                             self.ldif_base: False,
+                             self.ldif_appliance: False,
+                             self.ldif_attributes: False,
+                             self.ldif_scopes: False,
+                             self.ldif_clients: False,
+                             self.ldif_people: False,
+                             self.ldif_groups: False,
+                             self.ldif_scripts: False,
+                             self.ldif_scim: False,
+                             self.ldif_asimba: False,
+                             self.ldif_passport: False,
+                             self.ldif_passport_config: False,
+                             self.ldif_idp: False,
+                             self.asimba_configuration: False,
+                             self.asimba_properties: False,
+                             self.asimba_selector_configuration: False,
+                             self.network: False,
+                             }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
                                         'log4j-*.jar', 'commons-codec-*.jar', 'commons-cli-*.jar', 'commons-io-*.jar',
@@ -466,23 +474,23 @@ class Setup(object):
     def __repr__(self):
         try:
             return 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
-                + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n" \
-                + 'os'.ljust(30) + self.os_type.rjust(35) + "\n" \
-                + 'city'.ljust(30) + self.city.rjust(35) + "\n" \
-                + 'state'.ljust(30) + self.state.rjust(35) + "\n" \
-                + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n" \
-                + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
-                + 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n" \
-                + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
-                + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
-                + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
-                + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
-                + 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n" \
-                + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
-                + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
-                + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
-                + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
-                + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
+                   + 'orgName'.ljust(30) + self.orgName.rjust(35) + "\n" \
+                   + 'os'.ljust(30) + self.os_type.rjust(35) + "\n" \
+                   + 'city'.ljust(30) + self.city.rjust(35) + "\n" \
+                   + 'state'.ljust(30) + self.state.rjust(35) + "\n" \
+                   + 'countryCode'.ljust(30) + self.countryCode.rjust(35) + "\n" \
+                   + 'support email'.ljust(30) + self.admin_email.rjust(35) + "\n" \
+                   + 'Applications max ram'.ljust(30) + self.application_max_ram.rjust(35) + "\n" \
+                   + 'Admin Pass'.ljust(30) + self.ldapPass.rjust(35) + "\n" \
+                   + 'Install oxAuth'.ljust(30) + repr(self.installOxAuth).rjust(35) + "\n" \
+                   + 'Install oxTrust'.ljust(30) + repr(self.installOxTrust).rjust(35) + "\n" \
+                   + 'Install LDAP'.ljust(30) + repr(self.installLdap).rjust(35) + "\n" \
+                   + 'Install JCE 1.8'.ljust(30) + repr(self.installJce).rjust(35) + "\n" \
+                   + 'Install Apache 2 web server'.ljust(30) + repr(self.installHttpd).rjust(35) + "\n" \
+                   + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
+                   + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
+                   + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
+                   + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
         except:
             s = ""
             for key in self.__dict__.keys():
@@ -505,7 +513,7 @@ class Setup(object):
         # Set right permissions
         self.run([self.cmd_chmod, '-R', '440', realCertFolder])
         self.run([self.cmd_chmod, 'a+X', realCertFolder])
-        
+
         # Set write permission for Asimba's keystore (oxTrust can change it)
         self.run([self.cmd_chmod, 'u+w', realAsimbaJks])
 
@@ -604,6 +612,9 @@ class Setup(object):
         if not self.openldapKeyPass:
             self.openldapKeyPass = self.getPW()
             self.openldapJksPass = self.getPW()
+        if not self.passportSpKeyPass:
+            self.passportSpKeyPass = self.getPW()
+            self.passportSpJksPass = self.getPW()
         if not self.encode_salt:
             self.encode_salt= self.getPW() + self.getPW()
         if not self.baseInum:
@@ -704,7 +715,7 @@ class Setup(object):
         lines = []
         for textLine in textLines:
             lines.append('#%s' % textLine)
-    
+
         return "\n".join(lines)
 
     def replaceInText(self, text, pattern, update):
@@ -723,7 +734,7 @@ class Setup(object):
 
             for replace in change['replace']:
                 text = self.replaceInText(text, replace['pattern'], replace['update'])
-            
+
             self.writeFile(file, text)
             self.logIt("Wrote updated %s file %s..." % (changes['name'], file))
 
@@ -930,6 +941,7 @@ class Setup(object):
             self.copyFile("%s/static/auth/conf/duo_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/gplus_client_secrets.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/super_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
+            self.copyFile("%s/static/auth/conf/vericloud_gluu_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/cert_creds.json" % self.install_dir, "%s/" % self.certFolder)
             self.copyFile("%s/static/auth/conf/otp_configuration.json" % self.install_dir, "%s/" % self.certFolder)
 
@@ -989,8 +1001,8 @@ class Setup(object):
         self.logIt("Installing server JRE 1.8 %s..." % self.jre_version)
 
         jreArchive = 'server-jre-8u%s-linux-x64.tar.gz' % self.jre_version
-        
-	try:
+
+        try:
             self.logIt("Extracting %s into /opt/" % jreArchive)
             self.run(['tar', '-xzf', '%s/%s' % (self.distAppFolder, jreArchive), '-C', '/opt/', '--no-xattrs', '--no-same-owner', '--no-same-permissions'])
         except:
@@ -1091,7 +1103,7 @@ class Setup(object):
         self.logIt("Preparing %s service base folders" % serviceName)
         self.run([self.cmd_mkdir, '-p', jettyServiceBase])
 
-        # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module 
+        # Create ./ext/lib folder for custom libraries only if installed Jetty "ext" module
         if "ext" in jettyModulesList:
             self.run([self.cmd_mkdir, '-p', "%s/lib/ext" % jettyServiceBase])
 
@@ -1202,7 +1214,7 @@ class Setup(object):
         if self.installJce and not os.path.exists(jceArchivePath):
             print "Downloading JCE 1.8 zip file..."
             self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', jceArchivePath])
-            
+
 
     def encode_passwords(self):
         self.logIt("Encoding passwords")
@@ -1246,7 +1258,7 @@ class Setup(object):
                   '-passout',
                   'pass:%s' % password,
                   '2048'
-        ])
+                  ])
         self.run([self.opensslCommand,
                   'rsa',
                   '-in',
@@ -1255,12 +1267,12 @@ class Setup(object):
                   'pass:%s' % password,
                   '-out',
                   key
-        ])
+                  ])
 
         certCn = cn
         if certCn == None:
             certCn = self.hostname
-             
+
         self.run([self.opensslCommand,
                   'req',
                   '-new',
@@ -1270,7 +1282,7 @@ class Setup(object):
                   csr,
                   '-subj',
                   '/C=%s/ST=%s/L=%s/O=%s/CN=%s/emailAddress=%s' % (self.countryCode, self.state, self.city, self.orgName, certCn, self.admin_email)
-        ])
+                  ])
         self.run([self.opensslCommand,
                   'x509',
                   '-req',
@@ -1282,7 +1294,7 @@ class Setup(object):
                   key,
                   '-out',
                   public_certificate
-        ])
+                  ])
         self.run([self.cmd_chown, '%s:%s' % (user, user), key_with_password])
         self.run([self.cmd_chmod, '700', key_with_password])
         self.run([self.cmd_chown, '%s:%s' % (user, user), key])
@@ -1301,6 +1313,7 @@ class Setup(object):
             self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
             self.gen_cert('asimba', self.asimbaJksPass, 'jetty')
             self.gen_cert('openldap', self.openldapKeyPass, 'ldap', self.ldap_hostname)
+            self.gen_cert('passport-sp', self.passportSpKeyPass, 'ldap', self.ldap_hostname)
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
                               self.shibJksFn,
@@ -1320,6 +1333,19 @@ class Setup(object):
                               '%s/openldap.key' % self.certFolder,
                               '%s/openldap.crt' % self.certFolder,
                               'jetty')
+            # samp.pem from asimba.crt for asimba scrypt input
+            self.run([self.opensslCommand,
+                      'x509',
+                      '-inform',
+                      'pem',
+                      '-outform',
+                      'pem',
+                      '-in',
+                      '%s/asimba.crt' % self.certFolder,
+                      '-out',
+                      '%s/saml.pem' % self.certFolder
+                      ])
+            # permissions
             self.run([self.cmd_chown, '-R', 'jetty:jetty', self.certFolder])
             self.run([self.cmd_chmod, '-R', '500', self.certFolder])
             # oxTrust UI can add key to asimba's keystore
@@ -1345,7 +1371,7 @@ class Setup(object):
                   self.hostname,
                   '-passout',
                   'pass:%s' % keystorePW
-        ])
+                  ])
         # Import p12 to keystore
         self.run([self.cmd_keytool,
                   '-importkeystore',
@@ -1364,7 +1390,7 @@ class Setup(object):
                   '-keyalg',
                   'RSA',
                   '-noprompt'
-        ])
+                  ])
         self.run([self.cmd_chown, '%s:%s' % (user, user), pkcs_fn])
         self.run([self.cmd_chmod, '700', pkcs_fn])
         self.run([self.cmd_chown, '%s:%s' % (user, user), keystoreFN])
@@ -1388,32 +1414,32 @@ class Setup(object):
             self.logIt("Creating empty JKS keystore")
             # Create JKS with dummy key
             cmd = " ".join([self.cmd_keytool,
-                      '-genkey',
-                      '-alias',
-                      'dummy',
-                      '-keystore',
-                      jks_path,
-                      '-storepass',
-                      jks_pwd,
-                      '-keypass',
-                      jks_pwd,
-                      '-dname',
-                      '"%s"' % dn_name])
+                            '-genkey',
+                            '-alias',
+                            'dummy',
+                            '-keystore',
+                            jks_path,
+                            '-storepass',
+                            jks_pwd,
+                            '-keypass',
+                            jks_pwd,
+                            '-dname',
+                            '"%s"' % dn_name])
             self.run(['/bin/sh', '-c', cmd])
 
             # Delete dummy key from JKS
             cmd = " ".join([self.cmd_keytool,
-                      '-delete',
-                      '-alias',
-                      'dummy',
-                      '-keystore',
-                      jks_path,
-                      '-storepass',
-                      jks_pwd,
-                      '-keypass',
-                      jks_pwd,
-                      '-dname',
-                      '"%s"' % dn_name])
+                            '-delete',
+                            '-alias',
+                            'dummy',
+                            '-keystore',
+                            jks_path,
+                            '-storepass',
+                            jks_pwd,
+                            '-keypass',
+                            jks_pwd,
+                            '-dname',
+                            '"%s"' % dn_name])
             self.run(['/bin/sh', '-c', cmd])
 
         oxauth_lib_files = self.findFiles(self.oxauth_keys_utils_libs, self.jetty_user_home_lib)
@@ -1506,8 +1532,8 @@ class Setup(object):
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase
-                                     + string.ascii_uppercase
-                                     + string.digits) for _ in range(N))
+                                                    + string.ascii_uppercase
+                                                    + string.digits) for _ in range(N))
 
     def generate_scim_configuration(self):
         self.scim_rs_client_jks_pass = self.getPW()
@@ -1689,7 +1715,7 @@ class Setup(object):
 
             self.installJettyService(self.jetty_app_configuration[jettyIdpServiceName])
             self.copyFile('%s/idp.war' % self.distGluuFolder, jettyIdpServiceWebapps)
-            
+
             # Prepare libraries needed to for command line IDP3 utilities
             self.install_saml_libraries()
 
@@ -1722,7 +1748,7 @@ class Setup(object):
     def install_asimba(self):
         asimbaWar = 'asimba.war'
         distAsimbaPath = '%s/%s' % (self.distGluuFolder, asimbaWar)
-        
+
         self.logIt("Configuring Asimba...")
         self.copyFile(self.asimba_configuration, self.asimba_configuration_xml)
         self.copyFile(self.asimba_selector_configuration, self.asimba_selector_configuration_xml)
@@ -1730,7 +1756,7 @@ class Setup(object):
         self.run([self.cmd_chmod, '-R', 'ug+w', self.asimba_conf_folder])
         self.run([self.cmd_chmod, '-R', 'uga+r', self.asimba_configuration_xml, self.asimba_selector_configuration_xml])
         self.run([self.cmd_chown, '-R', 'jetty:jetty', self.asimba_conf_folder+'/metadata'])
-        
+
         self.logIt("Copying asimba.war into jetty webapps folder...")
         jettyServiceName = 'asimba'
         self.installJettyService(self.jetty_app_configuration[jettyServiceName])
@@ -1785,21 +1811,21 @@ class Setup(object):
         self.logIt("Preparing Passport OpenID RP certificate...")
         passport_rp_client_jwks_json = json.loads(''.join(self.passport_rp_client_jwks))
         for jwks_key in passport_rp_client_jwks_json["keys"]:
-            if jwks_key["alg"]  == self.passport_rp_client_cert_alg: 
+            if jwks_key["alg"]  == self.passport_rp_client_cert_alg:
                 self.passport_rp_client_cert_alias = jwks_key["kid"]
                 break
 
         self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
         self.renderTemplateInOut(self.passport_config, self.templateFolder, self.configFolder)
-        
+
         # Install passport system service script
         self.installNodeService('passport')
 
     def install_gluu_components(self):
         if self.installLdap:
             self.install_ldap_server()
- 
-        if self.installHttpd: 
+
+        if self.installHttpd:
             self.configure_httpd()
 
         if self.installOxAuth:
@@ -1865,7 +1891,7 @@ class Setup(object):
         self.createUser('node', self.node_user_home)
 
         self.createGroup('gluu')
-        
+
         self.addUserToGroup('gluu', 'ldap')
         self.addUserToGroup('gluu', 'jetty')
         self.addUserToGroup('gluu', 'node')
@@ -1915,14 +1941,14 @@ class Setup(object):
             if self.installLdap:
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/main_db'])
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
-                
+
             if self.installAsimba:
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder])
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata'])
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/idp'])
                 self.run([self.cmd_mkdir, '-p', self.asimba_conf_folder+'/metadata/sp'])
                 self.run([self.cmd_chown, '-R', 'jetty:jetty', self.asimba_conf_folder+'/metadata'])
-                
+
         except:
             self.logIt("Error making folders", True)
             self.logIt(traceback.format_exc(), True)
@@ -1932,14 +1958,14 @@ class Setup(object):
         if self.os_initdaemon == 'init':
             self.renderTemplate(self.system_profile_update)
             renderedSystemProfile = self.readFile(self.system_profile_update)
-    
+
             # Read source file
             currentSystemProfile = self.readFile(self.sysemProfile)
-    
+
             # Write merged file
             resultSystemProfile = "\n".join((currentSystemProfile, renderedSystemProfile))
             self.writeFile(self.sysemProfile, resultSystemProfile)
-    
+
             # Fix new file permissions
             self.run([self.cmd_chmod, '644', self.sysemProfile])
 
@@ -2050,8 +2076,8 @@ class Setup(object):
             self.installPassport = True
         else:
             self.installPassport = False
-            
-        #if self.allowDeprecatedApplications:
+
+            #if self.allowDeprecatedApplications:
             # Empty deprecated option
 
         promptForJCE = self.getPrompt("Install JCE 1.8?", "Yes")[0].lower()
@@ -2189,9 +2215,9 @@ class Setup(object):
                 for scriptFile in os.listdir(extensionTypeFolder):
                     scriptFilePath = os.path.join(extensionTypeFolder, scriptFile)
                     base64ScriptFile = self.generate_base64_file(scriptFilePath, 1)
-                    
+
                     # Prepare key for dictionary
-                    extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0]) 
+                    extensionScriptName = '%s_%s' % (extensionType, os.path.splitext(scriptFile)[0])
                     extensionScriptName = extensionScriptName.decode('utf-8').lower()
 
                     self.templateRenderingDict[extensionScriptName] = base64ScriptFile
@@ -2309,11 +2335,11 @@ class Setup(object):
         try:
             ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
             setupCmd = "cd /opt/opendj ; export OPENDJ_JAVA_HOME=" + self.jre_home + " ; " + " ".join([ldapSetupCommand,
-                                      '--no-prompt',
-                                      '--cli',
-                                      '--propertiesFilePath',
-                                      setupPropsFN,
-                                      '--acceptLicense'])
+                                                                                                       '--no-prompt',
+                                                                                                       '--cli',
+                                                                                                       '--propertiesFilePath',
+                                                                                                       setupPropsFN,
+                                                                                                       '--acceptLicense'])
             self.run(['/bin/su',
                       'ldap',
                       '-c',
@@ -2329,7 +2355,7 @@ class Setup(object):
                       'ldap',
                       '-c',
                       dsjavaCmd
-            ])
+                      ])
         except:
             self.logIt("Error running dsjavaproperties", True)
             self.logIt(traceback.format_exc(), True)
@@ -2341,7 +2367,7 @@ class Setup(object):
                       'ldap',
                       '-c',
                       dsjavaCmd
-            ])
+                      ])
         except:
             self.logIt("Error running stop-ds", True)
             self.logIt(traceback.format_exc(), True)
@@ -2374,41 +2400,41 @@ class Setup(object):
         service_path = '/sbin/service'
         apache_service_name = 'httpd'
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-           service_path = '/usr/bin/systemctl'
-           apache_service_name = 'httpd'
+            service_path = '/usr/bin/systemctl'
+            apache_service_name = 'httpd'
         elif self.os_type in ['debian', 'ubuntu']:
-           service_path = '/usr/sbin/service'
-           apache_service_name = 'apache2'
+            service_path = '/usr/sbin/service'
+            apache_service_name = 'apache2'
 
         # Apache HTTPD
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-           self.run([service_path, 'enable', apache_service_name])
-           self.run([service_path, 'start', apache_service_name])
+            self.run([service_path, 'enable', apache_service_name])
+            self.run([service_path, 'start', apache_service_name])
         else:
-           self.run([service_path, apache_service_name, 'start'])
+            self.run([service_path, apache_service_name, 'start'])
 
         # Memcached
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-           self.run([service_path, 'start', 'memcached.service'])
+            self.run([service_path, 'start', 'memcached.service'])
         else:
-           self.run([service_path, 'memcached', 'start'])
+            self.run([service_path, 'memcached', 'start'])
 
         # Openldap
         if self.installLdap:
             # FIXME Tested on ubuntu only
             if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-               self.run([service_path, 'restart', 'rsyslog.service'])
-               self.run([service_path, 'start', 'solserver.service'])
+                self.run([service_path, 'restart', 'rsyslog.service'])
+                self.run([service_path, 'start', 'solserver.service'])
             else:
-	           # Below two lines are specifically for Ubuntu 14.04
-               if self.os_type == 'ubuntu':
-                   self.copyFile(self.rsyslogUbuntuInitFile, "/etc/init.d")
-                   self.removeFile("/etc/init/rsyslog.conf")
-                   rsyslogFn = os.path.split(self.rsyslogUbuntuInitFile)[-1]
-                   self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % rsyslogFn])
+                # Below two lines are specifically for Ubuntu 14.04
+                if self.os_type == 'ubuntu':
+                    self.copyFile(self.rsyslogUbuntuInitFile, "/etc/init.d")
+                    self.removeFile("/etc/init/rsyslog.conf")
+                    rsyslogFn = os.path.split(self.rsyslogUbuntuInitFile)[-1]
+                    self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % rsyslogFn])
 
-               self.run([service_path, 'rsyslog', 'restart'])
-               self.run([service_path, 'solserver', 'start'])
+                self.run([service_path, 'rsyslog', 'restart'])
+                self.run([service_path, 'solserver', 'start'])
 
         # Jetty services
         try:
@@ -2416,9 +2442,9 @@ class Setup(object):
             for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
                 if applicationConfiguration['installed']:
                     if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                       self.run([service_path, 'start', applicationName], None, None, True)
+                        self.run([service_path, 'start', applicationName], None, None, True)
                     else:
-                       self.run([service_path, applicationName, 'start'], None, None, True)
+                        self.run([service_path, applicationName, 'start'], None, None, True)
         except:
             self.logIt("Error starting Jetty services")
             self.logIt(traceback.format_exc(), True)
@@ -2465,9 +2491,9 @@ class Setup(object):
 
         self.logIt("Found package '%s' for install" % packageName)
         if packageRpm:
-           self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
+            self.run([self.cmd_rpm, '--install', '--verbose', '--hash', packageName])
         else:
-           self.run([self.cmd_dpkg, '--install', packageName])
+            self.run([self.cmd_dpkg, '--install', packageName])
 
         openldapRunFolder = '/var/symas/run'
         self.run([self.cmd_chmod, '-R', '775', openldapRunFolder])
@@ -2519,6 +2545,13 @@ class Setup(object):
                 pem.write(crt.read())
             with open(self.openldapTLSKey, 'r') as key:
                 pem.write(key.read())
+
+        with open(self.passportSpTLSCACert, 'w') as pem:
+            with open(self.passportSpTLSCert, 'r') as crt:
+                pem.write(crt.read())
+            with open(self.passportSpTLSKey, 'r') as key:
+                pem.write(key.read())
+
 
         # 6. Setup Logging
         self.run([self.cmd_mkdir, '-m', '775', '-p', self.openldapLogDir])
@@ -2628,7 +2661,7 @@ class Setup(object):
                 self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
 
                 self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
-                
+
 
     def merge_dicts(self, *dict_args):
         result = {}
@@ -2637,7 +2670,7 @@ class Setup(object):
 
         return result
 
-    ##### Below function is temporary and will serve only 
+    ##### Below function is temporary and will serve only
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
     def change_rc_links(self):
         if self.os_type in ['ubuntu', 'debian']:
@@ -2716,11 +2749,11 @@ def getOpts(argv, setupOptions):
             setupOptions['installPassport'] = True
         elif opt == "-e":
             setupOptions['installJce'] = True
-	elif opt == '--allow_pre_released_applications':
+        elif opt == '--allow_pre_released_applications':
             setupOptions['allowPreReleasedApplications'] = True
         elif opt == '--allow_deprecated_applications':
             setupOptions['allowDeprecatedApplications'] = True
-	elif opt == '--import-ldif':
+        elif opt == '--import-ldif':
             if os.path.isdir(arg):
                 setupOptions['importLDIFDir'] = arg
                 print "Found setup LDIF import directory %s\n" % (arg)
@@ -2807,7 +2840,7 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
-### Ganesh Working Here...
+    ### Ganesh Working Here...
     if 'importLDIFDir' in setupOptions.keys():
         if os.path.isdir(installObject.openldapBaseFolder):
             installObject.logIt("Gluu server already installed. Setup will render and import templates and exit.", True)
@@ -2867,6 +2900,6 @@ if __name__ == '__main__':
     else:
         installObject.save_properties()
         print "Properties saved to %s. Change filename to %s if you want to re-use" % \
-                         (installObject.savedProperties, installObject.setup_properties_fn)
+              (installObject.savedProperties, installObject.setup_properties_fn)
 
 # END
