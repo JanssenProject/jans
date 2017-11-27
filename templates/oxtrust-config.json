@@ -125,9 +125,6 @@
     "rptConnectionPoolValidateAfterInactivity":10,
     "rptConnectionPoolCustomKeepAliveTimeout":5,
 
-    "scimTestMode":false,
-    "scimTestModeAccessToken":"",
-
     "shibbolethVersion":"%(shibboleth_version)s",
     "shibboleth3IdpRootDir":"%(idp3Folder)s",
     "shibboleth3SpConfDir":"%(idp3Folder)s/sp",
@@ -137,7 +134,9 @@
 
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
-	"ScimProperties": {
-		"maxCount": 200
-	}
+
+    "scimTestMode":false,
+    "ScimProperties": {
+        "maxCount": 200
+    }
 }

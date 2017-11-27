@@ -8,7 +8,7 @@ objectClass: oxAuthCustomScope
 displayName: openid
 inum: %(inumOrg)s!0009!F0C4
 defaultScope: true
-description: A persistent but non-identifiable correlation key released by your OpenID Provider.
+description: Authenticate using OpenID Connect.
 oxScopeType: openid
 
 dn: inum=%(inumOrg)s!0009!43F1,ou=scopes,o=%(inumOrg)s,o=gluu
@@ -17,9 +17,7 @@ objectClass: oxAuthCustomScope
 displayName: profile
 inum: %(inumOrg)s!0009!43F1
 defaultScope: false
-description: This information includes: name, family_name, given_name, middle_name, nickname,
-  preferred username, picture, website, gender, birthdate, zoneinfo, locale and when the profile
-  was last updated.
+description: View your basic profile info.
 oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!0C85,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!B4B0,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -43,7 +41,7 @@ objectClass: oxAuthCustomScope
 displayName: email
 inum: %(inumOrg)s!0009!764C
 defaultScope: false
-description: Your email address and whether its verified.
+description: View your email address.
 oxAuthClaim: inum=%(inumOrg)s!0005!8F88,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!CAE3,ou=attributes,o=%(inumOrg)s,o=gluu
 oxScopeType: openid
@@ -53,7 +51,7 @@ objectClass: top
 objectClass: oxAuthCustomScope
 displayName: address
 inum: %(inumOrg)s!0009!C17A
-description: This data has information about your address
+description: View your address.
 defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!27DB,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!2A3D,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -71,7 +69,7 @@ objectClass: top
 objectClass: oxAuthCustomScope
 displayName: phone
 inum: %(inumOrg)s!0009!D491
-description: Your phone number
+description: View your phone number.
 defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!B17A,ou=attributes,o=%(inumOrg)s,o=gluu
 oxAuthClaim: inum=%(inumOrg)s!0005!0C18,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -81,7 +79,7 @@ dn: inum=%(inumOrg)s!0009!341A,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: false
-description: Client Info
+description: View the client info.
 displayName: clientinfo
 inum: %(inumOrg)s!0009!341A
 oxAuthClaim: inum=%(inumOrg)s!0005!2B29,ou=attributes,o=%(inumOrg)s,o=gluu
@@ -93,14 +91,14 @@ objectClass: top
 objectClass: oxAuthCustomScope
 displayName: user_name
 inum: %(inumOrg)s!0009!10B2
-description: Your local username in the Gluu Server
+description: View your local username in the Gluu Server.
 defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!42E0,ou=attributes,o=%(inumOrg)s,o=gluu
 oxScopeType: openid
 
 dn: inum=%(inumOrg)s!0009!6D99,ou=scopes,o=%(inumOrg)s,o=gluu
 defaultScope: true
-description: Obtain UMA PAT
+description: Obtain UMA PAT.
 displayName: uma_protection
 inum: %(inumOrg)s!0009!6D99
 objectClass: oxAuthCustomScope
@@ -112,7 +110,7 @@ objectClass: top
 objectClass: oxAuthCustomScope
 displayName: mobile_phone
 inum: %(inumOrg)s!0009!8A01
-description: Your mobile phone number
+description: View your mobile phone number.
 defaultScope: false
 oxAuthClaim: inum=%(inumOrg)s!0005!6DA6,ou=attributes,o=%(inumOrg)s,o=gluu
 oxScopeType: openid
@@ -121,7 +119,7 @@ dn: inum=%(inumOrg)s!0009!C4F5.F66C,ou=scopes,o=%(inumOrg)s,o=gluu
 objectClass: oxAuthCustomScope
 objectClass: top
 defaultScope: true
-description: User permission and roles
+description: View your user permission and roles.
 displayName: permission
 inum: %(inumOrg)s!0009!C4F5.F66C
 oxScopeType: dynamic

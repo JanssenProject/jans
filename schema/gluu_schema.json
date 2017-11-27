@@ -4385,7 +4385,8 @@
                 "softwareVersion",
                 "userPassword",
                 "oxTrustCacheRefreshServerIpAddress",
-                "gluuPassportEnabled"
+                "gluuPassportEnabled",
+                "gluuSmtpServerTrust"
             ],
             "must": [
                 "objectclass"
