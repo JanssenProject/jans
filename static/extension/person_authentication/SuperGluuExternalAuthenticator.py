@@ -773,6 +773,9 @@ class PersonAuthentication(PersonAuthenticationType):
                         if self.pushSnsMode or self.pushGluuMode:
                             pushSnsService = CdiUtil.bean(PushSnsService)
                             targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.APNS, user, u2f_device)
+                            if targetEndpointArn == None:
+                            	return
+
                             send_notification = True
     
                             sns_push_request_dictionary = { "aps": 
@@ -823,6 +826,9 @@ class PersonAuthentication(PersonAuthenticationType):
                         if self.pushSnsMode or self.pushGluuMode:
                             pushSnsService = CdiUtil.bean(PushSnsService)
                             targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.GCM, user, u2f_device)
+                            if targetEndpointArn == None:
+                            	return
+
                             send_notification = True
     
                             sns_push_request_dictionary = { "collapse_key": "single",
@@ -861,7 +867,6 @@ class PersonAuthentication(PersonAuthenticationType):
         if StringHelper.isNotEmpty(notificationConf):
             notificationConfJson = json.loads(notificationConf)
             targetEndpointArn = notificationConfJson['sns_endpoint_arn']
-            print targetEndpointArn
             if StringHelper.isNotEmpty(targetEndpointArn):
                 print "Super-Gluu. Get target endpoint ARN. There is already created target endpoint ARN"
                 return targetEndpointArn
@@ -896,6 +901,11 @@ class PersonAuthentication(PersonAuthenticationType):
             registerDeviceResponse = pushClient.registerDevice(pushClientAuth, pushToken, customUserData);
             if registerDeviceResponse != None and registerDeviceResponse.getStatusCode() == 200:
                 targetEndpointArn = registerDeviceResponse.getEndpointArn()
+        
+        if StringHelper.isEmpty(targetEndpointArn):
+	        print "Super-Gluu. Failed to get endpoint ARN for user: '%s'" % user.getUserId()
+        	return None
+
         print "Super-Gluu. Get target endpoint ARN. Create target endpoint ARN '%s' for user: '%s'" % (targetEndpointArn, user.getUserId())
         
         # Store created endpoint ARN in device entry
