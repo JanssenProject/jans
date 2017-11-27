@@ -148,9 +148,6 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Basic (multi auth conf). Validate auth configuration. There is no ldap_configuration section in configuration"
             return False
         
-
-            #@JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs", "primaryKey",
-            #        "localPrimaryKey", "useAnonymousBind" })
         idx = 1
         for ldapConfiguration in authConfiguration["ldap_configuration"]:
             if (not self.containsAttributeString(ldapConfiguration, "configId")):

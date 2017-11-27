@@ -60,7 +60,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 15, 2017
+ * @version October 26, 2017
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -109,11 +109,13 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
-            if (appConfiguration.getDynamicRegistrationEnabled()) {
-                final RegisterRequest r = RegisterRequest.fromJson(requestParams);
+            final RegisterRequest r = RegisterRequest.fromJson(requestParams);
 
-                log.debug("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, params = {}",
-                        r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), requestParams);
+            log.info("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, defaultAcrValues = {}",
+                    r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
+            log.trace("Registration request = {}", requestParams);
+
+            if (appConfiguration.getDynamicRegistrationEnabled()) {
 
                 if (r.getSubjectType() == null) {
                     SubjectType defaultSubjectType = SubjectType.fromString(appConfiguration.getDefaultSubjectType());
@@ -213,7 +215,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                             entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.INVALID_CLIENT_METADATA));
                 }
             } else {
-                log.debug("Dynamic client registration is disabled.");
+                log.info("Dynamic client registration is disabled.");
                 builder = Response.status(Response.Status.BAD_REQUEST).
                         entity(errorResponseFactory.getErrorAsJson(RegisterErrorResponseType.ACCESS_DENIED));
             }
@@ -652,6 +654,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         if (StringHelper.equalsIgnoreCase("oxAuthTrustedClient", attr)) {
             boolean trustedClient = StringHelper.toBoolean(parameterValues.get(0), false);
             p_client.setTrustedClient(trustedClient);
+
+            return true;
+        } else if (StringHelper.equalsIgnoreCase("oxIncludeClaimsInIdToken", attr)) {
+            boolean includeClaimsInIdToken = StringHelper.toBoolean(parameterValues.get(0), false);
+            p_client.setIncludeClaimsInIdToken(includeClaimsInIdToken);
 
             return true;
         }

@@ -1,4 +1,4 @@
-package org.xdi.oxauth.uma.service;
+package org.xdi.oxauth.service.external;
 
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
