@@ -9,6 +9,7 @@ package org.xdi.oxauth.service;
 import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.util.StaticUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -19,7 +20,7 @@ import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
 import org.xdi.oxauth.model.common.ClientTokens;
-import org.xdi.oxauth.model.common.MemcachedGrant;
+import org.xdi.oxauth.model.common.CacheGrant;
 import org.xdi.oxauth.model.common.SessionTokens;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -93,7 +94,11 @@ public class GrantService {
         }
     }
 
-    private boolean shouldPutInCache(TokenType tokenType) {
+    private boolean shouldPutInCache(TokenType tokenType, boolean isImplicitFlow) {
+        if (isImplicitFlow && BooleanUtils.isTrue(appConfiguration.getUseCacheForAllImplicitFlowObjects())) {
+            return true;
+        }
+
         switch (tokenType) {
             case ID_TOKEN:
                 if (!isTrue(appConfiguration.getPersistIdTokenInLdap())) {
@@ -111,7 +116,7 @@ public class GrantService {
         String hashedToken = TokenHashUtil.getHashedToken(token.getTokenCode());
         token.setTokenCode(hashedToken);
 
-        if (shouldPutInCache(token.getTokenTypeEnum())) {
+        if (shouldPutInCache(token.getTokenTypeEnum(), token.isImplicitFlow())) {
             ClientTokens clientTokens = getCacheClientTokens(token.getClientId());
             clientTokens.getTokenHashes().add(hashedToken);
 
@@ -122,6 +127,9 @@ public class GrantService {
                     break;
                 case REFRESH_TOKEN:
                     expiration = Integer.toString(appConfiguration.getRefreshTokenLifetime());
+                    break;
+                case ACCESS_TOKEN:
+                    expiration = Integer.toString(appConfiguration.getAccessTokenLifetime());
                     break;
             }
 
@@ -182,7 +190,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(null, MemcachedGrant.cacheKey(token.getClientId(), token.getAuthorizationCode()));
+                cacheService.remove(null, CacheGrant.cacheKey(token.getClientId(), token.getAuthorizationCode(), token.getGrantId()));
             }
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
@@ -206,7 +214,7 @@ public class GrantService {
             for (TokenLdap t : p_entries) {
                 try {
                     remove(t);
-                } catch (Exception e){
+                } catch (Exception e) {
                     log.error("Failed to remove entry", e);
                 }
             }
@@ -246,7 +254,20 @@ public class GrantService {
     }
 
     public TokenLdap getGrantsByCode(String p_code) {
-        return load(baseDn(), p_code);
+        return getGrantsByCode(p_code, false);
+    }
+
+
+    public TokenLdap getGrantsByCode(String p_code, boolean onlyFromCache) {
+        Object grant = cacheService.get(null, TokenHashUtil.getHashedToken(p_code));
+        if (grant instanceof TokenLdap) {
+            return (TokenLdap) grant;
+        } else {
+            if (onlyFromCache) {
+                return null;
+            }
+            return load(baseDn(), p_code);
+        }
     }
 
     private TokenLdap load(String p_baseDn, String p_code) {
@@ -309,7 +330,7 @@ public class GrantService {
     public List<TokenLdap> getCacheClientTokensEntries(String clientId) {
         Object o = cacheService.get(null, new ClientTokens(clientId).cacheKey());
         if (o instanceof ClientTokens) {
-            return getCacheTokensEntries(((ClientTokens)o).getTokenHashes());
+            return getCacheTokensEntries(((ClientTokens) o).getTokenHashes());
         }
         return Collections.emptyList();
     }
@@ -342,7 +363,7 @@ public class GrantService {
         if (t != null) {
             removeSilently(t);
         }
-        cacheService.remove(null, MemcachedGrant.cacheKey(p_clientId, p_code));
+        cacheService.remove(null, CacheGrant.cacheKey(p_clientId, p_code, null));
     }
 
     public void removeAllByAuthorizationCode(String p_authorizationCode) {
@@ -371,7 +392,7 @@ public class GrantService {
             private Filter getFilter() {
                 try {
                     return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(new Date())));
-                }catch (LDAPException e) {
+                } catch (LDAPException e) {
                     log.trace(e.getMessage(), e);
                     return Filter.createPresenceFilter("oxAuthExpiration");
                 }
@@ -396,7 +417,7 @@ public class GrantService {
                     Calendar calendar = Calendar.getInstance();
                     calendar.add(Calendar.SECOND, 60);
                     return Filter.create(String.format("(&(oxAuthCreation<=%s)(|(numsubordinates=0)(hasSubordinates=FALSE)))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
-                }catch (LDAPException e) {
+                } catch (LDAPException e) {
                     log.trace(e.getMessage(), e);
                     return Filter.createPresenceFilter("oxAuthCreation");
                 }
@@ -420,7 +441,7 @@ public class GrantService {
             private Filter getFilter() {
                 try {
                     return Filter.create("(&(!(oxAuthCreation=*))(|(numsubordinates=0)(hasSubordinates=FALSE)))");
-                }catch (LDAPException e) {
+                } catch (LDAPException e) {
                     log.trace(e.getMessage(), e);
                     return Filter.createPresenceFilter("oxAuthCreation");
                 }
@@ -467,5 +488,4 @@ public class GrantService {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
         }
     }
-
 }

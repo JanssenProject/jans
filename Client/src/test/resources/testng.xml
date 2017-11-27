@@ -112,6 +112,12 @@
         </classes>
     </test>
 
+    <test name="Multivalued claims" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.MultivaluedClaims"/>
+        </classes>
+    </test>
+
     <!-- OpenID Request Object test -->
     <test name="OpenID Request Object test (HTTP)" enabled="true">
         <classes>
@@ -252,6 +258,12 @@
         </classes>
     </test>
 
+    <test name="Client authentication by Access Token" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.ws.rs.uma.ClientAuthenticationByAccessTokenHttpTest"/>
+        </classes>
+    </test>
+
     <test name="Introspection test (HTTP)" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.IntrospectionWsHttpTest"/>
@@ -373,6 +385,16 @@
     <test name="OC5. FeatureTest-Includes c hash in ID Token when Code Flow Used" enabled="true">
         <classes>
             <class name="org.xdi.oxauth.interop.IncludesCHashInIdTokenWhenCodeFlowUsed"/>
+        </classes>
+    </test>
+    <test name="OPRegistrationJwks" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.interop.OPRegistrationJwks"/>
+        </classes>
+    </test>
+    <test name="ProvidingAcrValues" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.interop.ProvidingAcrValues"/>
         </classes>
     </test>
     <test name="OC5. FeatureTest-Providing ID Token with Essential auth time Claim" enabled="true">

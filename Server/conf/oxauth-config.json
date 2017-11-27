@@ -135,6 +135,7 @@
     ],
     "dynamicRegistrationCustomAttributes":[
         "oxAuthTrustedClient",
+        "oxIncludeClaimsInIdToken",
         "myCustomAttr1",
         "myCustomAttr2"
     ],
@@ -254,5 +255,10 @@
         }
     ],
     "logClientIdOnClientAuthentication": true,
-    "logClientNameOnClientAuthentication": false
+    "logClientNameOnClientAuthentication": false,
+    "authorizationRequestCustomAllowedParameters" : [
+        "customParam1",
+        "customParam2",
+        "customParam3"
+    ]
 }
