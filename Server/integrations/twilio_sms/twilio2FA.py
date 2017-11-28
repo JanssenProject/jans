@@ -59,10 +59,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getApiVersion(self):
         return 1
- 
+
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
         return True
-          
+
     def getAlternativeAuthenticationMethod(self, usageType, configurationAttributes):
         return None
 
@@ -77,7 +77,7 @@ class PersonAuthentication(PersonAuthenticationType):
         form_name = ServerUtil.getFirstValue(requestParameters, "TwilioSmsloginForm")
 
         print "TwilioSMS. form_response_passcode: %s" % str(form_passcode)
-        
+
         if step == 1:
             print "TwilioSMS. Step 1 Password Authentication"
             identity = CdiUtil.bean(Identity)
@@ -89,7 +89,7 @@ class PersonAuthentication(PersonAuthenticationType):
             logged_in = False
             if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
                 logged_in = authenticationService.authenticate(user_name, user_password)
-            
+
             if not logged_in:
                 return False
 
@@ -125,7 +125,7 @@ class PersonAuthentication(PersonAuthenticationType):
             params.add(bodyParam)
             params.add(toParam)
             params.add(fromParam)
-            
+
             try:
                 messageFactory = client.getAccount().getMessageFactory()
                 message = messageFactory.create(params)
@@ -156,7 +156,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             if form_passcode == code:
-                print "TiwlioSMS, SUCCESS! User entered the same code!" 
+                print "TiwlioSMS, SUCCESS! User entered the same code!"
                 return True
 
             print "TwilioSMS. FAIL! User entered the wrong code! %s != %s" % (form_passcode, code)
