@@ -42,6 +42,9 @@ public class UmaResource {
     @LdapAttribute(name = "oxAuthUmaScope")
     private List<String> scopes;
 
+    @LdapAttribute(name = "oxScopeExpression")
+    private String scopeExpression;
+
     @LdapAttribute(name = "oxAssociatedClient")
     private List<String> clients;
 
@@ -59,6 +62,14 @@ public class UmaResource {
 
     @LdapAttribute(name = "oxType")
     private String type;
+
+    public String getScopeExpression() {
+        return scopeExpression;
+    }
+
+    public void setScopeExpression(String scopeExpression) {
+        this.scopeExpression = scopeExpression;
+    }
 
     public String getDn() {
         return dn;
