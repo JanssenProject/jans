@@ -19,6 +19,17 @@
 	<build>
 		<finalName>oxauth-model</finalName>
 
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.js</include>
+                </includes>
+            </resource>
+        </resources>
+
 		<testResources>
 			<testResource>
 				<directory>src/test/resources</directory>
