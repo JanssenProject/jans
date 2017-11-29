@@ -35,6 +35,9 @@ import static org.testng.Assert.*;
  */
 public class RegisterResourceFlowHttpTest extends BaseTest {
 
+    private static final String START_SCOPE_EXPRESSION = "{\"or\": [\"true\", \"false\"]}";
+    private static final String MODIFY_SCOPE_EXPRESSION = "{\"and\": [\"true\", \"false\"]}";
+
     protected UmaMetadata metadata;
     protected Token pat;
 
@@ -73,15 +76,16 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     @Test
     public void addResource() throws Exception {
         showTitle("addResource");
-        registerResource(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+        registerResource(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"), START_SCOPE_EXPRESSION);
     }
 
-    public String registerResource(List<String> scopes) throws Exception {
+    public String registerResource(List<String> scopes, String scopeExpression) throws Exception {
         try {
             UmaResource resource = new UmaResource();
             resource.setName("Photo Album");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(scopes);
+            resource.setScopeExpression(scopeExpression);
             resource.setType("myType");
 
             UmaResourceResponse resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
@@ -109,6 +113,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             resource.setName("Photo Album 2");
             resource.setIconUri("http://www.example.com/icons/flower.png");
             resource.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+            resource.setScopeExpression(MODIFY_SCOPE_EXPRESSION);
             resource.setType("myType");
 
             resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceId, resource);
@@ -176,6 +181,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
         try {
             UmaResourceWithId resource = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceId);
             assertEquals(resource.getType(), "myType");
+            assertEquals(resource.getScopeExpression(), MODIFY_SCOPE_EXPRESSION);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
