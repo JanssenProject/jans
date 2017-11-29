@@ -230,6 +230,12 @@
 		</classes>
 	</test>
 
+    <test name="JS Engine test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.dev.JsonLogicTest" />
+        </classes>
+    </test>
+
 	<test name="Locale test (embedded)" enabled="true">
 		<classes>
 			<class name="org.xdi.oxauth.comp.LocaleTest" />
