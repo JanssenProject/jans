@@ -25,12 +25,35 @@ public class JsonLogicTest {
         assertTrue("jsonLogic.apply( { \"==\" : [1, 1] } );");
         assertFalse("jsonLogic.apply( { \"==\" : [1, 0] } );");
 
+        Assert.assertTrue(JsonLogic.apply("{ \"==\" : [1, 1] }"));
+        Assert.assertFalse(JsonLogic.apply("{ \"==\" : [1, 0] }"));
+
         assertTrue("jsonLogic.apply(\n" +
                 "  {\"and\" : [\n" +
                 "    { \">\" : [3,1] },\n" +
                 "    { \"<\" : [1,3] }\n" +
                 "  ] }\n" +
                 ");");
+    }
+
+    @Test
+    public void umaSimulation() throws ScriptException {
+        String rule = "{" +
+                "    \"and\": [ {" +
+                "        \"or\": [" +
+                "          {\"var\": 0 }," +
+                "          {\"var\": 1 }" +
+                "        ]" +
+                "      }," +
+                "      {\"var\": 2 }" +
+                "    ]}";
+        Assert.assertTrue(JsonLogic.apply(rule, "[true, true, true]"));
+        Assert.assertTrue(JsonLogic.apply(rule, "[true, false, true]"));
+        Assert.assertTrue(JsonLogic.apply(rule, "[false, true, true]"));
+
+        Assert.assertFalse(JsonLogic.apply(rule, "[false, false, false]"));
+        Assert.assertFalse(JsonLogic.apply(rule, "[false, false, true]"));
+        Assert.assertFalse(JsonLogic.apply(rule, "[true, true, false]"));
     }
 
     private static void assertResult(String script, Boolean expectedResult) throws ScriptException {
