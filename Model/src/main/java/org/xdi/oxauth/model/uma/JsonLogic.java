@@ -72,4 +72,20 @@ public class JsonLogic {
     public static Object invokeFunction(String name, Object... args) throws ScriptException, NoSuchMethodException {
         return getInstance().getInvocable().invokeFunction(name, args);
     }
+
+    public static boolean apply(String rule) throws ScriptException {
+        return applyObject(rule).equals(Boolean.TRUE);
+    }
+
+    public static boolean apply(String rule, String data) throws ScriptException {
+        return applyObject(rule, data).equals(Boolean.TRUE);
+    }
+
+    public static Object applyObject(String rule) throws ScriptException {
+        return eval("jsonLogic.apply( " + rule + " );");
+    }
+
+    public static Object applyObject(String rule, String data) throws ScriptException {
+        return eval("jsonLogic.apply( " + rule + ", " + data + " );");
+    }
 }
