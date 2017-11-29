@@ -7,4 +7,9 @@
         </classes>
     </test>
 
+    <test name="JS Engine test" enabled="true">
+        <classes>
+            <class name="org.xdi.oxauth.model.uma.JsonLogicTest" />
+        </classes>
+    </test>
 </suite>
