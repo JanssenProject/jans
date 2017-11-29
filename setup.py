@@ -2791,7 +2791,7 @@ if __name__ == '__main__':
 
     installObject = Setup(setupOptions['install_dir'])
 
-    if not installObject.check_installed():
+    if installObject.check_installed():
         print "\nThis instance already configured. If you need to install new one you should reinstall package first."
         sys.exit(2)
 
