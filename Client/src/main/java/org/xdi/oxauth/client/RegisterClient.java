@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.util.StringUtils.implode;
 
 /**
  * Encapsulates functionality to make Register request calls to an authorization server via REST Services.
@@ -28,7 +29,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version February 5, 2016
+ * @version November 29, 2017
  */
 public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse> {
 
@@ -197,15 +198,19 @@ public class RegisterClient extends BaseClient<RegisterRequest, RegisterResponse
                 if (getRequest().getClientSecretExpiresAt() != null) {
                     requestBody.put(CLIENT_SECRET_EXPIRES_AT_.toString(), getRequest().getClientSecretExpiresAt().getTime());
                 }
-                
+
                 if (getRequest().getFrontChannelLogoutSessionRequired() != null) {
                     requestBody.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.getName(), getRequest().getFrontChannelLogoutSessionRequired());
                 }
                 if (getRequest().getRequestUris() != null && !getRequest().getRequestUris().isEmpty()) {
                     requestBody.put(REQUEST_URIS.toString(), new JSONArray(getRequest().getRequestUris()));
                 }
+
                 if (getRequest().getScopes() != null && !getRequest().getScopes().isEmpty()) {
                     requestBody.put(SCOPES.toString(), new JSONArray(getRequest().getScopes()));
+                } else if (getRequest().getScope() != null && !getRequest().getScope().isEmpty()) {
+                    String spaceSeparatedScope = implode(getRequest().getScope(), " ");
+                    requestBody.put(SCOPE.toString(), spaceSeparatedScope);
                 }
 
                 // Custom params
