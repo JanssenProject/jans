@@ -91,12 +91,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             print "Basic (with password update). Authenticate for step 2"
-            find_user_by_uid.setAttribute("oxPasswordExpirationDate", newExpDate)
             update_button = requestParameters.get("loginForm:updateButton")
 
             if ArrayHelper.isEmpty(update_button):
                 return True
 
+            find_user_by_uid.setAttribute("oxPasswordExpirationDate", newExpDate)
             new_password_array = requestParameters.get("new_password")
             if ArrayHelper.isEmpty(new_password_array) or StringHelper.isEmpty(new_password_array[0]):
                 print "Basic (with password update). Authenticate for step 2. New password is empty"
