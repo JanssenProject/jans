@@ -4,6 +4,7 @@ import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.uma.UmaScopeType;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandResponse;
 import org.xdi.oxd.common.ErrorResponseException;
@@ -77,8 +78,14 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
         if (params.getGrantType() == null) {
             params.setGrantType(new ArrayList<String>());
         }
+        if (params.getScope() == null) {
+            params.setScope(new ArrayList<String>());
+        }
         if (!params.getGrantType().contains(GrantType.CLIENT_CREDENTIALS.getValue())) {
             params.getGrantType().add(GrantType.CLIENT_CREDENTIALS.getValue());
+        }
+        if (!params.getScope().contains(UmaScopeType.PROTECTION.getValue())) {
+            params.getScope().add(UmaScopeType.PROTECTION.getValue());
         }
     }
 }
