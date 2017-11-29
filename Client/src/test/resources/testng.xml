@@ -126,7 +126,7 @@
     </test>
 
     <!-- PersistClientAuthorizationsHttpTest -->
-    <test name="Persist Client Authorizations test (HTTP)" enabled="true">
+    <test name="Persist Client Authorizations test (HTTP)" enabled="false">
         <classes>
             <class name="org.xdi.oxauth.ws.rs.PersistClientAuthorizationsHttpTest"/>
         </classes>
