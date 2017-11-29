@@ -267,5 +267,6 @@
         "customParam1",
         "customParam2",
         "customParam3"
-    ]
+    ],
+    "legacyDynamicRegistrationScopeParam": false
 }
