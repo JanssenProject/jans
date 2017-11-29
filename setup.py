@@ -561,14 +561,19 @@ class Setup(object):
         except:
             self.logIt("No detected IP address", True)
             self.logIt(traceback.format_exc(), True)
-        if detectedIP:
-            testIP = self.getPrompt("Enter IP Address", detectedIP)
-        else:
-            testIP = self.getPrompt("Enter IP Address")
-        if not self.isIP(testIP):
-            testIP = None
-            print 'ERROR: The IP Address is invalid. Try again\n'
+
+        while not testIP:
+            if detectedIP:
+                testIP = self.getPrompt("Enter IP Address", detectedIP)
+            else:
+                testIP = self.getPrompt("Enter IP Address")
+            if not self.isIP(testIP):
+                testIP = None
+                print 'ERROR: The IP Address is invalid. Try again\n'
         return testIP
+
+    def check_installed(self):
+        return os.path.exists(self.configFolder)
 
     def check_properties(self):
         self.logIt('Checking properties')
@@ -2786,6 +2791,10 @@ if __name__ == '__main__':
 
     installObject = Setup(setupOptions['install_dir'])
 
+    if installObject.check_installed():
+        print "\nThis instance already configured. If you need to install new one you should reinstall package first."
+        sys.exit(2)
+
     installObject.downloadWars = setupOptions['downloadWars']
 
     installObject.installOxAuth = setupOptions['installOxAuth']
@@ -2840,7 +2849,6 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
-    ### Ganesh Working Here...
     if 'importLDIFDir' in setupOptions.keys():
         if os.path.isdir(installObject.openldapBaseFolder):
             installObject.logIt("Gluu server already installed. Setup will render and import templates and exit.", True)
