@@ -21,11 +21,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.testng.Assert.*;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPE;
 
 /**
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version November 29, 2017
  */
 public class ClientWhiteListBlackListRedirectUris extends BaseTest {
 
@@ -93,7 +93,7 @@ public class ClientWhiteListBlackListRedirectUris extends BaseTest {
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
-        assertNotNull(response.getClaims().get(SCOPES.toString()));
+        assertNotNull(response.getClaims().get(SCOPE.toString()));
 
         registrationAccessToken1 = response.getRegistrationAccessToken();
         registrationClientUri1 = response.getRegistrationClientUri();
