@@ -375,7 +375,7 @@ public class AuthenticationService {
 
         List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
         if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-            user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+        	customEntry.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
         } else {
             customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
         }
