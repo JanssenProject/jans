@@ -37,7 +37,6 @@ public class UmaPermission {
     @LdapAttribute(name = "oxAuthExpiration")
 	private Date expirationDate;
 
-    // resource set permission request
     @LdapAttribute(name = "oxResourceSetId")
     private String resourceId;
     @LdapAttribute(name = "oxAuthUmaScope")
