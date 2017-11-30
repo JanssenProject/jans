@@ -33,7 +33,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version April 19, 2017
+ * @version November 29, 2017
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
@@ -71,7 +71,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setContacts(Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com"));
-        registerRequest.setScopes(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope"));
+        registerRequest.setScope(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope"));
         registerRequest.setLogoUri("http://www.gluu.org/wp-content/themes/gluursn/images/logo.png");
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setPolicyUri("http://www.gluu.org/policy");
@@ -104,7 +104,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClientSecret());
         assertNotNull(response.getRegistrationAccessToken());
         assertNotNull(response.getClientSecretExpiresAt());
-        assertNotNull(response.getClaims().get(SCOPES.toString()));
+        assertNotNull(response.getClaims().get(SCOPE.toString()));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
         assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_URI.toString()));
@@ -142,7 +142,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(SignatureAlgorithm.ES256,
                 SignatureAlgorithm.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
-        JSONArray scopesJsonArray = new JSONArray(response.getClaims().get(SCOPES.toString()));
+        JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
         List<String> scopes = new ArrayList<String>();
         for (int i = 0; i < scopesJsonArray.length(); i++) {
             scopes.add(scopesJsonArray.get(i).toString());
@@ -227,7 +227,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(response.getClaims().get(LOGO_URI.toString()));
         assertNotNull(response.getClaims().get(REQUEST_URIS.toString()));
-        assertNotNull(response.getClaims().get("scopes"));
+        assertNotNull(response.getClaims().get(SCOPE.toString()));
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
