@@ -2273,10 +2273,10 @@ class Setup(object):
         self.templateRenderingDict['oxasimba_config_base64'] = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, cwd=None, env=None, useWait=False):
+    def run(self, args, cwd=None, env=None, useWait=False, shell=False):
         self.logIt('Running: %s' % ' '.join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env, shell=shell)
             if useWait:
                 code = p.wait()
                 self.logIt('Run: %s with result code: %d' % (' '.join(args), code) )
@@ -2679,15 +2679,15 @@ class Setup(object):
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
     def change_rc_links(self):
         if self.os_type in ['ubuntu', 'debian']:
-            if os.path.isfile('/etc/rc3.d/S03solserver'):
-                self.logIt("Changing RC Level 3 Links")
-                self.run(['mv', '/etc/rc3.d/S03solserver', '/etc/rc3.d/S80solserver'])
-            if os.path.isfile('/etc/rc3.d/S01oxauth'):
-                self.run(['mv', '/etc/rc3.d/S01oxauth', '/etc/rc3.d/S81oxauth'])
-            if os.path.isfile('/etc/rc3.d/S01identity'):
-                self.run(['mv', '/etc/rc3.d/S01identity', '/etc/rc3.d/S82identity'])
-            if os.path.isfile('/etc/rc3.d/S02apache2'):
-                self.run(['mv', '/etc/rc3.d/S02apache2', '/etc/rc3.d/S83apache2'])
+            self.run(['mv -f /etc/rc3.d/S??solserver /etc/rc3.d/S90solserver'], None, None, True, True)
+            self.run(['mv -f /etc/rc3.d/S??oxauth /etc/rc3.d/S91oxauth'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??identity /etc/rc3.d/S92identity'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??idp /etc/rc3.d/S93idp'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??oxauth-rp /etc/rc3.d/S94oxauth-rp'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??asimba /etc/rc3.d/S94asimba'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??passport /etc/rc3.d/S94passport'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??apache2 /etc/rc3.d/S95apache2'], None, None, True, True)
+            
 ############################   Main Loop   #################################################
 
 def print_help():
