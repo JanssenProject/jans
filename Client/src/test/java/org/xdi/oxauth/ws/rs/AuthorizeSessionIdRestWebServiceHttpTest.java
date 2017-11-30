@@ -26,7 +26,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version August 9, 2017
+ * @version November 29, 2017
  */
 public class AuthorizeSessionIdRestWebServiceHttpTest extends BaseTest {
 
@@ -98,7 +98,7 @@ public class AuthorizeSessionIdRestWebServiceHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization but not enter credentials.
         // Store session_id parameter value
