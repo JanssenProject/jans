@@ -21,7 +21,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version November 23, 2017
+ * @version November 29, 2017
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -163,6 +163,7 @@ public class AppConfiguration implements Configuration {
     private Boolean logClientNameOnClientAuthentication;
     private Boolean disableJdkLogger = true;
     private Set<String> authorizationRequestCustomAllowedParameters;
+    private Boolean legacyDynamicRegistrationScopeParam;
 
     public Boolean getDisableJdkLogger() {
         return disableJdkLogger;
@@ -1295,5 +1296,13 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthorizationRequestCustomAllowedParameters(Set<String> authorizationRequestCustomAllowedParameters) {
         this.authorizationRequestCustomAllowedParameters = authorizationRequestCustomAllowedParameters;
+    }
+
+    public Boolean getLegacyDynamicRegistrationScopeParam() {
+        return legacyDynamicRegistrationScopeParam;
+    }
+
+    public void setLegacyDynamicRegistrationScopeParam(Boolean legacyDynamicRegistrationScopeParam) {
+        this.legacyDynamicRegistrationScopeParam = legacyDynamicRegistrationScopeParam;
     }
 }

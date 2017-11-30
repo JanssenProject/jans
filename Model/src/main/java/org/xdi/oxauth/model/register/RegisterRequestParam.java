@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version February 5, 2016
+ * @version November 29, 2017
  */
 
 public enum RegisterRequestParam {
@@ -224,7 +224,15 @@ public enum RegisterRequestParam {
      */
     REQUEST_URIS("request_uris"),
 
+    /**
+     * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
+     */
     SCOPES("scopes"),
+
+    /**
+     * String containing a space-separated list of scope values.
+     */
+    SCOPE("scope"),
 
     CLIENT_SECRET_EXPIRES_AT_("client_secret_expires_at");
 
