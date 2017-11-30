@@ -32,7 +32,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version May 19, 2017
+ * @version November 29, 2017
  */
 public class ApplicationTypeRestrictionHttpTest extends BaseTest {
 
@@ -86,7 +86,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
     }
 
     /**
@@ -139,7 +139,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
     }
 
     /**
@@ -181,7 +181,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScopes(scopes);
+        registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PUBLIC);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
@@ -222,7 +222,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization and receive the authorization code.
         String nonce = UUID.randomUUID().toString();
@@ -325,7 +325,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.NATIVE, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScopes(scopes);
+        registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -367,7 +367,7 @@ public class ApplicationTypeRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization and receive the authorization code.
         String nonce = UUID.randomUUID().toString();
