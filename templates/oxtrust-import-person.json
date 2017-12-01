@@ -3,30 +3,31 @@
 		"ldapName": "uid",
 		"displayName": "Username",
 		"dataType": "string",
-		"required": "true"
-	},
-	{
+		"required": true
+	}, {
 		"ldapName": "givenName",
 		"displayName": "First Name",
 		"dataType": "string",
-		"required": "true"
-	},
-	{
+		"required": true
+	}, {
 		"ldapName": "sn",
 		"displayName": "Last Name",
 		"dataType": "string",
-		"required": "true"
-	},
-	{
+		"required": true
+	}, {
 		"ldapName": "mail",
 		"displayName": "Email",
 		"dataType": "string",
-		"required": "true"
-	},
-	{
+		"required": true
+	}, {
 		"ldapName": "userPassword",
 		"displayName": "Password",
 		"dataType": "string",
-		"required": "false"
+		"required": false
+	}, {
+		"ldapName": "gluuStatus",
+		"displayName": "User Status",
+		"dataType": "string",
+		"required": false
 	}]
 }
