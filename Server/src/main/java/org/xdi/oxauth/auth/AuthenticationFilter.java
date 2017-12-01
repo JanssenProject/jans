@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 
 /**
@@ -209,8 +210,9 @@ public class AuthenticationFilter implements Filter {
                 int delim = token.indexOf(":");
 
                 if (delim != -1) {
-                    username = token.substring(0, delim);
-                    password = token.substring(delim + 1);
+                    // oxAuth #677 URL decode the username and password
+                    username = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
+                    password = URLDecoder.decode(token.substring(delim + 1), Util.UTF8_STRING_ENCODING);
                 }
 
                 requireAuth = !StringHelper.equals(username, identity.getCredentials().getUsername())
