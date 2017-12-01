@@ -1198,11 +1198,5 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			return countEntries;
 		}
 	};
-	
-	public static void main(String[] args) {
-		String str = StaticUtils.encodeGeneralizedTime(new Date());
-		System.out.println(str);
-	}
-
 
 }
