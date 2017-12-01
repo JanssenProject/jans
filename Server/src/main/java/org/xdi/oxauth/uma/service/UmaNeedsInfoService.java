@@ -13,10 +13,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.AttributeService;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.service.external.ExternalUmaRptPolicyService;
-import org.xdi.oxauth.uma.authorization.Claims;
-import org.xdi.oxauth.uma.authorization.UmaAuthorizationContext;
-import org.xdi.oxauth.uma.authorization.UmaAuthorizationContextBuilder;
-import org.xdi.oxauth.uma.authorization.UmaPCT;
+import org.xdi.oxauth.uma.authorization.*;
 import org.xdi.oxauth.util.ServerUtil;
 
 import javax.ejb.Stateless;
@@ -51,12 +48,11 @@ public class UmaNeedsInfoService {
     @Inject
     private UserService userService;
 
-    public Map<CustomScriptConfiguration, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<UmaScopeDescription, Boolean> requestedScopes,
+    public Map<UmaScriptByScope, UmaAuthorizationContext> checkNeedsInfo(Claims claims, Map<UmaScopeDescription, Boolean> requestedScopes,
                                                                                   List<UmaPermission> permissions, UmaPCT pct, HttpServletRequest httpRequest,
                                                                                   Client client) {
-        Set<String> scriptDNs = getScriptDNs(new ArrayList<UmaScopeDescription>(requestedScopes.keySet()));
 
-        Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = new HashMap<CustomScriptConfiguration, UmaAuthorizationContext>();
+        Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap = new HashMap<UmaScriptByScope, UmaAuthorizationContext>();
         Map<String, String> ticketAttributes = new HashMap<String, String>();
 
         List<ClaimDefinition> missedClaims = new ArrayList<ClaimDefinition>();
@@ -65,30 +61,37 @@ public class UmaNeedsInfoService {
                 attributeService, resourceService, permissions, requestedScopes, claims, httpRequest,
                 sessionService, userService, client);
 
-        for (String scriptDN : scriptDNs) {
-            CustomScriptConfiguration script = policyService.getScriptByDn(scriptDN);
 
-            if (script != null) {
-                UmaAuthorizationContext context = contextBuilder.build(script);
-                scriptMap.put(script, context);
+        for (UmaScopeDescription scope : requestedScopes.keySet()) {
+            List<String> authorizationPolicies = scope.getAuthorizationPolicies();
+            if (authorizationPolicies != null && !authorizationPolicies.isEmpty()) {
+                for (String scriptDN : authorizationPolicies) { //log.trace("Loading UMA script: " + scriptDN + ", scope: " + scope + " ...");
+                    CustomScriptConfiguration script = policyService.getScriptByDn(scriptDN);
+                    if (script != null) {
+                        UmaAuthorizationContext context = contextBuilder.build(script);
+                        scriptMap.put(new UmaScriptByScope(scope, script), context);
 
-                List<ClaimDefinition> requiredClaims = policyService.getRequiredClaims(script, context);
-                if (requiredClaims != null && !requiredClaims.isEmpty()) {
-                    for (ClaimDefinition definition : requiredClaims) {
-                        if (!claims.has(definition.getName())) {
-                            missedClaims.add(definition);
+                        List<ClaimDefinition> requiredClaims = policyService.getRequiredClaims(script, context);
+                        if (requiredClaims != null && !requiredClaims.isEmpty()) {
+                            for (ClaimDefinition definition : requiredClaims) {
+                                if (!claims.has(definition.getName())) {
+                                    missedClaims.add(definition);
+                                }
+                            }
                         }
+
+                        String claimsGatheringScriptName = policyService.getClaimsGatheringScriptName(script, context);
+                        if (StringUtils.isNotBlank(claimsGatheringScriptName)) {
+                            ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringScriptNameValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
+                        } else {
+                            log.error("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
+                        }
+                    } else {
+                        log.error("Unable to load UMA script dn: '{}'", scriptDN);
                     }
                 }
-
-                String claimsGatheringScriptName = policyService.getClaimsGatheringScriptName(script, context);
-                if (StringUtils.isNotBlank(claimsGatheringScriptName)) {
-                    ticketAttributes.put(UmaConstants.GATHERING_ID, constructGatheringScriptNameValue(ticketAttributes.get(UmaConstants.GATHERING_ID), claimsGatheringScriptName));
-                } else {
-                    log.error("External 'getClaimsGatheringScriptName' script method return null or blank value, script: " + script.getName());
-                }
             } else {
-                log.error("Unable to load UMA script dn: '{}'", scriptDN);
+                log.trace("No policies defined for scope: " + scope.getId() + ", scopeDn: " + scope.getDn());
             }
         }
 
