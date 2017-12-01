@@ -798,7 +798,7 @@ gluuAttributeName: gluuStatus
 description: User status to allow/disable user access
 displayName: User Status
 gluuAttributeOrigin: gluuPerson
-gluuAttributeType: boolean
+gluuAttributeType: string
 gluuAttributeEditType: admin
 gluuAttributeViewType: admin
 gluuAttributeViewType: user
