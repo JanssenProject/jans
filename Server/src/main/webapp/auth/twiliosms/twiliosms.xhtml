@@ -1,10 +1,18 @@
 <!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 template="/WEB-INF/incl/layout/template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+    </f:metadata>
+
     <ui:define name="head">
+	<link href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap.min.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/style.css"/>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
         <style type="text/css">
             .login-panel {
                 border-style: solid;
@@ -35,44 +43,86 @@
                 font-family: Arial, Verdana, sans-serif;
                 font-size: 11px;
             }
+            
+            .h4, h4 {
+    			font-size: 18px;
+			}
+			
+			.h4, .h5, .h6, h4, h5, h6 {
+			    margin-top: 10px;
+			    margin-bottom: 10px;
+			}
+			
+			p {
+			    margin: 0 0 10px !important;
+			}
+			
+			body {
+			    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+			    font-size: 14px;
+			    line-height: 1.42857143 !important;
+			    color: #333;
+			}
+			
+			input.btn.btn-done {
+			    background: #1ab26b;
+			    color: #fff !important;
+			    width: 100%;
+			    padding: 10px 10px;
+			    margin-top: 12px;
+			}
+			
+			.step_bx {
+				    margin: 0 20% auto;
+			}
         </style>
     </ui:define>
 
     <ui:define name="pageTitle">#{msgs['twiliosms.pageTitle']}</ui:define>
 
     <ui:define name="body">
+    	<header class="bs-docs-nav navbar navbar-static-top" id="top">
+			<div class="container">
+				<div class="navbar-header">
+					<a target="_blank" class="navbar-brand">
+					<img src="../../img/logo.png" alt="logo" /></a>
+				</div>
+			</div>
+		</header>
+    	
         <h:form id="TwilioSmsloginForm">
             <h:panelGroup id="loginGroup" rendered="#{not identity.loggedIn}">
-                <div class="login-panel">
-                    <div class="login-panel-header">#{msgs['twiliosms.login']}</div>
-                    <div class="login-panel-body">
                         <ui:param name="client" value="#{clientService.getClient(redirect.parameters['client_id'])}" />
 
                         <h:panelGroup rendered='#{!empty client.getLogoUri()}'>
                             <h:graphicImage url='#{client.getLogoUri()}'/>
                         </h:panelGroup>
 
-                        <p class="info">#{msgs['twiliosms.enterTheCode']}</p>
-
-                        <div class="dialog">
-                            <h:panelGrid columns="2" rowClasses="prop" columnClasses="name,value" width="500">
-                                <h:outputLabel for="passcode">#{msgs['twiliosms.passcode']}</h:outputLabel>
-                                <input name="passcode" type="text" autocomplete="off" />
-                            </h:panelGrid>
-                        </div>
-
+						<div class="bs-docs-section">
+							<div class="container">
+								<div class="step_bx">
+									<h2>#{msgs['twilio.verification']}</h2>
+									<p>#{msgs['twilio.usedevice']}</p>
+									<img
+										src="#{oxAuthConfigurationService.getImgLocation()}/phone-ver.png"
+										alt="phone-ver" />
+									<h4>#{msgs['twilio.verificationcode']}</h4>
+									<p>
+										<h:outputText value="#{msgs['twilio.codesent']} " escape="false" />
+										<h:outputText value="#{authenticator.getMaskMobilenumber(identity.getWorkingParameter('mobile_number'))}" />
+									</p>
+									
+										<input name="passcode" type="text" class="form-control" placeholder="Enter the 6 digit code" autocomplete="off" />
+										<h:commandButton styleClass="btn btn-done" value="#{msgs['twilio.login']}" action="#{authenticator.authenticate}"/>
+								</div>
+							</div>
+						</div>
                         <h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
                             <p>
                                 <a target="_blank" href='#{client.getPolicyUri()}'>#{msgs['twiliosms.termsPrivacy']}</a>
                             </p>
                         </h:panelGroup>
-
-                        <div class="actionButtons">
-                            <h:commandButton value="#{msgs['twiliosms.loginLabel']}" action="#{authenticator.authenticate}"/>
-                        </div>
-                    </div>
-                </div>
             </h:panelGroup>
-        </h:form>
+		</h:form>
     </ui:define>
 </ui:composition>
