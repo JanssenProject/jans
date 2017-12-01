@@ -721,4 +721,13 @@ public class Authenticator {
         facesContext.addMessage(null, message);
     }
 
+    public String getMaskMobilenumber(String mobile_number){
+    	final String s = mobile_number.replaceAll("\\D", "");
+
+        final int start = 0;
+        final int end = s.length() - 4;
+        final String overlay = StringUtils.repeat("*", end - start);
+
+        return StringUtils.overlay(s, overlay, start, end);
+    }
 }
