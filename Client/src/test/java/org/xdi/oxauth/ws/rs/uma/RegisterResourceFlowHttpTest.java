@@ -35,10 +35,16 @@ import static org.testng.Assert.*;
  */
 public class RegisterResourceFlowHttpTest extends BaseTest {
 
+    private static final String START_SCOPE_EXPRESSION = "{\"rule\": {\"and\": [{\"or\": [{\"var\": 0},{\"var\": 1}]},{\"var\": 2}]}," +
+            "  \"data\": [\"http://photoz.example.com/dev/actions/all\",\"http://photoz.example.com/dev/actions/add\",\"http://photoz.example.com/dev/actions/internalClient\"]}";
+    private static final String MODIFY_SCOPE_EXPRESSION = "{\"rule\": {\"or\": [{\"or\": [{\"var\": 0},{\"var\": 1}]},{\"var\": 2}]}," +
+            "  \"data\": [\"http://photoz.example.com/dev/actions/all\",\"http://photoz.example.com/dev/actions/add\",\"http://photoz.example.com/dev/actions/internalClient\"]}";
+
     protected UmaMetadata metadata;
     protected Token pat;
 
     protected String resourceId;
+    protected String resourceIdWithScopeExpression;
     protected UmaResourceService resourceService;
 
     public RegisterResourceFlowHttpTest() {
@@ -74,6 +80,7 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
     public void addResource() throws Exception {
         showTitle("addResource");
         registerResource(Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
+        registerResourceWithScopeExpression(START_SCOPE_EXPRESSION);
     }
 
     public String registerResource(List<String> scopes) throws Exception {
@@ -89,6 +96,25 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
 
             this.resourceId = resourceStatus.getId();
             return this.resourceId;
+        } catch (ClientResponseFailure ex) {
+            System.err.println(ex.getResponse().getEntity(String.class));
+            throw ex;
+        }
+    }
+
+    public String registerResourceWithScopeExpression(String scopeExpression) throws Exception {
+        try {
+            UmaResource resource = new UmaResource();
+            resource.setName("Photo Album");
+            resource.setIconUri("http://www.example.com/icons/flower.png");
+            resource.setScopeExpression(scopeExpression);
+            resource.setType("myType");
+
+            UmaResourceResponse resourceStatus = getResourceService().addResource("Bearer " + pat.getAccessToken(), resource);
+            UmaTestUtil.assert_(resourceStatus);
+
+            this.resourceIdWithScopeExpression = resourceStatus.getId();
+            return this.resourceIdWithScopeExpression;
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
@@ -117,8 +143,20 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
             throw ex;
         }
 
+        try {
+            UmaResource resource = new UmaResource();
+            resource.setName("Photo Album 2");
+            resource.setIconUri("http://www.example.com/icons/flower.png");
+            resource.setScopeExpression(MODIFY_SCOPE_EXPRESSION);
+            resource.setType("myType");
+
+            resourceStatus = getResourceService().updateResource("Bearer " + pat.getAccessToken(), this.resourceIdWithScopeExpression, resource);
+        } catch (ClientResponseFailure ex) {
+            System.err.println(ex.getResponse().getEntity(String.class));
+            throw ex;
+        }
+
         assertNotNull(resourceStatus, "Resource status is null");
-        this.resourceId = resourceStatus.getId();
         assertNotNull(this.resourceId, "Resource description id is null");
     }
 
@@ -176,6 +214,9 @@ public class RegisterResourceFlowHttpTest extends BaseTest {
         try {
             UmaResourceWithId resource = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceId);
             assertEquals(resource.getType(), "myType");
+
+            UmaResourceWithId resourceWithExpression = getResourceService().getResource("Bearer " + pat.getAccessToken(), this.resourceIdWithScopeExpression);
+            assertEquals(resourceWithExpression.getScopeExpression(), MODIFY_SCOPE_EXPRESSION);
         } catch (ClientResponseFailure ex) {
             System.err.println(ex.getResponse().getEntity(String.class));
             throw ex;
