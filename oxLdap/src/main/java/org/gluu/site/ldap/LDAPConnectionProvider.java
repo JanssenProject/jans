@@ -481,11 +481,21 @@ public class LDAPConnectionProvider {
 	}
 
 	public boolean isCertificateAttribute(String attributeName) {
-		if (StringHelper.isEmpty(attributeName)) {
-			return false;
-		}
+		String realAttributeName = getCertificateAttributeName(attributeName);
 
-		return certificateAttributes.contains(attributeName.toLowerCase());
+		return certificateAttributes.contains(realAttributeName.toLowerCase());
+	}
+
+	public String getCertificateAttributeName(String attributeName) {
+		if (StringHelper.isEmpty(attributeName)) {
+			return attributeName;
+		}
+		
+		if (attributeName.endsWith(";binary")) {
+			return attributeName.substring(0, attributeName.length() - 7);
+		}
+		
+		return attributeName;
 	}
 
 }

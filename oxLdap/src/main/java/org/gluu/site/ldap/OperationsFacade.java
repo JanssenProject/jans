@@ -696,6 +696,10 @@ public class OperationsFacade {
 		return this.connectionProvider.isCertificateAttribute(attributeName);
 	}
 
+	public String getCertificateAttributeName(String attributeName) {
+		return this.connectionProvider.getCertificateAttributeName(attributeName);
+	}
+
 	public <T> void sortListByAttributes(List<T> searchResultEntries, boolean caseSensetive, String... sortByAttributes) {
 		// Check input parameters
 		if (searchResultEntries == null) {

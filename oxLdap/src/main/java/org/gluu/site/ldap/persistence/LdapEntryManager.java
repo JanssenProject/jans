@@ -674,21 +674,28 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 				}
 			}
 
-			if (attribute.needsBase64Encoding() && ldapOperationService.isBinaryAttribute(attributeName)) {
-				byte[][] attributeValues = attribute.getValueByteArrays();
-				if (attributeValues != null) {
-					attributeValueStrings = new String[attributeValues.length];
-					for (int i = 0; i < attributeValues.length; i++) {
-						attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
-                        log.trace("Binary attribute: " + attribute.getName() + " value (hex): " + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) +
-                                 " value (base64): " + attributeValueStrings[i]);
+			attributeValueStrings = attribute.getValues();
+			if (attribute.needsBase64Encoding()) {
+				boolean binaryAttribute = ldapOperationService.isBinaryAttribute(attributeName);
+				boolean certificateAttribute =  ldapOperationService.isCertificateAttribute(attributeName);
+
+				if (binaryAttribute || certificateAttribute) {
+					byte[][] attributeValues = attribute.getValueByteArrays();
+					if (attributeValues != null) {
+						attributeValueStrings = new String[attributeValues.length];
+						for (int i = 0; i < attributeValues.length; i++) {
+							attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
+	                        log.trace("Binary attribute: " + attribute.getName() + " value (hex): " + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) +
+	                                 " value (base64): " + attributeValueStrings[i]);
+						}
 					}
 				}
-			} else {
-				attributeValueStrings = attribute.getValues();
+				if (certificateAttribute) {
+					attributeName = ldapOperationService.getCertificateAttributeName(attributeName);
+				}
 			}
 			
-			AttributeData tmpAttribute = new AttributeData(attribute.getName(), attributeValueStrings);
+			AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueStrings);
 			result.add(tmpAttribute);
 		}
 
@@ -1191,6 +1198,11 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			return countEntries;
 		}
 	};
+	
+	public static void main(String[] args) {
+		String str = StaticUtils.encodeGeneralizedTime(new Date());
+		System.out.println(str);
+	}
 
 
 }
