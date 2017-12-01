@@ -13,8 +13,6 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -133,16 +131,7 @@ public class UmaResource {
 
     @JsonIgnore
     public static boolean isValidExpression(String scopeExpression) {
-        if (StringUtils.isBlank(scopeExpression)) {
-            return true;
-        } else {
-            try {
-                new JSONObject(scopeExpression);
-                return true; // for now we just check whether it's json, we have to improve it
-            } catch (JSONException e) {
-                return false;
-            }
-        }
+        return StringUtils.isBlank(scopeExpression) || JsonLogicNodeParser.isNodeValid(scopeExpression);
     }
 
     @Override
