@@ -6,10 +6,15 @@
 
 package org.gluu.site.ldap;
 
-import com.unboundid.asn1.ASN1OctetString;
-import com.unboundid.ldap.sdk.*;
-import com.unboundid.ldap.sdk.controls.*;
-import com.unboundid.ldif.LDIFChangeRecord;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
@@ -23,8 +28,32 @@ import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import java.io.Serializable;
-import java.util.*;
+import com.unboundid.asn1.ASN1OctetString;
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.BindResult;
+import com.unboundid.ldap.sdk.Control;
+import com.unboundid.ldap.sdk.DeleteRequest;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPConnectionPool;
+import com.unboundid.ldap.sdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPResult;
+import com.unboundid.ldap.sdk.LDAPSearchException;
+import com.unboundid.ldap.sdk.Modification;
+import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ModifyRequest;
+import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchRequest;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.ldap.sdk.SearchResultReference;
+import com.unboundid.ldap.sdk.controls.ServerSideSortRequestControl;
+import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
+import com.unboundid.ldap.sdk.controls.SortKey;
+import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
+import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
+import com.unboundid.ldap.sdk.controls.VirtualListViewResponseControl;
+import com.unboundid.ldif.LDIFChangeRecord;
 
 /**
  * OperationsFacade is the base class that performs all the ldap operations
@@ -661,6 +690,14 @@ public class OperationsFacade {
 
 	public boolean isBinaryAttribute(String attributeName) {
 		return this.connectionProvider.isBinaryAttribute(attributeName);
+	}
+
+	public boolean isCertificateAttribute(String attributeName) {
+		return this.connectionProvider.isCertificateAttribute(attributeName);
+	}
+
+	public String getCertificateAttributeName(String attributeName) {
+		return this.connectionProvider.getCertificateAttributeName(attributeName);
 	}
 
 	public <T> void sortListByAttributes(List<T> searchResultEntries, boolean caseSensetive, String... sortByAttributes) {

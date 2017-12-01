@@ -31,16 +31,16 @@ public class ExternalScriptService implements Serializable {
 
 	@Inject
 	protected Logger log;
-	
+
 	@Inject
 	protected CustomScriptManager customScriptManager;
-	
+
 	protected CustomScriptType customScriptType;
 
 	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
 	protected List<CustomScriptConfiguration> customScriptConfigurations;
 	protected CustomScriptConfiguration defaultExternalCustomScript;
-	
+
 	public ExternalScriptService(CustomScriptType customScriptType) {
 		this.customScriptType = customScriptType;
 	}

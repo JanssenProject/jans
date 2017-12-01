@@ -7,10 +7,7 @@
 package org.xdi.service.cdi.util;
 
 import java.lang.reflect.Type;
-import java.util.Set;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.literal.NamedLiteral;
 import javax.enterprise.inject.spi.Bean;
@@ -19,7 +16,6 @@ import javax.enterprise.inject.spi.CDI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.model.security.Identity;
 
 /**
  * @author Yuriy Movchan
@@ -32,7 +28,6 @@ public class CdiUtil {
     private CdiUtil() {
     }
 
-    @Deprecated
     public static <T> T getContextBean(BeanManager beanManager, Type type, String beanName) {
 		Bean<T> bean = (Bean<T>) beanManager.resolve(beanManager.getBeans(type, NamedLiteral.of(beanName)));
 		if (bean == null) {
@@ -43,7 +38,7 @@ public class CdiUtil {
 
     	return existingInstance;
 	}
-
+/*
     @Deprecated
     public static <T> T getContextualReference(BeanManager bm, Set<Bean<?>> beans, Class<?> type) {
 		if (beans == null || beans.size() == 0) {
@@ -59,7 +54,7 @@ public class CdiUtil {
 			return (T) bm.getReference(bean, type, creationalContext);
 		}
 	}
-
+*/
     public static <T> Instance<T> instance(Class<T> p_clazz) {
 		return CDI.current().select(p_clazz);
     }    	

@@ -25,7 +25,6 @@ import javax.enterprise.context.BeforeDestroyed;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.servlet.ServletContext;
 
 import org.apache.commons.io.FileUtils;
@@ -46,7 +45,6 @@ import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.cdi.event.UpdateScriptEvent;
 import org.xdi.service.custom.inject.ReloadScript;
-import org.xdi.service.security.Secure;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
 import org.xdi.util.StringHelper;

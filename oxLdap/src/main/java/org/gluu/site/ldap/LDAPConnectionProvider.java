@@ -57,7 +57,7 @@ public class LDAPConnectionProvider {
 	private String sslKeyStore;
 	private String sslKeyStorePin;
 
-	private ArrayList<String> binaryAttributes;
+	private ArrayList<String> binaryAttributes, certificateAttributes;
 
 	private boolean supportsSubtreeDeleteRequestControl;
 
@@ -161,6 +161,12 @@ public class LDAPConnectionProvider {
 		}
 		log.debug("Using next binary attributes: " + this.binaryAttributes);
 		
+		this.certificateAttributes = new ArrayList<String>();
+		if (props.containsKey("certificateAttributes")) {
+			String[] binaryAttrs = StringHelper.split(props.get("certificateAttributes").toString().toLowerCase(), ",");
+			this.certificateAttributes.addAll(Arrays.asList(binaryAttrs));
+		}
+		log.debug("Using next binary certificateAttributes: " + this.certificateAttributes);
 		
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
 		this.subschemaSubentry = determineSubschemaSubentry();
@@ -462,12 +468,34 @@ public class LDAPConnectionProvider {
 		return binaryAttributes;
 	}
 
+	public ArrayList<String> getCertificateAttributes() {
+		return certificateAttributes;
+	}
+
 	public boolean isBinaryAttribute(String attributeName) {
 		if (StringHelper.isEmpty(attributeName)) {
 			return false;
 		}
 
 		return binaryAttributes.contains(attributeName.toLowerCase());
+	}
+
+	public boolean isCertificateAttribute(String attributeName) {
+		String realAttributeName = getCertificateAttributeName(attributeName);
+
+		return certificateAttributes.contains(realAttributeName.toLowerCase());
+	}
+
+	public String getCertificateAttributeName(String attributeName) {
+		if (StringHelper.isEmpty(attributeName)) {
+			return attributeName;
+		}
+		
+		if (attributeName.endsWith(";binary")) {
+			return attributeName.substring(0, attributeName.length() - 7);
+		}
+		
+		return attributeName;
 	}
 
 }

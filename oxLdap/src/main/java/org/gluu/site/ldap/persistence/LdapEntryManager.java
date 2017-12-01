@@ -6,17 +6,26 @@
 
 package org.gluu.site.ldap.persistence;
 
-import com.unboundid.asn1.ASN1OctetString;
-import com.unboundid.ldap.sdk.*;
-import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.util.StaticUtils;
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.codec.binary.Base64;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.persistence.AttributeDataModification.AttributeModificationType;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
-import org.gluu.site.ldap.persistence.exception.EmptyEntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
 import org.gluu.site.ldap.persistence.exception.MappingException;
@@ -31,9 +40,16 @@ import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.*;
+import com.unboundid.ldap.sdk.Attribute;
+import com.unboundid.ldap.sdk.Filter;
+import com.unboundid.ldap.sdk.LDAPConnection;
+import com.unboundid.ldap.sdk.LDAPSearchException;
+import com.unboundid.ldap.sdk.Modification;
+import com.unboundid.ldap.sdk.ModificationType;
+import com.unboundid.ldap.sdk.ResultCode;
+import com.unboundid.ldap.sdk.SearchResult;
+import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.util.StaticUtils;
 
 /**
  * LDAP Entry Manager
@@ -84,8 +100,17 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	protected void persist(String dn, List<AttributeData> attributes) {
 		List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
 		for (AttributeData attribute : attributes) {
-			if (ArrayHelper.isNotEmpty(attribute.getValues()) && StringHelper.isNotEmpty(attribute.getValues()[0])) {
-				ldapAttributes.add(new Attribute(attribute.getName(), attribute.getValues()));
+			String attributeName = attribute.getName();
+			String attributeValues[] = attribute.getValues();
+
+            if (ArrayHelper.isNotEmpty(attributeValues) && StringHelper.isNotEmpty(attributeValues[0])) {
+                if (ldapOperationService.isCertificateAttribute(attributeName)) {
+					byte[][] binaryValues = toBinaryValues(attributeValues);
+
+					ldapAttributes.add(new Attribute(attributeName + ";binary", binaryValues));
+				} else {
+					ldapAttributes.add(new Attribute(attributeName, attributeValues));
+				}
 			}
 		}
 
@@ -110,62 +135,79 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			for (AttributeDataModification attributeDataModification : attributeDataModifications) {
 				AttributeData attribute = attributeDataModification.getAttribute();
 				AttributeData oldAttribute = attributeDataModification.getOldAttribute();
+
+				String attributeName = null;
+				String[] attributeValues = null;
+				if (attribute != null) {
+					attributeName = attribute.getName();
+					attributeValues = attribute.getValues();
+				}
+
+				String oldAttributeName = null;
+				String[] oldAttributeValues = null;
+				if (oldAttribute != null) {
+					oldAttributeName = oldAttribute.getName();
+					oldAttributeValues = oldAttribute.getValues();
+				}
+
 				Modification modification = null;
 				if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-					modification = new Modification(ModificationType.ADD, attribute.getName(), attribute.getValues());
-				} else if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-					modification = new Modification(ModificationType.DELETE, oldAttribute.getName(), oldAttribute.getValues());
-				} else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-					if (attribute.getValues().length == 1) {
-						modification = new Modification(ModificationType.REPLACE, attribute.getName(), attribute.getValues());
-					} else {
-						String[] oldValues = ArrayHelper.arrayClone(oldAttribute.getValues());
-						String[] newValues = ArrayHelper.arrayClone(attribute.getValues());
+					modification = createModification(ModificationType.ADD, attributeName, attributeValues);
+				} else {
+					if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
+						modification = createModification(ModificationType.DELETE, oldAttributeName, oldAttributeValues);
+					} else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
+						if (attributeValues.length == 1) {
+							modification = createModification(ModificationType.REPLACE, attributeName, attributeValues);
+						} else {
+							String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
+							String[] newValues = ArrayHelper.arrayClone(attributeValues);
 
-						Arrays.sort(oldValues);
-						Arrays.sort(newValues);
+							Arrays.sort(oldValues);
+							Arrays.sort(newValues);
 
-						boolean[] retainOldValues = new boolean[oldValues.length];
-						Arrays.fill(retainOldValues, false);
+							boolean[] retainOldValues = new boolean[oldValues.length];
+							Arrays.fill(retainOldValues, false);
 
-						List<String> addValues = new ArrayList<String>();
-						List<String> removeValues = new ArrayList<String>();
+							List<String> addValues = new ArrayList<String>();
+							List<String> removeValues = new ArrayList<String>();
 
-						// Add new values
-						for (String value : newValues) {
-							int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
-								@Override
-								public int compare(String o1, String o2) {
-									return o1.toLowerCase().compareTo(o2.toLowerCase());
+							// Add new values
+							for (String value : newValues) {
+								int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
+									@Override
+									public int compare(String o1, String o2) {
+										return o1.toLowerCase().compareTo(o2.toLowerCase());
+									}
+								});
+								if (idx >= 0) {
+									// Old values array contains new value. Retain
+									// old value
+									retainOldValues[idx] = true;
+								} else {
+									// This is new value
+									addValues.add(value);
 								}
-							});
-							if (idx >= 0) {
-								// Old values array contains new value. Retain
-								// old value
-								retainOldValues[idx] = true;
-							} else {
-								// This is new value
-								addValues.add(value);
 							}
-						}
 
-						// Remove values which we don't have in new values
-						for (int i = 0; i < oldValues.length; i++) {
-							if (!retainOldValues[i]) {
-								removeValues.add(oldValues[i]);
+							// Remove values which we don't have in new values
+							for (int i = 0; i < oldValues.length; i++) {
+								if (!retainOldValues[i]) {
+									removeValues.add(oldValues[i]);
+								}
 							}
-						}
 
-						if (removeValues.size() > 0) {
-							Modification removeModification = new Modification(ModificationType.DELETE, attribute.getName(),
-									removeValues.toArray(new String[removeValues.size()]));
-							modifications.add(removeModification);
-						}
+							if (removeValues.size() > 0) {
+								Modification removeModification = createModification(ModificationType.DELETE, attributeName,
+										removeValues.toArray(new String[removeValues.size()]));
+								modifications.add(removeModification);
+							}
 
-						if (addValues.size() > 0) {
-							Modification addModification = new Modification(ModificationType.ADD, attribute.getName(),
-									addValues.toArray(new String[addValues.size()]));
-							modifications.add(addModification);
+							if (addValues.size() > 0) {
+								Modification addModification = createModification(ModificationType.ADD, attributeName,
+										addValues.toArray(new String[addValues.size()]));
+								modifications.add(addModification);
+							}
 						}
 					}
 				}
@@ -632,23 +674,28 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 				}
 			}
 
-			if (attribute.needsBase64Encoding() && ldapOperationService.isBinaryAttribute(attributeName)) {
-				byte[][] attributeValues = attribute.getValueByteArrays();
-				if (attributeValues != null) {
-					attributeValueStrings = new String[attributeValues.length];
-					for (int i = 0; i < attributeValues.length; i++) {
-						attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
-						if (log.isTraceEnabled()) {
-							log.trace("Binary attribute: " + attribute.getName() + " value (hex): " + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) +
-									 " value (base64): " + attributeValueStrings[i]);
+			attributeValueStrings = attribute.getValues();
+			if (attribute.needsBase64Encoding()) {
+				boolean binaryAttribute = ldapOperationService.isBinaryAttribute(attributeName);
+				boolean certificateAttribute =  ldapOperationService.isCertificateAttribute(attributeName);
+
+				if (binaryAttribute || certificateAttribute) {
+					byte[][] attributeValues = attribute.getValueByteArrays();
+					if (attributeValues != null) {
+						attributeValueStrings = new String[attributeValues.length];
+						for (int i = 0; i < attributeValues.length; i++) {
+							attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
+	                        log.trace("Binary attribute: " + attribute.getName() + " value (hex): " + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) +
+	                                 " value (base64): " + attributeValueStrings[i]);
 						}
 					}
 				}
-			} else {
-				attributeValueStrings = attribute.getValues();
+				if (certificateAttribute) {
+					attributeName = ldapOperationService.getCertificateAttributeName(attributeName);
+				}
 			}
 			
-			AttributeData tmpAttribute = new AttributeData(attribute.getName(), attributeValueStrings);
+			AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueStrings);
 			result.add(tmpAttribute);
 		}
 
@@ -1012,6 +1059,28 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return this.ldapOperationService.getSupportedLDAPVersion();
 	}
 
+	private byte[][] toBinaryValues(String[] attributeValues) {
+		byte binaryValues[][] = new byte[attributeValues.length][];
+
+		for (int i = 0; i < attributeValues.length; i++) {
+			binaryValues[i] = Base64.decodeBase64(attributeValues[i]);
+		}
+		return binaryValues;
+	}
+
+	private Modification createModification(final ModificationType modificationType, final String attributeName,
+			final String... attributeValues) {
+		String realAttributeName = attributeName;
+		if (ldapOperationService.isCertificateAttribute(realAttributeName)) {
+			realAttributeName += ";binary";
+			byte[][] binaryValues = toBinaryValues(attributeValues);
+
+			return new Modification(modificationType, realAttributeName, binaryValues);
+		}
+
+		return new Modification(modificationType, realAttributeName, attributeValues);
+	}
+
 	private static final class PropertyComparator<T> implements Comparator<T>, Serializable {
 
 		private static final long serialVersionUID = 574848841116711467L;
@@ -1129,6 +1198,5 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			return countEntries;
 		}
 	};
-
 
 }
