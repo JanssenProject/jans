@@ -30,7 +30,7 @@ import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version April 20, 2017
+ * @version November 29, 2017
  */
 public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
 
@@ -126,7 +126,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has(APPLICATION_TYPE.toString()));
             assertTrue(jsonObj.has(CLIENT_NAME.toString()));
             assertTrue(jsonObj.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-            assertTrue(jsonObj.has("scopes"));
+            assertTrue(jsonObj.has(SCOPE.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
@@ -212,7 +212,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has(APPLICATION_TYPE.toString()));
             assertTrue(jsonObj.has(CLIENT_NAME.toString()));
             assertTrue(jsonObj.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-            assertTrue(jsonObj.has("scopes"));
+            assertTrue(jsonObj.has(SCOPE.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
@@ -339,7 +339,7 @@ public class ApplicationTypeRestrictionEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has(APPLICATION_TYPE.toString()));
             assertTrue(jsonObj.has(CLIENT_NAME.toString()));
             assertTrue(jsonObj.has(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-            assertTrue(jsonObj.has("scopes"));
+            assertTrue(jsonObj.has(SCOPE.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
             fail(e.getMessage() + "\nResponse was: " + entity);
