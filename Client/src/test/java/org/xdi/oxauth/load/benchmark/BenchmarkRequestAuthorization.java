@@ -6,24 +6,13 @@
 
 package org.xdi.oxauth.load.benchmark;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import org.testng.Reporter;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.AuthorizationRequest;
-import org.xdi.oxauth.client.AuthorizationResponse;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestListener;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestSuiteListener;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -31,17 +20,24 @@ import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version June 19, 2015
+ * @version November 29, 2017
  */
 
 @Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class})
 public class BenchmarkRequestAuthorization extends BaseTest {
 
     private String clientId;
-	private String clientSecret;
+    private String clientSecret;
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @BeforeClass
@@ -64,11 +60,11 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         this.clientSecret = registerResponse.getClientSecret();
     }
 
-	@Parameters({ "userId", "userSecret", "redirectUri" })
-	@Test(invocationCount = 200, threadPoolSize = 1)
-	public void testAuthorization1(final String userId, final String userSecret, final String redirectUri) throws Exception {
-		testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri, false);
-	}
+    @Parameters({"userId", "userSecret", "redirectUri"})
+    @Test(invocationCount = 200, threadPoolSize = 1)
+    public void testAuthorization1(final String userId, final String userSecret, final String redirectUri) throws Exception {
+        testAuthorizationImpl(userId, userSecret, this.clientId, redirectUri, false);
+    }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
     @Test(invocationCount = 200, threadPoolSize = 5, dependsOnMethods = {"testAuthorization1"})
@@ -113,7 +109,7 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScopes(scopes);
+        registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 

@@ -31,11 +31,11 @@ import java.util.UUID;
 
 import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPE;
 
 /**
  * @author Javier Rojas Blum
- * @version August 23, 2017
+ * @version November 29, 2017
  */
 public class GrantTypesRestrictionHttpTest extends BaseTest {
 
@@ -55,7 +55,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
-        registerRequest.setScopes(scopes);
+        registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
@@ -97,7 +97,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         assertNotNull(readResponse.getRegistrationClientUri());
         assertNotNull(readResponse.getClientSecretExpiresAt());
         assertNotNull(readResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readResponse.getClaims().get(SCOPE.toString()));
         assertNotNull(readResponse.getResponseTypes());
         assertTrue(readResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(readResponse.getGrantTypes());

@@ -27,7 +27,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 23, 2017
+ * @version November 29, 2017
  */
 public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
@@ -82,7 +82,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
     }
 
     /**
@@ -143,7 +143,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -244,7 +244,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -342,7 +342,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -442,7 +442,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -550,7 +550,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -651,7 +651,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -749,7 +749,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -849,7 +849,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -958,7 +958,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1065,7 +1065,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1173,7 +1173,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1281,7 +1281,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1390,7 +1390,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1497,7 +1497,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1604,7 +1604,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1711,7 +1711,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1818,7 +1818,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -1925,7 +1925,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2031,7 +2031,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2139,7 +2139,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2244,7 +2244,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2349,7 +2349,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2457,7 +2457,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2562,7 +2562,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2667,7 +2667,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2775,7 +2775,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2880,7 +2880,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -2983,7 +2983,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3081,7 +3081,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3180,7 +3180,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3290,7 +3290,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3397,7 +3397,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3496,7 +3496,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3595,7 +3595,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3693,7 +3693,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3798,7 +3798,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -3903,7 +3903,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4008,7 +4008,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4113,7 +4113,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4218,7 +4218,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4327,7 +4327,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4436,7 +4436,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4542,7 +4542,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4648,7 +4648,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4754,7 +4754,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4860,7 +4860,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -4966,7 +4966,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5075,7 +5075,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5181,7 +5181,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5287,7 +5287,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5393,7 +5393,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5499,7 +5499,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5605,7 +5605,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5714,7 +5714,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5820,7 +5820,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -5926,7 +5926,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6032,7 +6032,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6138,7 +6138,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6244,7 +6244,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6353,7 +6353,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6459,7 +6459,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6565,7 +6565,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6671,7 +6671,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6777,7 +6777,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6883,7 +6883,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -6992,7 +6992,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7098,7 +7098,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7204,7 +7204,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7310,7 +7310,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7416,7 +7416,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7522,7 +7522,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7631,7 +7631,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7737,7 +7737,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7843,7 +7843,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -7949,7 +7949,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
@@ -8055,7 +8055,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get(SCOPES.toString()));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);

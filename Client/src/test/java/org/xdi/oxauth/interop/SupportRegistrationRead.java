@@ -6,24 +6,6 @@
 
 package org.xdi.oxauth.interop;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CLIENT_NAME;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.CONTACTS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.JWKS_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.LOGO_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.POLICY_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.REQUEST_URIS;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SCOPES;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static org.xdi.oxauth.model.register.RegisterRequestParam.SUBJECT_TYPE;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
@@ -37,11 +19,18 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+
 /**
  * OC5:FeatureTest-Support Registration Read
  *
  * @author Javier Rojas Blum
- * @version 1.0, 07/21/2014
+ * @version November 29, 2017
  */
 public class SupportRegistrationRead extends BaseTest {
 
@@ -77,7 +66,7 @@ public class SupportRegistrationRead extends BaseTest {
         assertNotNull(registerResponse1.getClientSecret());
         assertNotNull(registerResponse1.getRegistrationAccessToken());
         assertNotNull(registerResponse1.getClientSecretExpiresAt());
-        assertNotNull(registerResponse1.getClaims().get(SCOPES.toString()));
+        assertNotNull(registerResponse1.getClaims().get(SCOPE.toString()));
 
         String clientId = registerResponse1.getClientId();
         String registrationAccessToken = registerResponse1.getRegistrationAccessToken();
@@ -108,6 +97,6 @@ public class SupportRegistrationRead extends BaseTest {
         assertNotNull(registerResponse2.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(registerResponse2.getClaims().get(LOGO_URI.toString()));
         assertNotNull(registerResponse2.getClaims().get(REQUEST_URIS.toString()));
-        assertNotNull(registerResponse2.getClaims().get("scopes"));
+        assertNotNull(registerResponse2.getClaims().get(SCOPE.toString()));
     }
 }

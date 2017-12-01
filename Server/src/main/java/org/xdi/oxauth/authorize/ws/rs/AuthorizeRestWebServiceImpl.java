@@ -508,14 +508,6 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         sessionUser.addPermission(clientId, true);
                                     } else if (client.getTrustedClient()) {
                                         sessionUser.addPermission(clientId, true);
-                                    } else {
-                                        redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                                redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                                idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                                codeChallenge, codeChallengeMethod, sessionId, claims, customParameters);
-                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                        return builder.build();
                                     }
                                 }
 
