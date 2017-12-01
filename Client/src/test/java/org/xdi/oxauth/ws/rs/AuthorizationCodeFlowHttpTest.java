@@ -34,7 +34,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * Test cases for the authorization code flow (HTTP)
  *
  * @author Javier Rojas Blum
- * @version September 7, 2017
+ * @version November 29, 2017
  */
 public class AuthorizationCodeFlowHttpTest extends BaseTest {
 
@@ -463,7 +463,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization and receive the authorization code.
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
@@ -680,7 +680,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScopes(scopes);
+        registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
