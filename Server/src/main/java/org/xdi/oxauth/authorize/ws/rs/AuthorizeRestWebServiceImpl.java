@@ -504,8 +504,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                 ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
                                 if (scopes.size() > 0) {
-                                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null && Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
-                                        sessionUser.addPermission(clientId, true);
+                                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null) {
+                                    	if (Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
+                                    		sessionUser.addPermission(clientId, true);
+                                    	} else {
+                                            redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                                                    redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                                    idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                                    codeChallenge, codeChallengeMethod, sessionId, claims, customParameters);
+                                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                            return builder.build();
+                                    	}
                                     } else if (client.getTrustedClient()) {
                                         sessionUser.addPermission(clientId, true);
                                     }
