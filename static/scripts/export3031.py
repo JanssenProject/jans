@@ -560,6 +560,16 @@ class Exporter(object):
         f.write(output)
         f.close()
 
+        # Backup the oxidp config
+
+        args = [self.ldapsearch] + self.ldapCreds + \
+               ['-b',
+                'ou=appliances,o=gluu',
+                'objectclass=oxApplicationConfiguration']
+        output = self.getOutput(args)
+        f = open("%s/ldif/oxidp_config.ldif" % self.backupDir, 'w')
+        f.write(output)
+        f.close()
         # Backup the oxtrust config
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
