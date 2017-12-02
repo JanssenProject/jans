@@ -565,7 +565,7 @@ class Exporter(object):
         args = [self.ldapsearch] + self.ldapCreds + \
                ['-b',
                 'ou=appliances,o=gluu',
-                'objectclass=oxTrustConfiguration']
+                'objectclass=oxApplicationConfiguration']
         output = self.getOutput(args)
         f = open("%s/ldif/oxidp_config.ldif" % self.backupDir, 'w')
         f.write(output)
