@@ -311,6 +311,10 @@ class Migration(object):
                 else:
                     isOCcontinue = True
                 continue
+            line = line.replace("X-SCHEMA-FILE '100-user.ldif'","X-SCHEMA-FILE 'custom.schema'")
+            line = line.replace("X-SCHEMA-FILE '99-user.ldif'","X-SCHEMA-FILE 'custom.schema'")
+            line = line.replace("'gluu' )","'Gluu - custom person attribute' )")
+
             if re.match('^dn:', line) or re.match('^objectClass:', line) or \
                     re.match('^cn:', line):
                 continue
@@ -598,6 +602,10 @@ class Migration(object):
                 for line in infile:
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
                     line = line.replace('oxAuthUmaResourceSet', 'oxUmaResource')
+                    if ("gluuAttributeOrigin:" in line and line.split("gluuAttributeOrigin: ")[1][:3] == 'ox-'):
+                        line = line.replace(line, 'gluuAttributeOrigin: gluuCustomPerson' + '\n')
+                    if ("gluuAttributeOrigin:" in line and ):
+                        line = line.replace(line, 'gluuAttributeOrigin: gluuCustomPerson' + '\n')
                     if 'oxTrustAuthenticationMode' in line:
                         line = line.replace('internal', 'auth_ldap_server')
                     if 'oxAuthAuthenticationTime' in line:
