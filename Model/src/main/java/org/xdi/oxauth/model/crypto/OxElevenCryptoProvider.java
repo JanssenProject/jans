@@ -13,7 +13,7 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 
 /**
  * @author Javier Rojas Blum
- * @version April 25, 2017
+ * @version December 4, 2017
  */
 public class OxElevenCryptoProvider extends AbstractCryptoProvider {
 
