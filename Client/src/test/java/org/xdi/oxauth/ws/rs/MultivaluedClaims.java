@@ -1106,8 +1106,9 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestWithMultivaluedClaimAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -1197,8 +1198,9 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestWithMultivaluedClaimAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -1288,8 +1290,9 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void authorizationRequestWithMultivaluedClaimAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -2578,8 +2581,9 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "RS256_keyId", "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "dnName", "keyStoreFile", "keyStoreSecret", "RS256_enc_keyId",
+            "clientJwksUri", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -2687,8 +2691,9 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "RS256_keyId", "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "dnName", "keyStoreFile", "keyStoreSecret", "RS256_enc_keyId",
+            "clientJwksUri", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -2796,8 +2801,9 @@ public class MultivaluedClaims extends BaseTest {
         assertTrue(userInfoResponse.getClaim("member_of").size() > 1);
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "dnName", "keyStoreFile", "keyStoreSecret",
-            "RS256_keyId", "clientJwksUri", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "dnName", "keyStoreFile", "keyStoreSecret", "RS256_enc_keyId",
+            "clientJwksUri", "sectorIdentifierUri"})
     @Test
     public void authorizationRequestObjectWithMultivaluedClaimAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
