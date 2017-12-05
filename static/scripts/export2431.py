@@ -76,7 +76,7 @@ SKIP_DN = []
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(name)s %(message)s',
-                    filename='export30.log',
+                    filename='export2431.log',
                     filemode='w')
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
@@ -374,32 +374,34 @@ def doOxTrustChanges(oxTrustPath):
     oxTrustConfApplicationJson['shibbolethVersion'] = 'v3'
     oxTrustConfApplicationJson['ldifStore'] = "/var/ox/identity/removed"
     oxTrustConfApplicationJson['personCustomObjectClass'] = 'gluuCustomPerson'
-
-    del oxTrustConfApplicationJson['umaClientKeyId']
-    del oxTrustConfApplicationJson['umaClientKeyStoreFile']
-    del oxTrustConfApplicationJson['umaResourceId']
-    del oxTrustConfApplicationJson['umaScope']
-    del oxTrustConfApplicationJson['umaClientId']
-    del oxTrustConfApplicationJson['shibboleth2SpConfDir']
-    del oxTrustConfApplicationJson['shibboleth2IdpRootDir']
-    del oxTrustConfApplicationJson['shibboleth2FederationRootDir']
-    del oxTrustConfApplicationJson['schemaAddObjectClassWithoutAttributeTypesDefinition']
-    del oxTrustConfApplicationJson['schemaAddObjectClassWithAttributeTypesDefinition']
-    del oxTrustConfApplicationJson['schemaAddAttributeDefinition']
-    del oxTrustConfApplicationJson['recaptchaSiteKey']
-    del oxTrustConfApplicationJson['recaptchaSecretKey']
-    del oxTrustConfApplicationJson['oxAuthUserInfo']
-    del oxTrustConfApplicationJson['oxAuthTokenValidationUrl']
-    del oxTrustConfApplicationJson['oxAuthTokenUrl']
-    del oxTrustConfApplicationJson['oxAuthRegisterUrl']
-    del oxTrustConfApplicationJson['oxAuthEndSessionUrl']
-    del oxTrustConfApplicationJson['oxAuthLogoutUrl']
-    del oxTrustConfApplicationJson['oxAuthAuthorizeUrl']
-    del oxTrustConfApplicationJson['mysqlPassword']
-    del oxTrustConfApplicationJson['mysqlUrl']
-    del oxTrustConfApplicationJson['mysqlUser']
-    del oxTrustConfApplicationJson['authMode']
-    del oxTrustConfApplicationJson['umaClientKeyStorePassword']
+    try:
+        del oxTrustConfApplicationJson['umaClientKeyId']
+        del oxTrustConfApplicationJson['umaClientKeyStoreFile']
+        del oxTrustConfApplicationJson['umaResourceId']
+        del oxTrustConfApplicationJson['umaScope']
+        del oxTrustConfApplicationJson['umaClientId']
+        del oxTrustConfApplicationJson['shibboleth2SpConfDir']
+        del oxTrustConfApplicationJson['shibboleth2IdpRootDir']
+        del oxTrustConfApplicationJson['shibboleth2FederationRootDir']
+        del oxTrustConfApplicationJson['schemaAddObjectClassWithoutAttributeTypesDefinition']
+        del oxTrustConfApplicationJson['schemaAddObjectClassWithAttributeTypesDefinition']
+        del oxTrustConfApplicationJson['schemaAddAttributeDefinition']
+        del oxTrustConfApplicationJson['recaptchaSiteKey']
+        del oxTrustConfApplicationJson['recaptchaSecretKey']
+        del oxTrustConfApplicationJson['oxAuthUserInfo']
+        del oxTrustConfApplicationJson['oxAuthTokenValidationUrl']
+        del oxTrustConfApplicationJson['oxAuthTokenUrl']
+        del oxTrustConfApplicationJson['oxAuthRegisterUrl']
+        del oxTrustConfApplicationJson['oxAuthEndSessionUrl']
+        del oxTrustConfApplicationJson['oxAuthLogoutUrl']
+        del oxTrustConfApplicationJson['oxAuthAuthorizeUrl']
+        del oxTrustConfApplicationJson['mysqlPassword']
+        del oxTrustConfApplicationJson['mysqlUrl']
+        del oxTrustConfApplicationJson['mysqlUser']
+        del oxTrustConfApplicationJson['authMode']
+        del oxTrustConfApplicationJson['umaClientKeyStorePassword']
+    except:
+        logging.debug("Error")
 
     parser.lastEntry['oxTrustConfApplication'][0] = json.dumps(oxTrustConfApplicationJson, indent=4, sort_keys=True)
 
@@ -439,8 +441,8 @@ def doApplinceChanges(oxappliancesPath):
         idpConfigJson['useSSL'] = "true"
     else:
         idpConfigJson['useSSL'] = 'false'
-    del idpConfigJson['level']
-    del idpConfigJson['version']
+    #del idpConfigJson['level']
+    #del idpConfigJson['version']
     idpConfig['config'] = json.dumps(idpConfigJson, indent=4, sort_keys=True)
     parser.entries[0]['oxIDPAuthentication'][0] = json.dumps(idpConfig, indent=4, sort_keys=True)
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
@@ -506,6 +508,41 @@ class Exporter(object):
         self.scim_rs_client_id = ""
         self.passport_rp_client_id = ""
         self.scim_rp_client_id = ""
+        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os = self.detect_os_type()
+        self.service = "/usr/sbin/service"
+        if self.os is 'centos':
+            self.service = "/sbin/service"
+
+    def detect_os_type(self):
+        distro_info = self.readFile('/etc/redhat-release')
+        if distro_info is None:
+            distro_info = self.readFile('/etc/os-release')
+        if 'CentOS' in distro_info:
+            return self.os_types[0]
+        elif 'Red Hat' in distro_info:
+            return self.os_types[1]
+        elif 'Ubuntu' in distro_info:
+            return self.os_types[3]
+        elif 'Debian' in distro_info:
+            return self.os_types[4]
+        else:
+            return self.choose_from_list(self.os_types, "Operating System")
+    def readFile(self, inFilePath):
+        if not os.path.exists(inFilePath):
+            logging.debug("Cannot read: %s. File does not exist.", inFilePath)
+            return None
+
+        inFilePathText = None
+        try:
+            f = open(inFilePath)
+            inFilePathText = f.read()
+            f.close
+        except:
+            logging.warning("Error reading %s", inFilePath)
+            logging.debug(traceback.format_exc())
+
+        return inFilePathText
 
     def getOutput(self, args):
         try:
@@ -705,17 +742,79 @@ class Exporter(object):
                 f.write("%s=%s\n" % (key, props[key]))
         f.close()
 
+
+    def stopOpenDJ(self):
+        logging.info('Stopping OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'stop', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        else:
+            output = self.getOutput([self.service, 'opendj', 'stop'])
+        if output.find("Directory Server is now stopped") > 0 or output.find("Server already stopped") > 0 \
+                or output.strip() == "failed":
+            logging.info("Directory Server is now stopped")
+        else:
+            logging.error(
+                "OpenDJ did not stop properly. Export cannot run without "
+                "stopping the directory server. Exiting from import. Check"
+                " /opt/opendj/logs/errors")
+            sys.exit(1)
+
+    def editLdapConfig(self):
+
+        replacements = {'ds-cfg-size-limit: 1000':'ds-cfg-size-limit: 100000'}
+
+        lines = []
+        with open('/opt/opendj/config/config.ldif') as infile:
+            for line in infile:
+                for src, target in replacements.iteritems():
+                    line = line.replace(src, target)
+                lines.append(line)
+        with open('/opt/opendj/config/config.ldif', 'w') as outfile:
+            for line in lines:
+                outfile.write(line)
+
+    def removeLdapConfig(self):
+
+        replacements = {'ds-cfg-size-limit: 100000':'ds-cfg-size-limit: 1000'}
+
+        lines = []
+        with open('/opt/opendj/config/config.ldif') as infile:
+            for line in infile:
+                for src, target in replacements.iteritems():
+                    line = line.replace(src, target)
+                lines.append(line)
+        with open('/opt/opendj/config/config.ldif', 'w') as outfile:
+            for line in lines:
+                outfile.write(line)
+    def startOpenDJ(self):
+        logging.info('Starting OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'start', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        output = self.getOutput([self.service, 'opendj', 'start'])
+        if output.find("Directory Server has started successfully") > 0 or \
+                        output.strip() == "active":
+            logging.info("Directory Server has started successfully")
+        else:
+            logging.error("OpenDJ did not start properly. Check "
+                          "/opt/opendj/logs/errors. Restart it manually.")
+
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
         print("            Gluu Server Data Export Tool For v2.4x to v3.1x           ")
         print("-------------------------------------------------------------")
         print("")
+        self.stopOpenDJ()
+        self.editLdapConfig()
+        self.startOpenDJ()
         self.prepareLdapPW()
         self.makeFolders()
         self.backupFiles()
         self.getLdif()
         self.genProperties()
+        self.removeLdapConfig()
         print("")
         print("-------------------------------------------------------------")
         print("The data has been exported to %s" % self.backupDir)
@@ -724,7 +823,7 @@ class Exporter(object):
 
 if __name__ == "__main__":
     if len(sys.argv) != 1:
-        print ("Usage: python export30.py")
+        print ("Usage: python export2431.py")
     else:
         exporter = Exporter()
         exporter.export()
