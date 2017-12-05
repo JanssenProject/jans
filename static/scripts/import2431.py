@@ -110,6 +110,17 @@ class Migration(object):
 
         self.customAttrs = []
 
+    def slapdConfAdd(self):
+        with open(self.slapdConf, 'a') as f:
+            f.writelines("sizelimit -1")
+            f.close
+
+    def slapdConfremove(self):
+        with open(self.slapdConf, 'a+') as f:
+            lines = f.readlines()
+            lines = lines[:-1]
+            f.close
+
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
             logging.debug("Cannot read: %s. File does not exist.", inFilePath)
@@ -396,19 +407,24 @@ class Migration(object):
 
         outfile2 = open(os.path.join(self.gluuSchemaDir, 'custom.schema'), 'r')
         temp_schema = outfile2.read()
-        print temp_schema
         custArrtributes = ''
         for indx, line in enumerate(self.customAttrs):
             custArrtributes = custArrtributes + ' $ ' + line
-        self.customAttrs = set(custArrtributes.split(' $ '))
+        if len(self.customAttrs)>0:
+            customAttrs = set(custArrtributes.split(' $ '))
+        else:
+            customAttrs = []
         custArrtributes = ""
-        for indx, line in enumerate(self.customAttrs):
-            if indx ==0 :
-                custArrtributes = custArrtributes + " $ " +line
-            elif (indx < len(self.customAttrs) - 1):
-                custArrtributes = custArrtributes + line + " $ "
-            else:
-                custArrtributes = custArrtributes + line
+        if len(self.customAttrs) > 0:
+            for indx, line in enumerate(self.customAttrs):
+                if indx ==0 :
+                    custArrtributes = custArrtributes + " $ " +line
+                elif (indx < len(self.customAttrs) - 1):
+                    custArrtributes = custArrtributes + line + " $ "
+                else:
+                    custArrtributes = custArrtributes + line
+        print custArrtributes
+
         temp_schema = temp_schema.replace(re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(1),
                                           re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(
                                               1) + custArrtributes)
@@ -603,13 +619,15 @@ class Migration(object):
                     line = line.replace("lastModifiedTime", "oxLastAccessTime")
                     line = line.replace('oxAuthUmaResourceSet', 'oxUmaResource')
                     if ("gluuAttributeOrigin:" in line and line.split("gluuAttributeOrigin: ")[1][:3] == 'ox-'):
-                        line = line.replace(line, 'gluuAttributeOrigin: gluuCustomPerson' + '\n')
-                    if ("gluuAttributeOrigin:" in line and ):
-                        line = line.replace(line, 'gluuAttributeOrigin: gluuCustomPerson' + '\n')
-                    if 'oxTrustAuthenticationMode' in line:
-                        line = line.replace('internal', 'auth_ldap_server')
+                        line = 'gluuAttributeOrigin: gluuCustomPerson' + '\n'
+                    if ("gluuAttributeOrigin:" in line and 'inetOrgPerson' in line):
+                        line = 'gluuAttributeOrigin: gluuCustomPerson' + '\n'
                     if 'oxAuthAuthenticationTime' in line:
                         line = self.convertTimeStamp(line)
+                    if 'oxAuthenticationMode' in line:
+                        line = 'oxAuthenticationMode: auth_ldap_server' + '\n'
+                    if 'oxTrustAuthenticationMode' in line:
+                        line = 'oxTrustAuthenticationMode: auth_ldap_server'+ '\n'
                     if ("objectClass:" in line and line.split("objectClass: ")[1][:3] == 'ox-'):
                         line = line.replace(line, 'objectClass: gluuCustomPerson' + '\n')
                     if 'oxType' not in line and 'gluuVdsCacheRefreshLastUpdate' not in line and 'objectClass: person' not in line and 'objectClass: organizationalPerson' not in line and 'objectClass: inetOrgPerson' not in line:
@@ -626,13 +644,14 @@ class Migration(object):
                     #         f.write('\n')
                     #         f.write(out)
         data="".join(open( os.path.join(self.backupDir, 'ldif','site.ldif')).readlines()[4:-1])
-        open(os.path.join(self.backupDir, 'ldif','site.ldif'),"wb").write(data)
-        filenames = [self.o_site_static, os.path.join(self.backupDir, 'ldif','site.ldif')]
+        open(os.path.join(self.backupDir, 'ldif','sitetmp.ldif'),"wb").write(data)
+        filenames = [self.o_site_static, os.path.join(self.backupDir, 'ldif','sitetmp.ldif')]
         with open(self.o_site, 'w') as outfile:
             for fname in filenames:
                 with open(fname) as infile:
                     for line in infile:
                         outfile.write(line)
+        os.remove(os.path.join(self.backupDir, 'ldif','sitetmp.ldif'))
     def importDataIntoOpenldap(self):
         count = len(os.listdir('/opt/gluu/data/main_db/')) - 1
         backupfile = self.ldapDataFile + ".bkp_{0:02d}".format(count)
