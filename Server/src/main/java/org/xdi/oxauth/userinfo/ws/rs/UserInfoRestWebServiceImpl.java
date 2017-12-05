@@ -33,6 +33,7 @@ import org.xdi.oxauth.model.jwe.Jwe;
 import org.xdi.oxauth.model.jwe.JweEncrypter;
 import org.xdi.oxauth.model.jwe.JweEncrypterImpl;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.jwt.Jwt;
 import org.xdi.oxauth.model.jwt.JwtSubClaimObject;
 import org.xdi.oxauth.model.jwt.JwtType;
@@ -66,7 +67,7 @@ import java.util.*;
  * Provides interface for User Info REST web services
  *
  * @author Javier Rojas Blum
- * @version October 26, 2017
+ * @version December 5, 2017
  */
 @Path("/")
 public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
@@ -219,7 +220,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        String keyId = cryptoProvider.getKeyId(webKeysConfiguration, signatureAlgorithm);
+        String keyId = cryptoProvider.getKeyId(webKeysConfiguration, signatureAlgorithm, Use.SIGNATURE);
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
@@ -465,7 +466,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 || keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA1_5) {
             JSONObject jsonWebKeys = JwtUtil.getJSONWebKeys(authorizationGrant.getClient().getJwksUri());
             AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(appConfiguration);
-            String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys), SignatureAlgorithm.RS256);
+            String keyId = cryptoProvider.getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys), SignatureAlgorithm.RS256, Use.ENCRYPTION);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys);
 
             if (publicKey != null) {
@@ -665,7 +666,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss.SSS'Z'");
                         Object attributeValue = user.getAttribute(gluuAttribute.getName(), true);
                         if (attributeValue != null) {
-                        	attribute = format.parse(attributeValue.toString());
+                            attribute = format.parse(attributeValue.toString());
                         }
                     } else {
                         attribute = user.getAttribute(gluuAttribute.getName(), true);
