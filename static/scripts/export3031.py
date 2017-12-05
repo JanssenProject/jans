@@ -368,7 +368,7 @@ def doUmaResourcesChangesForUma2(self, UmaPath):
     newfile = UmaPath.replace('/uma.ldif', '/uma_new.ldif')
     f = open(newfile, 'w')
     base64Types = []
-    hostname = self.getOutput([self.hostname]).strip();
+    hostname = self.getOutput([self.hostname]).strip()
     for idx, val in enumerate(parser.entries):
         if 'displayName' in val:
             if len(val['oxId'][0]) > 1 and 'ou=resource_sets' in parser.getDNs()[idx]:
@@ -401,7 +401,7 @@ def doOxTrustChanges(self, oxTrustPath):
     atr = parser.parse()
     oxTrustConfApplication = parser.lastEntry['oxTrustConfApplication'][0]
     oxTrustConfApplication = oxTrustConfApplication.replace('seam/resource/', '')
-    parser.lastEntry['oxTrustConfApplication'][0] = oxTrustConfApplication;
+    parser.lastEntry['oxTrustConfApplication'][0] = oxTrustConfApplication
     base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh"]
 
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
@@ -463,21 +463,42 @@ class Exporter(object):
                          'ou=hosts',
                          'ou=u2f']
         self.propertiesFn = os.path.join(self.backupDir, 'setup.properties')
+        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os = self.detect_os_type()
+        self.service = "/usr/sbin/service"
+        if self.os is 'centos':
+            self.service = "/sbin/service"
+
+    def detect_os_type(self):
+        distro_info = self.readFile('/etc/redhat-release')
+        if distro_info is None:
+            distro_info = self.readFile('/etc/os-release')
+        if 'CentOS' in distro_info:
+            return self.os_types[0]
+        elif 'Red Hat' in distro_info:
+            return self.os_types[1]
+        elif 'Ubuntu' in distro_info:
+            return self.os_types[3]
+        elif 'Debian' in distro_info:
+            return self.os_types[4]
+        else:
+            return self.choose_from_list(self.os_types, "Operating System")
+    
 
     def getOutput(self, args):
-        try:
-            logging.debug("Running command : %s" % " ".join(args))
-            p = subprocess.Popen(args, stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
-            output, error = p.communicate()
-            if error:
-                logging.error(error)
-                logging.debug(output)
-            return output
-        except:
-            logging.error("Error running command : %s" % " ".join(args))
-            logging.error(traceback.format_exc())
-            sys.exit(1)
+            try:
+                logging.debug("Running command : %s" % " ".join(args))
+                p = subprocess.Popen(args, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
+                output, error = p.communicate()
+                if error:
+                    logging.error(error)
+                    logging.debug(output)
+                return output
+            except:
+                logging.error("Error running command : %s" % " ".join(args))
+                logging.error(traceback.format_exc())
+                sys.exit(1)
 
     def makeFolders(self):
         folders = [self.backupDir, "%s/ldif" % self.backupDir]
@@ -673,17 +694,78 @@ class Exporter(object):
             f.write("%s=%s\n" % (key, props[key]))
         f.close()
 
+    def stopOpenDJ(self):
+        logging.info('Stopping OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'stop', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        else:
+            output = self.getOutput([self.service, 'opendj', 'stop'])
+        if output.find("Directory Server is now stopped") > 0 or output.find("Server already stopped") > 0 \
+                or output.strip() == "failed":
+            logging.info("Directory Server is now stopped")
+        else:
+            logging.error(
+                "OpenDJ did not stop properly. Export cannot run without "
+                "stopping the directory server. Exiting from import. Check"
+                " /opt/opendj/logs/errors")
+            sys.exit(1)
+
+    def editLdapConfig(self):
+
+        replacements = {'ds-cfg-size-limit: 1000':'ds-cfg-size-limit: 100000'}
+
+        lines = []
+        with open('/opt/opendj/config/config.ldif') as infile:
+            for line in infile:
+                for src, target in replacements.iteritems():
+                    line = line.replace(src, target)
+                lines.append(line)
+        with open('/opt/opendj/config/config.ldif', 'w') as outfile:
+            for line in lines:
+                outfile.write(line)
+
+    def removeLdapConfig(self):
+
+        replacements = {'ds-cfg-size-limit: 1000':'ds-cfg-size-limit: 100000'}
+
+        lines = []
+        with open('/opt/opendj/config/config.ldif') as infile:
+            for line in infile:
+                for src, target in replacements.iteritems():
+                    line = line.replace(src, target)
+                lines.append(line)
+        with open('/opt/opendj/config/config.ldif', 'w') as outfile:
+            for line in lines:
+                outfile.write(line)
+    def startOpenDJ(self):
+        logging.info('Starting OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'start', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        output = self.getOutput([self.service, 'opendj', 'start'])
+        if output.find("Directory Server has started successfully") > 0 or \
+                        output.strip() == "active":
+            logging.info("Directory Server has started successfully")
+        else:
+            logging.error("OpenDJ did not start properly. Check "
+                          "/opt/opendj/logs/errors. Restart it manually.")
+
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
         print("            Gluu Server Data Export Tool For v3.1.x            ")
         print("-------------------------------------------------------------")
         print("")
+        self.stopOpenDJ()
+        self.editLdapConfig()
+        self.startOpenDJ()
         self.prepareLdapPW()
         self.makeFolders()
         self.backupFiles()
         self.getLdif()
         self.genProperties()
+        self.removeLdapConfig()
         print("")
         print("-------------------------------------------------------------")
         print("The data has been exported to %s" % self.backupDir)
