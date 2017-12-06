@@ -16,13 +16,16 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  * @author Yuriy Movchan Date: 12/30/2012
  */
 public interface UpdateUserType extends BaseExternalType {
-
-	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
 	
 	public boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
+
+	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean postUpdateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
 	
 	public boolean addUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean postAddUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
 	
 	public boolean deleteUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes);
+	public boolean postDeleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }
