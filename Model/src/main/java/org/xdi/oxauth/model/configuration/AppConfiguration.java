@@ -1299,7 +1299,7 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getLegacyDynamicRegistrationScopeParam() {
-        return legacyDynamicRegistrationScopeParam;
+        return Boolean.TRUE.equals(legacyDynamicRegistrationScopeParam);
     }
 
     public void setLegacyDynamicRegistrationScopeParam(Boolean legacyDynamicRegistrationScopeParam) {
