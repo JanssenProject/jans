@@ -29,12 +29,12 @@ import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
- * @version July 19, 2017
+ * @version December 5, 2017
  */
 public class TokenEncryptionHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestIdTokenAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
@@ -111,8 +111,8 @@ public class TokenEncryptionHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestIdTokenAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
@@ -189,8 +189,8 @@ public class TokenEncryptionHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUris", "clientJwksUri",
+            "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test
     public void requestIdTokenAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUris, final String jwksUri,
