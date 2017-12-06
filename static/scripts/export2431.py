@@ -329,9 +329,9 @@ def doUmaResourcesChangesForUma2(self, UmaPath):
                         'resource_sets',
                         'resources')
             elif val['oxId'][0] == 'passport_access':
-                parser.entries[idx]["oxId"] = ['https://'+ self.hostname +'/oxauth/restv1/uma/scopes/passport_access']
+                parser.entries[idx]["oxId"] = ['https://' + self.hostname + '/oxauth/restv1/uma/scopes/passport_access']
             if val['displayName'][0] == 'SCIM Resource Set':
-                parser.entries[idx]["oxResource"] = ['https://' + self.hostname +'/identity/restv1/scim/v1']
+                parser.entries[idx]["oxResource"] = ['https://' + self.hostname + '/identity/restv1/scim/v1']
                 parser.entries[idx]['oxAssociatedClient'] = [
                     ('inum=' + self.scim_rp_client_id + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
             elif val['displayName'][0] == 'Passport Resource Set':
@@ -412,9 +412,10 @@ def doOxTrustChanges(oxTrustPath):
     oxTrustConfCacheRefreshJson['snapshotFolder'] = '/var/ox/identity/cr-snapshots/'
     parser.lastEntry['oxTrustConfCacheRefresh'][0] = json.dumps(oxTrustConfCacheRefreshJson, indent=4, sort_keys=True)
 
-
-    parser.lastEntry['oxTrustConfImportPerson'] = [json.dumps(json.loads('{	"mappings": [{		"ldapName": "uid",		"displayName": "Username",		"dataType": "string",		"required": "true"	},	{		"ldapName": "givenName",		"displayName": "First Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "sn",		"displayName": "Last Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "mail",		"displayName": "Email",		"dataType": "string",		"required": "true"	},	{		"ldapName": "userPassword",		"displayName": "Password",		"dataType": "string",		"required": "false"	}]}'))]
-    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh","oxTrustConfImportPerson"]
+    parser.lastEntry['oxTrustConfImportPerson'] = [json.dumps(json.loads(
+        '{	"mappings": [{		"ldapName": "uid",		"displayName": "Username",		"dataType": "string",		"required": "true"	},	{		"ldapName": "givenName",		"displayName": "First Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "sn",		"displayName": "Last Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "mail",		"displayName": "Email",		"dataType": "string",		"required": "true"	},	{		"ldapName": "userPassword",		"displayName": "Password",		"dataType": "string",		"required": "false"	}]}'))]
+    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh",
+                   "oxTrustConfImportPerson"]
 
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
     newfile = oxTrustPath.replace('/oxtrust_config.ldif', '/oxtrust_config_new.ldif')
@@ -437,12 +438,12 @@ def doApplinceChanges(oxappliancesPath):
     idpConfig['priority'] = 1
     idpConfigJson = json.loads(idpConfig['config'])
     # idpConfigJson['bindDN'] = 'cn=directory manager,o=gluu'
-    if(idpConfigJson['useSSL']):
+    if (idpConfigJson['useSSL']):
         idpConfigJson['useSSL'] = "true"
     else:
         idpConfigJson['useSSL'] = 'false'
-    #del idpConfigJson['level']
-    #del idpConfigJson['version']
+    # del idpConfigJson['level']
+    # del idpConfigJson['version']
     idpConfig['config'] = json.dumps(idpConfigJson, indent=4, sort_keys=True)
     parser.entries[0]['oxIDPAuthentication'][0] = json.dumps(idpConfig, indent=4, sort_keys=True)
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
@@ -454,6 +455,27 @@ def doApplinceChanges(oxappliancesPath):
 
     os.remove(oxappliancesPath)
     os.rename(newfile, oxappliancesPath)
+
+
+def doAttributeChange(self, attributePath):
+    parser = MyLDIF(open(attributePath, 'rb'), sys.stdout)
+    parser.parse()
+    parser.parse()
+    newfile = attributePath.replace('attributes.ldif', 'attributes_new.ldif')
+    f = open(newfile, 'w')
+    base64Types = []
+    for idx, val in enumerate(parser.entries):
+        if 'inum' in val:
+            if (val['gluuAttributeName'][0] == "gluuStatus"):
+                print(parser.entries[idx])
+                parser.entries[idx]["displayName"] = ['User Status']
+
+        out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
+        f.write(out)
+
+    f.close()
+    os.remove(attributePath)
+    os.rename(newfile, attributePath)
 
 
 def changePassportConfigJson(self, param):
@@ -528,6 +550,7 @@ class Exporter(object):
             return self.os_types[4]
         else:
             return self.choose_from_list(self.os_types, "Operating System")
+
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
             logging.debug("Cannot read: %s. File does not exist.", inFilePath)
@@ -617,6 +640,7 @@ class Exporter(object):
 
         removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
         doClientsChangesForUMA2(self, "%s/ldif/clients.ldif" % self.backupDir)
+        doAttributeChange(self, "%s/ldif/attributes.ldif" % self.backupDir)
         changePassportConfigJson(self, "%s/etc/gluu/conf/passport-config.json" % self.backupDir)
 
         # Backup the appliance config
@@ -628,9 +652,9 @@ class Exporter(object):
                 'objectclass=*']
         output = self.getOutput(args)
         output = output.replace('IN_MEMORY', '"IN_MEMORY"')
-        output.replace('""IN_MEMORY""',"IN_MEMORY")
+        output.replace('""IN_MEMORY""', "IN_MEMORY")
         output = output.replace('DEFAULT', '"DEFAULT"')
-        output.replace('""DEFAULT""',"DEFAULT")
+        output.replace('""DEFAULT""', "DEFAULT")
 
         f = open("%s/ldif/appliance.ldif" % self.backupDir, 'w')
         f.write(output)
@@ -742,7 +766,6 @@ class Exporter(object):
                 f.write("%s=%s\n" % (key, props[key]))
         f.close()
 
-
     def stopOpenDJ(self):
         logging.info('Stopping OpenDJ Directory Server...')
         if (os.path.isfile('/usr/bin/systemctl')):
@@ -762,7 +785,7 @@ class Exporter(object):
 
     def editLdapConfig(self):
 
-        replacements = {'ds-cfg-size-limit: 1000':'ds-cfg-size-limit: 100000'}
+        replacements = {'ds-cfg-size-limit: 1000': 'ds-cfg-size-limit: 100000'}
 
         lines = []
         with open('/opt/opendj/config/config.ldif') as infile:
@@ -776,7 +799,7 @@ class Exporter(object):
 
     def removeLdapConfig(self):
 
-        replacements = {'ds-cfg-size-limit: 100000':'ds-cfg-size-limit: 1000'}
+        replacements = {'ds-cfg-size-limit: 100000': 'ds-cfg-size-limit: 1000'}
 
         lines = []
         with open('/opt/opendj/config/config.ldif') as infile:
@@ -787,6 +810,7 @@ class Exporter(object):
         with open('/opt/opendj/config/config.ldif', 'w') as outfile:
             for line in lines:
                 outfile.write(line)
+
     def startOpenDJ(self):
         logging.info('Starting OpenDJ Directory Server...')
         if (os.path.isfile('/usr/bin/systemctl')):
