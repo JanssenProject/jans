@@ -40,7 +40,7 @@ public class MultiStepAuthorizationCodeFlowHttpTest extends BaseTest {
     public void authorizationMultiStepCodeFlow(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("authorizationCodeFlow");
+        showTitle("authorizationMultiStepCodeFlow");
 
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.CODE,
