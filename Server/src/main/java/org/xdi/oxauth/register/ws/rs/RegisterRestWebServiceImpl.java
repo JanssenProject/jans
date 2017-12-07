@@ -61,7 +61,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version November 29, 2017
+ * @version December 7, 2017
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -453,7 +453,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                     if (redirectUrisValidated) {
                         if (request.getSubjectType() != null
-                                && !appConfiguration.getSubjectTypesSupported().contains(request.getSubjectType())) {
+                                && !appConfiguration.getSubjectTypesSupported().contains(request.getSubjectType().toString())) {
                             log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
