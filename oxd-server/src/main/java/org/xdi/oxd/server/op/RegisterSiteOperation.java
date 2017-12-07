@@ -257,7 +257,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         final RegisterResponse response = registerClient.exec();
         if (response != null) {
             if (!Strings.isNullOrEmpty(response.getClientId()) && !Strings.isNullOrEmpty(response.getClientSecret())) {
-                LOG.trace("Registered client for site - client_id: " + response.getClientId() + ", claims: " + response.getClaims());
+                LOG.trace("Registered client for site - client_id: " + response.getClientId() + ", claims: " + response.getClaims() + ", registration_client_uri:" + response.getRegistrationClientUri());
                 return response;
             } else {
                 LOG.error("ClientId: " + response.getClientId() + ", clientSecret: " + response.getClientSecret());
