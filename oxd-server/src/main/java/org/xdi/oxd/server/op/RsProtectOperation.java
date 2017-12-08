@@ -3,6 +3,7 @@ package org.xdi.oxd.server.op;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
+import org.codehaus.jackson.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
@@ -73,16 +74,24 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
             Set<String> scopes = Sets.newHashSet();
             Set<String> scopesForTicket = Sets.newHashSet();
+            Set<String> scopeExpressions = Sets.newHashSet();
+
             RsResource rsResource = resourceMapCopy.get(entry.getKey());
 
             for (String httpMethod : entry.getKey().getHttpMethods()) {
 
                 scopes.addAll(rsResource.scopes(httpMethod));
                 scopesForTicket.addAll(rsResource.getScopesForTicket(httpMethod));
+
+                JsonNode scopeExpression = rsResource.getScopeExpression(httpMethod);
+                if (scopeExpression != null) {
+                    scopeExpressions.add(scopeExpression.toString());
+                }
             }
 
             resource.setScopes(Lists.newArrayList(scopes));
             resource.setTicketScopes(Lists.newArrayList(scopesForTicket));
+            resource.setScopeExpressions(Lists.newArrayList(scopeExpressions));
 
             site.getUmaProtectedResources().add(resource);
         }
