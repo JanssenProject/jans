@@ -21,6 +21,7 @@ import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.Rp;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,7 +81,10 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
 
             for (String httpMethod : entry.getKey().getHttpMethods()) {
 
-                scopes.addAll(rsResource.scopes(httpMethod));
+                List<String> rsScopes = rsResource.scopes(httpMethod);
+                if (rsScopes != null) {
+                    scopes.addAll(rsScopes);
+                }
                 scopesForTicket.addAll(rsResource.getScopesForTicket(httpMethod));
 
                 JsonNode scopeExpression = rsResource.getScopeExpression(httpMethod);
