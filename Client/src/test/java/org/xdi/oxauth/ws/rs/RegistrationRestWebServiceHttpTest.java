@@ -15,6 +15,8 @@ import org.xdi.oxauth.client.RegisterClient;
 import org.xdi.oxauth.client.RegisterRequest;
 import org.xdi.oxauth.client.RegisterResponse;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
+import org.xdi.oxauth.model.common.GrantType;
+import org.xdi.oxauth.model.common.ResponseType;
 import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.crypto.encryption.BlockEncryptionAlgorithm;
 import org.xdi.oxauth.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -33,13 +35,14 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version November 29, 2017
+ * @version December 7, 2017
  */
 public class RegistrationRestWebServiceHttpTest extends BaseTest {
 
-    private String clientId1;
     private String registrationAccessToken1;
     private String registrationClientUri1;
+    private String registrationAccessToken2;
+    private String registrationClientUri2;
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
     @Test
@@ -154,7 +157,6 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertTrue(scopes.contains("phone"));
         assertTrue(scopes.contains("clientinfo"));
 
-        clientId1 = response.getClientId();
         registrationAccessToken1 = response.getRegistrationAccessToken();
         registrationClientUri1 = response.getRegistrationClientUri();
     }
@@ -228,6 +230,101 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
         assertNotNull(response.getClaims().get(LOGO_URI.toString()));
         assertNotNull(response.getClaims().get(REQUEST_URIS.toString()));
         assertNotNull(response.getClaims().get(SCOPE.toString()));
+    }
+
+    @Parameters({"redirectUris", "sectorIdentifierUri", "logoutUri"})
+    @Test
+    public void requestClientAssociate3(final String redirectUris, final String sectorIdentifierUri,
+                                        final String logoutUri) throws Exception {
+        showTitle("requestClientAssociate3");
+
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
+                StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setPostLogoutRedirectUris(Lists.newArrayList(logoutUri));
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri); //
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.IMPLICIT));
+        registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
+        registerRequest.setScope(Arrays.asList("openid", "profile", "email"));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setFrontChannelLogoutSessionRequired(true);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
+        RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+        assertNotNull(response.getClientSecret());
+        assertNotNull(response.getRegistrationAccessToken());
+        assertNotNull(response.getClientSecretExpiresAt());
+        assertNotNull(response.getClaims().get(SCOPE.toString()));
+        assertNotNull(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
+        assertTrue(Boolean.parseBoolean(response.getClaims().get(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString())));
+        assertNotNull(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
+        assertEquals(SignatureAlgorithm.RS256,
+                SignatureAlgorithm.fromString(response.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString())));
+        assertEquals(AuthenticationMethod.CLIENT_SECRET_POST,
+                AuthenticationMethod.fromString(response.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
+        List<String> scopes = new ArrayList<String>();
+        for (int i = 0; i < scopesJsonArray.length(); i++) {
+            scopes.add(scopesJsonArray.get(i).toString());
+        }
+        assertTrue(scopes.contains("openid"));
+        assertTrue(scopes.contains("email"));
+        assertTrue(scopes.contains("profile"));
+
+        registrationAccessToken2 = response.getRegistrationAccessToken();
+        registrationClientUri2 = response.getRegistrationClientUri();
+    }
+
+    @Test(dependsOnMethods = "requestClientAssociate3")
+    public void requestClientUpdate3() throws Exception {
+        showTitle("requestClientUpdate3");
+
+        final String clientName = "Dynamically Registered Client #1 update_1";
+
+        final RegisterRequest registerRequest = new RegisterRequest(registrationAccessToken2);
+        registerRequest.setHttpMethod(HttpMethod.PUT);
+
+        registerRequest.setRedirectUris(Arrays.asList("https://localhost:8443/auth"));
+        registerRequest.setPostLogoutRedirectUris(Arrays.asList("https://localhost:8443/auth"));
+        registerRequest.setApplicationType(ApplicationType.WEB);
+        registerRequest.setClientName(clientName);
+        registerRequest.setSubjectType(SubjectType.PUBLIC);
+        registerRequest.setGrantTypes(Arrays.asList(GrantType.IMPLICIT));
+        registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
+        registerRequest.setScope(Arrays.asList("openid", "address", "profile", "email", "phone", "clientinfo", "invalid_scope"));
+        registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
+        registerRequest.setFrontChannelLogoutSessionRequired(true);
+        registerRequest.addCustomAttribute("oxAuthTrustedClient", "true");
+
+        final RegisterClient registerClient = new RegisterClient(registrationClientUri2);
+        registerClient.setRequest(registerRequest);
+        registerClient.setExecutor(clientExecutor(true));
+        final RegisterResponse response = registerClient.exec();
+
+        showClient(registerClient);
+        assertEquals(response.getStatus(), 200, "Unexpected response code: " + response.getEntity());
+        assertNotNull(response.getClientId());
+
+        assertTrue(response.getClaims().containsKey(CLIENT_NAME.toString()));
+        assertEquals(clientName, response.getClaims().get(CLIENT_NAME.toString()));
+        JSONArray scopesJsonArray = new JSONArray(StringUtils.spaceSeparatedToList(response.getClaims().get(SCOPE.toString())));
+        List<String> scopes = new ArrayList<String>();
+        for (int i = 0; i < scopesJsonArray.length(); i++) {
+            scopes.add(scopesJsonArray.get(i).toString());
+        }
+        assertTrue(scopes.contains("openid"));
+        assertTrue(scopes.contains("address"));
+        assertTrue(scopes.contains("email"));
+        assertTrue(scopes.contains("profile"));
+        assertTrue(scopes.contains("phone"));
+        assertTrue(scopes.contains("clientinfo"));
     }
 
     @Parameters({"redirectUris", "sectorIdentifierUri"})
