@@ -508,7 +508,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         secretKeyBase32 = self.toBase32(secretKey)
         otpKey = OTPKey(secretKeyBase32, OTPType.HOTP)
-        label = issuer + ":%s" % userDisplayName
+        label = issuer + " %s" % userDisplayName
 
         otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).build()
 
@@ -542,7 +542,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         secretKeyBase32 = self.toBase32(secretKey)
         otpKey = OTPKey(secretKeyBase32, OTPType.TOTP)
-        label = issuer + ":%s" % userDisplayName
+        label = issuer + " %s" % userDisplayName
 
         otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).build()
 
