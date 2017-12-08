@@ -151,10 +151,6 @@ def dooxAuthChangesFor31(self, oxAuthPath):
     dataOxAuthConfDynamic['idTokenSigningAlgValuesSupported'].append("ES512")
     dataOxAuthConfDynamic['idTokenSigningAlgValuesSupported'].append("none")
 
-    del dataOxAuthConfDynamic['sessionStateHttpOnly']
-    del dataOxAuthConfDynamic['shortLivedAccessTokenLifetime']
-    del dataOxAuthConfDynamic['validateTokenEndpoint']
-    del dataOxAuthConfDynamic['longLivedAccessTokenLifetime']
 
     dataOxAuthConfDynamic['corsConfigurationFilters'] = []
     dataCross = {
@@ -483,7 +479,25 @@ class Exporter(object):
             return self.os_types[4]
         else:
             return self.choose_from_list(self.os_types, "Operating System")
-    
+
+
+
+    def readFile(self, inFilePath):
+        if not os.path.exists(inFilePath):
+            logging.debug("Cannot read: %s. File does not exist.", inFilePath)
+            return None
+
+        inFilePathText = None
+        try:
+            f = open(inFilePath)
+            inFilePathText = f.read()
+            f.close
+        except:
+            logging.warning("Error reading %s", inFilePath)
+            logging.debug(traceback.format_exc())
+
+        return inFilePathText
+
 
     def getOutput(self, args):
             try:
@@ -573,11 +587,11 @@ class Exporter(object):
                 'objectclass=*']
         output = self.getOutput(args)
         output = output.replace('IN_MEMORY', '"IN_MEMORY"')
-        output.replace('""IN_MEMORY""',"IN_MEMORY")
+        output = output.replace('""IN_MEMORY""','"IN_MEMORY"')
         output = output.replace('DEFAULT', '"DEFAULT"')
-        output.replace('""DEFAULT""',"DEFAULT")
+        output.replace('""DEFAULT""','"DEFAULT"')
 
-        f = open("%s/ldif/appliance.ldif" % self.backupDir, 'w')
+sudo         f = open("%s/ldif/appliance.ldif" % self.backupDir, 'w')
         f.write(output)
         f.close()
 
@@ -757,9 +771,9 @@ class Exporter(object):
         print("            Gluu Server Data Export Tool For v3.1.x            ")
         print("-------------------------------------------------------------")
         print("")
-        self.stopOpenDJ()
-        self.editLdapConfig()
-        self.startOpenDJ()
+        # self.stopOpenDJ()
+        # self.editLdapConfig()
+        # self.startOpenDJ()
         self.prepareLdapPW()
         self.makeFolders()
         self.backupFiles()
