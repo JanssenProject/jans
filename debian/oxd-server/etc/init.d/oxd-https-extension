@@ -10,7 +10,7 @@
 
 SERVICE_NAME=oxd-https-extension
 PID_PATH_NAME=/var/run/oxd-https-extension.pid
-LIB=/opt/oxd-https-extension/lib/oxd-https-extension-3.2.0-SNAPSHOT.jar
+LIB=/opt/oxd-https-extension/lib/oxd-https-extension-3.1.2-SNAPSHOT.jar
 
 case $1 in
     start)
