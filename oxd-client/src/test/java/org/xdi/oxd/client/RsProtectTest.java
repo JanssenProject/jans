@@ -36,6 +36,21 @@ public class RsProtectTest {
         }
     }
 
+    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtectScopeExpression"})
+    @Test
+    public void protectWithScopeExpression(String host, int port, String redirectUrl, String opHost, String rsProtectScopeExpression) throws IOException {
+        CommandClient client = null;
+        try {
+            client = new CommandClient(host, port);
+
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
+            protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources());
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
     public static RsProtectResponse protectResources(CommandClient client, RegisterSiteResponse site, List<RsResource> resources) {
         final RsProtectParams commandParams = new RsProtectParams();
         commandParams.setOxdId(site.getOxdId());
