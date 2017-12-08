@@ -661,7 +661,7 @@ class Migration(object):
         self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
         self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
         self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
-        self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
+        self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
 
     def getProp(self, prop):
         with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
