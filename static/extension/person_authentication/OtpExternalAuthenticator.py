@@ -98,8 +98,6 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
 
-        session_attributes = identity.getSessionId().getSessionAttributes()
-
         self.setRequestScopedParameters(identity)
 
         if step == 1:
@@ -137,12 +135,12 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
-            session_id_validation = self.validateSessionId(session_attributes)
+            session_id_validation = self.validateSessionId(identity)
             if not session_id_validation:
                 return False
 
             # Restore state from session
-            otp_auth_method = session_attributes.get("otp_auth_method")
+            otp_auth_method = identity.getWorkingParameter("otp_auth_method")
             if otp_auth_method == 'enroll':
                 auth_result = ServerUtil.getFirstValue(requestParameters, "auth_result")
                 if not StringHelper.isEmpty(auth_result):
@@ -152,7 +150,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "OTP. Authenticate for step 2. Skipping this step during enrollment"
                 return True
 
-            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), session_attributes, otp_auth_method)
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), identity, otp_auth_method)
             print "OTP. Authenticate for step 2. OTP authentication result: '%s'" % otp_auth_result
 
             return otp_auth_result
@@ -165,16 +163,16 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "OTP. Authenticate for step 2. Failed to determine user name"
                 return False
 
-            session_id_validation = self.validateSessionId(session_attributes)
+            session_id_validation = self.validateSessionId(identity)
             if not session_id_validation:
                 return False
 
             # Restore state from session
-            otp_auth_method = session_attributes.get("otp_auth_method")
+            otp_auth_method = identity.getWorkingParameter("otp_auth_method")
             if otp_auth_method != 'enroll':
                 return False
 
-            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), session_attributes, otp_auth_method)
+            otp_auth_result = self.processOtpAuthentication(requestParameters, user.getUserId(), identity, otp_auth_method)
             print "OTP. Authenticate for step 3. OTP authentication result: '%s'" % otp_auth_result
 
             return otp_auth_result
@@ -184,7 +182,6 @@ class PersonAuthentication(PersonAuthenticationType):
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
         credentials = identity.getCredentials()
-        session_attributes = identity.getSessionId().getSessionAttributes()
 
         self.setRequestScopedParameters(identity)
 
@@ -195,11 +192,11 @@ class PersonAuthentication(PersonAuthenticationType):
         elif step == 2:
             print "OTP. Prepare for step 2"
 
-            session_id_validation = self.validateSessionId(session_attributes)
+            session_id_validation = self.validateSessionId(identity)
             if not session_id_validation:
                 return False
 
-            otp_auth_method = session_attributes.get("otp_auth_method")
+            otp_auth_method = identity.getWorkingParameter("otp_auth_method")
             print "OTP. Prepare for step 2. otp_auth_method: '%s'" % otp_auth_method
 
             if otp_auth_method == 'enroll':
@@ -227,11 +224,11 @@ class PersonAuthentication(PersonAuthenticationType):
         elif step == 3:
             print "OTP. Prepare for step 3"
 
-            session_id_validation = self.validateSessionId(session_attributes)
+            session_id_validation = self.validateSessionId(identity)
             if not session_id_validation:
                 return False
 
-            otp_auth_method = session_attributes.get("otp_auth_method")
+            otp_auth_method = identity.getWorkingParameter("otp_auth_method")
             print "OTP. Prepare for step 3. otp_auth_method: '%s'" % otp_auth_method
 
             if otp_auth_method == 'enroll':
@@ -244,19 +241,17 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         identity = CdiUtil.bean(Identity)
-        session_attributes = identity.getSessionId().getSessionAttributes()
 
-        if session_attributes.containsKey("otp_count_login_steps"):
-            return StringHelper.toInteger(session_attributes.get("otp_count_login_steps"))
+        if identity.isSetWorkingParameter("otp_count_login_steps"):
+            return StringHelper.toInteger("%s" % identity.getWorkingParameter("otp_count_login_steps"))
         else:
             return 2
 
     def getPageForStep(self, configurationAttributes, step):
         if step == 2:
             identity = CdiUtil.bean(Identity)
-            session_attributes = identity.getSessionId().getSessionAttributes()
     
-            otp_auth_method = session_attributes.get("otp_auth_method")
+            otp_auth_method = identity.getWorkingParameter("otp_auth_method")
             print "OTP. Gep page for step 2. otp_auth_method: '%s'" % otp_auth_method
     
             if otp_auth_method == 'enroll':
@@ -371,20 +366,20 @@ class PersonAuthentication(PersonAuthenticationType):
         
         return result
 
-    def validateSessionId(self, session_attributes):
+    def validateSessionId(self, identity):
         session_id = CdiUtil.bean(SessionIdService).getSessionIdFromCookie()
         if StringHelper.isEmpty(session_id):
             print "OTP. Validate session id. Failed to determine session_id"
             return False
 
-        otp_auth_method = session_attributes.get("otp_auth_method")
+        otp_auth_method = identity.getWorkingParameter("otp_auth_method")
         if not otp_auth_method in ['enroll', 'authenticate']:
             print "OTP. Validate session id. Failed to authenticate user. otp_auth_method: '%s'" % otp_auth_method
             return False
 
         return True
 
-    def processOtpAuthentication(self, requestParameters, user_name, session_attributes, otp_auth_method):
+    def processOtpAuthentication(self, requestParameters, user_name, identity, otp_auth_method):
         facesMessages = CdiUtil.bean(FacesMessages)
         facesMessages.setKeepMessages()
 
@@ -399,7 +394,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         if otp_auth_method == "enroll":
             # Get key from session
-            otp_secret_key_encoded = session_attributes.get("otp_secret_key")
+            otp_secret_key_encoded = identity.getWorkingParameter("otp_secret_key")
             if otp_secret_key_encoded == None:
                 print "OTP. Process OTP authentication. OTP secret key is invalid"
                 return False
@@ -513,7 +508,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         secretKeyBase32 = self.toBase32(secretKey)
         otpKey = OTPKey(secretKeyBase32, OTPType.HOTP)
-        label = issuer + ":%s" % userDisplayName
+        label = issuer + " %s" % userDisplayName
 
         otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).build()
 
@@ -547,7 +542,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         secretKeyBase32 = self.toBase32(secretKey)
         otpKey = OTPKey(secretKeyBase32, OTPType.TOTP)
-        label = issuer + ":%s" % userDisplayName
+        label = issuer + " %s" % userDisplayName
 
         otpAuthURI = OTPAuthURIBuilder.fromKey(otpKey).label(label).issuer(issuer).digits(digits).timeStep(TimeUnit.SECONDS.toMillis(timeStep)).build()
 
@@ -555,7 +550,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     # Utility methods
     def toBase32(self, bytes):
-        return BaseEncoding.base32().encode(bytes)
+        return BaseEncoding.base32().omitPadding().encode(bytes)
 
     def toBase64Url(self, bytes):
         return BaseEncoding.base64Url().encode(bytes)

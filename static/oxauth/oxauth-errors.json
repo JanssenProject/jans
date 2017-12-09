@@ -327,7 +327,7 @@
         },
         {
             "id":"invalid_scope",
-            "description":"At least one of the scopes included in the request was not registered previously by this host.",
+            "description":"The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner.",
             "uri":null
         },
         {
