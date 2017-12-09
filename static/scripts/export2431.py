@@ -76,7 +76,7 @@ SKIP_DN = []
 # configure logging
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(name)s %(message)s',
-                    filename='export30.log',
+                    filename='export2431.log',
                     filemode='w')
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)
@@ -329,9 +329,9 @@ def doUmaResourcesChangesForUma2(self, UmaPath):
                         'resource_sets',
                         'resources')
             elif val['oxId'][0] == 'passport_access':
-                parser.entries[idx]["oxId"] = ['https://'+ self.hostname +'/oxauth/restv1/uma/scopes/passport_access']
+                parser.entries[idx]["oxId"] = ['https://' + self.hostname + '/oxauth/restv1/uma/scopes/passport_access']
             if val['displayName'][0] == 'SCIM Resource Set':
-                parser.entries[idx]["oxResource"] = ['https://' + self.hostname +'/identity/restv1/scim/v1']
+                parser.entries[idx]["oxResource"] = ['https://' + self.hostname + '/identity/restv1/scim/v1']
                 parser.entries[idx]['oxAssociatedClient'] = [
                     ('inum=' + self.scim_rp_client_id + ',ou=clients,o=' + inumOrg + ",o=gluu").replace("\n", '')]
             elif val['displayName'][0] == 'Passport Resource Set':
@@ -374,32 +374,34 @@ def doOxTrustChanges(oxTrustPath):
     oxTrustConfApplicationJson['shibbolethVersion'] = 'v3'
     oxTrustConfApplicationJson['ldifStore'] = "/var/ox/identity/removed"
     oxTrustConfApplicationJson['personCustomObjectClass'] = 'gluuCustomPerson'
-
-    del oxTrustConfApplicationJson['umaClientKeyId']
-    del oxTrustConfApplicationJson['umaClientKeyStoreFile']
-    del oxTrustConfApplicationJson['umaResourceId']
-    del oxTrustConfApplicationJson['umaScope']
-    del oxTrustConfApplicationJson['umaClientId']
-    del oxTrustConfApplicationJson['shibboleth2SpConfDir']
-    del oxTrustConfApplicationJson['shibboleth2IdpRootDir']
-    del oxTrustConfApplicationJson['shibboleth2FederationRootDir']
-    del oxTrustConfApplicationJson['schemaAddObjectClassWithoutAttributeTypesDefinition']
-    del oxTrustConfApplicationJson['schemaAddObjectClassWithAttributeTypesDefinition']
-    del oxTrustConfApplicationJson['schemaAddAttributeDefinition']
-    del oxTrustConfApplicationJson['recaptchaSiteKey']
-    del oxTrustConfApplicationJson['recaptchaSecretKey']
-    del oxTrustConfApplicationJson['oxAuthUserInfo']
-    del oxTrustConfApplicationJson['oxAuthTokenValidationUrl']
-    del oxTrustConfApplicationJson['oxAuthTokenUrl']
-    del oxTrustConfApplicationJson['oxAuthRegisterUrl']
-    del oxTrustConfApplicationJson['oxAuthEndSessionUrl']
-    del oxTrustConfApplicationJson['oxAuthLogoutUrl']
-    del oxTrustConfApplicationJson['oxAuthAuthorizeUrl']
-    del oxTrustConfApplicationJson['mysqlPassword']
-    del oxTrustConfApplicationJson['mysqlUrl']
-    del oxTrustConfApplicationJson['mysqlUser']
-    del oxTrustConfApplicationJson['authMode']
-    del oxTrustConfApplicationJson['umaClientKeyStorePassword']
+    try:
+        del oxTrustConfApplicationJson['umaClientKeyId']
+        del oxTrustConfApplicationJson['umaClientKeyStoreFile']
+        del oxTrustConfApplicationJson['umaResourceId']
+        del oxTrustConfApplicationJson['umaScope']
+        del oxTrustConfApplicationJson['umaClientId']
+        del oxTrustConfApplicationJson['shibboleth2SpConfDir']
+        del oxTrustConfApplicationJson['shibboleth2IdpRootDir']
+        del oxTrustConfApplicationJson['shibboleth2FederationRootDir']
+        del oxTrustConfApplicationJson['schemaAddObjectClassWithoutAttributeTypesDefinition']
+        del oxTrustConfApplicationJson['schemaAddObjectClassWithAttributeTypesDefinition']
+        del oxTrustConfApplicationJson['schemaAddAttributeDefinition']
+        del oxTrustConfApplicationJson['recaptchaSiteKey']
+        del oxTrustConfApplicationJson['recaptchaSecretKey']
+        del oxTrustConfApplicationJson['oxAuthUserInfo']
+        del oxTrustConfApplicationJson['oxAuthTokenValidationUrl']
+        del oxTrustConfApplicationJson['oxAuthTokenUrl']
+        del oxTrustConfApplicationJson['oxAuthRegisterUrl']
+        del oxTrustConfApplicationJson['oxAuthEndSessionUrl']
+        del oxTrustConfApplicationJson['oxAuthLogoutUrl']
+        del oxTrustConfApplicationJson['oxAuthAuthorizeUrl']
+        del oxTrustConfApplicationJson['mysqlPassword']
+        del oxTrustConfApplicationJson['mysqlUrl']
+        del oxTrustConfApplicationJson['mysqlUser']
+        del oxTrustConfApplicationJson['authMode']
+        del oxTrustConfApplicationJson['umaClientKeyStorePassword']
+    except:
+        logging.debug("Error")
 
     parser.lastEntry['oxTrustConfApplication'][0] = json.dumps(oxTrustConfApplicationJson, indent=4, sort_keys=True)
 
@@ -410,9 +412,10 @@ def doOxTrustChanges(oxTrustPath):
     oxTrustConfCacheRefreshJson['snapshotFolder'] = '/var/ox/identity/cr-snapshots/'
     parser.lastEntry['oxTrustConfCacheRefresh'][0] = json.dumps(oxTrustConfCacheRefreshJson, indent=4, sort_keys=True)
 
-
-    parser.lastEntry['oxTrustConfImportPerson'] = [json.dumps(json.loads('{	"mappings": [{		"ldapName": "uid",		"displayName": "Username",		"dataType": "string",		"required": "true"	},	{		"ldapName": "givenName",		"displayName": "First Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "sn",		"displayName": "Last Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "mail",		"displayName": "Email",		"dataType": "string",		"required": "true"	},	{		"ldapName": "userPassword",		"displayName": "Password",		"dataType": "string",		"required": "false"	}]}'))]
-    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh","oxTrustConfImportPerson"]
+    parser.lastEntry['oxTrustConfImportPerson'] = [json.dumps(json.loads(
+        '{	"mappings": [{		"ldapName": "uid",		"displayName": "Username",		"dataType": "string",		"required": "true"	},	{		"ldapName": "givenName",		"displayName": "First Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "sn",		"displayName": "Last Name",		"dataType": "string",		"required": "true"	},	{		"ldapName": "mail",		"displayName": "Email",		"dataType": "string",		"required": "true"	},	{		"ldapName": "userPassword",		"displayName": "Password",		"dataType": "string",		"required": "false"	}]}'))]
+    base64Types = ["oxTrustConfApplication", "oxTrustConfImportPerson", "oxTrustConfCacheRefresh",
+                   "oxTrustConfImportPerson"]
 
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
     newfile = oxTrustPath.replace('/oxtrust_config.ldif', '/oxtrust_config_new.ldif')
@@ -435,12 +438,12 @@ def doApplinceChanges(oxappliancesPath):
     idpConfig['priority'] = 1
     idpConfigJson = json.loads(idpConfig['config'])
     # idpConfigJson['bindDN'] = 'cn=directory manager,o=gluu'
-    if(idpConfigJson['useSSL']):
+    if (idpConfigJson['useSSL']):
         idpConfigJson['useSSL'] = "true"
     else:
         idpConfigJson['useSSL'] = 'false'
-    del idpConfigJson['level']
-    del idpConfigJson['version']
+    # del idpConfigJson['level']
+    # del idpConfigJson['version']
     idpConfig['config'] = json.dumps(idpConfigJson, indent=4, sort_keys=True)
     parser.entries[0]['oxIDPAuthentication'][0] = json.dumps(idpConfig, indent=4, sort_keys=True)
     out = CreateLDIF(parser.lastDN, parser.getLastEntry(), base64_attrs=base64Types)
@@ -452,6 +455,27 @@ def doApplinceChanges(oxappliancesPath):
 
     os.remove(oxappliancesPath)
     os.rename(newfile, oxappliancesPath)
+
+
+def doAttributeChange(self, attributePath):
+    parser = MyLDIF(open(attributePath, 'rb'), sys.stdout)
+    parser.parse()
+    parser.parse()
+    newfile = attributePath.replace('attributes.ldif', 'attributes_new.ldif')
+    f = open(newfile, 'w')
+    base64Types = []
+    for idx, val in enumerate(parser.entries):
+        if 'inum' in val:
+            if (val['gluuAttributeName'][0] == "gluuStatus"):
+                print(parser.entries[idx])
+                parser.entries[idx]["displayName"] = ['User Status']
+
+        out = CreateLDIF(parser.getDNs()[idx], parser.entries[idx], base64_attrs=base64Types)
+        f.write(out)
+
+    f.close()
+    os.remove(attributePath)
+    os.rename(newfile, attributePath)
 
 
 def changePassportConfigJson(self, param):
@@ -506,6 +530,42 @@ class Exporter(object):
         self.scim_rs_client_id = ""
         self.passport_rp_client_id = ""
         self.scim_rp_client_id = ""
+        self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
+        self.os = self.detect_os_type()
+        self.service = "/usr/sbin/service"
+        if self.os is 'centos':
+            self.service = "/sbin/service"
+
+    def detect_os_type(self):
+        distro_info = self.readFile('/etc/redhat-release')
+        if distro_info is None:
+            distro_info = self.readFile('/etc/os-release')
+        if 'CentOS' in distro_info:
+            return self.os_types[0]
+        elif 'Red Hat' in distro_info:
+            return self.os_types[1]
+        elif 'Ubuntu' in distro_info:
+            return self.os_types[3]
+        elif 'Debian' in distro_info:
+            return self.os_types[4]
+        else:
+            return self.choose_from_list(self.os_types, "Operating System")
+
+    def readFile(self, inFilePath):
+        if not os.path.exists(inFilePath):
+            logging.debug("Cannot read: %s. File does not exist.", inFilePath)
+            return None
+
+        inFilePathText = None
+        try:
+            f = open(inFilePath)
+            inFilePathText = f.read()
+            f.close
+        except:
+            logging.warning("Error reading %s", inFilePath)
+            logging.debug(traceback.format_exc())
+
+        return inFilePathText
 
     def getOutput(self, args):
         try:
@@ -580,6 +640,7 @@ class Exporter(object):
 
         removeDeprecatedScripts(self, "%s/ldif/scripts.ldif" % self.backupDir)
         doClientsChangesForUMA2(self, "%s/ldif/clients.ldif" % self.backupDir)
+        doAttributeChange(self, "%s/ldif/attributes.ldif" % self.backupDir)
         changePassportConfigJson(self, "%s/etc/gluu/conf/passport-config.json" % self.backupDir)
 
         # Backup the appliance config
@@ -591,9 +652,9 @@ class Exporter(object):
                 'objectclass=*']
         output = self.getOutput(args)
         output = output.replace('IN_MEMORY', '"IN_MEMORY"')
-        output.replace('""IN_MEMORY""',"IN_MEMORY")
+        output.replace('""IN_MEMORY""', "IN_MEMORY")
         output = output.replace('DEFAULT', '"DEFAULT"')
-        output.replace('""DEFAULT""',"DEFAULT")
+        output.replace('""DEFAULT""', "DEFAULT")
 
         f = open("%s/ldif/appliance.ldif" % self.backupDir, 'w')
         f.write(output)
@@ -705,17 +766,79 @@ class Exporter(object):
                 f.write("%s=%s\n" % (key, props[key]))
         f.close()
 
+    def stopOpenDJ(self):
+        logging.info('Stopping OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'stop', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        else:
+            output = self.getOutput([self.service, 'opendj', 'stop'])
+        if output.find("Directory Server is now stopped") > 0 or output.find("Server already stopped") > 0 \
+                or output.strip() == "failed":
+            logging.info("Directory Server is now stopped")
+        else:
+            logging.error(
+                "OpenDJ did not stop properly. Export cannot run without "
+                "stopping the directory server. Exiting from import. Check"
+                " /opt/opendj/logs/errors")
+            sys.exit(1)
+
+    def editLdapConfig(self):
+
+        replacements = {'ds-cfg-size-limit: 1000': 'ds-cfg-size-limit: 100000'}
+
+        lines = []
+        with open('/opt/opendj/config/config.ldif') as infile:
+            for line in infile:
+                for src, target in replacements.iteritems():
+                    line = line.replace(src, target)
+                lines.append(line)
+        with open('/opt/opendj/config/config.ldif', 'w') as outfile:
+            for line in lines:
+                outfile.write(line)
+
+    def removeLdapConfig(self):
+
+        replacements = {'ds-cfg-size-limit: 100000': 'ds-cfg-size-limit: 1000'}
+
+        lines = []
+        with open('/opt/opendj/config/config.ldif') as infile:
+            for line in infile:
+                for src, target in replacements.iteritems():
+                    line = line.replace(src, target)
+                lines.append(line)
+        with open('/opt/opendj/config/config.ldif', 'w') as outfile:
+            for line in lines:
+                outfile.write(line)
+
+    def startOpenDJ(self):
+        logging.info('Starting OpenDJ Directory Server...')
+        if (os.path.isfile('/usr/bin/systemctl')):
+            self.getOutput(['systemctl', 'start', 'opendj'])
+            output = self.getOutput(['systemctl', 'is-active', 'opendj'])
+        output = self.getOutput([self.service, 'opendj', 'start'])
+        if output.find("Directory Server has started successfully") > 0 or \
+                        output.strip() == "active":
+            logging.info("Directory Server has started successfully")
+        else:
+            logging.error("OpenDJ did not start properly. Check "
+                          "/opt/opendj/logs/errors. Restart it manually.")
+
     def export(self):
         # Call the sequence of functions that would backup the various stuff
         print("-------------------------------------------------------------")
         print("            Gluu Server Data Export Tool For v2.4x to v3.1x           ")
         print("-------------------------------------------------------------")
         print("")
+        self.stopOpenDJ()
+        self.editLdapConfig()
+        self.startOpenDJ()
         self.prepareLdapPW()
         self.makeFolders()
         self.backupFiles()
         self.getLdif()
         self.genProperties()
+        self.removeLdapConfig()
         print("")
         print("-------------------------------------------------------------")
         print("The data has been exported to %s" % self.backupDir)
@@ -724,7 +847,7 @@ class Exporter(object):
 
 if __name__ == "__main__":
     if len(sys.argv) != 1:
-        print ("Usage: python export30.py")
+        print ("Usage: python export2431.py")
     else:
         exporter = Exporter()
         exporter.export()

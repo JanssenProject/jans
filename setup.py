@@ -49,7 +49,7 @@ class Setup(object):
         self.install_dir = install_dir
 
         self.oxVersion = '3.2.0-SNAPSHOT'
-        self.githubBranchName = 'master'
+        self.githubBranchName = 'version_3.2.0'
 
         # Used only if -w (get wars) options is given to setup.py
         self.oxauth_war = 'https://ox.gluu.org/maven/org/xdi/oxauth-server/%s/oxauth-server-%s.war' % (self.oxVersion, self.oxVersion)
@@ -561,14 +561,19 @@ class Setup(object):
         except:
             self.logIt("No detected IP address", True)
             self.logIt(traceback.format_exc(), True)
-        if detectedIP:
-            testIP = self.getPrompt("Enter IP Address", detectedIP)
-        else:
-            testIP = self.getPrompt("Enter IP Address")
-        if not self.isIP(testIP):
-            testIP = None
-            print 'ERROR: The IP Address is invalid. Try again\n'
+
+        while not testIP:
+            if detectedIP:
+                testIP = self.getPrompt("Enter IP Address", detectedIP)
+            else:
+                testIP = self.getPrompt("Enter IP Address")
+            if not self.isIP(testIP):
+                testIP = None
+                print 'ERROR: The IP Address is invalid. Try again\n'
         return testIP
+
+    def check_installed(self):
+        return os.path.exists(self.configFolder)
 
     def check_properties(self):
         self.logIt('Checking properties')
@@ -1453,7 +1458,9 @@ class Setup(object):
                         jks_path,
                         "-keypasswd",
                         jks_pwd,
-                        "-algorithms",
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
                         "%s" % key_algs,
                         "-dnname",
                         '"%s"' % dn_name,
@@ -2268,10 +2275,10 @@ class Setup(object):
         self.templateRenderingDict['oxasimba_config_base64'] = self.generate_base64_ldap_file(self.oxasimba_config_json)
 
     # args = command + args, i.e. ['ls', '-ltr']
-    def run(self, args, cwd=None, env=None, useWait=False):
+    def run(self, args, cwd=None, env=None, useWait=False, shell=False):
         self.logIt('Running: %s' % ' '.join(args))
         try:
-            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env, shell=shell)
             if useWait:
                 code = p.wait()
                 self.logIt('Run: %s with result code: %d' % (' '.join(args), code) )
@@ -2674,15 +2681,15 @@ class Setup(object):
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
     def change_rc_links(self):
         if self.os_type in ['ubuntu', 'debian']:
-            if os.path.isfile('/etc/rc3.d/S03solserver'):
-                self.logIt("Changing RC Level 3 Links")
-                self.run(['mv', '/etc/rc3.d/S03solserver', '/etc/rc3.d/S80solserver'])
-            if os.path.isfile('/etc/rc3.d/S01oxauth'):
-                self.run(['mv', '/etc/rc3.d/S01oxauth', '/etc/rc3.d/S81oxauth'])
-            if os.path.isfile('/etc/rc3.d/S01identity'):
-                self.run(['mv', '/etc/rc3.d/S01identity', '/etc/rc3.d/S82identity'])
-            if os.path.isfile('/etc/rc3.d/S02apache2'):
-                self.run(['mv', '/etc/rc3.d/S02apache2', '/etc/rc3.d/S83apache2'])
+            self.run(['mv -f /etc/rc3.d/S??solserver /etc/rc3.d/S90solserver'], None, None, True, True)
+            self.run(['mv -f /etc/rc3.d/S??oxauth /etc/rc3.d/S91oxauth'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??identity /etc/rc3.d/S92identity'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??idp /etc/rc3.d/S93idp'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??oxauth-rp /etc/rc3.d/S94oxauth-rp'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??asimba /etc/rc3.d/S94asimba'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??passport /etc/rc3.d/S94passport'], None, None, True, True)            
+            self.run(['mv -f /etc/rc3.d/S??apache2 /etc/rc3.d/S95apache2'], None, None, True, True)
+            
 ############################   Main Loop   #################################################
 
 def print_help():
@@ -2786,6 +2793,10 @@ if __name__ == '__main__':
 
     installObject = Setup(setupOptions['install_dir'])
 
+    if installObject.check_installed():
+        print "\nThis instance already configured. If you need to install new one you should reinstall package first."
+        sys.exit(2)
+
     installObject.downloadWars = setupOptions['downloadWars']
 
     installObject.installOxAuth = setupOptions['installOxAuth']
@@ -2840,7 +2851,6 @@ if __name__ == '__main__':
     # Validate Properties
     installObject.check_properties()
 
-    ### Ganesh Working Here...
     if 'importLDIFDir' in setupOptions.keys():
         if os.path.isdir(installObject.openldapBaseFolder):
             installObject.logIt("Gluu server already installed. Setup will render and import templates and exit.", True)
