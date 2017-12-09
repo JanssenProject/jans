@@ -262,5 +262,11 @@
     "logClientNameOnClientAuthentication": false,
     "httpLoggingEnabled": false,
     "httpLoggingExludePaths": [],
-    "externalLoggerConfiguration": ""
+    "externalLoggerConfiguration": "",
+    "authorizationRequestCustomAllowedParameters" : [
+        "customParam1",
+        "customParam2",
+        "customParam3"
+    ],
+    "legacyDynamicRegistrationScopeParam": false
 }
