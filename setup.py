@@ -319,6 +319,7 @@ class Setup(object):
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
+        self.passport_saml_config = '%s/passport-saml-config.json' % self.configFolder
         self.oxauth_config_json = '%s/oxauth-config.json' % self.outputFolder
         self.oxtrust_config_json = '%s/oxtrust-config.json' % self.outputFolder
         self.oxtrust_cache_refresh_json = '%s/oxtrust-cache-refresh.json' % self.outputFolder
@@ -431,6 +432,7 @@ class Setup(object):
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
+                             self.passport_saml_config:True,
                              self.gluu_python_readme: True,
                              self.oxtrust_config_json: False,
                              self.oxtrust_cache_refresh_json: False,
@@ -1824,6 +1826,7 @@ class Setup(object):
 
         self.export_openid_key(self.passport_rp_client_jks_fn, self.passport_rp_client_jks_pass, self.passport_rp_client_cert_alias, self.passport_rp_client_cert_fn)
         self.renderTemplateInOut(self.passport_config, self.templateFolder, self.configFolder)
+
 
         # Install passport system service script
         self.installNodeService('passport')
