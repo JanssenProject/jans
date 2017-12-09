@@ -25,12 +25,30 @@ class UpdateUser(UpdateUserType):
         print "Update user. Destroyed successfully"
         return True   
 
+    def getApiVersion(self):
+        return 2
+
+    def newUser(self, user, configurationAttributes):
+        print "Update user. newUser method"
+
+        return True
+
+    def addUser(self, user, persisted, configurationAttributes):
+        print "Update user. addUser method"
+
+        return True
+
+    def postAddUser(self, user, configurationAttributes):
+        print "Update user. postAddUser method"
+
+        return True
+
     # Update user entry before persistent it
     #   user is org.gluu.oxtrust.model.GluuCustomPerson
     #   persisted is boolean value to specify if operation type: add/modify
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateUser(self, user, persisted, configurationAttributes):
-        print "Update user. UpdateUser method"
+        print "Update user. updateUser method"
 
         uid = user.getUid()
         print "Update user. User Uid:", uid
@@ -40,20 +58,17 @@ class UpdateUser(UpdateUserType):
 
         return True
 
-    def getApiVersion(self):
-        return 1
-    
-    def addUser(self, user, persisted, configurationAttributes):
-        print "addUser user. addUser method"
+    def postUpdateUser(self, user, configurationAttributes):
+        print "Update user. postUpdateUser method"
 
         return True
-		
+
     def deleteUser(self, user, persisted, configurationAttributes):
-        print "deleteUser user. deleteUser method"
+        print "Update user. deleteUser method"
 
         return True
-		
-    def newUser(self, user, configurationAttributes):
-        print "newUser user. newUser method"
+
+    def postDeleteUser(self, user, configurationAttributes):
+        print "Update user. postDeleteUser method"
 
         return True

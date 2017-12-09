@@ -450,3 +450,16 @@ oxScript::%(application_session_samplescript)s
 oxScriptType: application_session
 programmingLanguage: python
 
+dn: inum=%(inumOrg)s!0011!DAA9.BA60,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: top
+objectClass: oxCustomScript
+description: Consent Gathering script
+displayName: consent_gathering
+gluuStatus: false
+inum: %(inumOrg)s!0011!DAA9.BA60
+oxLevel: 10
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript::%(consent_gathering_consentgatheringsample)s
+oxScriptType: consent_gathering
+programmingLanguage: python
