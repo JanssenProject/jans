@@ -8,6 +8,8 @@ package org.xdi.oxauth.model.uma;
 
 import com.wordnik.swagger.annotations.ApiModel;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
@@ -26,15 +28,18 @@ import java.util.List;
 
 @IgnoreMediaTypes("application/*+json")
 // try to ignore jettison as it's recommended here: http://docs.jboss.org/resteasy/docs/2.3.4.Final/userguide/html/json.html
-@JsonPropertyOrder({"name", "uri", "type", "scopes", "icon_uri"})
+@JsonPropertyOrder({"name", "uri", "type", "scopes", "scopeExpression", "icon_uri"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement
 @ApiModel(value = "The resource server defines a resource set that the authorization server needs to be aware of by registering a resource set description at the authorization server. This registration process results in a unique identifier for the resource set that the resource server can later use for managing its description.")
 public class UmaResource {
 
     @ApiModelProperty(value = "An array of strings, any of which MAY be a URI, indicating the available scopes for this resource set. URIs MUST resolve to scope descriptions as defined in Section 2.1. Published scope descriptions MAY reside anywhere on the web; a resource server is not required to self-host scope descriptions and may wish to point to standardized scope descriptions residing elsewhere. It is the resource server's responsibility to ensure that scope description documents are accessible to authorization servers through GET calls to support any user interface requirements. The resource server and authorization server are presumed to have separately negotiated any required interpretation of scope handling not conveyed through scope descriptions."
-            , required = true)
+            , required = false)
     private List<String> scopes;
+
+    @ApiModelProperty(value = "Scope expression.", required = false)
+    private String scopeExpression;
 
     @ApiModelProperty(value = "A human-readable string describing the resource at length. The authorization server MAY use this description in any user interface it presents to a resource owner, for example, for resource protection monitoring or policy setting."
             , required = false)
@@ -106,11 +111,35 @@ public class UmaResource {
         return this;
     }
 
+    @JsonProperty(value = "scope_expression")
+    @XmlElement(name = "scope_expression")
+    public String getScopeExpression() {
+        return scopeExpression;
+    }
+
+    public void setScopeExpression(String scopeExpression) {
+        assertValidExpression(scopeExpression);
+        this.scopeExpression = scopeExpression;
+    }
+
+    @JsonIgnore
+    public static void assertValidExpression(String scopeExpression) {
+        if (!isValidExpression(scopeExpression)) {
+            throw new RuntimeException("Scope expression is not valid json logic expression. Expression:" + scopeExpression);
+        }
+    }
+
+    @JsonIgnore
+    public static boolean isValidExpression(String scopeExpression) {
+        return StringUtils.isBlank(scopeExpression) || JsonLogicNodeParser.isNodeValid(scopeExpression);
+    }
+
     @Override
     public String toString() {
         return "UmaResource{" +
                 "name='" + name + '\'' +
                 ", scopes=" + scopes +
+                ", scopeExpression=" + scopeExpression +
                 ", description='" + description + '\'' +
                 ", iconUri='" + iconUri + '\'' +
                 ", type='" + type + '\'' +

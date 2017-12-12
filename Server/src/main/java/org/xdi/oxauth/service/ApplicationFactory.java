@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -60,7 +61,7 @@ public class ApplicationFactory {
 		return cacheConfiguration;
 	}
 
-	@Produces @ApplicationScoped
+	@Produces @RequestScoped
 	public SmtpConfiguration getSmtpConfiguration() {
 		GluuAppliance appliance = applianceService.getAppliance();
 		SmtpConfiguration smtpConfiguration = appliance.getSmtpConfiguration();

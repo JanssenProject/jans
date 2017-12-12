@@ -75,7 +75,7 @@ public class UmaResourceService {
 
     public void validate(UmaResource resource) {
         Preconditions.checkArgument(StringUtils.isNotBlank(resource.getName()), "Name is required for resource.");
-        Preconditions.checkArgument(resource.getScopes() != null && !resource.getScopes().isEmpty(), "Scope must be specified for resource.");
+        Preconditions.checkArgument(((resource.getScopes() != null && !resource.getScopes().isEmpty()) || StringUtils.isNotBlank(resource.getScopeExpression())), "Scope must be specified for resource.");
         prepareBranch();
     }
 

@@ -19,9 +19,24 @@
 	<build>
 		<finalName>oxauth-model</finalName>
 
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                    <include>**/*.js</include>
+                </includes>
+            </resource>
+        </resources>
+
 		<testResources>
 			<testResource>
 				<directory>src/test/resources</directory>
+                <includes>
+                    <include>**/*.json</include>
+                    <include>**/*.xml</include>
+                </includes>
 			</testResource>
 		</testResources>
 
@@ -30,7 +45,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<skipTests>true</skipTests>  <!-- set it to false when test sources appear -->
+					<skipTests>false</skipTests>  <!-- set it to false when test sources appear -->
 				</configuration>
 			</plugin>
 		</plugins>

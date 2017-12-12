@@ -7,6 +7,9 @@
 package org.xdi.oxauth.introspection.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
@@ -48,6 +51,11 @@ public class IntrospectionWebService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+    		@ApiResponse(code = 500, message = "Introspection Internal Server Failed.")
+    })
     public Response introspectGet(@HeaderParam("Authorization") String p_authorization,
                                   @QueryParam("token") String p_token,
                                   @QueryParam("token_type_hint") String tokenTypeHint

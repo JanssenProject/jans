@@ -29,7 +29,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Can Provide Encrypted UserInfo Response
  *
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version December 5, 2017
  */
 public class CanProvideEncryptedUserInfoResponse extends BaseTest {
 
@@ -181,8 +181,9 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS_COUNTRY));
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -264,8 +265,9 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -347,8 +349,9 @@ public class CanProvideEncryptedUserInfoResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedUserInfoResponseAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
