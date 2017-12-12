@@ -255,5 +255,11 @@
         }
     ],
     "logClientIdOnClientAuthentication": true,
-    "logClientNameOnClientAuthentication": false
+    "logClientNameOnClientAuthentication": false,
+    "authorizationRequestCustomAllowedParameters" : [
+        "customParam1",
+        "customParam2",
+        "customParam3"
+    ],
+    "legacyDynamicRegistrationScopeParam": false
 }
