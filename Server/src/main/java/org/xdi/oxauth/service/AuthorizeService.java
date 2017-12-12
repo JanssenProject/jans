@@ -19,18 +19,27 @@ import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.util.ServerUtil;
 
+import javax.annotation.Nonnull;
 import javax.ejb.Stateless;
 import javax.faces.application.FacesMessage;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * @author Yuriy Movchan
@@ -41,6 +50,31 @@ import java.util.Set;
 @Stateless
 @Named
 public class AuthorizeService {
+
+	// use only "acr" instead of "acr_values" #334
+    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
+            AuthorizeRequestParam.SCOPE,
+            AuthorizeRequestParam.RESPONSE_TYPE,
+            AuthorizeRequestParam.CLIENT_ID,
+            AuthorizeRequestParam.REDIRECT_URI,
+            AuthorizeRequestParam.STATE,
+            AuthorizeRequestParam.RESPONSE_MODE,
+            AuthorizeRequestParam.NONCE,
+            AuthorizeRequestParam.DISPLAY,
+            AuthorizeRequestParam.PROMPT,
+            AuthorizeRequestParam.MAX_AGE,
+            AuthorizeRequestParam.UI_LOCALES,
+            AuthorizeRequestParam.ID_TOKEN_HINT,
+            AuthorizeRequestParam.LOGIN_HINT,
+            AuthorizeRequestParam.ACR_VALUES,
+            AuthorizeRequestParam.SESSION_ID,
+            AuthorizeRequestParam.REQUEST,
+            AuthorizeRequestParam.REQUEST_URI,
+            AuthorizeRequestParam.ORIGIN_HEADERS,
+            AuthorizeRequestParam.CODE_CHALLENGE,
+            AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
+            AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
+            AuthorizeRequestParam.CLAIMS));
 
     @Inject
     private Logger log;
@@ -56,9 +90,6 @@ public class AuthorizeService {
 
     @Inject
     private UserService userService;
-
-    @Inject
-    private AuthenticationService authenticationService;
 
     @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
@@ -80,6 +111,9 @@ public class AuthorizeService {
 
     @Inject
     private ScopeService scopeService;
+    
+    @Inject
+    private RequestParameterService requestParameterService;
 
     public SessionId getSession() {
     	return getSession(null);
@@ -136,7 +170,7 @@ public class AuthorizeService {
             // OXAUTH-297 - set session_id cookie
             sessionIdService.createSessionIdCookie(session.getId(), session.getSessionState(), false);
 
-            Map<String, String> sessionAttribute = authenticationService.getAllowedParameters(session.getSessionAttributes());
+            Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
             if (sessionAttribute.containsKey(AuthorizeRequestParam.PROMPT)) {
                 List<Prompt> prompts = Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
@@ -144,7 +178,7 @@ public class AuthorizeService {
                 sessionAttribute.put(AuthorizeRequestParam.PROMPT, org.xdi.oxauth.model.util.StringUtils.implodeEnum(prompts, " "));
             }
 
-            final String parametersAsString = authenticationService.parametersAsString(sessionAttribute);
+            final String parametersAsString = requestParameterService.parametersAsString(sessionAttribute);
             final String uri = httpRequest.getContextPath() + "/restv1/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {}", uri);
 

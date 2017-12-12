@@ -1,4 +1,4 @@
-This authentication interception script configures oxAuth to use an external Asimba/SAML identity provider. If you are using Asimba to consolidate many inbound SAML IDPs, then Asimba is the IDP you will configure here. One advantage of this approach is that it also enables you to enroll users--meaning you can create a local ldap entry for each new inbound SAML user. This is handy because it enables you to use either SAML or OpenID Connect API's that connect to the Gluu Server. Confusing? Yes! Handy... yes, yes! 
+This authentication interception script configures oxAuth to use an external SAML identity provider. This approach enables you to dynamically enroll users in your Gluu Server after they authenticate at their home IDP--meaning you can create a local ldap entry for each new inbound SAML user. This is handy because it enables you to use either SAML or OpenID Connect API's that connect to the Gluu Server. Confusing? Yes! Handy... yes, yes! 
 
 This module has next properties:
 1) asimba_saml_certificate_file - It's path to file which contains public IdP certificate in.

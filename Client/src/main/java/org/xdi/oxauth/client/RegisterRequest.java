@@ -24,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.*;
 
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
+import static org.xdi.oxauth.model.util.StringUtils.implode;
 import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
 
 /**
@@ -31,7 +32,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version September 11, 2017
+ * @version November 29, 2017
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -70,7 +71,17 @@ public class RegisterRequest extends BaseRequest {
     private String initiateLoginUri;
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
+
+    /**
+     * @deprecated This param will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
+     */
     private List<String> scopes;
+
+    /**
+     * String containing a space-separated list of scope values.
+     */
+    private List<String> scope;
+
     private Date clientSecretExpiresAt;
     private Map<String, String> customAttributes;
 
@@ -810,12 +821,26 @@ public class RegisterRequest extends BaseRequest {
         this.requestUris = requestUris;
     }
 
+    /**
+     * @deprecated This function will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
+     */
     public List<String> getScopes() {
         return scopes;
     }
 
+    /**
+     * @deprecated This method will be removed in a future version because the correct is 'scope' not 'scopes', see (rfc7591).
+     */
     public void setScopes(List<String> scopes) {
         this.scopes = scopes;
+    }
+
+    public List<String> getScope() {
+        return scope;
+    }
+
+    public void setScope(List<String> scope) {
+        this.scope = scope;
     }
 
     public String getHttpMethod() {
@@ -957,6 +982,9 @@ public class RegisterRequest extends BaseRequest {
         if (scopes != null && !scopes.isEmpty()) {
             parameters.put(SCOPES.toString(), toJSONArray(scopes).toString());
         }
+        if (scope != null && !scope.isEmpty()) {
+            parameters.put(SCOPE.toString(), implode(scope, " "));
+        }
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), Long.toString(clientSecretExpiresAt.getTime()));
         }
@@ -974,7 +1002,7 @@ public class RegisterRequest extends BaseRequest {
         return parameters;
     }
 
-    public static RegisterRequest fromJson(String p_json) throws JSONException {
+    public static RegisterRequest fromJson(String p_json, boolean authorizationRequestCustomAllowedParameters) throws JSONException {
         final JSONObject requestObject = new JSONObject(p_json);
 
         final List<String> redirectUris = new ArrayList<String>();
@@ -1052,11 +1080,19 @@ public class RegisterRequest extends BaseRequest {
             }
         }
 
-        final List<String> scopes = new ArrayList<String>();
-        if (requestObject.has(SCOPES.toString())) {
+        final List<String> scope = new ArrayList<String>();
+        if (authorizationRequestCustomAllowedParameters && requestObject.has(SCOPES.toString())) {
             JSONArray scopesJsonArray = requestObject.getJSONArray(SCOPES.toString());
             for (int i = 0; i < scopesJsonArray.length(); i++) {
-                scopes.add(scopesJsonArray.getString(i));
+                scope.add(scopesJsonArray.getString(i));
+            }
+        } else if (requestObject.has(SCOPE.toString())) {
+            String scopeString = requestObject.getString(SCOPE.toString());
+            String[] scopeArray = scopeString.split(" ");
+            for (String s : scopeArray) {
+                if (StringUtils.isNotBlank(s)) {
+                    scope.add(s);
+                }
             }
         }
 
@@ -1115,7 +1151,8 @@ public class RegisterRequest extends BaseRequest {
         result.setTokenEndpointAuthSigningAlg(requestObject.has(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()) ?
                 SignatureAlgorithm.fromString(requestObject.getString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())) : null);
         result.setRedirectUris(redirectUris);
-        result.setScopes(scopes);
+        result.setScopes(scope);
+        result.setScope(scope);
         result.setResponseTypes(new ArrayList<ResponseType>(responseTypes));
         result.setGrantTypes(new ArrayList<GrantType>(grantTypes));
         result.setApplicationType(requestObject.has(APPLICATION_TYPE.toString()) ?
@@ -1242,6 +1279,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (scopes != null && !scopes.isEmpty()) {
             parameters.put(SCOPES.toString(), toJSONArray(scopes));
+        }
+        if (scope != null && !scope.isEmpty()) {
+            parameters.put(SCOPE.toString(), implode(scope, " "));
         }
         if (clientSecretExpiresAt != null) {
             parameters.put(CLIENT_SECRET_EXPIRES_AT_.toString(), clientSecretExpiresAt.getTime());

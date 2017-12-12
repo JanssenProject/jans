@@ -6,23 +6,13 @@
 
 package org.xdi.oxauth.load.benchmark;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.testng.Reporter;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxauth.BaseTest;
-import org.xdi.oxauth.client.RegisterClient;
-import org.xdi.oxauth.client.RegisterRequest;
-import org.xdi.oxauth.client.RegisterResponse;
-import org.xdi.oxauth.client.TokenClient;
-import org.xdi.oxauth.client.TokenResponse;
+import org.xdi.oxauth.client.*;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestListener;
 import org.xdi.oxauth.load.benchmark.suite.BenchmarkTestSuiteListener;
 import org.xdi.oxauth.model.common.ResponseType;
@@ -30,16 +20,22 @@ import org.xdi.oxauth.model.common.SubjectType;
 import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 /**
  * @author Yuriy Movchan
- * @version 0.1, 04/10/2015
+ * @version November 29, 2017
  */
 
-@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class })
+@Listeners({BenchmarkTestSuiteListener.class, BenchmarkTestListener.class})
 public class BenchmarkRequestAccessToken extends BaseTest {
 
     private String clientId;
-	private String clientSecret;
+    private String clientSecret;
 
     @Parameters({"userId", "userSecret", "redirectUris", "sectorIdentifierUri"})
     @BeforeClass
@@ -62,22 +58,22 @@ public class BenchmarkRequestAccessToken extends BaseTest {
         this.clientSecret = registerResponse.getClientSecret();
     }
 
-	@Parameters({"userId", "userSecret"})
+    @Parameters({"userId", "userSecret"})
     @Test(invocationCount = 200, threadPoolSize = 1)
     public void requestAccessTokenPassword1(final String userId, final String userSecret) throws Exception {
-    	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
+        requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 200, threadPoolSize = 5, dependsOnMethods = { "requestAccessTokenPassword1" })
+    @Test(invocationCount = 200, threadPoolSize = 5, dependsOnMethods = {"requestAccessTokenPassword1"})
     public void requestAccessTokenPassword2(final String userId, final String userSecret) throws Exception {
-    	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
+        requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
     @Parameters({"userId", "userSecret"})
-    @Test(invocationCount = 200, threadPoolSize = 2, dependsOnMethods = { "requestAccessTokenPassword2" })
+    @Test(invocationCount = 200, threadPoolSize = 2, dependsOnMethods = {"requestAccessTokenPassword2"})
     public void requestAccessTokenPassword4(final String userId, final String userSecret) throws Exception {
-    	requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
+        requestAccessTokenPassword(userId, userSecret, this.clientId, this.clientSecret);
     }
 
     private void requestAccessTokenPassword(final String userId, final String userSecret, String clientId, String clientSecret) throws Exception {
@@ -101,7 +97,7 @@ public class BenchmarkRequestAccessToken extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth benchmark test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
-        registerRequest.setScopes(scopes);
+        registerRequest.setScope(scopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 

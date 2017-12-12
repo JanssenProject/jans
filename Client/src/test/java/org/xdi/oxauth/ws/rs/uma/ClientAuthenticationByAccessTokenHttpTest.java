@@ -21,11 +21,11 @@ import org.xdi.oxauth.model.register.ApplicationType;
 import org.xdi.oxauth.model.uma.UmaMetadata;
 import org.xdi.oxauth.model.uma.UmaNeedInfoResponse;
 import org.xdi.oxauth.model.uma.wrapper.Token;
-import org.xdi.oxauth.model.util.StringUtils;
 import org.xdi.oxauth.model.util.Util;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +38,7 @@ import static org.xdi.oxauth.model.uma.UmaTestUtil.assert_;
  */
 public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
 
+    public static final String REDIRECT_URI = "https://client.example.com/cb3";
     protected UmaMetadata metadata;
 
     protected RegisterResourceFlowHttpTest registerResourceTest;
@@ -72,9 +73,8 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         this.tokenService = UmaClientFactory.instance().createTokenService(metadata, clientExecutor(true));
     }
 
-    @Parameters({"redirectUris"})
     @Test
-    public void requestClientRegistrationWithCustomAttributes(String redirectUris) throws Exception {
+    public void requestClientRegistrationWithCustomAttributes() throws Exception {
         showTitle("requestClientRegistrationWithCustomAttributes");
 
         List<ResponseType> responseTypes = Arrays.asList(
@@ -85,8 +85,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
 
-        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app",
-                StringUtils.spaceSeparatedToList(redirectUris));
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "oxAuth test app", Collections.singletonList(REDIRECT_URI));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
@@ -108,10 +107,9 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         clientSecret = response.getClientSecret();
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri"})
+    @Parameters({"userId", "userSecret"})
     @Test(dependsOnMethods = "requestClientRegistrationWithCustomAttributes")
-    public void requestAccessTokenCustomClientAuth1(final String userId, final String userSecret,
-                                                    final String redirectUri) throws Exception {
+    public void requestAccessTokenCustomClientAuth1(final String userId, final String userSecret) throws Exception {
         showTitle("requestAccessTokenCustomClientAuth1");
 
         // 1. Request authorization and receive the authorization code.
@@ -123,7 +121,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, REDIRECT_URI, nonce);
         authorizationRequest.setState(state);
         authorizationRequest.setAuthUsername(userId);
         authorizationRequest.setAuthPassword(userSecret);
@@ -159,7 +157,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
-        tokenRequest.setRedirectUri(redirectUri);
+        tokenRequest.setRedirectUri(REDIRECT_URI);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
