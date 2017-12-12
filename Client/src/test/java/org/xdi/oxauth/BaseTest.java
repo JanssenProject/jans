@@ -269,16 +269,38 @@ public abstract class BaseTest {
     public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret,
             boolean cleanupCookies, boolean useNewDriver) {
+    	return authenticateResourceOwnerAndGrantAccess(authorizeUrl, authorizationRequest, userId, userSecret, cleanupCookies, useNewDriver, 1);
+    }
+    /**
+     * The authorization server authenticates the resource owner (via the user-agent)
+     * and establishes whether the resource owner grants or denies the client's access request.
+     */
+    public AuthorizationResponse authenticateResourceOwnerAndGrantAccess(
+            String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret,
+            boolean cleanupCookies, boolean useNewDriver, int authzSteps) {
+        WebDriver currentDriver = initWebDriver(useNewDriver, cleanupCookies);
 
+        AuthorizeClient authorizeClient = processAuthentication(currentDriver, authorizeUrl, authorizationRequest,
+				userId, userSecret);
 
-        String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+        int remainAuthzSteps = authzSteps;
 
-        AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
-        authorizeClient.setRequest(authorizationRequest);
+        String authorizationResponseStr = null;
+        do {
+            authorizationResponseStr = acceptAuthorization(currentDriver);
+            remainAuthzSteps--;
+		} while (remainAuthzSteps >= 1);
 
-        System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
+        AuthorizationResponse authorizationResponse = buildAuthorizationResponse(authorizationRequest, useNewDriver,
+				currentDriver, authorizeClient, authorizationResponseStr);
 
-        // Allow to run test in multi thread mode
+        stopWebDriver(useNewDriver, currentDriver);
+
+        return authorizationResponse;
+    }
+
+	private WebDriver initWebDriver(boolean useNewDriver, boolean cleanupCookies) {
+		// Allow to run test in multi thread mode
         WebDriver currentDriver;
         if (useNewDriver) {
             currentDriver = new HtmlUnitDriver();
@@ -290,6 +312,27 @@ public abstract class BaseTest {
                 deleteAllCookies();
             }
         }
+
+        return currentDriver;
+	}
+
+	private void stopWebDriver(boolean useNewDriver, WebDriver currentDriver) {
+		if (useNewDriver) {
+            currentDriver.close();
+            currentDriver.quit();
+        } else {
+            stopSelenium();
+        }
+	}
+
+	private AuthorizeClient processAuthentication(WebDriver currentDriver, String authorizeUrl,
+			AuthorizationRequest authorizationRequest, String userId, String userSecret) {
+		String authorizationRequestUrl = authorizeUrl + "?" + authorizationRequest.getQueryString();
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizeUrl);
+        authorizeClient.setRequest(authorizationRequest);
+
+        System.out.println("authenticateResourceOwnerAndGrantAccess: authorizationRequestUrl:" + authorizationRequestUrl);
 
         currentDriver.navigate().to(authorizationRequestUrl);
 
@@ -307,8 +350,13 @@ public abstract class BaseTest {
             loginButton.click();
         }
 
+        return authorizeClient;
+	}
+
+	private String acceptAuthorization(WebDriver currentDriver) {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
-        // Check for authorization form if client has persistent authorization
+
+        // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
             WebElement allowButton = currentDriver.findElement(By.id(authorizeFormAllowButton));
 
@@ -326,20 +374,18 @@ public abstract class BaseTest {
             fail("The authorization form was expected to be shown.");
         }
 
+        return authorizationResponseStr;
+	}
 
-        Cookie sessionStateCookie = currentDriver.manage().getCookieNamed("session_state");
+	private AuthorizationResponse buildAuthorizationResponse(AuthorizationRequest authorizationRequest,
+			boolean useNewDriver, WebDriver currentDriver, AuthorizeClient authorizeClient,
+			String authorizationResponseStr) {
+		Cookie sessionStateCookie = currentDriver.manage().getCookieNamed("session_state");
         String sessionState = null;
         if (sessionStateCookie != null) {
             sessionState = sessionStateCookie.getValue();
         }
         System.out.println("authenticateResourceOwnerAndGrantAccess: sessionState:" + sessionState);
-
-        if (useNewDriver) {
-            currentDriver.close();
-            currentDriver.quit();
-        } else {
-            stopSelenium();
-        }
 
         AuthorizationResponse authorizationResponse = new AuthorizationResponse(authorizationResponseStr);
         if (authorizationRequest.getRedirectUri() != null && authorizationRequest.getRedirectUri().equals(authorizationResponseStr)) {
@@ -349,7 +395,7 @@ public abstract class BaseTest {
         showClientUserAgent(authorizeClient);
 
         return authorizationResponse;
-    }
+	}
 
     public AuthorizationResponse authenticateResourceOwnerAndDenyAccess(
             String authorizeUrl, AuthorizationRequest authorizationRequest, String userId, String userSecret) {
@@ -621,8 +667,7 @@ public abstract class BaseTest {
             showTitle("OpenID Connect Discovery");
 
             OpenIdConnectDiscoveryClient openIdConnectDiscoveryClient = new OpenIdConnectDiscoveryClient(resource);
-            OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(
-                    new ApacheHttpClient4Executor(createHttpClient(HostnameVerifierType.ALLOW_ALL)));
+            OpenIdConnectDiscoveryResponse openIdConnectDiscoveryResponse = openIdConnectDiscoveryClient.exec(clientExecutor(true));
 
             showClient(openIdConnectDiscoveryClient);
             assertEquals(openIdConnectDiscoveryResponse.getStatus(), 200, "Unexpected response code");
@@ -635,6 +680,7 @@ public abstract class BaseTest {
             System.out.println("OpenID Connect Configuration");
 
             OpenIdConfigurationClient client = new OpenIdConfigurationClient(configurationEndpoint);
+            client.setExecutor(clientExecutor(true));
             OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
 
             showClient(client);

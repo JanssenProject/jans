@@ -96,6 +96,18 @@ public class UmaPermissionService {
         }
     }
 
+    public void merge(UmaPermission permission) {
+        ldapEntryManager.merge(permission);
+    }
+
+    public void mergeSilently(UmaPermission permission) {
+        try {
+            ldapEntryManager.merge(permission);
+        } catch (Exception e) {
+            log.error("Failed to persist permission: " + permission, e);
+        }
+    }
+
     public List<UmaPermission> getPermissionsByTicket(String ticket) {
         try {
             final String baseDn = staticConfiguration.getBaseDn().getClients();

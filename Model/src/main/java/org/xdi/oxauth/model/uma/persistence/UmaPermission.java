@@ -9,10 +9,7 @@ package org.xdi.oxauth.model.uma.persistence;
 import com.google.common.collect.Maps;
 import org.gluu.site.ldap.persistence.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * UMA permission
@@ -37,7 +34,6 @@ public class UmaPermission {
     @LdapAttribute(name = "oxAuthExpiration")
 	private Date expirationDate;
 
-    // resource set permission request
     @LdapAttribute(name = "oxResourceSetId")
     private String resourceId;
     @LdapAttribute(name = "oxAuthUmaScope")
@@ -126,6 +122,9 @@ public class UmaPermission {
     }
 
     public List<String> getScopeDns() {
+        if (scopeDns == null) {
+            scopeDns = new ArrayList<String>();
+        }
         return scopeDns;
     }
 

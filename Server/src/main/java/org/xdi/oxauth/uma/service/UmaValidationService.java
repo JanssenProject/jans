@@ -97,6 +97,9 @@ public class UmaValidationService {
     @Inject
     private ClientService clientService;
 
+    @Inject
+    private UmaExpressionService expressionService;
+
     public AuthorizationGrant assertHasProtectionScope(String authorization) {
         return validateAuthorization(authorization, UmaScopeType.PROTECTION);
     }
@@ -376,6 +379,13 @@ public class UmaValidationService {
         return result;
     }
 
+    public void validateScopeExpression(String scopeExpression) {
+        if (StringUtils.isNotBlank(scopeExpression) && !expressionService.isExpressionValid(scopeExpression)) {
+            log.error("Scope expression is invalid. Expression: " + scopeExpression);
+            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
+        }
+    }
+
     public Client validateClientAndClaimsRedirectUri(String clientId, String claimsRedirectUri, String state) {
         if (StringUtils.isBlank(clientId)) {
             log.error("Invalid clientId: {}", clientId);
@@ -444,5 +454,15 @@ public class UmaValidationService {
             }
         }
         throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_CLAIMS_GATHERING_SCRIPT_NAME, state);
+    }
+
+    public void validateResource(org.xdi.oxauth.model.uma.UmaResource resource) {
+        validateScopeExpression(resource.getScopeExpression());
+
+        List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
+        if (scopeDNs.isEmpty() && StringUtils.isBlank(resource.getScopeExpression()) ) {
+            log.error("Invalid resource. Both `scope` and `scope_expression` are blank.");
+            throw new UmaWebException(BAD_REQUEST, errorResponseFactory, UmaErrorResponseType.INVALID_RESOURCE_SCOPE);
+        }
     }
 }

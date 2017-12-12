@@ -31,7 +31,7 @@ import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
  * OC5:FeatureTest-Includes c hash in ID Token when Code Flow Used
  *
  * @author Javier Rojas Blum
- * @version November 3, 2016
+ * @version November 29, 2017
  */
 public class IncludesCHashInIdTokenWhenCodeFlowUsed extends BaseTest {
 
@@ -87,7 +87,7 @@ public class IncludesCHashInIdTokenWhenCodeFlowUsed extends BaseTest {
         assertNotNull(readClientResponse.getClaims().get(APPLICATION_TYPE.toString()));
         assertNotNull(readClientResponse.getClaims().get(CLIENT_NAME.toString()));
         assertNotNull(readClientResponse.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(readClientResponse.getClaims().get("scopes"));
+        assertNotNull(readClientResponse.getClaims().get(SCOPE.toString()));
 
         // 3. Request authorization
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
