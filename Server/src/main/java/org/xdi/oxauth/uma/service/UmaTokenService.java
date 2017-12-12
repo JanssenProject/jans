@@ -7,7 +7,6 @@
 package org.xdi.oxauth.uma.service;
 
 import org.slf4j.Logger;
-import org.xdi.model.custom.script.conf.CustomScriptConfiguration;
 import org.xdi.oxauth.model.config.WebKeysConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
@@ -65,6 +64,8 @@ public class UmaTokenService {
     private UmaNeedsInfoService umaNeedsInfoService;
     @Inject
     private ExternalUmaRptPolicyService policyService;
+    @Inject
+    private UmaExpressionService expressionService;
 
     public Response requestRpt(
             String grantType,
@@ -94,18 +95,10 @@ public class UmaTokenService {
             pct = pctService.updateClaims(pct, idToken, client.getClientId(), permissions); // creates new pct if pct is null in request
             Claims claims = new Claims(idToken, pct, claimToken);
 
-            Map<CustomScriptConfiguration, UmaAuthorizationContext> scriptMap = umaNeedsInfoService.checkNeedsInfo(claims, scopes, permissions, pct, httpRequest, client);
+            Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap = umaNeedsInfoService.checkNeedsInfo(claims, scopes, permissions, pct, httpRequest, client);
 
             if (!scriptMap.isEmpty()) {
-                for (Map.Entry<CustomScriptConfiguration, UmaAuthorizationContext> entry : scriptMap.entrySet()) {
-                    final boolean result = policyService.authorize(entry.getKey(), entry.getValue());
-                    log.trace("Policy script inum: '{}' result: '{}'", entry.getKey().getInum(), result);
-                    if (!result) {
-                        log.trace("Stop authorization scriptMap execution, current script returns false, script inum: " + entry.getKey().getInum());
-
-                        throw new UmaWebException(Response.Status.FORBIDDEN, errorResponseFactory, UmaErrorResponseType.FORBIDDEN_BY_POLICY);
-                    }
-                }
+                expressionService.evaluate(scriptMap, permissions);
             } else {
                 log.warn("There are no any policies that protects scopes. Scopes: " + UmaScopeService.asString(scopes.keySet()));
                 log.warn("Access granted because there are no any protection. Make sure it is intentional behavior.");
@@ -144,17 +137,16 @@ public class UmaTokenService {
     }
 
     private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<UmaScopeDescription, Boolean> scopes) {
+        log.trace("Updating permissions with requested scopes ...");
         for (UmaPermission permission : permissions) {
             Set<String> scopeDns = new HashSet<String>(permission.getScopeDns());
 
             for (Map.Entry<UmaScopeDescription, Boolean> entry : scopes.entrySet()) {
-                if (entry.getValue()) {
-                    scopeDns.add(entry.getKey().getDn());
-                }
+                log.trace("Updating permissions with scope: " + entry.getKey().getId() + ", isRequestedScope: " + entry.getValue() + ", permisson: " + permission.getDn());
+                scopeDns.add(entry.getKey().getDn());
             }
 
             permission.setScopeDns(new ArrayList<String>(scopeDns));
         }
     }
-
 }
