@@ -473,6 +473,33 @@ class Setup(object):
                                         'jackson-core-*.jar', 'jackson-core-asl-*.jar', 'jackson-mapper-asl-*.jar', 'jackson-xc-*.jar',
                                         'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
+        self.init_fixes = {
+                'solserver' : {'src_pattern' : 'S*solserver',
+                            'result_name' : 'S90solserver'
+                           },
+                'oxauth' : {'src_pattern' : 'S*oxauth',
+                            'result_name' : 'S91oxauth'
+                           },
+                'identity' : {'src_pattern' : 'S*identity',
+                            'result_name' : 'S92identity'
+                           },
+                'idp' : {'src_pattern' : 'S*idp',
+                            'result_name' : 'S93idp'
+                           },
+                'oxauth-rp' : {'src_pattern' : 'S*oxauth-rp',
+                            'result_name' : 'S94oxauth-rp'
+                           },
+                'asimba' : {'src_pattern' : 'S*asimba',
+                            'result_name' : 'S94asimba'
+                           },
+                'passport' : {'src_pattern' : 'S*passport',
+                            'result_name' : 'S94passport'
+                           },
+                'apache2' : {'src_pattern' : 'S*apache2',
+                            'result_name' : 'S95apache2'
+                           },
+        }
+
     def __repr__(self):
         try:
             return 'hostname'.ljust(30) + self.hostname.rjust(35) + "\n" \
@@ -2680,19 +2707,18 @@ class Setup(object):
 
         return result
 
-    ##### Below function is temporary and will serve only
+    ##### Below function is temporary and will serve only 
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
     def change_rc_links(self):
         if self.os_type in ['ubuntu', 'debian']:
-            self.run(['mv -f /etc/rc3.d/S??solserver /etc/rc3.d/S90solserver'], None, None, True, True)
-            self.run(['mv -f /etc/rc3.d/S??oxauth /etc/rc3.d/S91oxauth'], None, None, True, True)            
-            self.run(['mv -f /etc/rc3.d/S??identity /etc/rc3.d/S92identity'], None, None, True, True)            
-            self.run(['mv -f /etc/rc3.d/S??idp /etc/rc3.d/S93idp'], None, None, True, True)            
-            self.run(['mv -f /etc/rc3.d/S??oxauth-rp /etc/rc3.d/S94oxauth-rp'], None, None, True, True)            
-            self.run(['mv -f /etc/rc3.d/S??asimba /etc/rc3.d/S94asimba'], None, None, True, True)            
-            self.run(['mv -f /etc/rc3.d/S??passport /etc/rc3.d/S94passport'], None, None, True, True)            
-            self.run(['mv -f /etc/rc3.d/S??apache2 /etc/rc3.d/S95apache2'], None, None, True, True)
-            
+            for appName, initFixes in self.init_fixes.iteritems():
+                src_pattern = initFixes['src_pattern']
+                result_name = initFixes['result_name']
+
+                init_file = self.findFiles(src_pattern, '/etc/rc3.d')
+                if len(init_file) > 0:
+                        self.run(['mv -f %s%s %s%s' % ('/etc/rc3.d/', src_pattern, '/etc/rc3.d/', result_name)], None, None, True, True)
+
 ############################   Main Loop   #################################################
 
 def print_help():
