@@ -589,9 +589,9 @@ class Exporter(object):
         output = output.replace('IN_MEMORY', '"IN_MEMORY"')
         output = output.replace('""IN_MEMORY""','"IN_MEMORY"')
         output = output.replace('DEFAULT', '"DEFAULT"')
-        output.replace('""DEFAULT""','"DEFAULT"')
+        output = output.replace('""DEFAULT""','"DEFAULT"')
 
-sudo         f = open("%s/ldif/appliance.ldif" % self.backupDir, 'w')
+        f = open("%s/ldif/appliance.ldif" % self.backupDir, 'w')
         f.write(output)
         f.close()
 
