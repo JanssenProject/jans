@@ -27,7 +27,7 @@ import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 
 /**
  * Provides operations with user U2F devices
