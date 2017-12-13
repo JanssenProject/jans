@@ -7,7 +7,7 @@
 package org.xdi.oxauth.service;
 
 import com.google.common.collect.Sets;
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 import org.codehaus.jettison.json.JSONArray;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
