@@ -6,9 +6,17 @@
 
 package org.xdi.oxauth.uma.service;
 
-import com.google.common.base.Preconditions;
-import com.unboundid.ldap.sdk.Filter;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
+import org.gluu.search.filter.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.ldap.model.SimpleBranch;
@@ -18,13 +26,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaResource;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Preconditions;
 
 /**
  * Provides operations with resource set descriptions
