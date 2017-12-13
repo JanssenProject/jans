@@ -22,7 +22,7 @@ import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.util.StringHelper;
 
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 
 /**
  * @author Javier Rojas Blum

@@ -6,10 +6,18 @@
 
 package org.xdi.oxauth.uma.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
+import org.gluu.search.filter.Filter;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
@@ -21,10 +29,7 @@ import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.util.INumGenerator;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
+import com.unboundid.util.StaticUtils;
 
 /**
  * Holds permission tokens and permissions
@@ -170,12 +175,7 @@ public class UmaPermissionService {
             }
 
             private Filter getFilter() {
-                try {
-                    return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                }catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxAuthExpiration");
-                }
+                return Filter.createLessOrEqualFilter("oxAuthExpiration", StaticUtils.encodeGeneralizedTime(now));
             }
         };
         batchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);

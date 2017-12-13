@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
