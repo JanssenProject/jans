@@ -19,7 +19,7 @@ import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.ldap.UserGroup;
 
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 
 /**
  * It's utility service which applications uses in custom authentication scripts 

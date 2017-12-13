@@ -6,11 +6,24 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import static org.xdi.oxauth.util.ServerUtil.isTrue;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.search.filter.Filter;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
@@ -19,8 +32,8 @@ import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.ClientTokens;
 import org.xdi.oxauth.model.common.CacheGrant;
+import org.xdi.oxauth.model.common.ClientTokens;
 import org.xdi.oxauth.model.common.SessionTokens;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -30,12 +43,7 @@ import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
-
-import static org.xdi.oxauth.util.ServerUtil.isTrue;
+import com.unboundid.util.StaticUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -272,12 +280,10 @@ public class GrantService {
 
     private TokenLdap load(String p_baseDn, String p_code) {
         try {
-            final List<TokenLdap> entries = ldapEntryManager.findEntries(p_baseDn, TokenLdap.class, Filter.create(String.format("oxAuthTokenCode=%s", TokenHashUtil.getHashedToken(p_code))));
+            final List<TokenLdap> entries = ldapEntryManager.findEntries(p_baseDn, TokenLdap.class, Filter.createEqualityFilter("oxAuthTokenCode", TokenHashUtil.getHashedToken(p_code)));
             if (entries != null && !entries.isEmpty()) {
                 return entries.get(0);
             }
-        } catch (LDAPException e) {
-            log.trace(e.getMessage(), e);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -286,9 +292,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByGrantId(String p_grantId) {
         try {
-            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.create(String.format("oxAuthGrantId=%s", p_grantId)));
-        } catch (LDAPException e) {
-            log.trace(e.getMessage(), e);
+            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthGrantId", p_grantId));
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -297,9 +301,7 @@ public class GrantService {
 
     public List<TokenLdap> getGrantsByAuthorizationCode(String p_authorizationCode) {
         try {
-            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.create(String.format("oxAuthAuthorizationCode=%s", TokenHashUtil.getHashedToken(p_authorizationCode))));
-        } catch (LDAPException e) {
-            log.trace(e.getMessage(), e);
+            return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, Filter.createEqualityFilter("oxAuthAuthorizationCode", TokenHashUtil.getHashedToken(p_authorizationCode)));
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
         }
@@ -390,12 +392,7 @@ public class GrantService {
             }
 
             private Filter getFilter() {
-                try {
-                    return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(new Date())));
-                } catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxAuthExpiration");
-                }
+                return Filter.createLessOrEqualFilter("oxAuthExpiration", StaticUtils.encodeGeneralizedTime(new Date()));
             }
         };
         tokenBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
@@ -413,14 +410,15 @@ public class GrantService {
             }
 
             private Filter getFilter() {
-                try {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.add(Calendar.SECOND, 60);
-                    return Filter.create(String.format("(&(oxAuthCreation<=%s)(|(numsubordinates=0)(hasSubordinates=FALSE)))", StaticUtils.encodeGeneralizedTime(calendar.getTime())));
-                } catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxAuthCreation");
-                }
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.SECOND, 60);
+
+                Filter noSubFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+            			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
+            	Filter noCreation = Filter.createLessOrEqualFilter("oxAuthCreation", StaticUtils.encodeGeneralizedTime(calendar.getTime()));
+            	Filter filter = Filter.createANDFilter(noCreation, noSubFilter);
+            	
+            	return filter;
             }
         };
         grantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
@@ -439,12 +437,12 @@ public class GrantService {
             }
 
             private Filter getFilter() {
-                try {
-                    return Filter.create("(&(!(oxAuthCreation=*))(|(numsubordinates=0)(hasSubordinates=FALSE)))");
-                } catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxAuthCreation");
-                }
+            	Filter noSubFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+            			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
+            	Filter noCreation = Filter.createNOTFilter(Filter.createPresenceFilter("oxAuthCreation"));
+            	Filter filter = Filter.createANDFilter(noCreation, noSubFilter);
+            	
+            	return filter;
             }
         };
         oldGrantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
@@ -488,4 +486,5 @@ public class GrantService {
             applicationAuditLogger.sendMessage(oAuth2AuditLog);
         }
     }
+
 }

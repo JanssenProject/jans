@@ -6,10 +6,17 @@
 
 package org.xdi.oxauth.model.common;
 
-import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.ldap.sdk.RDN;
-import org.apache.commons.lang.ArrayUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
@@ -23,14 +30,6 @@ import org.xdi.oxauth.service.UserService;
 import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 /**
  * Component to hold in memory authorization grant objects.
@@ -61,6 +60,8 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Inject
     private CacheService cacheService;
+
+    private final Pattern clientInumPattern = Pattern.compile(".+inum=([\\w\\!\\@\\.]+).+");
 
     @Override
     public void removeAuthorizationGrants(List<AuthorizationGrant> authorizationGrants) {
@@ -180,23 +181,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     public String extractClientIdFromTokenDn(String p_dn) {
-        try {
-            if (StringUtils.isNotBlank(p_dn)) {
-                final RDN[] rdNs = DN.getRDNs(p_dn);
-                if (ArrayUtils.isNotEmpty(rdNs)) {
-                    for (RDN r : rdNs) {
-                        final String[] names = r.getAttributeNames();
-                        if (ArrayUtils.isNotEmpty(names) && Arrays.asList(names).contains("inum")) {
-                            final String[] values = r.getAttributeValues();
-                            if (ArrayUtils.isNotEmpty(values)) {
-                                return values[0];
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (LDAPException e) {
-            log.trace(e.getMessage(), e);
+        Matcher m = clientInumPattern.matcher(p_dn);
+        if (m.matches()) {
+        	return m.group(1);
         }
 
         return "";
@@ -301,4 +288,5 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         }
         return null;
     }
+
 }
