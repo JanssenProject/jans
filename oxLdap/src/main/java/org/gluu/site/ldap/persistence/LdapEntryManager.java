@@ -41,7 +41,7 @@ import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Attribute;
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPSearchException;
 import com.unboundid.ldap.sdk.Modification;
@@ -269,7 +269,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
     private void removeSubtreeThroughIteration(String dn) {
     	SearchResult searchResult = null;
     	try {
-    		searchResult = this.ldapOperationService.search(dn, Filter.createPresenceFilter("objectClass"), 0, 0, null, "dn");
+    		searchResult = this.ldapOperationService.search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), 0, 0, null, "dn");
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn));
 			}
@@ -396,7 +396,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, scope, batchOperation, startIndex, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, toLdapFilter(searchFilter), scope, batchOperation, startIndex, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -445,7 +445,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		SearchResult searchResult = null;
 		try {
 
-			searchResult = this.ldapOperationService.searchSearchResult(baseDN, searchFilter, SearchScope.SUB, startIndex, count, searchLimit, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.searchSearchResult(baseDN, toLdapFilter(searchFilter), SearchScope.SUB, startIndex, count, searchLimit, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -490,7 +490,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		SearchResult searchResult = null;
 		try {
 
-			searchResult = this.ldapOperationService.searchVirtualListView(baseDN, searchFilter, SearchScope.SUB, startIndex, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.searchVirtualListView(baseDN, toLdapFilter(searchFilter), SearchScope.SUB, startIndex, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -544,7 +544,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, 1, 1, null, ldapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, toLdapFilter(searchFilter), 1, 1, null, ldapReturnAttributes);
 			if ((searchResult == null) || !ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}
@@ -759,7 +759,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		CountBatchOperation<T> batchOperation = new CountBatchOperation<T>(this);
 
 		try {
-			ldapOperationService.search(baseDN, searchFilter, SearchScope.SUB, batchOperation, 0, 100, 0, null, ldapReturnAttributes);
+			ldapOperationService.search(baseDN, toLdapFilter(searchFilter), SearchScope.SUB, batchOperation, 0, 100, 0, null, ldapReturnAttributes);
 		} catch (Exception ex) {
 			throw new EntryPersistenceException(String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
 		}
@@ -1009,7 +1009,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	public List<String[]> getLDIF(String dn, String[] attributes) {
 		SearchResult searchResult;
 		try {
-			searchResult = this.ldapOperationService.search(dn, Filter.create("objectclass=*"), SearchScope.BASE, -1, 0, null, attributes);
+			searchResult = this.ldapOperationService.search(dn, toLdapFilter(Filter.create("objectclass=*")), SearchScope.BASE, -1, 0, null, attributes);
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s", dn));
 			}
@@ -1033,7 +1033,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	public List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes) {
 		SearchResult searchResult;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, searchFilter, -1, 0, null, attributes);
+			searchResult = this.ldapOperationService.search(baseDN, toLdapFilter(searchFilter), -1, 0, null, attributes);
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}
@@ -1079,6 +1079,10 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 
 		return new Modification(modificationType, realAttributeName, attributeValues);
+	}
+
+	private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter filter) {
+		return null;
 	}
 
 	private static final class PropertyComparator<T> implements Comparator<T>, Serializable {

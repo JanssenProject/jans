@@ -57,6 +57,7 @@
 
     <modules>
         <module>oxUtil</module>
+        <module>oxFilter</module>
         <module>oxLdap</module>
         <module>oxLdap-annotations</module>
         <module>oxLdapSample</module>
