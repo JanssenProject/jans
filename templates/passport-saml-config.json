@@ -1,38 +1,39 @@
 {
-  "idp1": {
-    "entryPoint": "<Your idps' entry point idp1>",
-    "issuer": "urn:test:example",
+  "your_idp_name1": {
+    "entryPoint": "<entrypoint>",
+    "issuer": "urn:test",
     "identifierFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
     "authnRequestBinding": "HTTP-POST",
-    "additionalAuthorizeParams": "{ 'providerId': 'test' }",
+    "additionalAuthorizeParams": "{ providerId: 'test' }",
+    "logo_img":"{Provider Logo url}",
+    "cert":"your_idp_public_certicate_in_single_line",
     "skipRequestCompression": "true",
     "reverseMapping": {
-      "email": "email",
+      "email" : "email",
       "username": "urn:oid:0.9.2342.19200300.100.1.1",
       "displayName": "urn:oid:2.16.840.1.113730.3.1.241",
-      "id": "urn:oid:0.9.2342.19200300.100.1.1",
+      "id":  "urn:oid:0.9.2342.19200300.100.1.1",
       "name": "urn:oid:2.5.4.42",
       "givenName": "urn:oid:2.5.4.42",
       "familyName": "urn:oid:2.5.4.4",
-      "provider": "issuer"
+      "provider" :"issuer"
     }
   },
-  "idp2": {
-    "entryPoint": "<Your idps' entry point idp2>",
-    "issuer": "urn:test:example",
-    "identifierFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-    "authnRequestBinding": "HTTP-POST",
-    "additionalAuthorizeParams": "{ 'providerId': 'test' }",
-    "skipRequestCompression": "true",
+  "your_idp_name2": {
+    "entryPoint": "<entrypoint>",
+    "issuer": "urn:test",
+    "identifierFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
+    "logo_img":"{Provider Logo url}",
+    "cert":"your_idp_public_certicate_in_single_line",
     "reverseMapping": {
-      "email": "email",
+      "email" : "email",
       "username": "urn:oid:0.9.2342.19200300.100.1.1",
       "displayName": "urn:oid:2.16.840.1.113730.3.1.241",
-      "id": "urn:oid:0.9.2342.19200300.100.1.1",
+      "id":  "urn:oid:0.9.2342.19200300.100.1.1",
       "name": "urn:oid:2.5.4.42",
       "givenName": "urn:oid:2.5.4.42",
       "familyName": "urn:oid:2.5.4.4",
-      "provider": "issuer"
+      "provider" :"issuer"
     }
   }
 }
