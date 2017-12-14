@@ -75,7 +75,7 @@ public class ApplicationFactory {
 			try {
 				smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
 			} catch (EncryptionException ex) {
-				log.error("Failed to decript SMTP user password", ex);
+				log.error("Failed to decrypt SMTP user password", ex);
 			}
 		}
 		
