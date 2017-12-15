@@ -2127,6 +2127,12 @@ class Setup(object):
         else:
             self.installJce = False
 
+
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","y|N")[0].lower()
+        if promptForMITLicense == 'n':
+            sys.exit(0)
+
+
     def get_filepaths(self, directory):
         file_paths = []
 
