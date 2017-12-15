@@ -1,5 +1,7 @@
 package org.gluu.search.filter;
 
+import java.util.List;
+
 /**
  * Simple filter without dependency to specific persistence filter mechanism
  * 
@@ -89,8 +91,16 @@ public class Filter {
 		return new Filter(FilterType.OR, filters);
 	}
 
+	public static Filter createORFilter(final List<Filter> filters) {
+		return new Filter(FilterType.OR, filters.toArray(new Filter[0]));
+	}
+
 	public static Filter createANDFilter(final Filter... filters) {
 		return new Filter(FilterType.AND, filters);
+	}
+
+	public static Filter createANDFilter(final List<Filter> filters) {
+		return new Filter(FilterType.AND, filters.toArray(new Filter[0]));
 	}
 
 	public final FilterType getType() {
