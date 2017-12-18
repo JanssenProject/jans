@@ -3,7 +3,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Authentication script for cred-manager
 displayName: credmanager
-gluuStatus: false
+gluuStatus: true
 inum: %(inumOrg)s!0011!BABA.CACA
 oxConfigurationProperty: {"value1":"supergluu_app_id","value2":"https://%(hostname)s/cred-manager","description":""}
 oxConfigurationProperty: {"value1":"u2f_app_id","value2":"https://%(hostname)s","description":""}
@@ -20,7 +20,7 @@ objectClass: top
 objectClass: oxCustomScript
 description: Cred-manager Client Registration script
 displayName: client_registration
-gluuStatus: false
+gluuStatus: true
 inum: %(inumOrg)s!0011!DAA9.F7F8
 oxLevel: 1
 oxConfigurationProperty: {"value1":"client_redirect_uris","value2":"https://%(hostname)s/cred-manager","description":""}
