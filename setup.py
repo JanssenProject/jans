@@ -252,6 +252,9 @@ class Setup(object):
         self.oxauthClient_encoded_pw = None
         self.oxTrustConfigGeneration = None
 
+        self.oxd_hostname = None
+        self.oxd_port = 8098
+
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
 
@@ -378,6 +381,8 @@ class Setup(object):
         self.idp3_configuration_password_authn = 'authn/password-authn-config.xml'
         self.idp3_metadata = 'idp-metadata.xml'
 
+        self.cred_manager_config = '%s/cred-manager.json' % self.configFolder
+
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = "%s/static/system/ubuntu/rsyslog" % self.install_dir
 
@@ -474,6 +479,7 @@ class Setup(object):
                              self.asimba_properties: False,
                              self.asimba_selector_configuration: False,
                              self.network: False,
+                             self.cred_manager_config:False,
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -611,6 +617,7 @@ class Setup(object):
             if not self.isIP(testIP):
                 testIP = None
                 print 'ERROR: The IP Address is invalid. Try again\n'
+
         return testIP
 
     def check_installed(self):
@@ -1881,6 +1888,9 @@ class Setup(object):
         credManagerWar = 'cred-manager.war'
         distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, credManagerWar)
 
+        self.logIt("Configuring Credentials manager...")
+        self.copyFile(self.cred_manager_config, self.configFolder)
+
         self.logIt("Copying cred-manager.war into jetty webapps folder...")
 
         jettyServiceName = 'cred-manager'
@@ -2151,6 +2161,9 @@ class Setup(object):
         promptForCredManager = self.getPrompt("Install Credentials Manager?", "No")[0].lower()
         if promptForCredManager == 'y':
             self.installCredManager = True
+
+            self.oxd_hostname = self.getPrompt("Enter oxd server hostname")
+            self.oxd_port = self.getPrompt("Enter oxd server port", 8098)
         else:
             self.installCredManager = False
 
