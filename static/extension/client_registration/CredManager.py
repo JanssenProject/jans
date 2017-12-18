@@ -17,16 +17,16 @@ class ClientRegistration(ClientRegistrationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
-        print "Client registration. Initialization"
+        print "Cred-manager client registration. Initialization"
         
         self.clientRedirectUrisSet = self.prepareClientRedirectUris(configurationAttributes)
 
-        print "Client registration. Initialized successfully"
+        print "Cred-manager client registration. Initialized successfully"
         return True   
 
     def destroy(self, configurationAttributes):
-        print "Client registration. Destroy"
-        print "Client registration. Destroyed successfully"
+        print "Cred-manager client registration. Destroy"
+        print "Cred-manager client registration. Destroyed successfully"
         return True   
 
     # Update client entry before persistent it
@@ -34,29 +34,34 @@ class ClientRegistration(ClientRegistrationType):
     #   client is org.xdi.oxauth.model.registration.Client
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateClient(self, registerRequest, client, configurationAttributes):
-        print "Client registration. UpdateClient method"
+        print "Cred-manager client registration. UpdateClient method"
 
         redirectUris = client.getRedirectUris()
-        print "Client registration. Redirect Uris: %s" % redirectUris
+        print "Cred-manager client registration. Redirect Uris: %s" % redirectUris
 
-        addAddressScope = False
+        credManagerClient = False
         for redirectUri in redirectUris:
             if (self.clientRedirectUrisSet.contains(redirectUri)):
-                addAddressScope = True
+                credManagerClient = True
                 break
         
-        print "Client registration. Is add address scope: %s" % addAddressScope
+        if not credManagerClient:
+            return True
 
-        if addAddressScope:
-            currentScopes = client.getScopes()
-            print "Client registration. Current scopes: %s" % currentScopes
-            
-            scopeService = CdiUtil.bean(ScopeService)
-            addressScope = scopeService.getScopeByDisplayName("address")
-            newScopes = ArrayHelper.addItemToStringArray(currentScopes, addressScope.getDn())
-    
-            print "Client registration. Result scopes: %s" % newScopes
-            client.setScopes(newScopes)
+        print "Cred-manager client registration. Client is Cred-manager"
+
+        newScopes = client.getScopes()
+        
+        scopeService = CdiUtil.bean(ScopeService)
+
+        profileScope = scopeService.getScopeByDisplayName("profile")
+        clientinfoScope = scopeService.getScopeByDisplayName("clientinfo")
+
+        newScopes = ArrayHelper.addItemToStringArray(newScopes, profileScope.getDn())
+        newScopes = ArrayHelper.addItemToStringArray(newScopes, clientinfoScope.getDn())
+
+        print "Cred-manager client registration. Result scopes: %s" % newScopes
+        client.setScopes(newScopes)
 
         return True
 
@@ -70,12 +75,12 @@ class ClientRegistration(ClientRegistrationType):
 
         clientRedirectUrisList = configurationAttributes.get("client_redirect_uris").getValue2()
         if StringHelper.isEmpty(clientRedirectUrisList):
-            print "Client registration. The property client_redirect_uris is empty"
+            print "Cred-manager client registration. The property client_redirect_uris is empty"
             return clientRedirectUrisSet    
 
         clientRedirectUrisArray = StringHelper.split(clientRedirectUrisList, ",")
         if ArrayHelper.isEmpty(clientRedirectUrisArray):
-            print "Client registration. No clients specified in client_redirect_uris property"
+            print "Cred-manager client registration. No clients specified in client_redirect_uris property"
             return clientRedirectUrisSet
         
         # Convert to HashSet to quick search
