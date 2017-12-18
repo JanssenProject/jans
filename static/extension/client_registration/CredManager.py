@@ -4,11 +4,11 @@
 # Author: Yuriy Movchan
 #
 
-from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.model.custom.script.type.client import ClientRegistrationType
-from org.xdi.util import StringHelper, ArrayHelper
+from org.xdi.service.cdi.util import CdiUtil
 from org.xdi.oxauth.service import ScopeService
-from java.util import Arrays, ArrayList
+from org.xdi.util import StringHelper, ArrayHelper
+from java.util import Arrays, ArrayList, HashSet
 
 import java
 

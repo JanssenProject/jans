@@ -382,7 +382,7 @@ class Setup(object):
         self.idp3_configuration_password_authn = 'authn/password-authn-config.xml'
         self.idp3_metadata = 'idp-metadata.xml'
 
-        self.cred_manager_config = '%s/cred-manager.json' % self.configFolder
+        self.cred_manager_config = '%s/cred-manager.json' % self.outputFolder
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = "%s/static/system/ubuntu/rsyslog" % self.install_dir
