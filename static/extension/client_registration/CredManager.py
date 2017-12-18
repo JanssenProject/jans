@@ -56,9 +56,11 @@ class ClientRegistration(ClientRegistrationType):
 
         profileScope = scopeService.getScopeByDisplayName("profile")
         clientinfoScope = scopeService.getScopeByDisplayName("clientinfo")
+        usernameScope = scopeService.getScopeByDisplayName("user_name")
 
         newScopes = ArrayHelper.addItemToStringArray(newScopes, profileScope.getDn())
         newScopes = ArrayHelper.addItemToStringArray(newScopes, clientinfoScope.getDn())
+        newScopes = ArrayHelper.addItemToStringArray(newScopes, usernameScope.getDn()) 
 
         print "Cred-manager client registration. Result scopes: %s" % newScopes
         client.setScopes(newScopes)
