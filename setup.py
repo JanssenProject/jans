@@ -360,6 +360,7 @@ class Setup(object):
         self.ldif_asimba = '%s/asimba.ldif' % self.outputFolder
         self.ldif_passport = '%s/passport.ldif' % self.outputFolder
         self.ldif_idp = '%s/oxidp.ldif' % self.outputFolder
+        self.ldif_scripts_cred_manager = '%s/scripts_cred_manager.ldif' % self.outputFolder
         self.passport_config = '%s/passport-config.json' % self.configFolder
         self.encode_script = '%s/bin/encode.py' % self.gluuOptFolder
         self.network = "/etc/sysconfig/network"
@@ -441,7 +442,8 @@ class Setup(object):
                            self.ldif_asimba,
                            self.ldif_passport,
                            self.ldif_passport_config,
-                           self.ldif_idp
+                           self.ldif_idp,
+                           self.ldif_scripts_cred_manager,
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
@@ -480,6 +482,7 @@ class Setup(object):
                              self.asimba_selector_configuration: False,
                              self.network: False,
                              self.cred_manager_config:False,
+                             self.ldif_scripts_cred_manager: False,
                              }
 
         self.oxauth_keys_utils_libs = [ 'bcprov-jdk15on-*.jar', 'bcpkix-jdk15on-*.jar', 'commons-lang-*.jar',
@@ -2667,6 +2670,9 @@ class Setup(object):
             if 'site.ldif' in ldif:
                 self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
             else:
+                # Ignore credential manager file if it's not selected for install
+                if ('scripts_cred_manager.ldif' in ldif) and not self.installCredManager:
+                    continue
                 self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def import_custom_ldif_openldap(self, fullPath):

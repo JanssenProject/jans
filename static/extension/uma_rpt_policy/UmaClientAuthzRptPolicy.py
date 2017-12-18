@@ -23,7 +23,9 @@ class UmaRptPolicy(UmaRptPolicyType):
 
     def init(self, configurationAttributes):
         print "RPT Policy. Initializing ..."
+
         self.clientsSet = self.prepareClientsSet(configurationAttributes)
+
         print "RPT Policy. Initialized successfully"
         return True
 
@@ -57,7 +59,7 @@ class UmaRptPolicy(UmaRptPolicyType):
             print "UmaRptPolicy. Client isn't authorized"
             return False
 
-        
+
     def prepareClientsSet(self, configurationAttributes):
         clientsSet = HashSet()
         if (not configurationAttributes.containsKey("allowed_clients")):
