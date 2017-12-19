@@ -13,6 +13,10 @@ public class RemoveSiteResponse implements IOpResponse {
     public RemoveSiteResponse() {
     }
 
+    public RemoveSiteResponse(String oxdId) {
+        this.oxdId = oxdId;
+    }
+
     public String getOxdId() {
         return oxdId;
     }
