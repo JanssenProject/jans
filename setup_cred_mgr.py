@@ -220,7 +220,7 @@ class SetupCredManager(object):
         config = os.path.join(self.setup.openldapConfFolder, 'slapd.conf')
         realInstallDir = os.path.realpath(self.install_dir)
         if self.installCredManager:
-            ldif = 'scripts_cred_manager.ldif';
+            ldif = self.setup.ldif_scripts_cred_manager
             self.setup.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def calculate_aplications_memory(self):
@@ -386,6 +386,7 @@ if __name__ == '__main__':
             installObject.install_gluu_components()
             installObject.set_ownership()
             installObject.set_permissions()
+            installObject.import_ldif_openldap()
             installObject.start_services()
             installObject.change_rc_links()
             installObject.save_properties()
