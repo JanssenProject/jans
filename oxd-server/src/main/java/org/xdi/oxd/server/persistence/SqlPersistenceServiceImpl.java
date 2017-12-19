@@ -202,4 +202,28 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
     public void destroy() {
         provider.onDestroy();
     }
+
+    @Override
+    public boolean remove(String oxdId) {
+        Connection conn = null;
+        try {
+            conn = provider.getConnection();
+            conn.setAutoCommit(false);
+
+            PreparedStatement query = conn.prepareStatement("delete from rp where id = ?");
+            query.setString(1, oxdId);
+            query.executeUpdate();
+            query.close();
+
+            conn.commit();
+            LOG.debug("Removed rp successfully. oxdId: " + oxdId);
+            return true;
+        } catch (Exception e) {
+            LOG.error("Failed to remove rp with oxdId: " + oxdId, e);
+            rollbackSilently(conn);
+            return false;
+        } finally {
+            IOUtils.closeSilently(conn);
+        }
+    }
 }

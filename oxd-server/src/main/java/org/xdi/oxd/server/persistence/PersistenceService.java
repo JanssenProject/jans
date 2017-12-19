@@ -22,4 +22,6 @@ public interface PersistenceService {
     Set<Rp> getRps();
 
     void destroy();
+
+    boolean remove(String oxdId);
 }

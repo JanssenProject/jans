@@ -17,6 +17,7 @@ public enum CommandType {
     SETUP_CLIENT("setup_client"),
     REGISTER_SITE("register_site"),
     UPDATE_SITE("update_site"),
+    REMOVE_SITE("remove_site"),
 
     // Connect (stateful)
     GET_AUTHORIZATION_URL("get_authorization_url"),
