@@ -64,6 +64,8 @@ public class OperationFactory {
                     return new SetupClientOperation(command, injector);
                 case GET_CLIENT_TOKEN:
                     return new GetClientTokenOperation(command, injector);
+                case REMOVE_SITE:
+                    return new RemoveSiteOperation(command, injector);
             }
             LOG.error("Command is not supported. Command: {}", command);
         } else {
