@@ -54,16 +54,24 @@ public class RestResource {
     @Path("/register-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String registerSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return response(oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(p_authorization)));
+    public String registerSite(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
+        return response(oxd.registerSite(read(params, RegisterSiteParams.class), validateAccessToken(authorization)));
     }
 
     @POST
     @Path("/update-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String updateSite(@HeaderParam("Authorization") String p_authorization, String params) throws IOException, JSONException {
-        return response(oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(p_authorization)));
+    public String updateSite(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
+        return response(oxd.updateSite(read(params, UpdateSiteParams.class), validateAccessToken(authorization)));
+    }
+
+    @POST
+    @Path("/remove-site")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String removeSite(@HeaderParam("Authorization") String authorization, String params) throws IOException, JSONException {
+        return response(oxd.removeSite(read(params, RemoveSiteParams.class), validateAccessToken(authorization)));
     }
 
     @POST

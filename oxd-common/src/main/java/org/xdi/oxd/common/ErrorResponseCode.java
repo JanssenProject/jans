@@ -60,7 +60,8 @@ public enum ErrorResponseCode {
     UMA_NEED_INFO("need_info", "The authorization server needs additional information in order to determine whether the client is authorized to have these permissions."),
     FAILED_TO_GET_END_SESSION_ENDPOINT("no_end_session_endpoint_at_op", "OP does not provide end_session_endpoint at /.well-known/openid-configuration."),
     FAILED_TO_GET_REVOCATION_ENDPOINT("no_revocation_endpoint_at_op", "Failed to get revocation_endpoint at https://accounts.google.com/.well-known/openid-configuration"),
-    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT.");
+    FAILED_TO_GET_RPT("internal_error", "Failed to get RPT."),
+    FAILED_TO_REMOVE_SITE("remove_site_failed", "Failed to remove site."),;
 
     private final String code;
     private final String description;
