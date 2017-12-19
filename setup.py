@@ -101,7 +101,6 @@ class Setup(object):
         self.installAsimba = False
         self.installOxAuthRP = False
         self.installPassport = False
-        self.installCredManager = False
 
         self.allowPreReleasedApplications = False
         self.allowDeprecatedApplications = False
@@ -157,7 +156,7 @@ class Setup(object):
         self.jetty_app_configuration = {
             'oxauth' : {'name' : 'oxauth',
                         'jetty' : {'modules' : 'deploy,http,logging,jsp,servlets,ext,http-forwarded,websocket'},
-                        'memory' : {'ratio' : 0.25, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
+                        'memory' : {'ratio' : 0.3, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 4096},
                         'installed' : False
                         },
             'identity' : {'name' : 'identity',
@@ -177,18 +176,13 @@ class Setup(object):
                         },
             'oxauth-rp' : {'name' : 'oxauth-rp',
                            'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded,websocket'},
-                           'memory' : {'ratio' : 0.05, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
+                           'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
                            'installed' : False
                            },
             'passport' : {'name' : 'passport',
                           'node' : {},
                           'memory' : {'ratio' : 0.1, "max_allowed_mb" : 1024},
                           'installed' : False
-                          },
-            'cred-manager' : {'name' : 'cred-manager',
-                           'jetty' : {'modules' : 'deploy,http,logging,jsp,http-forwarded'},
-                           'memory' : {'ratio' : 0.1, "jvm_heap_ration" : 0.7, "max_allowed_mb" : 512},
-                           'installed' : False
                            }
         }
 
@@ -442,8 +436,7 @@ class Setup(object):
                            self.ldif_asimba,
                            self.ldif_passport,
                            self.ldif_passport_config,
-                           self.ldif_idp,
-                           self.ldif_scripts_cred_manager,
+                           self.ldif_idp
                            ]
 
         self.ce_templates = {self.oxauth_config_json: False,
@@ -512,9 +505,6 @@ class Setup(object):
                 'passport' : {'src_pattern' : 'S*passport',
                             'result_name' : 'S96passport'
                            },
-                'cred-manager' : {'src_pattern' : 'S*cred-manager',
-                            'result_name' : 'S97cred-manager'
-                           },
                 'apache2' : {'src_pattern' : 'S*apache2',
                             'result_name' : 'S98apache2'
                            },
@@ -539,8 +529,7 @@ class Setup(object):
                    + 'Install Shibboleth SAML IDP'.ljust(30) + repr(self.installSaml).rjust(35) + "\n" \
                    + 'Install Asimba SAML Proxy'.ljust(30) + repr(self.installAsimba).rjust(35) + "\n" \
                    + 'Install oxAuth RP'.ljust(30) + repr(self.installOxAuthRP).rjust(35) + "\n" \
-                   + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n" \
-                   + 'Install Credentials manager '.ljust(30) + repr(self.installCredManager).rjust(35) + "\n"
+                   + 'Install Passport '.ljust(30) + repr(self.installPassport).rjust(35) + "\n"
         except:
             s = ""
             for key in self.__dict__.keys():
@@ -1265,13 +1254,6 @@ class Setup(object):
             print "Downloading Shibboleth IDP v3 binary distributive file..."
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
-        if self.installCredManager:
-            # Credential manager is not part of CE package. We need to download it if needed
-            distCredManagerPath = '%s/%s' % (self.distGluuFolder, "cred-manager.war")
-            if not os.path.exists(distCredManagerPath):
-                print "Downloading Credential manager war file..."
-                self.run(['/usr/bin/wget', self.cred_manager_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cred-manager.war' % self.distGluuFolder])
-
         jceArchive = 'jce_policy-8.zip'
         jceArchivePath = '%s/%s' % (self.distAppFolder, jceArchive)
         if self.installJce and not os.path.exists(jceArchivePath):
@@ -1887,21 +1869,6 @@ class Setup(object):
         # Install passport system service script
         self.installNodeService('passport')
 
-    def install_cred_manager(self):
-        credManagerWar = 'cred-manager.war'
-        distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, credManagerWar)
-
-        self.logIt("Configuring Credentials manager...")
-        self.copyFile(self.cred_manager_config, self.configFolder)
-
-        self.logIt("Copying cred-manager.war into jetty webapps folder...")
-
-        jettyServiceName = 'cred-manager'
-        self.installJettyService(self.jetty_app_configuration[jettyServiceName])
-
-        jettyServiceWebapps = '%s/%s/webapps' % (self.jetty_base, jettyServiceName)
-        self.copyFile('%s/cred-manager.war' % self.distGluuFolder, jettyServiceWebapps)
-
     def install_gluu_components(self):
         if self.installLdap:
             self.install_ldap_server()
@@ -1926,9 +1893,6 @@ class Setup(object):
 
         if self.installPassport:
             self.install_passport()
-
-        if self.installCredManager:
-            self.install_cred_manager()
 
     def isIP(self, address):
         try:
@@ -2160,15 +2124,6 @@ class Setup(object):
             self.installPassport = True
         else:
             self.installPassport = False
-
-        promptForCredManager = self.getPrompt("Install Credentials Manager?", "No")[0].lower()
-        if promptForCredManager == 'y':
-            self.installCredManager = True
-
-            self.oxd_hostname = self.getPrompt("Enter oxd server hostname")
-            self.oxd_port = self.getPrompt("Enter oxd server port", 8098)
-        else:
-            self.installCredManager = False
 
             #if self.allowDeprecatedApplications:
             # Empty deprecated option
@@ -2675,9 +2630,6 @@ class Setup(object):
             if 'site.ldif' in ldif:
                 self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=site', '-f', config, '-l', ldif])])
             else:
-                # Ignore credential manager file if it's not selected for install
-                if ('scripts_cred_manager.ldif' in ldif) and not self.installCredManager:
-                    continue
                 self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def import_custom_ldif_openldap(self, fullPath):
@@ -2726,8 +2678,6 @@ class Setup(object):
             installedComponents.append(self.jetty_app_configuration['asimba'])
         if self.installOxAuthRP:
             installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
-        if self.installCredManager:
-            installedComponents.append(self.jetty_app_configuration['cred-manager'])
 
         # Node apps
         if self.installPassport:
@@ -2802,7 +2752,6 @@ def print_help():
     print "    -a   Install Asimba"
     print "    -r   Install oxAuth RP"
     print "    -p   Install Passport"
-    print "    -c   Install Credentials Manager"
     print "    -d   specify the directory where community-edition-setup is located. Defaults to '.'"
     print "    -f   specify setup.properties file"
     print "    -h   Help"
@@ -2856,8 +2805,6 @@ def getOpts(argv, setupOptions):
             setupOptions['installOxAuthRP'] = True
         elif opt == '-p':
             setupOptions['installPassport'] = True
-        elif opt == '-c':
-            setupOptions['installCredManager'] = True
         elif opt == "-e":
             setupOptions['installJce'] = True
         elif opt == '--allow_pre_released_applications':
@@ -2888,7 +2835,6 @@ if __name__ == '__main__':
         'installAsimba': False,
         'installOxAuthRP': False,
         'installPassport': False,
-        'installCredManager': False,
         'allowPreReleasedApplications': False,
         'allowDeprecatedApplications': False,
         'installJce': False
@@ -2912,7 +2858,6 @@ if __name__ == '__main__':
     installObject.installAsimba = setupOptions['installAsimba']
     installObject.installOxAuthRP = setupOptions['installOxAuthRP']
     installObject.installPassport = setupOptions['installPassport']
-    installObject.installCredManager = setupOptions['installCredManager']
     installObject.allowPreReleasedApplications = setupOptions['allowPreReleasedApplications']
     installObject.allowDeprecatedApplications = setupOptions['allowDeprecatedApplications']
     installObject.installJce = setupOptions['installJce']

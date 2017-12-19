@@ -50,8 +50,6 @@ class SetupCredManager(object):
 
         self.templateRenderingDict = {}
 
-        self.cred_manager_war = 'http://ox.gluu.org/maven/org/xdi/cred-manager/%s/cred-manager-%s.war' % (self.setup.oxVersion, self.setup.oxVersion)
-
         # Gluu components installation status
         self.installCredManager = False
 
@@ -95,7 +93,7 @@ class SetupCredManager(object):
             distCredManagerPath = '%s/%s' % (self.setup.distGluuFolder, "cred-manager.war")
             if not os.path.exists(distCredManagerPath):
                 print "Downloading Credential manager war file..."
-                self.setup.run(['/usr/bin/wget', self.cred_manager_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cred-manager.war' % self.setup.distGluuFolder])
+                self.setup.run(['/usr/bin/wget', self.setup.cred_manager_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cred-manager.war' % self.setup.distGluuFolder])
 
     def install_cred_manager(self):
         credManagerWar = 'cred-manager.war'
