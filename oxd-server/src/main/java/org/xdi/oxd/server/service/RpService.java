@@ -93,4 +93,8 @@ public class RpService {
     private Rp put(Rp rp) {
         return rpMap.put(rp.getOxdId(), rp);
     }
+
+    public boolean remove(String oxdId) {
+        return persistenceService.remove(oxdId);
+    }
 }

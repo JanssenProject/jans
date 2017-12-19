@@ -91,6 +91,12 @@ public class RedisPersistenceService implements PersistenceService {
         LOG.debug("Destroyed RedisProvider");
     }
 
+    @Override
+    public boolean remove(String oxdId) {
+        redisProvider.remove(oxdId);
+        return false;
+    }
+
     private void testConnection() {
         put("testKey", "testValue");
         if (!"testValue".equals(get("testKey"))) {

@@ -56,6 +56,18 @@ public class Oxd {
         }
     }
 
+    public CommandResponse removeSite(RemoveSiteParams params, String token) throws IOException {
+        CommandClient client = null;
+        try {
+            client = newClient();
+            params.setProtectionAccessToken(token);
+
+            return client.send(new Command(CommandType.REMOVE_SITE).setParamsObject(params));
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
     public CommandResponse getAuthorizationUrl(GetAuthorizationUrlParams params, String p_authorization) throws IOException {
         CommandClient client = null;
         try {
