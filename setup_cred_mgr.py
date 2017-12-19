@@ -46,6 +46,9 @@ class SetupCredManager(object):
         self.setup_properties_fn = '%s/setup_cred_mgr.properties' % self.install_dir
         self.savedProperties = '%s/setup_cred_mgr.properties.last' % self.install_dir
 
+        self.twilio_jar = 'twilio-7.17.0.jar'
+        self.twilio_url = 'http://central.maven.org/maven2/com/twilio/sdk/twilio/7.17.0/%s' % self.twilio_jar
+
         self.application_max_ram = None    # in MB
 
         self.templateRenderingDict = {}
@@ -87,17 +90,22 @@ class SetupCredManager(object):
         if not self.application_max_ram:
             self.application_max_ram = 512
 
-    def downloadWarFiles(self):
+    def download_files(self):
+        self.setup.logIt("Downloading files")
         if self.installCredManager:
             # Credential manager is not part of CE package. We need to download it if needed
             distCredManagerPath = '%s/%s' % (self.setup.distGluuFolder, "cred-manager.war")
             if not os.path.exists(distCredManagerPath):
                 print "Downloading Credential manager war file..."
-                self.setup.run(['/usr/bin/wget', self.setup.cred_manager_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/cred-manager.war' % self.setup.distGluuFolder])
+                self.setup.run(['/usr/bin/wget', self.setup.cred_manager_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', distCredManagerPath])
+
+            twilioJarPath = '%s/%s' % (self.setup.distGluuFolder, self.twilio_jar)
+            if not os.path.exists(twilioJarPath):
+                print "Downloading Twilio jar file..."
+                self.setup.run(['/usr/bin/wget', self.twilio_url, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', twilioJarPath])
 
     def install_cred_manager(self):
         credManagerWar = 'cred-manager.war'
-        distOxAuthRpPath = '%s/%s' % (self.setup.distGluuFolder, credManagerWar)
 
         self.setup.logIt("Configuring Credentials manager...")
         self.setup.copyFile(self.setup.cred_manager_config, self.setup.configFolder)
@@ -109,6 +117,10 @@ class SetupCredManager(object):
 
         jettyServiceWebapps = '%s/%s/webapps' % (self.setup.jetty_base, jettyServiceName)
         self.setup.copyFile('%s/cred-manager.war' % self.setup.distGluuFolder, jettyServiceWebapps)
+
+        jettyServiceOxAuthCustomLibsPath = '%s/%s/%s' % (self.setup.jetty_base, "oxauth", "custom/libs")
+        self.setup.copyFile('%s/%s' % ( self.setup.distGluuFolder, self.twilio_jar) , jettyServiceOxAuthCustomLibsPath)
+        self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceOxAuthCustomLibsPath])
 
     def install_gluu_components(self):
         if self.installCredManager:
@@ -132,7 +144,7 @@ class SetupCredManager(object):
     def promptForProperties(self):
         self.application_max_ram = self.setup.getPrompt("Enter maximum RAM for applications in MB", '512')
 
-        promptForCredManager = self.setup.getPrompt("Install Credentials Manager?", "No")[0].lower()
+        promptForCredManager = self.setup.getPrompt("Install Credentials Manager?", "Yes")[0].lower()
         if promptForCredManager == 'y':
             self.installCredManager = True
 
@@ -208,6 +220,13 @@ class SetupCredManager(object):
                         self.setup.run([service_path, 'start', applicationName], None, None, True)
                     else:
                         self.setup.run([service_path, applicationName, 'start'], None, None, True)
+
+            # Restart oxAuth service
+            applicationName = 'oxauth'
+            if self.setup.os_type in ['centos', 'redhat', 'fedora'] and self.setup.os_initdaemon == 'systemd':
+                self.setup.run([service_path, 'restart', applicationName], None, None, True)
+            else:
+                self.setup.run([service_path, applicationName, 'restart'], None, None, True)
         except:
             self.setup.logIt("Error starting Jetty services")
             self.setup.logIt(traceback.format_exc(), True)
@@ -378,7 +397,7 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
-            installObject.downloadWarFiles()
+            installObject.download_files()
             installObject.calculate_aplications_memory()
             installObject.render_templates()
             installObject.install_gluu_components()
