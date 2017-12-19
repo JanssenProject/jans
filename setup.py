@@ -2211,6 +2211,11 @@ class Setup(object):
         f = open(os.path.join(templateFolder, fn))
         template_text = f.read()
         f.close()
+
+        # Create output folder if needed
+        if not os.path.exists(outputFolder):
+            os.makedirs(outputFolder)
+
         newFn = open(os.path.join(outputFolder, fn), 'w+')
         newFn.write(self.fomatWithDict(template_text, self.merge_dicts(self.__dict__, self.templateRenderingDict)))
         newFn.close()
