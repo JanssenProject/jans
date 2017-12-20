@@ -2455,9 +2455,9 @@ class Setup(object):
 
     def detect_service_path(self):
         service_path = '/sbin/service'
-        if self.setup.os_type in ['centos', 'redhat', 'fedora'] and self.setup.os_initdaemon == 'systemd':
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
             service_path = '/usr/bin/systemctl'
-        elif self.setup.os_type in ['debian', 'ubuntu']:
+        elif self.os_type in ['debian', 'ubuntu']:
             service_path = '/usr/sbin/service'
 
         return service_path
@@ -2722,7 +2722,7 @@ class Setup(object):
 
                 self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
 
-    def calculate_installed_aplications_memory(self):
+    def calculate_selected_aplications_memory(self):
         installedComponents = []
 
         # Jetty apps
@@ -2943,7 +2943,7 @@ if __name__ == '__main__':
         try:
             installObject.configureSystem()
             installObject.downloadWarFiles()
-            installObject.calculate_aplications_memory()
+            installObject.calculate_selected_aplications_memory()
             installObject.installJRE()
             installObject.installJetty()
             installObject.installJython()
