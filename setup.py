@@ -2471,8 +2471,8 @@ class Setup(object):
             else:
                 self.run([service_path, applicationName, operation], None, None, True)
         except:
-            self.setup.logIt("Error starting Jetty service '%s'" % operation)
-            self.setup.logIt(traceback.format_exc(), True)
+            self.logIt("Error starting Jetty service '%s'" % operation)
+            self.logIt(traceback.format_exc(), True)
 
     def start_services(self):
         # Detect service path and apache service name
@@ -2634,10 +2634,10 @@ class Setup(object):
 
     def import_ldif_template(self, ldif):
         self.logIt("Importing LDIF file '%s' into OpenLDAP" % ldif)
-        cmd = os.path.join(self.setup.openldapBinFolder, 'slapadd')
-        config = os.path.join(self.setup.openldapConfFolder, 'slapd.conf')
+        cmd = os.path.join(self.openldapBinFolder, 'slapadd')
+        config = os.path.join(self.openldapConfFolder, 'slapd.conf')
         realInstallDir = os.path.realpath(self.install_dir)
-        self.setup.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
+        self.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
 
     def import_ldif_openldap(self):
         self.logIt("Importing LDIF files into OpenLDAP")
