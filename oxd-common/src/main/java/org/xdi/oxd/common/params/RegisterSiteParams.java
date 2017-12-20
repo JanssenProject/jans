@@ -36,6 +36,10 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String clientId;
     @JsonProperty(value = "client_secret")
     private String clientSecret;
+    @JsonProperty(value = "client_registration_access_token")
+    private String clientRegistrationAccessToken;
+    @JsonProperty(value = "client_registration_client_uri")
+    private String clientRegistrationClientUri;
     @JsonProperty(value = "client_name")
     private String clientName;
     @JsonProperty(value = "client_jwks_uri")
@@ -67,6 +71,22 @@ public class RegisterSiteParams implements HasProtectionAccessTokenParams {
     private String oxdRpProgrammingLanguage;
 
     public RegisterSiteParams() {
+    }
+
+    public String getClientRegistrationAccessToken() {
+        return clientRegistrationAccessToken;
+    }
+
+    public void setClientRegistrationAccessToken(String clientRegistrationAccessToken) {
+        this.clientRegistrationAccessToken = clientRegistrationAccessToken;
+    }
+
+    public String getClientRegistrationClientUri() {
+        return clientRegistrationClientUri;
+    }
+
+    public void setClientRegistrationClientUri(String clientRegistrationClientUri) {
+        this.clientRegistrationClientUri = clientRegistrationClientUri;
     }
 
     public String getOxdRpProgrammingLanguage() {
