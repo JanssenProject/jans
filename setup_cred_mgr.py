@@ -158,135 +158,36 @@ class SetupCredManager(object):
             sys.exit(0)
 
     def save_properties(self):
-        self.setup.logIt('Saving properties to %s' % self.savedProperties)
-
-        def getString(value):
-            if isinstance(value, str):
-                return value.strip()
-            elif isinstance(value, bool):
-                return str(value)
-            else:
-                return ""
-        try:
-            p = Properties.Properties()
-            keys = self.__dict__.keys()
-            keys.sort()
-            for key in keys:
-                value = getString(self.__dict__[key])
-                if value != '':
-                    p[key] = value
-            p.store(open(self.savedProperties, 'w'))
-        except:
-            self.setup.logIt("Error saving properties", True)
-            self.setup.logIt(traceback.format_exc(), True)
+        self.setup.save_properties()
 
     def load_properties(self, fn):
-        self.setup.logIt('Loading Properties %s' % fn)
-        p = Properties.Properties()
-        try:
-            p.load(open(fn))
-            properties_list = p.keys()
-            for prop in properties_list:
-                try:
-                    self.__dict__[prop] = p[prop]
-                    if p[prop] == 'True':
-                        self.__dict__[prop] = True
-                    elif p[prop] == 'False':
-                        self.__dict__[prop] = False
-                except:
-                    self.setup.logIt("Error loading property %s" % prop)
-                    self.setup.logIt(traceback.format_exc(), True)
-        except:
-            self.setup.logIt("Error loading properties", True)
-            self.setup.logIt(traceback.format_exc(), True)
+        self.setup.load_properties(fn)
 
     def start_services(self):
-        # Detect service path and apache service name
-        service_path = '/sbin/service'
-        apache_service_name = 'httpd'
-        if self.setup.os_type in ['centos', 'redhat', 'fedora'] and self.setup.os_initdaemon == 'systemd':
-            service_path = '/usr/bin/systemctl'
-            apache_service_name = 'httpd'
-        elif self.setup.os_type in ['debian', 'ubuntu']:
-            service_path = '/usr/sbin/service'
-            apache_service_name = 'apache2'
-
         # Jetty services
-        try:
-            # Iterate through all components and start installed
-            for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
-                if applicationConfiguration['installed']:
-                    if self.setup.os_type in ['centos', 'redhat', 'fedora'] and self.setup.os_initdaemon == 'systemd':
-                        self.setup.run([service_path, 'start', applicationName], None, None, True)
-                    else:
-                        self.setup.run([service_path, applicationName, 'start'], None, None, True)
+        # Iterate through all components and start installed
+        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
+            if applicationConfiguration['installed']:
+                self.setup.run_service_command(applicationName, 'start')
 
-            # Restart oxAuth service
-            applicationName = 'oxauth'
-            if self.setup.os_type in ['centos', 'redhat', 'fedora'] and self.setup.os_initdaemon == 'systemd':
-                self.setup.run([service_path, 'restart', applicationName], None, None, True)
-            else:
-                self.setup.run([service_path, applicationName, 'restart'], None, None, True)
-        except:
-            self.setup.logIt("Error starting Jetty services")
-            self.setup.logIt(traceback.format_exc(), True)
+        # Restart oxAuth service to load new custom libs
+        self.setup.run_service_command('oxauth', 'restart')
 
     def import_ldif_openldap(self):
         self.setup.logIt("Importing LDIF files into OpenLDAP")
-        cmd = os.path.join(self.setup.openldapBinFolder, 'slapadd')
-        config = os.path.join(self.setup.openldapConfFolder, 'slapd.conf')
-        realInstallDir = os.path.realpath(self.install_dir)
         if self.installCredManager:
             ldif = self.setup.ldif_scripts_cred_manager
-            self.setup.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
+
+            self.setup.import_ldif_template(ldif)
 
     def calculate_aplications_memory(self):
-        self.setup.logIt("Calculating memory setting for applications")
-
         installedComponents = []
-        allowedApplicationsMemory = {}
 
         # Jetty apps
         if self.installCredManager:
             installedComponents.append(self.jetty_app_configuration['cred-manager'])
-
-        usedRatio = 0.001
-        for installedComponent in installedComponents:
-            usedRatio += installedComponent['memory']['ratio']
-
-        ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
-
-        for installedComponent in installedComponents:
-            allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
-            allowedMemory = int(round(allowedRatio * int(self.application_max_ram)))
-
-            if allowedMemory > installedComponent['memory']['max_allowed_mb']:
-                allowedMemory = installedComponent['memory']['max_allowed_mb']
-
-            allowedApplicationsMemory[installedComponent['name']] = allowedMemory
-
-        # Iterate through all components into order to prepare all keys
-        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
-            if applicationName in allowedApplicationsMemory:
-                applicationMemory = allowedApplicationsMemory.get(applicationName)
-            else:
-                # We uses this dummy value to render template properly of not installed application
-                applicationMemory = 256
-
-            self.templateRenderingDict["%s_max_mem" % applicationName] = applicationMemory
-
-            if 'jvm_heap_ration' in applicationConfiguration['memory']:
-                jvmHeapRation = applicationConfiguration['memory']['jvm_heap_ration']
-
-                minHeapMem = 256
-                maxHeapMem = int(applicationMemory * jvmHeapRation)
-                if maxHeapMem < minHeapMem:
-                    minHeapMem = maxHeapMem
-
-                self.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
-                self.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
-
-                self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
+            
+        self.setup.calculate_aplications_memory(self.application_max_ram, self.jetty_app_configuration, installedComponents)
 
     def check_installed(self):
         return os.path.exists('%s/cred-manager.json' % self.setup.configFolder)
@@ -297,17 +198,8 @@ class SetupCredManager(object):
     def set_permissions(self):
         self.setup.set_permissions()
 
-    ##### Below function is temporary and will serve only 
-    ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
     def change_rc_links(self):
-        if self.setup.os_type in ['ubuntu', 'debian']:
-            for appName, initFixes in self.init_fixes.iteritems():
-                src_pattern = initFixes['src_pattern']
-                result_name = initFixes['result_name']
-
-                init_file = self.setup.findFiles(src_pattern, '/etc/rc3.d')
-                if len(init_file) > 0:
-                        self.setup.run(['mv -f %s%s %s%s' % ('/etc/rc3.d/', src_pattern, '/etc/rc3.d/', result_name)], None, None, True, True)
+        self.setup.change_rc_links(self.init_fixes)
 
 ############################   Main Loop   #################################################
 
