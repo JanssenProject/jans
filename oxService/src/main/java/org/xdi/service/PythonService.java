@@ -181,7 +181,7 @@ public class PythonService implements Serializable {
         return (T) scriptJavaClass;
 	}
 	
-	public static class PythonLoggerOutputStream extends OutputStream {
+	class PythonLoggerOutputStream extends OutputStream {
 
 		private boolean error;
 		private Logger log;
