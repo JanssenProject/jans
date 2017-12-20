@@ -27,7 +27,7 @@ public enum ScopeType implements LdapEnum {
      * For OpenID Connect, scopes can be used to request that specific sets of
      * information be made available as Claim Values.
      * OpenID Connect defines the following scope values that are used to request Claims:
-     * <p/>
+     * <p>
      * <ul>
      * <li>
      * <b>profile</b>. This scope value requests access to the End-User's default profile Claims,
@@ -44,7 +44,7 @@ public enum ScopeType implements LdapEnum {
      * <b>phone</b>. This scope value requests access to the phone_number and phone_number_verified Claims.
      * </li>
      * </ul>
-     * <p/>
+     * <p>
      * The Claims requested by the profile, email, address, and phone scope values are returned from the
      * UserInfo Endpoint.
      */
