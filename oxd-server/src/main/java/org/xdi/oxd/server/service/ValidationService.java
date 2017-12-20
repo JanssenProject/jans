@@ -108,6 +108,9 @@ public class ValidationService {
         final IntrospectionResponse introspectionResponse = introspect(accessToken, params.getOxdId());
 
         LOG.trace("access_token: " + accessToken + ", introspection: " + introspectionResponse + ", setupClientId: " + rp.getSetupClientId());
+        if (StringUtils.isBlank(introspectionResponse.getClientId())) {
+            throw new ErrorResponseException(ErrorResponseCode.NO_CLIENT_ID_IN_INTROSPECTION_RESPONSE);
+        }
 
         if (introspectionResponse.getClientId().equals(rp.getSetupClientId())) {
             return true;
