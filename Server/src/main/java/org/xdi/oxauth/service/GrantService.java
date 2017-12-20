@@ -413,10 +413,10 @@ public class GrantService {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.SECOND, 60);
 
-                Filter noSubFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+                Filter hasSubordinates = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
             			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
-            	Filter noCreation = Filter.createLessOrEqualFilter("oxAuthCreation", StaticUtils.encodeGeneralizedTime(calendar.getTime()));
-            	Filter filter = Filter.createANDFilter(noCreation, noSubFilter);
+            	Filter creationDate = Filter.createLessOrEqualFilter("oxAuthCreation", StaticUtils.encodeGeneralizedTime(calendar.getTime()));
+            	Filter filter = Filter.createANDFilter(creationDate, hasSubordinates);
             	
             	return filter;
             }
@@ -437,10 +437,10 @@ public class GrantService {
             }
 
             private Filter getFilter() {
-            	Filter noSubFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+            	Filter hasSubordinatesFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
             			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
-            	Filter noCreation = Filter.createNOTFilter(Filter.createPresenceFilter("oxAuthCreation"));
-            	Filter filter = Filter.createANDFilter(noCreation, noSubFilter);
+            	Filter noCreationDate = Filter.createNOTFilter(Filter.createPresenceFilter("oxAuthCreation"));
+            	Filter filter = Filter.createANDFilter(noCreationDate, hasSubordinatesFilter);
             	
             	return filter;
             }
