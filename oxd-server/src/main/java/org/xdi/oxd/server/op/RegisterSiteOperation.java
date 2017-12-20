@@ -357,6 +357,8 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         if (!Strings.isNullOrEmpty(params.getClientId()) && !Strings.isNullOrEmpty(params.getClientSecret())) {
             rp.setClientId(params.getClientId());
             rp.setClientSecret(params.getClientSecret());
+            rp.setClientRegistrationAccessToken(params.getClientRegistrationAccessToken());
+            rp.setClientRegistrationClientUri(params.getClientRegistrationClientUri());
         }
 
         if (params.getContacts() != null && !params.getContacts().isEmpty()) {
