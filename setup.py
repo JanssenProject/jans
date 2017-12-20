@@ -246,8 +246,8 @@ class Setup(object):
         self.oxauthClient_encoded_pw = None
         self.oxTrustConfigGeneration = None
 
-        self.oxd_hostname = None
-        self.oxd_port = 8098
+        self.oxd_hostname = '%(oxd_hostname)s'
+        self.oxd_port = '%(oxd_port)s'
 
         self.outputFolder = '%s/output' % self.install_dir
         self.templateFolder = '%s/templates' % self.install_dir
