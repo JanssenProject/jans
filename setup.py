@@ -2453,16 +2453,34 @@ class Setup(object):
                 self.run(["/usr/sbin/update-rc.d", service, 'defaults'])
                 self.run(["/usr/sbin/update-rc.d", service, 'enable'])
 
+    def detect_service_path(self):
+        service_path = '/sbin/service'
+        if self.setup.os_type in ['centos', 'redhat', 'fedora'] and self.setup.os_initdaemon == 'systemd':
+            service_path = '/usr/bin/systemctl'
+        elif self.setup.os_type in ['debian', 'ubuntu']:
+            service_path = '/usr/sbin/service'
+
+        return service_path
+
+    def run_service_command(self, service, operation):
+        service_path = self.detect_service_path()
+
+        try:
+            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                self.run([service_path, operation, applicationName], None, None, True)
+            else:
+                self.run([service_path, applicationName, operation], None, None, True)
+        except:
+            self.setup.logIt("Error starting Jetty service '%s'" % operation)
+            self.setup.logIt(traceback.format_exc(), True)
 
     def start_services(self):
         # Detect service path and apache service name
-        service_path = '/sbin/service'
+        service_path = self.detect_service_path()
         apache_service_name = 'httpd'
         if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-            service_path = '/usr/bin/systemctl'
             apache_service_name = 'httpd'
         elif self.os_type in ['debian', 'ubuntu']:
-            service_path = '/usr/sbin/service'
             apache_service_name = 'apache2'
 
         # Apache HTTPD
@@ -2496,17 +2514,10 @@ class Setup(object):
                 self.run([service_path, 'solserver', 'start'])
 
         # Jetty services
-        try:
-            # Iterate through all components and start installed
-            for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
-                if applicationConfiguration['installed']:
-                    if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                        self.run([service_path, 'start', applicationName], None, None, True)
-                    else:
-                        self.run([service_path, applicationName, 'start'], None, None, True)
-        except:
-            self.logIt("Error starting Jetty services")
-            self.logIt(traceback.format_exc(), True)
+        # Iterate through all components and start installed
+        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
+            if applicationConfiguration['installed']:
+                self.run_service_command(applicationName, 'start')
 
     def update_hostname(self):
         self.logIt("Copying hosts and hostname to final destination")
@@ -2621,6 +2632,13 @@ class Setup(object):
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
         self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
 
+    def import_ldif_template(self, ldif):
+        self.logIt("Importing LDIF file '%s' into OpenLDAP" % ldif)
+        cmd = os.path.join(self.setup.openldapBinFolder, 'slapadd')
+        config = os.path.join(self.setup.openldapConfFolder, 'slapd.conf')
+        realInstallDir = os.path.realpath(self.install_dir)
+        self.setup.run(['/bin/su', 'ldap', '-c', "cd " + realInstallDir + "; " + " ".join([cmd, '-b', 'o=gluu', '-f', config, '-l', ldif])])
+
     def import_ldif_openldap(self):
         self.logIt("Importing LDIF files into OpenLDAP")
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
@@ -2661,27 +2679,10 @@ class Setup(object):
         installObject.configure_openldap()
         installObject.import_ldif_openldap()
 
-    def calculate_aplications_memory(self):
+    def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
         self.logIt("Calculating memory setting for applications")
 
-        installedComponents = []
         allowedApplicationsMemory = {}
-
-        # Jetty apps
-        if self.installOxAuth:
-            installedComponents.append(self.jetty_app_configuration['oxauth'])
-        if self.installOxTrust:
-            installedComponents.append(self.jetty_app_configuration['identity'])
-        if self.installSaml:
-            installedComponents.append(self.jetty_app_configuration['idp'])
-        if self.installAsimba:
-            installedComponents.append(self.jetty_app_configuration['asimba'])
-        if self.installOxAuthRP:
-            installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
-
-        # Node apps
-        if self.installPassport:
-            installedComponents.append(self.jetty_app_configuration['passport'])
 
         usedRatio = 0.001
         for installedComponent in installedComponents:
@@ -2691,7 +2692,7 @@ class Setup(object):
 
         for installedComponent in installedComponents:
             allowedRatio = installedComponent['memory']['ratio'] * ratioMultiplier
-            allowedMemory = int(round(allowedRatio * int(self.application_max_ram)))
+            allowedMemory = int(round(allowedRatio * int(application_max_ram)))
 
             if allowedMemory > installedComponent['memory']['max_allowed_mb']:
                 allowedMemory = installedComponent['memory']['max_allowed_mb']
@@ -2699,7 +2700,7 @@ class Setup(object):
             allowedApplicationsMemory[installedComponent['name']] = allowedMemory
 
         # Iterate through all components into order to prepare all keys
-        for applicationName, applicationConfiguration in self.jetty_app_configuration.iteritems():
+        for applicationName, applicationConfiguration in jetty_app_configuration.iteritems():
             if applicationName in allowedApplicationsMemory:
                 applicationMemory = allowedApplicationsMemory.get(applicationName)
             else:
@@ -2721,6 +2722,26 @@ class Setup(object):
 
                 self.templateRenderingDict["%s_max_meta_mem" % applicationName] = applicationMemory - self.templateRenderingDict["%s_max_heap_mem" % applicationName]
 
+    def calculate_installed_aplications_memory(self):
+        installedComponents = []
+
+        # Jetty apps
+        if self.installOxAuth:
+            installedComponents.append(self.jetty_app_configuration['oxauth'])
+        if self.installOxTrust:
+            installedComponents.append(self.jetty_app_configuration['identity'])
+        if self.installSaml:
+            installedComponents.append(self.jetty_app_configuration['idp'])
+        if self.installAsimba:
+            installedComponents.append(self.jetty_app_configuration['asimba'])
+        if self.installOxAuthRP:
+            installedComponents.append(self.jetty_app_configuration['oxauth-rp'])
+
+        # Node apps
+        if self.installPassport:
+            installedComponents.append(self.jetty_app_configuration['passport'])
+            
+        self.calculate_aplications_memory(self.application_max_ram, self.jetty_app_configuration, installedComponents)
 
     def merge_dicts(self, *dict_args):
         result = {}
@@ -2731,15 +2752,18 @@ class Setup(object):
 
     ##### Below function is temporary and will serve only 
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
-    def change_rc_links(self):
+    def change_rc_links(self, init_fixes):
         if self.os_type in ['ubuntu', 'debian']:
-            for appName, initFixes in self.init_fixes.iteritems():
+            for appName, initFixes in init_fixes.iteritems():
                 src_pattern = initFixes['src_pattern']
                 result_name = initFixes['result_name']
 
                 init_file = self.findFiles(src_pattern, '/etc/rc3.d')
                 if len(init_file) > 0:
                         self.run(['mv -f %s%s %s%s' % ('/etc/rc3.d/', src_pattern, '/etc/rc3.d/', result_name)], None, None, True, True)
+
+    def change_rc_links(self):
+        self.change_rc_links(self.init_fixes)
 
 ############################   Main Loop   #################################################
 
