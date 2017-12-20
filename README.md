@@ -1,4 +1,4 @@
-All rights reserved -- Copyright 2015 Gluu Inc.
+All rights reserved -- Copyright 2017 Gluu Inc.
 
 # oxd
 
