@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.Properties;
 
@@ -55,8 +56,8 @@ public class PythonService implements Serializable {
 	            this.pythonInterpreter = new PythonInterpreter();
 	            
 	            // Init output redirect for all new interpreters
-	            this.pythonInterpreter.setOut(new PythonLoggerOutputStream(log, false));
-	            this.pythonInterpreter.setErr(new PythonLoggerOutputStream(log, true));
+	            this.pythonInterpreter.setOut(new OutputStreamWriter(new PythonLoggerOutputStream(log, false), "UTF-8"));
+	            this.pythonInterpreter.setErr(new OutputStreamWriter(new PythonLoggerOutputStream(log, true), "UTF-8"));
 	
 	            result = true;
 			} catch (PyException ex) {
@@ -180,7 +181,7 @@ public class PythonService implements Serializable {
         return (T) scriptJavaClass;
 	}
 	
-	class PythonLoggerOutputStream extends OutputStream {
+	public static class PythonLoggerOutputStream extends OutputStream {
 
 		private boolean error;
 		private Logger log;
