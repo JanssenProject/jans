@@ -2467,9 +2467,9 @@ class Setup(object):
 
         try:
             if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                self.run([service_path, operation, applicationName], None, None, True)
+                self.run([service_path, operation, service], None, None, True)
             else:
-                self.run([service_path, applicationName, operation], None, None, True)
+                self.run([service_path, service, operation], None, None, True)
         except:
             self.logIt("Error starting Jetty service '%s'" % operation)
             self.logIt(traceback.format_exc(), True)
@@ -2752,7 +2752,7 @@ class Setup(object):
 
     ##### Below function is temporary and will serve only 
     ##### Untill we're done with systemd units for all services for Ubuntu 16 and CentOS 7
-    def change_rc_links(self, init_fixes):
+    def process_rc_links(self, init_fixes):
         if self.os_type in ['ubuntu', 'debian']:
             for appName, initFixes in init_fixes.iteritems():
                 src_pattern = initFixes['src_pattern']
@@ -2763,7 +2763,7 @@ class Setup(object):
                         self.run(['mv -f %s%s %s%s' % ('/etc/rc3.d/', src_pattern, '/etc/rc3.d/', result_name)], None, None, True, True)
 
     def change_rc_links(self):
-        self.change_rc_links(self.init_fixes)
+        self.process_rc_links(self.init_fixes)
 
 ############################   Main Loop   #################################################
 
