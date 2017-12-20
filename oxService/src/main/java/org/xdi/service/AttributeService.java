@@ -17,7 +17,7 @@ import org.xdi.model.GluuAttribute;
 import org.xdi.model.SchemaEntry;
 import org.xdi.util.OxConstants;
 
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 
 /**

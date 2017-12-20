@@ -40,7 +40,7 @@ import org.xdi.util.StringHelper;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 
 /**
  * Metric service

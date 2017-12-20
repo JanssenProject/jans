@@ -21,7 +21,7 @@ import org.xdi.ldap.model.Entry;
 import org.xdi.model.DisplayNameEntry;
 import org.xdi.util.OxConstants;
 
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 
 /**
  * Provides operations with DisplayNameEntry

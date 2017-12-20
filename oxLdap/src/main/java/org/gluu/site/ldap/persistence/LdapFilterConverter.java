@@ -3,7 +3,7 @@ package org.gluu.site.ldap.persistence;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
 
-import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPException;
+import com.unboundid.ldap.sdk.LDAPSearchException;
 
 /**
  * Simple filter without dependency to specific persistence filter mechanism
@@ -12,13 +12,13 @@ import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPException;
  */
 public class LdapFilterConverter {
 	
-	public com.unboundid.ldap.sdk.Filter convertToLdapFilter(Filter genericFilter) throws LDAPException {
+	public com.unboundid.ldap.sdk.Filter convertToLdapFilter(Filter genericFilter) throws LDAPSearchException {
 		FilterType type = genericFilter.getType();
 		if (FilterType.RAW == type) {
 			try {
 				return com.unboundid.ldap.sdk.Filter.create(genericFilter.getFilterString());
 			} catch (com.unboundid.ldap.sdk.LDAPException ex) {
-				throw new LDAPException("!!!!!!!!!!!!!!!!!");
+				throw new LDAPSearchException(ex);
 			}
 		}
 
@@ -65,7 +65,7 @@ public class LdapFilterConverter {
 			return com.unboundid.ldap.sdk.Filter.createSubstringFilter(genericFilter.getAttributeName(), genericFilter.getSubInitial(), genericFilter.getSubAny(), genericFilter.getSubFinal());
 		}
 		
-		throw new LDAPException("!!!!!!!!!!!!!!!!!");
+		throw new LDAPSearchException((com.unboundid.ldap.sdk.LDAPException) null);
 	}
 
 }

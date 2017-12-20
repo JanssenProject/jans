@@ -10,12 +10,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.gluu.search.filter.Filter;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.model.custom.script.model.CustomScript;
-
-import com.unboundid.ldap.sdk.Filter;
 
 /**
  * Operations with custom scripts

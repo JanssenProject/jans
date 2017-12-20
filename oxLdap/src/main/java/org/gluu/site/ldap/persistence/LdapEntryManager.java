@@ -49,6 +49,7 @@ import com.unboundid.ldap.sdk.ModificationType;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
+import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 
 /**
@@ -67,6 +68,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	private static final String[] NO_STRINGS = new String[0];
 	
 	private static final Comparator<String> LINE_LENGHT_COMPARATOR = new LineLenghtComparator<String>(false);
+
+	private static final LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
 
 	private transient OperationsFacade ldapOperationService;
 	private transient List<DeleteNotifier> subscribers;
@@ -1081,8 +1084,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return new Modification(modificationType, realAttributeName, attributeValues);
 	}
 
-	private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter filter) {
-		return null;
+	private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter genericFilter) throws LDAPSearchException {
+		return ldapFilterConverter.convertToLdapFilter(genericFilter);
 	}
 
 	private static final class PropertyComparator<T> implements Comparator<T>, Serializable {

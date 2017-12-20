@@ -59,7 +59,7 @@ public class Filter {
 	}
 
 	public static Filter createPresenceFilter(final String attributeName) {
-		return new Filter(FilterType.PRESENCE, attributeName);
+		return new Filter(FilterType.PRESENCE, attributeName, null);
 	}
 
 	public static Filter createEqualityFilter(final String attributeName, final String assertionValue) {
