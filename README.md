@@ -1,4 +1,4 @@
-oxd is [commercial software](./LICENSE.md) -- Copyright 2017 Gluu Inc.
+oxd is [commercial software](./LICENSE) -- Copyright 2017 Gluu Inc.
 
 # oxd
 
