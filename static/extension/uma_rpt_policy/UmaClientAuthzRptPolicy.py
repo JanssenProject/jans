@@ -4,13 +4,12 @@
 # Author: Jose Gonzalez
 # Adapted from previous 3.0.1 script of Yuriy Movchan
 #
-# oxConfigurationProperty required: 
-#   allowed_clients - comma separated list of dns of allowed clients 
+# oxConfigurationProperty required:
+#   allowed_clients - comma separated list of dns of allowed clients
 #   (i.e. the SCIM RP client)
 
 from org.xdi.model.custom.script.type.uma import UmaRptPolicyType
 from org.xdi.service.cdi.util import CdiUtil
-from org.xdi.oxauth.security import Identity
 from org.xdi.model.uma import ClaimDefinitionBuilder
 from org.xdi.util import StringHelper, ArrayHelper
 from java.util import Arrays, ArrayList, HashSet
@@ -23,9 +22,7 @@ class UmaRptPolicy(UmaRptPolicyType):
 
     def init(self, configurationAttributes):
         print "RPT Policy. Initializing ..."
-
         self.clientsSet = self.prepareClientsSet(configurationAttributes)
-
         print "RPT Policy. Initialized successfully"
         return True
 
@@ -36,18 +33,16 @@ class UmaRptPolicy(UmaRptPolicyType):
     def getApiVersion(self):
         return 1
 
-    def getRequiredClaims(self, context): 
+    def getRequiredClaims(self, context):
         json = """[
         ]"""
         return ClaimDefinitionBuilder.build(json)
-        
+
     def authorize(self, context): # context is reference of org.xdi.oxauth.uma.authorization.UmaAuthorizationContext
         print "RPT Policy. Authorizing ..."
-        
-        identity = CdiUtil.bean(Identity)
-        client_id = identity.getSessionClient().getClient().getClientId()
-        
-        print "UmaRptPolicy. client_id=", client_id
+
+        client_id=context.getClient().getClientId()
+        print "UmaRptPolicy. client_id = %s" % client_id
 
         if (StringHelper.isEmpty(client_id)):
             return False
@@ -59,6 +54,8 @@ class UmaRptPolicy(UmaRptPolicyType):
             print "UmaRptPolicy. Client isn't authorized"
             return False
 
+    def getClaimsGatheringScriptName(self, context):
+        return ""
 
     def prepareClientsSet(self, configurationAttributes):
         clientsSet = HashSet()
