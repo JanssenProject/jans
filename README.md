@@ -1,4 +1,4 @@
-All rights reserved -- Copyright 2017 Gluu Inc.
+oxd is commercial software -- Copyright 2017 Gluu Inc.
 
 # oxd
 
