@@ -1167,6 +1167,12 @@ class Setup(object):
         self.run([self.cmd_java, '-jar', '%s/start.jar' % self.jetty_home, 'jetty.home=%s' % self.jetty_home, 'jetty.base=%s' % jettyServiceBase, '--add-to-start=%s' % jettyModules], None, jettyEnv)
         self.run([self.cmd_chown, '-R', 'jetty:jetty', jettyServiceBase])
 
+        try:
+            self.renderTemplateInOut(serviceName, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
+        except:
+            self.setup.logIt("Error rendering service '%s' defaults" % serviceName, True)
+            self.setup.logIt(traceback.format_exc(), True)
+
         jettyServiceConfiguration = '%s/jetty/%s' % (self.outputFolder, serviceName)
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
@@ -2249,12 +2255,6 @@ class Setup(object):
         testTepmplatesFolder = '%s/test/' % self.templateFolder
         self.render_templates_folder(testTepmplatesFolder)
 
-    def render_jetty_templates(self):
-        self.logIt("Rendering jetty templates")
-
-        jettyTepmplatesFolder = '%s/jetty/' % self.templateFolder
-        self.render_templates_folder(jettyTepmplatesFolder)
-
     def render_node_templates(self):
         self.logIt("Rendering node templates")
 
@@ -2964,7 +2964,6 @@ if __name__ == '__main__':
             installObject.set_ulimits()
             installObject.copy_output()
             installObject.setup_init_scripts()
-            installObject.render_jetty_templates()
             installObject.render_node_templates()
             installObject.install_gluu_components()
             installObject.render_test_templates()
