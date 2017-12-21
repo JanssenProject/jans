@@ -268,5 +268,6 @@
         "customParam2",
         "customParam3"
     ],
-    "legacyDynamicRegistrationScopeParam": false
+    "legacyDynamicRegistrationScopeParam": false,
+    "useCacheForAllImplicitFlowObjects":false
 }
