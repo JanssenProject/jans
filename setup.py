@@ -279,7 +279,6 @@ class Setup(object):
         self.ldap_admin_port = '4444'
         self.ldapBaseFolder = '/opt/opendj'
 
-        self.ldapStartTimeOut = 30
         self.ldapSetupCommand = '%s/setup' % self.ldapBaseFolder
         self.ldapDsconfigCommand = "%s/bin/dsconfig" % self.ldapBaseFolder
         self.ldapDsCreateRcCommand = "%s/bin/create-rc-script" % self.ldapBaseFolder
@@ -294,7 +293,7 @@ class Setup(object):
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
 
-        self.init_files = ['%s/static/opendj/opendj' % self.install_dir]
+        self.opendj_init_file = '%s/static/opendj/opendj' % self.install_dir
         self.opendj_service_centos7 = '%s/static/opendj/systemd/opendj.service' % self.install_dir
 
         self.redhat_services = ['memcached', 'httpd', 'rsyslog']
@@ -2643,6 +2642,28 @@ class Setup(object):
         self.index_opendj_backend('userRoot')
         self.index_opendj_backend('site')
 
+    def setup_opendj_service(self):
+        service_path = self.detect_service_path()
+
+        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+            opendj_script_name = os.path.split(self.opendj_service_centos7)[-1]
+            opendj_dest_folder = "/etc/systemd/system"
+            try:
+                self.copyFile(self.opendj_service_centos7, opendj_dest_folder)
+                self.run([service_path, 'daemon-reload'])
+                self.run([service_path, 'enable', 'opendj'])
+            except:
+                self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
+                self.logIt(traceback.format_exc(), True)
+        else:
+            self.run([ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
+        
+        if self.os_type in ['centos', 'fedora', 'redhat']:
+            self.run(["/sbin/chkconfig", 'opendj', "on"])
+        elif self.os_type in ['ubuntu', 'debian']:
+            self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
+            self.run(["/usr/sbin/update-rc.d", 'opendj', 'enable'])
+
     def setup_init_scripts(self):
         if self.os_initdaemon == 'initd':
             for init_file in self.init_files:
@@ -2708,22 +2729,27 @@ class Setup(object):
         else:
             self.run([service_path, 'memcached', 'start'])
 
-        # Openldap
+        # LDAP services
         if self.installLdap:
-            # FIXME Tested on ubuntu only
-            if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                self.run([service_path, 'restart', 'rsyslog.service'])
-                self.run([service_path, 'start', 'solserver.service'])
-            else:
-                # Below two lines are specifically for Ubuntu 14.04
-                if self.os_type == 'ubuntu':
-                    self.copyFile(self.rsyslogUbuntuInitFile, "/etc/init.d")
-                    self.removeFile("/etc/init/rsyslog.conf")
-                    rsyslogFn = os.path.split(self.rsyslogUbuntuInitFile)[-1]
-                    self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % rsyslogFn])
-
-                self.run([service_path, 'rsyslog', 'restart'])
-                self.run([service_path, 'solserver', 'start'])
+            if self.ldap_type is 'openldap':
+                if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                    self.run([service_path, 'restart', 'rsyslog.service'])
+                    self.run([service_path, 'start', 'solserver.service'])
+                else:
+                    # Below two lines are specifically for Ubuntu 14.04
+                    if self.os_type == 'ubuntu':
+                        self.copyFile(self.rsyslogUbuntuInitFile, "/etc/init.d")
+                        self.removeFile("/etc/init/rsyslog.conf")
+                        rsyslogFn = os.path.split(self.rsyslogUbuntuInitFile)[-1]
+                        self.run([self.cmd_chmod, "755", "/etc/init.d/%s" % rsyslogFn])
+    
+                    self.run([service_path, 'rsyslog', 'restart'])
+                    self.run([service_path, 'solserver', 'start'])
+            elif self.ldap_type is 'opendj':
+                if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
+                    self.run([service_path, 'start', 'opendj.service'])
+                else:
+                    self.run([service_path, 'opendj', 'start'])
 
         # Jetty services
         # Iterate through all components and start installed
@@ -2885,6 +2911,7 @@ class Setup(object):
         installObject.install_opendj()
 
         if self.ldap_type is 'opendj':
+            installOject.setup_opendj_service()
             installObject.configure_opendj()
             installOject.export_opendj_public_cert()
             installOject.index_opendj()
