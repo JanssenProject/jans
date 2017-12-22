@@ -2651,7 +2651,8 @@ class Setup(object):
             try:
                 self.copyFile(self.opendj_service_centos7, opendj_dest_folder)
                 self.run([service_path, 'daemon-reload'])
-                self.run([service_path, 'enable', 'opendj'])
+                self.run([service_path, 'enable', 'opendj.service'])
+                self.run([service_path, 'start', 'opendj.service'])
             except:
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
                 self.logIt(traceback.format_exc(), True)
@@ -2660,9 +2661,11 @@ class Setup(object):
         
         if self.os_type in ['centos', 'fedora', 'redhat']:
             self.run(["/sbin/chkconfig", 'opendj', "on"])
+            self.run([service_path, 'opendj', 'start'])
         elif self.os_type in ['ubuntu', 'debian']:
             self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
             self.run(["/usr/sbin/update-rc.d", 'opendj', 'enable'])
+            self.run([service_path, 'opendj', 'start'])
 
     def setup_init_scripts(self):
         if self.os_initdaemon == 'initd':
@@ -2745,11 +2748,6 @@ class Setup(object):
     
                     self.run([service_path, 'rsyslog', 'restart'])
                     self.run([service_path, 'solserver', 'start'])
-            elif self.ldap_type is 'opendj':
-                if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-                    self.run([service_path, 'start', 'opendj.service'])
-                else:
-                    self.run([service_path, 'opendj', 'start'])
 
         # Jetty services
         # Iterate through all components and start installed
