@@ -270,7 +270,7 @@ class Setup(object):
         self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
 
         self.ldapTrustStoreFn = None
-        self.encoded_openldapJksPass = None
+        self.encoded_ldapTrustStorePass = None
 
         self.opendj_cert_fn = '%s/opendj.crt' % self.certFolder
         self.opendj_p12_fn = '%s/opendj.pkcs12' % self.certFolder
@@ -1706,10 +1706,10 @@ class Setup(object):
                 self.ldap_site_binddn = self.opendj_ldap_binddn
 
                 self.ldapTrustStoreFn = self.opendj_p12_fn
-                self.encoded_openldapJksPass = self.encoded_opendj_p12_pass
+                self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
             elif self.ldap_type is 'openldap':
                 self.ldapTrustStoreFn = self.openldapP12Fn
-                self.encoded_openldapJksPass = self.encoded_openldapJksPass
+                self.encoded_ldapTrustStorePass = self.encoded_openldapJksPass
                 
 
         if self.installSaml:
