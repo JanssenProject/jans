@@ -187,20 +187,6 @@
 		"index": ["equality"],
 		"backend": ["userRoot"]
 	},
-
-	{
-		"attribute": "myCustomAttr1",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
-		"attribute": "myCustomAttr2",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
 	
 	{
 		"attribute": "member",
