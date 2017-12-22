@@ -37,7 +37,7 @@ def autogenerate():
     folders.
     """
     openldap_folder = os.path.join(os.path.dirname(localdir), 'static/openldap/')
-    opendj_folder = os.path.join(os.path.dirname(localdir), 'static/opendj/deprecated/')
+    opendj_folder = os.path.join(os.path.dirname(localdir), 'static/opendj/')
 
     fp = open(os.path.join(localdir, 'gluu_schema.json'), 'r')
     gluu_json = fp.read()
