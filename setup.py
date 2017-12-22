@@ -2582,7 +2582,7 @@ class Setup(object):
         self.logIt("Importing userRoot LDIF data")
         realInstallDir = os.path.realpath(self.outputFolder)
         for ldif_file_fn in self.ldif_files:
-            ldif_file_fullpath = "%s/%s" % (realInstallDir, os.path.split(ldif_file_fn)[-1])
+            ldif_file_fullpath = os.path.split(ldif_file_fn)
 
             importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.loadLdifCommand,
@@ -2606,31 +2606,6 @@ class Setup(object):
                       'ldap',
                       '-c',
                       '%s' % importCmd])
-
-        self.logIt("Importing site LDIF")
-        site_ldif_fn = "%s/cache-refresh/o_site.ldif" % self.staticFolder
-        
-        importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
-                              self.importLdifCommand,
-                              '--ldifFile',
-                              site_ldif_fn,
-                              '--backendID',
-                              'site',
-                              '--hostname',
-                              self.ldap_hostname,
-                              '--port',
-                              self.ldap_admin_port,
-                              '--bindDN',
-                              '"%s"' % self.ldap_binddn,
-                              '-j',
-                              self.ldapPassFn,
-                              '--trustAll']
-
-        importCmd = " ".join(importParams)
-        self.run(['/bin/su',
-                  'ldap',
-                  '-c',
-                  '%s' % importCmd])
 
     def index_opendj_backend(self, backend):
         index_command = 'create-backend-index'
