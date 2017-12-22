@@ -268,7 +268,13 @@ class Setup(object):
         self.shibJksFn = '%s/shibIDP.jks' % self.certFolder
         self.asimbaJksPass = None
         self.asimbaJksFn = '%s/asimbaIDP.jks' % self.certFolder
-        self.openDjCertFn = '%s/opendj.crt' % self.certFolder
+
+        self.ldapTrustStoreFn = None
+        self.encoded_openldapJksPass = None
+
+        self.opendj_cert_fn = '%s/opendj.crt' % self.certFolder
+        self.opendj_p12_fn = '%s/opendj.pkcs12' % self.certFolder
+        self.opendj_p12_pass = None
 
         self.ldap_type = None
         self.opendj_ldap_binddn = 'cn=directory manager'
@@ -321,6 +327,7 @@ class Setup(object):
         self.openldapTLSKey = '%s/openldap.key' % self.certFolder
         self.openldapJksPass = None
         self.openldapJksFn = '%s/openldap.jks' % self.certFolder
+        self.openldapP12Fn = '%s/openldap.pkcs12' % self.certFolder
 
         self.passportSpKeyPass = None
         self.passportSpTLSCACert = '%s/passport-sp.pem' % self.certFolder
@@ -676,6 +683,8 @@ class Setup(object):
         if not self.openldapKeyPass:
             self.openldapKeyPass = self.getPW()
             self.openldapJksPass = self.getPW()
+        if not self.opendj_p12_pass:
+            self.opendj_p12_pass = self.getPW()
         if not self.passportSpKeyPass:
             self.passportSpKeyPass = self.getPW()
             self.passportSpJksPass = self.getPW()
@@ -1293,6 +1302,7 @@ class Setup(object):
             self.encoded_shib_jks_pw = self.obscure(self.shibJksPass)
             self.encoded_ox_ldap_pw = self.obscure(self.ldapPass)
             self.encoded_openldapJksPass = self.obscure(self.openldapJksPass)
+            self.encoded_opendj_p12_pass = self.obscure(self.opendj_p12_pass)
             self.oxauthClient_pw = self.getPW()
             self.oxauthClient_encoded_pw = self.obscure(self.oxauthClient_pw)
         except:
@@ -1690,9 +1700,17 @@ class Setup(object):
         self.ldap_binddn = self.openldapRootUser
         self.ldap_site_binddn = self.openldapSiteUser
 
-        if self.installLdap and self.ldap_type is 'opendj':
-            self.ldap_binddn = self.opendj_ldap_binddn
-            self.ldap_site_binddn = self.opendj_ldap_binddn
+        if self.installLdap:
+            if self.ldap_type is 'opendj':
+                self.ldap_binddn = self.opendj_ldap_binddn
+                self.ldap_site_binddn = self.opendj_ldap_binddn
+
+                self.ldapTrustStoreFn = self.opendj_p12_fn
+                self.encoded_openldapJksPass = self.encoded_opendj_p12_pass
+            elif self.ldap_type is 'openldap':
+                self.ldapTrustStoreFn = self.openldapP12Fn
+                self.encoded_openldapJksPass = self.encoded_openldapJksPass
+                
 
         if self.installSaml:
             self.oxTrustConfigGeneration = "true"
@@ -2525,16 +2543,35 @@ class Setup(object):
                   '-storepass',
                   openDjPin,
                   '-file',
-                  self.openDjCertFn,
+                  self.opendj_cert_fn,
                   '-alias',
                   'server-cert',
                   '-rfc'])
+
+        # Convert OpenDJ certificate to PKCS12
+        self.logIt("Converting OpenDJ truststore")
+        self.run([self.cmd_keytool,
+                  '-importkeystore',
+                  '-srckeystore',
+                  openDjTruststoreFn,
+                  '-srcstoretype',
+                  'jks',
+                  '-srcstorepass',
+                  openDjPin,
+                  '-destkeystore',
+                  self.opendj_p12_fn,
+                  '-deststoretype',
+                  'pkcs12',
+                  '-deststorepass',
+                  self.opendj_p12_pass,
+                  '-srcalias',
+                  'server-cert'])
 
         # Import OpenDJ certificate into java truststore
         self.logIt("Import OpenDJ certificate")
 
         self.run([self.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_opendj" % self.hostname, \
-                  "-file", self.openDjCertFn, "-keystore", self.defaultTrustStoreFN, \
+                  "-file", self.opendj_cert_fn, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
     def import_ldif_opendj(self):
@@ -3212,9 +3249,9 @@ if __name__ == '__main__':
             installObject.make_salt()
             installObject.make_oxauth_salt()
             installObject.copy_scripts()
-            installObject.install_gluu_base()
             installObject.encode_passwords()
             installObject.encode_test_passwords()
+            installObject.install_gluu_base()
             installObject.prepare_base64_extension_scripts()
             installObject.render_templates()
             installObject.generate_crypto()
