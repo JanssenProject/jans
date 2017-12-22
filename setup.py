@@ -1410,12 +1410,13 @@ class Setup(object):
                               '%s/asimba.key' % self.certFolder,
                               '%s/asimba.crt' % self.certFolder,
                               'jetty')
-            self.gen_keystore('openldap',
-                              self.openldapJksFn,
-                              self.openldapJksPass,
-                              '%s/openldap.key' % self.certFolder,
-                              '%s/openldap.crt' % self.certFolder,
-                              'jetty')
+            if self.installLdap and self.ldap_type is 'openldap':
+                self.gen_keystore('openldap',
+                                  self.openldapJksFn,
+                                  self.openldapJksPass,
+                                  '%s/openldap.key' % self.certFolder,
+                                  '%s/openldap.crt' % self.certFolder,
+                                  'jetty')
             # samp.pem from asimba.crt for asimba scrypt input
             self.run([self.opensslCommand,
                       'x509',
@@ -2356,7 +2357,7 @@ class Setup(object):
         try:
             plain_file = open(fn)
             plain_file_text = plain_file.read()
-            plain_file_b64encoded_text = plain_file_text.encode('base64').strip()
+            plain_file_b64encoded_text = base64.b64encode(plain_file_text).strip()
             plain_file.close()
         except:
             self.logIt("Error loading file", True)
@@ -2579,13 +2580,10 @@ class Setup(object):
 
     def import_ldif_opendj(self):
         self.logIt("Importing userRoot LDIF data")
-        ldifFolder = '%s/ldif' % self.ldapBaseFolder
+        realInstallDir = os.path.realpath(self.outputFolder)
         for ldif_file_fn in self.ldif_files:
-            ldifFolder = '%s/ldif' % self.ldapBaseFolder
-            self.copyFile(ldif_file_fn, ldifFolder)
-            ldif_file_fullpath = "%s/ldif/%s" % (self.ldapBaseFolder,
-                                                 os.path.split(ldif_file_fn)[-1])
-            self.run([self.cmd_chown, 'ldap:ldap', ldif_file_fullpath])
+            ldif_file_fullpath = "%s/%s" % (realInstallDir, os.path.split(ldif_file_fn)[-1])
+
             importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.loadLdifCommand,
                                   '--hostname',
@@ -2610,9 +2608,7 @@ class Setup(object):
                       '%s' % importCmd])
 
         self.logIt("Importing site LDIF")
-        self.copyFile("%s/static/cache-refresh/o_site.ldif" % self.install_dir, ldifFolder)
-        site_ldif_fn = "%s/o_site.ldif" % ldifFolder
-        self.run([self.cmd_chown, 'ldap:ldap', site_ldif_fn])
+        site_ldif_fn = "%s/cache-refresh/o_site.ldif" % self.staticFolder
         
         importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                               self.importLdifCommand,
