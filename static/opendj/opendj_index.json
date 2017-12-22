@@ -1,0 +1,219 @@
+[
+	{
+		"attribute": "displayName",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
+	},
+
+	{
+		"attribute": "description",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
+	},
+
+	{
+		"attribute": "inum",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
+	},
+
+	{
+		"attribute": "iname",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
+	},
+
+	{
+		"attribute": "uniqueIdentifier",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxID",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAuthClientId",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAuthGrantId",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAuthAuthorizationCode",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAuthTokenCode",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+    	{
+        	"attribute": "oxSectorIdentifier",
+	        "type": "string",
+        	"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "gluuStatus",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
+	},
+
+	{
+		"attribute": "oxState",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxScriptType",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot", "site"]
+	},
+
+	{
+		"attribute": "oxAuthExpiration",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxLastAccessTime",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "lastModifiedTime",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxApplication",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxRequestId",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "creationDate",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxStartDate",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxEndDate",
+		"type": "date",
+		"index": ["ordering"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxApplicationType",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxMetricType",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxDeviceHashCode",
+		"type": "integer",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxAuthSessionDn",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "oxExternalUid",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "myCustomAttr1",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "myCustomAttr2",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+	
+	{
+		"attribute": "member",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["site"]
+	},
+	
+	{
+		"attribute": "uniqueMember",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["site"]
+	}
+
+]
