@@ -1684,6 +1684,10 @@ class Setup(object):
         self.ldap_binddn = self.openldapRootUser
         self.ldap_site_binddn = self.openldapSiteUser
 
+        if self.installLdap and self.ldap_type is 'opendj':
+            self.ldap_binddn = self.opendj_ldap_binddn
+            self.ldap_site_binddn = self.opendj_ldap_binddn
+
         if self.installSaml:
             self.oxTrustConfigGeneration = "true"
         else:
@@ -2121,10 +2125,8 @@ class Setup(object):
 
             if option == 1:
                 self.ldap_type = 'openldap'
-                self.ldap_binddn = self.openldapRootUser
             elif option == 2:
                 self.ldap_type = 'opendj'
-                self.ldap_binddn = self.opendj_ldap_binddn
         else:
             self.installLdap = False
 
