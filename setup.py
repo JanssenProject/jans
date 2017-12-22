@@ -2582,7 +2582,7 @@ class Setup(object):
         self.logIt("Importing userRoot LDIF data")
         realInstallDir = os.path.realpath(self.outputFolder)
         for ldif_file_fn in self.ldif_files:
-            ldif_file_fullpath = os.path.split(ldif_file_fn)
+            ldif_file_fullpath = os.path.realpath(ldif_file_fn)
 
             importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
                                   self.loadLdifCommand,
