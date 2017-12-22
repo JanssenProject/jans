@@ -293,6 +293,7 @@ class Setup(object):
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
 
+        self.openDjIndexJson = '%s/static/opendj/index.json' % self.install_dir
         self.openDjSchemaFolder = "%s/config/schema" % self.ldapBaseFolder
         self.openDjschemaFiles = ["%s/static/opendj/96-eduperson.ldif" % self.install_dir,
                             "%s/static/opendj/101-ox.ldif" % self.install_dir,
@@ -2602,7 +2603,7 @@ class Setup(object):
             self.logIt("Running LDAP index creation commands for " + backend + " backend")
             # This json file contains a mapping of the required indexes.
             # [ { "attribute": "inum", "type": "string", "index": ["equality"] }, ...}
-            index_json = self.load_json(self.indexJson)
+            index_json = self.load_json(self.openDjIndexJson)
             if index_json:
                 for attrDict in index_json:
                     attr_name = attrDict['attribute']
