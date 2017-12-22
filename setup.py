@@ -2905,25 +2905,25 @@ class Setup(object):
     def install_ldap_server(self):
         self.logIt("Running OpenDJ Setup")
 
-        installObject.extractOpenDJ()
-        installObject.opendj_version = installObject.determineOpenDJVersion()
-        installObject.createLdapPw()
-        installObject.install_opendj()
+        self.extractOpenDJ()
+        self.opendj_version = self.determineOpenDJVersion()
+        self.createLdapPw()
+        self.install_opendj()
 
         if self.ldap_type is 'opendj':
-            installOject.setup_opendj_service()
-            installObject.configure_opendj()
-            installOject.export_opendj_public_cert()
-            installOject.index_opendj()
-            installOject.import_ldif_opendj()
+            self.setup_opendj_service()
+            self.configure_opendj()
+            self.export_opendj_public_cert()
+            self.index_opendj()
+            self.import_ldif_opendj()
 
-        installObject.deleteLdapPw()
+        self.deleteLdapPw()
 
         if self.ldap_type is 'openldap':
             self.logIt("Running OpenLDAP Setup")
-            installObject.install_openldap()
-            installObject.configure_openldap()
-            installObject.import_ldif_openldap()
+            self.install_openldap()
+            self.configure_openldap()
+            self.import_ldif_openldap()
 
     def calculate_aplications_memory(self, application_max_ram, jetty_app_configuration, installedComponents):
         self.logIt("Calculating memory setting for applications")
