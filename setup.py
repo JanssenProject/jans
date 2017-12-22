@@ -294,9 +294,9 @@ class Setup(object):
                                 '%s/static/scripts/testBind.py' % self.install_dir]
 
         self.openDjSchemaFolder = "%s/config/schema" % self.ldapBaseFolder
-        self.openDjschemaFiles = ["%s/static/%s/96-eduperson.ldif" % (self.install_dir, self.ldap_type),
-                            "%s/static/%s/101-ox.ldif" % (self.install_dir, self.ldap_type),
-                            "%s/static/%s/77-customAttributes.ldif" % (self.install_dir, self.ldap_type)]
+        self.openDjschemaFiles = ["%s/static/opendj/96-eduperson.ldif" % self.install_dir,
+                            "%s/static/opendj/101-ox.ldif" % self.install_dir,
+                            "%s/static/opendj/77-customAttributes.ldif" % self.install_dir]
 
         self.opendj_init_file = '%s/static/opendj/opendj' % self.install_dir
         self.opendj_service_centos7 = '%s/static/opendj/systemd/opendj.service' % self.install_dir
