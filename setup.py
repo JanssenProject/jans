@@ -2656,7 +2656,7 @@ class Setup(object):
                 self.logIt("Error copying script file %s to %s" % (opendj_script_name, opendj_dest_folder))
                 self.logIt(traceback.format_exc(), True)
         else:
-            self.run([ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
+            self.run([self.ldapDsCreateRcCommand, "--outputFile", "/etc/init.d/opendj", "--userName",  "ldap"])
         
         if self.os_type in ['centos', 'fedora', 'redhat']:
             self.run(["/sbin/chkconfig", 'opendj', "on"])
