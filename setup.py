@@ -1392,7 +1392,10 @@ class Setup(object):
             self.gen_cert('idp-encryption', self.shibJksPass, 'jetty')
             self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
             self.gen_cert('asimba', self.asimbaJksPass, 'jetty')
-            self.gen_cert('openldap', self.openldapKeyPass, 'ldap', self.ldap_hostname)
+
+            if self.installLdap and self.ldap_type is 'openldap':
+                self.gen_cert('openldap', self.openldapKeyPass, 'ldap', self.ldap_hostname)
+
             self.gen_cert('passport-sp', self.passportSpKeyPass, 'ldap', self.ldap_hostname)
             # Shibboleth IDP and Asimba will be added soon...
             self.gen_keystore('shibIDP',
