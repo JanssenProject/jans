@@ -293,6 +293,11 @@ class Setup(object):
         self.gluuScriptFiles = ['%s/static/scripts/logmanager.sh' % self.install_dir,
                                 '%s/static/scripts/testBind.py' % self.install_dir]
 
+        self.openDjSchemaFolder = "%s/config/schema" % self.ldapBaseFolder
+        self.openDjschemaFiles = ["%s/static/%s/96-eduperson.ldif" % (self.install_dir, self.ldap_type),
+                            "%s/static/%s/101-ox.ldif" % (self.install_dir, self.ldap_type),
+                            "%s/static/%s/77-customAttributes.ldif" % (self.install_dir, self.ldap_type)]
+
         self.opendj_init_file = '%s/static/opendj/opendj' % self.install_dir
         self.opendj_service_centos7 = '%s/static/opendj/systemd/opendj.service' % self.install_dir
 
@@ -2462,7 +2467,7 @@ class Setup(object):
             self.logIt(traceback.format_exc(), True)
 
     def configure_opendj(self):
-        self.logIt("Configuring OpneDJ")
+        self.logIt("Configuring OpenDJ")
 
         opendj_prop_name = 'global-aci:\'(targetattr!="userPassword||authPassword||debugsearchindex||changes||changeNumber||changeType||changeTime||targetDN||newRDN||newSuperior||deleteOldRDN")(version 3.0; acl "Anonymous read access"; allow (read,search,compare) userdn="ldap:///anyone";)\''
         config_changes = [['set-global-configuration-prop', '--set', 'single-structural-objectclass-behavior:accept'],
@@ -2643,6 +2648,14 @@ class Setup(object):
     def index_opendj(self):
         self.index_opendj_backend('userRoot')
         self.index_opendj_backend('site')
+
+    def prepare_opendj_schema(self):
+        self.logIt("Copying OpenDJ schema")
+        for schemaFile in self.openDjschemaFiles:
+            self.copyFile(schemaFile, self.openDjSchemaFolder)
+
+        self.run([self.cmd_chmod, '-R', 'a+rX', self.ldapBaseFolder])
+        self.run([self.cmd_chown, '-R', 'ldap:ldap', self.ldapBaseFolder])
 
     def setup_opendj_service(self):
         service_path = self.detect_service_path()
@@ -2911,6 +2924,7 @@ class Setup(object):
         self.install_opendj()
 
         if self.ldap_type is 'opendj':
+            self.prepare_opendj_schema()
             self.setup_opendj_service()
             self.configure_opendj()
             self.export_opendj_public_cert()
