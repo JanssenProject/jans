@@ -2,15 +2,15 @@
 	{
 		"attribute": "displayName",
 		"type": "string",
-		"index": ["equality", "substring"],
-		"backend": ["userRoot", "site"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
 		"attribute": "description",
 		"type": "string",
-		"index": ["equality", "substring"],
-		"backend": ["userRoot", "site"]
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
