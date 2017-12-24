@@ -2,15 +2,36 @@
 	{
 		"attribute": "displayName",
 		"type": "string",
-		"index": ["equality"],
+		"index": ["equality", "substring"],
 		"backend": ["userRoot", "site"]
 	},
 
 	{
 		"attribute": "description",
 		"type": "string",
-		"index": ["equality"],
+		"index": ["equality", "substring"],
 		"backend": ["userRoot", "site"]
+	},
+
+	{
+		"attribute": "owner",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+
+	{
+		"attribute": "member",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
+	},
+	
+	{
+		"attribute": "uniqueMember",
+		"type": "string",
+		"index": ["equality"],
+		"backend": ["userRoot"]
 	},
 
 	{
@@ -35,7 +56,7 @@
 	},
 
 	{
-		"attribute": "oxID",
+		"attribute": "oxId",
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
@@ -69,10 +90,10 @@
 		"backend": ["userRoot"]
 	},
 
-    	{
-        	"attribute": "oxSectorIdentifier",
-	        "type": "string",
-        	"index": ["equality"],
+    {
+    	"attribute": "oxSectorIdentifier",
+        "type": "string",
+    	"index": ["equality"],
 		"backend": ["userRoot"]
 	},
 
@@ -186,20 +207,6 @@
 		"type": "string",
 		"index": ["equality"],
 		"backend": ["userRoot"]
-	},
-	
-	{
-		"attribute": "member",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["site"]
-	},
-	
-	{
-		"attribute": "uniqueMember",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["site"]
 	}
 
 ]
