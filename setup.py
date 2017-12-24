@@ -2578,6 +2578,44 @@ class Setup(object):
                   "-file", self.opendj_cert_fn, "-keystore", self.defaultTrustStoreFN, \
                   "-storepass", "changeit", "-noprompt"])
 
+    def import_ldif_template_opendj(self, ldif):
+        self.logIt("Importing LDIF file '%s' into OpenDJ" % ldif)
+        realInstallDir = os.path.realpath(self.outputFolder)
+
+        ldif_file_fullpath = os.path.realpath(ldif)
+
+        importParams = ['cd %s/bin ; ' % self.ldapBaseFolder,
+                              self.loadLdifCommand,
+                              '--hostname',
+                              self.ldap_hostname,
+                              '--port',
+                              self.ldap_admin_port,
+                              '--bindDN',
+                              '"%s"' % self.ldap_binddn,
+                              '-j',
+                              self.ldapPassFn,
+                              '--trustAll']
+        importParams.append('--useSSL')
+        importParams.append('--defaultAdd')
+        importParams.append('--continueOnError')
+        importParams.append('--filename')
+        importParams.append(ldif_file_fullpath)
+
+        importCmd = " ".join(importParams)
+        
+        # Check if there is no .pw file
+        createPwFile = not os.path.exists(self.ldapPassFn)
+        if createPwFile:
+            self.createLdapPw()
+        
+        self.run(['/bin/su',
+                  'ldap',
+                  '-c',
+                  '%s' % importCmd])
+
+        if createPwFile:
+            self.deleteLdapPw()
+
     def import_ldif_opendj(self):
         self.logIt("Importing userRoot LDIF data")
         realInstallDir = os.path.realpath(self.outputFolder)
@@ -2894,7 +2932,7 @@ class Setup(object):
         self.copyFile(self.openldapSyslogConf, '/etc/rsyslog.d/')
         self.copyFile(self.openldapLogrotate, '/etc/logrotate.d/')
 
-    def import_ldif_template(self, ldif):
+    def import_ldif_template_openldap(self, ldif):
         self.logIt("Importing LDIF file '%s' into OpenLDAP" % ldif)
         cmd = os.path.join(self.openldapBinFolder, 'slapadd')
         config = os.path.join(self.openldapConfFolder, 'slapd.conf')
