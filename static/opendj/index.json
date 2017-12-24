@@ -21,20 +21,6 @@
 	},
 
 	{
-		"attribute": "member",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-	
-	{
-		"attribute": "uniqueMember",
-		"type": "string",
-		"index": ["equality"],
-		"backend": ["userRoot"]
-	},
-
-	{
 		"attribute": "inum",
 		"type": "string",
 		"index": ["equality"],
