@@ -2670,7 +2670,7 @@ class Setup(object):
                                                      '--type',
                                                      'generic',
                                                      '--index-name',
-                                                     attr_name,
+                                                     '%s_%s' % (attr_name, index_type),
                                                      '--set',
                                                      'index-type:%s' % index_type,
                                                      '--set',
