@@ -81,6 +81,11 @@
             <class name="org.xdi.oxd.client.RpGetRptTest"/>
         </classes>
     </test>
+    <test name="RP - Get Claims-Gathering Url" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.UmaGetClaimsGatheringUrlTest"/>
+        </classes>
+    </test>
 
     <!-- Custom -->
     <test name="Setup client" enabled="true">
