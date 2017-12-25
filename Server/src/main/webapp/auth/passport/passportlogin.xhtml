@@ -354,13 +354,16 @@
                 $.get(APIURL + "/passport/saml_config", function (data) {
 
                     var idp_provider = JSON.parse(data);
-                    for (var y in idp_provider) {
+                    for (var provider in idp_provider) {
 
-                        var logo_img = idp_provider[y].logo_img;
-                        $("#provider_panel").css("visibility", "visible");
-                        var dydiv = '<div class="row"><div class="col-xs-3 col-sm-1 col-md-2"><img alt="tumblr" style="cursor: pointer" class="img-responsive" onclick="idp_redirect(\'' + y + '\');"  src="' + logo_img + '"></img></div><div class="col-xs-9 col-sm-11 col-md-10"><h4>' + y + '</h4></div><div class="clearfix"></div><hr/> </div>';
-                        $('#add_here').append(dydiv);
+                        if(idp_provider[provider].enable == "true"){
 
+                            var logo_img = idp_provider[provider].logo_img;
+                            $("#provider_panel").css("visibility", "visible");
+                            var dydiv = '<div class="row"><div class="col-xs-3 col-sm-1 col-md-2"><img alt="'+provider+'" style="cursor: pointer" class="img-responsive" onclick="idp_redirect(\'' + provider + '\');"  src="' + logo_img + '"></img></div><div class="col-xs-9 col-sm-11 col-md-10"><h4>' + provider + '</h4></div><div class="clearfix"></div><hr/> </div>';
+                            $('#add_here').append(dydiv);
+
+                        }
                     }
                 });
 
