@@ -6,6 +6,7 @@
     "authnRequestBinding": "HTTP-POST",
     "additionalAuthorizeParams": "{ providerId: 'test' }",
     "logo_img":"{Provider Logo url}",
+    "enable":"false",
     "cert":"your_idp_public_certicate_in_single_line",
     "skipRequestCompression": "true",
     "reverseMapping": {
@@ -24,6 +25,7 @@
     "issuer": "urn:test",
     "identifierFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:basic",
     "logo_img":"{Provider Logo url}",
+    "enable":"false",
     "cert":"your_idp_public_certicate_in_single_line",
     "reverseMapping": {
       "email" : "email",
