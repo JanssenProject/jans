@@ -59,24 +59,28 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         elif (step == 2):
             print "Basic (with password update). Authenticate for step 2"
+            user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                print "Basic (with password update). Authenticate for step 2. Failed to determine user name"
+                return False
 
-            update_button = ServerUtil.getFirstValue(requestParameters, "loginForm:updateButton")
+            user_name = user.getUserId()
+            find_user_by_uid = userService.getUser(user_name)
+
+            update_button = requestParameters.get("loginForm:updateButton")
+
             if ArrayHelper.isEmpty(update_button):
                 return True
 
-            new_password = ServerUtil.getFirstValue(requestParameters, "new_password")
-            if ArrayHelper.isEmpty(new_password):
+            new_password_array = requestParameters.get("new_password")
+            if ArrayHelper.isEmpty(new_password_array) or StringHelper.isEmpty(new_password_array[0]):
                 print "Basic (with password update). Authenticate for step 2. New password is empty"
                 return False
 
-            print "Basic (with password update). Authenticate for step 2. Attempting to set new user '" + user_name + "' password"
-
-            find_user_by_uid = userService.getUser(user_name)
-            if (find_user_by_uid == None):
-                print "Basic (with password update). Authenticate for step 2. Failed to find user"
-                return False
-            
+            new_password = new_password_array[0]
             find_user_by_uid.setAttribute("userPassword", new_password)
+            print "Basic (with password update). Authenticate for step 2. Attempting to set new user '%s' password" % user_name
+
             userService.updateUser(find_user_by_uid)
             print "Basic (with password update). Authenticate for step 2. Password updated successfully"
 
