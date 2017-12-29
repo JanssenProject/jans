@@ -1,6 +1,8 @@
 package org.xdi.oxd.client;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.ArrayUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
@@ -92,5 +94,12 @@ public class GetTokensByCodeTest {
         final Command command = new Command(CommandType.GET_AUTHORIZATION_CODE).setParamsObject(params);
         return client.send(command).dataAsResponse(GetAuthorizationCodeResponse.class).getCode();
     }
+
+    public static void main(String[] args) {
+        long[] ids = new long[] {123};
+
+        System.out.println(Joiner.on(",").join(ArrayUtils.toObject(ids)));
+    }
+
 
 }
