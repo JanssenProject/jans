@@ -1105,6 +1105,7 @@ gluuAttributeViewType: admin
 gluuStatus: active
 inum: %(inumOrg)s!0005!6049
 urn: urn:gluu:dir:attribute-def:role
+oxMultivaluedAttribute: true
 
 dn: inum=%(inumOrg)s!0005!CACA,ou=attributes,o=%(inumOrg)s,o=gluu
 objectClass: top
