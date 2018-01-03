@@ -8,7 +8,7 @@
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
-OXD_HTTPS_EXTENSION_VERSION="3.1.2-SNAPSHOT"
+OXD_HTTPS_EXTENSION_VERSION="3.1.2.Final"
 SERVICE_NAME=oxd-https-extension
 PID_PATH_NAME=/var/run/oxd-https-extension.pid
 LIB=/opt/oxd-https-extension/lib/oxd-https-extension-${OXD_HTTPS_EXTENSION_VERSION}.jar
