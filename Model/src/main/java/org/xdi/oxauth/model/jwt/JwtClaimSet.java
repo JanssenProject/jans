@@ -20,7 +20,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version October 26, 2017
+ * @version January 3, 2018
  */
 public abstract class JwtClaimSet {
 
@@ -237,6 +237,10 @@ public abstract class JwtClaimSet {
 
     public void setClaim(String key, JwtSubClaimObject subClaimObject) {
         claims.put(key, subClaimObject);
+    }
+
+    public void setClaim(String key, JSONObject values) {
+        claims.put(key, values);
     }
 
     public void removeClaim(String key) {
