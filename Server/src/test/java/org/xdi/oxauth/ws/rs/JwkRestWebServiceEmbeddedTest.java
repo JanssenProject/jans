@@ -101,7 +101,7 @@ public class JwkRestWebServiceEmbeddedTest extends BaseTest {
     }
 
     @Test
-    public void setClaimTestIntString() {
+    public void setClaimTestStringList() {
         try {
             JwtClaims claims = new JwtClaims();
             claims.setClaim("test_claim", Arrays.asList("qwe", "asd", "zxc"));
