@@ -22,6 +22,7 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.Arrays;
 
 import static org.testng.Assert.*;
 import static org.xdi.oxauth.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
@@ -64,7 +65,7 @@ public class JwkRestWebServiceEmbeddedTest extends BaseTest {
     }
 
     @Test
-    public void setClaimTest() {
+    public void setClaimTestJsonObj() {
         try {
             String stringJson = StringUtil.fromBytes(Base64Util.base64urldecode("eyJzYWx0IjoibWFjbmgiLCJwcm92aWRlciI6ImlkcDEifQ=="));
             JSONObject jobj = new JSONObject(stringJson);
@@ -72,6 +73,39 @@ public class JwkRestWebServiceEmbeddedTest extends BaseTest {
             JwtClaims claims = new JwtClaims();
             claims.setClaim("test_claim", jobj);
             assertEquals(jobj, claims.toJsonObject());
+        } catch (Exception ex) {
+            fail(ex.getMessage());
+        }
+    }
+
+    @Test
+    public void setClaimTestInt() {
+        try {
+            JwtClaims claims = new JwtClaims();
+            claims.setClaim("test_claim", 123);
+            assertEquals("{\"test_claim\":123}", claims.toJsonObject());
+        } catch (Exception ex) {
+            fail(ex.getMessage());
+        }
+    }
+
+    @Test
+    public void setClaimTestIntList() {
+        try {
+            JwtClaims claims = new JwtClaims();
+            claims.setClaim("test_claim", Arrays.asList(123, 456, 789));
+            assertEquals("{\"test_claim\":[123,456,789]}", claims.toJsonObject());
+        } catch (Exception ex) {
+            fail(ex.getMessage());
+        }
+    }
+
+    @Test
+    public void setClaimTestIntString() {
+        try {
+            JwtClaims claims = new JwtClaims();
+            claims.setClaim("test_claim", Arrays.asList("qwe", "asd", "zxc"));
+            assertEquals("{\"test_claim\":[\"qwe\",\"asd\",\"zxc\"]}", claims.toJsonObject());
         } catch (Exception ex) {
             fail(ex.getMessage());
         }
