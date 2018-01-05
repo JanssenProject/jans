@@ -308,8 +308,8 @@ class Setup(object):
         self.opendj_init_file = '%s/static/opendj/opendj' % self.install_dir
         self.opendj_service_centos7 = '%s/static/opendj/systemd/opendj.service' % self.install_dir
 
-        self.redhat_services = ['memcached', 'httpd', 'rsyslog']
-        self.debian_services = ['memcached', 'apache2', 'rsyslog']
+        self.redhat_services = ['httpd', 'rsyslog']
+        self.debian_services = ['apache2', 'rsyslog']
 
         self.apache_start_script = '/etc/init.d/httpd'
 
@@ -2790,12 +2790,6 @@ class Setup(object):
             self.run([service_path, 'start', apache_service_name])
         else:
             self.run([service_path, apache_service_name, 'start'])
-
-        # Memcached
-        if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
-            self.run([service_path, 'start', 'memcached.service'])
-        else:
-            self.run([service_path, 'memcached', 'start'])
 
         # LDAP services
         if self.installLdap:
