@@ -68,7 +68,7 @@ gluuStatus: active
 displayName: Test Aaaa 1111
 oxTrustExternalId: 11000
 birthdate: 20140101000000Z
-oxTrustEmail: {"value":"aaaa1111@test.email","type":"work","primary":"false"}
+oxTrustEmail: {"value":"aaaa1111@test.email","type":"work","primary":false}
 
 dn: inum=%(inumOrg)s!0000!XXXX.AAAA.2222,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
@@ -83,7 +83,7 @@ gluuStatus: active
 displayName: Test Aaaa 2222
 oxTrustExternalId: 12000
 birthdate: 20140210000000Z
-oxTrustAddresses: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":"false"}
+oxTrustAddresses: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":false}
 
 dn: inum=%(inumOrg)s!0000!XXXX.AAAA.3333,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
@@ -140,7 +140,7 @@ gluuStatus: active
 displayName: Test Bbbb 1111
 oxTrustExternalId: 21000
 birthdate: 20150108000000Z
-oxTrustEmail: {"value":"bbbb1111@test.email","type":"home","primary":"true"}
+oxTrustEmail: {"value":"bbbb1111@test.email","type":"home","primary":true}
 
 dn: inum=%(inumOrg)s!0000!XXXX.BBBB.2222,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
@@ -155,7 +155,7 @@ gluuStatus: active
 displayName: Test Bbbb 2222
 oxTrustExternalId: 22000
 birthdate: 20150214000000Z
-oxTrustAddresses: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":"true"}
+oxTrustAddresses: {"type":"home","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 
 dn: inum=%(inumOrg)s!0000!XXXX.BBBB.3333,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
@@ -212,7 +212,7 @@ gluuStatus: active
 displayName: Test Cccc 1111
 oxTrustExternalId: 31000
 birthdate: 20160125000000Z
-oxTrustEmail: {"value":"cccc1111@test.email","type":"work","primary":"true"}
+oxTrustEmail: {"value":"cccc1111@test.email","type":"work","primary":true}
 
 dn: inum=%(inumOrg)s!0000!XXXX.CCCC.2222,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
@@ -227,7 +227,7 @@ gluuStatus: active
 displayName: Test Cccc 2222
 oxTrustExternalId: 32000
 birthdate: 20160119000000Z
-oxTrustAddresses: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":"true"}
+oxTrustAddresses: {"type":"work","streetAddress":"621 East 6th Street Suite 200","locality":"Austin","region":"TX","postalCode":"78701","country":"US","formatted":"621 East 6th Street Suite 200  Austin, TX 78701 US","primary":true}
 
 dn: inum=%(inumOrg)s!0000!XXXX.CCCC.3333,ou=people,o=%(inumOrg)s,o=gluu
 objectClass: top
