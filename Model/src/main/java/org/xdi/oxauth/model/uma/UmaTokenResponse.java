@@ -8,6 +8,7 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author yuriyz on 06/04/2017.
@@ -34,6 +35,10 @@ public class UmaTokenResponse implements Serializable {
     @JsonProperty(value = "upgraded")
     @XmlElement(name = "upgraded")
     private Boolean upgraded =false;
+
+    @JsonProperty(value = "expiration_time")
+    @XmlElement(name = "expiration_time")
+    private Date expirationTime;
 
     public String getAccessToken() {
         return accessToken;
@@ -67,13 +72,22 @@ public class UmaTokenResponse implements Serializable {
         this.upgraded = upgraded;
     }
 
-    @Override
+    public final Date getExpirationTime() {
+		return expirationTime;
+	}
+
+	public final void setExpirationTime(Date expirationTime) {
+		this.expirationTime = expirationTime;
+	}
+
+	@Override
     public String toString() {
         return "UmaTokenResponse{" +
                 "accessToken='" + accessToken + '\'' +
                 ", tokenType='" + tokenType + '\'' +
                 ", pct='" + pct + '\'' +
                 ", upgraded=" + upgraded +
+                ", expirationTime=" + expirationTime +
                 '}';
     }
 }
