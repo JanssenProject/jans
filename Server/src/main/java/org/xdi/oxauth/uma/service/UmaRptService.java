@@ -199,7 +199,7 @@ public class UmaRptService {
     public UmaRPT createRPT(String clientId) {
         try {
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, appConfiguration.getAccessTokenLifetime());
+            calendar.add(Calendar.SECOND, appConfiguration.getUmaRptLifetime());
             Date expirationDate = calendar.getTime();
 
             String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
