@@ -120,7 +120,6 @@ public class UmaTokenService {
 
             UmaTokenResponse response = new UmaTokenResponse();
             response.setAccessToken(rpt.getCode());
-            response.setExpirationTime(rpt.getExpirationDate());
             response.setUpgraded(upgraded);
             response.setTokenType("Bearer");
             response.setPct(pct.getCode());
