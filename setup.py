@@ -1393,7 +1393,7 @@ class Setup(object):
             self.gen_cert('idp-signing', self.shibJksPass, 'jetty')
             self.gen_cert('asimba', self.asimbaJksPass, 'jetty')
 
-            if self.installLdap and self.ldap_type is 'openldap':
+            if self.installLdap and self.ldap_type == 'openldap':
                 self.gen_cert('openldap', self.openldapKeyPass, 'ldap', self.ldap_hostname)
 
             self.gen_cert('passport-sp', self.passportSpKeyPass, 'ldap', self.ldap_hostname)
@@ -1410,7 +1410,7 @@ class Setup(object):
                               '%s/asimba.key' % self.certFolder,
                               '%s/asimba.crt' % self.certFolder,
                               'jetty')
-            if self.installLdap and self.ldap_type is 'openldap':
+            if self.installLdap and self.ldap_type == 'openldap':
                 self.gen_keystore('openldap',
                                   self.openldapJksFn,
                                   self.openldapJksPass,
@@ -1705,13 +1705,13 @@ class Setup(object):
         self.ldap_site_binddn = self.openldapSiteUser
 
         if self.installLdap:
-            if self.ldap_type is 'opendj':
+            if self.ldap_type == 'opendj':
                 self.ldap_binddn = self.opendj_ldap_binddn
                 self.ldap_site_binddn = self.opendj_ldap_binddn
 
                 self.ldapTrustStoreFn = self.opendj_p12_fn
                 self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
-            elif self.ldap_type is 'openldap':
+            elif self.ldap_type == 'openldap':
                 self.ldapTrustStoreFn = self.openldapP12Fn
                 self.encoded_ldapTrustStorePass = self.encoded_openldapJksPass
                 
@@ -2037,7 +2037,7 @@ class Setup(object):
                 # self.run([self.cmd_mkdir, '-p', self.idp3WarFolder])
                 self.run([self.cmd_chown, '-R', 'jetty:jetty', self.idp3Folder])
 
-            if self.installLdap and self.ldap_type is 'openldap':
+            if self.installLdap and self.ldap_type == 'openldap':
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/main_db'])
                 self.run([self.cmd_mkdir, '-p', '/opt/gluu/data/site_db'])
 
@@ -2793,7 +2793,7 @@ class Setup(object):
 
         # LDAP services
         if self.installLdap:
-            if self.ldap_type is 'openldap':
+            if self.ldap_type == 'openldap':
                 if self.os_type in ['centos', 'redhat', 'fedora'] and self.os_initdaemon == 'systemd':
                     self.run([service_path, 'restart', 'rsyslog.service'])
                     self.run([service_path, 'start', 'solserver.service'])
@@ -2967,7 +2967,7 @@ class Setup(object):
         self.createLdapPw()
         self.install_opendj()
 
-        if self.ldap_type is 'opendj':
+        if self.ldap_type == 'opendj':
             self.prepare_opendj_schema()
             self.setup_opendj_service()
             self.configure_opendj()
@@ -2977,7 +2977,7 @@ class Setup(object):
 
         self.deleteLdapPw()
 
-        if self.ldap_type is 'openldap':
+        if self.ldap_type == 'openldap':
             self.logIt("Running OpenLDAP Setup")
             self.install_openldap()
             self.configure_openldap()
