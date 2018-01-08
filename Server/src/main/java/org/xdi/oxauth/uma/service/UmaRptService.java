@@ -198,12 +198,8 @@ public class UmaRptService {
 
     public UmaRPT createRPT(String clientId) {
         try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, appConfiguration.getUmaRptLifetime());
-            Date expirationDate = calendar.getTime();
-
             String code = UUID.randomUUID().toString() + "_" + INumGenerator.generate(8);
-            return new UmaRPT(code, new Date(), expirationDate, null, clientId);
+            return new UmaRPT(code, new Date(), rptExpirationDate(), null, clientId);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new RuntimeException("Failed to generate RPT, clientId: " + clientId, e);
