@@ -6,10 +6,30 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.ResultCode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.BeforeDestroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.gluu.site.ldap.LdapAuthConnectionProvider;
+import org.gluu.site.ldap.LdapConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.gluu.site.ldap.persistence.exception.LdapMappingException;
@@ -38,7 +58,6 @@ import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.cdi.util.CdiUtil;
 import org.xdi.service.custom.lib.CustomLibrariesLoader;
 import org.xdi.service.custom.script.CustomScriptManager;
-import org.xdi.service.ldap.LdapConnectionService;
 import org.xdi.service.timer.QuartzSchedulerManager;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
@@ -46,24 +65,6 @@ import org.xdi.util.StringHelper;
 import org.xdi.util.properties.FileConfiguration;
 import org.xdi.util.security.StringEncrypter;
 import org.xdi.util.security.StringEncrypter.EncryptionException;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.BeforeDestroyed;
-import javax.enterprise.context.Initialized;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -111,9 +112,6 @@ public class AppInitializer {
 	private Instance<EncryptionService> encryptionServiceInstance;
 
     @Inject
-    private ApplianceService applianceService;
-
-    @Inject
     private PythonService pythonService;
 
     @Inject
@@ -146,11 +144,11 @@ public class AppInitializer {
 	private FileConfiguration ldapConfig;
 	private List<GluuLdapConfiguration> ldapAuthConfigs;
 
-	private LdapConnectionService connectionProvider;
-	private LdapConnectionService bindConnectionProvider;
+	private LdapConnectionProvider connectionProvider;
+	private LdapConnectionProvider bindConnectionProvider;
 
-	private List<LdapConnectionService> authConnectionProviders;
-	private List<LdapConnectionService> authBindConnectionProviders;
+	private List<LdapConnectionProvider> authConnectionProviders;
+	private List<LdapConnectionProvider> authBindConnectionProviders;
 
     private AtomicBoolean isActive;
 	private long lastFinishedTime;
@@ -327,15 +325,14 @@ public class AppInitializer {
 
         Properties connectionProperties = (Properties) this.ldapConfig.getProperties();
         this.connectionProvider = createConnectionProvider(connectionProperties);
-        if (!ResultCode.SUCCESS.equals(this.connectionProvider.getCreationResultCode())) {
+        if (!this.connectionProvider.isCreated()) {
     		throw new ConfigurationException("Failed to create LDAP connection pool!");
         }
     	log.debug("Created connectionProvider: {}", connectionProvider);
 
-        Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
-        this.bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
-        if (!ResultCode.SUCCESS.equals(this.bindConnectionProvider.getCreationResultCode())) {
-    		throw new ConfigurationException("Failed to create LDAP connection pool!");
+        this.bindConnectionProvider = createBindConnectionProvider(connectionProperties);
+        if (!this.bindConnectionProvider.isCreated()) {
+    		throw new ConfigurationException("Failed to create LDAP bind connection pool!");
         }
         log.debug("Created bindConnectionProvider: {}", bindConnectionProvider);
     }
@@ -375,8 +372,8 @@ public class AppInitializer {
     	// Backup current references to objects to allow shutdown properly
     	List<GluuLdapConfiguration> oldLdapAuthConfigs = ldapAuthConfigInstance.get();
 
-    	List<LdapConnectionService> tmpAuthConnectionProviders = new ArrayList<LdapConnectionService>();
-    	List<LdapConnectionService> tmpAuthBindConnectionProviders = new ArrayList<LdapConnectionService>();
+    	List<LdapConnectionProvider> tmpAuthConnectionProviders = new ArrayList<LdapConnectionProvider>();
+    	List<LdapConnectionProvider> tmpAuthBindConnectionProviders = new ArrayList<LdapConnectionProvider>();
 
     	// Prepare connection providers per LDAP authentication configuration
         for (GluuLdapConfiguration ldapAuthConfig : newLdapAuthConfigs) {
@@ -404,10 +401,9 @@ public class AppInitializer {
 
     public LdapConnectionProviders createAuthConnectionProviders(GluuLdapConfiguration ldapAuthConfig) {
         Properties connectionProperties = prepareAuthConnectionProperties(ldapAuthConfig);
-        LdapConnectionService connectionProvider = createConnectionProvider(connectionProperties);
+        LdapConnectionProvider connectionProvider = createConnectionProvider(connectionProperties);
 
-        Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
-        LdapConnectionService bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties, connectionProperties);
+        LdapConnectionProvider bindConnectionProvider = createBindConnectionProvider(connectionProperties);
     	
         return new LdapConnectionProviders(connectionProvider, bindConnectionProvider);
     }
@@ -431,30 +427,18 @@ public class AppInitializer {
 		return properties;
 	}
 
-    private Properties prepareBindConnectionProperties(Properties connectionProperties) {
-		// TODO: Use own properties with prefix specified in variable 'bindConfigurationComponentName'
-		Properties bindProperties = (Properties) connectionProperties.clone();
-		bindProperties.remove("bindDN");
-		bindProperties.remove("bindPassword");
-
-		return bindProperties;
-	}
-
-	private LdapConnectionService createConnectionProvider(Properties connectionProperties) {
+	private LdapConnectionProvider createConnectionProvider(Properties connectionProperties) {
 		EncryptionService securityService = encryptionServiceInstance.get();
-		LdapConnectionService connectionProvider = new LdapConnectionService(securityService.decryptProperties(connectionProperties));
+		LdapConnectionProvider connectionProvider = new LdapConnectionProvider(securityService.decryptProperties(connectionProperties));
 
 		return connectionProvider;
 	}
 
-	private LdapConnectionService createBindConnectionProvider(Properties bindConnectionProperties, Properties connectionProperties) {
-		LdapConnectionService bindConnectionProvider = createConnectionProvider(bindConnectionProperties);
-		if (ResultCode.INAPPROPRIATE_AUTHENTICATION.equals(bindConnectionProvider.getCreationResultCode())) {
-			log.warn("It's not possible to create authentication LDAP connection pool using anonymous bind. Attempting to create it using binDN/bindPassword");
-			bindConnectionProvider = createConnectionProvider(connectionProperties);
-		}
+	private LdapConnectionProvider createBindConnectionProvider(Properties connectionProperties) {
+		EncryptionService securityService = encryptionServiceInstance.get();
+		LdapAuthConnectionProvider authConnectionProvider = new LdapAuthConnectionProvider(securityService.decryptProperties(connectionProperties));
 		
-		return bindConnectionProvider;
+		return authConnectionProvider;
 	}
 
 	private String buildServersString(List<?> servers) {
@@ -630,19 +614,19 @@ public class AppInitializer {
 	}
 	
 	private class LdapConnectionProviders {
-		private LdapConnectionService connectionProvider;
-		private LdapConnectionService connectionBindProvider;
+		private LdapConnectionProvider connectionProvider;
+		private LdapConnectionProvider connectionBindProvider;
 
-		public LdapConnectionProviders(LdapConnectionService connectionProvider, LdapConnectionService connectionBindProvider) {
+		public LdapConnectionProviders(LdapConnectionProvider connectionProvider, LdapConnectionProvider connectionBindProvider) {
 			this.connectionProvider = connectionProvider;
 			this.connectionBindProvider = connectionBindProvider;
 		}
 
-		public LdapConnectionService getConnectionProvider() {
+		public LdapConnectionProvider getConnectionProvider() {
 			return connectionProvider;
 		}
 
-		public LdapConnectionService getConnectionBindProvider() {
+		public LdapConnectionProvider getConnectionBindProvider() {
 			return connectionBindProvider;
 		}
 
