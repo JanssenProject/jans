@@ -6,7 +6,7 @@
 
 package org.xdi.oxauth.service.status.ldap;
 
-import org.gluu.site.ldap.LDAPConnectionProvider;
+import org.gluu.site.ldap.LdapConnectionProvider;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.service.AppInitializer;
@@ -85,8 +85,8 @@ public class LdapStatusTimer {
     }
 
 	public void logConnectionProviderStatistic(LdapEntryManager ldapEntryManager, String connectionProviderName, String bindConnectionProviderName) {
-		LDAPConnectionProvider ldapConnectionProvider = ldapEntryManager.getLdapOperationService().getConnectionProvider();
-        LDAPConnectionProvider bindLdapConnectionProvider = ldapEntryManager.getLdapOperationService().getBindConnectionProvider();
+		LdapConnectionProvider ldapConnectionProvider = ldapEntryManager.getLdapOperationService().getConnectionProvider();
+        LdapConnectionProvider bindLdapConnectionProvider = ldapEntryManager.getLdapOperationService().getBindConnectionProvider();
         
         if (ldapConnectionProvider == null) {
         	log.error("{} is empty", connectionProviderName);

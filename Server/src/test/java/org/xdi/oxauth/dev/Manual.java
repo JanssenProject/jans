@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.Properties;
 
-import org.gluu.site.ldap.LDAPConnectionProvider;
+import org.gluu.site.ldap.LdapConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.testng.annotations.AfterClass;
@@ -43,7 +43,7 @@ public class Manual {
 	public void init() {
 		final FileConfiguration fileConfiguration = new FileConfiguration(LDAP_FILE_PATH);
 		final Properties props = PropertiesDecrypter.decryptProperties(fileConfiguration.getProperties(), "passoword");
-		final LDAPConnectionProvider connectionProvider = new LDAPConnectionProvider(props);
+		final LdapConnectionProvider connectionProvider = new LdapConnectionProvider(props);
 		MANAGER = new LdapEntryManager(new OperationsFacade(connectionProvider));
 	}
 
