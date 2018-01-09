@@ -385,6 +385,23 @@ oxScript::%(person_authentication_samlexternalauthenticator)s
 oxScriptType: person_authentication
 programmingLanguage: python
 
+dn: inum=%(inumOrg)s!D40C.1CA4,ou=scripts,o=%(inumOrg)s,o=gluu
+objectClass: oxCustomScript
+objectClass: top
+description: Passport SAML authentication module
+displayName: passport-saml
+gluuStatus: false
+inum: %(inumOrg)s!D40C.1CA4
+oxConfigurationProperty: {"value1":"generic_remote_attributes_list","value2":"username, email, name, name, givenName, familyName, provider","description":""}
+oxConfigurationProperty: {"value1":"generic_local_attributes_list","value2":"uid, mail, cn, displayName, givenName, sn, provider","description":""}
+oxLevel: 50
+oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript::%(person_authentication_samlpassportauthenticator)s
+oxScriptType: person_authentication
+programmingLanguage: python
+
 dn: inum=%(inumOrg)s!0011!DAA9.B788,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: top
 objectClass: oxCustomScript
