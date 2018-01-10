@@ -755,7 +755,7 @@ class Exporter(object):
         # if shibv:
         props['shibboleth_version'] = 'v3'
         props['installAsimba'] = os.path.isfile(
-            'opt/tomcat/webapps/asimba.war')
+            '/opt/tomcat/webapps/asimba.war')
         props['installOxAuthRP'] = os.path.isfile(
             '/opt/tomcat/webapps/oxauth-rp.war')
         installPassport = raw_input("\tInstall passport in new version? (y/N): [N]") or "N"
