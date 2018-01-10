@@ -2203,7 +2203,7 @@ class Setup(object):
             self.installJce = False
 
 
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","n|Y")[0].lower()
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
         if promptForMITLicense != 'y':
             sys.exit(0)
 
