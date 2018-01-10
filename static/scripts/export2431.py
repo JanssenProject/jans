@@ -723,6 +723,7 @@ class Exporter(object):
         logging.info('Creating setup.properties backup file')
         props = {}
         props['ldapPass'] = self.getOutput([self.cat, self.passwordFile]).strip()
+        props['ldap_type'] = 'openldap'        
         props['hostname'] = self.hostname
         props['inumAppliance'] = self.getOutput(
             [self.grep, "^inum", "%s/ldif/appliance.ldif" % self.backupDir]
