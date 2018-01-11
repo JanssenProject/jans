@@ -176,6 +176,25 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     foundUserName = foundUser.getUserId()
                     print("Passport: User Found " + str(foundUserName))
+                    userService = CdiUtil.bean(UserService)
+
+                    for attributesMappingEntry in self.attributesMapping.entrySet():
+                        remoteAttribute = attributesMappingEntry.getKey()
+                        localAttribute = attributesMappingEntry.getValue()
+                        localAttributeValue = self.getUserValueFromAuth(remoteAttribute, requestParameters)
+                        if ((localAttribute != None) & (localAttributeValue != "undefined") & (
+                                    localAttribute != "provider")):
+                            try:
+                                value = foundUser.getAttributeValues(str(localAttribute))[0]
+
+                                if value != localAttributeValue:
+                                    userService.setCustomAttribute(foundUser,localAttribute,localAttributeValue)
+                                    userService.updateUser(foundUser)
+
+
+                            except Exception, err:
+                                print("Error in update Attribute " + str(err))
+
                     userAuthenticated = authenticationService.authenticate(foundUserName)
                     print("Passport: Is user authenticated = " + str(userAuthenticated))
                     return True
