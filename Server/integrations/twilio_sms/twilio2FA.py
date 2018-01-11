@@ -20,7 +20,7 @@ from org.xdi.util import StringHelper
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
-          self.currentTimeMillis = currentTimeMillis
+        self.currentTimeMillis = currentTimeMillis
 
     def init(self, configurationAttributes):
         print "Twilio SMS. Initialization"
