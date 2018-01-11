@@ -20,10 +20,9 @@ import re
 import subprocess
 import time
 import datetime
-import itertools
 
 from distutils.dir_util import copy_tree
-from ldif import LDIFParser, LDIFWriter, CreateLDIF
+from ldif import LDIFParser, LDIFWriter
 from jsonmerge import merge
 
 # configure logging
@@ -304,6 +303,8 @@ class Migration(object):
         elif self.ldap_type == 'opendj':
             output = self.getOutput(
                 [self.ldif_export, '-n', 'userRoot', '-l', self.currentData])
+        else:
+            output = "No LDAP configured."
         logging.debug(output)
 
     def convertSchema(self, f):
@@ -322,9 +323,12 @@ class Migration(object):
                 else:
                     isOCcontinue = True
                 continue
-            line = line.replace("X-SCHEMA-FILE '100-user.ldif'","X-SCHEMA-FILE 'custom.schema'")
-            line = line.replace("X-SCHEMA-FILE '99-user.ldif'","X-SCHEMA-FILE 'custom.schema'")
-            line = line.replace("'gluu' )","'Gluu - custom person attribute' )")
+            line = line.replace("X-SCHEMA-FILE '100-user.ldif'",
+                                "X-SCHEMA-FILE 'custom.schema'")
+            line = line.replace("X-SCHEMA-FILE '99-user.ldif'",
+                                "X-SCHEMA-FILE 'custom.schema'")
+            line = line.replace("'gluu' )",
+                                "'Gluu - custom person attribute' )")
 
             if re.match('^dn:', line) or re.match('^objectClass:', line) or \
                     re.match('^cn:', line):
@@ -410,24 +414,24 @@ class Migration(object):
         custArrtributes = ''
         for indx, line in enumerate(self.customAttrs):
             custArrtributes = custArrtributes + ' $ ' + line
-        if len(self.customAttrs)>0:
+        if len(self.customAttrs) > 0:
             customAttrs = set(custArrtributes.split(' $ '))
         else:
             customAttrs = []
         custArrtributes = ""
         if len(self.customAttrs) > 0:
             for indx, line in enumerate(self.customAttrs):
-                if indx ==0 :
-                    custArrtributes = custArrtributes + " $ " +line
+                if indx == 0:
+                    custArrtributes = custArrtributes + " $ " + line
                 elif (indx < len(self.customAttrs) - 1):
                     custArrtributes = custArrtributes + line + " $ "
                 else:
                     custArrtributes = custArrtributes + line
         print custArrtributes
 
-        temp_schema = temp_schema.replace(re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(1),
-                                          re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(
-                                              1) + custArrtributes)
+        temp_schema = temp_schema.replace(
+            re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(1),
+            re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(1) + custArrtributes)
         outfile2.close()
         outfile = open(custom_schema, 'w')
         outfile.write(output + "\n" + temp_schema)
@@ -543,7 +547,7 @@ class Migration(object):
                            'oxTrustPhotos', 'oxTrustAddresses', 'oxTrustRole',
                            'oxTrustEntitlements', 'oxTrustx509Certificate']
 
-        if self.oxIDPAuthentication == 1:
+        if self.ldap_type == 'opendj':
             ignoreList.remove('oxIDPAuthentication')
 
         # Rewriting all the new DNs in the new installation to ldif file
@@ -694,38 +698,19 @@ class Migration(object):
             self.importDataIntoOpenDJ()
 
     def getLDAPServerType(self):
-        # choice = 1
-        # try:
-        #     choice = int(raw_input(
-        #         "\nEnter LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
-        # except ValueError:
-        #     logging.error("You entered non-interger value. Cannot decide LDAP"
-        #                   "server type. Quitting.")
-        #     sys.exit(1)
-        #
-        # if choice == 1:
-        #     self.ldap_type = 'openldap'
-        # elif choice == 2:
-        #     self.ldap_type = 'opendj'
-        # else:
-        #     logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-        #     sys.exit(1)
-        self.ldap_type = 'openldap'
-
-    def getLDAPServerType(self):
-        self.oxIDPAuthentication = 2
         try:
             choice = int(raw_input(
-                "\nMigrate LDAP server's configuration used for authentication at the source instance?- 1.yes, 2.no [2]: "))
+                "\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: ")
+            )
         except ValueError:
-            logging.error('You entered non-interger value. Cannot decide LDAP migration'
-                          'server type. Quitting.')
+            logging.error("You did not enter a integer value. "
+                          "Cannot decide LDAP server type. Quitting.")
             sys.exit(1)
 
         if choice == 1:
-            self.oxIDPAuthentication = 1
+            self.ldap_type = 'openldap'
         elif choice == 2:
-            self.oxIDPAuthentication = 2
+            self.ldap_type = 'opendj'
         else:
             logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
             sys.exit(1)
