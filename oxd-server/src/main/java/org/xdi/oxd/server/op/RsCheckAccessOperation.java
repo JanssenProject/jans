@@ -114,7 +114,17 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         }
 
         final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
-        final BuiltResponse response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+        BuiltResponse response = null;
+        try {
+            response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+        } catch (ClientResponseFailure e) {
+            LOG.debug("Failed to register ticket.", e);
+            if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
+                LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
+                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
+                response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+            }
+        }
 
         RsCheckAccessResponse opResponse = new RsCheckAccessResponse("denied");
         opResponse.setWwwAuthenticateHeader((String) response.getMetadata().getFirst("WWW-Authenticate"));
