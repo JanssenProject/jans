@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Injector;
 import org.codehaus.jackson.JsonNode;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.Command;
@@ -57,7 +58,18 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         };
 
         ResourceRegistrar registrar = new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost()));
-        registrar.register(params.getResources());
+        try {
+            registrar.register(params.getResources());
+        } catch (ClientResponseFailure e) {
+            LOG.debug("Failed to register resource.", e);
+            if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
+                LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
+                getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
+                registrar.register(params.getResources());
+            } else {
+                throw e;
+            }
+        }
 
         persist(registrar, site);
 
