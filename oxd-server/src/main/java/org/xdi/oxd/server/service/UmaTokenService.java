@@ -3,6 +3,7 @@ package org.xdi.oxd.server.service;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.*;
@@ -96,7 +97,21 @@ public class UmaTokenService {
 
         if (tokenResponse != null && StringUtils.isNotBlank(tokenResponse.getAccessToken())) {
             UmaRptIntrospectionService introspectionService = UmaClientFactory.instance().createRptStatusService(discovery, httpService.getClientExecutor());
-            RptIntrospectionResponse status = introspectionService.requestRptStatus("Bearer " + getPat(params.getOxdId()).getToken(), tokenResponse.getAccessToken(), "");
+            RptIntrospectionResponse status = null;
+
+            try {
+                status = introspectionService.requestRptStatus("Bearer " + getPat(params.getOxdId()).getToken(), tokenResponse.getAccessToken(), "");
+            } catch (ClientResponseFailure e) {
+                LOG.debug("Failed to request RPT status.", e);
+                if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
+                    LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
+                    obtainPat(params.getOxdId()); // force to refresh PAT
+                    status = introspectionService.requestRptStatus("Bearer " + getPat(params.getOxdId()).getToken(), tokenResponse.getAccessToken(), "");
+                } else {
+                    throw e;
+                }
+            }
+
             LOG.debug("RPT " + tokenResponse.getAccessToken() + ", status: " + status);
             if (status.getActive()) {
                 LOG.debug("RPT is successfully obtained from AS. RPT: {}", tokenResponse.getAccessToken());

@@ -2,6 +2,7 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.client.ProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +137,20 @@ public class ValidationService {
         final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
         final HttpService httpService = ServerLauncher.getInjector().getInstance(HttpService.class);
         final IntrospectionService introspectionService = ProxyFactory.create(IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
-        final IntrospectionResponse response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+        IntrospectionResponse response = null;
+
+        try {
+            response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+        } catch (ClientResponseFailure e) {
+            LOG.debug("Failed to introspect token.", e);
+            if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
+                LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
+                umaTokenService.obtainPat(oxdId); // force to refresh PAT
+                response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
+            } else {
+                throw e;
+            }
+        }
 
         if (!response.isActive()) {
             LOG.debug("access_token is not active.");
