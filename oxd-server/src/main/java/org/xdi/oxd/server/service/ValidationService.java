@@ -142,8 +142,9 @@ public class ValidationService {
         try {
             response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
         } catch (ClientResponseFailure e) {
-            LOG.debug("Failed to introspect token.", e);
-            if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
+            int status = e.getResponse().getStatus();
+            LOG.debug("Failed to introspect token. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + status, e);
+            if (status == 400 || status == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
                 umaTokenService.obtainPat(oxdId); // force to refresh PAT
                 response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
