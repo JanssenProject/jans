@@ -102,7 +102,7 @@ public class UmaTokenService {
             try {
                 status = introspectionService.requestRptStatus("Bearer " + getPat(params.getOxdId()).getToken(), tokenResponse.getAccessToken(), "");
             } catch (ClientResponseFailure e) {
-                LOG.debug("Failed to request RPT status.", e);
+                LOG.debug("Failed to request RPT status. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
                 if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                     LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
                     obtainPat(params.getOxdId()); // force to refresh PAT

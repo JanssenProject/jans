@@ -118,7 +118,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         try {
             response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
         } catch (ClientResponseFailure e) {
-            LOG.debug("Failed to register ticket.", e);
+            LOG.debug("Failed to register ticket. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
                 getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT

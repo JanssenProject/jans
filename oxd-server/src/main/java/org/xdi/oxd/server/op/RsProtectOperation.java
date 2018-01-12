@@ -61,7 +61,7 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         try {
             registrar.register(params.getResources());
         } catch (ClientResponseFailure e) {
-            LOG.debug("Failed to register resource.", e);
+            LOG.debug("Failed to register resource. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
             if (e.getResponse().getStatus() == 400 || e.getResponse().getStatus() == 401) {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
                 getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
