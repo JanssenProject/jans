@@ -123,6 +123,8 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
                 LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and request ticket again ...");
                 getUmaTokenService().obtainPat(params.getOxdId()); // force to refresh PAT
                 response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
+            } else {
+                throw e;
             }
         }
 
