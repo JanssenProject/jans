@@ -87,7 +87,6 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
         LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
 
-        final boolean isGat = RptPreProcessInterceptor.isGat(params.getRpt());
         if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
             for (UmaPermission permission : status.getPermissions()) {
                 final List<String> requiredScopes = resource.getScopes();
@@ -96,10 +95,6 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
                 LOG.trace("containsAny: " + containsAny + ", requiredScopes: " + requiredScopes + ", permissionScopes: " + permission.getScopes());
 
                 if (containsAny) {
-                    if (isGat) { // GAT
-                        LOG.debug("GAT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
-                        return okResponse(new RsCheckAccessResponse("granted"));
-                    }
                     if ((permission.getResourceId() != null && permission.getResourceId().equals(resource.getId()))) { // normal UMA
                         LOG.debug("RPT has enough permissions, access GRANTED. Path: " + params.getPath() + ", httpMethod:" + params.getHttpMethod() + ", site: " + site);
                         return okResponse(new RsCheckAccessResponse("granted"));
