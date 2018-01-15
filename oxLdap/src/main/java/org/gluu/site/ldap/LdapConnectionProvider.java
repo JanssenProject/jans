@@ -32,9 +32,9 @@ import com.unboundid.util.ssl.TrustStoreTrustManager;
 /**
  * @author Yuriy Movchan
  */
-public class LDAPConnectionProvider {
+public class LdapConnectionProvider {
 
-	private static final Logger log = Logger.getLogger(LDAPConnectionProvider.class);
+	private static final Logger log = Logger.getLogger(LdapConnectionProvider.class);
 
 	private static final int DEFAULT_SUPPORTED_LDAP_VERSION = 2;
 	private static final String DEFAULT_SUBSCHEMA_SUBENTRY = "cn=schema";
@@ -42,7 +42,7 @@ public class LDAPConnectionProvider {
 	private static final String[] SSL_PROTOCOLS = { "TLSv1.2", "TLSv1.1", "TLSv1", "SSLv3" };
 
 	private LDAPConnectionPool connectionPool;
-	private ResultCode creationResultCode;
+	private int creationResultCode;
 	
 	private int supportedLDAPVersion = DEFAULT_SUPPORTED_LDAP_VERSION;
 	private String subschemaSubentry = DEFAULT_SUBSCHEMA_SUBENTRY;
@@ -61,14 +61,17 @@ public class LDAPConnectionProvider {
 
 	private boolean supportsSubtreeDeleteRequestControl;
 
-	@SuppressWarnings("unused")
-	private LDAPConnectionProvider() {}
+	protected LdapConnectionProvider() {}
 
-	public LDAPConnectionProvider(Properties props) {
+	public LdapConnectionProvider(Properties props) {
+		create(props);
+	}
+
+	protected void create(Properties props) {
 		try {
 			init(props);
 		} catch (LDAPException ex) {
-			creationResultCode = ex.getResultCode();
+			creationResultCode = ex.getResultCode().intValue();
 
 			Properties clonedProperties = (Properties) props.clone();
 			if (clonedProperties.getProperty("bindPassword") != null) {
@@ -171,7 +174,7 @@ public class LDAPConnectionProvider {
 		this.supportedLDAPVersion = determineSupportedLdapVersion();
 		this.subschemaSubentry = determineSubschemaSubentry();
 		this.supportsSubtreeDeleteRequestControl = supportsSubtreeDeleteRequestControl();
-		this.creationResultCode = ResultCode.SUCCESS;
+		this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
 	}
 
 	private LDAPConnectionPool createConnectionPoolWithWaitImpl(Properties props, FailoverServerSet failoverSet, BindRequest bindRequest, LDAPConnectionOptions connectionOptions,
@@ -271,7 +274,7 @@ public class LDAPConnectionProvider {
 	}
 
 	private int determineSupportedLdapVersion() {
-		int resultSupportedLDAPVersion = LDAPConnectionProvider.DEFAULT_SUPPORTED_LDAP_VERSION;
+		int resultSupportedLDAPVersion = LdapConnectionProvider.DEFAULT_SUPPORTED_LDAP_VERSION;
 
 		boolean validConnection = isValidConnection();
 		if (!validConnection) {
@@ -295,7 +298,7 @@ public class LDAPConnectionProvider {
 	}
 
 	private String determineSubschemaSubentry() {
-		String resultSubschemaSubentry = LDAPConnectionProvider.DEFAULT_SUBSCHEMA_SUBENTRY;
+		String resultSubschemaSubentry = LdapConnectionProvider.DEFAULT_SUBSCHEMA_SUBENTRY;
 
 		boolean validConnection = isValidConnection();
 		if (!validConnection) {
@@ -432,12 +435,16 @@ public class LDAPConnectionProvider {
 		return isConnected;
 	}
 
-	public ResultCode getCreationResultCode() {
+	public int getCreationResultCode() {
 		return creationResultCode;
 	}
 
-	public void setCreationResultCode(ResultCode creationResultCode) {
+	public void setCreationResultCode(int creationResultCode) {
 		this.creationResultCode = creationResultCode;
+	}
+
+	public boolean isCreated() {
+		return ResultCode.SUCCESS_INT_VALUE == this.creationResultCode;
 	}
 
 	public String[] getServers() {

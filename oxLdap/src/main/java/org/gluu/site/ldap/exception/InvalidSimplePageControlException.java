@@ -13,7 +13,7 @@ import com.unboundid.ldap.sdk.ResultCode;
  * 
  * @author Yuriy Movchan Date: 12/30/2016
  */
-public class InvalidSimplePageControlException extends LugeException {
+public class InvalidSimplePageControlException extends PersistentException {
 
 	private static final long serialVersionUID = 1756816743469359856L;
 	

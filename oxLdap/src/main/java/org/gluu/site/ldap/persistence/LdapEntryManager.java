@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.gluu.search.filter.Filter;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.exception.ConnectionException;
+import org.gluu.site.ldap.exception.SearchException;
 import org.gluu.site.ldap.persistence.AttributeDataModification.AttributeModificationType;
 import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 import org.gluu.site.ldap.persistence.exception.AuthenticationException;
@@ -41,15 +43,12 @@ import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
 import com.unboundid.ldap.sdk.Attribute;
-import org.gluu.search.filter.Filter;
 import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.LDAPSearchException;
 import com.unboundid.ldap.sdk.Modification;
 import com.unboundid.ldap.sdk.ModificationType;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPException;
 import com.unboundid.util.StaticUtils;
 
 /**
@@ -276,7 +275,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn));
 			}
-		} catch (LDAPSearchException ex) {
+		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
 		}
 
@@ -551,8 +550,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			if ((searchResult == null) || !ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
 			}
-		} catch (LDAPSearchException ex) {
-			if (!ResultCode.NO_SUCH_OBJECT.equals(ex.getResultCode())) {
+		} catch (SearchException ex) {
+			if (!(ResultCode.NO_SUCH_OBJECT_INT_VALUE == ex.getResultCode())) {
 				throw new EntryPersistenceException(
 						String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
 			}
@@ -710,6 +709,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 			return ldapOperationService.authenticate(userName, password, baseDN);
 		} catch (ConnectionException ex) {
 			throw new AuthenticationException(String.format("Failed to authenticate user: %s", userName), ex);
+		} catch (SearchException ex) {
+			throw new AuthenticationException(String.format("Failed to find user DN: %s", userName), ex);
 		}
 	}
 
@@ -717,7 +718,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		try {
 			return ldapOperationService.authenticate(bindDn, password);
 		} catch (ConnectionException ex) {
-			throw new AuthenticationException(String.format("Failed to authenticate dn: %s", bindDn), ex);
+			throw new AuthenticationException(String.format("Failed to authenticate DN: %s", bindDn), ex);
 		}
 	}
 
@@ -1084,7 +1085,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return new Modification(modificationType, realAttributeName, attributeValues);
 	}
 
-	private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter genericFilter) throws LDAPSearchException {
+	private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter genericFilter) throws SearchException {
 		return ldapFilterConverter.convertToLdapFilter(genericFilter);
 	}
 

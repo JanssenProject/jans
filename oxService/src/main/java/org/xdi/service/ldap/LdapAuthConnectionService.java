@@ -6,16 +6,16 @@
 
 import java.util.Properties;
 
-import org.gluu.site.ldap.LdapConnectionProvider;
+import org.gluu.site.ldap.LdapAuthConnectionProvider;
 
 /**
  * Super class to forbid interceptor calls
  * 
- * @author Yuriy Movchan Date: 08/09/2013
+ * @author Yuriy Movchan Date: 12/29/2017
  */
-public class LdapConnectionService extends LdapConnectionProvider {
+public class LdapAuthConnectionService extends LdapAuthConnectionProvider {
 
-	public LdapConnectionService(Properties props) {
+	public LdapAuthConnectionService(Properties props) {
 		super(props);
 	}
 

@@ -3,7 +3,7 @@ package org.gluu.ldap;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.gluu.site.ldap.LDAPConnectionProvider;
+import org.gluu.site.ldap.LdapConnectionProvider;
 import org.gluu.site.ldap.OperationsFacade;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 
@@ -29,15 +29,15 @@ public class LdapSampleEntryManager {
 		return connectionProperties;
 	}
 
-	private LDAPConnectionProvider createConnectionProvider(Properties connectionProperties) {
-		LDAPConnectionProvider connectionProvider = new LDAPConnectionProvider(connectionProperties);
+	private LdapConnectionProvider createConnectionProvider(Properties connectionProperties) {
+		LdapConnectionProvider connectionProvider = new LdapConnectionProvider(connectionProperties);
 
 		return connectionProvider;
 	}
 
-	private LDAPConnectionProvider createBindConnectionProvider(Properties bindConnectionProperties,
+	private LdapConnectionProvider createBindConnectionProvider(Properties bindConnectionProperties,
 			Properties connectionProperties) {
-		LDAPConnectionProvider bindConnectionProvider = createConnectionProvider(bindConnectionProperties);
+		LdapConnectionProvider bindConnectionProvider = createConnectionProvider(bindConnectionProperties);
 		if (ResultCode.INAPPROPRIATE_AUTHENTICATION.equals(bindConnectionProvider.getCreationResultCode())) {
 			log.warn(
 					"It's not possible to create authentication LDAP connection pool using anonymous bind. Attempting to create it using binDN/bindPassword");
@@ -57,10 +57,10 @@ public class LdapSampleEntryManager {
 
 	public LdapEntryManager createLdapEntryManager() {
 		Properties connectionProperties = getSampleConnectionProperties();
-		LDAPConnectionProvider connectionProvider = createConnectionProvider(connectionProperties);
+		LdapConnectionProvider connectionProvider = createConnectionProvider(connectionProperties);
 
 		Properties bindConnectionProperties = prepareBindConnectionProperties(connectionProperties);
-		LDAPConnectionProvider bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties,
+		LdapConnectionProvider bindConnectionProvider = createBindConnectionProvider(bindConnectionProperties,
 				connectionProperties);
 
 		LdapEntryManager ldapEntryManager = new LdapEntryManager(

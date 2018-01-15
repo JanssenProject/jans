@@ -11,7 +11,7 @@ package org.gluu.site.ldap.exception;
  * 
  * @author Pankaj
  */
-public class DuplicateEntryException extends LugeException {
+public class DuplicateEntryException extends PersistentException {
 	/**
 	 * Serialization ID
 	 */

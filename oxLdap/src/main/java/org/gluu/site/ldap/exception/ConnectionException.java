@@ -11,7 +11,7 @@ package org.gluu.site.ldap.exception;
  * 
  * @author Pankaj
  */
-public class ConnectionException extends LugeException {
+public class ConnectionException extends PersistentException {
 	/**
 	 * Serial UID
 	 */

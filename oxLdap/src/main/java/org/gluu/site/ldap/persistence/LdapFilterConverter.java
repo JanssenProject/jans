@@ -2,8 +2,7 @@ package org.gluu.site.ldap.persistence;
 
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
-
-import com.unboundid.ldap.sdk.LDAPSearchException;
+import org.gluu.site.ldap.exception.SearchException;
 
 /**
  * Simple filter without dependency to specific persistence filter mechanism
@@ -11,14 +10,14 @@ import com.unboundid.ldap.sdk.LDAPSearchException;
  * @author Yuriy Movchan Date: 2017/12/15
  */
 public class LdapFilterConverter {
-	
-	public com.unboundid.ldap.sdk.Filter convertToLdapFilter(Filter genericFilter) throws LDAPSearchException {
+
+	public com.unboundid.ldap.sdk.Filter convertToLdapFilter(Filter genericFilter) throws SearchException {
 		FilterType type = genericFilter.getType();
 		if (FilterType.RAW == type) {
 			try {
 				return com.unboundid.ldap.sdk.Filter.create(genericFilter.getFilterString());
 			} catch (com.unboundid.ldap.sdk.LDAPException ex) {
-				throw new LDAPSearchException(ex);
+				throw new SearchException("Failed to parse RAW Ldap filter", ex, ex.getResultCode().intValue());
 			}
 		}
 
@@ -65,7 +64,7 @@ public class LdapFilterConverter {
 			return com.unboundid.ldap.sdk.Filter.createSubstringFilter(genericFilter.getAttributeName(), genericFilter.getSubInitial(), genericFilter.getSubAny(), genericFilter.getSubFinal());
 		}
 		
-		throw new LDAPSearchException((com.unboundid.ldap.sdk.LDAPException) null);
+		throw new SearchException(String.format("Unknown filter type '%s'", type), com.unboundid.ldap.sdk.ResultCode.PROTOCOL_ERROR_INT_VALUE);
 	}
 
 }

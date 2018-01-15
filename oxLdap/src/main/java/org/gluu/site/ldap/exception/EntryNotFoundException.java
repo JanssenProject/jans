@@ -11,7 +11,7 @@ package org.gluu.site.ldap.exception;
  * 
  * @author Pankaj
  */
-public class EntryNotFoundException extends LugeException {
+public class EntryNotFoundException extends PersistentException {
 	/**
 	 * Serialization ID
 	 */

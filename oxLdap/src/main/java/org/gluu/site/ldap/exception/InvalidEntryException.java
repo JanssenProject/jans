@@ -14,7 +14,7 @@ import java.util.List;
  * 
  * @author Pankaj
  */
-public class InvalidEntryException extends LugeException {
+public class InvalidEntryException extends PersistentException {
 
 	/**
 	 * Serialization ID

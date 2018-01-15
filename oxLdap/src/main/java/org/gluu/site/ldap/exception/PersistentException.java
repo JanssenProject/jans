@@ -7,9 +7,9 @@
 package org.gluu.site.ldap.exception;
 
 /**
- * Generic LUGE exception
+ * Generic persistent layer exception
  */
-public class LugeException extends Exception {
+public class PersistentException extends Exception {
 
 	/**
 	 * S Serialization ID
@@ -31,7 +31,7 @@ public class LugeException extends Exception {
 	 * @param message
 	 *            Detailed message
 	 */
-	public LugeException(final String message) {
+	public PersistentException(final String message) {
 		super(message);
 	}
 
@@ -41,7 +41,7 @@ public class LugeException extends Exception {
 	 * @param e
 	 *            Wrapped LDAP exception
 	 */
-	public LugeException(final Throwable e) {
+	public PersistentException(final Throwable e) {
 		super(e);
 		this.e = e;
 	}
@@ -54,7 +54,7 @@ public class LugeException extends Exception {
 	 * @param e
 	 *            Wrapped LDAP exception
 	 */
-	public LugeException(final String message, final Throwable e) {
+	public PersistentException(final String message, final Throwable e) {
 		super(message, e);
 		this.e = e;
 	}

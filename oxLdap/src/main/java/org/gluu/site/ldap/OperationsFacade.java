@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.DuplicateEntryException;
 import org.gluu.site.ldap.exception.InvalidSimplePageControlException;
+import org.gluu.site.ldap.exception.SearchException;
 import org.gluu.site.ldap.persistence.BatchOperation;
 import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
 import org.gluu.site.ldap.persistence.exception.MappingException;
@@ -72,36 +73,36 @@ public class OperationsFacade {
 	public static final String userPassword = "userPassword";
 	public static final String objectClass = "objectClass";
 
-	private LDAPConnectionProvider connectionProvider;
-	private LDAPConnectionProvider bindConnectionProvider;
+	private LdapConnectionProvider connectionProvider;
+	private LdapConnectionProvider bindConnectionProvider;
 
 	@SuppressWarnings("unused")
 	private OperationsFacade() {
 	}
 
 	@Deprecated
-	public OperationsFacade(LDAPConnectionProvider connectionProvider) {
+	public OperationsFacade(LdapConnectionProvider connectionProvider) {
 		this(connectionProvider, null);
 	}
 
-	public OperationsFacade(LDAPConnectionProvider connectionProvider, LDAPConnectionProvider bindConnectionProvider) {
+	public OperationsFacade(LdapConnectionProvider connectionProvider, LdapConnectionProvider bindConnectionProvider) {
 		this.connectionProvider = connectionProvider;
 		this.bindConnectionProvider = bindConnectionProvider;
 	}
 
-	public LDAPConnectionProvider getConnectionProvider() {
+	public LdapConnectionProvider getConnectionProvider() {
 		return connectionProvider;
 	}
 
-	public void setConnectionProvider(LDAPConnectionProvider connectionProvider) {
+	public void setConnectionProvider(LdapConnectionProvider connectionProvider) {
 		this.connectionProvider = connectionProvider;
 	}
 
-	public LDAPConnectionProvider getBindConnectionProvider() {
+	public LdapConnectionProvider getBindConnectionProvider() {
 		return bindConnectionProvider;
 	}
 
-	public void setBindConnectionProvider(LDAPConnectionProvider bindConnectionProvider) {
+	public void setBindConnectionProvider(LdapConnectionProvider bindConnectionProvider) {
 		this.bindConnectionProvider = bindConnectionProvider;
 	}
 
@@ -124,9 +125,10 @@ public class OperationsFacade {
 	 * @return
 	 * @throws ConnectionException
 	 * @throws ConnectionException
+	 * @throws SearchException 
 	 * @throws LDAPException
 	 */
-	public boolean authenticate(final String userName, final String password, final String baseDN) throws ConnectionException {
+	public boolean authenticate(final String userName, final String password, final String baseDN) throws ConnectionException, SearchException {
 		try {
 			return authenticateImpl(userName, password, baseDN);
 		} catch (LDAPException ex) {
@@ -142,7 +144,7 @@ public class OperationsFacade {
 		}
 	}
 
-	private boolean authenticateImpl(final String userName, final String password, final String baseDN) throws LDAPException, ConnectionException {
+	private boolean authenticateImpl(final String userName, final String password, final String baseDN) throws SearchException, ConnectionException, LDAPException {
 		return authenticateImpl(lookupDnByUid(userName, baseDN), password);
 	}
 
@@ -197,7 +199,7 @@ public class OperationsFacade {
 	/**
 	 * Looks the uid in ldap and return the DN
 	 */
-	protected String lookupDnByUid(String uid, String baseDN) throws LDAPSearchException {
+	protected String lookupDnByUid(String uid, String baseDN) throws SearchException {
 		Filter filter = Filter.createEqualityFilter(OperationsFacade.uid, uid);
 		SearchResult searchResult = search(baseDN, filter, 1, 1);
 		if ((searchResult != null) && searchResult.getEntryCount() > 0) {
@@ -207,22 +209,22 @@ public class OperationsFacade {
 		return null;
 	}
 
-	public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit) throws LDAPSearchException {
+	public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit) throws SearchException {
 		return search(dn, filter, searchLimit, sizeLimit, null, (String[]) null);
 	}
 
 	public SearchResult search(String dn, Filter filter, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
-			throws LDAPSearchException {
+			throws SearchException {
 		return search(dn, filter, SearchScope.SUB, searchLimit, sizeLimit, controls, attributes);
 	}
 
 	public SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
-		throws LDAPSearchException {
+		throws SearchException {
 		return search(dn, filter, scope, null, 0, searchLimit, sizeLimit, controls, attributes);
 	}
 
 	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation<?> batchOperation, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
-			throws LDAPSearchException {
+			throws SearchException {
 		SearchRequest searchRequest;
 
 		if (log.isTraceEnabled()) {
@@ -308,8 +310,8 @@ public class OperationsFacade {
 						break;
 					}
 				} while ((cookie != null) && (cookie.getValueLength() > 0));
-			} catch (LDAPException e) {
-				throw new LDAPSearchException(e.getResultCode(), "Failed to scroll to specified startIndex", e);
+			} catch (LDAPException ex) {
+				throw new SearchException("Failed to scroll to specified startIndex", ex, ex.getResultCode().intValue());
 			} finally {
 				if (ldapConnection != null) {
 					if (batchOperation != null) {
@@ -329,7 +331,11 @@ public class OperationsFacade {
 			}
 		} else {
 			setControls(searchRequest, controls);
-			searchResult = getConnectionPool().search(searchRequest);
+			try {
+				searchResult = getConnectionPool().search(searchRequest);
+			} catch (LDAPSearchException ex) {
+				throw new SearchException(ex.getMessage(), ex, ex.getResultCode().intValue());
+			}
 		}
 
 		return searchResult;
