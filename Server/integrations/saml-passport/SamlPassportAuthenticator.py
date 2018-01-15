@@ -71,8 +71,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def destroy(self, configurationAttributes):
-        print "Passport: Basic. Destroy method call"
-        print "Passport: Basic. Destroyed successfully"
+        print "Passport: Destroy. Destroy method call"
+        print "Passport: Destroy. Destroyed successfully"
         return True
 
     def getApiVersion(self):
