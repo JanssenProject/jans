@@ -388,8 +388,8 @@ programmingLanguage: python
 dn: inum=%(inumOrg)s!D40C.1CA4,ou=scripts,o=%(inumOrg)s,o=gluu
 objectClass: oxCustomScript
 objectClass: top
-description: Passport Inbound SAML authentication module
-displayName: passport-inbound-saml
+description: Passport SAML authentication module
+displayName: passport-saml
 gluuStatus: false
 inum: %(inumOrg)s!D40C.1CA4
 oxConfigurationProperty: {"value1":"generic_remote_attributes_list","value2":"username, email, name, name, givenName, familyName, provider","description":""}
