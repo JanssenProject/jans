@@ -2145,16 +2145,16 @@ class Setup(object):
             option = None
             while (option != 1) and (option != 2):
                 try:
-                    option = int(self.getPrompt("Install (1) OpenLDAP Gluu Edition (2) Gluu OpenDJ [1|2]", "1"))
+                    option = int(self.getPrompt("Install (1) Gluu OpenDJ (2) OpenLDAP Gluu Edition [1|2]", "1"))
                 except ValueError:
                     option = None
                 if (option != 1) and (option != 2):
                     print "You did not enter the correct option. Enter either 1 or 2."
 
             if option == 1:
-                self.ldap_type = 'openldap'
-            elif option == 2:
                 self.ldap_type = 'opendj'
+            elif option == 2:
+                self.ldap_type = 'openldap'
         else:
             self.installLdap = False
 
