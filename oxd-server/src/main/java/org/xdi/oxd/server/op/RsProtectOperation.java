@@ -119,5 +119,8 @@ public class RsProtectOperation extends BaseOperation<RsProtectParams> {
         if (params.getResources() == null || params.getResources().isEmpty()) {
             throw new ErrorResponseException(ErrorResponseCode.NO_UMA_RESOURCES_TO_PROTECT);
         }
+        if (!org.xdi.oxd.rs.protect.ResourceValidator.isHttpMethodUniqueInPath(params.getResources())) {
+            throw new ErrorResponseException(ErrorResponseCode.UMA_HTTP_METHOD_NOT_UNIQUE);
+        }
     }
 }
