@@ -33,7 +33,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         metaDataConfigurationService = FidoU2fClientFactory.instance().createMetaDataConfigurationService(u2f_server_metadata_uri)
 
-        max_attempts = 10
+        max_attempts = 20
         for attempt in range(1, max_attempts + 1):
             try:
                 self.metaDataConfiguration = metaDataConfigurationService.getMetadataConfiguration()
