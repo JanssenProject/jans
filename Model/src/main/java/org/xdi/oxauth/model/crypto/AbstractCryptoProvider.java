@@ -16,6 +16,7 @@ import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
 import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithmFamily;
 import org.xdi.oxauth.model.jwk.JSONWebKey;
 import org.xdi.oxauth.model.jwk.JSONWebKeySet;
+import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.Base64Util;
 import sun.security.rsa.RSAPublicKeyImpl;
 
@@ -35,7 +36,7 @@ import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
  * @author Javier Rojas Blum
- * @version August 28, 2017
+ * @version December 5, 2017
  */
 public abstract class AbstractCryptoProvider {
 
@@ -47,9 +48,9 @@ public abstract class AbstractCryptoProvider {
 
     public abstract boolean deleteKey(String keyId) throws Exception;
 
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, SignatureAlgorithm signatureAlgorithm) throws Exception {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, SignatureAlgorithm signatureAlgorithm, Use use) throws Exception {
         for (JSONWebKey key : jsonWebKeySet.getKeys()) {
-            if (signatureAlgorithm == key.getAlg()) {
+            if (signatureAlgorithm == key.getAlg() && (use == null || use == key.getUse())) {
                 return key.getKid();
             }
         }

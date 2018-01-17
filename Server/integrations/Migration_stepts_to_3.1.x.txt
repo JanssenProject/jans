@@ -22,14 +22,14 @@ with:
 CdiUtil.bean(FacesContext)
 
 5. Instead of:
-from org.xdi.oxauth.security import Identity
+from org.jboss.seam.contexts import Contexts
 ...
 context = Contexts.getEventContext()
 context.set(param, value)
 context.get(param)
 
 use:
-from org.jboss.seam.contexts import Contexts
+from org.xdi.oxauth.security import Identity
 ...
 identity = CdiUtil.bean(Identity)
 identity.setWorkingParameter(param, value)

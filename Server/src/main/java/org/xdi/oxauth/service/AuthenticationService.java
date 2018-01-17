@@ -6,6 +6,22 @@
 
 package org.xdi.oxauth.service;
 
+import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
+
+import java.io.UnsupportedEncodingException;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.Stateless;
+import javax.faces.context.ExternalContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
@@ -19,7 +35,6 @@ import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.model.metric.MetricType;
 import org.xdi.model.security.Credentials;
 import org.xdi.model.security.SimplePrincipal;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SimpleUser;
 import org.xdi.oxauth.model.common.User;
@@ -27,59 +42,21 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.session.SessionClient;
-import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
-
-import javax.annotation.Nonnull;
-import javax.ejb.Stateless;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.security.Principal;
-import java.util.*;
-import java.util.Map.Entry;
-
-import static org.xdi.oxauth.model.authorize.AuthorizeResponseParam.SESSION_ID;
 
 /**
  * Authentication service methods
  *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version November 23, 2017
  */
 @Stateless
 @Named
 public class AuthenticationService {
 
-    // use only "acr" instead of "acr_values" #334
-    public static final List<String> ALLOWED_PARAMETER = Collections.unmodifiableList(Arrays.asList(
-            AuthorizeRequestParam.SCOPE,
-            AuthorizeRequestParam.RESPONSE_TYPE,
-            AuthorizeRequestParam.CLIENT_ID,
-            AuthorizeRequestParam.REDIRECT_URI,
-            AuthorizeRequestParam.STATE,
-            AuthorizeRequestParam.RESPONSE_MODE,
-            AuthorizeRequestParam.NONCE,
-            AuthorizeRequestParam.DISPLAY,
-            AuthorizeRequestParam.PROMPT,
-            AuthorizeRequestParam.MAX_AGE,
-            AuthorizeRequestParam.UI_LOCALES,
-            AuthorizeRequestParam.ID_TOKEN_HINT,
-            AuthorizeRequestParam.LOGIN_HINT,
-            AuthorizeRequestParam.ACR_VALUES,
-            AuthorizeRequestParam.SESSION_ID,
-            AuthorizeRequestParam.REQUEST,
-            AuthorizeRequestParam.REQUEST_URI,
-            AuthorizeRequestParam.ORIGIN_HEADERS,
-            AuthorizeRequestParam.CODE_CHALLENGE,
-            AuthorizeRequestParam.CODE_CHALLENGE_METHOD,
-            AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS,
-            AuthorizeRequestParam.CLAIMS));
     private static final String EVENT_CONTEXT_AUTHENTICATED_USER = "authenticatedUser";
 
     @Inject
@@ -125,6 +102,9 @@ public class AuthenticationService {
 
     @Inject
     private FacesService facesService;
+
+    @Inject
+    private RequestParameterService requestParameterService;
 
     /**
      * Authenticate user.
@@ -393,12 +373,12 @@ public class AuthenticationService {
         CustomEntry customEntry = new CustomEntry();
         customEntry.setDn(user.getDn());
 
-    	List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
-    	if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-    		user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
-    	} else {
+        List<String> personCustomObjectClassList = appConfiguration.getPersonCustomObjectClassList();
+        if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
+        	customEntry.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+        } else {
             customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
-    	}
+        }
 
         CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
         customEntry.getCustomAttributes().add(customAttribute);
@@ -523,27 +503,13 @@ public class AuthenticationService {
 
         if (user != null) {
             final Map<String, String> result = sessionUser.getSessionAttributes();
-            Map<String, String> allowedParameters = getAllowedParameters(result);
+            Map<String, String> allowedParameters = requestParameterService.getAllowedParameters(result);
 
             result.put(SESSION_ID, sessionUser.getId());
 
             log.trace("Logged in successfully! User: {}, page: /authorize.xhtml, map: {}", user, allowedParameters);
             facesService.redirect("/authorize.xhtml", (Map) allowedParameters);
         }
-    }
-
-    public static Map<String, String> getAllowedParameters(@Nonnull final Map<String, String> requestParameterMap) {
-        final Map<String, String> result = new HashMap<String, String>();
-        if (!requestParameterMap.isEmpty()) {
-            final Set<Map.Entry<String, String>> set = requestParameterMap.entrySet();
-            for (Map.Entry<String, String> entry : set) {
-                if (ALLOWED_PARAMETER.contains(entry.getKey())) {
-                    result.put(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        return result;
     }
 
     public User getUserOrRemoveSession(SessionId p_sessionId) {
@@ -569,78 +535,14 @@ public class AuthenticationService {
     public String parametersAsString() throws UnsupportedEncodingException {
         final Map<String, String> parameterMap = getParametersMap(null);
 
-        return parametersAsString(parameterMap);
-    }
-
-    public String parametersAsString(final Map<String, String> parameterMap) throws UnsupportedEncodingException {
-        final StringBuilder sb = new StringBuilder();
-        final Set<Entry<String, String>> set = parameterMap.entrySet();
-        for (Map.Entry<String, String> entry : set) {
-            final String value = (String) entry.getValue();
-            if (StringUtils.isNotBlank(value)) {
-                sb.append(entry.getKey()).append("=").append(URLEncoder.encode(value, Util.UTF8_STRING_ENCODING)).append("&");
-            }
-        }
-
-        String result = sb.toString();
-        if (result.endsWith("&")) {
-            result = result.substring(0, result.length() - 1);
-        }
-        return result;
+        return requestParameterService.parametersAsString(parameterMap);
     }
 
     public Map<String, String> getParametersMap(List<String> extraParameters) {
         final Map<String, String> parameterMap = new HashMap<String, String>(externalContext
                 .getRequestParameterMap());
 
-        return getParametersMap(extraParameters, parameterMap);
-    }
-
-    public Map<String, String> getParametersMap(List<String> extraParameters, final Map<String, String> parameterMap) {
-        final List<String> allowedParameters = new ArrayList<String>(ALLOWED_PARAMETER);
-
-        if (extraParameters != null) {
-            for (String extraParameter : extraParameters) {
-                putInMap(parameterMap, extraParameter);
-            }
-
-            allowedParameters.addAll(extraParameters);
-        }
-
-        for (Iterator<Entry<String, String>> it = parameterMap.entrySet().iterator(); it.hasNext(); ) {
-            Entry<String, String> entry = it.next();
-            if (!allowedParameters.contains(entry.getKey())) {
-                it.remove();
-            }
-        }
-
-        return parameterMap;
-    }
-
-    private void putInMap(Map<String, String> map, String p_name) {
-        if (map == null) {
-            return;
-        }
-
-        String value = getParameterValue(p_name);
-
-        map.put(p_name, value);
-    }
-
-    public String getParameterValue(String p_name) {
-        final Object o = identity.getWorkingParameter(p_name);
-        if (o instanceof String) {
-            final String s = (String) o;
-            return s;
-        } else if (o instanceof Integer) {
-            final Integer i = (Integer) o;
-            return i.toString();
-        } else if (o instanceof Boolean) {
-            final Boolean b = (Boolean) o;
-            return b.toString();
-        }
-
-        return null;
+        return requestParameterService.getParametersMap(extraParameters, parameterMap);
     }
 
     public boolean isParameterExists(String p_name) {

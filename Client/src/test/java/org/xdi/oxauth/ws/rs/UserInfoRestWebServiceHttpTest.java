@@ -36,7 +36,7 @@ import static org.testng.Assert.*;
  * Functional tests for User Info Web Services (HTTP)
  *
  * @author Javier Rojas Blum
- * @version September 6, 2017
+ * @version December 5, 2017
  */
 public class UserInfoRestWebServiceHttpTest extends BaseTest {
 
@@ -1099,8 +1099,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "sectorIdentifierUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
+            "clientJwksUri", "sectorIdentifierUri", "RS256_enc_keyId", "keyStoreFile",
+            "keyStoreSecret"})
     @Test
     public void requestUserInfoAlgRSAOAEPEncA256GCM(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
@@ -1166,8 +1167,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "sectorIdentifierUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
+            "clientJwksUri", "sectorIdentifierUri", "RS256_enc_keyId", "keyStoreFile",
+            "keyStoreSecret"})
     @Test
     public void requestUserInfoAlgRSA15EncA128CBCPLUSHS256(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
@@ -1233,8 +1235,9 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         }
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "clientJwksUri", "sectorIdentifierUri",
-            "RS256_keyId", "keyStoreFile", "keyStoreSecret"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret",
+            "clientJwksUri", "sectorIdentifierUri", "RS256_enc_keyId", "keyStoreFile",
+            "keyStoreSecret"})
     @Test
     public void requestUserInfoAlgRSA15EncA256CBCPLUSHS512(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
