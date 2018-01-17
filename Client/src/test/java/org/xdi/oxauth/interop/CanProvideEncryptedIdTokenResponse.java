@@ -32,7 +32,7 @@ import static org.testng.Assert.*;
  * OC5:FeatureTest-Can Provide Encrypted ID Token Response
  *
  * @author Javier Rojas Blum
- * @version November 2, 2016
+ * @version December 5, 2017
  */
 public class CanProvideEncryptedIdTokenResponse extends BaseTest {
 
@@ -174,8 +174,9 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSA15EncA128CBCPLUSHS256(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -248,8 +249,9 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSA15EncA256CBCPLUSHS512(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,
@@ -322,8 +324,9 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
         }
     }
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RS256_keyId", "keyStoreFile",
-            "keyStoreSecret", "sectorIdentifierUri"})
+    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris",
+            "clientJwksUri", "RS256_enc_keyId", "keyStoreFile", "keyStoreSecret",
+            "sectorIdentifierUri"})
     @Test
     public void canProvideEncryptedIdTokenResponseAlgRSAOAEPEncA256GCM(
             final String userId, final String userSecret, final String redirectUri, final String redirectUris,

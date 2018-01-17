@@ -12,7 +12,8 @@ import java.util.Map;
 /**
  * Provides functionality to parse query strings.
  *
- * @author Javier Rojas Blum Date: 07.31.2012
+ * @author Javier Rojas Blum
+ * @version November 24, 2017
  */
 public class QueryStringDecoder {
 
@@ -24,14 +25,16 @@ public class QueryStringDecoder {
      * @return A map with the parsed query string parameters and its values.
      */
     public static Map<String, String> decode(String queryString) {
-        String[] params = queryString.split("&");
         Map<String, String> map = new HashMap<String, String>();
 
-        for (String param : params) {
-            String[] nameValue = param.split("=");
-            String name = nameValue.length > 0 ? nameValue[0] : "";
-            String value = nameValue.length > 1 ? nameValue[1] : "";
-            map.put(name, value);
+        if (queryString != null) {
+            String[] params = queryString.split("&");
+            for (String param : params) {
+                String[] nameValue = param.split("=");
+                String name = nameValue.length > 0 ? nameValue[0] : "";
+                String value = nameValue.length > 1 ? nameValue[1] : "";
+                map.put(name, value);
+            }
         }
 
         return map;

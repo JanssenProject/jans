@@ -1,6 +1,5 @@
 package org.xdi.oxauth.model.authorize;
 
-import org.apache.commons.codec.binary.Hex;
 import org.testng.annotations.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -51,6 +50,6 @@ public class CodeVerifierTest {
         md.update(verifier.getCodeVerifier().getBytes("UTF-8")); // Change this to "UTF-16" if needed
         byte[] digest = md.digest();
 
-        assertEquals(Hex.encodeHexString(digest), verifier.getCodeChallenge());
+        assertEquals(CodeVerifier.base64UrlEncode(digest), verifier.getCodeChallenge());
     }
 }

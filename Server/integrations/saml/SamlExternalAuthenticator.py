@@ -205,6 +205,11 @@ class PersonAuthentication(PersonAuthenticationType):
             if saml_validate_response:
                 if not samlResponse.isValid():
                     print "Asimba. Authenticate for step 1. saml_response isn't valid"
+                    return False
+                
+            if samlResponse.isAuthnFailed():
+                print "Asimba. Authenticate for step 1. saml_response AuthnFailed"
+                return False
 
             saml_response_attributes = samlResponse.getAttributes()
             print "Asimba. Authenticate for step 1. attributes: '%s'" % saml_response_attributes
