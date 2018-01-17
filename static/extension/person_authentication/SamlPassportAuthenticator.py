@@ -155,12 +155,9 @@ class PersonAuthentication(PersonAuthenticationType):
                                     localAttribute != "provider")):
                             newUser.setAttribute(localAttribute, localAttributeValue)
 
-                    if "shibboleth" in self.getUserValueFromAuth("provider", requestParameters):
                         newUser.setAttribute("oxExternalUid", "passport-saml" + ":" + self.getUserValueFromAuth(self.getUidRemoteAttr(), requestParameters))
-                    else:
-                        newUser.setAttribute("oxExternalUid", "passport-"+ self.getUserValueFromAuth("provider",requestParameters) + ":" + self.getUserValueFromAuth(self.getUidRemoteAttr(), requestParameters))
 
-                    print ("Passport-saml: " + self.getUserValueFromAuth("provider",
+                        print ("Passport-saml: " + self.getUserValueFromAuth("provider",
                                                      requestParameters) + ": Attempting to add user " + self.getUserValueFromAuth(
                         self.getUidRemoteAttr(), requestParameters))
 
