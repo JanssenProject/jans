@@ -6,7 +6,22 @@
 
 package org.xdi.oxauth.auth;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jettison.json.JSONException;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
@@ -20,22 +35,15 @@ import org.xdi.oxauth.model.config.Constants;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.jwt.JwtClaimName;
 import org.xdi.oxauth.model.registration.Client;
+import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.security.Identity;
 import org.xdi.oxauth.service.AuthenticationService;
+import org.xdi.oxauth.service.AuthorizeService;
 import org.xdi.oxauth.service.ClientService;
+import org.xdi.oxauth.service.RequestParameterService;
 import org.xdi.oxauth.service.SessionIdService;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.util.StringHelper;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.FacesMessage.Severity;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Authenticator component
@@ -48,7 +56,9 @@ import java.util.Map;
 @Named
 public class Authenticator {
 
-    @Inject
+    private static final String AUTH_EXTERNAL_ATTRIBUTES = "auth_external_attributes";
+
+	@Inject
     private Logger log;
 
     @Inject
@@ -83,6 +93,9 @@ public class Authenticator {
 
     @Inject
     private LanguageBean languageBean;
+
+    @Inject
+    private RequestParameterService requestParameterService;
 
     private String authAcr;
 
@@ -243,6 +256,9 @@ public class Authenticator {
                         this.authAcr, this.authStep);
                 return false;
             }
+
+            // Restore identity working parameters from session
+            setIdentityWorkingParameters(sessionIdAttributes);
 
             boolean result = externalAuthenticationService.executeExternalAuthenticate(customScriptConfiguration,
                     externalContext.getRequestParameterValuesMap(), this.authStep);
@@ -418,15 +434,66 @@ public class Authenticator {
                                        Map<String, String> sessionIdAttributes) {
         List<String> extraParameters = externalAuthenticationService
                 .executeExternalGetExtraParametersForStep(customScriptConfiguration, step);
+
+    	// Load extra parameters set
+        Set<String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+        
         if (extraParameters != null) {
             for (String extraParameter : extraParameters) {
                 if (authenticationService.isParameterExists(extraParameter)) {
-                    String extraParameterValue = authenticationService.getParameterValue(extraParameter);
+                	// Store parameter name
+                	authExternalAttributes.add(extraParameter);
+
+                	String extraParameterValue = requestParameterService.getParameterValue(extraParameter);
                     sessionIdAttributes.put(extraParameter, extraParameterValue);
                 }
             }
         }
+
+        // Store identity working parameters in session
+        setExternalScriptExtraParameters(sessionIdAttributes, authExternalAttributes);
     }
+
+	private Set<String> getExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
+		String authExternalAttributesString = sessionIdAttributes.get(AUTH_EXTERNAL_ATTRIBUTES);
+        Set<String> authExternalAttributes = new HashSet<String>();
+        try {
+			List<String> list = Util.jsonArrayStringAsList(authExternalAttributesString);
+			authExternalAttributes = new HashSet<String>(list);
+		} catch (JSONException ex) {
+			log.error("Failed to convert list of auth_external_attributes to list");
+		}
+
+        return authExternalAttributes;
+	}
+
+	private void setExternalScriptExtraParameters(Map<String, String> sessionIdAttributes, Set<String> authExternalAttributes) {
+		String authExternalAttributesString = Util.listToJsonArray(authExternalAttributes).toString();
+
+        sessionIdAttributes.put(AUTH_EXTERNAL_ATTRIBUTES, authExternalAttributesString);
+	}
+
+	private void clearExternalScriptExtraParameters(Map<String, String> sessionIdAttributes) {
+        Set<String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+
+        for (String authExternalAttribute : authExternalAttributes) {
+    		sessionIdAttributes.remove(authExternalAttribute);
+        }
+
+        sessionIdAttributes.remove(AUTH_EXTERNAL_ATTRIBUTES);
+	}
+
+	private void setIdentityWorkingParameters(Map<String, String> sessionIdAttributes) {
+        Set<String> authExternalAttributes = getExternalScriptExtraParameters(sessionIdAttributes);
+
+        HashMap<String, Object> workingParameters = identity.getWorkingParameters();
+        for (String authExternalAttribute : authExternalAttributes) {
+        	if (sessionIdAttributes.containsKey(authExternalAttribute)) {
+        		String authExternalAttributeValue = sessionIdAttributes.get(authExternalAttribute);
+        		workingParameters.put(authExternalAttribute, authExternalAttributeValue);
+        	}
+		}
+	}
 
     public String prepareAuthenticationForStep() {
         String result = prepareAuthenticationForStepImpl();
@@ -509,6 +576,9 @@ public class Authenticator {
                 sessionIdAttributes.put("acr", determinedauthAcr);
                 sessionIdAttributes.put("auth_level", determinedAuthLevel);
                 sessionIdAttributes.put("auth_step", Integer.toString(1));
+                
+                // Remove old session parameters from session
+                clearExternalScriptExtraParameters(sessionIdAttributes);
 
                 if (sessionId != null) {
                     boolean updateResult = updateSession(sessionId, sessionIdAttributes);
@@ -530,6 +600,9 @@ public class Authenticator {
                     this.authStep);
             return Constants.RESULT_FAILURE;
         }
+
+        // Restore identity working parameters from session
+        setIdentityWorkingParameters(sessionIdAttributes);
 
         Boolean result = externalAuthenticationService.executeExternalPrepareForStep(customScriptConfiguration,
                 externalContext.getRequestParameterValuesMap(), this.authStep);
@@ -648,4 +721,13 @@ public class Authenticator {
         facesContext.addMessage(null, message);
     }
 
+    public String getMaskMobilenumber(String mobile_number){
+    	final String s = mobile_number.replaceAll("\\D", "");
+
+        final int start = 0;
+        final int end = s.length() - 4;
+        final String overlay = StringUtils.repeat("*", end - start);
+
+        return StringUtils.overlay(s, overlay, start, end);
+    }
 }

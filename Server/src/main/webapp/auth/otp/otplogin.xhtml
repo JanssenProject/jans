@@ -5,12 +5,16 @@
 				xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 				xmlns:h="http://xmlns.jcp.org/jsf/html"
 				template="/WEB-INF/incl/layout/template.xhtml">
-
 	<f:metadata>
 		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
 	</f:metadata>
+
 	<ui:define name="head">
 		<meta name="description" content="Gluu Inc." />
+		
+	<link href="#{oxAuthConfigurationService.getCssLocation()}/bootstrap.min.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="#{oxAuthConfigurationService.getCssLocation()}/style.css"/>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600" rel="stylesheet"/>
 	</ui:define>
 
 	<ui:define name="pageTitle">
@@ -40,35 +44,28 @@
 
 		</header>
 		<!-- end header-->
-		<div class="container">
-			<div id="content" class="sign-in-page">
-				<div class="row-fluid">
-					<h:form id="loginForm" class="signin-form span6 offset3">
-						<h:panelGroup rendered="#{not identity.loggedIn}">
+					<h:form id="loginForm" >
+						<h:panelGroup rendered="#{not identity.loggedIn}">							
+							<div class="bs-docs-section">
+								<div class="container">								
+									<h:messages style="color:red;" />
+									<div class="step_bx">
+										<h2>#{msgs['otp.verification']}</h2>
+										<p>#{msgs['otp.usedevice']}</p>
+										<img src="#{oxAuthConfigurationService.getImgLocation()}/ver_code.png" alt="ver_code"/>
+										<h4>#{msgs['otp.entercode']}</h4>
+											<p>#{msgs['otp.getcode']}</p>
+										
+										   	<input class="form-control" id="loginForm:otpCode" name="loginForm:otpCode"   type="text" autocomplete="off" />
+										   	<h:commandButton class="btn btn-done"
+																 value="#{msgs['login.login']}"
+																 action="#{authenticator.authenticate}" />															
+									</div>
+								</div>
+							</div>						
 							<div class="inner-form-container row-fluid">
 								<ul class="offset2 span10">
-									<h:messages style="color:red;" />
-									<div class="row-fluid">
-										<span class="input-name span3"> <h:outputLabel
-												for="loginForm:otpCode" value="#{msgs['otp.otpCode']}" />
-										</span>
-
-										<div class="span6">
-											<input id="loginForm:otpCode" name="loginForm:otpCode"
-												   type="text" autocomplete="off" />
-										</div>
-									</div>
-
-									<li class="row-fluid submit-container">
-										<div class="gradient contact-button green span2 offset3">
-											<div id="submit_block" class="login_input">
-												<h:commandButton id="loginButton" style="padding-left: 35%;"
-																 value="#{msgs['login.login']}"
-																 action="#{authenticator.authenticate}" />
-											</div>
-											<span class="sprite-green_click_icon"></span>
-										</div>
-									</li>
+									
 									<h:panelGroup rendered='#{!empty client.getPolicyUri()}'>
 										<p>
 											<h:outputText value="#{msgs['common.agreePolicy']}" />
@@ -91,8 +88,6 @@
 							</div>
 						</h:panelGroup>
 					</h:form>
-				</div>
-			</div>
 			<div id="footer">
 				<p>
 					<h:outputText value="#{msgs['common.gluuInc']}" />
@@ -100,7 +95,7 @@
 					<h:outputText value="#{msgs['common.caution']}" escape="false" />
 				</p>
 			</div>
-		</div>
+<!-- 		</div> -->
 
 		<script type="text/javascript">
 			window.onload = function () {

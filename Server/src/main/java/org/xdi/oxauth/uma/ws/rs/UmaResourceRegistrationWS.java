@@ -96,7 +96,6 @@ public class UmaResourceRegistrationWS {
             String id = UUID.randomUUID().toString();
             log.trace("Try to create resource, id: {}", id);
 
-            umaValidationService.assertHasProtectionScope(authorization);
             return putResourceImpl(Response.Status.CREATED, authorization, id, resource);
         } catch (Exception ex) {
             log.error("Exception during resource creation", ex);
@@ -125,8 +124,6 @@ public class UmaResourceRegistrationWS {
                                    @ApiParam(value = "Resource description JSON object", required = true)
                                        UmaResource resource) {
         try {
-            umaValidationService.assertHasProtectionScope(authorization);
-
             return putResourceImpl(Response.Status.OK, authorization, rsid, resource);
         } catch (Exception ex) {
             log.error("Exception during resource update, rsId: " + rsid + ", message: " + ex.getMessage(), ex);
@@ -168,6 +165,7 @@ public class UmaResourceRegistrationWS {
             response.setDescription(ldapResource.getDescription());
             response.setIconUri(ldapResource.getIconUri());
             response.setScopes(umaScopeService.getScopeIdsByDns(ldapResource.getScopes()));
+            response.setScopeExpression(ldapResource.getScopeExpression());
             response.setType(ldapResource.getType());
 
             final ResponseBuilder builder = Response.ok();
@@ -282,6 +280,10 @@ public class UmaResourceRegistrationWS {
     private Response putResourceImpl(Response.Status status, String authorization, String rsid,
                                      UmaResource resource) throws IllegalAccessException, InvocationTargetException, IOException {
         log.trace("putResourceImpl, rsid: {}, status:", rsid, status.name());
+
+        umaValidationService.assertHasProtectionScope(authorization);
+        umaValidationService.validateResource(resource);
+
         String patToken = tokenService.getTokenFromAuthorizationParameter(authorization);
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(patToken);
 
@@ -324,6 +326,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setCreator(userDn);
         ldapResource.setDn(resourceDn);
         ldapResource.setScopes(scopeDNs);
+        ldapResource.setScopeExpression(resource.getScopeExpression());
         ldapResource.setClients(new ArrayList<String>(Collections.singletonList(clientDn)));
         ldapResource.setType(resource.getType());
 
@@ -344,6 +347,7 @@ public class UmaResourceRegistrationWS {
         ldapResource.setDescription(resource.getDescription());
         ldapResource.setIconUri(resource.getIconUri());
         ldapResource.setScopes(umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes()));
+        ldapResource.setScopeExpression(resource.getScopeExpression());
         ldapResource.setRev(String.valueOf(incrementRev(ldapResource.getRev())));
         ldapResource.setType(resource.getType());
 

@@ -16,7 +16,6 @@ import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
-import org.xdi.oxauth.auth.Authenticator;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
 import org.xdi.oxauth.model.authorize.*;
@@ -105,10 +104,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ClientAuthorizationsService clientAuthorizationsService;
 
     @Inject
-    private Authenticator authenticator;
-
-    @Inject
-    private AuthenticationService authenticationService;
+    private RequestParameterService requestParameterService;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -180,6 +176,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         List<String> amrValues = Util.splittedStringAsList(amrValuesStr, " ");
 
         ResponseMode responseMode = ResponseMode.getByValue(respMode);
+
+        Map<String, String> customParameters = requestParameterService.getCustomParameters(
+                QueryStringDecoder.decode(httpRequest.getQueryString()));
 
         SessionId sessionUser = identity.getSessionId();
         User user = sessionUser != null && StringUtils.isNotBlank(sessionUser.getUserDn()) ?
@@ -393,7 +392,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                                 Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
 
                                                 Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
-                                                Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+                                                Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
                                                 sessionUser = sessionIdService.generateAuthenticatedSessionId(userDn, prompt);
                                                 sessionUser.setSessionAttributes(requestParameterMap);
@@ -427,7 +426,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                                 redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                                 idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                                codeChallenge, codeChallengeMethod, sessionId, claims);
+                                                codeChallenge, codeChallengeMethod, sessionId, claims, customParameters);
                                         builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                         applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                         return builder.build();
@@ -461,7 +460,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                             idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims);
+                                            codeChallenge, codeChallengeMethod, sessionId, claims, customParameters);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
@@ -474,18 +473,20 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                         client.getClientId(),
                                         client.getPersistClientAuthorizations());
                                 if (scopes.size() > 0) {
-                                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null && Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
-                                        sessionUser.addPermission(clientId, true);
+                                    if (clientAuthorizations != null && clientAuthorizations.getScopes() != null) {
+                                        if (Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
+                                            sessionUser.addPermission(clientId, true);
+                                        } else {
+                                            redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
+                                                    redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
+                                                    idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
+                                                    codeChallenge, codeChallengeMethod, sessionId, claims, customParameters);
+                                            builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
+                                            applicationAuditLogger.sendMessage(oAuth2AuditLog);
+                                            return builder.build();
+                                        }
                                     } else if (client.getTrustedClient()) {
                                         sessionUser.addPermission(clientId, true);
-                                    } else {
-                                        redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
-                                                redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
-                                                idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                                codeChallenge, codeChallengeMethod, sessionId, claims);
-                                        builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
-                                        applicationAuditLogger.sendMessage(oAuth2AuditLog);
-                                        return builder.build();
                                     }
                                 }
 
@@ -497,7 +498,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                             idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims);
+                                            codeChallenge, codeChallengeMethod, sessionId, claims, customParameters);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
@@ -509,7 +510,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                     redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                             redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                             idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
-                                            codeChallenge, codeChallengeMethod, sessionId, claims);
+                                            codeChallenge, codeChallengeMethod, sessionId, claims, customParameters);
                                     builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                     applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                     return builder.build();
@@ -674,7 +675,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Map<String, String> genericRequestMap = getGenericRequestMap(httpRequest);
 
             Map<String, String> parameterMap = Maps.newHashMap(genericRequestMap);
-            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             sessionUser.setUserDn(null);
             sessionUser.setSessionAttributes(requestParameterMap);
@@ -707,7 +708,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String redirectUri, String state, ResponseMode responseMode, String nonce, String display,
             List<Prompt> prompts, Integer maxAge, List<String> uiLocales, String idTokenHint, String loginHint,
             List<String> acrValues, List<String> amrValues, String request, String requestUri, String originHeaders,
-            String codeChallenge, String codeChallengeMethod, String sessionId, String claims) {
+            String codeChallenge, String codeChallengeMethod, String sessionId, String claims,
+            Map<String, String> customParameters) {
 
         redirectUriResponse.setBaseRedirectUri(appConfiguration.getAuthorizationPage());
         redirectUriResponse.setResponseMode(ResponseMode.QUERY);
@@ -787,6 +789,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         // mod_ox param
         if (StringUtils.isNotBlank(originHeaders)) {
             redirectUriResponse.addResponseParameter(AuthorizeRequestParam.ORIGIN_HEADERS, originHeaders);
+        }
+
+        if (customParameters != null && customParameters.size() > 0) {
+            for (Map.Entry<String, String> entry : customParameters.entrySet()) {
+                redirectUriResponse.addResponseParameter(entry.getKey(), entry.getValue());
+            }
         }
     }
 

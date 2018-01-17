@@ -14,10 +14,12 @@ import javax.inject.Named;
 
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
+import org.xdi.model.SmtpConfiguration;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
+import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 /**
  * GluuAppliance service
@@ -39,7 +41,11 @@ public class ApplianceService {
 
 	@Inject
 	private StaticConfiguration staticConfiguration;
-	/**
+    
+    @Inject
+    private EncryptionService encryptionService;
+
+    /**
 	 * Add new appliance
 	 * @param appliance Appliance
 	 */
@@ -123,6 +129,21 @@ public class ApplianceService {
 
 	public String getApplianceInum() {
 		return appConfiguration.getApplianceInum();
+	}
+
+	public void decryptSmtpPassword(SmtpConfiguration smtpConfiguration) {
+		if (smtpConfiguration == null) {
+			return;
+		}
+
+		String password = smtpConfiguration.getPassword();
+		if (StringHelper.isNotEmpty(password)) {
+			try {
+				smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
+			} catch (EncryptionException ex) {
+				log.error("Failed to decrypt SMTP user password", ex);
+			}
+		}
 	}
 
 }
