@@ -390,6 +390,10 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 	}
 
 	public List<CustomScriptConfiguration> getCustomScriptConfigurationsMap() {
+		if (this.customScriptConfigurationsNameMap == null) {
+			return new ArrayList<CustomScriptConfiguration>(0);
+		}
+
 		List<CustomScriptConfiguration> configurations = new ArrayList<CustomScriptConfiguration>(this.customScriptConfigurationsNameMap.values());
 		return configurations;
 	}

@@ -7,6 +7,7 @@
 package org.xdi.oxauth.service;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -17,8 +18,6 @@ import org.xdi.oxauth.crypto.signature.SHA256withECDSASignatureVerification;
 import org.xdi.oxauth.model.appliance.GluuAppliance;
 import org.xdi.service.cache.CacheConfiguration;
 import org.xdi.service.cache.InMemoryConfiguration;
-import org.xdi.util.StringHelper;
-import org.xdi.util.security.StringEncrypter.EncryptionException;
 
 /**
  * Holds factory methods to create services
@@ -34,9 +33,6 @@ public class ApplicationFactory {
     
     @Inject
     private ApplianceService applianceService;
-    
-    @Inject
-    private EncryptionService encryptionService;
 
     @Produces @ApplicationScoped @Named("sha256withECDSASignatureVerification")
     public SHA256withECDSASignatureVerification getBouncyCastleSignatureVerification() {
@@ -60,24 +56,17 @@ public class ApplicationFactory {
 		return cacheConfiguration;
 	}
 
-	@Produces @ApplicationScoped
+	@Produces @RequestScoped
 	public SmtpConfiguration getSmtpConfiguration() {
 		GluuAppliance appliance = applianceService.getAppliance();
 		SmtpConfiguration smtpConfiguration = appliance.getSmtpConfiguration();
 		
 		if (smtpConfiguration == null) {
-			return null;
+			return new SmtpConfiguration();
 		}
 
-		String password = smtpConfiguration.getPassword();
-		if (StringHelper.isNotEmpty(password)) {
-			try {
-				smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
-			} catch (EncryptionException ex) {
-				log.error("Failed to decript SMTP user password", ex);
-			}
-		}
-		
+		applianceService.decryptSmtpPassword(smtpConfiguration);
+
 		return smtpConfiguration;
 	}
 

@@ -54,7 +54,9 @@ class UmaRptPolicy(UmaRptPolicyType):
             print "UmaRptPolicy. Client isn't authorized"
             return False
 
-        
+    def getClaimsGatheringScriptName(self, context):
+        return ""
+
     def prepareClientsSet(self, configurationAttributes):
         clientsSet = HashSet()
         if (not configurationAttributes.containsKey("allowed_clients")):

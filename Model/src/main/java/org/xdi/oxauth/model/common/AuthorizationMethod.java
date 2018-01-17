@@ -23,26 +23,26 @@ public enum AuthorizationMethod {
      * client adds the access token to the request body using the
      * "access_token" parameter.  The client MUST NOT use this method unless
      * all of the following conditions are met:
-     * <p/>
+     * <p>
      * - The HTTP request entity-header includes the "Content-Type" header
      * field set to "application/x-www-form-urlencoded".
-     * <p/>
+     * <p>
      * - The entity-body follows the encoding requirements of the
      * "application/x-www-form-urlencoded" content-type as defined by
      * HTML 4.01 [W3C.REC-html401-19991224].
-     * <p/>
+     * <p>
      * - The HTTP request entity-body is single-part.
-     * <p/>
+     * <p>
      * - The content to be encoded in the entity-body MUST consist entirely
      * of ASCII [USASCII] characters.
-     * <p/>
+     * <p>
      * - The HTTP request method is one for which the request body has
      * defined semantics.  In particular, this means that the "GET"
      * method MUST NOT be used.
-     * <p/>
+     * <p>
      * The entity-body MAY include other request-specific parameters, in
      * which case, the "access_token" parameter MUST be properly separated
-     * from the request-specific parameters using "&" character(s) (ASCII
+     * from the request-specific parameters using "&amp;" character(s) (ASCII
      * code 38).
      */
     FORM_ENCODED_BODY_PARAMETER,
@@ -51,12 +51,12 @@ public enum AuthorizationMethod {
      * adds the access token to the request URI query component as defined
      * by Uniform Resource Identifier (URI) [RFC3986] using the
      * "access_token" parameter.
-     * <p/>
+     * <p>
      * The HTTP request URI query can include other request-specific
      * parameters, in which case, the "access_token" parameter MUST be
-     * properly separated from the request-specific parameters using "&"
+     * properly separated from the request-specific parameters using "&amp;"
      * character(s) (ASCII code 38).
-     * <p/>
+     * <p>
      * Because of the security weaknesses associated with the URI method
      * (see Section 5), including the high likelihood that the URL
      * containing the access token will be logged, it SHOULD NOT be used

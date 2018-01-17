@@ -22,6 +22,7 @@ import org.xdi.oxauth.model.jwk.Use;
 import org.xdi.oxauth.model.util.SecurityProviderUtility;
 import org.xdi.oxauth.model.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -29,24 +30,21 @@ import java.util.List;
 import static org.xdi.oxauth.model.jwk.JWKParameter.*;
 
 /**
- * Command example: java -cp
- * bcprov-jdk15on-1.54.jar:.jar:bcpkix-jdk15on-1.54.jar:commons-cli-1.2.jar:commons-codec-1.5.jar:commons-lang-2.6.jar:jettison-1.3.jar:log4j-1.2.14.jar:oxauth-model.jar:oxauth.jar
- * org.xdi.oxauth.util.KeyGenerator -h
+ * Command example:
+ * java -cp bcprov-jdk15on-1.54.jar:.jar:bcpkix-jdk15on-1.54.jar:commons-cli-1.2.jar:commons-codec-1.5.jar:commons-lang-2.6.jar:jettison-1.3.jar:log4j-1.2.14.jar:oxauth-model.jar:oxauth.jar org.xdi.oxauth.util.KeyGenerator -h
  * <p/>
- * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -keystore
- * /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=oxAuth CA
- * Certificates" -expiration 365
+ * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -keystore /Users/JAVIER/tmp/mykeystore.jks -keypasswd secret -dnname "CN=oxAuth CA Certificates" -expiration 365
  * <p/>
- * KeyGenerator -algorithms RS256 RS384 RS512 ES256 ES384 ES512 -ox11
- * https://ce.gluu.info:8443/oxeleven/rest/oxeleven/generateKey -expiration 365 -at xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+ * KeyGenerator -sig_keys RS256 RS384 RS512 ES256 ES384 ES512 -enc_keys RS256 RS384 RS512 ES256 ES384 ES512 -ox11 https://ce.gluu.info:8443/oxeleven/rest/generateKey -expiration 365 -at xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
  *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version August 28, 2017
+ * @version December 4, 2017
  */
 public class KeyGenerator {
 
-    private static final String ALGORITHMS = "algorithms";
+    private static final String SIGNING_KEYS = "sig_keys";
+    private static final String ENCRYPTION_KEYS = "enc_keys";
     private static final String KEY_STORE_FILE = "keystore";
     private static final String KEY_STORE_PASSWORD = "keypasswd";
     private static final String DN_NAME = "dnname";
@@ -72,11 +70,16 @@ public class KeyGenerator {
         public Cli(String[] args) {
             this.args = args;
 
-            Option algorithmsOption = new Option(ALGORITHMS, true,
-                    "Signature Algorithms (RS256 RS384 RS512 ES256 ES384 ES512).");
-            algorithmsOption.setArgs(Option.UNLIMITED_VALUES);
+            Option signingKeysOption = new Option(SIGNING_KEYS, true,
+                    "Signature keys to generate. (RS256 RS384 RS512 ES256 ES384 ES512).");
+            signingKeysOption.setArgs(Option.UNLIMITED_VALUES);
 
-            options.addOption(algorithmsOption);
+            Option encryptionKeysOption = new Option(ENCRYPTION_KEYS, true,
+                    "Encryption keys to generate. (RS256 RS384 RS512 ES256 ES384 ES512).");
+            encryptionKeysOption.setArgs(Option.UNLIMITED_VALUES);
+
+            options.addOption(signingKeysOption);
+            options.addOption(encryptionKeysOption);
             options.addOption(KEY_STORE_FILE, true, "Key Store file.");
             options.addOption(KEY_STORE_PASSWORD, true, "Key Store password.");
             options.addOption(DN_NAME, true, "DN of certificate issuer.");
@@ -96,23 +99,27 @@ public class KeyGenerator {
                 if (cmd.hasOption(HELP))
                     help();
 
-                if (cmd.hasOption(ALGORITHMS) && cmd.hasOption(OXELEVEN_ACCESS_TOKEN)
+                if ((cmd.hasOption(SIGNING_KEYS) || cmd.hasOption(ENCRYPTION_KEYS))
+                        && cmd.hasOption(OXELEVEN_ACCESS_TOKEN)
                         && cmd.hasOption(OXELEVEN_GENERATE_KEY_ENDPOINT)
                         && cmd.hasOption(EXPIRATION)) {
-                    String[] algorithms = cmd.getOptionValues(ALGORITHMS);
+                    String[] sigAlgorithms = cmd.getOptionValues(SIGNING_KEYS);
+                    String[] encAlgorithms = cmd.getOptionValues(ENCRYPTION_KEYS);
                     String accessToken = cmd.getOptionValue(OXELEVEN_ACCESS_TOKEN);
                     String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
                     int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
 
-                    List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
-                    if (signatureAlgorithms.isEmpty()) {
+                    List<SignatureAlgorithm> signatureAlgorithms = cmd.hasOption(SIGNING_KEYS) ?
+                            SignatureAlgorithm.fromString(sigAlgorithms) : new ArrayList<SignatureAlgorithm>();
+                    List<SignatureAlgorithm> encryptionAlgorithms = cmd.hasOption(ENCRYPTION_KEYS) ?
+                            SignatureAlgorithm.fromString(encAlgorithms) : new ArrayList<SignatureAlgorithm>();
+                    if (signatureAlgorithms.isEmpty() && encryptionAlgorithms.isEmpty()) {
                         help();
                     } else {
                         try {
                             JSONWebKeySet jwks = new JSONWebKeySet();
-                            OxElevenCryptoProvider cryptoProvider = new OxElevenCryptoProvider(accessToken,
-                                    generateKeyEndpoint,
-                                    null, null, null);
+                            OxElevenCryptoProvider cryptoProvider = new OxElevenCryptoProvider(generateKeyEndpoint,
+                                    null, null, null, accessToken);
 
                             Calendar calendar = new GregorianCalendar();
                             calendar.add(Calendar.DATE, expiration);
@@ -140,22 +147,52 @@ public class KeyGenerator {
                                 jwks.getKeys().add(key);
                             }
 
+                            for (SignatureAlgorithm encryptionAlgorithm : encryptionAlgorithms) {
+                                JSONObject result = cryptoProvider.generateKey(encryptionAlgorithm,
+                                        calendar.getTimeInMillis());
+                                // System.out.println(result);
+
+                                JSONWebKey key = new JSONWebKey();
+                                key.setKid(result.getString(KEY_ID));
+                                key.setUse(Use.ENCRYPTION);
+                                key.setAlg(encryptionAlgorithm);
+                                key.setKty(KeyType.fromString(encryptionAlgorithm.getFamily().toString()));
+                                key.setExp(result.optLong(EXPIRATION_TIME));
+                                key.setCrv(encryptionAlgorithm.getCurve());
+                                key.setN(result.optString(MODULUS));
+                                key.setE(result.optString(EXPONENT));
+                                key.setX(result.optString(X));
+                                key.setY(result.optString(Y));
+
+                                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                                key.setX5c(StringUtils.toList(x5c));
+
+                                jwks.getKeys().add(key);
+                            }
+
                             System.out.println(jwks);
                         } catch (Exception e) {
                             log.error("Failed to generate keys", e);
                             help();
                         }
                     }
-                } else if (cmd.hasOption(ALGORITHMS) && cmd.hasOption(KEY_STORE_FILE)
-                        && cmd.hasOption(KEY_STORE_PASSWORD) && cmd.hasOption(DN_NAME) && cmd.hasOption(EXPIRATION)) {
-                    String[] algorithms = cmd.getOptionValues(ALGORITHMS);
+                } else if ((cmd.hasOption(SIGNING_KEYS) || cmd.hasOption(ENCRYPTION_KEYS))
+                        && cmd.hasOption(KEY_STORE_FILE)
+                        && cmd.hasOption(KEY_STORE_PASSWORD)
+                        && cmd.hasOption(DN_NAME)
+                        && cmd.hasOption(EXPIRATION)) {
+                    String[] sigAlgorithms = cmd.getOptionValues(SIGNING_KEYS);
+                    String[] encAlgorithms = cmd.getOptionValues(ENCRYPTION_KEYS);
                     String keystore = cmd.getOptionValue(KEY_STORE_FILE);
                     String keypasswd = cmd.getOptionValue(KEY_STORE_PASSWORD);
                     String dnName = cmd.getOptionValue(DN_NAME);
                     int expiration = Integer.parseInt(cmd.getOptionValue(EXPIRATION));
 
-                    List<SignatureAlgorithm> signatureAlgorithms = SignatureAlgorithm.fromString(algorithms);
-                    if (signatureAlgorithms.isEmpty()) {
+                    List<SignatureAlgorithm> signatureAlgorithms = cmd.hasOption(SIGNING_KEYS) ?
+                            SignatureAlgorithm.fromString(sigAlgorithms) : new ArrayList<SignatureAlgorithm>();
+                    List<SignatureAlgorithm> encryptionAlgorithms = cmd.hasOption(ENCRYPTION_KEYS) ?
+                            SignatureAlgorithm.fromString(encAlgorithms) : new ArrayList<SignatureAlgorithm>();
+                    if (signatureAlgorithms.isEmpty() && encryptionAlgorithms.isEmpty()) {
                         help();
                     } else {
                         try {
@@ -190,6 +227,29 @@ public class KeyGenerator {
                                 jwks.getKeys().add(key);
                             }
 
+                            for (SignatureAlgorithm encryptionAlgorithm : encryptionAlgorithms) {
+                                JSONObject result = cryptoProvider.generateKey(encryptionAlgorithm,
+                                        calendar.getTimeInMillis());
+                                // System.out.println(result);
+
+                                JSONWebKey key = new JSONWebKey();
+                                key.setKid(result.getString(KEY_ID));
+                                key.setUse(Use.ENCRYPTION);
+                                key.setAlg(encryptionAlgorithm);
+                                key.setKty(KeyType.fromString(encryptionAlgorithm.getFamily().toString()));
+                                key.setExp(result.optLong(EXPIRATION_TIME));
+                                key.setCrv(encryptionAlgorithm.getCurve());
+                                key.setN(result.optString(MODULUS));
+                                key.setE(result.optString(EXPONENT));
+                                key.setX(result.optString(X));
+                                key.setY(result.optString(Y));
+
+                                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                                key.setX5c(StringUtils.toList(x5c));
+
+                                jwks.getKeys().add(key);
+                            }
+
                             System.out.println(jwks);
                         } catch (Exception e) {
                             log.error("Failed to generate keys", e);
@@ -209,7 +269,7 @@ public class KeyGenerator {
             HelpFormatter formatter = new HelpFormatter();
 
             formatter.printHelp(
-                    "KeyGenerator -algorithms alg ... -expiration n_days [-ox11 url] [-keystore path -keypasswd secret -dnname dn_name]",
+                    "KeyGenerator -sig_keys alg ... -enc_keys alg ... -expiration n_days [-ox11 url] [-keystore path -keypasswd secret -dnname dn_name]",
                     options);
             System.exit(0);
         }
