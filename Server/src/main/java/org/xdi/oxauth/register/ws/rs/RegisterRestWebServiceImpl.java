@@ -52,6 +52,7 @@ import java.util.*;
 
 import static org.xdi.oxauth.model.register.RegisterRequestParam.*;
 import static org.xdi.oxauth.model.register.RegisterResponseParam.*;
+import static org.xdi.oxauth.model.util.StringUtils.implode;
 import static org.xdi.oxauth.model.util.StringUtils.toList;
 
 /**
@@ -60,7 +61,7 @@ import static org.xdi.oxauth.model.util.StringUtils.toList;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version October 26, 2017
+ * @version December 7, 2017
  */
 @Path("/")
 public class RegisterRestWebServiceImpl implements RegisterRestWebService {
@@ -109,7 +110,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
         Response.ResponseBuilder builder = Response.ok();
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(httpRequest), Action.CLIENT_REGISTRATION);
         try {
-            final RegisterRequest r = RegisterRequest.fromJson(requestParams);
+            final RegisterRequest r = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
 
             log.info("Attempting to register client: applicationType = {}, clientName = {}, redirectUris = {}, isSecure = {}, sectorIdentifierUri = {}, defaultAcrValues = {}",
                     r.getApplicationType(), r.getClientName(), r.getRedirectUris(), securityContext.isSecure(), r.getSectorIdentifierUri(), r.getDefaultAcrValues());
@@ -197,7 +198,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                             clientService.persist(client);
 
-                            JSONObject jsonObject = getJSONObject(client);
+                            JSONObject jsonObject = getJSONObject(client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
                             builder.entity(jsonObject.toString(4).replace("\\/", "/"));
 
                             oAuth2AuditLog.setClientId(client.getClientId());
@@ -402,7 +403,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             p_client.setRequestUris(requestUris.toArray(new String[requestUris.size()]));
         }
 
-        List<String> scopes = requestObject.getScopes();
+        List<String> scopes = requestObject.getScope();
         List<String> scopesDn;
         if (scopes != null && !scopes.isEmpty()
                 && appConfiguration.getDynamicRegistrationScopesParamEnabled() != null
@@ -442,7 +443,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
             final String accessToken = tokenService.getTokenFromAuthorizationParameter(authorization);
 
             if (StringUtils.isNotBlank(accessToken) && StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(requestParams)) {
-                final RegisterRequest request = RegisterRequest.fromJson(requestParams);
+                final RegisterRequest request = RegisterRequest.fromJson(requestParams, appConfiguration.getLegacyDynamicRegistrationScopeParam());
                 if (request != null) {
                     boolean redirectUrisValidated = true;
                     if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
@@ -452,7 +453,7 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
 
                     if (redirectUrisValidated) {
                         if (request.getSubjectType() != null
-                                && !appConfiguration.getSubjectTypesSupported().contains(request.getSubjectType())) {
+                                && !appConfiguration.getSubjectTypesSupported().contains(request.getSubjectType().toString())) {
                             log.debug("Client UPDATE : parameter subject_type is invalid. Returns BAD_REQUEST response.");
                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                             return Response.status(Response.Status.BAD_REQUEST).
@@ -542,11 +543,11 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
     }
 
     private String clientAsEntity(Client p_client) throws JSONException, StringEncrypter.EncryptionException {
-        final JSONObject jsonObject = getJSONObject(p_client);
+        final JSONObject jsonObject = getJSONObject(p_client, appConfiguration.getLegacyDynamicRegistrationScopeParam());
         return jsonObject.toString(4).replace("\\/", "/");
     }
 
-    private JSONObject getJSONObject(Client client) throws JSONException, StringEncrypter.EncryptionException {
+    private JSONObject getJSONObject(Client client, boolean authorizationRequestCustomAllowedParameters) throws JSONException, StringEncrypter.EncryptionException {
         JSONObject responseJsonObject = new JSONObject();
 
         Util.addToJSONObjectIfNotNull(responseJsonObject, RegisterResponseParam.CLIENT_ID.toString(), client.getClientId());
@@ -608,7 +609,12 @@ public class RegisterRestWebServiceImpl implements RegisterRestWebService {
                 scopeNames[i] = scope.getDisplayName();
             }
         }
-        Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPES.toString(), scopeNames);
+
+        if (authorizationRequestCustomAllowedParameters) {
+            Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPES.toString(), scopeNames);
+        } else {
+            Util.addToJSONObjectIfNotNull(responseJsonObject, SCOPE.toString(), implode(scopeNames, " "));
+        }
 
         return responseJsonObject;
     }

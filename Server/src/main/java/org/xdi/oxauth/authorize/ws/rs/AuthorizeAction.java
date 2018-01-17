@@ -76,9 +76,6 @@ public class AuthorizeAction {
     private RedirectionUriService redirectionUriService;
 
     @Inject
-    private AuthenticationService authenticationService;
-
-    @Inject
     private ClientAuthorizationsService clientAuthorizationsService;
 
     @Inject
@@ -116,6 +113,9 @@ public class AuthorizeAction {
 
     @Inject
     private AuthorizeService authorizeService;
+
+    @Inject
+    private RequestParameterService requestParameterService;
 
     // OAuth 2.0 request parameters
     private String scope;
@@ -205,7 +205,7 @@ public class AuthorizeAction {
 
         if (session == null || StringUtils.isBlank(session.getUserDn()) || SessionIdState.AUTHENTICATED != session.getState()) {
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-            Map<String, String> requestParameterMap = authenticationService.getAllowedParameters(parameterMap);
+            Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
 

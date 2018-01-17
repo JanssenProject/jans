@@ -128,9 +128,8 @@ class PersonAuthentication(PersonAuthenticationType):
             try:
                 userService = CdiUtil.bean(UserService)
                 authenticationService = CdiUtil.bean(AuthenticationService)
-                foundUser = userService.getUserByAttribute("oxExternalUid", self.getUserValueFromAuth("provider",
-                                                                                                      requestParameters) + ":" + self.getUserValueFromAuth(
-                    self.getUidRemoteAttr(), requestParameters))
+
+                foundUser = userService.getUserByAttribute("mail", self.getUserValueFromAuth("email", requestParameters))
 
                 if (foundUser == None):
                     newUser = User()

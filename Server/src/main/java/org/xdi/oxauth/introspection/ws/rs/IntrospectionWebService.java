@@ -7,6 +7,9 @@
 package org.xdi.oxauth.introspection.ws.rs;
 
 import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
@@ -22,6 +25,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -47,6 +51,11 @@ public class IntrospectionWebService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 400, message = "invalid_request\n" +
+                    "The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats the same parameter or is otherwise malformed.  The resource server SHOULD respond with the HTTP 400 (Bad Request) status code."),
+    		@ApiResponse(code = 500, message = "Introspection Internal Server Failed.")
+    })
     public Response introspectGet(@HeaderParam("Authorization") String p_authorization,
                                   @QueryParam("token") String p_token,
                                   @QueryParam("token_type_hint") String tokenTypeHint
@@ -77,14 +86,16 @@ public class IntrospectionWebService {
                         final AuthorizationGrant grantOfIntrospectionToken = authorizationGrantList.getAuthorizationGrantByAccessToken(p_token);
                         if (grantOfIntrospectionToken != null) {
                             final AbstractToken tokenToIntrospect = grantOfIntrospectionToken.getAccessToken(p_token);
+                            final User user = grantOfIntrospectionToken.getUser();
 
                             response.setActive(tokenToIntrospect.isValid());
-                            response.setExpiresAt(tokenToIntrospect.getExpirationDate());
-                            response.setIssuedAt(tokenToIntrospect.getCreationDate());
+                            response.setExpiresAt(dateToSeconds(tokenToIntrospect.getExpirationDate()));
+                            response.setIssuedAt(dateToSeconds(tokenToIntrospect.getCreationDate()));
                             response.setAcrValues(tokenToIntrospect.getAuthMode());
                             response.setScopes(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : new ArrayList<String>()); // #433
                             response.setClientId(grantOfIntrospectionToken.getClientId());
-                            response.setUsername(grantOfIntrospectionToken.getUserId());
+                            response.setSubject(grantOfIntrospectionToken.getUserId());
+                            response.setUsername(user != null ? user.getAttribute("displayName") : null);
                             response.setIssuer(appConfiguration.getIssuer());
                             response.setAudience(grantOfIntrospectionToken.getClientId());
 
@@ -111,5 +122,9 @@ public class IntrospectionWebService {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST)).build();
+    }
+
+    public static Integer dateToSeconds(Date date) {
+        return date != null ? (int) (date.getTime() / 1000) : null;
     }
 }
