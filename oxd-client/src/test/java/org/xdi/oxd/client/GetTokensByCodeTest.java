@@ -36,7 +36,7 @@ public class GetTokensByCodeTest {
             client = new CommandClient(host, port);
 
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-            GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, redirectUrl, userId, userSecret, CoreUtils.secureRandomString());
+            GetTokensByCodeResponse tokensResponse = tokenByCode(client, site, userId, userSecret, CoreUtils.secureRandomString());
             refreshToken(tokensResponse, client, site.getOxdId());
         } finally {
             CommandClient.closeQuietly(client);
@@ -60,7 +60,7 @@ public class GetTokensByCodeTest {
         return refreshResponse;
     }
 
-    public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String redirectUrl, String userId, String userSecret, String nonce) {
+    public static GetTokensByCodeResponse tokenByCode(CommandClient client, RegisterSiteResponse site, String userId, String userSecret, String nonce) {
 
         final String state = CoreUtils.secureRandomString();
 
