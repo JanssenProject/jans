@@ -6,25 +6,6 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
@@ -50,22 +31,27 @@ import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.model.util.LocaleUtil;
 import org.xdi.oxauth.model.util.Util;
-import org.xdi.oxauth.service.AuthorizeService;
-import org.xdi.oxauth.service.ClientAuthorizationsService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.RequestParameterService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.service.external.ExternalAuthenticationService;
 import org.xdi.oxauth.service.external.ExternalConsentGatheringService;
 import org.xdi.service.net.NetworkService;
 import org.xdi.util.StringHelper;
 
+import javax.enterprise.context.RequestScoped;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
+
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version September 6, 2017
+ * @version January 17, 2018
  */
 @RequestScoped
 @Named
@@ -121,7 +107,7 @@ public class AuthorizeAction {
 
     @Inject
     private ExternalContext externalContext;
-    
+
     @Inject
     private ConsentGathererService consentGatherer;
 
@@ -300,14 +286,15 @@ public class AuthorizeAction {
                 }
             }
 
-            if (client.getPersistClientAuthorizations()) {
-                ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
-                if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
-                        Arrays.asList(clientAuthorizations.getScopes()).containsAll(
-                                org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
-                    permissionGranted(session);
-                    return;
-                }
+            ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(
+                    user.getAttribute("inum"),
+                    client.getClientId(),
+                    client.getPersistClientAuthorizations());
+            if (clientAuthorizations != null && clientAuthorizations.getScopes() != null &&
+                    Arrays.asList(clientAuthorizations.getScopes()).containsAll(
+                            org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope))) {
+                permissionGranted(session);
+                return;
             }
 
         } else {
@@ -315,20 +302,20 @@ public class AuthorizeAction {
         }
 
         if (externalConsentGatheringService.isEnabled()) {
-        	if (consentGatherer.isConsentGathered()) {
-            	log.trace("Consent-gathered flow passed successfully");
+            if (consentGatherer.isConsentGathered()) {
+                log.trace("Consent-gathered flow passed successfully");
                 permissionGranted(session);
                 return;
-        	}
+            }
 
-        	log.trace("Starting external consent-gathering flow");
+            log.trace("Starting external consent-gathering flow");
 
-        	boolean result = consentGatherer.configure(session.getUserDn(), clientId, state);
-        	if (!result) {
+            boolean result = consentGatherer.configure(session.getUserDn(), clientId, state);
+            if (!result) {
                 log.error("Failed to initialize external consent-gathering flow.");
                 permissionDenied();
                 return;
-        	}
+            }
         }
 
         return;
@@ -356,7 +343,7 @@ public class AuthorizeAction {
     }
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
-    	return authorizeService.getScopes(scope);
+        return authorizeService.getScopes(scope);
     }
 
     /**
@@ -627,12 +614,12 @@ public class AuthorizeAction {
 
     public void permissionGranted(SessionId session) {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
-    	authorizeService.permissionGranted(httpRequest, session);
+        authorizeService.permissionGranted(httpRequest, session);
     }
 
     public void permissionDenied() {
         final SessionId session = getSession();
-    	authorizeService.permissionDenied(session);
+        authorizeService.permissionDenied(session);
     }
 
     private void authenticationFailedSessionInvalid() {
