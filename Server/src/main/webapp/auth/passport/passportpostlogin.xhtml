@@ -46,13 +46,6 @@
                 history.replaceState({}, 'oxAuth-Login', '/oxauth/auth/passport/passport-post-login');
                 var userQueryString = decodeURIComponent(user[1]);
                 var userObj = JSON.parse(userQueryString.substring(0, userQueryString.indexOf('}') + 1));
-                if(provider.match(/shibboleth/)) {
-                    var arc_value_set = '<div style="visibility: hidden"> #{identity.sessionId.sessionAttributes["acr"] = "passport-saml"} </div>';
-                    jQuery("#acr_set").append(arc_value_set);
-                } else {
-                    var arc_value_set = '<div style="visibility: hidden"> #{identity.sessionId.sessionAttributes["acr"] = "passport-social"} </div>';
-                    jQuery("#acr_set").append(arc_value_set);
-                }
                 document.getElementById('loginForm')["loginForm:userid"].value = userObj.id;
                 document.getElementById('loginForm')["loginForm:displayname"].value = userObj.name;
                 document.getElementById('loginForm')["loginForm:username"].value = userObj.username;
@@ -65,7 +58,6 @@
                     document.getElementById('loginForm')["loginForm:email"].value = userObj.email;
                     document.getElementById('loginForm')["loginForm:postForm"].click();
                 }
-
             });
         </script>
     </ui:define>
@@ -79,8 +71,6 @@
                 <div class="login-panel">
                     <div class="login-panel-header">#{msgs['passport.loginSecondStep']}</div>
                     <div class="login-panel-body">
-                    <div id="acr_set"></div>
-
 			<ui:param name="client"
 				value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}" />
 
