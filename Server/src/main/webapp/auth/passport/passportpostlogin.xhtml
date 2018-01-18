@@ -48,15 +48,16 @@
                 var userObj
                 try{
                     userObj = JSON.parse(userQueryString.substring(0, userQueryString.indexOf('}') + 1));
+                    document.getElementById('loginForm')["loginForm:provider"].value = userObj.provider;
                 }
                 catch(err){
                     userObj = JSON.parse(userQueryString);
+                    document.getElementById('loginForm')["loginForm:provider"].value = userObj.provider['_'];
                 }
                 document.getElementById('loginForm')["loginForm:userid"].value = userObj.id;
                 document.getElementById('loginForm')["loginForm:displayname"].value = userObj.name;
                 document.getElementById('loginForm')["loginForm:username"].value = userObj.username;
                 document.getElementById('loginForm')["loginForm:token"].value = userObj.accessToken;
-                document.getElementById('loginForm')["loginForm:provider"].value = userObj.provider;
                 document.getElementById('loginForm')["loginForm:givenname"].value = userObj.givenName;
                 document.getElementById('loginForm')["loginForm:familyname"].value = userObj.familyName;
                 document.getElementById('loginForm')["loginForm:name"].value = userObj.name;
