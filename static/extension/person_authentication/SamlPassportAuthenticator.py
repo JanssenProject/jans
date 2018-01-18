@@ -155,11 +155,11 @@ class PersonAuthentication(PersonAuthenticationType):
                                     localAttribute != "provider")):
                             newUser.setAttribute(localAttribute, localAttributeValue)
 
-                        newUser.setAttribute("oxExternalUid", "passport-saml" + ":" + self.getUserValueFromAuth(self.getUidRemoteAttr(), requestParameters))
+                    newUser.setAttribute("oxExternalUid", "passport-saml" + ":" + self.getUserValueFromAuth(self.getUidRemoteAttr(), requestParameters))
 
-                        print ("Passport-saml: " + self.getUserValueFromAuth("provider",
+                    print ("Passport-saml: " + self.getUserValueFromAuth("provider",
                                                      requestParameters) + ": Attempting to add user " + self.getUserValueFromAuth(
-                        self.getUidRemoteAttr(), requestParameters))
+                    self.getUidRemoteAttr(), requestParameters))
 
                     try:
                         foundUser = userService.addUser(newUser, True)
