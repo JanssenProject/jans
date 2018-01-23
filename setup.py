@@ -756,7 +756,7 @@ class Setup(object):
 
         return foundFiles
 
-    def readFile(self, inFilePath):
+    def readFile(self, inFilePath, logError=True):
         inFilePathText = None
 
         try:
@@ -764,8 +764,9 @@ class Setup(object):
             inFilePathText = f.read()
             f.close
         except:
-            self.logIt("Error reading %s" % inFilePathText, True)
-            self.logIt(traceback.format_exc(), True)
+            if logError:
+                self.logIt("Error reading %s" % inFilePathText, True)
+                self.logIt(traceback.format_exc(), True)
 
         return inFilePathText
 
@@ -1021,7 +1022,7 @@ class Setup(object):
     def detect_os_type(self):
         # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
-        distro_info = self.readFile('/etc/redhat-release')
+        distro_info = self.readFile('/etc/redhat-release', False)
         if distro_info == None:
             distro_info = self.readFile('/etc/os-release')
 
