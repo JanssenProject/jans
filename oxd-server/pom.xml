@@ -32,6 +32,9 @@
             <testResource>
                 <directory>src/test/resources</directory>
                 <filtering>true</filtering>
+                <includes>
+                    <include>**/*.json</include>
+                </includes>
             </testResource>
         </testResources>
         <filters>
