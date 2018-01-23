@@ -34,6 +34,7 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>**/*.json</include>
+                    <include>**/*.xml</include>
                 </includes>
             </testResource>
         </testResources>
