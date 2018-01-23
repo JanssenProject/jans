@@ -34,7 +34,7 @@ do_start () {
         if [ "x$PID_NUM" = "x" ]; then                
                 echo "Starting $SERVICE_NAME ..."                
 
-                nohup java -Doxd.server.config=$CONF/oxd-conf.json -Dlog4j.configuration=$CONF/log4j.xml -cp $LIB/bcprov-jdk15on-1.54.jar:$LIB/resteasy-jaxrs-2.3.7.Final.jar:$LIB/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher 2>>/dev/null>>/dev/null&                
+                nohup java -Doxd.server.config=$CONF/oxd-conf.json -Dlog4j.configuration=$CONF/log4j.xml -cp $LIB/bcprov-jdk15on-1.54.jar:$LIB/oxd-server-jar-with-dependencies.jar org.xdi.oxd.server.ServerLauncher 2>>/dev/null>>/dev/null&                
 
                 sleep 10
                 echo $! > $TMP_PID_PATH_NAME        
