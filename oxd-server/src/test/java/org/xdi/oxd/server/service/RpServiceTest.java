@@ -32,6 +32,7 @@ public class RpServiceTest {
     @BeforeClass
     public void setUp() {
         Tester.setSystemConfPath();
+        configurationService.load();
         persistenceService.create();
         service.removeAllRps();
         service.load();
@@ -45,6 +46,7 @@ public class RpServiceTest {
     @AfterSuite
     public void tearDownSuite() {
         service.removeAllRps();
+        persistenceService.destroy();
         EXECUTOR_SERVICE.shutdown();
     }
 
