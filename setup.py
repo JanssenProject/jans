@@ -1206,8 +1206,14 @@ class Setup(object):
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
-        if os.path.exists(jettyServiceConfiguration+"_web_resources.xml"):
-            self.copyFile(jettyServiceConfiguration+"_web_resources.xml", self.jetty_base+"/"+serviceName+"/webapps")
+        try:
+            web_resources = '%s_web_resources.xml' % serviceName
+            if os.path.exists('%s/jetty/%s' % (self.templateFolder, web_resources)):
+                self.renderTemplateInOut(web_resources, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
+                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_resources), self.jetty_base+"/"+serviceName+"/webapps")
+        except:
+            self.setup.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
+            self.setup.logIt(traceback.format_exc(), True)
 
         self.copyFile('%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName)
         source_string = '# Provides:          jetty'
