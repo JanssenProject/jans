@@ -35,7 +35,7 @@ public enum ErrorResponseCode {
     INVALID_ACCESS_TOKEN_BAD_HASH("invalid_access_token_bad_hash", "access_token is invalid. Hash of access_token does not match hash from id_token (at_hash)."),
     INVALID_AUTHORIZATION_CODE_BAD_HASH("invalid_authorization_code_bad_hash", "Authorization code is invalid. Hash of authorization code does not match hash from id_token (c_hash)."),
     INVALID_REGISTRATION_CLIENT_URL("invalid_registration_client_url", "Registration client URL is invalid. Please check registration_client_url response parameter from IDP (http://openid.net/specs/openid-connect-registration-1_0.html#RegistrationResponse)."),
-    INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. Please use register_site or setup_client command for site registration."),
+    INVALID_OXD_ID("invalid_oxd_id", "Invalid oxd_id. Unable to find site for oxd_id. It does not exist or removed from the server. Please use register_site command to register a site."),
     INVALID_REQUEST("invalid_request", "Request is invalid. It doesn't contains all required parameters or otherwise is malformed."),
     INVALID_REQUEST_SCOPES_REQUIRED("invalid_request", "Request is invalid. Scopes are required parameter in request."),
     RPT_NOT_AUTHORIZED("rpt_not_authorized", "Unable to authorize RPT."),

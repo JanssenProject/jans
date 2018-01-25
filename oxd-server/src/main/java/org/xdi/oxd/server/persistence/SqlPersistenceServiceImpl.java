@@ -124,12 +124,12 @@ public class SqlPersistenceServiceImpl implements PersistenceService {
                 return rp;
             } else {
                 LOG.error("Failed to fetch RP by id: " + oxdId);
-                throw new RuntimeException("No RP with id: " + oxdId);
+                return null;
             }
         } catch (Exception e) {
             LOG.error("Failed to find RP by id: " + oxdId + ". Error: " + e.getMessage(), e);
             rollbackSilently(conn);
-            throw new RuntimeException(e);
+            return null;
         } finally {
             IOUtils.closeSilently(conn);
         }
