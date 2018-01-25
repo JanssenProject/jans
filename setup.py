@@ -2445,7 +2445,6 @@ class Setup(object):
     def deleteLdapPw(self):
         try:
             os.remove(self.ldapPassFn)
-            os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
         except:
             self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
             self.logIt(traceback.format_exc(), True)
@@ -2494,6 +2493,13 @@ class Setup(object):
                       ])
         except:
             self.logIt("Error running stop-ds", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def post_install_opendj(self):
+        try:
+            os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
+        except:
+            self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % self.ldapBaseFolder)
             self.logIt(traceback.format_exc(), True)
 
     def configure_opendj(self):
@@ -2971,18 +2977,22 @@ class Setup(object):
 
         self.extractOpenDJ()
         self.opendj_version = self.determineOpenDJVersion()
+
         self.createLdapPw()
-        self.install_opendj()
-
-        if self.ldap_type == 'opendj':
-            self.prepare_opendj_schema()
-            self.setup_opendj_service()
-            self.configure_opendj()
-            self.export_opendj_public_cert()
-            self.index_opendj()
-            self.import_ldif_opendj()
-
-        self.deleteLdapPw()
+        try:
+            self.install_opendj()
+    
+            if self.ldap_type == 'opendj':
+                self.prepare_opendj_schema()
+                self.setup_opendj_service()
+                self.configure_opendj()
+                self.export_opendj_public_cert()
+                self.index_opendj()
+                self.import_ldif_opendj()
+    
+            self.post_install_opendj()
+        finally:
+            self.deleteLdapPw()
 
         if self.ldap_type == 'openldap':
             self.logIt("Running OpenLDAP Setup")
