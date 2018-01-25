@@ -26,8 +26,9 @@ public class RemoveSiteOperation extends BaseOperation<RemoveSiteParams> {
 
     @Override
     public CommandResponse execute(RemoveSiteParams params) throws Exception {
-        if (getRpService().remove(getRp().getOxdId())) {
-            return okResponse(new RemoveSiteResponse(getRp().getOxdId()));
+        String oxdId = getRp().getOxdId();
+        if (getRpService().remove(oxdId)) {
+            return okResponse(new RemoveSiteResponse(oxdId));
         }
         return CommandResponse.createErrorResponse(ErrorResponseCode.FAILED_TO_REMOVE_SITE);
     }
