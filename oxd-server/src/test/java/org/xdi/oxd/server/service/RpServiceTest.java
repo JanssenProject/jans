@@ -3,6 +3,8 @@ package org.xdi.oxd.server.service;
 import com.google.inject.Inject;
 import org.testng.annotations.*;
 import org.xdi.oxd.Tester;
+import org.xdi.oxd.common.ErrorResponseCode;
+import org.xdi.oxd.common.ErrorResponseException;
 import org.xdi.oxd.server.guice.GuiceModule;
 import org.xdi.oxd.server.persistence.PersistenceService;
 
@@ -12,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -60,7 +63,7 @@ public class RpServiceTest {
         Rp rp = newRp();
 
         service.create(rp);
-        assertEquals(service.getRps().size(), 2);
+        assertEquals(service.getRps().size(), 1);
 
         rp.setClientName("Updated name");
         service.update(rp);
@@ -69,7 +72,29 @@ public class RpServiceTest {
         assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
     }
 
-    @Test(invocationCount = 10, threadPoolSize = 10)
+    @Test
+    public void remove() throws Exception {
+        Rp rp = newRp();
+
+        service.create(rp);
+        assertNotNull(service.getRp(rp.getOxdId()));
+
+        rp.setClientName("Updated name");
+        service.update(rp);
+
+        assertEquals(service.getRp(rp.getOxdId()).getClientName(), "Updated name");
+        assertEquals(persistenceService.getRp(rp.getOxdId()).getClientName(), "Updated name");
+
+        service.remove(rp.getOxdId());
+        try {
+            service.getRp(rp.getOxdId());
+            throw new AssertionError("RP is not removed.");
+        } catch (ErrorResponseException e) {
+            assertEquals(e.getErrorResponseCode(), ErrorResponseCode.INVALID_OXD_ID);
+        }
+    }
+
+    @Test(invocationCount = 10, threadPoolSize = 10, enabled = false)
     public void stressTest() throws IOException {
 
         final Rp rp = configurationService.defaultRp();
