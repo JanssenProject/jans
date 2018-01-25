@@ -95,6 +95,10 @@ public class RpService {
     }
 
     public boolean remove(String oxdId) {
-        return persistenceService.remove(oxdId);
+        boolean ok = persistenceService.remove(oxdId);
+        if (ok) {
+            rpMap.remove(oxdId);
+        }
+        return ok;
     }
 }
