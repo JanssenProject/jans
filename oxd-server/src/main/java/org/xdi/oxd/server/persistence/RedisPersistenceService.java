@@ -94,7 +94,7 @@ public class RedisPersistenceService implements PersistenceService {
     @Override
     public boolean remove(String oxdId) {
         redisProvider.remove(oxdId);
-        return false;
+        return true;
     }
 
     private void testConnection() {
