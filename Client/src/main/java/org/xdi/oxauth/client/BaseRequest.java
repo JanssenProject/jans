@@ -14,11 +14,13 @@ import org.xdi.oxauth.model.common.AuthorizationMethod;
 import org.xdi.oxauth.model.util.Util;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Javier Rojas Blum Date: 01.31.2012
+ * @author Javier Rojas Blum
+ * @version January 26. 2018
  */
 public abstract class BaseRequest {
 
@@ -100,12 +102,14 @@ public abstract class BaseRequest {
     }
 
     /**
-     * Returns the client credentials.
+     * Returns the client credentials (URL encoded).
      *
      * @return The client credentials.
      */
     public String getCredentials() throws UnsupportedEncodingException {
-        return authUsername + ":" + authPassword;
+        return URLEncoder.encode(authUsername, Util.UTF8_STRING_ENCODING)
+                + ":"
+                + URLEncoder.encode(authPassword, Util.UTF8_STRING_ENCODING);
     }
 
     /**
