@@ -76,11 +76,18 @@ public class ValidationService {
      * Returns whether has valid token
      *
      * @param params params
-     * @return whether has valid token
+     * @return true - client is remote, false - client is local. If validation does not pass exception must be thrown
      */
     private boolean validate(HasProtectionAccessTokenParams params) {
         if (params instanceof SetupClientParams) {
             return false;
+        }
+        if (params instanceof UpdateSiteParams) {
+            final RpService rpService = ServerLauncher.getInjector().getInstance(RpService.class);
+            final Rp rp = rpService.getRp(params.getOxdId());
+            if (rp.getSetupClient() != null && rp.getSetupClient()) {
+                return false; // skip validation if client is setup client (if we can setup client without protection access token then we allow also update it)
+            }
         }
 
         final Configuration configuration = ServerLauncher.getInjector().getInstance(ConfigurationService.class).get();
