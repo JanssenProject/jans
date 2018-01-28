@@ -63,6 +63,8 @@ public class Rp implements Serializable {
     @JsonProperty(value = "client_jwks_uri")
     private String clientJwksUri;
 
+    @JsonProperty(value = "is_setup_client")
+    private Boolean setupClient;
     @JsonProperty(value = "setup_oxd_id")
     private String setupOxdId;
     @JsonProperty(value = "setup_client_id")
@@ -142,6 +144,7 @@ public class Rp implements Serializable {
         this.sectorIdentifierUri = conf.sectorIdentifierUri;
         this.clientJwksUri = conf.clientJwksUri;
 
+        this.setupClient = conf.setupClient;
         this.setupOxdId = conf.setupOxdId;
         this.setupClientId = conf.setupClientId;
 
@@ -514,6 +517,14 @@ public class Rp implements Serializable {
         return null;
     }
 
+    public Boolean getSetupClient() {
+        return setupClient;
+    }
+
+    public void setSetupClient(Boolean setupClient) {
+        this.setupClient = setupClient;
+    }
+
     public String getSetupOxdId() {
         return setupOxdId;
     }
@@ -553,6 +564,7 @@ public class Rp implements Serializable {
                 ", clientName='" + clientName + '\'' +
                 ", sectorIdentifierUri='" + sectorIdentifierUri + '\'' +
                 ", clientJwksUri='" + clientJwksUri + '\'' +
+                ", setupClient='" + setupClient + '\'' +
                 ", setupOxdId='" + setupOxdId + '\'' +
                 ", setupClientId='" + setupClientId + '\'' +
                 ", scope=" + scope +
