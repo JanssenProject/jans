@@ -98,5 +98,9 @@
             <class name="org.xdi.oxd.client.GetClientTokenTest"/>
         </classes>
     </test>
-
+    <test name="Introspect access token" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.IntrospectAccessTokenTest"/>
+        </classes>
+    </test>
 </suite>
