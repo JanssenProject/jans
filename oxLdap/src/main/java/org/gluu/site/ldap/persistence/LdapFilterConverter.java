@@ -7,7 +7,7 @@ import org.gluu.site.ldap.exception.SearchException;
 /**
  * Simple filter without dependency to specific persistence filter mechanism
  * 
- * @author Yuriy Movchan Date: 2017/12/15
+ * @author Yuriy Movchan Date: 12/15/2017
  */
 public class LdapFilterConverter {
 

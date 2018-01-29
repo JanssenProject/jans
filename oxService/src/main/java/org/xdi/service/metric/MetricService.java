@@ -24,11 +24,9 @@ import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.gluu.site.ldap.persistence.BatchOperation;
+import org.gluu.site.ldap.LdapBatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SearchScope;
 import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
@@ -40,6 +38,9 @@ import org.xdi.util.StringHelper;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+
+import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.persist.model.SearchScope;
 import org.gluu.search.filter.Filter;
 
 /**
@@ -159,7 +160,7 @@ public abstract class MetricService implements Serializable {
 	}
 
 	public void removeBranch(String branchDn) {
-		ldapEntryManager.removeWithSubtree(branchDn);
+		ldapEntryManager.removeRecursively(branchDn);
 	}
 
 	public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
@@ -201,7 +202,7 @@ public abstract class MetricService implements Serializable {
 				Filter filter = Filter.createANDFilter(metricTypeFilters);
 
 				List<? extends MetricEntry> metricTypeMonthResult = (List<? extends MetricEntry>) ldapEntryManager.findEntries(metricDn,
-						metricType.getMetricEntryType(), returnAttributes, filter);
+						metricType.getMetricEntryType(), filter, returnAttributes);
 				metricTypeResult.addAll(metricTypeMonthResult);
 			}
 			// Sort entries to avoid calculation errors
@@ -213,7 +214,7 @@ public abstract class MetricService implements Serializable {
 		return result;
 	}
 
-	public List<MetricEntry> getExpiredMetricEntries(BatchOperation<MetricEntry> batchOperation, int batchSize, String baseDnForPeriod, Date expirationDate) {
+	public List<MetricEntry> getExpiredMetricEntries(LdapBatchOperation<MetricEntry> batchOperation, int batchSize, String baseDnForPeriod, Date expirationDate) {
 		Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
 		List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB, new String[] { "uniqueIdentifier" }, batchOperation, 0, batchSize, batchSize);
@@ -221,7 +222,7 @@ public abstract class MetricService implements Serializable {
 		return metricEntries;
 	}
 
-	public List<SimpleBranch> findAllPeriodBranches(BatchOperation<SimpleBranch> batchOperation, int batchSize, ApplicationType applicationType, String applianceInum) {
+	public List<SimpleBranch> findAllPeriodBranches(LdapBatchOperation<SimpleBranch> batchOperation, int batchSize, ApplicationType applicationType, String applianceInum) {
 		String baseDn = buildDn(null, null, applicationType, applianceInum);
 
 		Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
@@ -232,7 +233,7 @@ public abstract class MetricService implements Serializable {
 		final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
 		// Remove expired entries
 		for (final String baseDnForPeriod : keepBaseDnForPeriod) {
-			BatchOperation<MetricEntry> metricEntryBatchOperation = new BatchOperation<MetricEntry>(ldapEntryManager) {
+			LdapBatchOperation<MetricEntry> metricEntryBatchOperation = new LdapBatchOperation<MetricEntry>(ldapEntryManager) {
 				@Override
 				protected List<MetricEntry> getChunkOrNull(int batchSize) {
 					return getExpiredMetricEntries(this, batchSize, baseDnForPeriod, expirationDate);
@@ -248,7 +249,7 @@ public abstract class MetricService implements Serializable {
 			metricEntryBatchOperation.iterateAllByChunks(batchSize);
 		}
 
-		BatchOperation<SimpleBranch> batchOperation = new BatchOperation<SimpleBranch>(ldapEntryManager) {
+		LdapBatchOperation<SimpleBranch> batchOperation = new LdapBatchOperation<SimpleBranch>(ldapEntryManager) {
 			@Override
 			protected List<SimpleBranch> getChunkOrNull(int batchSize) {
 				return findAllPeriodBranches(this, batchSize, applicationType, applianceInum);

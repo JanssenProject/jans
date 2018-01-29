@@ -9,14 +9,14 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.site.ldap.persistence.BatchOperation;
+import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.search.filter.Filter;
+import org.gluu.site.ldap.LdapBatchOperation;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.SearchScope;
 import org.xdi.log.LoggingHelper;
 
-import com.unboundid.ldap.sdk.Filter;
 import com.unboundid.util.StaticUtils;
 
 /**
@@ -38,7 +38,7 @@ public class LdapSampleBatchJob {
 		// Create LDAP entry manager
 		final LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
 
-        BatchOperation<SimpleTokenLdap> tokenLdapBatchOperation = new BatchOperation<SimpleTokenLdap>(ldapEntryManager) {
+        LdapBatchOperation<SimpleTokenLdap> tokenLdapBatchOperation = new LdapBatchOperation<SimpleTokenLdap>(ldapEntryManager) {
         	
         	private int processedCount = 0;
 
@@ -66,7 +66,7 @@ public class LdapSampleBatchJob {
         tokenLdapBatchOperation.iterateAllByChunks(100);
 
 
-        BatchOperation<SimpleSession> sessionBatchOperation = new BatchOperation<SimpleSession>(ldapEntryManager) {
+        LdapBatchOperation<SimpleSession> sessionBatchOperation = new LdapBatchOperation<SimpleSession>(ldapEntryManager) {
         	
         	private int processedCount = 0;
 

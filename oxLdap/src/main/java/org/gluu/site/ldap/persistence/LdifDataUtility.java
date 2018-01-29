@@ -6,6 +6,19 @@
 
 package org.gluu.site.ldap.persistence;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+import org.xdi.util.StringHelper;
+
 import com.unboundid.ldap.sdk.ChangeType;
 import com.unboundid.ldap.sdk.Entry;
 import com.unboundid.ldap.sdk.Filter;
@@ -19,19 +32,6 @@ import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldif.LDIFChangeRecord;
 import com.unboundid.ldif.LDIFException;
 import com.unboundid.ldif.LDIFReader;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
-import org.xdi.util.StringHelper;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Utility class to import ldif file to LDAP.

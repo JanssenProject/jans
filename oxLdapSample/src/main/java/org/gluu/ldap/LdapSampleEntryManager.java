@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.gluu.site.ldap.LdapConnectionProvider;
-import org.gluu.site.ldap.OperationsFacade;
+import org.gluu.site.ldap.LdapOperationsService;
 import org.gluu.site.ldap.persistence.LdapEntryManager;
 
 import com.unboundid.ldap.sdk.ResultCode;
@@ -64,7 +64,7 @@ public class LdapSampleEntryManager {
 				connectionProperties);
 
 		LdapEntryManager ldapEntryManager = new LdapEntryManager(
-				new OperationsFacade(connectionProvider, bindConnectionProvider));
+				new LdapOperationsService(connectionProvider, bindConnectionProvider));
 		log.debug("Created LdapEntryManager: " + ldapEntryManager);
 
 		return ldapEntryManager;

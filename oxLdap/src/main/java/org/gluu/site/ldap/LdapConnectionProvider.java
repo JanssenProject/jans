@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.gluu.site.ldap.persistence.exception.InvalidConfigurationException;
+import org.gluu.persist.exception.InvalidConfigurationException;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter.EncryptionException;

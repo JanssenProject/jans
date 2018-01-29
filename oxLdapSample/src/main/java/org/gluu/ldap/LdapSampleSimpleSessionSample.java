@@ -72,7 +72,7 @@ public class LdapSampleSimpleSessionSample {
 
 			Thread.sleep(5000L);
 		} finally {
-			ldapEntryManager.getLdapOperationService().getConnectionPool().close();
+			ldapEntryManager.getOperationService().getConnectionPool().close();
 		}
 	}
 

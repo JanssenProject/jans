@@ -54,7 +54,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
     public List<CustomScript> findAllCustomScripts(String[] returnAttributes) {
         String baseDn = baseDn();
 
-        List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, returnAttributes, null);
+        List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, null, returnAttributes);
 
 		return result;
 	}
@@ -74,7 +74,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
         		
         Filter filter = Filter.createORFilter(customScriptTypeFilters);
 
-        List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, returnAttributes, filter);
+        List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);
 
 		return result;
 	}

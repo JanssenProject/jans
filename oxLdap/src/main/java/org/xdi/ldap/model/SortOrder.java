@@ -5,10 +5,10 @@
  */
 package org.xdi.ldap.model;
 
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * @author Val Pecaoco

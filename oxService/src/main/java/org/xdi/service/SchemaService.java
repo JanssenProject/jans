@@ -490,7 +490,7 @@ public class SchemaService {
 	 * @return DN string for DS schema
 	 */
 	public String getDnForSchema() {
-		return ldapEntryManager.getLdapOperationService().getSubschemaSubentry();
+		return ldapEntryManager.getOperationService().getSubschemaSubentry();
 	}
 
 }

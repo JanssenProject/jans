@@ -14,31 +14,33 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
+import org.gluu.persist.event.DeleteNotifier;
+import org.gluu.persist.exception.AuthenticationException;
+import org.gluu.persist.exception.EntryPersistenceException;
+import org.gluu.persist.exception.MappingException;
+import org.gluu.persist.impl.AbstractEntryManager;
+import org.gluu.persist.model.AttributeData;
+import org.gluu.persist.model.AttributeDataModification;
+import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.PropertyAnnotation;
+import org.gluu.persist.model.SearchScope;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.OperationsFacade;
+import org.gluu.site.ldap.LdapBatchOperation;
+import org.gluu.site.ldap.LdapOperationsService;
 import org.gluu.site.ldap.exception.ConnectionException;
 import org.gluu.site.ldap.exception.SearchException;
-import org.gluu.site.ldap.persistence.AttributeDataModification.AttributeModificationType;
-import org.gluu.site.ldap.persistence.annotation.LdapEnum;
-import org.gluu.site.ldap.persistence.exception.AuthenticationException;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
-import org.gluu.site.ldap.persistence.exception.InvalidArgumentException;
-import org.gluu.site.ldap.persistence.exception.MappingException;
-import org.gluu.site.ldap.persistence.property.Getter;
-import org.gluu.site.ldap.persistence.property.Setter;
-import org.gluu.site.ldap.persistence.util.ReflectHelper;
+import org.gluu.site.ldap.exception.SearchScopeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.ldap.model.SearchScope;
+import org.xdi.ldap.model.ListViewResponse;
 import org.xdi.ldap.model.SortOrder;
-import org.xdi.ldap.model.VirtualListViewResponse;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
 
@@ -60,40 +62,44 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 
 	private static final long serialVersionUID = -2544614410981223105L;
 
+	private static final int DEFAULT_PAGINATION_SIZE = 100;
+
 	private static final Logger log = LoggerFactory.getLogger(LdapEntryManager.class);
 
-	private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = { String.class, Date.class, Integer.class, LdapEnum.class };
-	private static final Class<?>[] SUM_BY_ALLOWED_DATA_TYPES = { int.class, Integer.class, float.class, Float.class, double.class, Double.class };
 	private static final String[] NO_STRINGS = new String[0];
 	
 	private static final Comparator<String> LINE_LENGHT_COMPARATOR = new LineLenghtComparator<String>(false);
 
 	private static final LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
+	private static final LdapSearchScopeConverter ldapSearchScopeConverter = new LdapSearchScopeConverter();
 
-	private transient OperationsFacade ldapOperationService;
+	private transient LdapOperationsService ldapOperationService;
 	private transient List<DeleteNotifier> subscribers;
 
 	public LdapEntryManager() {}
 
-	public LdapEntryManager(OperationsFacade ldapOperationService) {
+	public LdapEntryManager(LdapOperationsService ldapOperationService) {
 		this.ldapOperationService = ldapOperationService;
 		subscribers = new LinkedList<DeleteNotifier>();
 	}
 
+	@Override
 	public boolean destroy() {
 		boolean destroyResult = this.ldapOperationService.destroy();
 		
 		return destroyResult;
 	}
 
-	public OperationsFacade getLdapOperationService() {
+	public LdapOperationsService getOperationService() {
 		return ldapOperationService;
 	}
 
+	@Override
 	public void addDeleteSubscriber(DeleteNotifier subscriber) {
 		subscribers.add(subscriber);
 	}
 
+	@Override
 	public void removerDeleteSubscriber(DeleteNotifier subscriber) {
 		subscribers.remove(subscriber);
 	}
@@ -250,7 +256,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 	}
 
     @Override
-    public void removeWithSubtree(String dn) {
+    public void removeRecursively(String dn) {
         try {
             if (this.ldapOperationService.getConnectionProvider().isSupportsSubtreeDeleteRequestControl()) {
 	            for (DeleteNotifier subscriber : subscribers) {
@@ -308,16 +314,14 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn));
 	}
 
+	@Override
 	public <T> List<T> findEntries(Object entry) {
 		return findEntries(entry, 0);
 	}
 
-	public <T> List<T> findEntries(Object entry, int searchLimit) {
-		return findEntries(entry, searchLimit, 0);
-	}
-
+	@Override
 	@SuppressWarnings("unchecked")
-	public <T> List<T> findEntries(Object entry, int searchLimit, int sizeLimit) {
+	public <T> List<T> findEntries(Object entry, int sizeLimit) {
 		if (entry == null) {
 			throw new MappingException("Entry to find is null");
 		}
@@ -332,50 +336,36 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
 		Filter searchFilter = createFilterByEntry(entry, entryClass, attributes);
 
-		return findEntries(dnValue.toString(), entryClass, searchFilter, null, searchLimit);
+		return findEntries(dnValue.toString(), entryClass, searchFilter, SearchScope.SUB, null, sizeLimit, DEFAULT_PAGINATION_SIZE);
 	}
 
+	@Override
 	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter) {
-		return findEntries(baseDN, entryClass, filter, SearchScope.SUB);
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, null, null, 0, 0, 0);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope) {
-		return findEntries(baseDN, entryClass, filter, scope, null, 0);
+	@Override
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int sizeLimit) {
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, null, null, 0, sizeLimit, 0);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, String[] ldapReturnAttributes, Filter filter) {
-		return findEntries(baseDN, entryClass, ldapReturnAttributes, filter, SearchScope.SUB);
+	@Override
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes) {
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, 0, 0, 0);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, String[] ldapReturnAttributes, Filter filter, SearchScope scope) {
-		return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, 0);
+	@Override
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int sizeLimit) {
+		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, 0, sizeLimit, 0);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int searchLimit) {
-		return findEntries(baseDN, entryClass, filter, null, searchLimit, 0);
+	@Override
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit, int chunkSize) {
+		return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, null, 0, sizeLimit, chunkSize);
 	}
 
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int searchLimit, int sizeLimit) {
-		return findEntries(baseDN, entryClass, filter, null, searchLimit, sizeLimit);
-	}
-
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int searchLimit) {
-		return findEntries(baseDN, entryClass, filter, ldapReturnAttributes, searchLimit, 0); 
-	}
-
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int searchLimit) {
-		return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, searchLimit, 0); 
-	}
-
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
-		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, searchLimit, sizeLimit);
-	}
-
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int searchLimit, int sizeLimit) {
-		return findEntries(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, null, 0, searchLimit, sizeLimit);
-	}
-
-	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int startIndex, int searchLimit, int sizeLimit) {
+	@Override
+	public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize) {
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
 		}
@@ -398,7 +388,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, toLdapFilter(searchFilter), scope, batchOperation, startIndex, searchLimit, sizeLimit, null, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperation, startIndex, chunkSize, sizeLimit, null, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -421,7 +411,56 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return entries;
 	}
 
-	public <T> List<T> findEntriesSearchSearchResult(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int searchLimit, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String[] ldapReturnAttributes) {
+	@Deprecated
+	public <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize, String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes) {
+		if (StringHelper.isEmptyString(baseDN)) {
+			throw new MappingException("Base DN to find entries is null");
+		}
+
+		// Check entry class
+		checkEntryClass(entryClass, false);
+		String[] objectClasses = getTypeObjectClasses(entryClass);
+		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+		String[] currentLdapReturnAttributes = ldapReturnAttributes;
+		if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
+			currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
+		}
+
+		// Find entries
+		Filter searchFilter;
+		if (objectClasses.length > 0) {
+			searchFilter = addObjectClassFilter(filter, objectClasses);
+		} else {
+			searchFilter = filter;
+		}
+
+		SearchResult searchResult = null;
+		ListViewResponse<T> vlvResponse = new ListViewResponse<T>();
+		try {
+
+			searchResult = this.ldapOperationService.searchSearchResult(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), startIndex, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+
+			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
+			}
+
+		} catch (Exception ex) {
+			throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
+		}
+
+		if (searchResult.getEntryCount() == 0) {
+			vlvResponse.setResult(new ArrayList<T>(0));
+			return vlvResponse;
+		}
+
+		List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations, searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
+		vlvResponse.setResult(entries);
+
+		return vlvResponse;
+	}
+
+	@Deprecated
+	public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, String sortBy, SortOrder sortOrder, ListViewResponse vlvResponse, String[] ldapReturnAttributes) {
 
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
@@ -447,7 +486,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		SearchResult searchResult = null;
 		try {
 
-			searchResult = this.ldapOperationService.searchSearchResult(baseDN, toLdapFilter(searchFilter), SearchScope.SUB, startIndex, count, searchLimit, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+			searchResult = this.ldapOperationService.searchVirtualListView(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), startIndex, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -466,51 +505,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return entries;
 	}
 
-	public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, String sortBy, SortOrder sortOrder, VirtualListViewResponse vlvResponse, String[] ldapReturnAttributes) {
-
-		if (StringHelper.isEmptyString(baseDN)) {
-			throw new MappingException("Base DN to find entries is null");
-		}
-
-		// Check entry class
-		checkEntryClass(entryClass, false);
-		String[] objectClasses = getTypeObjectClasses(entryClass);
-		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-		String[] currentLdapReturnAttributes = ldapReturnAttributes;
-		if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-			currentLdapReturnAttributes = getLdapAttributes(null, propertiesAnnotations, false);
-		}
-
-		// Find entries
-		Filter searchFilter;
-		if (objectClasses.length > 0) {
-			searchFilter = addObjectClassFilter(filter, objectClasses);
-		} else {
-			searchFilter = filter;
-		}
-
-		SearchResult searchResult = null;
-		try {
-
-			searchResult = this.ldapOperationService.searchVirtualListView(baseDN, toLdapFilter(searchFilter), SearchScope.SUB, startIndex, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
-
-			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-			}
-
-		} catch (Exception ex) {
-			throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
-		}
-
-		if (searchResult.getEntryCount() == 0) {
-			return new ArrayList<T>(0);
-		}
-
-		List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations, searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
-
-		return entries;
-	}
-
+	@Override
 	public <T> boolean contains(String baseDN, Class<T> entryClass, Filter filter) {
 		// Check entry class
 		checkEntryClass(entryClass, false);
@@ -606,6 +601,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return result;
 	}
 
+	@Deprecated
 	private <T> List<T> createEntitiesVirtualListView(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, SearchResultEntry... searchResultEntries) {
 
 		List<T> result = new LinkedList<T>();
@@ -704,6 +700,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return result;
 	}
 
+	@Override
 	public boolean authenticate(String userName, String password, String baseDN) {
 		try {
 			return ldapOperationService.authenticate(userName, password, baseDN);
@@ -714,6 +711,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 	}
 
+	@Override
 	public boolean authenticate(String bindDn, String password) {
 		try {
 			return ldapOperationService.authenticate(bindDn, password);
@@ -722,6 +720,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> int countEntries(Object entry) {
 		if (entry == null) {
@@ -741,6 +740,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return countEntries(dnValue.toString(), entryClass, searchFilter);
 	}
 
+	@Override
 	public <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter) {
 		if (StringHelper.isEmptyString(baseDN)) {
 			throw new MappingException("Base DN to find entries is null");
@@ -763,7 +763,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		CountBatchOperation<T> batchOperation = new CountBatchOperation<T>(this);
 
 		try {
-			ldapOperationService.search(baseDN, toLdapFilter(searchFilter), SearchScope.SUB, batchOperation, 0, 100, 0, null, ldapReturnAttributes);
+			ldapOperationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperation, 0, 100, 0, null, ldapReturnAttributes);
 		} catch (Exception ex) {
 			throw new EntryPersistenceException(String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
 		}
@@ -782,185 +782,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
         return addObjectClassFilter(attributesFilter, objectClasses);
 	}
 
-	public <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties) {
-		// Check input parameters
-		if (entries == null) {
-			throw new MappingException("Entries list to sort is null");
-		}
-
-		if (entries.size() == 0) {
-			return;
-		}
-
-		if ((sortByProperties == null) || (sortByProperties.length == 0)) {
-			throw new InvalidArgumentException("Invalid list of sortBy properties " + Arrays.toString(sortByProperties));
-		}
-
-		// Get getters for all properties
-		Getter[][] propertyGetters = new Getter[sortByProperties.length][];
-		for (int i = 0; i < sortByProperties.length; i++) {
-			String[] tmpProperties = sortByProperties[i].split("\\.");
-			propertyGetters[i] = new Getter[tmpProperties.length];
-			Class<?> currentEntryClass = entryClass;
-			for (int j = 0; j < tmpProperties.length; j++) {
-				if (j > 0) {
-					currentEntryClass = propertyGetters[i][j - 1].getReturnType();
-				}
-				propertyGetters[i][j] = getGetter(currentEntryClass, tmpProperties[j]);
-			}
-
-			if (propertyGetters[i][tmpProperties.length - 1] == null) {
-				throw new MappingException("Entry should has getteres for all properties " + sortByProperties[i]);
-			}
-
-                        Class<?> propertyType = propertyGetters[i][tmpProperties.length - 1].getReturnType();
-			if (!((propertyType == String.class) || (propertyType == Date.class) || (propertyType == Integer.class) || (propertyType == Integer.TYPE))) {
-				throw new MappingException("Entry properties should has String, Date or Integer type. Property: '" + tmpProperties[tmpProperties.length - 1] + "'");
-			}
-		}
-
-		PropertyComparator<T> comparator = new PropertyComparator<T>(propertyGetters, caseSensetive);
-		Collections.sort(entries, comparator);
-	}
-
-	public <T> void sortListByProperties(Class<T> entryClass, List<T> entries, String... sortByProperties) {
-		sortListByProperties(entryClass, entries, false, sortByProperties);
-	}
-
-	public <T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String groupByProperties,
-			String sumByProperties) {
-		// Check input parameters
-		if (entries == null) {
-			throw new MappingException("Entries list to group is null");
-		}
-
-		if (entries.size() == 0) {
-			return new HashMap<T, List<T>>(0);
-		}
-
-		if (StringHelper.isEmpty(groupByProperties)) {
-			throw new InvalidArgumentException("List of groupBy properties is null");
-		}
-
-		// Get getters for all properties
-		Getter[] groupPropertyGetters = getEntryPropertyGetters(entryClass, groupByProperties, GROUP_BY_ALLOWED_DATA_TYPES);
-		Setter[] groupPropertySetters = getEntryPropertySetters(entryClass, groupByProperties, GROUP_BY_ALLOWED_DATA_TYPES);
-		Getter[] sumPropertyGetters = getEntryPropertyGetters(entryClass, sumByProperties, SUM_BY_ALLOWED_DATA_TYPES);
-		Setter[] sumPropertySetter = getEntryPropertySetters(entryClass, sumByProperties, SUM_BY_ALLOWED_DATA_TYPES);
-
-		return groupListByPropertiesImpl(entryClass, entries, caseSensetive, groupPropertyGetters, groupPropertySetters,
-				sumPropertyGetters, sumPropertySetter);
-	}
-
-	private <T> Getter[] getEntryPropertyGetters(Class<T> entryClass, String properties, Class<?>[] allowedTypes) {
-		if (StringHelper.isEmpty(properties)) {
-			return null;
-		}
-
-		String[] tmpProperties = properties.split("\\,");
-		Getter[] propertyGetters = new Getter[tmpProperties.length];
-		for (int i = 0; i < tmpProperties.length; i++) {
-			propertyGetters[i] = getGetter(entryClass, tmpProperties[i].trim());
-
-			if (propertyGetters[i] == null) {
-				throw new MappingException("Entry should has getter for property " + tmpProperties[i]);
-			}
-
-			Class<?> returnType = propertyGetters[i].getReturnType();
-			boolean found = false;
-			for (Class<?> clazz : allowedTypes) {
-				if (ReflectHelper.assignableFrom(returnType, clazz)) {
-					found = true;
-					break;
-				}
-			}
-
-			if (!found) {
-				throw new MappingException("Entry property getter should has next data types " + Arrays.toString(allowedTypes));
-			}
-		}
-
-		return propertyGetters;
-	}
-
-	private <T> Setter[] getEntryPropertySetters(Class<T> entryClass, String properties, Class<?>[] allowedTypes) {
-		if (StringHelper.isEmpty(properties)) {
-			return null;
-		}
-
-		String[] tmpProperties = properties.split("\\,");
-		Setter[] propertySetters = new Setter[tmpProperties.length];
-		for (int i = 0; i < tmpProperties.length; i++) {
-			propertySetters[i] = getSetter(entryClass, tmpProperties[i].trim());
-
-			if (propertySetters[i] == null) {
-				throw new MappingException("Entry should has setter for property " + tmpProperties[i]);
-			}
-
-			Class<?> paramType = ReflectHelper.getSetterType(propertySetters[i]);
-			boolean found = false;
-			for (Class<?> clazz : allowedTypes) {
-				if (ReflectHelper.assignableFrom(paramType, clazz)) {
-					found = true;
-					break;
-				}
-			}
-
-			if (!found) {
-				throw new MappingException("Entry property setter should has next data types " + Arrays.toString(allowedTypes));
-			}
-		}
-
-		return propertySetters;
-	}
-
-	public <T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, String groupByProperties, String sumByProperties) {
-		return groupListByProperties(entryClass, entries, false, groupByProperties, sumByProperties);
-	}
-
-	private <T> Map<T, List<T>> groupListByPropertiesImpl(Class<T> entryClass, List<T> entries, boolean caseSensetive,
-			Getter[] groupPropertyGetters, Setter[] groupPropertySetters, Getter[] sumProperyGetters, Setter[] sumPropertySetter) {
-		Map<String, T> keys = new HashMap<String, T>();
-		Map<T, List<T>> groups = new IdentityHashMap<T, List<T>>();
-
-		for (T entry : entries) {
-			String key = getEntryKey(entry, caseSensetive, groupPropertyGetters);
-
-			T entryKey = keys.get(key);
-			if (entryKey == null) {
-				try {
-					entryKey = ReflectHelper.createObjectByDefaultConstructor(entryClass);
-				} catch (Exception ex) {
-					throw new MappingException(String.format("Entry %s should has default constructor", entryClass), ex);
-				}
-				try {
-					ReflectHelper.copyObjectPropertyValues(entry, entryKey, groupPropertyGetters, groupPropertySetters);
-				} catch (Exception ex) {
-					throw new MappingException("Failed to set values in group Entry", ex);
-				}
-				keys.put(key, entryKey);
-			}
-
-			List<T> groupValues = groups.get(entryKey);
-			if (groupValues == null) {
-				groupValues = new ArrayList<T>();
-				groups.put(entryKey, groupValues);
-			}
-
-			try {
-				if (sumProperyGetters != null) {
-					ReflectHelper.sumObjectPropertyValues(entryKey, entry, sumProperyGetters, sumPropertySetter);
-				}
-			} catch (Exception ex) {
-				throw new MappingException("Failed to sum values in group Entry", ex);
-			}
-
-			groupValues.add(entry);
-		}
-
-		return groups;
-	}
-
+	@Override
 	public String encodeGeneralizedTime(Date date) {
 		if (date == null) {
 			return null;
@@ -969,6 +791,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return StaticUtils.encodeGeneralizedTime(date);
 	}
 
+	@Override
 	public Date decodeGeneralizedTime(String date) {
 		if (date == null) {
 			return null;
@@ -999,6 +822,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 	}
 
+	@Override
 	public String[] getLDIF(String dn) {
 		String[] ldif = null;
 		try {
@@ -1010,10 +834,11 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return ldif;
 	}
 
+	@Override
 	public List<String[]> getLDIF(String dn, String[] attributes) {
 		SearchResult searchResult;
 		try {
-			searchResult = this.ldapOperationService.search(dn, toLdapFilter(Filter.create("objectclass=*")), SearchScope.BASE, -1, 0, null, attributes);
+			searchResult = this.ldapOperationService.search(dn, toLdapFilter(Filter.create("objectclass=*")), toLdapSearchScope(SearchScope.BASE), -1, 0, null, attributes);
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s", dn));
 			}
@@ -1034,6 +859,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return result;
 	}
 
+	@Override
 	public List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes) {
 		SearchResult searchResult;
 		try {
@@ -1059,6 +885,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return result;
 	}
 
+	@Override
 	public int getSupportedLDAPVersion() {
 		return this.ldapOperationService.getSupportedLDAPVersion();
 	}
@@ -1089,64 +916,8 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		return ldapFilterConverter.convertToLdapFilter(genericFilter);
 	}
 
-	private static final class PropertyComparator<T> implements Comparator<T>, Serializable {
-
-		private static final long serialVersionUID = 574848841116711467L;
-		private Getter[][] propertyGetters;
-		private boolean caseSensetive;
-
-		private PropertyComparator(Getter[][] propertyGetters, boolean caseSensetive) {
-			this.propertyGetters = propertyGetters;
-			this.caseSensetive = caseSensetive;
-		}
-
-		public int compare(T entry1, T entry2) {
-			if ((entry1 == null) && (entry2 == null)) {
-				return 0;
-			}
-			if ((entry1 == null) && (entry2 != null)) {
-				return -1;
-			} else if ((entry1 != null) && (entry2 == null)) {
-				return 1;
-			}
-
-			int result = 0;
-			for (Getter[] curPropertyGetters : propertyGetters) {
-				result = compare(entry1, entry2, curPropertyGetters);
-				if (result != 0) {
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public int compare(T entry1, T entry2, Getter[] propertyGetters) {
-			Object value1 = ReflectHelper.getPropertyValue(entry1, propertyGetters);
-			Object value2 = ReflectHelper.getPropertyValue(entry2, propertyGetters);
-
-			if ((value1 == null) && (value2 == null)) {
-				return 0;
-			}
-			if ((value1 == null) && (value2 != null)) {
-				return -1;
-			} else if ((value1 != null) && (value2 == null)) {
-				return 1;
-			}
-
-			if (value1 instanceof Date) {
-				return ((Date) value1).compareTo((Date) value2);
-			} else if (value1 instanceof Integer) {
-				return ((Integer) value1).compareTo((Integer) value2);
-			} else if (value1 instanceof String && value2 instanceof String) {
-				if (caseSensetive) {
-					return ((String) value1).compareTo((String) value2);
-				} else {
-					return ((String) value1).toLowerCase().compareTo(((String) value2).toLowerCase());
-				}
-			}
-            return 0;
-		}
+	private com.unboundid.ldap.sdk.SearchScope toLdapSearchScope(SearchScope scope) throws SearchScopeException {
+		return ldapSearchScopeConverter.convertToLdapSearchScope(scope);
 	}
 
 	private static final class LineLenghtComparator<T> implements Comparator<T>, Serializable {
@@ -1177,7 +948,7 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 	}
 	
-	private static final class CountBatchOperation<T> extends BatchOperation<T> {
+	private static final class CountBatchOperation<T> extends LdapBatchOperation<T> {
 
 		private int countEntries = 0;
 
@@ -1186,14 +957,15 @@ public class LdapEntryManager extends AbstractEntryManager implements Serializab
 		}
 
 		@Override
-		protected List<T> getChunkOrNull(int batchSize) {
+		public List<T> getChunkOrNull(int batchSize) {
 			return null;
 		}
 
 		@Override
-		protected void performAction(List<T> objects) {
+		public void performAction(List<T> objects) {
 			
 		}
+
 		public boolean collectSearchResult(SearchResult searchResult) {
 			return false;
 		}
