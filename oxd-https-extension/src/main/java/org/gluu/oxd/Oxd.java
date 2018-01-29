@@ -200,6 +200,16 @@ public class Oxd {
         }
     }
 
+    public CommandResponse introspectAccessToken(IntrospectAccessTokenParams params) throws IOException {
+        CommandClient client = null;
+        try {
+            client = newClient();
+            return client.send(new Command(CommandType.INTROSPECT_ACCESS_TOKEN).setParamsObject(params));
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
     private CommandClient newClient() throws IOException {
         return new CommandClient(configuration.getOxdHost(), Integer.parseInt(configuration.getOxdPort()));
     }

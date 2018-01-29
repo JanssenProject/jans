@@ -50,6 +50,9 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
             Rp setup = getRpService().getRp(setupClient.getOxdId());
             Rp registered = getRpService().getRp(registeredClient.getOxdId());
 
+            setup.setSetupClient(true);
+            getRpService().update(setup);
+
             registered.setSetupOxdId(setup.getOxdId());
             registered.setSetupClientId(setup.getClientId());
             getRpService().update(registered);
@@ -58,6 +61,7 @@ public class SetupClientOperation extends BaseOperation<SetupClientParams> {
             response.setOxdId(registeredClient.getOxdId());
             response.setOpHost(registeredClient.getOpHost());
 
+            response.setSetupClientOxdId(setupClient.getOxdId());
             response.setClientId(setup.getClientId());
             response.setClientSecret(setup.getClientSecret());
             response.setClientRegistrationAccessToken(setup.getClientRegistrationAccessToken());
