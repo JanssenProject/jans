@@ -514,22 +514,22 @@ class Setup(object):
                             'result_name' : 'S90solserver'
                            },
                 'oxauth' : {'src_pattern' : 'S*oxauth',
-                            'result_name' : 'S91oxauth'
+                            'result_name' : 'S92oxauth'
                            },
                 'identity' : {'src_pattern' : 'S*identity',
-                            'result_name' : 'S92identity'
+                            'result_name' : 'S93identity'
                            },
                 'idp' : {'src_pattern' : 'S*idp',
-                            'result_name' : 'S93idp'
+                            'result_name' : 'S94idp'
                            },
                 'oxauth-rp' : {'src_pattern' : 'S*oxauth-rp',
-                            'result_name' : 'S94oxauth-rp'
+                            'result_name' : 'S95oxauth-rp'
                            },
                 'asimba' : {'src_pattern' : 'S*asimba',
-                            'result_name' : 'S95asimba'
+                            'result_name' : 'S96asimba'
                            },
                 'passport' : {'src_pattern' : 'S*passport',
-                            'result_name' : 'S96passport'
+                            'result_name' : 'S97passport'
                            },
                 'apache2' : {'src_pattern' : 'S*apache2',
                             'result_name' : 'S98apache2'
