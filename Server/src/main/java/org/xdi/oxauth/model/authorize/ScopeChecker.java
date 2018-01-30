@@ -6,24 +6,24 @@
 
 package org.xdi.oxauth.model.authorize;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.registration.Client;
 import org.xdi.oxauth.service.ScopeService;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Validates the scopes received for the authorize web service.
  *
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version June 3, 2015
+ * @author Javier Rojas Blum
+ * @version January 30, 2018
  */
 @Stateless
 @Named("scopeChecker")
@@ -38,6 +38,10 @@ public class ScopeChecker {
     public Set<String> checkScopesPolicy(Client client, String scope) {
         log.debug("Checking scopes policy for: " + scope);
         Set<String> grantedScopes = new HashSet<String>();
+
+        if (scope == null || client == null) {
+            return grantedScopes;
+        }
 
         final String[] scopesRequested = scope.split(" ");
         final String[] scopesAllowed = client.getScopes();
