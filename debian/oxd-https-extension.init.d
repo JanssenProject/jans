@@ -8,25 +8,26 @@
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
+#CONF=/opt/oxd-https-extension/lib/oxd-https.yml
 OXD_HTTPS_EXTENSION_VERSION="3.1.2.Final"
 SERVICE_NAME=oxd-https-extension
 PID_PATH_NAME=/var/run/oxd-https-extension.pid
 LIB=/opt/oxd-https-extension/lib/oxd-https-extension-${OXD_HTTPS_EXTENSION_VERSION}.jar
-      
-      
-        
 
-case $1 in
-    start)
-        echo "Starting $SERVICE_NAME ..."
+
+do_start () {
         if [ ! -f $PID_PATH_NAME ]; then
-            nohup java -jar server oxd-https.yml $LIB 2>>/dev/null>>/dev/null&
-                        echo $! > $PID_PATH_NAME
+                echo "Starting $SERVICE_NAME ..."
+                nohup java -jar $LIB server $CONF 2>>/dev/null>>/dev/null&
+                echo $! > $PID_PATH_NAME
         else
             echo "$SERVICE_NAME is already running ..."
         fi
-    ;;
-    stop)
+        PID_NUM=$(cat $PID_PATH_NAME)
+        echo "PID: [$PID_NUM]"
+}
+
+do_stop () {
         if [ -f $PID_PATH_NAME ]; then
             PID=$(cat $PID_PATH_NAME);
             echo "$SERVICE_NAME stoping ..."
@@ -35,29 +36,30 @@ case $1 in
         else
             echo "$SERVICE_NAME is not running ..."
         fi
+}
+
+case $1 in
+    start)
+        do_start
+    ;;
+    stop)
+        do_stop
     ;;
     restart)
-        if [ -f $PID_PATH_NAME ]; then
-            PID=$(cat $PID_PATH_NAME);
-            echo "$SERVICE_NAME stopping ...";
-            kill $PID;
-            rm $PID_PATH_NAME
-            echo "$SERVICE_NAME starting ..."
-            nohup java -jar $LIB 2>>/dev/null>>/dev/null&
-                        echo $! > $PID_PATH_NAME
-        else
-            echo "$SERVICE_NAME is not running ..."
-        fi
+        do_stop
+        do_start
     ;;
     status)
         if [ -f $PID_PATH_NAME ]; then
-            echo "$SERVICE_NAME is running ...";
+                echo "$SERVICE_NAME is running ...";
+                PID_NUM=$(cat $PID_PATH_NAME)
+                echo "PID: [$PID_NUM]"
         else
-           echo "$SERVICE_NAME is not running ..."
+                echo "$SERVICE_NAME is not running ..."
         fi
     ;;
     *)
         echo "Usage: $0 {start|stop|status|restart}"
         RETVAL=2
     ;;
-esac 
+esac
