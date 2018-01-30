@@ -164,7 +164,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
     public void authorizationCodeFlowNegativeTest(
             final String userId, final String userSecret, final String redirectUris, final String redirectUri,
             final String sectorIdentifierUri) throws Exception {
-        showTitle("authorizationCodeFlow");
+        showTitle("authorizationCodeFlowNegativeTest");
 
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.CODE,
