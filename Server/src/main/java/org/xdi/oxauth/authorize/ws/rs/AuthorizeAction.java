@@ -18,6 +18,7 @@ import org.xdi.oxauth.model.auth.AuthenticationMode;
 import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
 import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
 import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
+import org.xdi.oxauth.model.authorize.ScopeChecker;
 import org.xdi.oxauth.model.common.Prompt;
 import org.xdi.oxauth.model.common.SessionId;
 import org.xdi.oxauth.model.common.SessionIdState;
@@ -51,7 +52,7 @@ import java.util.*;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version January 17, 2018
+ * @version January 30, 2018
  */
 @RequestScoped
 @Named
@@ -117,6 +118,9 @@ public class AuthorizeAction {
     @Inject
     private RequestParameterService requestParameterService;
 
+    @Inject
+    private ScopeChecker scopeChecker;
+
     // OAuth 2.0 request parameters
     private String scope;
     private String responseType;
@@ -143,6 +147,8 @@ public class AuthorizeAction {
 
     // custom oxAuth parameters
     private String sessionId;
+
+    private String allowedScope;
 
     public void checkUiLocales() {
         List<String> uiLocalesList = null;
@@ -186,6 +192,10 @@ public class AuthorizeAction {
             permissionDenied();
             return;
         }
+
+        // Fix the list of scopes in the authorization page. oxAuth #739
+        Set<String> grantedScopes = scopeChecker.checkScopesPolicy(client, scope);
+        allowedScope = org.xdi.oxauth.model.util.StringUtils.implode(grantedScopes, " ");
 
         SessionId session = getSession();
         List<Prompt> prompts = Prompt.fromString(prompt, " ");
@@ -343,7 +353,7 @@ public class AuthorizeAction {
     }
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
-        return authorizeService.getScopes(scope);
+        return authorizeService.getScopes(allowedScope);
     }
 
     /**
