@@ -510,6 +510,9 @@ class Setup(object):
                                         'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
         self.init_fixes = {
+                'opendj' : {'src_pattern' : 'S*opendj',
+                            'result_name' : 'S90opendj'
+                           },
                 'solserver' : {'src_pattern' : 'S*solserver',
                             'result_name' : 'S90solserver'
                            },
