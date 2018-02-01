@@ -210,6 +210,16 @@ public class Oxd {
         }
     }
 
+    public CommandResponse introspectRpt(IntrospectRptParams params) throws IOException {
+        CommandClient client = null;
+        try {
+            client = newClient();
+            return client.send(new Command(CommandType.INTROSPECT_RPT).setParamsObject(params));
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
     private CommandClient newClient() throws IOException {
         return new CommandClient(configuration.getOxdHost(), Integer.parseInt(configuration.getOxdPort()));
     }
