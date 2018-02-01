@@ -30,22 +30,9 @@ public class RpGetRptTest {
             client = new CommandClient(host, port);
 
             RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
-
-            RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
-
-            final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
-
-            final RpGetRptParams params = new RpGetRptParams();
-            params.setOxdId(site.getOxdId());
-            params.setTicket(checkAccess.getTicket());
-
-            final RpGetRptResponse response = client
-                    .send(new Command(CommandType.RP_GET_RPT).setParamsObject(params))
-                    .dataAsResponse(RpGetRptResponse.class);
+            final RpGetRptResponse response = requestRpt(client, site, rsProtect);
 
             assertNotNull(response);
-            assertTrue(StringUtils.isNotBlank(response.getRpt()));
-            assertTrue(StringUtils.isNotBlank(response.getPct()));
 
 //            ErrorResponse errorResponse = commandResponse.dataAsResponse(ErrorResponse.class);
 //            assertNotNull(errorResponse);
@@ -58,5 +45,24 @@ public class RpGetRptTest {
         } finally {
             CommandClient.closeQuietly(client);
         }
+    }
+
+    public static RpGetRptResponse requestRpt(CommandClient client, RegisterSiteResponse site, String rsProtect) throws IOException {
+        RsProtectTest.protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
+
+        final RsCheckAccessResponse checkAccess = RsCheckAccessTest.checkAccess(client, site);
+
+        final RpGetRptParams params = new RpGetRptParams();
+        params.setOxdId(site.getOxdId());
+        params.setTicket(checkAccess.getTicket());
+
+        final RpGetRptResponse response = client
+                .send(new Command(CommandType.RP_GET_RPT).setParamsObject(params))
+                .dataAsResponse(RpGetRptResponse.class);
+
+        assertNotNull(response);
+        assertTrue(StringUtils.isNotBlank(response.getRpt()));
+        assertTrue(StringUtils.isNotBlank(response.getPct()));
+        return response;
     }
 }
