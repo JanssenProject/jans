@@ -46,6 +46,7 @@ public class RsProtectTest {
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
             protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources());
+            RsCheckAccessTest.checkAccess(client, site);
         } finally {
             CommandClient.closeQuietly(client);
         }
