@@ -2099,6 +2099,11 @@ class Setup(object):
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def promptForProperties(self):
+
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
+        if promptForMITLicense != 'y':
+            sys.exit(0)
+        
         # IP address needed only for Apache2 and hosts file update
         if self.installHttpd:
             self.ip = self.get_ip()
@@ -2211,11 +2216,6 @@ class Setup(object):
                 self.installJce = False
         else:
             self.installJce = False
-
-
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
-        if promptForMITLicense != 'y':
-            sys.exit(0)
 
 
     def get_filepaths(self, directory):
