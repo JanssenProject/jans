@@ -11,12 +11,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.SchemaEntry;
 import org.xdi.util.OxConstants;
-
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.search.filter.Filter;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 

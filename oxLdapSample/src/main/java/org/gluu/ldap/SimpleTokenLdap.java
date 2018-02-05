@@ -1,7 +1,7 @@
 package org.gluu.ldap;
 
+import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.site.ldap.persistence.annotation.*;
-import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.util.StringHelper;
 
 import java.io.Serializable;

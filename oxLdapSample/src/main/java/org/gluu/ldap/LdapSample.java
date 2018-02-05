@@ -5,14 +5,13 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.SortOrder;
+import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.ListViewResponse;
 import org.xdi.log.LoggingHelper;
-
-import com.unboundid.ldap.sdk.SearchResult;
 
 /**
  * @author Yuriy Movchan
@@ -63,11 +62,10 @@ public class LdapSample {
 		log.debug("Found grants: " + grants.size());
 
 		try {
-			ListViewResponse virtualListViewResponse = new ListViewResponse();
-			SearchResult searchResult = ldapEntryManager.getOperationService().searchSearchResult("o=gluu", com.unboundid.ldap.sdk.Filter.createEqualityFilter("objectClass", "gluuPerson"), SearchScope.SUB, 10, 100, 100000, "displayName", null, virtualListViewResponse, "uid", "displayName", "gluuStatus");
+			ListViewResponse<SimpleUser> vlvResponse = ldapEntryManager.findListViewResponse("o=gluu", SimpleUser.class, null, 10, 100000, 1000, "displayName", SortOrder.ASCENDING, new String[] { "uid", "displayName", "gluuStatus"});
 
-			log.debug("Found persons: " + virtualListViewResponse.getTotalResults());
-			System.out.println(searchResult.getSearchEntries());
+			log.debug("Found persons: " + vlvResponse.getTotalResults());
+			System.out.println(vlvResponse.getResult().size());
 		} catch (Exception ex) {
 			log.error("Failed to search", ex);
 		}

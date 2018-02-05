@@ -3,7 +3,7 @@ package org.gluu.ldap;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.xdi.log.LoggingHelper;
 
 import java.util.Date;

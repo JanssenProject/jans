@@ -2,10 +2,14 @@ package org.gluu.persist;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.gluu.persist.event.DeleteNotifier;
+import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.SortOrder;
 import org.gluu.search.filter.Filter;
 
 /**
@@ -22,9 +26,12 @@ public interface PersistenceEntryManager {
 	void removeRecursively(String dn);
 
 	boolean contains(Object entry);
+	<T> boolean contains(Class<T> entryClass, String primaryKey);
 	<T> boolean contains(String baseDN, Class<T> entryClass, Filter filter);
 
 	<T> List<T> findEntries(Object entry);
+
+	<T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes);
 
 	/**
 	 * Search by sample
@@ -34,7 +41,7 @@ public interface PersistenceEntryManager {
 	 * @return Result entries
 	 */
 	<T> List<T> findEntries(Object entry, int sizeLimit);
-
+	
 	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter);
 	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int sizeLimit);
 
@@ -56,6 +63,8 @@ public interface PersistenceEntryManager {
 	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit, int chunkSize);
 	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize);
 
+	<T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize, String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes);
+
 	boolean authenticate(String bindDn, String password);
 	boolean authenticate(String userName, String password, String baseDN);
 
@@ -64,13 +73,20 @@ public interface PersistenceEntryManager {
 
 	int getHashCode(Object entry);
 
+	String[] getObjectClasses(Object entry, Class<?> entryClass);
+	<T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes);
+
 	public String encodeGeneralizedTime(Date date);
 	Date decodeGeneralizedTime(String date);
 
+	// TODO: use close
 	boolean destroy();
 
+	<T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
+	<T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String groupByProperties, String sumByProperties);
+
 	void addDeleteSubscriber(DeleteNotifier subscriber);
-	void removerDeleteSubscriber(DeleteNotifier subscriber);
+	void removeDeleteSubscriber(DeleteNotifier subscriber);
 
 	// TODO: 3.2.0: Change name
 	String[] getLDIF(String dn);
@@ -80,8 +96,5 @@ public interface PersistenceEntryManager {
 
 	// TODO: 3.2.0: Change name
 	List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes);
-
-	// TODO: 3.2.0: Change name
-	int getSupportedLDAPVersion();
 
 }

@@ -10,12 +10,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapAttributesList;
 import org.gluu.site.ldap.persistence.annotation.LdapCustomObjectClass;
 import org.gluu.site.ldap.persistence.annotation.LdapDN;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
-import org.xdi.ldap.model.CustomAttribute;
 import org.xdi.util.StringHelper;
 
 /**

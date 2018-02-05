@@ -6,7 +6,7 @@
 
 import java.util.Properties;
 
-import org.gluu.site.ldap.LdapAuthConnectionProvider;
+import org.gluu.persist.ldap.operation.impl.LdapAuthConnectionProvider;
 
 /**
  * Super class to forbid interceptor calls
