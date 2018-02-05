@@ -15,10 +15,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.common.IdType;
 import org.xdi.oxauth.model.config.BaseDnConfiguration;
 import org.xdi.oxauth.model.config.StaticConfiguration;
@@ -105,7 +105,7 @@ public class InumGenerator implements IdGenerator {
 	public boolean contains(String inum, IdType type) {
 		final String baseDn = baseDn(type);
 		final Filter filter = Filter.createEqualityFilter("inum", inum);
-		final List<LdapDummyEntry> entries = ldapEntryManager.findEntries(baseDn, LdapDummyEntry.class, filter);
+		final List<DummyEntry> entries = ldapEntryManager.findEntries(baseDn, DummyEntry.class, filter);
 		return entries != null && !entries.isEmpty();
 	}
 

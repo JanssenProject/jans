@@ -17,8 +17,8 @@ import javax.inject.Named;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;

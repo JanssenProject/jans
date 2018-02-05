@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.service.fido.u2f;
 
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.crypto.random.ChallengeGenerator;
 import org.xdi.oxauth.exception.fido.u2f.DeviceCompromisedException;
