@@ -2,7 +2,9 @@
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
- */package org.xdi.config.oxtrust;
+ */
+
+package org.xdi.config.oxtrust;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,17 +25,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class AppConfiguration implements Configuration, Serializable {
 
 	private static final long serialVersionUID = -8991383390239617013L;
-
-	@JsonProperty("ScimProperties")
-	private ScimProperties scimProperties;
-
-	public ScimProperties getScimProperties() {
-		return scimProperties;
-	}
-
-	public void setScimProperties(ScimProperties scimProperties) {
-		this.scimProperties = scimProperties;
-	}
 	
 	private String baseDN;
 
@@ -140,6 +131,13 @@ public class AppConfiguration implements Configuration, Serializable {
 	private String passportUmaClientKeyStoreFile;
 	private String passportUmaClientKeyStorePassword;
 
+	private String apiUmaClientId;
+	private String apiUmaClientKeyId;
+	private String apiUmaResourceId;
+	private String apiUmaScope;
+	private String apiUmaClientKeyStoreFile;
+	private String apiUmaClientKeyStorePassword;
+
 	private String cssLocation;
 	private String jsLocation;
 	
@@ -169,6 +167,17 @@ public class AppConfiguration implements Configuration, Serializable {
 	private String idp3EncryptionCert;
 
 	private int metricReporterInterval;
+
+	@JsonProperty("ScimProperties")
+	private ScimProperties scimProperties;
+
+	public ScimProperties getScimProperties() {
+		return scimProperties;
+	}
+
+	public void setScimProperties(ScimProperties scimProperties) {
+		this.scimProperties = scimProperties;
+	}
 
 	public boolean isOxIncommonFlag() {
 		return oxIncommonFlag;
@@ -893,5 +902,89 @@ public class AppConfiguration implements Configuration, Serializable {
 	public void setMetricReporterInterval(int metricReporterInterval) {
 		this.metricReporterInterval = metricReporterInterval;
 	}
+
+    /**
+     * @return the apiUmaClientId
+     */
+    public String getApiUmaClientId() {
+        return apiUmaClientId;
+    }
+
+    /**
+     * @param apiUmaClientId the apiUmaClientId to set
+     */
+    public void setApiUmaClientId(String apiUmaClientId) {
+        this.apiUmaClientId = apiUmaClientId;
+    }
+
+    /**
+     * @return the apiUmaClientKeyId
+     */
+    public String getApiUmaClientKeyId() {
+        return apiUmaClientKeyId;
+    }
+
+    /**
+     * @param apiUmaClientKeyId the apiUmaClientKeyId to set
+     */
+    public void setApiUmaClientKeyId(String apiUmaClientKeyId) {
+        this.apiUmaClientKeyId = apiUmaClientKeyId;
+    }
+
+    /**
+     * @return the apiUmaResourceId
+     */
+    public String getApiUmaResourceId() {
+        return apiUmaResourceId;
+    }
+
+    /**
+     * @param apiUmaResourceId the apiUmaResourceId to set
+     */
+    public void setApiUmaResourceId(String apiUmaResourceId) {
+        this.apiUmaResourceId = apiUmaResourceId;
+    }
+
+    /**
+     * @return the apiUmaScope
+     */
+    public String getApiUmaScope() {
+        return apiUmaScope;
+    }
+
+    /**
+     * @param apiUmaScope the apiUmaScope to set
+     */
+    public void setApiUmaScope(String apiUmaScope) {
+        this.apiUmaScope = apiUmaScope;
+    }
+
+    /**
+     * @return the apiUmaClientKeyStoreFile
+     */
+    public String getApiUmaClientKeyStoreFile() {
+        return apiUmaClientKeyStoreFile;
+    }
+
+    /**
+     * @param apiUmaClientKeyStoreFile the apiUmaClientKeyStoreFile to set
+     */
+    public void setApiUmaClientKeyStoreFile(String apiUmaClientKeyStoreFile) {
+        this.apiUmaClientKeyStoreFile = apiUmaClientKeyStoreFile;
+    }
+
+    /**
+     * @return the apiUmaClientKeyStorePassword
+     */
+    public String getApiUmaClientKeyStorePassword() {
+        return apiUmaClientKeyStorePassword;
+    }
+
+    /**
+     * @param apiUmaClientKeyStorePassword the apiUmaClientKeyStorePassword to set
+     */
+    public void setApiUmaClientKeyStorePassword(String apiUmaClientKeyStorePassword) {
+        this.apiUmaClientKeyStorePassword = apiUmaClientKeyStorePassword;
+    }
 
 }
