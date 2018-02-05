@@ -1,0 +1,53 @@
+<div    align="center"
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:h="http://xmlns.jcp.org/jsf/html">
+
+    <h:panelGroup rendered="${methods.size()>0}">
+    	<hr />
+        <style type="text/css">
+        input.mybtn{
+        	width: 145px !important;
+        	color: #fff !important;
+        }
+	</style>    	
+        <p>
+            <br />
+            Don't have your preferred credential at hand?. Login with an alternative credential:
+        </p>
+
+        <form id="credmgr_form" action="#{request.contextPath}/postlogin">
+            <h:panelGroup rendered="${methods.contains('twilio_sms')}">
+                &#160;
+                <input class="btn btn-done mybtn" type="submit" value="Code sent via SMS" onclick="return submitAlternative('twilio_sms')"/>
+                &#160;
+            </h:panelGroup>
+            <h:panelGroup rendered="${methods.contains('super_gluu')}">
+                &#160;
+                <input class="btn btn-done mybtn" type="submit" value=" Super Gluu " onclick="return submitAlternative('super_gluu')"/>
+                &#160;
+            </h:panelGroup>
+            <h:panelGroup rendered="${methods.contains('u2f')}">
+                &#160;
+                <input class="btn btn-done mybtn" type="submit" value="Security key" onclick="return submitAlternative('u2f')"/>
+                &#160;
+            </h:panelGroup>
+            <h:panelGroup rendered="${methods.contains('otp')}">
+                &#160;
+                <input class="btn btn-done mybtn" type="submit" value="OTP mobile app" onclick="return submitAlternative('otp')"/>
+                &#160;
+            </h:panelGroup>
+            <input type="hidden" name="alternativeMethod" id="alternativeMethod"/>
+        </form>
+        <p>&#160;</p>
+        <script>
+            function submitAlternative(alternative){
+                var f=document.getElementById("credmgr_form");
+                f.alternativeMethod.value=alternative;
+                //alert(alternative);
+                return true;
+            }
+        </script>
+    </h:panelGroup>
+</div>
