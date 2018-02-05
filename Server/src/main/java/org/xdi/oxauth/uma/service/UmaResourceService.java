@@ -16,10 +16,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.uma.persistence.UmaResource;

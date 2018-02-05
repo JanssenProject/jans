@@ -10,8 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jettison.json.JSONObject;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.LdapMappingException;
+import org.gluu.persist.exception.mapping.BaseMappingException;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.exception.ConfigurationException;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -364,7 +364,7 @@ public class ConfigurationFactory {
 			final Conf conf = ldapManager.find(Conf.class, dn, returnAttributes);
 
 			return conf;
-		} catch (LdapMappingException ex) {
+		} catch (BaseMappingException ex) {
 			log.error(ex.getMessage());
 		}
 
