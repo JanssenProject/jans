@@ -44,8 +44,7 @@ import java.util.Map.Entry;
 /**
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
- * 
- * @version November 3, 2017
+ * @version January 17, 2018
  */
 @Stateless
 @Named
@@ -116,7 +115,7 @@ public class AuthorizeService {
     private RequestParameterService requestParameterService;
 
     public SessionId getSession() {
-    	return getSession(null);
+        return getSession(null);
     }
 
     public SessionId getSession(String sessionId) {
@@ -155,14 +154,10 @@ public class AuthorizeService {
             String scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
 
-            // oxAuth #441 Pre-Authorization + Persist Authorizations... don't write anything
-            // If a client has pre-authorization=true, there is no point to create the entry under
-            // ou=clientAuthorizations it will negatively impact performance, grow the size of the
-            // ldap database, and serve no purpose.
             boolean persistDuringImplicitFlow = ServerUtil.isFalse(appConfiguration.getUseCacheForAllImplicitFlowObjects()) || !ResponseType.isImplicitFlow(responseType);
-            if (client.getPersistClientAuthorizations() && !client.getTrustedClient() && persistDuringImplicitFlow) {
+            if (!client.getTrustedClient() && persistDuringImplicitFlow) {
                 final Set<String> scopes = Sets.newHashSet(org.xdi.oxauth.model.util.StringUtils.spaceSeparatedToList(scope));
-                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
+                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes, client.getPersistClientAuthorizations());
             }
             session.addPermission(clientId, true);
             sessionIdService.updateSessionId(session);
@@ -217,11 +212,11 @@ public class AuthorizeService {
     }
 
     public List<org.xdi.oxauth.model.common.Scope> getScopes() {
-    	SessionId session = getSession();
-    	String scope = session.getSessionAttributes().get("scope");
-    	
-    	return getScopes(scope);
-    	
+        SessionId session = getSession();
+        String scope = session.getSessionAttributes().get("scope");
+
+        return getScopes(scope);
+
     }
 
     public List<Scope> getScopes(String scopes) {
@@ -232,7 +227,7 @@ public class AuthorizeService {
             for (String scopeName : scopesName) {
                 org.xdi.oxauth.model.common.Scope s = scopeService.getScopeByDisplayName(scopeName);
                 if (s != null && s.getDescription() != null) {
-                	result.add(s);
+                    result.add(s);
                 }
             }
         }
