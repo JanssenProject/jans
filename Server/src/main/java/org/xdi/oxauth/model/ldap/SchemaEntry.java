@@ -10,9 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gluu.persist.model.base.BaseEntry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapSchemaEntry;
-import org.xdi.ldap.model.BaseEntry;
 
 /**
  * Schema attribute

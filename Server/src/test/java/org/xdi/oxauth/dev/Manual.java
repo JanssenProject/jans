@@ -10,9 +10,10 @@ import java.io.File;
 import java.util.Date;
 import java.util.Properties;
 
-import org.gluu.site.ldap.LdapConnectionProvider;
-import org.gluu.site.ldap.OperationsFacade;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
+import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
+import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,13 +44,14 @@ public class Manual {
 	public void init() {
 		final FileConfiguration fileConfiguration = new FileConfiguration(LDAP_FILE_PATH);
 		final Properties props = PropertiesDecrypter.decryptProperties(fileConfiguration.getProperties(), "passoword");
+		final LdapEntryManagerFactory ldapEntryManagerFactory = new LdapEntryManagerFactory(); 
 		final LdapConnectionProvider connectionProvider = new LdapConnectionProvider(props);
-		MANAGER = new LdapEntryManager(new OperationsFacade(connectionProvider));
+		MANAGER = ldapEntryManagerFactory.createEntryManager(props);
 	}
 
 	@AfterClass
 	public void destroy() {
-		MANAGER.getLdapOperationService().getConnectionPool().close();
+		MANAGER.getOperationService().getConnectionPool().close();
 	}
 
 	@Test

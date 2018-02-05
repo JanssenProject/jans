@@ -22,6 +22,7 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONException;
+import org.gluu.jsf2.message.FacesMessages;
 import org.gluu.jsf2.service.FacesService;
 import org.slf4j.Logger;
 import org.xdi.model.AuthenticationScriptUsageType;
@@ -90,6 +91,9 @@ public class Authenticator {
 
     @Inject
     private FacesService facesService;
+
+    @Inject
+    private FacesMessages facesMessages;
 
     @Inject
     private LanguageBean languageBean;
@@ -716,9 +720,10 @@ public class Authenticator {
     }
 
     public void addMessage(Severity severity, String summary) {
-        String msg = languageBean.getMessage(summary);
-        FacesMessage message = new FacesMessage(severity, msg, null);
-        facesContext.addMessage(null, message);
+    	String message = languageBean.getMessage(summary);
+        if (StringHelper.isNotEmpty(message)) {
+        	facesMessages.add(severity, message);
+        }
     }
 
     public String getMaskMobilenumber(String mobile_number){
