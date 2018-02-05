@@ -23,11 +23,11 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.SearchScope;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
@@ -379,14 +379,14 @@ public class GrantService {
     public void cleanUp() {
 
         // Cleaning oxAuthToken
-        BatchOperation<TokenLdap> tokenBatchService = new BatchOperation<TokenLdap>(ldapEntryManager) {
+        LdapBatchOperation<TokenLdap> tokenBatchService = new LdapBatchOperation<TokenLdap>(ldapEntryManager) {
             @Override
-            protected List<TokenLdap> getChunkOrNull(int chunkSize) {
+        	public List<TokenLdap> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
-            protected void performAction(List<TokenLdap> entries) {
+        	public void performAction(List<TokenLdap> entries) {
                 auditLogging(entries);
                 remove(entries);
             }
@@ -398,14 +398,14 @@ public class GrantService {
         tokenBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
         // Cleaning oxAuthGrant
-        BatchOperation<Grant> grantBatchService = new BatchOperation<Grant>(ldapEntryManager) {
+        LdapBatchOperation<Grant> grantBatchService = new LdapBatchOperation<Grant>(ldapEntryManager) {
             @Override
-            protected List<Grant> getChunkOrNull(int chunkSize) {
+            public List<Grant> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
-            protected void performAction(List<Grant> entries) {
+            public void performAction(List<Grant> entries) {
                 removeGrants(entries);
             }
 
@@ -425,14 +425,14 @@ public class GrantService {
 
         // Cleaning old oxAuthGrant
         // Note: This block should be removed, it is used only to delete old legacy data.
-        BatchOperation<Grant> oldGrantBatchService = new BatchOperation<Grant>(ldapEntryManager) {
+        LdapBatchOperation<Grant> oldGrantBatchService = new LdapBatchOperation<Grant>(ldapEntryManager) {
             @Override
-            protected List<Grant> getChunkOrNull(int chunkSize) {
+            public List<Grant> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
-            protected void performAction(List<Grant> entries) {
+            public void performAction(List<Grant> entries) {
                 removeGrants(entries);
             }
 

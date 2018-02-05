@@ -13,14 +13,13 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.RequestMessageLdap;
 import org.xdi.oxauth.service.CleanerTimer;
-
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.SearchScope;
 import org.gluu.search.filter.Filter;
 
 /**
@@ -41,7 +40,7 @@ public class RequestService {
 	@Inject
 	private StaticConfiguration staticConfiguration;
 
-	public List<RequestMessageLdap> getExpiredRequestMessages(BatchOperation<RequestMessageLdap> batchOperation, Date expirationDate) {
+	public List<RequestMessageLdap> getExpiredRequestMessages(LdapBatchOperation<RequestMessageLdap> batchOperation, Date expirationDate) {
 		final String u2fBaseDn = staticConfiguration.getBaseDn().getU2fBase(); // ou=u2f,o=@!1111,o=gluu
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 

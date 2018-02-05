@@ -36,7 +36,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
+import org.gluu.persist.exception.mapping.EntryPersistenceException;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;

@@ -6,8 +6,8 @@
 
 package org.xdi.oxauth.service;
 
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -143,14 +143,14 @@ public class CleanerTimer {
     private void processRegisteredClients() {
         log.debug("Start Client clean up");
 
-        BatchOperation<Client> clientBatchService = new BatchOperation<Client>(ldapEntryManager) {
+        LdapBatchOperation<Client> clientBatchService = new LdapBatchOperation<Client>(ldapEntryManager) {
             @Override
-            protected List<Client> getChunkOrNull(int chunkSize) {
+            public List<Client> getChunkOrNull(int chunkSize) {
                 return clientService.getClientsWithExpirationDate(this, chunkSize, chunkSize);
             }
 
             @Override
-            protected void performAction(List<Client> entries) {
+            public void performAction(List<Client> entries) {
                 for (Client client : entries) {
                     try {
                         GregorianCalendar now = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
@@ -183,14 +183,14 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new BatchOperation<RequestMessageLdap>(ldapEntryManager) {
+        LdapBatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new LdapBatchOperation<RequestMessageLdap>(ldapEntryManager) {
             @Override
-            protected List<RequestMessageLdap> getChunkOrNull(int chunkSize) {
+            public List<RequestMessageLdap> getChunkOrNull(int chunkSize) {
                 return u2fRequestService.getExpiredRequestMessages(this, expirationDate);
             }
 
             @Override
-            protected void performAction(List<RequestMessageLdap> entries) {
+            public void performAction(List<RequestMessageLdap> entries) {
                 for (RequestMessageLdap requestMessageLdap : entries) {
                     try {
                         log.debug("Removing RequestMessageLdap: {}, Creation date: {}",
@@ -214,14 +214,14 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        BatchOperation<DeviceRegistration> deviceRegistrationBatchService = new BatchOperation<DeviceRegistration>(ldapEntryManager) {
+        LdapBatchOperation<DeviceRegistration> deviceRegistrationBatchService = new LdapBatchOperation<DeviceRegistration>(ldapEntryManager) {
             @Override
-            protected List<DeviceRegistration> getChunkOrNull(int chunkSize) {
+            public List<DeviceRegistration> getChunkOrNull(int chunkSize) {
                 return deviceRegistrationService.getExpiredDeviceRegistrations(this, expirationDate);
             }
 
             @Override
-            protected void performAction(List<DeviceRegistration> entries) {
+            public void performAction(List<DeviceRegistration> entries) {
                 for (DeviceRegistration deviceRegistration : entries) {
                     try {
                         log.debug("Removing DeviceRegistration: {}, Creation date: {}",

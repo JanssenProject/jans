@@ -18,10 +18,10 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.DummyEntry;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.configuration.BaseFilter;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
@@ -217,7 +217,7 @@ public abstract class BaseAuthFilterService {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
         Filter ldapFilter = Filter.create(filter);
-        List<LdapDummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), LdapDummyEntry.class, new String[0], ldapFilter);
+        List<DummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), DummyEntry.class, ldapFilter, new String[0]);
 
         if (foundEntries.size() > 1) {
             log.error("Found more than one entry by filter: '{}'. Entries:\n", ldapFilter, foundEntries);
