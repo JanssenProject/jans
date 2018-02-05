@@ -15,8 +15,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.AuthenticationException;
+import org.gluu.persist.exception.operation.AuthenticationException;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.util.StringHelper;
 

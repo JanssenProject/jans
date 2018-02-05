@@ -17,12 +17,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SearchScope;
-import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
@@ -157,14 +157,14 @@ public class UmaPermissionService {
     }
 
     public void cleanup(final Date now) {
-        BatchOperation<UmaPermission> batchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
+        LdapBatchOperation<UmaPermission> batchService = new LdapBatchOperation<UmaPermission>(ldapEntryManager) {
             @Override
-            protected List<UmaPermission> getChunkOrNull(int chunkSize) {
+            public List<UmaPermission> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
-            protected void performAction(List<UmaPermission> entries) {
+            public void performAction(List<UmaPermission> entries) {
                 for (UmaPermission p : entries) {
                     try {
                         ldapEntryManager.remove(p);
