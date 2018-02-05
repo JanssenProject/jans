@@ -6,33 +6,8 @@
 
 package org.xdi.oxauth.authorize.ws.rs;
 
-import static org.xdi.oxauth.model.util.StringUtils.implode;
-
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TimeZone;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.SecurityContext;
-
+import com.google.common.collect.Maps;
+import com.wordnik.swagger.annotations.Api;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -43,24 +18,8 @@ import org.slf4j.Logger;
 import org.xdi.oxauth.audit.ApplicationAuditLogger;
 import org.xdi.oxauth.model.audit.Action;
 import org.xdi.oxauth.model.audit.OAuth2AuditLog;
-import org.xdi.oxauth.model.authorize.AuthorizeErrorResponseType;
-import org.xdi.oxauth.model.authorize.AuthorizeParamsValidator;
-import org.xdi.oxauth.model.authorize.AuthorizeRequestParam;
-import org.xdi.oxauth.model.authorize.AuthorizeResponseParam;
-import org.xdi.oxauth.model.authorize.Claim;
-import org.xdi.oxauth.model.authorize.JwtAuthorizationRequest;
-import org.xdi.oxauth.model.authorize.ScopeChecker;
-import org.xdi.oxauth.model.common.AccessToken;
-import org.xdi.oxauth.model.common.AuthorizationCode;
-import org.xdi.oxauth.model.common.AuthorizationGrant;
-import org.xdi.oxauth.model.common.AuthorizationGrantList;
-import org.xdi.oxauth.model.common.IdToken;
-import org.xdi.oxauth.model.common.Prompt;
-import org.xdi.oxauth.model.common.ResponseMode;
-import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.model.common.SessionId;
-import org.xdi.oxauth.model.common.SessionIdState;
-import org.xdi.oxauth.model.common.User;
+import org.xdi.oxauth.model.authorize.*;
+import org.xdi.oxauth.model.common.*;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
 import org.xdi.oxauth.model.error.ErrorResponseFactory;
 import org.xdi.oxauth.model.exception.AcrChangedException;
@@ -72,15 +31,7 @@ import org.xdi.oxauth.model.util.Base64Util;
 import org.xdi.oxauth.model.util.JwtUtil;
 import org.xdi.oxauth.model.util.Util;
 import org.xdi.oxauth.security.Identity;
-import org.xdi.oxauth.service.AuthenticationFilterService;
-import org.xdi.oxauth.service.AuthenticationService;
-import org.xdi.oxauth.service.AuthorizeService;
-import org.xdi.oxauth.service.ClientAuthorizationsService;
-import org.xdi.oxauth.service.ClientService;
-import org.xdi.oxauth.service.RedirectionUriService;
-import org.xdi.oxauth.service.RequestParameterService;
-import org.xdi.oxauth.service.SessionIdService;
-import org.xdi.oxauth.service.UserService;
+import org.xdi.oxauth.service.*;
 import org.xdi.oxauth.util.QueryStringDecoder;
 import org.xdi.oxauth.util.RedirectUri;
 import org.xdi.oxauth.util.RedirectUtil;
@@ -88,14 +39,29 @@ import org.xdi.oxauth.util.ServerUtil;
 import org.xdi.util.StringHelper;
 import org.xdi.util.security.StringEncrypter;
 
-import com.google.common.collect.Maps;
-import com.wordnik.swagger.annotations.Api;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.SecurityContext;
+import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+import java.security.SignatureException;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.xdi.oxauth.model.util.StringUtils.implode;
 
 /**
  * Implementation for request authorization through REST web services.
  *
  * @author Javier Rojas Blum
- * @version November 23, 2017
+ * @version January 17, 2018
  */
 @Path("/")
 @Api(value = "/oxauth/authorize", description = "Authorization Endpoint")
@@ -502,12 +468,15 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
                                 oAuth2AuditLog.setUsername(user.getUserId());
 
-                                ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(user.getAttribute("inum"), client.getClientId());
+                                ClientAuthorizations clientAuthorizations = clientAuthorizationsService.findClientAuthorizations(
+                                        user.getAttribute("inum"),
+                                        client.getClientId(),
+                                        client.getPersistClientAuthorizations());
                                 if (scopes.size() > 0) {
                                     if (clientAuthorizations != null && clientAuthorizations.getScopes() != null) {
-                                    	if (Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
-                                    		sessionUser.addPermission(clientId, true);
-                                    	} else {
+                                        if (Arrays.asList(clientAuthorizations.getScopes()).containsAll(scopes)) {
+                                            sessionUser.addPermission(clientId, true);
+                                        } else {
                                             redirectToAuthorizationPage(redirectUriResponse, responseTypes, scope, clientId,
                                                     redirectUri, state, responseMode, nonce, display, prompts, maxAge, uiLocales,
                                                     idTokenHint, loginHint, acrValues, amrValues, request, requestUri, originHeaders,
@@ -515,7 +484,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                                             builder = RedirectUtil.getRedirectResponseBuilder(redirectUriResponse, httpRequest);
                                             applicationAuditLogger.sendMessage(oAuth2AuditLog);
                                             return builder.build();
-                                    	}
+                                        }
                                     } else if (client.getTrustedClient()) {
                                         sessionUser.addPermission(clientId, true);
                                     }

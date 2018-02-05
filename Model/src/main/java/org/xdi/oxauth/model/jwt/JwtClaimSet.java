@@ -20,7 +20,7 @@ import java.util.*;
 
 /**
  * @author Javier Rojas Blum
- * @version October 26, 2017
+ * @version January 3, 2018
  */
 public abstract class JwtClaimSet {
 
@@ -231,12 +231,16 @@ public abstract class JwtClaimSet {
         claims.put(key, value);
     }
 
-    public void setClaim(String key, List<String> values) {
+    public void setClaim(String key, List values) {
         claims.put(key, values);
     }
 
     public void setClaim(String key, JwtSubClaimObject subClaimObject) {
         claims.put(key, subClaimObject);
+    }
+
+    public void setClaim(String key, JSONObject values) {
+        claims.put(key, values);
     }
 
     public void removeClaim(String key) {
@@ -255,9 +259,9 @@ public abstract class JwtClaimSet {
                     JwtSubClaimObject subClaimObject = (JwtSubClaimObject) claim.getValue();
                     jsonObject.put(subClaimObject.getName(), subClaimObject.toJsonObject());
                 } else if (claim.getValue() instanceof List) {
-                    List<String> claimObjectList = (List<String>) claim.getValue();
+                    List claimObjectList = (List) claim.getValue();
                     JSONArray claimsJSONArray = new JSONArray();
-                    for (String claimObj : claimObjectList) {
+                    for (Object claimObj : claimObjectList) {
                         claimsJSONArray.put(claimObj);
                     }
                     jsonObject.put(claim.getKey(), claimsJSONArray);
