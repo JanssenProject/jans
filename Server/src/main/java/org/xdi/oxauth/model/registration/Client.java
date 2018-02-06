@@ -22,7 +22,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.oxauth.model.common.AuthenticationMethod;
 import org.xdi.oxauth.model.common.GrantType;
 import org.xdi.oxauth.model.common.ResponseType;
-import org.xdi.oxauth.util.LdapUtils;
 
 /**
  * @author Javier Rojas Blum
@@ -32,7 +31,9 @@ import org.xdi.oxauth.util.LdapUtils;
 @LdapObjectClass(values = {"top", "oxAuthClient"})
 public class Client implements Serializable {
 
-    @LdapDN
+	private static final long serialVersionUID = -6832496019942067969L;
+
+	@LdapDN
     private String dn;
 
     @LdapAttribute(name = "inum")
@@ -999,34 +1000,6 @@ public class Client implements Serializable {
 
     public void setTrustedClient(boolean trustedClient) {
         this.trustedClient = trustedClient;
-    }
-
-    /**
-     * Gets user group.
-     * <p/>
-     * Example:
-     * "inum=@!1111!0003!D9B4,ou=groups,o=@!1111,o=gluu",
-     * "inum=@!1111!0003!A3F4,ou=groups,o=@!1111,o=gluu"
-     *
-     * @return user group
-     */
-    public String[] getUserGroups() {
-        return userGroups;
-    }
-
-    /**
-     * Sets user group. Must be valid DN.
-     * <p/>
-     * Example:
-     * "inum=@!1111!0003!D9B4,ou=groups,o=@!1111,o=gluu",
-     * "inum=@!1111!0003!A3F4,ou=groups,o=@!1111,o=gluu"
-     *
-     * @param p_userGroups user group
-     */
-    public void setUserGroups(String[] p_userGroups) {
-        if (LdapUtils.isValidDNs(p_userGroups)) {
-            userGroups = p_userGroups;
-        }
     }
 
     public Date getLastAccessTime() {

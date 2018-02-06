@@ -55,20 +55,6 @@ public class Manual {
 	}
 
 	@Test
-	public void addGroupsToClient() throws StringEncrypter.EncryptionException {
-		Client c = new Client();
-		c.setDn("inum=@!0000!0008!7652.0000,ou=clients,o=@!1111,o=gluu");
-		c.setClientId("@!0000!0008!7652.0000"); // inum
-		c.setClientName("web");
-		c.setApplicationType("web");
-		c.setClientSecretExpiresAt(new Date());
-		c.setClientSecret("00000000-0000-0000-0000-097337e87435");
-		c.setUserGroups(new String[] { "inum=@!1111!0003!D9B4,ou=groups,o=@!1111,o=gluu",
-				"inum=@!1111!0003!A3F4,ou=groups,o=@!1111,o=gluu" });
-		MANAGER.persist(c);
-	}
-
-	@Test
 	public void getGroupsFromClient() {
 		final Client client = MANAGER.find(Client.class, "inum=@!0000!0008!7652.0000,ou=clients,o=@!1111,o=gluu");
 		System.out.println(client);
