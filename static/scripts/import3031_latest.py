@@ -107,6 +107,9 @@ class Migration(object):
         self.gluuSchemaDir = '/opt/gluu/schema/openldap/'
         self.backupVersion = 0
 
+        self.ox_ldap_properties = 'backup_3031/etc/gluu/conf/ox-ldap.properties'
+
+
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
             logging.debug("Cannot read: %s. File does not exist.", inFilePath)
@@ -163,8 +166,6 @@ class Migration(object):
 
     def verifyBackupData(self):
 
-        #print "3 = verify backupdir and ldifdir"
-
         if not os.path.exists(self.backupDir):
             logging.error("Backup folder %s doesn't exist! Quitting migration",
                           self.backupDir)
@@ -175,8 +176,6 @@ class Migration(object):
             sys.exit(1)
 
     def setupWorkDirectory(self):
-
-        #print "4 = make Working Directory"
 
         if not os.path.exists(self.workingDir):
             os.mkdir(self.workingDir)
@@ -207,6 +206,12 @@ class Migration(object):
         logging.info("Updating the CA Certs Keystore.")
         keys = ['httpd', 'idp-signing', 'idp-encryption', 'shibidp', 'asimba',
                 'openldap']
+
+        # other wise gives error keytool error: java.lang.Exception: Alias <gluu.local.org_openldap> does not exist
+        if self.ldap_type == 'opendj':
+            keys.remove('openldap')
+
+
         hostname = self.getOutput(['hostname']).strip()
         # import all the keys into the keystore
         for key in keys:
@@ -216,22 +221,19 @@ class Migration(object):
                 logging.debug("Missing file: %s", filename)
                 continue  # skip the non-existant certs
 
-            if self.ldap_type == 'openldap':
+            logging.debug('Deleting new %s', alias)
+            result = self.getOutput(
+                [self.keytool, '-delete', '-alias', alias, '-keystore',
+                 self.key_store, '-storepass', 'changeit', '-noprompt'])
+            logging.error(result) if 'error' in result else logging.debug('Delete operation success.')
 
-                logging.debug('Deleting new %s', alias)
-                result = self.getOutput(
-                    [self.keytool, '-delete', '-alias', alias, '-keystore',
-                     self.key_store, '-storepass', 'changeit', '-noprompt'])
-                logging.error(result) if 'error' in result else logging.debug('Delete operation success.')
+            logging.debug('Importing old %s', alias)
+            result = self.getOutput(
+                [self.keytool, '-import', '-trustcacerts', '-file', filename,
+                 '-alias', alias, '-keystore', self.key_store, '-storepass',
+                 'changeit', '-noprompt'])
+            logging.error(result) if 'error' in result else logging.debug('Certificate import success.')
 
-                logging.debug('Importing old %s', alias)
-                result = self.getOutput(
-                    [self.keytool, '-import', '-trustcacerts', '-file', filename,
-                     '-alias', alias, '-keystore', self.key_store, '-storepass',
-                     'changeit', '-noprompt'])
-                logging.error(result) if 'error' in result else logging.debug('Certificate import success.')
-
-        #sys.exit(0)
 
     def stopSolserver(self):
         logging.info("Stopping OpenLDAP Server.")
@@ -383,6 +385,7 @@ class Migration(object):
     def copyCustomSchema(self):
 
         if self.ldap_type == 'openldap':
+
             custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
             outfile = open(custom_schema, 'w')
             output = self.readFile(self.backupDir + "/custom.schema")
@@ -392,98 +395,7 @@ class Migration(object):
             outfile.close()
 
         else:
-            logging.info("Converting Schema files of custom attributes.")
-            loc = os.path.join(self.backupDir, 'opt', 'opendj', 'config', 'schema')
-            schema_99 = os.path.join(loc, '99-user.ldif')
-            schema_100 = os.path.join(loc, '100-user.ldif')
-
-            if self.ldap_type == 'opendj':
-                if os.path.isfile(schema_99):
-                    shutil.copyfile(
-                        schema_99, '/opt/opendj/config/schema/99-user.ldif')
-                if os.path.isfile(schema_100):
-                    shutil.copyfile(
-                        schema_100, '/opt/opendj/config/schema/100-user.ldif')
-                return
-
-            # Process for openldap and then append the contents to custom schema
-            new_user = os.path.join(self.workingDir, 'new_99.ldif')
-            custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
-            output = ""
-
-            if os.path.isfile(schema_99):
-                output = self.convertSchema(schema_100)
-                self.updateUserSchema(schema_99, new_user)
-                output = output + "\n" + self.convertSchema(new_user)
-            else:
-                # If there is no 99-user file, then the schema def is in 100-user
-                self.updateUserSchema(schema_100, new_user)
-                output = self.convertSchema(new_user)
-
-            outfile2 = open(os.path.join(self.gluuSchemaDir, 'custom.schema'), 'r')
-            temp_schema = outfile2.read()
-            custArrtributes = ''
-            for indx, line in enumerate(self.customAttrs):
-                custArrtributes = custArrtributes + ' $ ' + line
-            if len(self.customAttrs) > 0:
-                customAttrs = set(custArrtributes.split(' $ '))
-            else:
-                customAttrs = []
-            custArrtributes = ""
-            if len(self.customAttrs) > 0:
-                for indx, line in enumerate(self.customAttrs):
-                    if indx == 0:
-                        custArrtributes = custArrtributes + " $ " + line
-                    elif (indx < len(self.customAttrs) - 1):
-                        custArrtributes = custArrtributes + line + " $ "
-                    else:
-                        custArrtributes = custArrtributes + line
-            #print custArrtributes
-
-            temp_schema = temp_schema.replace(
-                re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(1),
-                re.search(r'\((.*?)\)', temp_schema.split('MAY')[1]).group(1) + custArrtributes)
-            outfile2.close()
-            outfile = open(custom_schema, 'w')
-            outfile.write(output + "\n" + temp_schema)
-            outfile.close()
-
-            eduperson = ""
-            eduPath = os.path.join("/opt", "symas", "etc", "openldap", "schema", "eduperson.schema")
-            input_file = open(eduPath)
-            try:
-                for i, line in enumerate(input_file):
-                    if i == 62:
-                        line = line + "\n" + "attributetype ( 1.3.6.1.4.1.5923.1.1.1.9"
-                        line = line + "\n" + "\t\tNAME 'eduPersonScopedAffiliation'"
-                        line = line + "\n" + "\t\tDESC 'eduPerson per Internet2 and EDUCAUSE'"
-                        line = line + "\n" + "\t\tEQUALITY caseIgnoreMatch"
-                        line = line + "\n" + "\t\tSYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )"
-                        line = line + "\n"
-                        line = line + "\n" + "attributetype ( 1.3.6.1.4.1.5923.1.1.1.10"
-                        line = line + "\n" + "\t\tNAME 'eduPersonTargetedID'"
-                        line = line + "\n" + "\t\tDESC 'eduPerson per Internet2 and EDUCAUSE'"
-                        line = line + "\n" + "\t\tEQUALITY caseIgnoreMatch"
-                        line = line + "\n" + "\t\tSYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )"
-                        line = line + "\n"
-                        line = line + "\n" + "attributetype ( 1.3.6.1.4.1.5923.1.1.1.11"
-                        line = line + "\n" + "\t\tNAME 'eduPersonAssurance'"
-                        line = line + "\n" + "\t\tDESC 'eduPerson per Internet2 and EDUCAUSE'"
-                        line = line + "\n" + "\t\tEQUALITY caseIgnoreMatch"
-                        line = line + "\n" + "\t\tSYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )"
-                        line = line + "\n\n"
-                    if i == 63:
-                        line = "\n" + line
-                    if i == 67:
-                        line = line + "\t\teduPersonScopedAffiliation $ eduPersonTargetedID $ eduPersonAssurance $\n"
-                    eduperson = eduperson + line
-            except Exception, e:
-                logging.log(e)
-            finally:
-                input_file.close()
-                f = open(eduPath, "w")
-                f.write(eduperson)
-
+            return
 
     def getEntry(self, fn, dn):
         parser = MyLDIF(open(fn, 'rb'), sys.stdout)
@@ -689,6 +601,31 @@ class Migration(object):
             self.importDataIntoOpenDJ()
 
 
+
+    def choice_opendj_change(self):
+        # change bindDN
+        if os.path.isfile(self.ox_ldap_properties):
+            ox_data = ""
+            try:
+                with open(self.ox_ldap_properties) as f:
+                    for line in f:
+                        if line == 'bindDN: cn=directory manager,o=gluu\n':
+                            line = 'bindDN: cn=directory manager\n'
+                        ox_data += line
+            except:
+                logging.error(self.ox_ldap_properties+" error in reading ")
+                sys.exit(0)
+
+
+            fh = open(self.ox_ldap_properties, 'w')
+            fh.write(ox_data)
+            fh.close()
+
+        else:
+            logging.error(self.setup_properties+" File not Found")
+            sys.exit(0)
+
+
     def getLDAPServerTypeChoice(self):
 
         try:
@@ -700,16 +637,16 @@ class Migration(object):
 
         if choice == 1:
             self.ldap_type = 'openldap'
+
         elif choice == 2:
             self.ldap_type = 'opendj'
+            self.choice_opendj_change()
         else:
             logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
             sys.exit(1)
 
 
     def getLDAPServerType(self):
-        #self.ldap_type = 'openldap'
-        #print "2 = authentication"
         self.oxIDPAuthentication = 2
         try:
             choice = int(raw_input(
@@ -728,8 +665,6 @@ class Migration(object):
             sys.exit(1)
 
     def stopOpenDJ(self):
-
-        #print "6 = Open Dj Stop"
 
         logging.info('Stopping OpenDJ Directory Server...')
         if (os.path.isfile('/usr/bin/systemctl')):
@@ -785,7 +720,6 @@ class Migration(object):
                 copy_tree(
                     os.path.join(self.backupDir, 'opt', 'idp', 'ssl'),
                     '/opt/shibboleth-idp/ssl')
-        #sys.exit(0)
 
     def fixPermissions(self):
         logging.info('Fixing permissions for files.')
@@ -811,25 +745,19 @@ class Migration(object):
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
         self.version = int(self.getProp('version').replace('.', '')[0:3])
-
         self.getLDAPServerTypeChoice()
-
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
         self.stopWebapps()
         self.stopLDAPServer()
-
         self.copyCertificates()
-
         self.copyCustomFiles()
         self.copyIDPFiles()
         self.copyCustomSchema()
-
         self.exportInstallData()
         self.processBackupData()
         self.importProcessedData()
-
         self.fixPermissions()
         self.startLDAPServer()
         # self.startWebapps()
