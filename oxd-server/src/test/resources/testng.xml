@@ -103,6 +103,11 @@
             <class name="org.xdi.oxd.client.UmaGetClaimsGatheringUrlTest"/>
         </classes>
     </test>
+    <test name="Introspect RPT" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.IntrospectRptTest"/>
+        </classes>
+    </test>
 
     <!-- Custom -->
     <test name="Setup client" enabled="true">
@@ -113,6 +118,11 @@
     <test name="Get client token" enabled="true">
         <classes>
             <class name="org.xdi.oxd.client.GetClientTokenTest"/>
+        </classes>
+    </test>
+    <test name="Introspect access token" enabled="true">
+        <classes>
+            <class name="org.xdi.oxd.client.IntrospectAccessTokenTest"/>
         </classes>
     </test>
 </suite>
