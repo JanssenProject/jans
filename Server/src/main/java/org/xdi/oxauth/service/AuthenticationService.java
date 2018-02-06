@@ -13,9 +13,11 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.ejb.Stateless;
 import javax.faces.context.ExternalContext;
@@ -24,12 +26,12 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
 import org.gluu.jsf2.service.FacesService;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
+import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.persist.model.base.CustomEntry;
+import org.gluu.persist.model.base.GluuStatus;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.CustomEntry;
-import org.xdi.ldap.model.GluuStatus;
 import org.xdi.model.SimpleProperty;
 import org.xdi.model.ldap.GluuLdapConfiguration;
 import org.xdi.model.metric.MetricType;
@@ -380,7 +382,9 @@ public class AuthenticationService {
             customEntry.setCustomObjectClasses(UserService.USER_OBJECT_CLASSES);
         }
 
-        CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", new Date());
+        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
+        String nowDateString = ldapEntryManager.encodeGeneralizedTime(now);
+        CustomAttribute customAttribute = new CustomAttribute("oxLastLogonTime", nowDateString);
         customEntry.getCustomAttributes().add(customAttribute);
 
         try {

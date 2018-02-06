@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.unboundid.ldap.sdk.DN;
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.search.filter.Filter;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.RDN;
 

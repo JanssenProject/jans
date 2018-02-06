@@ -7,16 +7,17 @@
 package org.xdi.oxauth.service;
 
 import com.google.common.collect.Sets;
-import com.unboundid.ldap.sdk.Filter;
+
+import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.persist.model.base.CustomEntry;
+import org.gluu.search.filter.Filter;
 import org.codehaus.jettison.json.JSONArray;
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.CustomEntry;
-import org.xdi.ldap.model.SearchScope;
 import org.xdi.oxauth.model.common.Scope;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -148,7 +149,7 @@ public class ClientService {
         Filter registrationAccessTokenInum = Filter.createEqualityFilter("oxAuthRegistrationAccessToken", registrationAccessToken);
         Filter filter = Filter.createANDFilter(filterInum, registrationAccessTokenInum);
 
-        List<Client> clients = ldapEntryManager.findEntries(baseDN, Client.class, filter, null, 1, 1);
+        List<Client> clients = ldapEntryManager.findEntries(baseDN, Client.class, filter, null, 1);
         if (clients != null && clients.size() > 0) {
             return clients.get(0);
         }
@@ -221,8 +222,8 @@ public class ClientService {
         }
     }
 
-    public org.xdi.ldap.model.CustomAttribute getCustomAttribute(Client client, String attributeName) {
-        for (org.xdi.ldap.model.CustomAttribute customAttribute : client.getCustomAttributes()) {
+    public org.gluu.persist.model.base.CustomAttribute getCustomAttribute(Client client, String attributeName) {
+        for (org.gluu.persist.model.base.CustomAttribute customAttribute : client.getCustomAttributes()) {
             if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
                 return customAttribute;
             }
@@ -232,10 +233,10 @@ public class ClientService {
     }
 
     public void setCustomAttribute(Client client, String attributeName, String attributeValue) {
-        org.xdi.ldap.model.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
+        org.gluu.persist.model.base.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
 
         if (customAttribute == null) {
-            customAttribute = new org.xdi.ldap.model.CustomAttribute(attributeName);
+            customAttribute = new org.gluu.persist.model.base.CustomAttribute(attributeName);
             client.getCustomAttributes().add(customAttribute);
         }
 
@@ -245,7 +246,7 @@ public class ClientService {
     public List<Client> getAllClients(String[] returnAttributes) {
         String baseDn = staticConfiguration.getBaseDn().getClients();
 
-        List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, returnAttributes, null);
+        List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes);
 
         return result;
     }
@@ -253,15 +254,15 @@ public class ClientService {
     public List<Client> getAllClients(String[] returnAttributes, int size) {
         String baseDn = staticConfiguration.getBaseDn().getClients();
 
-        List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size, size);
+        List<Client> result = ldapEntryManager.findEntries(baseDn, Client.class, null, returnAttributes, size);
 
         return result;
     }
 
-    public List<Client> getClientsWithExpirationDate(BatchOperation<Client> batchOperation, int searchLimit, int sizeLimit){
+    public List<Client> getClientsWithExpirationDate(LdapBatchOperation<Client> batchOperation, int searchLimit, int sizeLimit){
         String baseDN = staticConfiguration.getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
-        return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, null, batchOperation, 0, searchLimit, sizeLimit);
+        return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, null, batchOperation, 0, sizeLimit, searchLimit);
     }
 
     public String buildClientDn(String p_clientId) {
@@ -276,7 +277,7 @@ public class ClientService {
             removeFromCache(client);
 
             String clientDn = client.getDn();
-            ldapEntryManager.removeWithSubtree(clientDn);
+            ldapEntryManager.removeRecursively(clientDn);
         }
     }
 
@@ -304,11 +305,13 @@ public class ClientService {
 		customEntry.setCustomObjectClasses(CLIENT_OBJECT_CLASSES);
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-        CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", now);
+        String nowDateString = ldapEntryManager.encodeGeneralizedTime(now);
+
+        CustomAttribute customAttributeLastAccessTime = new CustomAttribute("oxLastAccessTime", nowDateString);
         customEntry.getCustomAttributes().add(customAttributeLastAccessTime);
 
         if (isUpdateLogonTime) {
-            CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", now);
+            CustomAttribute customAttributeLastLogonTime = new CustomAttribute("oxLastLogonTime", nowDateString);
             customEntry.getCustomAttributes().add(customAttributeLastLogonTime);
         }
 
