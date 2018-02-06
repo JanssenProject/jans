@@ -338,8 +338,6 @@ RUN_CMD=("$JAVA" ${RUN_ARGS[@]})
 #####################################################
 if (( DEBUG ))
 then
-  echo "START_INI      =  $START_INI"
-  echo "START_D        =  $START_D"
   echo "OXD_HOME     =  $OXD_HOME"
   echo "OXD_BASE     =  $OXD_BASE"
   echo "OXD_CONF     =  $OXD_CONF"
@@ -500,8 +498,6 @@ case "$ACTION" in
       echo "oxd server NOT running"
     fi
     echo
-    echo "START_INI      =  $START_INI"
-    echo "START_D        =  $START_D"
     echo "OXD_HOME     =  $OXD_HOME"
     echo "OXD_BASE     =  $OXD_BASE"
     echo "OXD_CONF     =  $OXD_CONF"
