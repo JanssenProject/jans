@@ -26,6 +26,7 @@ import org.xdi.oxd.common.params.SetupClientParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.server.Configuration;
 import org.xdi.oxd.server.Utils;
+import org.xdi.oxd.server.model.UmaResource;
 import org.xdi.oxd.server.service.ConfigurationService;
 import org.xdi.oxd.server.service.Rp;
 
@@ -349,6 +350,7 @@ public class RegisterSiteOperation extends BaseOperation<RegisterSiteParams> {
         rp.setClaimsRedirectUri(params.getClaimsRedirectUri());
         rp.setApplicationType("web");
         rp.setOxdRpProgrammingLanguage(params.getOxdRpProgrammingLanguage());
+        rp.setUmaProtectedResources(new ArrayList<UmaResource>());
 
         if (!Strings.isNullOrEmpty(params.getPostLogoutRedirectUri())) {
             rp.setPostLogoutRedirectUri(params.getPostLogoutRedirectUri());

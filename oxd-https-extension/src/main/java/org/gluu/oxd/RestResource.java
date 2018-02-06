@@ -51,6 +51,22 @@ public class RestResource {
     }
 
     @POST
+    @Path("/introspect-access-token")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String introspectAccessToken(String params) throws IOException {
+        return response(oxd.introspectAccessToken(read(params, IntrospectAccessTokenParams.class)));
+    }
+
+    @POST
+    @Path("/introspect-rpt")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public String introspectRpt(String params) throws IOException {
+        return response(oxd.introspectRpt(read(params, IntrospectRptParams.class)));
+    }
+
+    @POST
     @Path("/register-site")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
