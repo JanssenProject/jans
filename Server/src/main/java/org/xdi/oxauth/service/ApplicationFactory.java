@@ -67,7 +67,7 @@ public class ApplicationFactory {
 
 		applianceService.decryptSmtpPassword(smtpConfiguration);
 
-		return smtpConfiguration;
+    return smtpConfiguration;
 	}
 
 }

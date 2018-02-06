@@ -44,7 +44,11 @@ public class ScopeChecker {
         }
 
         final String[] scopesRequested = scope.split(" ");
-        final String[] scopesAllowed = client.getScopes();
+        String[] scopesAllowed = client.getScopes();
+        
+        if (scopesAllowed == null) {
+        	scopesAllowed = new String[0];
+        }
 
         for (String scopeRequested : scopesRequested) {
             if (StringUtils.isNotBlank(scopeRequested)) {
