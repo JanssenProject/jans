@@ -7,6 +7,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.xdi.oxd.server.model.UmaResource;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -505,7 +506,10 @@ public class Rp implements Serializable {
     }
 
     public UmaResource umaResource(String path, String httpMethod) {
-        for (UmaResource resource : umaProtectedResources) {
+        List<UmaResource> copy = Lists.newArrayList(umaProtectedResources);
+        Collections.reverse(copy);
+
+        for (UmaResource resource : copy) {
             if (path.equalsIgnoreCase(resource.getPath()) && resource.getHttpMethods() != null) {
                 for (String http : resource.getHttpMethods()) {
                     if (http.equalsIgnoreCase(httpMethod)) {
