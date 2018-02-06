@@ -108,6 +108,7 @@ class Migration(object):
         self.backupVersion = 0
 
         self.ox_ldap_properties = 'backup_3031/etc/gluu/conf/ox-ldap.properties'
+        self.setup_properties = 'backup_3031/setup.properties'
 
 
     def readFile(self, inFilePath):
@@ -622,18 +623,26 @@ class Migration(object):
             fh.close()
 
         else:
-            logging.error(self.setup_properties+" File not Found")
+            logging.error(self.ox_ldap_properties+" File not Found")
             sys.exit(0)
 
 
     def getLDAPServerTypeChoice(self):
 
-        try:
-            choice = int(raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: "))
-        except ValueError:
-            logging.error("You did not enter a integer value. "
-                          "Cannot decide LDAP server type. Quitting.")
-            sys.exit(1)
+        if os.path.isfile(self.setup_properties):
+            data = ""
+            choice = 0
+            try:
+                with open(self.setup_properties) as f:
+                    for line in f:
+                        if line == 'ldap_type=openldap\n':
+                            choice = 1
+                        elif line == 'ldap_type=opendj\n':
+                            choice = 2
+            except:
+                logging.error(self.setup_properties+" File not Found")
+                sys.exit(0)
+
 
         if choice == 1:
             self.ldap_type = 'openldap'
