@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 import javax.inject.Inject;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.slf4j.Logger;
 
 /**

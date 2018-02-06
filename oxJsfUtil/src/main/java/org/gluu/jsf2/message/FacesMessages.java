@@ -1,7 +1,7 @@
 package org.gluu.jsf2.message;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.el.ELContext;
@@ -35,12 +35,14 @@ public class FacesMessages implements Serializable {
 	private ExpressionEvaluator expressionEvaluator;
 
 	public void add(Severity severity, String message) {
-		String evaluatedMessage = evalAsString(message);
-		facesContext.addMessage(null, new FacesMessage(severity, evaluatedMessage, evaluatedMessage));
-		setKeepMessages();
+		add(null, severity, message);
 	}
 
 	public void add(String clientId, Severity severity, String message) {
+		if (facesContext == null) {
+			return;
+		}
+
 		String evaluatedMessage = evalAsString(message);
 		facesContext.addMessage(clientId, new FacesMessage(severity, evaluatedMessage, evaluatedMessage));
 		setKeepMessages();
@@ -54,10 +56,30 @@ public class FacesMessages implements Serializable {
 	}
 
 	public void setKeepMessages() {
+		if (externalContext == null) {
+			return;
+		}
+
 		externalContext.getFlash().setKeepMessages(true);
 	}
 
+	public void clear() {
+		if (facesContext == null) {
+			return;
+		}
+
+		Iterator<FacesMessage> messages = facesContext.getMessages();
+		while(messages.hasNext()) {
+			messages.next();
+			messages.remove();
+		}
+	}
+
 	public String evalAsString(String expression) {
+		if (facesContext == null) {
+			return expression;
+		}
+
 		ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();
 		ELContext elContext = facesContext.getELContext();
 		ValueExpression valueExpression = expressionFactory.createValueExpression(elContext, expression, String.class);
