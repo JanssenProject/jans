@@ -13,13 +13,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
-
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.search.filter.Filter;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012

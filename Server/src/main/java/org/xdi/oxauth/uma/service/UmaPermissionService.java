@@ -6,25 +6,30 @@
 
 package org.xdi.oxauth.uma.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
-import com.unboundid.util.StaticUtils;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.BatchOperation;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SearchScope;
-import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.uma.UmaPermissionList;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.util.INumGenerator;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
+import com.unboundid.util.StaticUtils;
 
 /**
  * Holds permission tokens and permissions
@@ -152,14 +157,14 @@ public class UmaPermissionService {
     }
 
     public void cleanup(final Date now) {
-        BatchOperation<UmaPermission> batchService = new BatchOperation<UmaPermission>(ldapEntryManager) {
+        LdapBatchOperation<UmaPermission> batchService = new LdapBatchOperation<UmaPermission>(ldapEntryManager) {
             @Override
-            protected List<UmaPermission> getChunkOrNull(int chunkSize) {
+            public List<UmaPermission> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
             }
 
             @Override
-            protected void performAction(List<UmaPermission> entries) {
+            public void performAction(List<UmaPermission> entries) {
                 for (UmaPermission p : entries) {
                     try {
                         ldapEntryManager.remove(p);
@@ -170,12 +175,7 @@ public class UmaPermissionService {
             }
 
             private Filter getFilter() {
-                try {
-                    return Filter.create(String.format("(oxAuthExpiration<=%s)", StaticUtils.encodeGeneralizedTime(now)));
-                }catch (LDAPException e) {
-                    log.trace(e.getMessage(), e);
-                    return Filter.createPresenceFilter("oxAuthExpiration");
-                }
+                return Filter.createLessOrEqualFilter("oxAuthExpiration", StaticUtils.encodeGeneralizedTime(now));
             }
         };
         batchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
