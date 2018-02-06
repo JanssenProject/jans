@@ -57,6 +57,9 @@
 
     <modules>
         <module>oxUtil</module>
+        <module>oxFilter</module>
+        <module>oxPersistModel</module>
+        <module>oxPersist</module>
         <module>oxLdap</module>
         <module>oxLdap-annotations</module>
         <module>oxLdapSample</module>

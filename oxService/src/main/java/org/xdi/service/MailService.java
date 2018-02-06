@@ -83,11 +83,13 @@ public class MailService {
 		props.put("mail.smtp.timeout", this.connectionTimeout);
 		props.put("mail.transport.protocol", "smtp");
 		props.put("mail.smtp.ssl.trust", mailSmtpConfiguration.getHost());
+		props.put("mail.debug", true);
 
 		if (mailSmtpConfiguration.isRequiresSsl()) {
 			props.put("mail.smtp.socketFactory.port", mailSmtpConfiguration.getPort());
 			props.put("mail.smtp.starttls.enable", true);
 			props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+			props.put("mail.transport.protocol", "smtps");
 		}
 
 		Session session = null;
