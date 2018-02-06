@@ -159,9 +159,6 @@ public class Client implements Serializable {
     @LdapAttribute(name = "oxAuthTrustedClient")
     private boolean trustedClient;
 
-    @LdapAttribute(name = "oxAuthClientUserGroup")
-    private String[] userGroups;
-
     @LdapAttribute(name = "oxLastAccessTime")
     private Date lastAccessTime;
 
@@ -1068,15 +1065,6 @@ public class Client implements Serializable {
 
     public static Client instance() {
         return new Client();
-    }
-
-    /**
-     * Returns whether client contains user groups.
-     *
-     * @return whether client contains user groups
-     */
-    public boolean hasUserGroups() {
-        return !ArrayUtils.isEmpty(userGroups);
     }
 
 }
