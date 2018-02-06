@@ -370,7 +370,7 @@ case "$ACTION" in
       fi
 
       echo ${RUN_ARGS[@]}
-      start-stop-daemon -S -p"$OXD_PID" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file=$OXD_LOGS/start.log >> $OXD_LOGS/start.log 2>&1
+      start-stop-daemon -S -p"$OXD_PID" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
 
     else
 
@@ -392,7 +392,7 @@ case "$ACTION" in
         chown "$OXD_USER" "$OXD_PID"
         # FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         su - "$OXD_USER" $SU_SHELL -c "
-          exec ${RUN_CMD[*]} start-log-file=$OXD_LOGS/start.log >> $OXD_LOGS/start.log 2>&1 &
+          exec ${RUN_CMD[*]} start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1 &
           disown \$!
           echo \$! > '$OXD_PID'"
       else
