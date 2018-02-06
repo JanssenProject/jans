@@ -86,7 +86,7 @@ public class RpService {
             put(rp);
             persistenceService.create(rp);
         } else {
-            LOG.error("RP with already exists in database, oxd_id: " + rp.getOxdId());
+            LOG.error("RP already exists in database, oxd_id: " + rp.getOxdId());
         }
     }
 

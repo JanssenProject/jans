@@ -9,7 +9,6 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.node.POJONode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxd.common.response.IOpResponse;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -64,7 +63,7 @@ public class CommandResponse implements Serializable {
         return this;
     }
 
-    public <T extends IOpResponse> T dataAsResponse(Class<T> p_class) {
+    public <T> T dataAsResponse(Class<T> p_class) {
         if (data != null && p_class != null) {
             final String asString = data.toString();
             try {

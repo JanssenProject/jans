@@ -111,6 +111,7 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
         final RptPreProcessInterceptor rptInterceptor = new RptPreProcessInterceptor(new ResourceRegistrar(patProvider, new ServiceProvider(site.getOpHost())));
         BuiltResponse response = null;
         try {
+            LOG.trace("Try to register ticket, scopes: " + scopes + ", resourceId: " + resource.getId());
             response = (BuiltResponse) rptInterceptor.registerTicketResponse(scopes, resource.getId());
         } catch (ClientResponseFailure e) {
             LOG.debug("Failed to register ticket. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + e.getResponse().getStatus(), e);
