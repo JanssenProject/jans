@@ -6,14 +6,23 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.slf4j.Logger;
-import org.xdi.ldap.model.SimpleBranch;
 import org.xdi.oxauth.model.ldap.ClientAuthorizations;
 import org.xdi.service.CacheService;
 import org.xdi.util.StringHelper;
-
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;

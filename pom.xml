@@ -135,6 +135,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.xdi</groupId>
+				<artifactId>oxcore-filter</artifactId>
+				<version>${oxcore.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xdi</groupId>
 				<artifactId>oxcore-service</artifactId>
 				<version>${oxcore.version}</version>
 			</dependency>
@@ -372,13 +377,6 @@
 				<groupId>javax.mail</groupId>
 				<artifactId>mail</artifactId>
 				<version>1.4.7</version>
-			</dependency>
-
-			<!-- LDAP -->
-			<dependency>
-				<groupId>com.unboundid</groupId>
-				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>3.2.0</version>
 			</dependency>
 
 			<!-- Metrics -->

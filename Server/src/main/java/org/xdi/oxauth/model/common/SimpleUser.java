@@ -9,21 +9,21 @@ package org.xdi.oxauth.model.common;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
-import org.xdi.ldap.model.CustomAttribute;
+import org.gluu.persist.model.base.CustomAttribute;
 import org.xdi.oxauth.model.exception.InvalidClaimException;
 import org.xdi.util.StringHelper;
 
 /**
  * @author Javier Rojas Blum Date: 11.25.2011
  */
-public class SimpleUser extends org.xdi.ldap.model.SimpleUser {
+public class SimpleUser extends org.gluu.persist.model.base.SimpleUser {
 
     private static final long serialVersionUID = -2634191420188575733L;
 
     public Object getAttribute(String userAttribute, boolean optional) throws InvalidClaimException {
         Object attribute = null;
 
-        for (org.xdi.ldap.model.CustomAttribute customAttribute : customAttributes) {
+        for (org.gluu.persist.model.base.CustomAttribute customAttribute : customAttributes) {
             if (customAttribute.getName().equals(userAttribute)) {
                 List<String> values = customAttribute.getValues();
                 if (values != null) {
