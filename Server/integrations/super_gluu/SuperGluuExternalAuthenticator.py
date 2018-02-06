@@ -936,7 +936,7 @@ class PersonAuthentication(PersonAuthenticationType):
         if self.customLabel != None:
             identity.setWorkingParameter("super_gluu_label", self.customLabel)
             
-        identity.setWorkingParameter("download_url",downloadMap)
+        identity.setWorkingParameter("download_url", downloadMap)
         identity.setWorkingParameter("super_gluu_qr_options", self.customQrOptions)
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):

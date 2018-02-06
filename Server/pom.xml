@@ -267,6 +267,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xdi</groupId>
+			<artifactId>oxcore-filter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.xdi</groupId>
 			<artifactId>oxcore-service</artifactId>
 		</dependency>
 		<dependency>
@@ -395,12 +399,6 @@
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>mail</artifactId>
-		</dependency>
-
-		<!-- LDAP -->
-		<dependency>
-			<groupId>com.unboundid</groupId>
-			<artifactId>unboundid-ldapsdk</artifactId>
 		</dependency>
 
 		<!-- Metrics -->

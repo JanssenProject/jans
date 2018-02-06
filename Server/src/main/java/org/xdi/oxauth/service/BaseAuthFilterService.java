@@ -18,15 +18,13 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.DummyEntry;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.LdapDummyEntry;
 import org.xdi.oxauth.model.configuration.BaseFilter;
 import org.xdi.util.ArrayHelper;
 import org.xdi.util.StringHelper;
-
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
 
 /**
  * @author Yuriy Movchan
@@ -218,15 +216,8 @@ public abstract class BaseAuthFilterService {
     public String loadEntryDN(LdapEntryManager p_manager, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) {
         final String filter = buildFilter(authenticationFilterWithParameters, normalizedAttributeValues);
 
-        Filter ldapFilter;
-        try {
-            ldapFilter = Filter.create(filter);
-        } catch (LDAPException ex) {
-            log.error("Failed to create Ldap filter: '{}'", filter, ex);
-            return null;
-        }
-
-        List<LdapDummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), LdapDummyEntry.class, new String[0], ldapFilter);
+        Filter ldapFilter = Filter.create(filter);
+        List<DummyEntry> foundEntries = p_manager.findEntries(authenticationFilterWithParameters.getAuthenticationFilter().getBaseDn(), DummyEntry.class, ldapFilter, new String[0]);
 
         if (foundEntries.size() > 1) {
             log.error("Found more than one entry by filter: '{}'. Entries:\n", ldapFilter, foundEntries);

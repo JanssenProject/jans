@@ -6,11 +6,11 @@
 
 package org.xdi.oxauth.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.persist.model.base.GluuStatus;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.CustomAttribute;
-import org.xdi.ldap.model.GluuStatus;
 import org.xdi.oxauth.model.common.User;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -92,7 +92,7 @@ public class UserService {
 
 		Filter userUidFilter = Filter.createEqualityFilter("uid", userId);
 
-		List<User> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getPeople(), User.class, returnAttributes, userUidFilter);
+		List<User> entries = ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getPeople(), User.class, userUidFilter, returnAttributes);
 		log.debug("Found {} entries for user id = {}", entries.size(), userId);
 
 		if (entries.size() > 0) {
@@ -212,7 +212,7 @@ public class UserService {
     public List<User> getUsersBySample(User user, int limit) {
         log.debug("Getting user by sample");
 
-        List<User> entries = ldapEntryManager.findEntries(user, limit, limit);
+        List<User> entries = ldapEntryManager.findEntries(user, limit);
         log.debug("Found '{}' entries", entries.size());
 
         return entries;

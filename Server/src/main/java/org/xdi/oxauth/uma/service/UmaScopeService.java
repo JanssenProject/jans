@@ -6,10 +6,19 @@
 
 package org.xdi.oxauth.uma.service;
 
-import com.unboundid.ldap.sdk.Filter;
-import com.unboundid.ldap.sdk.LDAPException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.configuration.AppConfiguration;
@@ -19,15 +28,6 @@ import org.xdi.oxauth.model.uma.persistence.UmaScopeDescription;
 import org.xdi.oxauth.service.InumService;
 import org.xdi.oxauth.uma.authorization.UmaWebException;
 import org.xdi.oxauth.uma.ws.rs.UmaMetadataWS;
-
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -188,23 +188,17 @@ public class UmaScopeService {
     }
 
     private Filter createAnyFilterByIds(List<String> scopeIds) {
-        try {
-            if (scopeIds != null && !scopeIds.isEmpty()) {
-                final StringBuilder sb = new StringBuilder("(|");
-                for (String url : scopeIds) {
-                    sb.append("(");
-                    sb.append("oxId=");
-                    sb.append(url);
-                    sb.append(")");
-                }
-                sb.append(")");
-                final String filterAsString = sb.toString();
-                log.trace("Uma scope ids: " + scopeIds + ", ldapFilter: " + filterAsString);
-                return Filter.create(filterAsString);
+        if (scopeIds != null && !scopeIds.isEmpty()) {
+        	List<Filter> filters = new ArrayList<Filter>();
+            for (String url : scopeIds) {
+            	Filter filter = Filter.createEqualityFilter("oxId", url);
+            	filters.add(filter);
             }
-        } catch (LDAPException e) {
-            log.error(e.getMessage(), e);
+            Filter filter = Filter.createORFilter(filters.toArray(new Filter[0]));
+            log.trace("Uma scope ids: " + scopeIds + ", ldapFilter: " + filter);
+            return filter;
         }
+
         return null;
     }
 

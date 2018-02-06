@@ -14,12 +14,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang.StringUtils;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.gluu.site.ldap.persistence.exception.EntryPersistenceException;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.ldap.UserGroup;
-
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.persist.exception.mapping.EntryPersistenceException;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.search.filter.Filter;
 
 /**
  * It's utility service which applications uses in custom authentication scripts 
@@ -67,7 +66,7 @@ public class UserGroupService {
 
 		boolean isMemberOrOwner = false;
 		try {
-			isMemberOrOwner = ldapEntryManager.findEntries(groupDn, UserGroup.class, searchFilter, 0, 1).size() > 0;
+			isMemberOrOwner = ldapEntryManager.findEntries(groupDn, UserGroup.class, searchFilter, 1).size() > 0;
 
 		} catch (EntryPersistenceException ex) {
 			log.error("Failed to determine if person '{}' memeber or owner of group '{}'", personDn, groupDn, ex);
