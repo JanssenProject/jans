@@ -2,11 +2,8 @@ package org.xdi.oxd.server.service;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
-import org.jboss.resteasy.client.ClientResponseFailure;
-import org.jboss.resteasy.client.ProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.service.IntrospectionService;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
 import org.xdi.oxd.common.ErrorResponseCode;
 import org.xdi.oxd.common.ErrorResponseException;
@@ -139,26 +136,8 @@ public class ValidationService {
         }
         LOG.trace("Introspect token with rp: " + rpService.getRp(oxdId));
 
-        final DiscoveryService discoveryService = ServerLauncher.getInjector().getInstance(DiscoveryService.class);
-        final String introspectionEndpoint = discoveryService.getConnectDiscoveryResponseByOxdId(oxdId).getIntrospectionEndpoint();
-        final UmaTokenService umaTokenService = ServerLauncher.getInjector().getInstance(UmaTokenService.class);
-        final HttpService httpService = ServerLauncher.getInjector().getInstance(HttpService.class);
-        final IntrospectionService introspectionService = ProxyFactory.create(IntrospectionService.class, introspectionEndpoint, httpService.getClientExecutor());
-        IntrospectionResponse response = null;
-
-        try {
-            response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
-        } catch (ClientResponseFailure e) {
-            int status = e.getResponse().getStatus();
-            LOG.debug("Failed to introspect token. Entity: " + e.getResponse().getEntity(String.class) + ", status: " + status, e);
-            if (status == 400 || status == 401) {
-                LOG.debug("Try maybe PAT is lost on AS, force refresh PAT and re-try ...");
-                umaTokenService.obtainPat(oxdId); // force to refresh PAT
-                response = introspectionService.introspectToken("Bearer " + umaTokenService.getPat(oxdId).getToken(), accessToken);
-            } else {
-                throw e;
-            }
-        }
+        final IntrospectionService introspectionService = ServerLauncher.getInjector().getInstance(IntrospectionService.class);
+        final IntrospectionResponse response = introspectionService.introspectToken(oxdId, accessToken);
 
         if (!response.isActive()) {
             LOG.debug("access_token is not active.");
