@@ -6,6 +6,20 @@
 
 package org.xdi.oxauth.service;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.ejb.DependsOn;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
 import org.slf4j.Logger;
@@ -26,15 +40,6 @@ import org.xdi.service.cdi.async.Asynchronous;
 import org.xdi.service.cdi.event.Scheduled;
 import org.xdi.service.timer.event.TimerEvent;
 import org.xdi.service.timer.schedule.TimerSchedule;
-
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -146,8 +151,13 @@ public class CleanerTimer {
         LdapBatchOperation<Client> clientBatchService = new LdapBatchOperation<Client>(ldapEntryManager) {
             @Override
             public List<Client> getChunkOrNull(int chunkSize) {
-                return clientService.getClientsWithExpirationDate(this, chunkSize, chunkSize);
+            	return null;
             }
+
+            @Override
+        	public void processSearchResult(List<Client> entries) {
+            	performAction(entries);
+        	}
 
             @Override
             public void performAction(List<Client> entries) {
@@ -171,7 +181,8 @@ public class CleanerTimer {
                 }
             }
         };
-        clientBatchService.iterateAllByChunks(BATCH_SIZE);
+
+        clientService.getClientsWithExpirationDate(clientBatchService, new String[] {"inum", "oxAuthClientSecretExpiresAt"}, 0, BATCH_SIZE);
 
         log.debug("End Client clean up");
     }
