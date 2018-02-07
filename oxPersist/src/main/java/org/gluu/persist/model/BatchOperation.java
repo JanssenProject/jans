@@ -15,6 +15,8 @@ public interface BatchOperation<T> {
 
 	void iterateAllByChunks(int batchSize);
 
+	boolean collectSearchResult(int size);
+
 	void processSearchResult(List<T> entries);
 
 }
