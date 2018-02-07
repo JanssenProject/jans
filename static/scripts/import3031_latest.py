@@ -772,7 +772,7 @@ class Migration(object):
         # self.startWebapps()
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
-        print("\n\n\t# exit\n\t# service gluu-server-x.x.x restart\n")
+        print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
         print("------------------------------------------------------------")
         print("\n")
 
