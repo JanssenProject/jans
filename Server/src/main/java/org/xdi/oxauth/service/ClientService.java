@@ -259,10 +259,10 @@ public class ClientService {
         return result;
     }
 
-    public List<Client> getClientsWithExpirationDate(LdapBatchOperation<Client> batchOperation, int searchLimit, int sizeLimit){
+    public List<Client> getClientsWithExpirationDate(LdapBatchOperation<Client> batchOperation, String[] returnAttributes, int sizeLimit, int chunkSize){
         String baseDN = staticConfiguration.getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
-        return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, null, batchOperation, 0, sizeLimit, searchLimit);
+        return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, returnAttributes, batchOperation, 0, sizeLimit, chunkSize);
     }
 
     public String buildClientDn(String p_clientId) {
