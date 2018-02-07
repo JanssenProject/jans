@@ -673,6 +673,10 @@ class Exporter(object):
                           "Cannot decide LDAP server type. Quitting.")
             sys.exit(1)
 
+        if self.choice != 1 and self.choice != 2:
+            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+            sys.exit(1)
+
     def genProperties(self):
         logging.info('Creating setup.properties backup file')
         props = {}
@@ -684,9 +688,6 @@ class Exporter(object):
         elif self.choice == 2:
             ldap_type = 'opendj'
             props['opendj_version'] = 3.0
-        else:
-            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
-            sys.exit(1)
 
         props['ldap_type'] = ldap_type
         props['hostname'] = self.getOutput([self.hostname]).strip()
