@@ -22,8 +22,8 @@ import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.exception.InvalidSimplePageControlException;
+import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.LdapOperationService;
-import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.SortOrder;
 import org.xdi.util.ArrayHelper;
@@ -265,11 +265,14 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 	 * @see org.gluu.site.ldap.PlatformOperationFacade#search(java.lang.String, com.unboundid.ldap.sdk.Filter, org.xdi.ldap.model.SearchScope, org.gluu.site.ldap.persistence.BatchOperation, int, int, int, com.unboundid.ldap.sdk.Control[], java.lang.String)
 	 */
 	@Override
-	public SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation<?> batchOperation, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
+	public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int startIndex, int searchLimit, int sizeLimit, Control[] controls, String... attributes)
 			throws SearchException {
 		SearchRequest searchRequest;
 		
-		LdapBatchOperation<?> ldapBatchOperation = (LdapBatchOperation<?>) batchOperation;
+		LdapBatchOperation<T> ldapBatchOperation = null;
+		if (batchOperationWraper != null) {
+			ldapBatchOperation = (LdapBatchOperation<T>) batchOperationWraper.getBatchOperation();
+		}
 
 		if (log.isTraceEnabled()) {
 			// Find whole tree search
@@ -334,7 +337,8 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 					}
 
 					if (ldapBatchOperation != null) {
-						ldapBatchOperation.processSearchResult(searchResult);
+						List<T> entries = batchOperationWraper.createEntities(searchResult);
+						ldapBatchOperation.processSearchResult(entries);
 					}
 					cookie = null;
 					try {
