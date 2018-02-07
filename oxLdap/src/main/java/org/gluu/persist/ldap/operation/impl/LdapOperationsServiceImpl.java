@@ -330,7 +330,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 					searchRequest.setControls(new Control[]{new SimplePagedResultsControl(searchLimit, cookie)});
 					setControls(searchRequest, controls);
 					searchResult = ldapConnection.search(searchRequest);
-					if ((ldapBatchOperation == null) || ldapBatchOperation.collectSearchResult(searchResult)) {
+					if ((ldapBatchOperation == null) || ldapBatchOperation.collectSearchResult(searchResult.getEntryCount())) {
 						searchResultList.add(searchResult);
 						searchResultEntries.addAll(searchResult.getSearchEntries());
 						searchResultReferences.addAll(searchResult.getSearchReferences());
