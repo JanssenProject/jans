@@ -15,7 +15,8 @@ import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.SearchResult;
 
 /**
- * Created by eugeniuparvan on 12/29/16.
+ * @author eugeniuparvan Date: 12/29/16
+ * @author Yuriy Movchan Date: 02/07/2018
  */
 public abstract class LdapBatchOperation<T> implements BatchOperation<T> {
 
@@ -57,7 +58,7 @@ public abstract class LdapBatchOperation<T> implements BatchOperation<T> {
 		return true;
 	}
 
-	public void processSearchResult(SearchResult searchResult) {
+	public void processSearchResult(List<T> entries) {
 	}
 
 	protected ASN1OctetString getCookie() {

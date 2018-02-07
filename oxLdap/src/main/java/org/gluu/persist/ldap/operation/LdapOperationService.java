@@ -6,8 +6,8 @@ import java.util.List;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.SearchException;
+import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
-import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.SortOrder;
 
@@ -61,7 +61,7 @@ public interface LdapOperationService {
 	SearchResult search(String dn, Filter filter, SearchScope scope, int searchLimit, int sizeLimit, Control[] controls,
 			String... attributes) throws SearchException;
 
-	SearchResult search(String dn, Filter filter, SearchScope scope, BatchOperation<?> batchOperation, int startIndex,
+	<T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int startIndex,
 			int searchLimit, int sizeLimit, Control[] controls, String... attributes) throws SearchException;
 
 	SearchResult searchSearchResult(String dn, Filter filter, SearchScope scope, int startIndex, int count,

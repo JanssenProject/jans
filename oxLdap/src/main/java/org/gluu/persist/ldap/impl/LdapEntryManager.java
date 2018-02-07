@@ -384,7 +384,8 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		}
 		SearchResult searchResult = null;
 		try {
-			searchResult = this.ldapOperationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperation, startIndex, chunkSize, sizeLimit, null, currentLdapReturnAttributes);
+			LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
+			searchResult = this.ldapOperationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope),  batchOperationWraper, startIndex, chunkSize, sizeLimit, null, currentLdapReturnAttributes);
 
 			if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
 				throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -531,7 +532,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		return (searchResult != null) && (searchResult.getEntryCount() > 0);
 	}
 
-	private <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
+	protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
 			SearchResultEntry... searchResultEntries) {
 		List<T> result = new ArrayList<T>(searchResultEntries.length);
 		Map<String, List<AttributeData>> entriesAttributes = new HashMap<String, List<AttributeData>>(100);
@@ -684,7 +685,8 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		CountBatchOperation<T> batchOperation = new CountBatchOperation<T>(this);
 
 		try {
-			ldapOperationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperation, 0, 100, 0, null, ldapReturnAttributes);
+			LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation);
+			ldapOperationService.search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper, 0, 100, 0, null, ldapReturnAttributes);
 		} catch (Exception ex) {
 			throw new EntryPersistenceException(String.format("Failed to calucalte count of entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
 		}
@@ -839,11 +841,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		}
 
 		public boolean collectSearchResult(SearchResult searchResult) {
+			countEntries += searchResult.getEntryCount();
 			return false;
 		}
 
-		public void processSearchResult(SearchResult searchResult) {
-			countEntries += searchResult.getEntryCount();
+		public void processSearchResult(List<T> entries) {
 		}
 
 		public int getCountEntries() {
