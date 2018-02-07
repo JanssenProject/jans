@@ -155,6 +155,11 @@ public class CleanerTimer {
             }
 
             @Override
+			public boolean collectSearchResult(int size) {
+				return false;
+			}
+
+			@Override
         	public void processSearchResult(List<Client> entries) {
             	performAction(entries);
         	}
@@ -259,7 +264,7 @@ public class CleanerTimer {
         calendar.add(Calendar.DATE, -keepDataDays);
         Date expirationDate = calendar.getTime();
 
-        metricService.removeExpiredMetricEntries(BATCH_SIZE, expirationDate, ApplicationType.OX_AUTH, metricService.applianceInum());
+        metricService.removeExpiredMetricEntries(expirationDate, ApplicationType.OX_AUTH, metricService.applianceInum(), 0, BATCH_SIZE);
 
         log.debug("End metric entries clean up");
     }
