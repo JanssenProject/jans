@@ -54,7 +54,7 @@ public abstract class LdapBatchOperation<T> implements BatchOperation<T> {
 		}
 	}
 
-	public boolean collectSearchResult(SearchResult searchResult) {
+	public boolean collectSearchResult(int size) {
 		return true;
 	}
 

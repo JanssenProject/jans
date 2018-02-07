@@ -20,21 +20,8 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.xdi.model.ApplicationType;
-import org.xdi.model.metric.MetricType;
-import org.xdi.model.metric.ldap.MetricEntry;
-import org.xdi.model.metric.ldap.MetricReport;
-import org.xdi.service.metric.inject.ReportMetric;
-import org.xdi.util.StringHelper;
-
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 
 import org.gluu.persist.exception.mapping.EntryPersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
@@ -42,6 +29,18 @@ import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
+import org.slf4j.Logger;
+import org.xdi.model.ApplicationType;
+import org.xdi.model.metric.MetricType;
+import org.xdi.model.metric.ldap.MetricEntry;
+import org.xdi.model.metric.ldap.MetricReport;
+import org.xdi.service.cdi.async.Asynchronous;
+import org.xdi.service.metric.inject.ReportMetric;
+import org.xdi.util.StringHelper;
+
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 /**
  * Metric service
@@ -214,46 +213,66 @@ public abstract class MetricService implements Serializable {
 		return result;
 	}
 
-	public List<MetricEntry> getExpiredMetricEntries(LdapBatchOperation<MetricEntry> batchOperation, int batchSize, String baseDnForPeriod, Date expirationDate) {
+	public List<MetricEntry> getExpiredMetricEntries(LdapBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate, int sizeLimit, int chunkSize) {
 		Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB, new String[] { "uniqueIdentifier" }, batchOperation, 0, batchSize, batchSize);
+		List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB, new String[] { "uniqueIdentifier" }, batchOperation, 0, sizeLimit, chunkSize);
 
 		return metricEntries;
 	}
 
-	public List<SimpleBranch> findAllPeriodBranches(LdapBatchOperation<SimpleBranch> batchOperation, int batchSize, ApplicationType applicationType, String applianceInum) {
+	public List<SimpleBranch> findAllPeriodBranches(LdapBatchOperation<SimpleBranch> batchOperation, ApplicationType applicationType, String applianceInum, int sizeLimit, int chunkSize) {
 		String baseDn = buildDn(null, null, applicationType, applianceInum);
 
 		Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
-		return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0, batchSize, batchSize);
+		return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0, sizeLimit, chunkSize);
 	}
 
-	public void removeExpiredMetricEntries(int batchSize, final Date expirationDate, final ApplicationType applicationType, final String applianceInum) {
+	public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum, int sizeLimit, int chunkSize) {
 		final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
 		// Remove expired entries
 		for (final String baseDnForPeriod : keepBaseDnForPeriod) {
 			LdapBatchOperation<MetricEntry> metricEntryBatchOperation = new LdapBatchOperation<MetricEntry>(ldapEntryManager) {
-				@Override
-				public List<MetricEntry> getChunkOrNull(int batchSize) {
-					return getExpiredMetricEntries(this, batchSize, baseDnForPeriod, expirationDate);
+	            @Override
+	            public List<MetricEntry> getChunkOrNull(int chunkSize) {
+	            	return null;
+	            }
+
+	            @Override
+				public boolean collectSearchResult(int size) {
+					return false;
 				}
 
 				@Override
-				public void performAction(List<MetricEntry> objects) {
-					for (MetricEntry metricEntry : objects) {
+	        	public void processSearchResult(List<MetricEntry> entries) {
+	            	performAction(entries);
+	        	}
+
+				@Override
+				public void performAction(List<MetricEntry> entries) {
+					for (MetricEntry metricEntry : entries) {
 						remove(metricEntry);
 					}
 				}
 			};
-			metricEntryBatchOperation.iterateAllByChunks(batchSize);
+			getExpiredMetricEntries(metricEntryBatchOperation, baseDnForPeriod, expirationDate, sizeLimit, chunkSize);
 		}
 
 		LdapBatchOperation<SimpleBranch> batchOperation = new LdapBatchOperation<SimpleBranch>(ldapEntryManager) {
-			@Override
-			public List<SimpleBranch> getChunkOrNull(int batchSize) {
-				return findAllPeriodBranches(this, batchSize, applicationType, applianceInum);
+            @Override
+            public List<SimpleBranch> getChunkOrNull(int chunkSize) {
+            	return null;
+            }
+
+            @Override
+			public boolean collectSearchResult(int size) {
+				return false;
 			}
+
+			@Override
+        	public void processSearchResult(List<SimpleBranch> entries) {
+            	performAction(entries);
+        	}
 
 			@Override
 			public void performAction(List<SimpleBranch> objects) {
@@ -271,7 +290,7 @@ public abstract class MetricService implements Serializable {
 				}
 			}
 		};
-		batchOperation.iterateAllByChunks(batchSize);
+		findAllPeriodBranches(batchOperation, applicationType, applianceInum, sizeLimit, chunkSize);
 	}
 	
 	private Set<String> getBaseDnForPeriod(ApplicationType applicationType, String applianceInum, Date startDate, Date endDate) {
