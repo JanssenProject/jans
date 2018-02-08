@@ -19,7 +19,8 @@ import javax.inject.Named;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.SimpleBranch;
 import org.gluu.search.filter.Filter;
@@ -37,7 +38,6 @@ import org.xdi.oxauth.uma.authorization.UmaRPT;
 import org.xdi.util.INumGenerator;
 
 import com.google.common.base.Preconditions;
-import com.unboundid.util.StaticUtils;
 
 /**
  * RPT manager component
@@ -127,12 +127,7 @@ public class UmaRptService {
     }
 
     public void cleanup(final Date now) {
-        LdapBatchOperation<UmaRPT> rptBatchService = new LdapBatchOperation<UmaRPT>() {
-            @Override
-            public List<UmaRPT> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-            }
-
+    	BatchOperation<UmaRPT> rptBatchService = new ProcessBatchOperation<UmaRPT>() {
             @Override
             public void performAction(List<UmaRPT> entries) {
                 for (UmaRPT p : entries) {
@@ -143,12 +138,12 @@ public class UmaRptService {
                     }
                 }
             }
-
-            private Filter getFilter() {
-                return Filter.createLessOrEqualFilter("oxAuthExpiration", StaticUtils.encodeGeneralizedTime(now));
-            }
         };
-        rptBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, getExpiredUmaRptFilter(now), SearchScope.SUB, new String[] { "" }, rptBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
+    }
+
+    private Filter getExpiredUmaRptFilter(Date date) {
+        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(date));
     }
 
     public void addPermissionToRPT(UmaRPT rpt, Collection<UmaPermission> permissions) {

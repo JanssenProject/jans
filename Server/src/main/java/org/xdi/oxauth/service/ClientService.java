@@ -10,7 +10,8 @@ import com.google.common.collect.Sets;
 
 import org.gluu.persist.exception.mapping.EntryPersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.model.base.CustomEntry;
@@ -259,7 +260,7 @@ public class ClientService {
         return result;
     }
 
-    public List<Client> getClientsWithExpirationDate(LdapBatchOperation<Client> batchOperation, String[] returnAttributes, int sizeLimit, int chunkSize){
+    public List<Client> getClientsWithExpirationDate(BatchOperation<Client> batchOperation, String[] returnAttributes, int sizeLimit, int chunkSize) {
         String baseDN = staticConfiguration.getBaseDn().getClients();
         Filter filter = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
         return ldapEntryManager.findEntries(baseDN, Client.class, filter, SearchScope.SUB, returnAttributes, batchOperation, 0, sizeLimit, chunkSize);
