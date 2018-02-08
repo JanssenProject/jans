@@ -181,7 +181,7 @@ public class UmaPctService {
 
     public void cleanup(final Date now) {
         prepareBranch();
-        LdapBatchOperation<UmaPCT> batchService = new LdapBatchOperation<UmaPCT>(ldapEntryManager) {
+        LdapBatchOperation<UmaPCT> batchService = new LdapBatchOperation<UmaPCT>() {
             @Override
             public List<UmaPCT> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(branchBaseDn(), UmaPCT.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);

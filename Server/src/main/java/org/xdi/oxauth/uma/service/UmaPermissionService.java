@@ -157,7 +157,7 @@ public class UmaPermissionService {
     }
 
     public void cleanup(final Date now) {
-        LdapBatchOperation<UmaPermission> batchService = new LdapBatchOperation<UmaPermission>(ldapEntryManager) {
+        LdapBatchOperation<UmaPermission> batchService = new LdapBatchOperation<UmaPermission>() {
             @Override
             public List<UmaPermission> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaPermission.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);

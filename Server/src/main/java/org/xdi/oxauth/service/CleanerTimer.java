@@ -148,7 +148,7 @@ public class CleanerTimer {
     private void processRegisteredClients() {
         log.debug("Start Client clean up");
 
-        LdapBatchOperation<Client> clientBatchService = new LdapBatchOperation<Client>(ldapEntryManager) {
+        LdapBatchOperation<Client> clientBatchService = new LdapBatchOperation<Client>() {
             @Override
             public List<Client> getChunkOrNull(int chunkSize) {
             	return null;
@@ -199,7 +199,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        LdapBatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new LdapBatchOperation<RequestMessageLdap>(ldapEntryManager) {
+        LdapBatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new LdapBatchOperation<RequestMessageLdap>() {
             @Override
             public List<RequestMessageLdap> getChunkOrNull(int chunkSize) {
                 return u2fRequestService.getExpiredRequestMessages(this, expirationDate);
@@ -230,7 +230,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        LdapBatchOperation<DeviceRegistration> deviceRegistrationBatchService = new LdapBatchOperation<DeviceRegistration>(ldapEntryManager) {
+        LdapBatchOperation<DeviceRegistration> deviceRegistrationBatchService = new LdapBatchOperation<DeviceRegistration>() {
             @Override
             public List<DeviceRegistration> getChunkOrNull(int chunkSize) {
                 return deviceRegistrationService.getExpiredDeviceRegistrations(this, expirationDate);
