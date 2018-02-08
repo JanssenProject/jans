@@ -612,6 +612,8 @@ class Migration(object):
                     for line in f:
                         if line == 'bindDN: cn=directory manager,o=gluu\n':
                             line = 'bindDN: cn=directory manager\n'
+                        elif line.startswith('ssl.trustStorePin') or line.startswith('ssl.trustStoreFile') or line.startswith('ssl.trustStoreFormat'):
+                            continue
                         ox_data += line
             except:
                 logging.error(self.ox_ldap_properties+" error in reading ")
