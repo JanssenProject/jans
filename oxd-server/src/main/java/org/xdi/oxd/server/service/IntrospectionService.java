@@ -1,9 +1,9 @@
 package org.xdi.oxd.server.service;
 
 import com.google.inject.Inject;
-import org.codehaus.jackson.JsonParseException;
 import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.client.ProxyFactory;
+import org.jboss.resteasy.spi.ReaderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.model.common.IntrospectionResponse;
@@ -50,7 +50,7 @@ public class IntrospectionService {
             }
         } catch (Throwable e) {
             LOG.trace("Exception during access token introspection.", e);
-            if (e instanceof JsonParseException) { // dummy construction but checked JsonParseException is thrown inside jackson provider, so we don't have choice
+            if (e instanceof ReaderException) { // dummy construction but checked JsonParseException is thrown inside jackson provider, so we don't have choice
                 // trying to handle compatiblity issue.
                 LOG.trace("Trying to handle compatibility issue ...");
                 BackCompatibleIntrospectionService backCompatibleIntrospectionService = ClientFactory.instance().createBackCompatibleIntrospectionService(introspectionEndpoint, httpService.getClientExecutor());
