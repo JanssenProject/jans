@@ -183,8 +183,8 @@ public class RestResource {
             if (StringUtils.isNotBlank(accessToken)) {
                 return accessToken;
             }
-
         }
+        LOG.debug("No access token provided in Authorization header. Forbidden.");
         throw new ServerErrorException(forbiddenErrorResponse(), Response.Status.FORBIDDEN);
     }
 
