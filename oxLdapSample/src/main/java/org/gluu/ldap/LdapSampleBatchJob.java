@@ -38,7 +38,7 @@ public class LdapSampleBatchJob {
 		// Create LDAP entry manager
 		final LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
 
-        LdapBatchOperation<SimpleTokenLdap> tokenLdapBatchOperation = new LdapBatchOperation<SimpleTokenLdap>(ldapEntryManager) {
+        LdapBatchOperation<SimpleTokenLdap> tokenLdapBatchOperation = new LdapBatchOperation<SimpleTokenLdap>() {
         	
         	private int processedCount = 0;
 
@@ -66,7 +66,7 @@ public class LdapSampleBatchJob {
         tokenLdapBatchOperation.iterateAllByChunks(100);
 
 
-        LdapBatchOperation<SimpleSession> sessionBatchOperation = new LdapBatchOperation<SimpleSession>(ldapEntryManager) {
+        LdapBatchOperation<SimpleSession> sessionBatchOperation = new LdapBatchOperation<SimpleSession>() {
         	
         	private int processedCount = 0;
 
