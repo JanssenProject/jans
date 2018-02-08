@@ -21,7 +21,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ProcessBatchOperation;
 import org.slf4j.Logger;
 import org.xdi.model.ApplicationType;
 import org.xdi.oxauth.model.common.AuthorizationGrant;
@@ -148,22 +149,7 @@ public class CleanerTimer {
     private void processRegisteredClients() {
         log.debug("Start Client clean up");
 
-        LdapBatchOperation<Client> clientBatchService = new LdapBatchOperation<Client>() {
-            @Override
-            public List<Client> getChunkOrNull(int chunkSize) {
-            	return null;
-            }
-
-            @Override
-			public boolean collectSearchResult(int size) {
-				return false;
-			}
-
-			@Override
-        	public void processSearchResult(List<Client> entries) {
-            	performAction(entries);
-        	}
-
+        BatchOperation<Client> clientBatchService = new ProcessBatchOperation<Client>() {
             @Override
             public void performAction(List<Client> entries) {
                 for (Client client : entries) {
@@ -199,12 +185,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        LdapBatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new LdapBatchOperation<RequestMessageLdap>() {
-            @Override
-            public List<RequestMessageLdap> getChunkOrNull(int chunkSize) {
-                return u2fRequestService.getExpiredRequestMessages(this, expirationDate);
-            }
-
+        BatchOperation<RequestMessageLdap> requestMessageLdapBatchService = new ProcessBatchOperation<RequestMessageLdap>() {
             @Override
             public void performAction(List<RequestMessageLdap> entries) {
                 for (RequestMessageLdap requestMessageLdap : entries) {
@@ -219,7 +200,8 @@ public class CleanerTimer {
                 }
             }
         };
-        requestMessageLdapBatchService.iterateAllByChunks(BATCH_SIZE);
+
+        u2fRequestService.getExpiredRequestMessages(requestMessageLdapBatchService, expirationDate, new String[] {"oxRequestId", "creationDate"}, 0, BATCH_SIZE);
         log.debug("End U2F request clean up");
     }
 
@@ -230,12 +212,7 @@ public class CleanerTimer {
         calendar.add(Calendar.SECOND, -90);
         final Date expirationDate = calendar.getTime();
 
-        LdapBatchOperation<DeviceRegistration> deviceRegistrationBatchService = new LdapBatchOperation<DeviceRegistration>() {
-            @Override
-            public List<DeviceRegistration> getChunkOrNull(int chunkSize) {
-                return deviceRegistrationService.getExpiredDeviceRegistrations(this, expirationDate);
-            }
-
+        BatchOperation<DeviceRegistration> deviceRegistrationBatchService = new ProcessBatchOperation<DeviceRegistration>() {
             @Override
             public void performAction(List<DeviceRegistration> entries) {
                 for (DeviceRegistration deviceRegistration : entries) {
@@ -250,7 +227,7 @@ public class CleanerTimer {
                 }
             }
         };
-        deviceRegistrationBatchService.iterateAllByChunks(BATCH_SIZE);
+        deviceRegistrationService.getExpiredDeviceRegistrations(deviceRegistrationBatchService, expirationDate, new String[] {"oxId", "creationDate"}, 0, BATCH_SIZE);
 
         log.debug("End U2F request clean up");
     }
