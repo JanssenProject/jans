@@ -21,7 +21,6 @@ public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
 	@Override
 	public LdapEntryManager createEntryManager(Properties conf) {
-		log.trace("Props:" + conf);
 		LdapConnectionProvider connectionProvider = new LdapConnectionProvider(conf);
 		if (!connectionProvider.isCreated()) {
 			throw new ConfigurationException(String.format("Failed to create LDAP connection pool! Result code: '%s'", connectionProvider.getCreationResultCode()));

@@ -28,12 +28,12 @@ import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.exception.operation.SearchScopeException;
 import org.gluu.persist.impl.BaseEntryManager;
-import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
 import org.gluu.persist.ldap.operation.impl.LdapOperationsServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.PropertyAnnotation;
 import org.gluu.persist.model.SearchScope;
@@ -822,26 +822,18 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		return ldapSearchScopeConverter.convertToLdapSearchScope(scope);
 	}
 	
-	private static final class CountBatchOperation<T> extends LdapBatchOperation<T> {
+	private static final class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 
 		private int countEntries = 0;
 
 		@Override
-		public List<T> getChunkOrNull(int batchSize) {
-			return null;
+		public void performAction(List<T> entries) {
 		}
 
 		@Override
-		public void performAction(List<T> objects) {
-			
-		}
-
-		public boolean collectSearchResult(SearchResult searchResult) {
-			countEntries += searchResult.getEntryCount();
+		public boolean collectSearchResult(int size) {
+			countEntries += size;
 			return false;
-		}
-
-		public void processSearchResult(List<T> entries) {
 		}
 
 		public int getCountEntries() {
