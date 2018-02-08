@@ -9,14 +9,8 @@ import java.util.List;
  */
 public interface BatchOperation<T> {
 
-	List<T> getChunkOrNull(int batchSize);
-
-	void performAction(List<T> objects);
-
-	void iterateAllByChunks(int batchSize);
-
 	boolean collectSearchResult(int size);
 
-	void processSearchResult(List<T> entries);
+	void performAction(List<T> entries);
 
 }

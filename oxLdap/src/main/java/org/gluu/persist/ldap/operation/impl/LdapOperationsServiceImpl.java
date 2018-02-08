@@ -24,6 +24,7 @@ import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.exception.InvalidSimplePageControlException;
 import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.LdapOperationService;
+import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.ListViewResponse;
 import org.gluu.persist.model.SortOrder;
 import org.xdi.util.ArrayHelper;
@@ -269,9 +270,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 			throws SearchException {
 		SearchRequest searchRequest;
 		
-		LdapBatchOperation<T> ldapBatchOperation = null;
+		BatchOperation<T> ldapBatchOperation = null;
 		if (batchOperationWraper != null) {
-			ldapBatchOperation = (LdapBatchOperation<T>) batchOperationWraper.getBatchOperation();
+			ldapBatchOperation = (BatchOperation<T>) batchOperationWraper.getBatchOperation();
 		}
 
 		if (log.isTraceEnabled()) {
@@ -304,6 +305,9 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 				// Default page size
 				searchLimit = 100;
 			}
+
+			boolean collectSearchResult;
+
 			LDAPConnection ldapConnection = null;
 			try {
 				ldapConnection = getConnectionPool().getConnection();
@@ -319,10 +323,15 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 				}
 
 				do {
+					collectSearchResult = true;
 					searchRequest.setControls(new Control[]{new SimplePagedResultsControl(searchLimit, cookie)});
 					setControls(searchRequest, controls);
 					searchResult = ldapConnection.search(searchRequest);
-					if ((ldapBatchOperation == null) || ldapBatchOperation.collectSearchResult(searchResult.getEntryCount())) {
+					
+					if (ldapBatchOperation != null) {
+						collectSearchResult = ldapBatchOperation.collectSearchResult(searchResult.getEntryCount());
+					}
+					if (collectSearchResult) {
 						searchResultList.add(searchResult);
 						searchResultEntries.addAll(searchResult.getSearchEntries());
 						searchResultReferences.addAll(searchResult.getSearchReferences());
@@ -330,7 +339,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 
 					if (ldapBatchOperation != null) {
 						List<T> entries = batchOperationWraper.createEntities(searchResult);
-						ldapBatchOperation.processSearchResult(entries);
+						ldapBatchOperation.performAction(entries);
 					}
 					cookie = null;
 					try {
@@ -354,9 +363,16 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 				}
 			}
 
+			if (!collectSearchResult) {
+				return new SearchResult(searchResult.getMessageID(), searchResult.getResultCode(),
+						searchResult.getDiagnosticMessage(), searchResult.getMatchedDN(), searchResult.getReferralURLs(),
+						searchResultEntries, searchResultReferences, searchResultEntries.size(), searchResultReferences.size(),
+						searchResult.getResponseControls());
+			}
+			
 			if (!searchResultList.isEmpty()) {
 				SearchResult searchResultTemp = searchResultList.get(0);
-				searchResult = new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(),
+				return new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(),
 						searchResultTemp.getDiagnosticMessage(), searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(),
 						searchResultEntries, searchResultReferences, searchResultEntries.size(), searchResultReferences.size(),
 						searchResultTemp.getResponseControls());

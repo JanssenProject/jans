@@ -1,3 +1,9 @@
+/*
+ * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2014, Gluu
+ */
+
 package org.gluu.ldap;
 
 import java.io.Serializable;
@@ -13,16 +19,21 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 import org.xdi.util.StringHelper;
 
 /**
- * Created by eugeniuparvan on 1/12/17.
+ * @author Yuriy Movchan
+ * Date: 02/08/2018
  */
 @LdapEntry
-@LdapObjectClass(values = {"top", "oxAuthToken"})
-public class SimpleTokenLdap implements Serializable {
+@LdapObjectClass(values = {"oxAuthClient", "top"})
+public class SimpleClient implements Serializable {
+
+    private static final long serialVersionUID = -2534191420188575733L;
+
+    @LdapDN
+    private String dn;
 
     @LdapAttributesList(name = "name", value = "values", sortByName = true)
     protected List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
-    @LdapDN
-    private String dn;
+
     @LdapCustomObjectClass
     private String[] customObjectClasses;
 
@@ -34,7 +45,7 @@ public class SimpleTokenLdap implements Serializable {
         this.dn = dn;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+	public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
@@ -57,11 +68,11 @@ public class SimpleTokenLdap implements Serializable {
     }
 
     public List<String> getAttributeValues(String ldapAttribute) {
-        List<String> values = null;
+    	List<String> values = null;
         if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
             for (CustomAttribute customAttribute : customAttributes) {
                 if (StringHelper.equalsIgnoreCase(customAttribute.getName(), ldapAttribute)) {
-                    values = customAttribute.getValues();
+                	values = customAttribute.getValues();
                     break;
                 }
             }
@@ -70,12 +81,12 @@ public class SimpleTokenLdap implements Serializable {
         return values;
     }
 
-    public String[] getCustomObjectClasses() {
-        return customObjectClasses;
-    }
+	public String[] getCustomObjectClasses() {
+		return customObjectClasses;
+	}
 
-    public void setCustomObjectClasses(String[] customObjectClasses) {
-        this.customObjectClasses = customObjectClasses;
-    }
+	public void setCustomObjectClasses(String[] customObjectClasses) {
+		this.customObjectClasses = customObjectClasses;
+	}
 
 }

@@ -17,10 +17,10 @@ public class LdapSampleEntryManager {
 	private Properties getSampleConnectionProperties() {
 		Properties connectionProperties = new Properties();
 
-		connectionProperties.put("bindDN", "cn=directory manager");
-		connectionProperties.put("bindPassword", "9lQoXSINUsnP");
-		connectionProperties.put("servers", "xeon.gluu.info:11636");
-		connectionProperties.put("useSSL", "true");
+		connectionProperties.put("bindDN", "cn=Directory Manager,o=gluu");
+		connectionProperties.put("bindPassword", "secret");
+		connectionProperties.put("servers", "localhost:389");
+		connectionProperties.put("useSSL", "false");
 		connectionProperties.put("maxconnections", "3");
 
 		return connectionProperties;
