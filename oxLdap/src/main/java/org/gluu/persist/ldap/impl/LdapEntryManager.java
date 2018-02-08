@@ -682,7 +682,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 			searchFilter = filter;
 		}
 		
-		CountBatchOperation<T> batchOperation = new CountBatchOperation<T>(this);
+		CountBatchOperation<T> batchOperation = new CountBatchOperation<T>();
 
 		try {
 			LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation);
@@ -825,10 +825,6 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 	private static final class CountBatchOperation<T> extends LdapBatchOperation<T> {
 
 		private int countEntries = 0;
-
-		public CountBatchOperation(LdapEntryManager ldapEntryManager) {
-			super(ldapEntryManager);
-		}
 
 		@Override
 		public List<T> getChunkOrNull(int batchSize) {

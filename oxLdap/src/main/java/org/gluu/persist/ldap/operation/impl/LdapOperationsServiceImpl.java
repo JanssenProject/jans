@@ -306,11 +306,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 			}
 			LDAPConnection ldapConnection = null;
 			try {
-				if (ldapBatchOperation != null) {
-					ldapConnection = ldapBatchOperation.getLdapConnection();
-				} else {
-					ldapConnection = getConnectionPool().getConnection();
-				}
+				ldapConnection = getConnectionPool().getConnection();
 				ASN1OctetString cookie = null;
 				if (startIndex > 0) {
 					try {
@@ -320,10 +316,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 					} catch (LDAPException ex) {
 						throw new LDAPSearchException(ex.getResultCode(), "Failed to scroll to specified startIndex", ex);
 					}
-				}
-
-				if (ldapBatchOperation != null) {
-					cookie = ldapBatchOperation.getCookie();
 				}
 
 				do {
@@ -345,10 +337,6 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 						SimplePagedResultsControl c = SimplePagedResultsControl.get(searchResult);
 						if (c != null) {
 							cookie = c.getCookie();
-							if (ldapBatchOperation != null) {
-								ldapBatchOperation.setCookie(cookie);
-								ldapBatchOperation.setMoreResultsToReturn(c.moreResultsToReturn());
-							}
 						}
 					} catch (LDAPException ex) {
 						log.error("Error while accessing cookies" + ex.getMessage());
@@ -362,11 +350,7 @@ public class LdapOperationsServiceImpl implements LdapOperationService {
 				throw new SearchException("Failed to scroll to specified startIndex", ex, ex.getResultCode().intValue());
 			} finally {
 				if (ldapConnection != null) {
-					if (ldapBatchOperation != null) {
-						ldapBatchOperation.releaseConnection();
-					} else {
-						getConnectionPool().releaseConnection(ldapConnection);
-					}
+					getConnectionPool().releaseConnection(ldapConnection);
 				}
 			}
 

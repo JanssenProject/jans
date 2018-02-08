@@ -232,7 +232,7 @@ public abstract class MetricService implements Serializable {
 		final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
 		// Remove expired entries
 		for (final String baseDnForPeriod : keepBaseDnForPeriod) {
-			LdapBatchOperation<MetricEntry> metricEntryBatchOperation = new LdapBatchOperation<MetricEntry>(ldapEntryManager) {
+			LdapBatchOperation<MetricEntry> metricEntryBatchOperation = new LdapBatchOperation<MetricEntry>() {
 	            @Override
 	            public List<MetricEntry> getChunkOrNull(int chunkSize) {
 	            	return null;
@@ -258,7 +258,7 @@ public abstract class MetricService implements Serializable {
 			getExpiredMetricEntries(metricEntryBatchOperation, baseDnForPeriod, expirationDate, sizeLimit, chunkSize);
 		}
 
-		LdapBatchOperation<SimpleBranch> batchOperation = new LdapBatchOperation<SimpleBranch>(ldapEntryManager) {
+		LdapBatchOperation<SimpleBranch> batchOperation = new LdapBatchOperation<SimpleBranch>() {
             @Override
             public List<SimpleBranch> getChunkOrNull(int chunkSize) {
             	return null;
