@@ -127,7 +127,7 @@ public class UmaRptService {
     }
 
     public void cleanup(final Date now) {
-        LdapBatchOperation<UmaRPT> rptBatchService = new LdapBatchOperation<UmaRPT>(ldapEntryManager) {
+        LdapBatchOperation<UmaRPT> rptBatchService = new LdapBatchOperation<UmaRPT>() {
             @Override
             public List<UmaRPT> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(staticConfiguration.getBaseDn().getClients(), UmaRPT.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
