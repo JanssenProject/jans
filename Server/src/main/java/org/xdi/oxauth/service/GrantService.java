@@ -379,7 +379,7 @@ public class GrantService {
     public void cleanUp() {
 
         // Cleaning oxAuthToken
-        LdapBatchOperation<TokenLdap> tokenBatchService = new LdapBatchOperation<TokenLdap>(ldapEntryManager) {
+        LdapBatchOperation<TokenLdap> tokenBatchService = new LdapBatchOperation<TokenLdap>() {
             @Override
         	public List<TokenLdap> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
@@ -398,7 +398,7 @@ public class GrantService {
         tokenBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
 
         // Cleaning oxAuthGrant
-        LdapBatchOperation<Grant> grantBatchService = new LdapBatchOperation<Grant>(ldapEntryManager) {
+        LdapBatchOperation<Grant> grantBatchService = new LdapBatchOperation<Grant>() {
             @Override
             public List<Grant> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
@@ -425,7 +425,7 @@ public class GrantService {
 
         // Cleaning old oxAuthGrant
         // Note: This block should be removed, it is used only to delete old legacy data.
-        LdapBatchOperation<Grant> oldGrantBatchService = new LdapBatchOperation<Grant>(ldapEntryManager) {
+        LdapBatchOperation<Grant> oldGrantBatchService = new LdapBatchOperation<Grant>() {
             @Override
             public List<Grant> getChunkOrNull(int chunkSize) {
                 return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
