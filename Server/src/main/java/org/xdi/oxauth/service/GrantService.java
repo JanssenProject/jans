@@ -24,7 +24,8 @@ import javax.inject.Named;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
@@ -42,8 +43,6 @@ import org.xdi.oxauth.model.ldap.TokenLdap;
 import org.xdi.oxauth.model.ldap.TokenType;
 import org.xdi.oxauth.util.TokenHashUtil;
 import org.xdi.service.CacheService;
-
-import com.unboundid.util.StaticUtils;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -377,75 +376,60 @@ public class GrantService {
     }
 
     public void cleanUp() {
-
         // Cleaning oxAuthToken
-        LdapBatchOperation<TokenLdap> tokenBatchService = new LdapBatchOperation<TokenLdap>() {
-            @Override
-        	public List<TokenLdap> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(baseDn(), TokenLdap.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-            }
-
+    	BatchOperation<TokenLdap> tokenBatchService = new ProcessBatchOperation<TokenLdap>() {
             @Override
         	public void performAction(List<TokenLdap> entries) {
                 auditLogging(entries);
                 remove(entries);
             }
-
-            private Filter getFilter() {
-                return Filter.createLessOrEqualFilter("oxAuthExpiration", StaticUtils.encodeGeneralizedTime(new Date()));
-            }
         };
-        tokenBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(baseDn(), TokenLdap.class, getExpiredTokenFilter(), SearchScope.SUB, new String[] { "oxAuthTokenCode", "oxAuthClientId", "oxAuthScope", "oxAuthUserId" }, tokenBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
 
         // Cleaning oxAuthGrant
-        LdapBatchOperation<Grant> grantBatchService = new LdapBatchOperation<Grant>() {
-            @Override
-            public List<Grant> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-            }
-
+        BatchOperation<Grant> grantBatchService = new ProcessBatchOperation<Grant>() {
             @Override
             public void performAction(List<Grant> entries) {
                 removeGrants(entries);
             }
 
-            private Filter getFilter() {
-                Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.SECOND, 60);
-
-                Filter hasSubordinates = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
-            			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
-            	Filter creationDate = Filter.createLessOrEqualFilter("oxAuthCreation", StaticUtils.encodeGeneralizedTime(calendar.getTime()));
-            	Filter filter = Filter.createANDFilter(creationDate, hasSubordinates);
-            	
-            	return filter;
-            }
         };
-        grantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(baseDn(), Grant.class, getExpiredGrantFilter(), SearchScope.SUB, new String[] { "" }, grantBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
 
         // Cleaning old oxAuthGrant
         // Note: This block should be removed, it is used only to delete old legacy data.
-        LdapBatchOperation<Grant> oldGrantBatchService = new LdapBatchOperation<Grant>() {
-            @Override
-            public List<Grant> getChunkOrNull(int chunkSize) {
-                return ldapEntryManager.findEntries(baseDn(), Grant.class, getFilter(), SearchScope.SUB, null, this, 0, chunkSize, chunkSize);
-            }
-
+        BatchOperation<Grant> oldGrantBatchService = new ProcessBatchOperation<Grant>() {
             @Override
             public void performAction(List<Grant> entries) {
                 removeGrants(entries);
             }
-
-            private Filter getFilter() {
-            	Filter hasSubordinatesFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
-            			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
-            	Filter noCreationDate = Filter.createNOTFilter(Filter.createPresenceFilter("oxAuthCreation"));
-            	Filter filter = Filter.createANDFilter(noCreationDate, hasSubordinatesFilter);
-            	
-            	return filter;
-            }
         };
-        oldGrantBatchService.iterateAllByChunks(CleanerTimer.BATCH_SIZE);
+        ldapEntryManager.findEntries(baseDn(), Grant.class, getExpiredOldGrantFilter(), SearchScope.SUB, new String[] { "" }, oldGrantBatchService, 0, 0, CleanerTimer.BATCH_SIZE);
+    }
+
+    private Filter getExpiredTokenFilter() {
+        return Filter.createLessOrEqualFilter("oxAuthExpiration", ldapEntryManager.encodeGeneralizedTime(new Date()));
+    }
+
+    private Filter getExpiredGrantFilter() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, 60);
+
+        Filter hasSubordinates = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+    			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
+    	Filter creationDate = Filter.createLessOrEqualFilter("oxAuthCreation", ldapEntryManager.encodeGeneralizedTime(calendar.getTime()));
+    	Filter filter = Filter.createANDFilter(creationDate, hasSubordinates);
+    	
+    	return filter;
+    }
+
+    private Filter getExpiredOldGrantFilter() {
+    	Filter hasSubordinatesFilter = Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+    			Filter.createEqualityFilter("hasSubordinates", "FALSE")); 
+    	Filter noCreationDate = Filter.createNOTFilter(Filter.createPresenceFilter("oxAuthCreation"));
+    	Filter filter = Filter.createANDFilter(noCreationDate, hasSubordinatesFilter);
+    	
+    	return filter;
     }
 
     private void addGrantBranch(final String p_grantId, final String p_clientId) {

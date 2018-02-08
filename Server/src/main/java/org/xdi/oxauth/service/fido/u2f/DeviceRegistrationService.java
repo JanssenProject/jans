@@ -14,19 +14,18 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.BatchOperation;
+import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.base.SimpleBranch;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.xdi.oxauth.model.config.StaticConfiguration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistration;
 import org.xdi.oxauth.model.fido.u2f.DeviceRegistrationStatus;
 import org.xdi.oxauth.model.util.Base64Util;
-import org.xdi.oxauth.service.CleanerTimer;
 import org.xdi.oxauth.service.UserService;
 import org.xdi.util.StringHelper;
-import org.gluu.persist.ldap.impl.LdapEntryManager;
-import org.gluu.persist.ldap.operation.impl.LdapBatchOperation;
-import org.gluu.persist.model.SearchScope;
-import org.gluu.persist.model.base.SimpleBranch;
-import org.gluu.search.filter.Filter;
 
 /**
  * Provides operations with user U2F devices
@@ -157,11 +156,11 @@ public class DeviceRegistrationService {
 		ldapEntryManager.remove(deviceRegistration);
 	}
 
-	public List<DeviceRegistration> getExpiredDeviceRegistrations(LdapBatchOperation<DeviceRegistration> batchOperation, Date expirationDate) {
+	public List<DeviceRegistration> getExpiredDeviceRegistrations(BatchOperation<DeviceRegistration> batchOperation, Date expirationDate, String[] returnAttributes, int sizeLimit, int chunkSize) {
 		final String u2fBaseDn = getDnForOneStepU2fDevice(null);
 		Filter expirationFilter = Filter.createLessOrEqualFilter("creationDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, null, batchOperation, 0, CleanerTimer.BATCH_SIZE, CleanerTimer.BATCH_SIZE);
+		List<DeviceRegistration> deviceRegistrations = ldapEntryManager.findEntries(u2fBaseDn, DeviceRegistration.class, expirationFilter, SearchScope.SUB, returnAttributes, batchOperation, 0, sizeLimit, chunkSize);
 
 		return deviceRegistrations;
 	}
