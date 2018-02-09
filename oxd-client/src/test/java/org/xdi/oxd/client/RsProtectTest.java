@@ -1,11 +1,15 @@
 package org.xdi.oxd.client;
 
+import junit.framework.Assert;
+import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.params.RsProtectParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
+import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.common.response.RsProtectResponse;
 import org.xdi.oxd.rs.protect.RsResource;
 
@@ -31,6 +35,7 @@ public class RsProtectTest {
             final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
 
             protectResources(client, site, UmaFullTest.resourceList(rsProtect).getResources());
+            RsCheckAccessTest.checkAccess(client, site);
         } finally {
             CommandClient.closeQuietly(client);
         }
@@ -47,6 +52,34 @@ public class RsProtectTest {
 
             protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpression).getResources());
             RsCheckAccessTest.checkAccess(client, site);
+        } finally {
+            CommandClient.closeQuietly(client);
+        }
+    }
+
+    @Parameters({"host", "port", "redirectUrl", "opHost", "rsProtectScopeExpressionSecond"})
+    @Test
+    public void protectWithScopeExpressionSeconds(String host, int port, String redirectUrl, String opHost, String rsProtectScopeExpressionSecond) throws IOException {
+        CommandClient client = null;
+        try {
+            client = new CommandClient(host, port);
+
+            final RegisterSiteResponse site = RegisterSiteTest.registerSite(client, opHost, redirectUrl);
+
+            protectResources(client, site, UmaFullTest.resourceList(rsProtectScopeExpressionSecond).getResources());
+
+            final RsCheckAccessParams params = new RsCheckAccessParams();
+            params.setOxdId(site.getOxdId());
+            params.setHttpMethod("GET");
+            params.setPath("/GetAll");
+            params.setRpt("");
+
+            final RsCheckAccessResponse response = client
+                    .send(new Command(CommandType.RS_CHECK_ACCESS).setParamsObject(params))
+                    .dataAsResponse(RsCheckAccessResponse.class);
+
+            Assert.assertNotNull(response);
+            Assert.assertTrue(StringUtils.isNotBlank(response.getAccess()));
         } finally {
             CommandClient.closeQuietly(client);
         }
