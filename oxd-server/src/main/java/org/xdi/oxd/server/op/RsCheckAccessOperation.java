@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxauth.client.uma.UmaClientFactory;
 import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
+import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
 import org.xdi.oxauth.model.uma.PermissionTicket;
 import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxauth.model.uma.UmaPermission;
@@ -89,7 +90,16 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
 
         if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
             for (UmaPermission permission : status.getPermissions()) {
-                final List<String> requiredScopes = resource.getScopes();
+                List<String> requiredScopes = resource.getScopes();
+
+                if (requiredScopes.isEmpty()) {
+                    LOG.trace("Not scopes in resource:" + resource + ", oxdId: " + params.getOxdId());
+                    if (!resource.getScopeExpressions().isEmpty() && JsonLogicNodeParser.isNodeValid(resource.getScopeExpressions().get(0))) {
+                        requiredScopes = JsonLogicNodeParser.parseNode(resource.getScopeExpressions().get(0)).getData();
+                        LOG.trace("Set requiredScope from scope expression.");
+                    }
+                }
+
                 boolean containsAny = !Collections.disjoint(requiredScopes, permission.getScopes());
 
                 LOG.trace("containsAny: " + containsAny + ", requiredScopes: " + requiredScopes + ", permissionScopes: " + permission.getScopes());
