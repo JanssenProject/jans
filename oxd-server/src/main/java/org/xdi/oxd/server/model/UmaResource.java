@@ -26,6 +26,9 @@ public class UmaResource {
     private List<String> ticketScopes = Lists.newArrayList();
 
     public List<String> getScopeExpressions() {
+        if (scopeExpressions == null) {
+            scopeExpressions = Lists.newArrayList();
+        }
         return scopeExpressions;
     }
 
