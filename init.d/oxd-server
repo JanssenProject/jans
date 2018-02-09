@@ -2,7 +2,7 @@
 
 # LSB Tags
 ### BEGIN INIT INFO
-# Provides:          oxauth
+# Provides:          oxd-server
 # Required-Start:    $local_fs $network
 # Required-Stop:     $local_fs $network
 # Default-Start:     2 3 4 5
@@ -369,7 +369,6 @@ case "$ACTION" in
         CH_USER="-c$OXD_USER"
       fi
 
-      echo ${RUN_ARGS[@]}
       start-stop-daemon -S -p"$OXD_PID" $CH_USER -d"$OXD_BASE" -b -m -a "$JAVA" -- "${RUN_ARGS[@]}" start-log-file="$OXD_LOGS/start.log" >> "$OXD_LOGS/start.log" 2>&1
 
     else
