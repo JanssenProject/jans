@@ -1719,9 +1719,11 @@ class Setup(object):
                 self.ldap_binddn = self.opendj_ldap_binddn
                 self.ldap_site_binddn = self.opendj_ldap_binddn
 
+                self.ldapCertFn = self.opendj_cert_fn
                 self.ldapTrustStoreFn = self.opendj_p12_fn
                 self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
             elif self.ldap_type == 'openldap':
+                self.ldapCertFn = self.openldapTLSCert
                 self.ldapTrustStoreFn = self.openldapP12Fn
                 self.encoded_ldapTrustStorePass = self.encoded_openldapJksPass
                 
