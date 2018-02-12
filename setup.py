@@ -50,6 +50,7 @@ except:
 from pyDes import *
 
 def progress_bar(i, act=''):
+    time.sleep(0.2)
     if setupOptions.get('verbose'):
         ft = '#' * i
         ft = ft.ljust(33)
