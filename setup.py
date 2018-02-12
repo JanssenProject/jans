@@ -41,7 +41,11 @@ import re
 import glob
 import base64
 
-tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
+try:
+    tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
+except:
+    tty_rows = 60
+    tty_columns = 120
 
 from pyDes import *
 
