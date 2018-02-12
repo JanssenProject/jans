@@ -3354,7 +3354,7 @@ if __name__ == '__main__':
             installObject.set_ownership()
             progress_bar(29, "Setting permissions")
             installObject.set_permissions()
-            progress_bar(30, "Satrting services")
+            progress_bar(30, "Starting services")
             installObject.start_services()
             progress_bar(31, "Changing rc links")
             installObject.change_rc_links()
