@@ -106,7 +106,7 @@ class Migration(object):
         self.ldap_type = 'openldap'
         self.gluuSchemaDir = '/opt/gluu/schema/openldap/'
         self.backupVersion = 0
-
+        self.setup_properties = 'backup_2431/setup.properties'
         self.customAttrs = []
 
     def slapdConfAdd(self):
@@ -698,14 +698,20 @@ class Migration(object):
             self.importDataIntoOpenDJ()
 
     def getLDAPServerType(self):
-        try:
-            choice = int(raw_input(
-                "\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [1]: ")
-            )
-        except ValueError:
-            logging.error("You did not enter a integer value. "
-                          "Cannot decide LDAP server type. Quitting.")
-            sys.exit(1)
+
+        choice = 0
+        if os.path.isfile(self.setup_properties):
+            data = ""
+            try:
+                with open(self.setup_properties) as f:
+                    for line in f:
+                        if line == 'ldap_type=openldap\n':
+                            choice = 1
+                        elif line == 'ldap_type=opendj\n':
+                            choice = 2
+            except:
+                logging.error(self.setup_properties+" File not Found")
+                sys.exit(0)
 
         if choice == 1:
             self.ldap_type = 'openldap'
