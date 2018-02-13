@@ -533,6 +533,7 @@ class Exporter(object):
         self.os_types = ['centos', 'redhat', 'fedora', 'ubuntu', 'debian']
         self.os = self.detect_os_type()
         self.service = "/usr/sbin/service"
+        self.choice = 0
         if self.os is 'centos':
             self.service = "/sbin/service"
 
@@ -719,11 +720,31 @@ class Exporter(object):
                 if "{0}=".format(prop) in line:
                     return line.split('=')[-1].strip()
 
+    def getLDAPServerTypeChoice(self):
+        try:
+            self.choice = int(raw_input("\nChoose the target LDAP Server - 1.OpenLDAP, 2.OpenDJ [2]: "))
+        except ValueError:
+            logging.error("You did not enter a integer value. "
+                          "Cannot decide LDAP server type. Quitting.")
+            sys.exit(1)
+
+        if self.choice != 1 and self.choice != 2:
+            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+            sys.exit(1)
+
     def genProperties(self):
         logging.info('Creating setup.properties backup file')
         props = {}
         props['ldapPass'] = self.getOutput([self.cat, self.passwordFile]).strip()
-        props['ldap_type'] = 'openldap'        
+
+        ldap_type = 'openldap'
+        if self.choice == 1:
+            ldap_type = 'openldap'
+        elif self.choice == 2:
+            ldap_type = 'opendj'
+            props['opendj_version'] = 3.0
+
+        props['ldap_type'] = ldap_type
         props['hostname'] = self.hostname
         props['inumAppliance'] = self.getOutput(
             [self.grep, "^inum", "%s/ldif/appliance.ldif" % self.backupDir]
@@ -831,6 +852,7 @@ class Exporter(object):
         print("            Gluu Server Data Export Tool For v2.4x to v3.1x           ")
         print("-------------------------------------------------------------")
         print("")
+        self.getLDAPServerTypeChoice()
         self.stopOpenDJ()
         self.editLdapConfig()
         self.startOpenDJ()
