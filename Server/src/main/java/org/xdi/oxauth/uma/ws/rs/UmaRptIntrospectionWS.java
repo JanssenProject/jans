@@ -93,6 +93,9 @@ public class UmaRptIntrospectionWS {
             statusResponse.setExpiresAt(rpt.getExpirationDate());
             statusResponse.setIssuedAt(rpt.getCreationDate());
             statusResponse.setPermissions(permissions);
+            statusResponse.setClientId(rpt.getClientId());
+            statusResponse.setAud(rpt.getClientId());
+            statusResponse.setSub(rpt.getUserId());
 
             // convert manually to avoid possible conflict between resteasy providers, e.g. jettison, jackson
             final String entity = ServerUtil.asJson(statusResponse);
