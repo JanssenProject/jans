@@ -41,7 +41,24 @@ import re
 import glob
 import base64
 
+try:
+    tty_rows, tty_columns = os.popen('stty size', 'r').read().split()
+except:
+    tty_rows = 60
+    tty_columns = 120
+
 from pyDes import *
+
+def progress_bar(i, act=''):
+    time.sleep(0.2)
+    if setupOptions.get('verbose'):
+        ft = '#' * i
+        ft = ft.ljust(33)
+        act =act.ljust(40)
+        if int(tty_columns) < 88:
+            act = act[:int(tty_columns)-47]
+        sys.stdout.write("\rInstalling [{0}] {1}".format(ft, act))
+        sys.stdout.flush()
 
 
 class Setup(object):
@@ -510,26 +527,29 @@ class Setup(object):
                                         'jettison-*.jar', 'oxauth-model-*.jar', 'oxauth-client-*.jar' ]
 
         self.init_fixes = {
+                'opendj' : {'src_pattern' : 'S*opendj',
+                            'result_name' : 'S90opendj'
+                           },
                 'solserver' : {'src_pattern' : 'S*solserver',
                             'result_name' : 'S90solserver'
                            },
                 'oxauth' : {'src_pattern' : 'S*oxauth',
-                            'result_name' : 'S91oxauth'
+                            'result_name' : 'S92oxauth'
                            },
                 'identity' : {'src_pattern' : 'S*identity',
-                            'result_name' : 'S92identity'
+                            'result_name' : 'S93identity'
                            },
                 'idp' : {'src_pattern' : 'S*idp',
-                            'result_name' : 'S93idp'
+                            'result_name' : 'S94idp'
                            },
                 'oxauth-rp' : {'src_pattern' : 'S*oxauth-rp',
-                            'result_name' : 'S94oxauth-rp'
+                            'result_name' : 'S95oxauth-rp'
                            },
                 'asimba' : {'src_pattern' : 'S*asimba',
-                            'result_name' : 'S95asimba'
+                            'result_name' : 'S96asimba'
                            },
                 'passport' : {'src_pattern' : 'S*passport',
-                            'result_name' : 'S96passport'
+                            'result_name' : 'S97passport'
                            },
                 'apache2' : {'src_pattern' : 'S*apache2',
                             'result_name' : 'S98apache2'
@@ -756,7 +776,7 @@ class Setup(object):
 
         return foundFiles
 
-    def readFile(self, inFilePath):
+    def readFile(self, inFilePath, logError=True):
         inFilePathText = None
 
         try:
@@ -764,8 +784,9 @@ class Setup(object):
             inFilePathText = f.read()
             f.close
         except:
-            self.logIt("Error reading %s" % inFilePathText, True)
-            self.logIt(traceback.format_exc(), True)
+            if logError:
+                self.logIt("Error reading %s" % inFilePathText, True)
+                self.logIt(traceback.format_exc(), True)
 
         return inFilePathText
 
@@ -1021,7 +1042,7 @@ class Setup(object):
     def detect_os_type(self):
         # TODO: Change this to support more distros. For example according to
         # http://unix.stackexchange.com/questions/6345/how-can-i-get-distribution-name-and-version-number-in-a-simple-shell-script
-        distro_info = self.readFile('/etc/redhat-release')
+        distro_info = self.readFile('/etc/redhat-release', False)
         if distro_info == None:
             distro_info = self.readFile('/etc/os-release')
 
@@ -1205,8 +1226,14 @@ class Setup(object):
         self.copyFile(jettyServiceConfiguration, "/etc/default")
         self.run([self.cmd_chown, 'root:root', "/etc/default/%s" % serviceName])
 
-        if os.path.exists(jettyServiceConfiguration+"_web_resources.xml"):
-            self.copyFile(jettyServiceConfiguration+"_web_resources.xml", self.jetty_base+"/"+serviceName+"/webapps")
+        try:
+            web_resources = '%s_web_resources.xml' % serviceName
+            if os.path.exists('%s/jetty/%s' % (self.templateFolder, web_resources)):
+                self.renderTemplateInOut(web_resources, '%s/jetty' % self.templateFolder, '%s/jetty' % self.outputFolder)
+                self.copyFile('%s/jetty/%s' % (self.outputFolder, web_resources), self.jetty_base+"/"+serviceName+"/webapps")
+        except:
+            self.setup.logIt("Error rendering service '%s' web_resources.xml" % serviceName, True)
+            self.setup.logIt(traceback.format_exc(), True)
 
         self.copyFile('%s/bin/jetty.sh' % self.jetty_home, '/etc/init.d/%s' % serviceName)
         source_string = '# Provides:          jetty'
@@ -1259,39 +1286,39 @@ class Setup(object):
 
     def downloadWarFiles(self):
         if self.downloadWars:
-            print "Downloading oxAuth war file..."
+            progress_bar(2, "Downloading oxAuth war file")
+            
             self.run(['/usr/bin/wget', self.oxauth_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth.war' % self.distGluuFolder])
-            print "Downloading oxTrust war file..."
+            progress_bar(2, "Downloading oxTrust war file")
             self.run(['/usr/bin/wget', self.oxtrust_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/identity.war' % self.distGluuFolder])
-
-            print "Finished downloading latest war files"
 
         if self.installAsimba:
             # Asimba is not part of CE package. We need to download it if needed
             distAsimbaPath = '%s/%s' % (self.distGluuFolder, "asimba.war")
             if not os.path.exists(distAsimbaPath):
-                print "Downloading Asimba war file..."
+                progress_bar(2, "Downloading Asimba war file")
                 self.run(['/usr/bin/wget', self.asimba_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/asimba.war' % self.distGluuFolder])
 
         if self.installOxAuthRP:
             # oxAuth RP is not part of CE package. We need to download it if needed
             distOxAuthRpPath = '%s/%s' % (self.distGluuFolder, "oxauth-rp.war")
             if not os.path.exists(distOxAuthRpPath):
-                print "Downloading oxAuth RP war file..."
+                progress_bar(2, "Downloading oxAuth RP war file")
                 self.run(['/usr/bin/wget', self.oxauth_rp_war, '--no-verbose', '--retry-connrefused', '--tries=10', '-O', '%s/oxauth-rp.war' % self.distGluuFolder])
 
         if self.downloadWars and self.installSaml:
-            print "Downloading Shibboleth IDP v3 war file..."
+            
+            progress_bar(2, "Downloading Shibboleth IDP v3 war file")
             self.run(['/usr/bin/wget', self.idp3_war, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', '%s/idp.war' % self.distGluuFolder])
-            print "Downloading Shibboleth IDP v3 keygenerator..."
+            progress_bar(2, "Downloading Shibboleth IDP v3 keygenerator")
             self.run(['/usr/bin/wget', self.idp3_cml_keygenerator, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/idp3_cml_keygenerator.jar'])
-            print "Downloading Shibboleth IDP v3 binary distributive file..."
+            progress_bar(2, "Downloading Shibboleth IDP v3 binary distributive file")
             self.run(['/usr/bin/wget', self.idp3_dist_jar, '--no-verbose', '-c', '--retry-connrefused', '--tries=10', '-O', self.distGluuFolder + '/shibboleth-idp.jar'])
 
         jceArchive = 'jce_policy-8.zip'
         jceArchivePath = '%s/%s' % (self.distAppFolder, jceArchive)
         if self.installJce and not os.path.exists(jceArchivePath):
-            print "Downloading JCE 1.8 zip file..."
+            progress_bar(2, "Downloading JCE 1.8 zip file")
             self.run(['/usr/bin/curl', self.java_1_8_jce_zip, '-s', '-j', '-k', '-L', '-H', 'Cookie:oraclelicense=accept-securebackup-cookie', '-o', jceArchivePath])
 
 
@@ -1709,9 +1736,11 @@ class Setup(object):
                 self.ldap_binddn = self.opendj_ldap_binddn
                 self.ldap_site_binddn = self.opendj_ldap_binddn
 
+                self.ldapCertFn = self.opendj_cert_fn
                 self.ldapTrustStoreFn = self.opendj_p12_fn
                 self.encoded_ldapTrustStorePass = self.encoded_opendj_p12_pass
             elif self.ldap_type == 'openldap':
+                self.ldapCertFn = self.openldapTLSCert
                 self.ldapTrustStoreFn = self.openldapP12Fn
                 self.encoded_ldapTrustStorePass = self.encoded_openldapJksPass
                 
@@ -1922,27 +1951,35 @@ class Setup(object):
 
     def install_gluu_components(self):
         if self.installLdap:
+            progress_bar(25, "Installing Gluu components: LDAP")
             self.install_ldap_server()
 
         if self.installHttpd:
+            progress_bar(25, "Installing Gluu components: HTTPD")
             self.configure_httpd()
 
         if self.installOxAuth:
+            progress_bar(25, "Installing Gluu components: OxAuth")
             self.install_oxauth()
 
         if self.installOxTrust:
+            progress_bar(25, "Installing Gluu components: oxtruest")
             self.install_oxtrust()
 
         if self.installSaml:
+            progress_bar(25, "Installing Gluu components: saml")
             self.install_saml()
 
         if self.installAsimba:
+            progress_bar(25, "Installing Gluu components: Asimba")
             self.install_asimba()
 
         if self.installOxAuthRP:
+            progress_bar(25, "Installing Gluu components: OxAuthRP")
             self.install_oxauth_rp()
 
         if self.installPassport:
+            progress_bar(25, "Installing Gluu components: Passport")
             self.install_passport()
 
     def isIP(self, address):
@@ -2089,6 +2126,11 @@ class Setup(object):
         self.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def promptForProperties(self):
+
+        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
+        if promptForMITLicense != 'y':
+            sys.exit(0)
+        
         # IP address needed only for Apache2 and hosts file update
         if self.installHttpd:
             self.ip = self.get_ip()
@@ -2201,11 +2243,6 @@ class Setup(object):
                 self.installJce = False
         else:
             self.installJce = False
-
-
-        promptForMITLicense = self.getPrompt("Do you acknowledge that use of the Gluu Server is under the MIT license?","N|y")[0].lower()
-        if promptForMITLicense != 'y':
-            sys.exit(0)
 
 
     def get_filepaths(self, directory):
@@ -2438,7 +2475,6 @@ class Setup(object):
     def deleteLdapPw(self):
         try:
             os.remove(self.ldapPassFn)
-            os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
         except:
             self.logIt("Error deleting ldap pw. Make sure %s is deleted" % self.ldapPassFn)
             self.logIt(traceback.format_exc(), True)
@@ -2487,6 +2523,13 @@ class Setup(object):
                       ])
         except:
             self.logIt("Error running stop-ds", True)
+            self.logIt(traceback.format_exc(), True)
+
+    def post_install_opendj(self):
+        try:
+            os.remove(os.path.join(self.ldapBaseFolder, 'opendj-setup.properties'))
+        except:
+            self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % self.ldapBaseFolder)
             self.logIt(traceback.format_exc(), True)
 
     def configure_opendj(self):
@@ -2728,7 +2771,7 @@ class Setup(object):
             self.run(["/sbin/chkconfig", 'opendj', "on"])
             self.run([service_path, 'opendj', 'start'])
         elif self.os_type in ['ubuntu', 'debian']:
-            self.run(["/usr/sbin/update-rc.d", 'opendj', 'start', '40', '3', "."])
+            self.run(["/usr/sbin/update-rc.d", 'opendj', 'defaults', 'start', '40', '30'])
             self.run(["/usr/sbin/update-rc.d", 'opendj', 'enable'])
             self.run([service_path, 'opendj', 'start'])
 
@@ -2964,18 +3007,22 @@ class Setup(object):
 
         self.extractOpenDJ()
         self.opendj_version = self.determineOpenDJVersion()
+
         self.createLdapPw()
-        self.install_opendj()
-
-        if self.ldap_type == 'opendj':
-            self.prepare_opendj_schema()
-            self.setup_opendj_service()
-            self.configure_opendj()
-            self.export_opendj_public_cert()
-            self.index_opendj()
-            self.import_ldif_opendj()
-
-        self.deleteLdapPw()
+        try:
+            self.install_opendj()
+    
+            if self.ldap_type == 'opendj':
+                self.prepare_opendj_schema()
+                self.setup_opendj_service()
+                self.configure_opendj()
+                self.export_opendj_public_cert()
+                self.index_opendj()
+                self.import_ldif_opendj()
+    
+            self.post_install_opendj()
+        finally:
+            self.deleteLdapPw()
 
         if self.ldap_type == 'openldap':
             self.logIt("Running OpenLDAP Setup")
@@ -3089,13 +3136,14 @@ def print_help():
     print "    -u   Update hosts file with IP address / hostname"
     print "    -w   Get the development head war files"
     print "    -e   Download JCE 1.8 and install it"
+    print "    -v   Be verbose and show progress bar"
     print "    --allow_pre_released_applications"
     print "    --allow_deprecated_applications"
     print "    --import-ldif=custom-ldif-dir Render ldif templates from custom-ldif-dir and import them in LDAP"
 
 def getOpts(argv, setupOptions):
     try:
-        opts, args = getopt.getopt(argv, "adp:f:hNnsuwre", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
+        opts, args = getopt.getopt(argv, "adp:f:hNnsuwrev", ['allow_pre_released_applications', 'allow_deprecated_applications', 'import-ldif='])
     except getopt.GetoptError:
         print_help()
         sys.exit(2)
@@ -3119,6 +3167,9 @@ def getOpts(argv, setupOptions):
                     print "\nOoops... %s file not found for setup properties.\n" % arg
             except:
                 print "\nOoops... %s file not found\n" % arg
+        
+        elif opt == "-v":
+            setupOptions['verbose'] = True
         elif opt == "-n":
             setupOptions['noPrompt'] = True
         elif opt == "-N":
@@ -3245,42 +3296,79 @@ if __name__ == '__main__':
         proceed = raw_input('Proceed with these values [Y|n] ').lower().strip()
     if (setupOptions['noPrompt'] or not len(proceed) or (len(proceed) and (proceed[0] == 'y'))):
         try:
+            progress_bar(1, "Configuring system")
             installObject.configureSystem()
+            progress_bar(2, "Downloading War files")
             installObject.downloadWarFiles()
+            progress_bar(3, "Calculating application memory")
             installObject.calculate_selected_aplications_memory()
+            progress_bar(4, "Downloading and installing JRE")
             installObject.installJRE()
+            progress_bar(5, "Installing Jetty")
             installObject.installJetty()
+            progress_bar(6, "Installing Jython")
             installObject.installJython()
+            progress_bar(7, "Installing Node")
             installObject.installNode()
+            progress_bar(8, "Making salt")
             installObject.make_salt()
+            progress_bar(9, "Making oxauth salt")
             installObject.make_oxauth_salt()
+            progress_bar(10, "Copying scripts")
             installObject.copy_scripts()
+            progress_bar(11, "Encoding passwords")
             installObject.encode_passwords()
+            progress_bar(12, "Encoding test passwords")
             installObject.encode_test_passwords()
+            progress_bar(13, "Installing Gluu base")
             installObject.install_gluu_base()
+            progress_bar(14, "Preparing bas64 extention scripts")
             installObject.prepare_base64_extension_scripts()
+            progress_bar(15, "Rendering templates")
             installObject.render_templates()
+            progress_bar(16, "Generating crypto")
             installObject.generate_crypto()
+            progress_bar(17, "Generating oxauth openid keys")
             installObject.generate_oxauth_openid_keys()
+            progress_bar(18, "Generating base64 configuration")
             installObject.generate_base64_configuration()
+            progress_bar(19, "Rendering configuratipn template")
             installObject.render_configuration_template()
+            progress_bar(20, "Updating hostname")
             installObject.update_hostname()
+            progress_bar(21, "Setting ulimits")
             installObject.set_ulimits()
+            progress_bar(22, "Copying output")
             installObject.copy_output()
+            progress_bar(23, "Setting up init scripts")
             installObject.setup_init_scripts()
+            progress_bar(24, "Rendering node templates")
             installObject.render_node_templates()
+            progress_bar(25, "Installing Gluu components")
             installObject.install_gluu_components()
+            progress_bar(26, "Rendering test templates")
             installObject.render_test_templates()
+            progress_bar(27, "Copying static")
             installObject.copy_static()
+            progress_bar(28, "Setting ownerships")
             installObject.set_ownership()
+            progress_bar(29, "Setting permissions")
             installObject.set_permissions()
+            progress_bar(30, "Starting services")
             installObject.start_services()
+            progress_bar(31, "Changing rc links")
             installObject.change_rc_links()
+            progress_bar(32, "Saving properties")
             installObject.save_properties()
+            
             if 'importLDIFDir' in setupOptions.keys():
+                progress_bar(33, "Importing LDIF files")
                 installObject.render_custom_templates(setupOptions['importLDIFDir'])
                 installObject.import_custom_ldif_openldap(setupOptions['importLDIFDir'])
-
+                progress_bar(33, "Completed")
+            else:
+                progress_bar(33, "Completed")
+            print
         except:
             installObject.logIt("***** Error caught in main loop *****", True)
             installObject.logIt(traceback.format_exc(), True)
