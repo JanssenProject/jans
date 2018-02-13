@@ -773,8 +773,9 @@ class Migration(object):
 
     def fixPermissions(self):
         logging.info('Fixing permissions for files.')
-        self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
-        self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+        if self.ldap_type == 'openldap':
+            self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
+            self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
 
     def getProp(self, prop):
         with open(os.path.join(self.backupDir, 'setup.properties'), 'r') as f:
@@ -808,7 +809,7 @@ class Migration(object):
         # self.startWebapps()
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
-        print("\n\n\t# exit\n\t# service gluu-server-x.x.x restart\n")
+        print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
         print("------------------------------------------------------------")
         print("\n")
 
