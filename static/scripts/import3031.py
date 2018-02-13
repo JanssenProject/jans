@@ -107,6 +107,10 @@ class Migration(object):
         self.gluuSchemaDir = '/opt/gluu/schema/openldap/'
         self.backupVersion = 0
 
+        self.ox_ldap_properties = 'backup_3031/etc/gluu/conf/ox-ldap.properties'
+        self.setup_properties = 'backup_3031/setup.properties'
+
+
     def readFile(self, inFilePath):
         if not os.path.exists(inFilePath):
             logging.debug("Cannot read: %s. File does not exist.", inFilePath)
@@ -201,6 +205,12 @@ class Migration(object):
         logging.info("Updating the CA Certs Keystore.")
         keys = ['httpd', 'idp-signing', 'idp-encryption', 'shibidp', 'asimba',
                 'openldap']
+
+        # other wise gives error keytool error: java.lang.Exception: Alias <gluu.local.org_openldap> does not exist
+        if self.ldap_type == 'opendj':
+            keys.remove('openldap')
+
+
         hostname = self.getOutput(['hostname']).strip()
         # import all the keys into the keystore
         for key in keys:
@@ -369,13 +379,18 @@ class Migration(object):
 
     def copyCustomSchema(self):
 
-        custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
-        outfile = open(custom_schema, 'w')
-        output = self.readFile(self.backupDir + "/custom.schema")
+        if self.ldap_type == 'openldap':
 
-        outfile.write("\n")
-        outfile.write(output)
-        outfile.close()
+            custom_schema = os.path.join(self.gluuSchemaDir, 'custom.schema')
+            outfile = open(custom_schema, 'w')
+            output = self.readFile(self.backupDir + "/custom.schema")
+
+            outfile.write("\n")
+            outfile.write(output)
+            outfile.close()
+
+        else:
+            return
 
     def getEntry(self, fn, dn):
         parser = MyLDIF(open(fn, 'rb'), sys.stdout)
@@ -443,7 +458,7 @@ class Migration(object):
         for dn in currentDNs:
             new_entry = self.getEntry(self.currentData, dn)
             if "o=site" in dn:
-                 continue  # skip all the o=site DNs
+                continue  # skip all the o=site DNs
             if dn not in old_dn_map.keys():
                 #  Write to the file if there is no matching old DN data
                 ldif_writer.unparse(dn, new_entry)
@@ -563,11 +578,11 @@ class Migration(object):
         logging.debug(output)
 
     def importDataIntoOpenDJ(self):
-        command = [self.ldif_import, '-n', 'userRoot',
+        command = [self.ldif_import,'-b','o=gluu','-n', 'userRoot',
                    '-l', self.o_gluu, '-R', self.o_gluu + '.rejects']
         output = self.getOutput(command)
         logging.debug(output)
-        command = [self.ldif_import, '-n', 'userRoot',
+        command = [self.ldif_import,'-b','o=gluu','-n', 'userRoot',
                    '-l', self.o_site, '-R', self.o_site + '.rejects']
         output = self.getOutput(command)
         logging.debug(output)
@@ -581,8 +596,61 @@ class Migration(object):
 
 
 
+    def choice_opendj_change(self):
+        # change bindDN
+        if os.path.isfile(self.ox_ldap_properties):
+            ox_data = ""
+            try:
+                with open(self.ox_ldap_properties) as f:
+                    for line in f:
+                        if line == 'bindDN: cn=directory manager,o=gluu\n':
+                            line = 'bindDN: cn=directory manager\n'
+                        elif line.startswith('ssl.trustStorePin') or line.startswith('ssl.trustStoreFile') or line.startswith('ssl.trustStoreFormat'):
+                            continue
+                        ox_data += line
+            except:
+                logging.error(self.ox_ldap_properties+" error in reading ")
+                sys.exit(0)
+
+
+            fh = open(self.ox_ldap_properties, 'w')
+            fh.write(ox_data)
+            fh.close()
+
+        else:
+            logging.error(self.ox_ldap_properties+" File not Found")
+            sys.exit(0)
+
+
+    def getLDAPServerTypeChoice(self):
+
+        if os.path.isfile(self.setup_properties):
+            data = ""
+            choice = 0
+            try:
+                with open(self.setup_properties) as f:
+                    for line in f:
+                        if line == 'ldap_type=openldap\n':
+                            choice = 1
+                        elif line == 'ldap_type=opendj\n':
+                            choice = 2
+            except:
+                logging.error(self.setup_properties+" File not Found")
+                sys.exit(0)
+
+
+        if choice == 1:
+            self.ldap_type = 'openldap'
+
+        elif choice == 2:
+            self.ldap_type = 'opendj'
+            self.choice_opendj_change()
+        else:
+            logging.error("Invalid selection of LDAP Server. Cannot Migrate.")
+            sys.exit(1)
+
+
     def getLDAPServerType(self):
-        self.ldap_type = 'openldap'
         self.oxIDPAuthentication = 2
         try:
             choice = int(raw_input(
@@ -658,8 +726,11 @@ class Migration(object):
 
     def fixPermissions(self):
         logging.info('Fixing permissions for files.')
-        self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
-        self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+
+        if self.ldap_type == 'openldap':
+            self.getOutput(['chown', 'ldap:ldap', self.ldapDataFile])
+            self.getOutput(['chown', 'ldap:ldap', self.ldapSiteFile])
+
         self.getOutput(['chown','jetty:jetty',os.path.join('/opt','shibboleth-idp','metadata')])
         self.getOutput(['chown','-R','jetty:jetty',os.path.join('/opt','shibboleth-idp','conf')])
 
@@ -677,6 +748,7 @@ class Migration(object):
         print("        Gluu Server Community Edition Migration Tool        ")
         print("============================================================")
         self.version = int(self.getProp('version').replace('.', '')[0:3])
+        self.getLDAPServerTypeChoice()
         self.getLDAPServerType()
         self.verifyBackupData()
         self.setupWorkDirectory()
@@ -694,7 +766,7 @@ class Migration(object):
         # self.startWebapps()
         print("============================================================")
         print("The migration is complete. Gluu Server needs to be restarted.")
-        print("\n\n\t# exit\n\t# service gluu-server-x.x.x restart\n")
+        print("\n\n\t# logout\n\t# service gluu-server-x.x.x restart\n")
         print("------------------------------------------------------------")
         print("\n")
 
