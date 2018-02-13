@@ -681,7 +681,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		} else {
 			searchFilter = filter;
 		}
-		
+
 		CountBatchOperation<T> batchOperation = new CountBatchOperation<T>();
 
 		try {
