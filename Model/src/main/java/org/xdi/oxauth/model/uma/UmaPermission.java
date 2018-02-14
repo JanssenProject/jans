@@ -16,7 +16,6 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,7 +41,7 @@ public class UmaPermission implements Serializable {
     @ApiModelProperty(value = "An array referencing one or more identifiers of scopes to which access is needed for this resource. Each scope identifier MUST correspond to a scope that was registered by RS for the referenced resource."
             , required = true)
     private List<String> scopes;
-    private Date expiresAt;
+    private Integer expiresAt;
 
     public UmaPermission() {
     }
@@ -74,12 +73,12 @@ public class UmaPermission implements Serializable {
 
     @JsonProperty(value = "exp")
     @XmlElement(name = "exp")
-    public Date getExpiresAt() {
-        return expiresAt != null ? new Date(expiresAt.getTime()) : null;
+    public Integer getExpiresAt() {
+        return expiresAt;
     }
 
-    public void setExpiresAt(Date expiresAt) {
-        this.expiresAt = expiresAt != null ? new Date(expiresAt.getTime()) : null;
+    public void setExpiresAt(Integer expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     @Override

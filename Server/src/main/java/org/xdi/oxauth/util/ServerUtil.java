@@ -17,6 +17,8 @@ import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xdi.ldap.model.CustomAttribute;
+import org.xdi.oxauth.introspection.ws.rs.IntrospectionWebService;
 import org.xdi.oxauth.model.uma.persistence.UmaPermission;
 import org.xdi.oxauth.service.AppInitializer;
 import org.xdi.oxauth.uma.service.UmaScopeService;
@@ -162,7 +164,7 @@ public class ServerUtil {
             final org.xdi.oxauth.model.uma.UmaPermission result = new org.xdi.oxauth.model.uma.UmaPermission();
             result.setResourceId(permission.getResourceId());
             result.setScopes(umaScopeService.getScopeIdsByDns(permission.getScopeDns()));
-            result.setExpiresAt(permission.getExpirationDate());
+            result.setExpiresAt(IntrospectionWebService.dateToSeconds(permission.getExpirationDate()));
             return result;
         }
         return null;
