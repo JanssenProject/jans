@@ -13,7 +13,6 @@ import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,9 +32,9 @@ import java.util.List;
 public class RptIntrospectionResponse {
 
     private boolean active;   // according spec, must be "active" http://tools.ietf.org/html/draft-richer-oauth-introspection-03#section-2.2
-    private Date expiresAt;
-    private Date issuedAt;
-    private Date nbf;
+    private Integer expiresAt;
+    private Integer issuedAt;
+    private Integer nbf;
     private String clientId;
     private String sub;
     private String aud;
@@ -112,32 +111,32 @@ public class RptIntrospectionResponse {
 
     @JsonProperty(value = "nbf")
     @XmlElement(name = "nbf")
-    public Date getNbf() {
+    public Integer getNbf() {
         return nbf;
     }
 
-    public void setNbf(Date nbf) {
+    public void setNbf(Integer nbf) {
         this.nbf = nbf;
     }
 
     @JsonProperty(value = "exp")
     @XmlElement(name = "exp")
-    public Date getExpiresAt() {
-        return expiresAt != null ? new Date(expiresAt.getTime()) : null;
+    public Integer getExpiresAt() {
+        return expiresAt;
     }
 
-    public void setExpiresAt(Date expirationDate) {
-        this.expiresAt = expirationDate != null ? new Date(expirationDate.getTime()) : null;
+    public void setExpiresAt(Integer expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     @JsonProperty(value = "iat")
     @XmlElement(name = "iat")
-    public Date getIssuedAt() {
-        return issuedAt != null ? new Date(issuedAt.getTime()) : null;
+    public Integer getIssuedAt() {
+        return issuedAt;
     }
 
-    public void setIssuedAt(Date p_issuedAt) {
-        issuedAt = p_issuedAt != null ? new Date(p_issuedAt.getTime()) : null;
+    public void setIssuedAt(Integer p_issuedAt) {
+        issuedAt = p_issuedAt;
     }
 
     @JsonProperty(value = "permissions")
