@@ -7,13 +7,11 @@ import org.jboss.resteasy.client.ClientResponseFailure;
 import org.jboss.resteasy.specimpl.BuiltResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xdi.oxauth.client.uma.UmaClientFactory;
-import org.xdi.oxauth.client.uma.UmaRptIntrospectionService;
 import org.xdi.oxauth.model.uma.JsonLogicNodeParser;
 import org.xdi.oxauth.model.uma.PermissionTicket;
-import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
-import org.xdi.oxauth.model.uma.UmaPermission;
 import org.xdi.oxd.common.*;
+import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
+import org.xdi.oxd.common.introspection.CorrectUmaPermission;
 import org.xdi.oxd.common.params.RsCheckAccessParams;
 import org.xdi.oxd.common.response.RsCheckAccessResponse;
 import org.xdi.oxd.rs.protect.resteasy.PatProvider;
@@ -71,25 +69,12 @@ public class RsCheckAccessOperation extends BaseOperation<RsCheckAccessParams> {
             }
         };
 
-        final UmaRptIntrospectionService introspectionService = UmaClientFactory.instance().createRptStatusService(getDiscoveryService().getUmaDiscoveryByOxdId(params.getOxdId()), getHttpService().getClientExecutor());
-
-        RptIntrospectionResponse status;
-        try {
-            status = introspectionService.requestRptStatus("Bearer " + patProvider.getPatToken(), params.getRpt(), "");
-        } catch (ClientResponseFailure e) {
-            int httpStatus = e.getResponse().getStatus();
-            if (httpStatus == 401 || httpStatus == 400 || httpStatus == 403) {
-                String freshPat = getUmaTokenService().obtainPat(params.getOxdId()).getToken();
-                status = introspectionService.requestRptStatus("Bearer " + freshPat, params.getRpt(), "");
-            } else {
-                throw e;
-            }
-        }
+        CorrectRptIntrospectionResponse status = getIntrospectionService().introspectRpt(params.getOxdId(), params.getRpt());
 
         LOG.trace("RPT: " + params.getRpt() + ", status: " + status);
 
         if (!Strings.isNullOrEmpty(params.getRpt()) && status != null && status.getActive() && status.getPermissions() != null) {
-            for (UmaPermission permission : status.getPermissions()) {
+            for (CorrectUmaPermission permission : status.getPermissions()) {
                 List<String> requiredScopes = resource.getScopes();
 
                 if (requiredScopes.isEmpty()) {
