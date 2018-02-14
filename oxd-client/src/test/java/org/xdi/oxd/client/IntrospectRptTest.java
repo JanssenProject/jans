@@ -2,9 +2,9 @@ package org.xdi.oxd.client;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xdi.oxauth.model.uma.RptIntrospectionResponse;
 import org.xdi.oxd.common.Command;
 import org.xdi.oxd.common.CommandType;
+import org.xdi.oxd.common.introspection.CorrectRptIntrospectionResponse;
 import org.xdi.oxd.common.params.IntrospectRptParams;
 import org.xdi.oxd.common.response.RegisterSiteResponse;
 import org.xdi.oxd.common.response.RpGetRptResponse;
@@ -33,9 +33,9 @@ public class IntrospectRptTest {
             params.setOxdId(site.getOxdId());
             params.setRpt(rptResponse.getRpt());
 
-            final RptIntrospectionResponse response = client
+            final CorrectRptIntrospectionResponse response = client
                     .send(new Command(CommandType.INTROSPECT_RPT).setParamsObject(params))
-                    .dataAsResponse(RptIntrospectionResponse.class);
+                    .dataAsResponse(CorrectRptIntrospectionResponse.class);
 
             assertNotNull(response);
             assertTrue(response.getActive());
