@@ -31,7 +31,7 @@ public enum GluuStatus implements LdapEnum {
         }
     }
 
-    private GluuStatus(String value, String displayName) {
+    GluuStatus(String value, String displayName) {
         this.value = value;
         this.displayName = displayName;
     }
