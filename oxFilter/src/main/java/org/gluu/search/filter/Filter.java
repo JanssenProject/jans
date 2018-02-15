@@ -11,7 +11,7 @@ public class Filter {
 
     private FilterType type;
 
-    private Filter filters[];
+    private Filter[] filters;
 
     private String filterString;
     private String attributeName;
