@@ -16,13 +16,17 @@ import java.util.Collection;
  */
 public final class AssertionHelper {
 
-	private AssertionHelper() {}
+	private AssertionHelper() {
+	}
 
 	/**
-	 * Check whether the object is null or not. If it is, throw an exception and display the message.
+	 * Check whether the object is null or not. If it is, throw an exception and
+	 * display the message.
 	 * 
-	 * @param object the object to check.
-	 * @param message the message to display if the object is null.
+	 * @param object
+	 *            the object to check.
+	 * @param message
+	 *            the message to display if the object is null.
 	 */
 	public static void assertNotNull(final Object object, final String message) {
 		if (object == null) {
@@ -31,10 +35,13 @@ public final class AssertionHelper {
 	}
 
 	/**
-	 * Check whether the collection is null or empty. If it is, throw an exception and display the message.
+	 * Check whether the collection is null or empty. If it is, throw an exception
+	 * and display the message.
 	 * 
-	 * @param list the collecion to check.
-	 * @param message the message to display if the object is null.
+	 * @param list
+	 *            the collecion to check.
+	 * @param message
+	 *            the message to display if the object is null.
 	 */
 	public static void assertNotEmpty(final Collection<?> list, final String message) {
 		assertNotNull(list, message);
@@ -44,10 +51,13 @@ public final class AssertionHelper {
 	}
 
 	/**
-	 * Assert that the statement is true, otherwise throw an exception with the provided message.
+	 * Assert that the statement is true, otherwise throw an exception with the
+	 * provided message.
 	 * 
-	 * @param condition the condition to assert is true.
-	 * @param message the message to display if the condition is not true.
+	 * @param condition
+	 *            the condition to assert is true.
+	 * @param message
+	 *            the message to display if the condition is not true.
 	 */
 	public static void assertTrue(final boolean condition, final String message) {
 		if (!condition) {

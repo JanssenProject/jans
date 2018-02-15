@@ -37,14 +37,13 @@ public class ReverseLineReader {
 
 	private ByteArrayOutputStream baos;
 
-
 	private boolean initialized = false;
 
 	public ReverseLineReader(File file, String encoding) {
 		this.file = file;
 		this.encoding = encoding;
 	}
-	
+
 	private void init() throws IOException {
 		synchronized (this) {
 			if (this.raf == null) {
@@ -53,9 +52,9 @@ public class ReverseLineReader {
 				this.filePos = raf.length();
 
 				this.bufPos = 0;
-				
+
 				this.baos = new ByteArrayOutputStream();
-				
+
 				this.initialized = true;
 			}
 		}
@@ -113,7 +112,7 @@ public class ReverseLineReader {
 			}
 			lastLines.add(0, line);
 		}
-		
+
 		return lastLines;
 	}
 
@@ -136,7 +135,7 @@ public class ReverseLineReader {
 			bytes[bytes.length - i - 1] = t;
 		}
 	}
-	
+
 	public void close() throws IOException {
 		if (this.channel != null) {
 			this.channel.close();

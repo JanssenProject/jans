@@ -23,7 +23,8 @@ public class DownloadWrapper {
 		this(stream, name, contentType, modificationDate, 0);
 	}
 
-	public DownloadWrapper(InputStream stream, String name, String contentType, Date modificationDate, int contentLength) {
+	public DownloadWrapper(InputStream stream, String name, String contentType, Date modificationDate,
+			int contentLength) {
 		this.stream = stream;
 		this.name = name;
 		this.contentType = contentType;
@@ -60,12 +61,14 @@ public class DownloadWrapper {
 	}
 
 	public boolean isReady() {
-		return (stream != null) && (name != null) && (contentType != null) && (modificationDate != null) && (contentLength >= 0);
+		return (stream != null) && (name != null) && (contentType != null) && (modificationDate != null)
+				&& (contentLength >= 0);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("FileDownloadWrapper [contentLength=%s, contentType=%s, modificationDate=%s, name=%s, stream=%s]",
+		return String.format(
+				"FileDownloadWrapper [contentLength=%s, contentType=%s, modificationDate=%s, name=%s, stream=%s]",
 				contentLength, contentType, modificationDate, name, stream);
 	}
 

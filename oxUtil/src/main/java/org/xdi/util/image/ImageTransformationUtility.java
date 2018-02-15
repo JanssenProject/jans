@@ -49,21 +49,22 @@ public class ImageTransformationUtility {
 	 *            {@code RenderingHints.VALUE_INTERPOLATION_BILINEAR},
 	 *            {@code RenderingHints.VALUE_INTERPOLATION_BICUBIC})
 	 * @param higherQuality
-	 *            if true, this method will use a multi-step scaling technique
-	 *            that provides higher quality than the usual one-step technique
-	 *            (only useful in downscaling cases, where {@code targetWidth}
-	 *            or {@code targetHeight} is smaller than the original
-	 *            dimensions, and generally only when the {@code BILINEAR} hint
-	 *            is specified)
+	 *            if true, this method will use a multi-step scaling technique that
+	 *            provides higher quality than the usual one-step technique (only
+	 *            useful in downscaling cases, where {@code targetWidth} or
+	 *            {@code targetHeight} is smaller than the original dimensions, and
+	 *            generally only when the {@code BILINEAR} hint is specified)
 	 * @return a scaled version of the original {@code BufferedImage}
 	 */
-	public static BufferedImage scaleImage(BufferedImage img, int maxWidth, int maxHeight, Object hint, boolean higherQuality) {
+	public static BufferedImage scaleImage(BufferedImage img, int maxWidth, int maxHeight, Object hint,
+			boolean higherQuality) {
 		BufferedImage ret = img;
 		if ((img.getWidth() <= maxWidth) && (img.getHeight() <= maxHeight)) {
 			return ret;
 		}
 
-		int type = (img.getTransparency() == Transparency.OPAQUE) ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+		int type = (img.getTransparency() == Transparency.OPAQUE) ? BufferedImage.TYPE_INT_RGB
+				: BufferedImage.TYPE_INT_ARGB;
 
 		int targetWidth = img.getWidth();
 		int targetHeight = img.getHeight();

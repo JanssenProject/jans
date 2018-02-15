@@ -47,7 +47,8 @@ public class StringEncrypter {
 		}
 	}
 
-	public StringEncrypter() {}
+	public StringEncrypter() {
+	}
 
 	public static StringEncrypter defaultInstance() throws EncryptionException {
 		return Holder.instance;
@@ -201,7 +202,6 @@ public class StringEncrypter {
 			throw new IllegalArgumentException("encrypted string was null or empty");
 		}
 
-		
 		try {
 			final SecretKey key = keyFactory.generateSecret(keySpec);
 			cipher.init(Cipher.DECRYPT_MODE, key);
@@ -214,6 +214,7 @@ public class StringEncrypter {
 			throw new EncryptionException(e);
 		}
 	}
+
 	/**
 	 * Decrypt a string encrypted with this encrypter
 	 * 
@@ -224,9 +225,9 @@ public class StringEncrypter {
 	 */
 	public String decrypt(final String encryptedString) throws EncryptionException {
 		lock.lock();
-		try{
+		try {
 			return decrypt(encryptedString, keySpec);
-		}finally{
+		} finally {
 			lock.unlock();
 		}
 	}
@@ -260,7 +261,6 @@ public class StringEncrypter {
 		}
 	}
 
-	
 	private String encrypt(final String unencryptedString, KeySpec keySpec) throws EncryptionException {
 		if (keySpec == null) {
 			throw new IllegalArgumentException("keySpec was null or empty");
@@ -270,7 +270,6 @@ public class StringEncrypter {
 			throw new IllegalArgumentException("unencrypted string was null or empty");
 		}
 
-		
 		try {
 			final SecretKey key = keyFactory.generateSecret(keySpec);
 			cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -282,7 +281,7 @@ public class StringEncrypter {
 			throw new EncryptionException(e);
 		}
 	}
-	
+
 	/**
 	 * Encrypt a string
 	 * 
@@ -331,9 +330,9 @@ public class StringEncrypter {
 	}
 
 	/*
-	 * private String decrypt2(final String password){ final String
-	 * encryptionKey = "123456789012345678901234567890"; final String
-	 * encryptionScheme = StringEncrypter.DESEDE_ENCRYPTION_SCHEME;
+	 * private String decrypt2(final String password){ final String encryptionKey =
+	 * "123456789012345678901234567890"; final String encryptionScheme =
+	 * StringEncrypter.DESEDE_ENCRYPTION_SCHEME;
 	 * 
 	 * try { final StringEncrypter encrypter = new StringEncrypter(
 	 * encryptionScheme, encryptionKey ); return encrypter.decrypt(password); }

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  * This is wrapper and utility for J2E request and response
- *  
+ * 
  * @author Yuriy Movchan 11/14/2014
  */
 public class J2EContext implements WebContext {
@@ -26,7 +26,7 @@ public class J2EContext implements WebContext {
 	 * Build a J2E context from the current HTTP request
 	 * 
 	 * @param request
-         * @param response
+	 * @param response
 	 */
 	public J2EContext(final HttpServletRequest request, final HttpServletResponse response) {
 		this.request = request;

@@ -240,13 +240,15 @@ public class GluuImage implements java.io.Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("GluuImage [uuid=").append(uuid).append(", creator=").append(creator).append(", sourceName=").append(sourceName)
-				.append(", creationDate=").append(creationDate).append(", sourceContentType=").append(sourceContentType)
-				.append(", sourceFilePath=").append(sourceFilePath).append(", size=").append(size).append(", width=").append(width)
-				.append(", height=").append(height).append(", thumbContentType=").append(thumbContentType).append(", thumbWidth=")
-				.append(thumbWidth).append(", thumbHeight=").append(thumbHeight).append(", data=").append(Arrays.toString(data))
-				.append(", thumbData=").append(Arrays.toString(thumbData)).append(", thumbFilePath=").append(thumbFilePath)
-				.append(", storeTemporary=").append(storeTemporary).append(", logo=").append(logo).append("]");
+		builder.append("GluuImage [uuid=").append(uuid).append(", creator=").append(creator).append(", sourceName=")
+				.append(sourceName).append(", creationDate=").append(creationDate).append(", sourceContentType=")
+				.append(sourceContentType).append(", sourceFilePath=").append(sourceFilePath).append(", size=")
+				.append(size).append(", width=").append(width).append(", height=").append(height)
+				.append(", thumbContentType=").append(thumbContentType).append(", thumbWidth=").append(thumbWidth)
+				.append(", thumbHeight=").append(thumbHeight).append(", data=").append(Arrays.toString(data))
+				.append(", thumbData=").append(Arrays.toString(thumbData)).append(", thumbFilePath=")
+				.append(thumbFilePath).append(", storeTemporary=").append(storeTemporary).append(", logo=").append(logo)
+				.append("]");
 		return builder.toString();
 	}
 }

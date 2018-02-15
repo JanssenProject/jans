@@ -21,7 +21,8 @@ import org.xdi.model.SimpleProperty;
  * 
  * @author Yuriy Movchan Date: 07.29.2011
  */
-@JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs", "primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
+@JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs",
+		"primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuLdapConfiguration implements Serializable {
 
@@ -39,7 +40,7 @@ public class GluuLdapConfiguration implements Serializable {
 
 	private int maxConnections;
 	private boolean useSSL;
-	
+
 	@JsonIgnore
 	private List<SimpleProperty> baseDNs;
 
@@ -51,9 +52,9 @@ public class GluuLdapConfiguration implements Serializable {
 	private boolean useAnonymousBind;
 	private boolean enabled;
 	private int version;
-	
+
 	@JsonProperty("level")
-    private int level;
+	private int level;
 
 	public int getLevel() {
 		return level;
@@ -70,8 +71,9 @@ public class GluuLdapConfiguration implements Serializable {
 		updateStringsLists();
 	}
 
-	public GluuLdapConfiguration(String configId, String bindDN, String bindPassword, List<String> servers, int maxConnections,
-			boolean useSSL, List<String> baseDNs, String primaryKey, String localPrimaryKey, boolean useAnonymousBind) {
+	public GluuLdapConfiguration(String configId, String bindDN, String bindPassword, List<String> servers,
+			int maxConnections, boolean useSSL, List<String> baseDNs, String primaryKey, String localPrimaryKey,
+			boolean useAnonymousBind) {
 		this.configId = configId;
 		this.bindDN = bindDN;
 		this.bindPassword = bindPassword;
@@ -341,11 +343,13 @@ public class GluuLdapConfiguration implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("GluuLdapConfiguration [configId=").append(configId).append(", bindDN=").append(bindDN).append(", bindPassword=")
-				.append(bindPassword).append(", servers=").append(servers).append(", maxConnections=").append(maxConnections)
-				.append(", useSSL=").append(useSSL).append(", baseDNs=").append(baseDNs).append(", primaryKey=").append(primaryKey)
-				.append(", localPrimaryKey=").append(localPrimaryKey).append(", useAnonymousBind=").append(useAnonymousBind)
-				.append(", enabled=").append(enabled).append(", version=").append(version).append("]");
+		builder.append("GluuLdapConfiguration [configId=").append(configId).append(", bindDN=").append(bindDN)
+				.append(", bindPassword=").append(bindPassword).append(", servers=").append(servers)
+				.append(", maxConnections=").append(maxConnections).append(", useSSL=").append(useSSL)
+				.append(", baseDNs=").append(baseDNs).append(", primaryKey=").append(primaryKey)
+				.append(", localPrimaryKey=").append(localPrimaryKey).append(", useAnonymousBind=")
+				.append(useAnonymousBind).append(", enabled=").append(enabled).append(", version=").append(version)
+				.append("]");
 		return builder.toString();
 	}
 

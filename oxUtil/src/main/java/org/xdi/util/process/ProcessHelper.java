@@ -35,12 +35,13 @@ public class ProcessHelper {
 	private ProcessHelper() {
 	}
 
-	public static boolean executeProgram(String programPath, boolean executeInBackground, int successExitValue, OutputStream outputStream) {
+	public static boolean executeProgram(String programPath, boolean executeInBackground, int successExitValue,
+			OutputStream outputStream) {
 		return executeProgram(programPath, null, executeInBackground, successExitValue, outputStream);
 	}
 
-	public static boolean executeProgram(String programPath, String workingDirectory, boolean executeInBackground, int successExitValue,
-			OutputStream outputStream) {
+	public static boolean executeProgram(String programPath, String workingDirectory, boolean executeInBackground,
+			int successExitValue, OutputStream outputStream) {
 		CommandLine commandLine = new CommandLine(programPath);
 		return executeProgram(commandLine, workingDirectory, executeInBackground, successExitValue, outputStream);
 	}
@@ -62,8 +63,8 @@ public class ProcessHelper {
 		PrintResultHandler printResult = null;
 		try {
 			log.debug(String.format("Preparing to start process %s", commandLine.toString()));
-			printResult = executeProgram(commandLine, workingDirectory, printJobTimeout, executeInBackground, successExitValue,
-					streamHandler);
+			printResult = executeProgram(commandLine, workingDirectory, printJobTimeout, executeInBackground,
+					successExitValue, streamHandler);
 			log.debug(String.format("Successfully start process %s", commandLine.toString()));
 		} catch (Exception ex) {
 			log.trace(String.format("Problem during starting process %s", commandLine.toString()), ex);
@@ -90,8 +91,8 @@ public class ProcessHelper {
 	/**
 	 * 
 	 * @param printJobTimeout
-	 *            the printJobTimeout (ms) before the watchdog terminates the
-	 *            print process
+	 *            the printJobTimeout (ms) before the watchdog terminates the print
+	 *            process
 	 * @param printInBackground
 	 *            printing done in the background or blocking
 	 * @param streamHandler
@@ -99,16 +100,16 @@ public class ProcessHelper {
 	 * @throws IOException
 	 *             the test failed
 	 */
-	public static PrintResultHandler executeProgram(CommandLine commandLine, long printJobTimeout, boolean printInBackground,
-			int successExitValue, ExecuteStreamHandler streamHandler) throws IOException {
+	public static PrintResultHandler executeProgram(CommandLine commandLine, long printJobTimeout,
+			boolean printInBackground, int successExitValue, ExecuteStreamHandler streamHandler) throws IOException {
 		return executeProgram(commandLine, null, printJobTimeout, printInBackground, successExitValue, streamHandler);
 	}
 
 	/**
 	 * 
 	 * @param printJobTimeout
-	 *            the printJobTimeout (ms) before the watchdog terminates the
-	 *            print process
+	 *            the printJobTimeout (ms) before the watchdog terminates the print
+	 *            process
 	 * @param printInBackground
 	 *            printing done in the background or blocking
 	 * @param streamHandler
@@ -116,8 +117,9 @@ public class ProcessHelper {
 	 * @throws IOException
 	 *             the test failed
 	 */
-	public static PrintResultHandler executeProgram(CommandLine commandLine, String workingDirectory, long printJobTimeout,
-			boolean printInBackground, int successExitValue, ExecuteStreamHandler streamHandler) throws IOException {
+	public static PrintResultHandler executeProgram(CommandLine commandLine, String workingDirectory,
+			long printJobTimeout, boolean printInBackground, int successExitValue, ExecuteStreamHandler streamHandler)
+			throws IOException {
 		ExecuteWatchdog watchdog = null;
 		PrintResultHandler resultHandler;
 

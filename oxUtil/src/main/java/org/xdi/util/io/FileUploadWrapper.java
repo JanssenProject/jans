@@ -69,8 +69,8 @@ public class FileUploadWrapper implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("FileUploadWrapper [contentType=%s, fileName=%s, fileSize=%s, stream=%s]", contentType, fileName, fileSize,
-				stream);
+		return String.format("FileUploadWrapper [contentType=%s, fileName=%s, fileSize=%s, stream=%s]", contentType,
+				fileName, fileSize, stream);
 	}
 
 }

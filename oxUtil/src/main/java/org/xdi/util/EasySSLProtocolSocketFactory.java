@@ -111,20 +111,21 @@ public class EasySSLProtocolSocketFactory implements ProtocolSocketFactory {
 	/**
 	 * @see SecureProtocolSocketFactory#createSocket(java.lang.String,int,java.net.InetAddress,int)
 	 */
-	public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort) throws IOException, UnknownHostException {
+	public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort)
+			throws IOException, UnknownHostException {
 
 		return getSSLContext().getSocketFactory().createSocket(host, port, clientHost, clientPort);
 	}
 
 	/**
-	 * Attempts to get a new socket connection to the given host within the
-	 * given time limit.
+	 * Attempts to get a new socket connection to the given host within the given
+	 * time limit.
 	 * <p>
 	 * To circumvent the limitations of older JREs that do not support connect
-	 * timeout a controller thread is executed. The controller thread attempts
-	 * to create a new socket within the given limit of time. If socket
-	 * constructor does not return until the timeout expires, the controller
-	 * terminates and throws an {@link ConnectTimeoutException}
+	 * timeout a controller thread is executed. The controller thread attempts to
+	 * create a new socket within the given limit of time. If socket constructor
+	 * does not return until the timeout expires, the controller terminates and
+	 * throws an {@link ConnectTimeoutException}
 	 * </p>
 	 * 
 	 * @param host
@@ -174,32 +175,37 @@ public class EasySSLProtocolSocketFactory implements ProtocolSocketFactory {
 	/**
 	 * @see SecureProtocolSocketFactory#createSocket(java.net.Socket,java.lang.String,int,boolean)
 	 */
-	public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
+	public Socket createSocket(Socket socket, String host, int port, boolean autoClose)
+			throws IOException, UnknownHostException {
 		return getSSLContext().getSocketFactory().createSocket(socket, host, port, autoClose);
 	}
 
-//	public boolean equals(Object obj) {
-//		return ((obj != null) && obj.getClass().equals(EasySSLProtocolSocketFactory.class));
-//	}
+	// public boolean equals(Object obj) {
+	// return ((obj != null) &&
+	// obj.getClass().equals(EasySSLProtocolSocketFactory.class));
+	// }
 
-//	public int hashCode() {
-//		return EasySSLProtocolSocketFactory.class.hashCode();
-//	}
+	// public int hashCode() {
+	// return EasySSLProtocolSocketFactory.class.hashCode();
+	// }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
 
-        EasySSLProtocolSocketFactory that = (EasySSLProtocolSocketFactory) o;
+		EasySSLProtocolSocketFactory that = (EasySSLProtocolSocketFactory) o;
 
-        if (sslcontext != null ? !sslcontext.equals(that.sslcontext) : that.sslcontext != null) return false;
+		if (sslcontext != null ? !sslcontext.equals(that.sslcontext) : that.sslcontext != null)
+			return false;
 
-        return true;
-    }
+		return true;
+	}
 
-    @Override
-    public int hashCode() {
-        return sslcontext != null ? sslcontext.hashCode() : 0;
-    }
+	@Override
+	public int hashCode() {
+		return sslcontext != null ? sslcontext.hashCode() : 0;
+	}
 }

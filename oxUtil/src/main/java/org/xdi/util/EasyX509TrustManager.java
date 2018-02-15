@@ -88,9 +88,9 @@ public class EasyX509TrustManager implements X509TrustManager {
 			certificates[0].checkValidity();
 		} else {
 			List<X509Certificate> certs = new ArrayList<X509Certificate>();
-            if (certificates != null) {
-			    certs.addAll(Arrays.asList(certificates));
-            }
+			if (certificates != null) {
+				certs.addAll(Arrays.asList(certificates));
+			}
 			X509Certificate certChain = certs.get(0);
 			certs.remove(certChain);
 			LinkedList<X509Certificate> chainList = new LinkedList<X509Certificate>();

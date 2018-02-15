@@ -25,7 +25,7 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 public final class Util {
 
-    public static final String UTF8 = "UTF-8";
+	public static final String UTF8 = "UTF-8";
 
 	/**
 	 * Converts an array to the appropriate ArrayList
@@ -97,49 +97,51 @@ public final class Util {
 		return new ArrayList<E>(set);
 	}
 
-    /**
-     * Json representation of object.
-     *
-     * @param p_object object to represent
-     * @return json as string
-     * @throws IOException
-     */
-    public static String asJson(Object p_object) throws IOException {
-        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
-        return mapper.writeValueAsString(p_object);
-    }
+	/**
+	 * Json representation of object.
+	 *
+	 * @param p_object
+	 *            object to represent
+	 * @return json as string
+	 * @throws IOException
+	 */
+	public static String asJson(Object p_object) throws IOException {
+		final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+		return mapper.writeValueAsString(p_object);
+	}
 
-    /**
-     * Pretty json representation of object.
-     *
-     * @param p_object object to represent
-     * @return json as string
-     * @throws IOException
-     */
-    public static String asPrettyJson(Object p_object) throws IOException {
-        final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
-        final ObjectWriter writer = mapper.writer().withDefaultPrettyPrinter();
-        return writer.writeValueAsString(p_object);
-    }
+	/**
+	 * Pretty json representation of object.
+	 *
+	 * @param p_object
+	 *            object to represent
+	 * @return json as string
+	 * @throws IOException
+	 */
+	public static String asPrettyJson(Object p_object) throws IOException {
+		final ObjectMapper mapper = createJsonMapper().configure(SerializationConfig.Feature.WRAP_ROOT_VALUE, false);
+		final ObjectWriter writer = mapper.writer().withDefaultPrettyPrinter();
+		return writer.writeValueAsString(p_object);
+	}
 
-    /**
-     * Creates json mapper.
-     *
-     * @return json mapper
-     */
-    public static ObjectMapper createJsonMapper() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
-        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
+	/**
+	 * Creates json mapper.
+	 *
+	 * @return json mapper
+	 */
+	public static ObjectMapper createJsonMapper() {
+		final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
+		final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
-        final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
+		final AnnotationIntrospector pair = new AnnotationIntrospector.Pair(jackson, jaxb);
 
-        final ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().withAnnotationIntrospector(pair);
-        mapper.getSerializationConfig().withAnnotationIntrospector(pair);
-        return mapper;
-    }
+		final ObjectMapper mapper = new ObjectMapper();
+		mapper.getDeserializationConfig().withAnnotationIntrospector(pair);
+		mapper.getSerializationConfig().withAnnotationIntrospector(pair);
+		return mapper;
+	}
 
-    /**
+	/**
 	 * Get the First RDN
 	 * 
 	 * @param dn

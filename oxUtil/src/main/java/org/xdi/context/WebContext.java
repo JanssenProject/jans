@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  * This is interface for J2E context wrapper
- *  
+ * 
  * @author Yuriy Movchan 11/14/2014
  */
 public interface WebContext {

@@ -1,12 +1,10 @@
 package org.xdi.model;
 
-
 /**
  * Hold IMAP Data configuration
  * 
  * @author Shekhar L
  */
-
 
 public class GluuIMAPData implements java.io.Serializable {
 
@@ -14,15 +12,15 @@ public class GluuIMAPData implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 216941324769217751L;
-	
+
 	private String imaphost;
-	
-	private ImapPassword imapPassword;	
-	
-	private String useSSL;	
-	
-	private String imapusername;	
-	
+
+	private ImapPassword imapPassword;
+
+	private String useSSL;
+
+	private String imapusername;
+
 	private String imapport;
 
 	public String getImaphost() {

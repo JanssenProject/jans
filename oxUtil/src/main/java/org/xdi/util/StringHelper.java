@@ -122,18 +122,18 @@ public final class StringHelper {
 	}
 
 	public static boolean isEmpty(String str) {
-        int strLen;
-        if (str == null || (strLen = str.length()) == 0) {
-            return true;
-        }
+		int strLen;
+		if (str == null || (strLen = str.length()) == 0) {
+			return true;
+		}
 
-        for (int i = 0; i < strLen; i++) {
-            if (Character.isWhitespace(str.charAt(i)) == false) {
-                return false;
-            }
-        }
+		for (int i = 0; i < strLen; i++) {
+			if (Character.isWhitespace(str.charAt(i)) == false) {
+				return false;
+			}
+		}
 
-        return true;
+		return true;
 	}
 
 	public static String truncate(String string, int length) {
@@ -168,9 +168,9 @@ public final class StringHelper {
 
 	public static String formatZeroLeadingLong(long n, int digits) {
 		/*
-		 * we create a format : %% : % the first % is to escape the second % 0 :
-		 * 0 zero character %d : how many '0' we want (specified by digits) d :
-		 * d the number to format
+		 * we create a format : %% : % the first % is to escape the second % 0 : 0 zero
+		 * character %d : how many '0' we want (specified by digits) d : d the number to
+		 * format
 		 */
 		String format = String.format("%%0%dd", digits);
 		return String.format(format, n);
@@ -430,10 +430,9 @@ public final class StringHelper {
 	@Deprecated
 	public static String convertStreamToString(InputStream is) throws IOException {
 		/*
-		 * To convert the InputStream to String we use the Reader.read(char[]
-		 * buffer) method. We iterate until the Reader return -1 which means
-		 * there's no more data to read. We use the StringWriter class to
-		 * produce the string.
+		 * To convert the InputStream to String we use the Reader.read(char[] buffer)
+		 * method. We iterate until the Reader return -1 which means there's no more
+		 * data to read. We use the StringWriter class to produce the string.
 		 */
 		if (is != null) {
 			Writer writer = new StringWriter();
@@ -453,17 +452,15 @@ public final class StringHelper {
 			return "";
 		}
 	}
-    
-    public static String replaceLast(String string, String toReplace, String replacement) {
-        int pos = string.lastIndexOf(toReplace);
-        if (pos > -1) {
-            return string.substring(0, pos)
-                 + replacement
-                 + string.substring(pos + toReplace.length(), string.length());
-        } else {
-            return string;
-        }
-    }
+
+	public static String replaceLast(String string, String toReplace, String replacement) {
+		int pos = string.lastIndexOf(toReplace);
+		if (pos > -1) {
+			return string.substring(0, pos) + replacement + string.substring(pos + toReplace.length(), string.length());
+		} else {
+			return string;
+		}
+	}
 
 	public static String doubleQuotes(String string) {
 		if (isEmpty(string)) {
@@ -497,18 +494,18 @@ public final class StringHelper {
 		return (object == null) ? null : object.toString();
 	}
 
-    public static String qualify(String prefix, String name) {
-        if (name == null || prefix == null) {
-            throw new NullPointerException();
-        }
-        return new StringBuffer(prefix.length() + name.length() + 1).append(prefix).append('.').append(name).toString();
-    }
+	public static String qualify(String prefix, String name) {
+		if (name == null || prefix == null) {
+			throw new NullPointerException();
+		}
+		return new StringBuffer(prefix.length() + name.length() + 1).append(prefix).append('.').append(name).toString();
+	}
 
 	public static String trimAll(String string) {
 		if (isEmpty(string)) {
 			return string;
 		}
-		
+
 		return string.trim();
 	}
 
