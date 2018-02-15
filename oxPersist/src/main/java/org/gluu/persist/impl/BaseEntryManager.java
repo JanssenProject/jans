@@ -64,28 +64,28 @@ import org.xdi.util.StringHelper;
  */
 public abstract class BaseEntryManager implements EntityManager, PersistenceEntryManager {
 
-    private static final Logger log = LoggerFactory.getLogger(BaseEntryManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
-    private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { LdapEntry.class, LdapSchemaEntry.class, LdapObjectClass.class };
-    private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { LdapAttribute.class, LdapAttributesList.class, LdapJsonObject.class };
-    private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = { LdapCustomObjectClass.class };
-    private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = { LdapDN.class };
+    private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = {LdapEntry.class, LdapSchemaEntry.class, LdapObjectClass.class};
+    private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = {LdapAttribute.class, LdapAttributesList.class, LdapJsonObject.class};
+    private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = {LdapCustomObjectClass.class};
+    private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = {LdapDN.class };
 
     public static final String OBJECT_CLASS = "objectClass";
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = { String.class, Date.class, Integer.class, LdapEnum.class };
-    private static final Class<?>[] SUM_BY_ALLOWED_DATA_TYPES = { int.class, Integer.class, float.class, Float.class, double.class, Double.class };
+    private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = {String.class, Date.class, Integer.class, LdapEnum.class};
+    private static final Class<?>[] SUM_BY_ALLOWED_DATA_TYPES = {int.class, Integer.class, float.class, Float.class, double.class, Double.class};
 
     private final Map<String, List<PropertyAnnotation>> classAnnotations = new HashMap<String, List<PropertyAnnotation>>();
     private final Map<String, Getter> classGetters = new HashMap<String, Getter>();
     private final Map<String, Setter> classSetters = new HashMap<String, Setter>();
 
-    private static Object classAnnotationsLock = new Object();
-    private static Object classSettersLock = new Object();
-    private static Object classGettersLock = new Object();
+    private static Object CLASS_ANNOTATIONS_LOCK = new Object();
+    private static Object CLASS_SETTERS_LOCK = new Object();
+    private static Object CLASS_GETTERS_LOCK = new Object();
 
-    private static final ObjectMapper jsonObjectMapper = new ObjectMapper();
+    private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
 
     protected static final String[] NO_STRINGS = new String[0];
 
@@ -112,7 +112,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         String[] objectClasses = getObjectClasses(entry, entryClass);
         attributes.add(new AttributeData(OBJECT_CLASS, objectClasses));
 
-        log.debug(String.format("LDAP attributes for persist: %s", attributes));
+        LOG.debug(String.format("LDAP attributes for persist: %s", attributes));
 
         persist(dnValue.toString(), attributes);
     }
@@ -165,7 +165,8 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
     }
 
     @Override
-    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit, int chunkSize) {
+    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit,
+            int chunkSize) {
         return findEntries(baseDN, entryClass, filter, scope, ldapReturnAttributes, null, 0, sizeLimit, chunkSize);
     }
 
@@ -222,13 +223,12 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         // Prepare list of modifications
 
         // Process properties with LdapAttribute annotation
-        List<AttributeDataModification> attributeDataModifications = collectAttributeModifications(
-                propertiesAnnotations, attributesToPersistMap, attributesFromLdapMap, isSchemaUpdate,
-                schemaModificationType);
+        List<AttributeDataModification> attributeDataModifications = collectAttributeModifications(propertiesAnnotations, attributesToPersistMap,
+                attributesFromLdapMap, isSchemaUpdate, schemaModificationType);
 
         updateMergeChanges(entry, isSchemaUpdate, entryClass, attributesFromLdapMap, attributeDataModifications);
 
-        log.debug(String.format("LDAP attributes for merge: %s", attributeDataModifications));
+        LOG.debug(String.format("LDAP attributes for merge: %s", attributeDataModifications));
 
         merge(dnValue.toString(), attributeDataModifications);
 
@@ -236,12 +236,11 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
     }
 
     protected abstract <T> void updateMergeChanges(T entry, boolean isSchemaUpdate, Class<?> entryClass,
-            Map<String, AttributeData> attributesFromLdapMap,
-            List<AttributeDataModification> attributeDataModifications);
+            Map<String, AttributeData> attributesFromLdapMap, List<AttributeDataModification> attributeDataModifications);
 
-    protected List<AttributeDataModification> collectAttributeModifications(
-            List<PropertyAnnotation> propertiesAnnotations, Map<String, AttributeData> attributesToPersistMap, Map<String, AttributeData> attributesFromLdapMap,
-            boolean isSchemaUpdate, AttributeModificationType schemaModificationType) {
+    protected List<AttributeDataModification> collectAttributeModifications(List<PropertyAnnotation> propertiesAnnotations,
+            Map<String, AttributeData> attributesToPersistMap, Map<String, AttributeData> attributesFromLdapMap, boolean isSchemaUpdate,
+            AttributeModificationType schemaModificationType) {
         List<AttributeDataModification> attributeDataModifications = new ArrayList<AttributeDataModification>();
 
         for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
@@ -274,15 +273,13 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                         if (isEmptyAttributeValues(attributeToPersist) && !ldapAttributeAnnotation.updateOnly()) {
                             attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
                         } else {
-                            attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE, attributeToPersist,
-                                    attributeFromLdap));
+                            attributeDataModifications
+                                    .add(new AttributeDataModification(AttributeModificationType.REPLACE, attributeToPersist, attributeFromLdap));
                         }
                     }
                 } else if ((attributeFromLdap == null) && (attributeToPersist != null)) {
                     // Add entry attribute or change schema
-                    if (isSchemaUpdate
-                            && (attributeToPersist.getValue() == null && Arrays.equals(attributeToPersist.getValues(),
-                                    new String[] { }))) {
+                    if (isSchemaUpdate && (attributeToPersist.getValue() == null && Arrays.equals(attributeToPersist.getValues(), new String[] {}))) {
                         continue;
                     }
                     AttributeModificationType modType = isSchemaUpdate ? schemaModificationType : AttributeModificationType.ADD;
@@ -291,15 +288,13 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                             attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.ADD, attributeToPersist));
                         }
                     } else {
-                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
-                                attributeToPersist));
+                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeToPersist));
                     }
                 } else if ((attributeFromLdap != null) && (attributeToPersist == null)) {
                     // Remove if attribute not marked as ignoreDuringRead = true
                     // or updateOnly = true
                     if (!ldapAttributeAnnotation.ignoreDuringRead() && !ldapAttributeAnnotation.updateOnly()) {
-                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
-                                attributeFromLdap));
+                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
                     }
                 }
             }
@@ -332,8 +327,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                         // true
                         if ((ldapAttributeConfiguration == null)
                                 || ((ldapAttributeConfiguration != null) && !ldapAttributeConfiguration.ignoreDuringRead())) {
-                            attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
-                                    attributeFromLdap));
+                            attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
                         }
                     }
                 }
@@ -353,24 +347,22 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                         AttributeModificationType modType = isSchemaUpdate ? schemaModificationType : AttributeModificationType.ADD;
                         if (AttributeModificationType.ADD.equals(modType)) {
                             if (!isEmptyAttributeValues(attributeToPersist)) {
-                                attributeDataModifications
-                                        .add(new AttributeDataModification(AttributeModificationType.ADD, attributeToPersist));
+                                attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.ADD, attributeToPersist));
                             }
                         } else {
-                            attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
-                                    attributeToPersist));
+                            attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeToPersist));
                         }
-                    } else if ((attributeFromLdap != null) && (Arrays.equals(attributeToPersist.getValues(), new String[] { }))) {
+                    } else if ((attributeFromLdap != null) && (Arrays.equals(attributeToPersist.getValues(), new String[] {}))) {
 
-                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null,
-                                attributeFromLdap));
+                        attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
                     } else {
                         if (!attributeFromLdap.equals(attributeToPersist)) {
                             if (isEmptyAttributeValues(attributeToPersist) && !ldapAttributeConfiguration.updateOnly()) {
-                                attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
+                                attributeDataModifications
+                                        .add(new AttributeDataModification(AttributeModificationType.REMOVE, null, attributeFromLdap));
                             } else {
-                                attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
-                                        attributeToPersist, attributeFromLdap));
+                                attributeDataModifications
+                                        .add(new AttributeDataModification(AttributeModificationType.REPLACE, attributeToPersist, attributeFromLdap));
                             }
                         }
                     }
@@ -385,7 +377,8 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
     protected boolean isEmptyAttributeValues(AttributeData attributeData) {
         String[] attributeToPersistValues = attributeData.getValues();
 
-        return ArrayHelper.isEmpty(attributeToPersistValues) || ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0]));
+        return ArrayHelper.isEmpty(attributeToPersistValues)
+                || ((attributeToPersistValues.length == 1) && StringHelper.isEmpty(attributeToPersistValues[0]));
     }
 
     protected abstract void merge(String dn, List<AttributeDataModification> attributeDataModifications);
@@ -479,7 +472,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
     protected <T> String[] getLdapAttributes(T entry, List<PropertyAnnotation> propertiesAnnotations, boolean isIgnoreLdapAttributesList) {
         List<String> attributes = getLdapAttributesList(entry, propertiesAnnotations, isIgnoreLdapAttributesList);
-    
+
         if (attributes == null) {
             return null;
         }
@@ -487,8 +480,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         return attributes.toArray(new String[0]);
     }
 
-    private <T> List<String> getLdapAttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations,
-            boolean isIgnoreLdapAttributesList) {
+    private <T> List<String> getLdapAttributesList(T entry, List<PropertyAnnotation> propertiesAnnotations, boolean isIgnoreLdapAttributesList) {
         List<String> attributes = new ArrayList<String>();
 
         for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
@@ -681,11 +673,13 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         return propertiesAnnotations.get(0).getPropertyName();
     }
 
-    protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Map<String, List<AttributeData>> entriesAttributes) {
+    protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
+            Map<String, List<AttributeData>> entriesAttributes) {
         return createEntities(entryClass, propertiesAnnotations, entriesAttributes, true);
     }
 
-    protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations, Map<String, List<AttributeData>> entriesAttributes, boolean doSort) {
+    protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
+            Map<String, List<AttributeData>> entriesAttributes, boolean doSort) {
         // Check if entry has DN property
         String dnProperty = getDNPropertyName(entryClass);
 
@@ -806,7 +800,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                                         return o1.toLowerCase().compareTo(o2.toLowerCase());
                                     }
                                 });
-                            
+
                                 if (idx < 0) {
                                     customObjectClasses.add(objectClass);
                                 }
@@ -820,8 +814,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                             continue;
                         }
 
-                        Object listItem = getListItem(propertyName, entryPropertyNameSetter, entryPropertyValueSetter, entryItemType,
-                                entryAttribute);
+                        Object listItem = getListItem(propertyName, entryPropertyNameSetter, entryPropertyValueSetter, entryItemType, entryAttribute);
                         if (listItem != null) {
                             propertyValue.add(listItem);
                         }
@@ -900,9 +893,11 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                 throw new MappingException("Entry should has getteres for all properties " + sortByProperties[i]);
             }
 
-                        Class<?> propertyType = propertyGetters[i][tmpProperties.length - 1].getReturnType();
-            if (!((propertyType == String.class) || (propertyType == Date.class) || (propertyType == Integer.class) || (propertyType == Integer.TYPE))) {
-                throw new MappingException("Entry properties should has String, Date or Integer type. Property: '" + tmpProperties[tmpProperties.length - 1] + "'");
+            Class<?> propertyType = propertyGetters[i][tmpProperties.length - 1].getReturnType();
+            if (!((propertyType == String.class) || (propertyType == Date.class) || (propertyType == Integer.class)
+                    || (propertyType == Integer.TYPE))) {
+                throw new MappingException(
+                        "Entry properties should has String, Date or Integer type. Property: '" + tmpProperties[tmpProperties.length - 1] + "'");
             }
         }
 
@@ -936,8 +931,8 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         Getter[] sumPropertyGetters = getEntryPropertyGetters(entryClass, sumByProperties, SUM_BY_ALLOWED_DATA_TYPES);
         Setter[] sumPropertySetter = getEntryPropertySetters(entryClass, sumByProperties, SUM_BY_ALLOWED_DATA_TYPES);
 
-        return groupListByPropertiesImpl(entryClass, entries, caseSensetive, groupPropertyGetters, groupPropertySetters,
-                sumPropertyGetters, sumPropertySetter);
+        return groupListByPropertiesImpl(entryClass, entries, caseSensetive, groupPropertyGetters, groupPropertySetters, sumPropertyGetters,
+                sumPropertySetter);
     }
 
     private <T> Getter[] getEntryPropertyGetters(Class<T> entryClass, String properties, Class<?>[] allowedTypes) {
@@ -1006,8 +1001,8 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         return groupListByProperties(entryClass, entries, false, groupByProperties, sumByProperties);
     }
 
-    private <T> Map<T, List<T>> groupListByPropertiesImpl(Class<T> entryClass, List<T> entries, boolean caseSensetive,
-            Getter[] groupPropertyGetters, Setter[] groupPropertySetters, Getter[] sumProperyGetters, Setter[] sumPropertySetter) {
+    private <T> Map<T, List<T>> groupListByPropertiesImpl(Class<T> entryClass, List<T> entries, boolean caseSensetive, Getter[] groupPropertyGetters,
+            Setter[] groupPropertySetters, Getter[] sumProperyGetters, Setter[] sumPropertySetter) {
         Map<String, T> keys = new HashMap<String, T>();
         Map<T, List<T>> groups = new IdentityHashMap<T, List<T>>();
 
@@ -1098,17 +1093,18 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         } else if (jsonObject) {
             attributeValues[0] = convertJsonToString(propertyValue);
         } else {
-            throw new MappingException(
-                    "Entry property '" + propertyName + "' should has getter with String, String[], Boolean, Integer, Long, Date, List, LdapEnum or LdapEnum[] return type or has annotation LdapJsonObject");
+            throw new MappingException("Entry property '" + propertyName
+                    + "' should has getter with String, String[], Boolean, Integer, Long, Date, List, LdapEnum or LdapEnum[]"
+                    + " return type or has annotation LdapJsonObject");
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName, ldapAttributeName,
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName, ldapAttributeName,
                     Arrays.toString(attributeValues)));
         }
 
         if (attributeValues.length == 0) {
-            attributeValues = new String[] { };
+            attributeValues = new String[] {};
         } else if ((attributeValues.length == 1) && StringHelper.isEmpty(attributeValues[0])) {
             return null;
         }
@@ -1118,11 +1114,11 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
     private String convertJsonToString(Object propertyValue) {
         try {
-            String value = jsonObjectMapper.writeValueAsString(propertyValue);
-        
+            String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
+
             return value;
         } catch (Exception ex) {
-            log.error("Failed to convert '{}' to json value:", propertyValue, ex);
+            LOG.error("Failed to convert '{}' to json value:", propertyValue, ex);
             throw new MappingException(String.format("Failed to convert '%s' to json value", propertyValue));
         }
     }
@@ -1160,8 +1156,8 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
         return attributes;
     }
 
-    private AttributeData getAttributeFromLdapAttribute(Object entry, Annotation ldapAttribute,
-            PropertyAnnotation propertiesAnnotation, String propertyName) {
+    private AttributeData getAttributeFromLdapAttribute(Object entry, Annotation ldapAttribute, PropertyAnnotation propertiesAnnotation,
+            String propertyName) {
         Class<?> entryClass = entry.getClass();
 
         String ldapAttributeName = ((LdapAttribute) ldapAttribute).name();
@@ -1219,7 +1215,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
                 listAttributes.add(attribute);
             }
         }
-    
+
         return listAttributes;
     }
 
@@ -1240,7 +1236,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
         List<PropertyAnnotation> annotations = classAnnotations.get(key);
         if (annotations == null) {
-            synchronized (classAnnotationsLock) {
+            synchronized (CLASS_ANNOTATIONS_LOCK) {
                 annotations = classAnnotations.get(key);
                 if (annotations == null) {
                     Map<String, List<Annotation>> annotationsMap = ReflectHelper.getPropertiesAnnotations(entryClass, annotationTypes);
@@ -1269,7 +1265,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
         Getter getter = classGetters.get(key);
         if (getter == null) {
-            synchronized (classGettersLock) {
+            synchronized (CLASS_GETTERS_LOCK) {
                 getter = classGetters.get(key);
                 if (getter == null) {
                     getter = ReflectHelper.getGetter(entryClass, propertyName);
@@ -1286,7 +1282,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
         Setter setter = classSetters.get(key);
         if (setter == null) {
-            synchronized (classSettersLock) {
+            synchronized (CLASS_SETTERS_LOCK) {
                 setter = classSetters.get(key);
                 if (setter == null) {
                     setter = ReflectHelper.getSetter(entryClass, propertyName);
@@ -1312,7 +1308,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
             return;
         }
 
-        log.debug(String.format("LdapProperty: %s, AttributeName: %s, AttributeValue: %s", propertyName, attribute.getName(),
+        LOG.debug(String.format("LdapProperty: %s, AttributeName: %s, AttributeValue: %s", propertyName, attribute.getName(),
                 Arrays.toString(attribute.getValues())));
 
         Class<?> parameterType = ReflectHelper.getSetterType(propertyValueSetter);
@@ -1332,7 +1328,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
             if (jsonObject) {
                 String[] stringValues = attribute.getValues();
                 List<Object> jsonValues = new ArrayList<Object>(stringValues.length);
-            
+
                 for (String stringValue : stringValues) {
                     Object jsonValue = convertStringToJson(ReflectHelper.getListType(propertyValueSetter), stringValue);
                     jsonValues.add(jsonValue);
@@ -1343,10 +1339,8 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
             }
         } else if (ReflectHelper.assignableFrom(parameterType, LdapEnum.class)) {
             try {
-                propertyValueSetter.set(
-                        entry,
-                        parameterType.getMethod("resolveByValue", String.class).invoke(parameterType.getEnumConstants()[0],
-                                attribute.getValue()));
+                propertyValueSetter.set(entry,
+                        parameterType.getMethod("resolveByValue", String.class).invoke(parameterType.getEnumConstants()[0], attribute.getValue()));
             } catch (Exception ex) {
                 throw new MappingException("Failed to resolve Enum by value " + attribute.getValue(), ex);
             }
@@ -1374,18 +1368,19 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
             Object jsonValue = convertStringToJson(parameterType, stringValue);
             propertyValueSetter.set(entry, jsonValue);
         } else {
-            throw new MappingException(
-                    "Entry property '" + propertyName + "' should has setter with String, Boolean, Integer, Long, Date, String[], List, LdapEnum or LdapEnum[] parameter type or has annotation LdapJsonObject");
+            throw new MappingException("Entry property '" + propertyName
+                    + "' should has setter with String, Boolean, Integer, Long, Date, String[], List, LdapEnum or LdapEnum[]"
+                    + " parameter type or has annotation LdapJsonObject");
         }
     }
 
     private Object convertStringToJson(Class<?> parameterType, String stringValue) {
         try {
-            Object jsonValue = jsonObjectMapper.readValue(stringValue, parameterType);
+            Object jsonValue = JSON_OBJECT_MAPPER.readValue(stringValue, parameterType);
 
             return jsonValue;
         } catch (Exception ex) {
-            log.error("Failed to convert json value '{}' to object: ", stringValue, ex);
+            LOG.error("Failed to convert json value '{}' to object: ", stringValue, ex);
             throw new MappingException(String.format("Failed to convert json value '%s' to object", stringValue));
         }
     }
@@ -1472,7 +1467,7 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
             processedProperties.add(ldapAttributeName);
 
-            String values[] = null;
+            String[] values = null;
 
             AttributeData attributeData = attributesDataMap.get(ldapAttributeName);
             if ((attributeData != null) && (attributeData.getValues() != null)) {
@@ -1534,15 +1529,15 @@ public abstract class BaseEntryManager implements EntityManager, PersistenceEntr
 
         List<AttributeData> attributes = getAttributesListForPersist(entry, propertiesAnnotations);
         String key = getEntryKey(dnValue, false, propertiesAnnotations, attributes);
-        if (log.isDebugEnabled()) {
-            log.debug(String.format("Entry key HashCode is: %s", key.hashCode()));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(String.format("Entry key HashCode is: %s", key.hashCode()));
         }
 
         return key.hashCode();
     }
 
     protected byte[][] toBinaryValues(String[] attributeValues) {
-        byte binaryValues[][] = new byte[attributeValues.length][];
+        byte[][] binaryValues = new byte[attributeValues.length][];
 
         for (int i = 0; i < attributeValues.length; i++) {
             binaryValues[i] = Base64.decodeBase64(attributeValues[i]);

@@ -8,8 +8,8 @@ package org.gluu.persist.event;
 
 public interface DeleteNotifier {
 
-    public void onBeforeRemove(String dn);
+    void onBeforeRemove(String dn);
 
-    public void onAfterRemove(String dn);
+    void onAfterRemove(String dn);
 
 }

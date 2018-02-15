@@ -22,17 +22,17 @@ public interface PropertyAnnotationResolver {
     /**
      * Get list of class annotations
      */
-    public List<Annotation> getClassAnnotations(Class<?> theClass, Class<?>... allowedAnnotations);
+    List<Annotation> getClassAnnotations(Class<?> theClass, Class<?>... allowedAnnotations);
 
     /**
      * Get list of property annotations
      */
-    public List<Annotation> getPropertyAnnotations(Class<?> theClass, String propertyName, Class<?>... allowedAnnotations)
+    List<Annotation> getPropertyAnnotations(Class<?> theClass, String propertyName, Class<?>... allowedAnnotations)
             throws PropertyNotFoundException;
 
     /**
      * Get map of properties annotations
      */
-    public Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> theClass, Class<?>... allowedAnnotations);
+    Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> theClass, Class<?>... allowedAnnotations);
 
 }

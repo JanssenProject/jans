@@ -19,7 +19,7 @@ public class ListViewResponse<T> implements Serializable {
     private int totalResults;
     private int itemsPerPage;
     private int startIndex;
-    List<T> result;
+    private List<T> result;
 
     public int getTotalResults() {
         return totalResults;

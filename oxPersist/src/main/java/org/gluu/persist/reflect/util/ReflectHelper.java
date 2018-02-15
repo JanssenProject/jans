@@ -44,7 +44,7 @@ public final class ReflectHelper {
     public static final Annotation[] NO_ANNOTATIONS = new Annotation[0];
 
     // findbugs: mutable static field should be package protected. In case it needed outside of the class please copy via method
-    private static final Class<?>[] SINGLE_OBJECT_PARAM_SIGNATURE = new Class<?>[] { Object.class };
+    private static final Class<?>[] SINGLE_OBJECT_PARAM_SIGNATURE = new Class<?>[] {Object.class};
 
     private static final Method OBJECT_EQUALS;
     private static final Method OBJECT_HASHCODE;

@@ -20,7 +20,7 @@ public class PropertyAnnotation implements Comparable<PropertyAnnotation>, Seria
     private static final long serialVersionUID = 4620529664753916995L;
 
     private final String propertyName;
-    private transient final List<Annotation> annotations;
+    private final transient List<Annotation> annotations;
 
     public PropertyAnnotation(String property, List<Annotation> annotations) {
         this.propertyName = property;
