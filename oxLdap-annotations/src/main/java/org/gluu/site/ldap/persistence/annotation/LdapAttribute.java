@@ -20,27 +20,27 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LdapAttribute {
 
-	/**
-	 * (Optional) The name of the LDAP attribute. Defaults to the field name.
-	 */
-	String name() default "";
+    /**
+     * (Optional) The name of the LDAP attribute. Defaults to the field name.
+     */
+    String name() default "";
 
-	/**
-	 * (Optional) Specify that we ignore this LDAP attribute during read.
-	 * Defaults value is false.
-	 */
-	boolean ignoreDuringRead() default false;
+    /**
+     * (Optional) Specify that we ignore this LDAP attribute during read.
+     * Defaults value is false.
+     */
+    boolean ignoreDuringRead() default false;
 
-	/**
-	 * (Optional) Specify that we ignore this LDAP attribute during update.
-	 * Defaults value is false.
-	 */
-	boolean ignoreDuringUpdate() default false;
+    /**
+     * (Optional) Specify that we ignore this LDAP attribute during update.
+     * Defaults value is false.
+     */
+    boolean ignoreDuringUpdate() default false;
 
-	/**
-	 * (Optional) Specify that we will only update this attribute, and never
-	 * remove it (set to null). Use this with health status attributes.
-	 */
-	boolean updateOnly() default false;
+    /**
+     * (Optional) Specify that we will only update this attribute, and never
+     * remove it (set to null). Use this with health status attributes.
+     */
+    boolean updateOnly() default false;
 
 }

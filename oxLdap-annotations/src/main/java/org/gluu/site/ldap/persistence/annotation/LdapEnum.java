@@ -13,8 +13,8 @@ package org.gluu.site.ldap.persistence.annotation;
  */
 public interface LdapEnum {
 
-	public String getValue();
+    String getValue();
 
-	public Enum<? extends LdapEnum> resolveByValue(String value);
+    Enum<? extends LdapEnum> resolveByValue(String value);
 
 }

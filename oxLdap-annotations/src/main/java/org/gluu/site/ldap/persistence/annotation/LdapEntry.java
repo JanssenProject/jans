@@ -20,14 +20,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LdapEntry {
 
-	/**
-	 * (Optional) Specify that this entry contains schema definition.
-	 */
-	boolean schemaDefinition() default false;
+    /**
+     * (Optional) Specify that this entry contains schema definition.
+     */
+    boolean schemaDefinition() default false;
 
-	/**
-	 * (Optional) Specify sortBy properties to sort by default list of Entries.
-	 */
-	String[] sortBy() default {};
+    /**
+     * (Optional) Specify sortBy properties to sort by default list of Entries.
+     */
+    String[] sortBy() default {};
 
 }
