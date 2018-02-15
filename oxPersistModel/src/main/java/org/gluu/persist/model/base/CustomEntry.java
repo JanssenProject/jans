@@ -39,7 +39,7 @@ public class CustomEntry extends BaseEntry implements Serializable {
         if (customAttributes == null) {
             return null;
         }
-    
+
         for (CustomAttribute customAttribute : customAttributes) {
             if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
                 return customAttribute.getValue();
