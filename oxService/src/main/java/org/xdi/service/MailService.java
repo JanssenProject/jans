@@ -4,19 +4,24 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import org.slf4j.Logger;
 import org.xdi.model.SmtpConfiguration;
@@ -27,7 +32,7 @@ import org.xdi.util.StringHelper;
  * 
  * @author Yuriy Movchan Date: 20/04/2014
  */
-@ApplicationScoped
+@RequestScoped
 @Named
 public class MailService {
 
@@ -40,14 +45,18 @@ public class MailService {
 	private long connectionTimeout = 5000;
 
 	public boolean sendMail(String to, String subject, String message) {
-		return sendMail(smtpConfiguration, null, to, subject, message);
+		return sendMail(smtpConfiguration, null, null, to, null, subject, message, null);
 	}
 
-	public boolean sendMail(String from, String to, String subject, String message) {
-		return sendMail(smtpConfiguration, from, to, subject, message);
+	public boolean sendMail(String to, String toDisplayName, String subject, String message, String htmlMessage) {
+		return sendMail(smtpConfiguration, null, null, to, null, subject, message, htmlMessage);
 	}
 
-	public boolean sendMail(SmtpConfiguration mailSmtpConfiguration, String from, String to, String subject, String message) {
+	public boolean sendMail(String from, String fromDisplayName, String to, String toDisplayName, String subject, String message, String htmlMessage) {
+		return sendMail(smtpConfiguration, from, fromDisplayName, to, null, subject, message, htmlMessage);
+	}
+
+	public boolean sendMail(SmtpConfiguration mailSmtpConfiguration, String from, String fromDisplayName, String to, String toDisplayName, String subject, String message, String htmlMessage) {
 		if (mailSmtpConfiguration == null) {
 			log.error("Failed to send message from '{}' to '{}' because the SMTP configuration isn't valid!", from, to);
 			return false;
@@ -61,16 +70,26 @@ public class MailService {
 			mailFrom = mailSmtpConfiguration.getFromEmailAddress();
 		}
 
+		String mailFromName = fromDisplayName;
+		if (StringHelper.isEmpty(mailFromName)) {
+			mailFromName = mailSmtpConfiguration.getFromName();
+		}
+
 		Properties props = new Properties();
 		props.put("mail.smtp.host", mailSmtpConfiguration.getHost());
 		props.put("mail.smtp.port", mailSmtpConfiguration.getPort());
 		props.put("mail.from", mailFrom);
 		props.put("mail.smtp.connectiontimeout", this.connectionTimeout);
 		props.put("mail.smtp.timeout", this.connectionTimeout);
+		props.put("mail.transport.protocol", "smtp");
+		props.put("mail.smtp.ssl.trust", mailSmtpConfiguration.getHost());
+		props.put("mail.debug", true);
 
 		if (mailSmtpConfiguration.isRequiresSsl()) {
 			props.put("mail.smtp.socketFactory.port", mailSmtpConfiguration.getPort());
+			props.put("mail.smtp.starttls.enable", true);
 			props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+			props.put("mail.transport.protocol", "smtps");
 		}
 
 		Session session = null;
@@ -91,14 +110,36 @@ public class MailService {
 
 		MimeMessage msg = new MimeMessage(session);
 		try {
-			msg.setFrom(new InternetAddress(mailFrom));
-			msg.setRecipients(Message.RecipientType.TO, to);
+			msg.setFrom(new InternetAddress(mailFrom, mailFromName));
+			if (StringHelper.isEmpty(toDisplayName)) {
+				msg.setRecipients(Message.RecipientType.TO, to);
+			} else {
+				msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to, toDisplayName));
+			}
 			msg.setSubject(subject, "UTF-8");
 			msg.setSentDate(new Date());
-			msg.setText(message + "\n", "UTF-8");
+
+			if (StringHelper.isEmpty(htmlMessage)) {
+				msg.setText(message + "\n", "UTF-8");
+			} else {
+				// Unformatted text version
+				final MimeBodyPart textPart = new MimeBodyPart();
+				textPart.setContent(message, "text/plain");
+				// HTML version
+				final MimeBodyPart htmlPart = new MimeBodyPart();
+				htmlPart.setContent(htmlMessage, "text/html");
+
+				// Create the Multipart. Add BodyParts to it.
+				final Multipart mp = new MimeMultipart("alternative");
+				mp.addBodyPart(textPart);
+				mp.addBodyPart(htmlPart);
+
+				// Set Multipart as the message's content
+				msg.setContent(mp);
+			}
 
 			Transport.send(msg);
-		} catch (MessagingException ex) {
+		} catch (Exception ex) {
 			log.error("Failed to send message", ex);
 			return false;
 		}

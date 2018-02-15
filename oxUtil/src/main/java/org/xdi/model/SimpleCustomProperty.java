@@ -10,6 +10,7 @@ import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
 /**
@@ -19,6 +20,7 @@ import org.codehaus.jackson.annotate.JsonPropertyOrder;
  */
 @XmlRootElement
 @JsonPropertyOrder({ "value1", "value2", "description" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SimpleCustomProperty implements Serializable {
 
 	private static final long serialVersionUID = -1451889014702205980L;

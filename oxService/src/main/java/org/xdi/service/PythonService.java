@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.Properties;
 
@@ -18,7 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.site.ldap.persistence.util.ReflectHelper;
+import org.gluu.persist.reflect.util.ReflectHelper;
 import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
@@ -55,8 +56,8 @@ public class PythonService implements Serializable {
 	            this.pythonInterpreter = new PythonInterpreter();
 	            
 	            // Init output redirect for all new interpreters
-	            this.pythonInterpreter.setOut(new PythonLoggerOutputStream(log, false));
-	            this.pythonInterpreter.setErr(new PythonLoggerOutputStream(log, true));
+	            this.pythonInterpreter.setOut(new OutputStreamWriter(new PythonLoggerOutputStream(log, false), "UTF-8"));
+	            this.pythonInterpreter.setErr(new OutputStreamWriter(new PythonLoggerOutputStream(log, true), "UTF-8"));
 	
 	            result = true;
 			} catch (PyException ex) {

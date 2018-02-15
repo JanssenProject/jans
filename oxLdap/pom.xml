@@ -18,6 +18,16 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>oxcore-filter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>oxcore-persist</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.xdi</groupId>
             <artifactId>oxcore-ldap-annotations</artifactId>
             <version>${project.version}</version>

@@ -11,13 +11,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.model.GluuAttribute;
 import org.xdi.model.SchemaEntry;
 import org.xdi.util.OxConstants;
-
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.search.filter.Filter;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 
 /**
@@ -56,8 +55,10 @@ public abstract class AttributeService implements Serializable {
 		attributeNames.add(name);
 		List<AttributeTypeDefinition> attributeTypes = schemaService.getAttributeTypeDefinitions(schemaEntry, attributeNames);
 		AttributeTypeDefinition attributeTypeDefinition = schemaService.getAttributeTypeDefinition(attributeTypes, name);
-
-		return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
+		if (attributeTypeDefinition != null)
+			return String.format("urn:oid:%s", attributeTypeDefinition.getOID());
+		
+		return "";
     }
 
 	/**

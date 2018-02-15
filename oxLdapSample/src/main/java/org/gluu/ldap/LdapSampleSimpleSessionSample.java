@@ -1,15 +1,15 @@
 package org.gluu.ldap;
 
-import org.apache.log4j.Logger;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.site.ldap.persistence.LdapEntryManager;
-import org.xdi.log.LoggingHelper;
-
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+
+import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.status.StatusLogger;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.xdi.log.LoggingHelper;
 
 /**
  * @author Yuriy Movchan
@@ -72,7 +72,7 @@ public class LdapSampleSimpleSessionSample {
 
 			Thread.sleep(5000L);
 		} finally {
-			ldapEntryManager.getLdapOperationService().getConnectionPool().close();
+			ldapEntryManager.getOperationService().getConnectionPool().close();
 		}
 	}
 

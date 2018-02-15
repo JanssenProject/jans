@@ -33,23 +33,38 @@ public class DummyUpdateUserType implements UpdateUserType {
 	}
 
 	@Override
-	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
+	public boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
 	}
 
 	@Override
-	public boolean newUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
+	public boolean postUpdateUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
+	}
+
+	@Override
+	public boolean updateUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
 	}
 
 	@Override
 	public boolean addUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
+		return true;
+	}
+
+	@Override
+	public boolean postAddUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
 	}
 
 	@Override
 	public boolean deleteUser(Object user, boolean persisted, Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
+		return true;
+	}
+
+	@Override
+	public boolean postDeleteUser(Object user, Map<String, SimpleCustomProperty> configurationAttributes) {
+		return true;
 	}
 
 }

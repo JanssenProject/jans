@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.xdi.service.cdi.async.Asynchronous;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
@@ -32,16 +31,16 @@ public class ExternalScriptService implements Serializable {
 
 	@Inject
 	protected Logger log;
-	
+
 	@Inject
 	protected CustomScriptManager customScriptManager;
-	
+
 	protected CustomScriptType customScriptType;
 
 	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
 	protected List<CustomScriptConfiguration> customScriptConfigurations;
 	protected CustomScriptConfiguration defaultExternalCustomScript;
-	
+
 	public ExternalScriptService(CustomScriptType customScriptType) {
 		this.customScriptType = customScriptType;
 	}

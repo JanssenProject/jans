@@ -15,13 +15,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
 import org.slf4j.Logger;
-import org.xdi.ldap.model.Entry;
 import org.xdi.model.DisplayNameEntry;
 import org.xdi.util.OxConstants;
-
-import com.unboundid.ldap.sdk.Filter;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
+import org.gluu.persist.model.base.Entry;
+import org.gluu.search.filter.Filter;
 
 /**
  * Provides operations with DisplayNameEntry

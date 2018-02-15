@@ -1,11 +1,12 @@
 package org.xdi.service.el;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
-import javax.enterprise.inject.Instance;
+import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 
 /**
@@ -16,44 +17,34 @@ public class ExpressionEvaluator implements Serializable {
 	private static final long serialVersionUID = -16629423172996440L;
 
 	@Inject
-	private Instance<ELContext> elContext;
+	private ExtendedELContext ctx;
 
 	@Inject
 	private ExpressionFactory expressionFactory;
 
-	public <T> T evaluateValueExpression(String expression, Class<Boolean> expectedType, Map<String, Object> parameters) {
+	public <T> T evaluateValueExpression(String expression, Class<T> expectedType, Map<String, Object> parameters) {
 		if ((parameters == null) || (parameters.size() == 0)) {
             return (T) evaluateValueExpression(expression, expectedType);
 		}
 
-		ExtendedELContext ctx = (ExtendedELContext) elContext.get();
+		ConstantResolver constantResolver = ctx.getConstantResolver();
 		try {
-			ConstantResolver constantResolver = ctx.getConstantResolver();
-			try {
-				// Setting parameters
-				for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
-					constantResolver.addConstant(parameter.getKey(), parameter.getValue());
-				}
-
-				return (T) expressionFactory.createValueExpression(ctx, expression, expectedType).getValue(ctx);
-			} finally {
-				// Clearing up parameters
-				for (String parameterName : parameters.keySet()) {
-					constantResolver.removeConstant(parameterName);
-				}
+			// Setting parameters
+			for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+				constantResolver.addConstant(parameter.getKey(), parameter.getValue());
 			}
+
+			return (T) expressionFactory.createValueExpression(ctx, expression, expectedType).getValue(ctx);
 		} finally {
-			elContext.destroy(ctx);
+			// Clearing up parameters
+			for (String parameterName : parameters.keySet()) {
+				constantResolver.removeConstant(parameterName);
+			}
 		}
 	}
 
 	public <T> T evaluateValueExpression(String expression, Class<T> expectedType) {
-		ELContext ctx = elContext.get();
-		try {
-			return (T) expressionFactory.createValueExpression(ctx, expression, expectedType).getValue(ctx);
-		} finally {
-			elContext.destroy(ctx);
-		}
+		return (T) expressionFactory.createValueExpression(ctx, expression, expectedType).getValue(ctx);
 	}
 
 	public Object evaluateValueExpression(String expression) {
@@ -61,13 +52,7 @@ public class ExpressionEvaluator implements Serializable {
 	}
 
 	public <T> T invokeMethodExpression(String expression, Class<T> expectedReturnType, Object[] args, Class<?>[] argTypes) {
-		ELContext ctx = elContext.get();
-		try {
-			return (T) expressionFactory.createMethodExpression(ctx, expression, expectedReturnType, argTypes).invoke(ctx,
-					args);
-		} finally {
-			elContext.destroy(ctx);
-		}
+		return (T) expressionFactory.createMethodExpression(ctx, expression, expectedReturnType, argTypes).invoke(ctx, args);
 	}
 
 	public <T> T invokeMethodExpression(String expression, Class<T> expectedReturnType) {
