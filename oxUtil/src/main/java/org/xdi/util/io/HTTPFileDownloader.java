@@ -34,37 +34,37 @@ public class HTTPFileDownloader {
 		}
 		String result = null;
 
-        GetMethod method = new GetMethod(path);
-        try {
-            method.setRequestHeader("Accept", contentType);
+		GetMethod method = new GetMethod(path);
+		try {
+			method.setRequestHeader("Accept", contentType);
 
-            if (getEasyhttps() == null) {
-                setEasyhttps(new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
-            }
-            Protocol.registerProtocol("https", getEasyhttps());
+			if (getEasyhttps() == null) {
+				setEasyhttps(new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
+			}
+			Protocol.registerProtocol("https", getEasyhttps());
 
-            final HttpClient httpClient;
-            if (isUseAuthentication) {
-                httpClient = createHttpClientWithBasicAuth(user, password);
-            } else {
-                httpClient = new HttpClient();
-            }
+			final HttpClient httpClient;
+			if (isUseAuthentication) {
+				httpClient = createHttpClientWithBasicAuth(user, password);
+			} else {
+				httpClient = new HttpClient();
+			}
 
-            httpClient.executeMethod(method);
-            if (method.getStatusCode() == HttpStatus.SC_OK) {
-                result = method.getResponseBodyAsString();
-            }
-        } catch (IOException ex) {
-            result = null;
-            log.error(String.format("Failed to get resource %s", path), ex);
-        } catch (Exception ex) {
-            result = null;
-            log.error(String.format("Failed to get resource %s", path), ex);
-        } finally {
-            method.releaseConnection();
-        }
+			httpClient.executeMethod(method);
+			if (method.getStatusCode() == HttpStatus.SC_OK) {
+				result = method.getResponseBodyAsString();
+			}
+		} catch (IOException ex) {
+			result = null;
+			log.error(String.format("Failed to get resource %s", path), ex);
+		} catch (Exception ex) {
+			result = null;
+			log.error(String.format("Failed to get resource %s", path), ex);
+		} finally {
+			method.releaseConnection();
+		}
 
-        return result;
+		return result;
 	}
 
 	private static HttpClient createHttpClientWithBasicAuth(String userid, String password) {

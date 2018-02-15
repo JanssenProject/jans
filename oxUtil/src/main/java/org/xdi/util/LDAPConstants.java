@@ -14,6 +14,5 @@ public class LDAPConstants {
 	public static String userPassword = "userPassword";
 	public static String objectClass = "objectClass";
 	public static String inum = "inum";
-	
 
 }

@@ -29,29 +29,29 @@ public class SimpleCustomProperty implements Serializable {
 	private String value2;
 	private String description;
 
-    public SimpleCustomProperty() {
-        this("", "");
-    }
+	public SimpleCustomProperty() {
+		this("", "");
+	}
 
-    public SimpleCustomProperty(String value1, String value2) {
+	public SimpleCustomProperty(String value1, String value2) {
 		this(value1, value2, "");
 	}
 
-    public SimpleCustomProperty(String p_value1, String p_value2, String p_description) {
-        description = p_description;
-        value1 = p_value1;
-        value2 = p_value2;
-    }
+	public SimpleCustomProperty(String p_value1, String p_value2, String p_description) {
+		description = p_description;
+		value1 = p_value1;
+		value2 = p_value2;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setDescription(String p_description) {
-        description = p_description;
-    }
+	public void setDescription(String p_description) {
+		description = p_description;
+	}
 
-    public final String getValue1() {
+	public final String getValue1() {
 		return value1;
 	}
 
@@ -106,7 +106,8 @@ public class SimpleCustomProperty implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("SimpleCustomProperty [value1=%s, value2=%s, description=%s]", value1, value2, description);
+		return String.format("SimpleCustomProperty [value1=%s, value2=%s, description=%s]", value1, value2,
+				description);
 	}
 
 }

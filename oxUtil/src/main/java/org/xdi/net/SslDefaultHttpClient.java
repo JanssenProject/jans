@@ -36,84 +36,87 @@ import org.xdi.util.StringHelper;
  */
 public class SslDefaultHttpClient extends DefaultHttpClient {
 
-    private String trustStoreType, keyStoreType;
-    private String trustStorePath, keyStorePath;
+	private String trustStoreType, keyStoreType;
+	private String trustStorePath, keyStorePath;
 	private String trustStorePassword, keyStorePassword;
-	
+
 	private TrustManager[] trustManagers;
-	
+
 	private boolean useTrustManager = false;
 	private boolean useKeyManager = false;
-	 
-	public SslDefaultHttpClient() {}
+
+	public SslDefaultHttpClient() {
+	}
 
 	public SslDefaultHttpClient(TrustManager trustManager) {
-        this.trustManagers = new TrustManager[] { trustManager };
-    }
+		this.trustManagers = new TrustManager[] { trustManager };
+	}
 
 	public SslDefaultHttpClient(TrustManager[] trustManagers) {
-        this.trustManagers = trustManagers;
-    }
+		this.trustManagers = trustManagers;
+	}
 
 	public SslDefaultHttpClient(String trustStoreType, String trustStorePath, String trustStorePassword) {
-        this.trustStoreType = trustStoreType;
-        this.trustStorePath = trustStorePath;
-        this.trustStorePassword = trustStorePassword;
-        
-        this.useTrustManager = StringHelper.isNotEmpty(trustStoreType) && StringHelper.isNotEmpty(trustStorePath) && StringHelper.isNotEmpty(trustStorePassword);
-    }
+		this.trustStoreType = trustStoreType;
+		this.trustStorePath = trustStorePath;
+		this.trustStorePassword = trustStorePassword;
+
+		this.useTrustManager = StringHelper.isNotEmpty(trustStoreType) && StringHelper.isNotEmpty(trustStorePath)
+				&& StringHelper.isNotEmpty(trustStorePassword);
+	}
 
 	public SslDefaultHttpClient(String trustStoreType, String trustStorePath, String trustStorePassword,
 			String keyStoreType, String keyStorePath, String keyStorePassword) {
-        this(trustStoreType, trustStorePath, trustStorePassword);
+		this(trustStoreType, trustStorePath, trustStorePassword);
 
-        this.keyStoreType = keyStoreType;
-        this.keyStorePath = keyStorePath;
-        this.keyStorePassword = keyStorePassword;
-        
-        this.useKeyManager = StringHelper.isNotEmpty(keyStoreType) && StringHelper.isNotEmpty(keyStorePath) && StringHelper.isNotEmpty(keyStorePassword);
-    }
+		this.keyStoreType = keyStoreType;
+		this.keyStorePath = keyStorePath;
+		this.keyStorePassword = keyStorePassword;
+
+		this.useKeyManager = StringHelper.isNotEmpty(keyStoreType) && StringHelper.isNotEmpty(keyStorePath)
+				&& StringHelper.isNotEmpty(keyStorePassword);
+	}
 
 	@Override
-    protected ClientConnectionManager createClientConnectionManager() {
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        // Register for port 443 our SSLSocketFactory with our keystore to the ConnectionManager
-        registry.register(new Scheme("https", 443, newSslSocketFactory()));
+	protected ClientConnectionManager createClientConnectionManager() {
+		SchemeRegistry registry = new SchemeRegistry();
+		registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+		// Register for port 443 our SSLSocketFactory with our keystore to the
+		// ConnectionManager
+		registry.register(new Scheme("https", 443, newSslSocketFactory()));
 
-        return new PoolingClientConnectionManager(registry);
-    }
+		return new PoolingClientConnectionManager(registry);
+	}
 
-    private SSLSocketFactory newSslSocketFactory() {
-        try {
-            TrustManager[] trustManagers = this.trustManagers;
-            if (useTrustManager) {
-            	trustManagers = getTrustManagers();
-            }
+	private SSLSocketFactory newSslSocketFactory() {
+		try {
+			TrustManager[] trustManagers = this.trustManagers;
+			if (useTrustManager) {
+				trustManagers = getTrustManagers();
+			}
 
-            KeyManager[] keyManagers = null;
-            if (useKeyManager) {
-                keyManagers = getKeyManagers();
-            }
+			KeyManager[] keyManagers = null;
+			if (useKeyManager) {
+				keyManagers = getKeyManagers();
+			}
 
-            SSLContext ctx = SSLContext.getInstance("TLS");
-            
-            ctx.init(keyManagers, trustManagers, new SecureRandom());
+			SSLContext ctx = SSLContext.getInstance("TLS");
 
-            // Pass the keystore to the SSLSocketFactory
-            SSLSocketFactory sf = new SSLSocketFactory(ctx, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+			ctx.init(keyManagers, trustManagers, new SecureRandom());
 
-            return sf;
-        } catch (Exception ex) {
-            throw new IllegalArgumentException("Failed to load keystore", ex);
-        }
-        
-        
-    }
+			// Pass the keystore to the SSLSocketFactory
+			SSLSocketFactory sf = new SSLSocketFactory(ctx, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+
+			return sf;
+		} catch (Exception ex) {
+			throw new IllegalArgumentException("Failed to load keystore", ex);
+		}
+
+	}
 
 	private TrustManager[] getTrustManagers() throws Exception {
 		KeyStore keyStore = getKeyStore(this.trustStoreType, this.trustStorePath, this.trustStorePassword);
-		
+
 		TrustManagerFactory tmFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 		tmFactory.init(keyStore);
 
@@ -122,14 +125,14 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
 
 	private KeyManager[] getKeyManagers() throws Exception {
 		KeyStore keyStore = getKeyStore(this.keyStoreType, this.keyStorePath, this.keyStorePassword);
-		
+
 		KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-		kmFactory.init(keyStore, this.keyStorePassword .toCharArray());
+		kmFactory.init(keyStore, this.keyStorePassword.toCharArray());
 
 		return kmFactory.getKeyManagers();
 	}
 
-    private KeyStore getKeyStore(String storeType, String storePath, String storePassword) throws Exception {
+	private KeyStore getKeyStore(String storeType, String storePath, String storePassword) throws Exception {
 		InputStream keyStoreInput = FileUtils.openInputStream(new File(storePath));
 
 		try {

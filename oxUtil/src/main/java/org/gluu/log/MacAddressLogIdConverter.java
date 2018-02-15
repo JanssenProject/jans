@@ -18,16 +18,16 @@ public class MacAddressLogIdConverter extends LogEventPatternConverter {
 
 	public static final String PLUGIN_NAME = "MacAddressLogIdConverter";
 
-	protected MacAddressLogIdConverter(String name, String style) {
-	         super(name, style);
-	     }
+	protected MacAddressLogIdConverter(final String name, final String style) {
+		super(name, style);
+	}
 
-	public static MacAddressLogIdConverter newInstance(String[] options) {
+	public static MacAddressLogIdConverter newInstance(final String[] options) {
 		return new MacAddressLogIdConverter("macAddr", Thread.currentThread().getName());
 	}
 
 	@Override
-	public void format(LogEvent event, StringBuilder toAppendTo) {
+	public void format(final LogEvent event, final StringBuilder toAppendTo) {
 		String macAddress = InetAddressUtility.getMACAddressOrNull();
 		toAppendTo.append(macAddress);
 

@@ -22,30 +22,30 @@ public class SmtpConfiguration implements java.io.Serializable {
 
 	private static final long serialVersionUID = -5675038049444038755L;
 
-    @JsonProperty("host")
+	@JsonProperty("host")
 	private String host;
-    @JsonProperty("port")
+	@JsonProperty("port")
 	private int port;
-    @JsonProperty("requires-ssl")
+	@JsonProperty("requires-ssl")
 	private boolean requiresSsl;
-    @JsonProperty("trust-host")
+	@JsonProperty("trust-host")
 	private boolean serverTrust;
 
-    @JsonProperty("from-name")
+	@JsonProperty("from-name")
 	private String fromName;
-    @JsonProperty("from-email-address")
+	@JsonProperty("from-email-address")
 	private String fromEmailAddress;
 
-    @JsonProperty("requires-authentication")
+	@JsonProperty("requires-authentication")
 	private boolean requiresAuthentication;
 
-    @JsonProperty("user-name")
+	@JsonProperty("user-name")
 	private String userName;
-    @JsonProperty("password")
+	@JsonProperty("password")
 	private String password;
 
 	@Transient
-    @JsonIgnore
+	@JsonIgnore
 	private String passwordDecrypted;
 
 	public String getHost() {

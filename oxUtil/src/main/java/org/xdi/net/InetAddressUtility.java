@@ -40,35 +40,35 @@ public class InetAddressUtility {
 		return m2.matches();
 	}
 
-    public static String getMACAddressOrNull() {
-    	if (!macAddressSet) {
-    		macAddress = getMACAddressOrNullImpl();
-    		macAddressSet = true;
-    	}
+	public static String getMACAddressOrNull() {
+		if (!macAddressSet) {
+			macAddress = getMACAddressOrNullImpl();
+			macAddressSet = true;
+		}
 
-    	return macAddress;
-    }
+		return macAddress;
+	}
 
 	private static synchronized String getMACAddressOrNullImpl() {
 		try {
-            InetAddress ip = InetAddress.getLocalHost();
-            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+			InetAddress ip = InetAddress.getLocalHost();
+			NetworkInterface network = NetworkInterface.getByInetAddress(ip);
 
-            byte[] mac = network.getHardwareAddress();
-            if (mac == null) {
-            	return null;
-            }
+			byte[] mac = network.getHardwareAddress();
+			if (mac == null) {
+				return null;
+			}
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < mac.length; i++) {
-                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-            }
-            return sb.toString();
-        } catch (UnknownHostException e) {
-            return null;
-        } catch (SocketException e) {
-            return null;
-        }
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < mac.length; i++) {
+				sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+			}
+			return sb.toString();
+		} catch (UnknownHostException e) {
+			return null;
+		} catch (SocketException e) {
+			return null;
+		}
 	}
 
 }

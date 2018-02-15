@@ -13,7 +13,8 @@ import java.util.Random;
  */
 public class INumGenerator {
 
-	private static final char[] hexchars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	private static final char[] hexchars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',
+			'F' };
 	private static final Random random = new Random();
 
 	/**
@@ -47,8 +48,8 @@ public class INumGenerator {
 	}
 
 	public static String fourRandomChars() {
-        final StringBuilder result = new StringBuilder();
-        result.append(randomHexChar()).append(randomHexChar()).append(randomHexChar()).append(randomHexChar());
+		final StringBuilder result = new StringBuilder();
+		result.append(randomHexChar()).append(randomHexChar()).append(randomHexChar()).append(randomHexChar());
 		return result.toString();
 	}
 

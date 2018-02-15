@@ -15,7 +15,7 @@ import org.xdi.model.AuthenticationScriptUsageType;
 import org.xdi.model.SimpleCustomProperty;
 
 /**
- * Custom authentication configuration 
+ * Custom authentication configuration
  *
  * @author Yuriy Movchan Date: 04/08/2012
  */
@@ -26,18 +26,18 @@ public class CustomAuthenticationConfiguration {
 	private int priority;
 	private boolean enabled;
 	private int version;
-	
+
 	private AuthenticationScriptUsageType usageType;
 
 	private List<SimpleCustomProperty> customAuthenticationAttributes;
 	private String customAuthenticationScript;
-	
+
 	@Transient
 	private transient String dn;
 
 	@Transient
 	private transient String inum;
-	
+
 	public CustomAuthenticationConfiguration() {
 		this.customAuthenticationAttributes = new ArrayList<SimpleCustomProperty>();
 	}

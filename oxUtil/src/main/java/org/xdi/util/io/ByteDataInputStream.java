@@ -36,11 +36,11 @@ public class ByteDataInputStream extends DataInputStream {
 	}
 
 	public byte readSigned() throws IOException {
-        return readByte();
-    }
+		return readByte();
+	}
 
-    public int readUnsigned() throws IOException {
-        return readUnsignedByte();
-    }
+	public int readUnsigned() throws IOException {
+		return readUnsignedByte();
+	}
 
 }

@@ -1,7 +1,5 @@
 package org.xdi.model;
 
-
-
 /**
  * Hold ImapPassword
  * 

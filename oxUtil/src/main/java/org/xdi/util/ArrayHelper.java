@@ -87,15 +87,14 @@ public final class ArrayHelper {
 	}
 
 	public static String[] addItemToStringArray(String[] array, String item) {
-		String[] array2 = new String[] { item }; 
+		String[] array2 = new String[] { item };
 		if (array == null) {
 			return array2;
 		}
-		
 
 		return arrayMerge(array, array2);
 	}
-	
+
 	public static String toString(Object[] array) {
 		return StringHelper.toString(array);
 	}

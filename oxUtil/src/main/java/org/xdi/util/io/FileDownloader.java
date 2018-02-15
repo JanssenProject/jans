@@ -28,10 +28,10 @@ public class FileDownloader {
 		INLINE, ATTACHEMENT, NONE
 	};
 
-    // DateFormats are not safe in multi-threaded env.
-    public static SimpleDateFormat responseHeaderDateFormat() {
-        return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.ENGLISH);
-    }
+	// DateFormats are not safe in multi-threaded env.
+	public static SimpleDateFormat responseHeaderDateFormat() {
+		return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+	}
 
 	public static void sendError(HttpServletResponse response) {
 		sendError(response, null);
@@ -50,21 +50,26 @@ public class FileDownloader {
 		}
 	}
 
-	public static int writeOutput(DownloadWrapper downloadWrapper, ContentDisposition contentDisposition, HttpServletResponse response) throws IOException {
+	public static int writeOutput(DownloadWrapper downloadWrapper, ContentDisposition contentDisposition,
+			HttpServletResponse response) throws IOException {
 		return writeOutputImpl(downloadWrapper, contentDisposition, response);
 	}
 
 	@Deprecated
-	public static int writeOutput(DownloadWrapper downloadWrapper, boolean inline, HttpServletResponse response) throws IOException {
-		return writeOutputImpl(downloadWrapper, inline ? ContentDisposition.INLINE : ContentDisposition.ATTACHEMENT, response);
+	public static int writeOutput(DownloadWrapper downloadWrapper, boolean inline, HttpServletResponse response)
+			throws IOException {
+		return writeOutputImpl(downloadWrapper, inline ? ContentDisposition.INLINE : ContentDisposition.ATTACHEMENT,
+				response);
 	}
 
-	private static int writeOutputImpl(DownloadWrapper downloadWrapper, ContentDisposition contentDisposition, HttpServletResponse response) throws IOException {
-		log.debug("Downloading File: fileName='{}',mimeType='{}', size='{}'",
-				new Object[] { downloadWrapper.getName(), downloadWrapper.getContentType(), downloadWrapper.getContentLength() });
+	private static int writeOutputImpl(DownloadWrapper downloadWrapper, ContentDisposition contentDisposition,
+			HttpServletResponse response) throws IOException {
+		log.debug("Downloading File: fileName='{}',mimeType='{}', size='{}'", new Object[] { downloadWrapper.getName(),
+				downloadWrapper.getContentType(), downloadWrapper.getContentLength() });
 
 		if ((response == null) || !downloadWrapper.isReady()) {
-			throw new IOException(String.format("Invalid OutputStream or FileDownloadWrapper '%s' specified", downloadWrapper));
+			throw new IOException(
+					String.format("Invalid OutputStream or FileDownloadWrapper '%s' specified", downloadWrapper));
 		}
 
 		if (!((contentDisposition == null) || (ContentDisposition.NONE == contentDisposition))) {
@@ -87,8 +92,7 @@ public class FileDownloader {
 		try {
 			OutputStream out = response.getOutputStream();
 			try {
-				bytesTransfered = IOUtils
-						.copy(downloadWrapper.getStream(), out);
+				bytesTransfered = IOUtils.copy(downloadWrapper.getStream(), out);
 				out.flush();
 			} finally {
 				IOUtils.closeQuietly(out);

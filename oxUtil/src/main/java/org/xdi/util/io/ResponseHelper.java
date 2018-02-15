@@ -47,8 +47,8 @@ public class ResponseHelper {
 		InputStream is = null;
 		try {
 			is = FileUtils.openInputStream(file);
-			DownloadWrapper downloadWrapper = new DownloadWrapper(is, file.getName(), contentType, new Date(file.lastModified()),
-					(int) file.length());
+			DownloadWrapper downloadWrapper = new DownloadWrapper(is, file.getName(), contentType,
+					new Date(file.lastModified()), (int) file.length());
 			FileDownloader.writeOutput(downloadWrapper, false, response);
 
 			facesContext.responseComplete();
@@ -66,7 +66,8 @@ public class ResponseHelper {
 		return downloadFile(fileName, contentType, file, FileDownloader.ContentDisposition.ATTACHEMENT, facesContext);
 	}
 
-	public static boolean downloadFile(String fileName, String contentType, byte[] file, FileDownloader.ContentDisposition contentDisposition, FacesContext facesContext) {
+	public static boolean downloadFile(String fileName, String contentType, byte[] file,
+			FileDownloader.ContentDisposition contentDisposition, FacesContext facesContext) {
 		HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
 		InputStream is = null;
 		try {
@@ -143,8 +144,9 @@ public class ResponseHelper {
 	public static boolean addResourceToZip(InputStream is, String fileName, ZipOutputStream zos) {
 		boolean result = false;
 
-//		String fileName = (new File(resourceName)).getName();
-//		InputStream is = ResponseHelper.class.getClassLoader().getResourceAsStream(resourceName);
+		// String fileName = (new File(resourceName)).getName();
+		// InputStream is =
+		// ResponseHelper.class.getClassLoader().getResourceAsStream(resourceName);
 		try {
 			result = addInputStream(zos, fileName, is);
 		} catch (Exception ex) {

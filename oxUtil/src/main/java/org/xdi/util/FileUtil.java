@@ -148,22 +148,22 @@ public class FileUtil {
 		try {
 			URL u = new URL(url);
 			StringBuilder data = new StringBuilder();
-            InputStream is = u.openStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            try {
-                String theLine;
-                while ((theLine = br.readLine()) != null) {
-                    data.append(theLine);
-                }
-            } finally {
-                IOUtils.closeQuietly(br);
-            }
-            return data.toString();
+			InputStream is = u.openStream();
+			InputStreamReader isr = new InputStreamReader(is);
+			BufferedReader br = new BufferedReader(isr);
+			try {
+				String theLine;
+				while ((theLine = br.readLine()) != null) {
+					data.append(theLine);
+				}
+			} finally {
+				IOUtils.closeQuietly(br);
+			}
+			return data.toString();
 		} catch (MalformedURLException ex) {
-            log.error(ex.getMessage(), ex);
+			log.error(ex.getMessage(), ex);
 		} catch (IOException ex) {
-            log.error(ex.getMessage(), ex);
+			log.error(ex.getMessage(), ex);
 		}
 		return "";
 	}
@@ -181,19 +181,19 @@ public class FileUtil {
 			// Get the object of DataInputStream
 			DataInputStream in = new DataInputStream(fstream);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            try {
-                String strLine = "";
-                // Read File Line By Line
-                while ((strLine = br.readLine()) != null) {
-                    // Print the content on the console
-                    data.append(strLine);
-                }
-            } finally {
-                IOUtils.closeQuietly(br);
-            }
-            return data.toString();
+			try {
+				String strLine = "";
+				// Read File Line By Line
+				while ((strLine = br.readLine()) != null) {
+					// Print the content on the console
+					data.append(strLine);
+				}
+			} finally {
+				IOUtils.closeQuietly(br);
+			}
+			return data.toString();
 		} catch (Exception e) {
-            log.error(e.getMessage(), e);
+			log.error(e.getMessage(), e);
 			return null;
 		}
 
@@ -210,13 +210,13 @@ public class FileUtil {
 				if (i < 0)
 					break;
 				byte[] outBuffer = new byte[i];
-                System.arraycopy(buffer, 0, outBuffer, 0, i);
-                buf.append(new String(outBuffer, "UTF-8"));
+				System.arraycopy(buffer, 0, outBuffer, 0, i);
+				buf.append(new String(outBuffer, "UTF-8"));
 			}
 		} catch (Exception ex) {
-			log.debug("File read error: " , ex);
+			log.debug("File read error: ", ex);
 		} finally {
-            IOUtils.closeQuietly(input);
+			IOUtils.closeQuietly(input);
 		}
 		return buf;
 	}
