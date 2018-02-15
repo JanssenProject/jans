@@ -1,15 +1,14 @@
 package org.xdi.service.cache;
 
-import java.util.concurrent.TimeUnit;
+import net.jodah.expiringmap.ExpirationPolicy;
+import net.jodah.expiringmap.ExpiringMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-
-import org.slf4j.Logger;
-
-import net.jodah.expiringmap.ExpirationPolicy;
-import net.jodah.expiringmap.ExpiringMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yuriyz on 02/21/2017.
@@ -17,8 +16,7 @@ import net.jodah.expiringmap.ExpiringMap;
 
 public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
-	@Inject
-    private Logger log;
+    private final static Logger log = LoggerFactory.getLogger(InMemoryCacheProvider.class);
 
     @Inject
     private CacheConfiguration cacheConfiguration;
@@ -69,6 +67,10 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
     @Override // it is so weird but we use as workaround "region" field to pass "expiration" for put operation
     public void put(String expirationInSeconds, String key, Object object) {
+        // if key already exists and hash is the same for value then expiration time is not updated
+        // net.jodah.expiringmap.ExpiringMap.putInternal()
+        // therefore we first remove entry and then put it
+        map.remove(key);
         map.put(key, object, ExpirationPolicy.CREATED, putExpiration(expirationInSeconds), TimeUnit.SECONDS);
     }
 
@@ -88,5 +90,9 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
     @Override
     public void clear() {
         map.clear();
+    }
+
+    public void setCacheConfiguration(CacheConfiguration cacheConfiguration) {
+        this.cacheConfiguration = cacheConfiguration;
     }
 }

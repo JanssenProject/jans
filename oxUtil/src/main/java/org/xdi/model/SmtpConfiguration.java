@@ -7,39 +7,41 @@
 package org.xdi.model;
 
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Hold SMTP configuration
  * 
  * @author Yuriy Movchan Date: 04/20/2014
  */
-@XmlRootElement
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SmtpConfiguration implements java.io.Serializable {
 
 	private static final long serialVersionUID = -5675038049444038755L;
 
-    @XmlElement(name = "host")
+    @JsonProperty("host")
 	private String host;
-    @XmlElement(name = "port")
+    @JsonProperty("port")
 	private int port;
-    @XmlElement(name = "requires-ssl")
+    @JsonProperty("requires-ssl")
 	private boolean requiresSsl;
+    @JsonProperty("trust-host")
+	private boolean serverTrust;
 
-    @XmlElement(name = "from-name")
+    @JsonProperty("from-name")
 	private String fromName;
-    @XmlElement(name = "from-email-address")
+    @JsonProperty("from-email-address")
 	private String fromEmailAddress;
 
-    @XmlElement(name = "requires-authentication")
+    @JsonProperty("requires-authentication")
 	private boolean requiresAuthentication;
 
-    @XmlElement(name = "user-name")
+    @JsonProperty("user-name")
 	private String userName;
-    @XmlElement(name = "password")
+    @JsonProperty("password")
 	private String password;
 
 	@Transient
@@ -68,6 +70,14 @@ public class SmtpConfiguration implements java.io.Serializable {
 
 	public void setRequiresSsl(boolean requiresSsl) {
 		this.requiresSsl = requiresSsl;
+	}
+
+	public boolean isServerTrust() {
+		return serverTrust;
+	}
+
+	public void setServerTrust(boolean serverTrust) {
+		this.serverTrust = serverTrust;
 	}
 
 	public String getFromName() {

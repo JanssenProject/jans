@@ -121,6 +121,12 @@
 			<artifactId>quartz</artifactId>
 		</dependency>
 
+        <!-- Tests -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+
 		<!-- Other -->
 		<dependency>
 			<groupId>javax.mail</groupId>

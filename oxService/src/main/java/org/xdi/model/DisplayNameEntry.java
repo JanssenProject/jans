@@ -8,9 +8,9 @@ package org.xdi.model;
 
 import java.io.Serializable;
 
+import org.gluu.persist.model.base.Entry;
 import org.gluu.site.ldap.persistence.annotation.LdapAttribute;
 import org.gluu.site.ldap.persistence.annotation.LdapEntry;
-import org.xdi.ldap.model.Entry;
 
 /**
  * Entry with display Name attribute

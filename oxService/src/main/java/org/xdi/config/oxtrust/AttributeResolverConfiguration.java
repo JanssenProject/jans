@@ -19,17 +19,17 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AttributeResolverConfiguration implements Configuration {
 
-	private String base;
+	private String attributeBase;
 	private String attributeName;
 	private String nameIdType;
 	private boolean enabled;
 
-	public String getBase() {
-		return base;
+	public String getAttributeBase() {
+		return attributeBase;
 	}
 
-	public void setBase(String base) {
-		this.base = base;
+	public void setAttributeBase(String attributeBase) {
+		this.attributeBase = attributeBase;
 	}
 
 	public String getAttributeName() {

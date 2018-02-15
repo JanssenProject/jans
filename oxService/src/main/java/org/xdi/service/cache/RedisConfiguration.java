@@ -10,7 +10,9 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RedisConfiguration implements Serializable {
 
-	private static final long serialVersionUID = 5513197227832695470L;
+	private static final long serialVersionUID = 5513197227832695471L;
+
+    private RedisProviderType redisProviderType = RedisProviderType.STANDALONE;
 
 	private String servers = "localhost:6379"; // server1:11211 server2:11211
 
@@ -32,11 +34,20 @@ public class RedisConfiguration implements Serializable {
         this.defaultPutExpiration = defaultPutExpiration;
     }
 
+    public RedisProviderType getRedisProviderType() {
+        return redisProviderType;
+    }
+
+    public void setRedisProviderType(RedisProviderType redisProviderType) {
+        this.redisProviderType = redisProviderType;
+    }
+
     @Override
     public String toString() {
         return "RedisConfiguration{" +
                 "servers='" + servers + '\'' +
                 ", defaultPutExpiration=" + defaultPutExpiration +
+                ", redisProviderType=" + redisProviderType +
                 '}';
     }
 }

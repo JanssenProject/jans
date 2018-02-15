@@ -1,6 +1,8 @@
 package org.gluu.jsf2.message;
 
 import java.io.Serializable;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.el.ELContext;
 import javax.el.ExpressionFactory;
@@ -11,6 +13,8 @@ import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
+
+import org.xdi.service.el.ExpressionEvaluator;
 
 /**
  * @author Yuriy Movchan
@@ -27,19 +31,24 @@ public class FacesMessages implements Serializable {
 	@Inject
 	private ExternalContext externalContext;
 
+	@Inject
+	private ExpressionEvaluator expressionEvaluator;
+
 	public void add(Severity severity, String message) {
-		String evaluatedMessage = evalAsString(message);
-		facesContext.addMessage(null, new FacesMessage(severity, evaluatedMessage, evaluatedMessage));
-		setKeepMessages();
+		add(null, severity, message);
 	}
 
 	public void add(String clientId, Severity severity, String message) {
+		if (facesContext == null) {
+			return;
+		}
+
 		String evaluatedMessage = evalAsString(message);
 		facesContext.addMessage(clientId, new FacesMessage(severity, evaluatedMessage, evaluatedMessage));
 		setKeepMessages();
 	}
 
-	public void add(Severity severity, String message, Object... params) {
+	public void add(Severity severity, String message, Object ... params) {
 		String fomrattedMessage = String.format(message, params); 
 
 		add(severity, fomrattedMessage);
@@ -47,10 +56,30 @@ public class FacesMessages implements Serializable {
 	}
 
 	public void setKeepMessages() {
+		if (externalContext == null) {
+			return;
+		}
+
 		externalContext.getFlash().setKeepMessages(true);
 	}
 
+	public void clear() {
+		if (facesContext == null) {
+			return;
+		}
+
+		Iterator<FacesMessage> messages = facesContext.getMessages();
+		while(messages.hasNext()) {
+			messages.next();
+			messages.remove();
+		}
+	}
+
 	public String evalAsString(String expression) {
+		if (facesContext == null) {
+			return expression;
+		}
+
 		ExpressionFactory expressionFactory = facesContext.getApplication().getExpressionFactory();
 		ELContext elContext = facesContext.getELContext();
 		ValueExpression valueExpression = expressionFactory.createValueExpression(elContext, expression, String.class);
@@ -58,4 +87,19 @@ public class FacesMessages implements Serializable {
 
 		return result;
 	}
+
+	public String evalResourceAsString(String resource) {
+		// Get resource message
+		String resourceMessage = evalAsString(resource);
+
+		// Evaluate resource message
+		String message = evalAsString(resourceMessage);
+
+		return message;
+	}
+
+	public String evalAsString(String expression, Map<String, Object> parameters) {
+		return expressionEvaluator.evaluateValueExpression(expression, String.class, parameters);
+	}
+
 }

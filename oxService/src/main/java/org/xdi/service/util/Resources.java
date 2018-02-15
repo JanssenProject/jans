@@ -1,10 +1,12 @@
 package org.xdi.service.util;
 
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.InjectionPoint;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class which provides external resources for injection
@@ -13,11 +15,20 @@ import org.slf4j.LoggerFactory;
  */
 public class Resources {
 
+    private static Map<String, Logger> cache = new HashMap<String, Logger>();
+
 	@Produces
 	public Logger getLogger(InjectionPoint ip) {
 		Class<?> clazz = ip.getMember().getDeclaringClass();
 
-		return LoggerFactory.getLogger(clazz);
-	}
+        String clazzName = clazz.getName();
+        Logger cached = cache.get(clazzName);
+        if (cached != null) {
+            return cached;
+        }
 
+        Logger logger = LoggerFactory.getLogger(clazz);
+        cache.put(clazzName, logger);
+        return logger;
+	}
 }

@@ -18,7 +18,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.gluu.site.ldap.persistence.LdapEntryManager;
+import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.slf4j.Logger;
 import org.xdi.model.SchemaEntry;
 import org.xdi.util.StringHelper;
@@ -490,7 +490,7 @@ public class SchemaService {
 	 * @return DN string for DS schema
 	 */
 	public String getDnForSchema() {
-		return ldapEntryManager.getLdapOperationService().getSubschemaSubentry();
+		return ldapEntryManager.getOperationService().getSubschemaSubentry();
 	}
 
 }
