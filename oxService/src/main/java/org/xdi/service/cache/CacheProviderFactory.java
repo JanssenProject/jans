@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 @Named
 public class CacheProviderFactory {
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject
@@ -45,13 +45,13 @@ public class CacheProviderFactory {
         // Create proxied bean
         switch (cacheProviderType) {
             case IN_MEMORY:
-            	cacheProvider = instance.select(InMemoryCacheProvider.class).get();
+                cacheProvider = instance.select(InMemoryCacheProvider.class).get();
                 break;
             case MEMCACHED:
-            	cacheProvider = instance.select(MemcachedProvider.class).get();
+                cacheProvider = instance.select(MemcachedProvider.class).get();
                 break;
             case REDIS:
-            	cacheProvider = instance.select(RedisProvider.class).get();
+                cacheProvider = instance.select(RedisProvider.class).get();
                 break;
         }
 
@@ -60,7 +60,7 @@ public class CacheProviderFactory {
         }
 
         cacheProvider.create();
-        
+    
         return cacheProvider;
     }
 

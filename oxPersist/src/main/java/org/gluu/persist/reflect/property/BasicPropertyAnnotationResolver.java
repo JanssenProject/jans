@@ -19,78 +19,78 @@ import org.xdi.util.StringHelper;
 
 /**
  * Defines a strategy for accessing class and propery annotations.
- * 
+ *
  * @author Yuriy Movchan Date: 10.08.2010
  */
 public class BasicPropertyAnnotationResolver implements PropertyAnnotationResolver {
 
-	public List<Annotation> getClassAnnotations(Class<?> theClass, Class<?>... allowedAnnotations) {
-		List<Annotation> result = getOnlyAllowedAnntotations(theClass.getAnnotations(), allowedAnnotations);
+    public List<Annotation> getClassAnnotations(Class<?> theClass, Class<?>... allowedAnnotations) {
+        List<Annotation> result = getOnlyAllowedAnntotations(theClass.getAnnotations(), allowedAnnotations);
 
-		Class<?> superClass = theClass.getSuperclass();
-		while (ReflectHelper.isNotPrimitiveClass(superClass)) {
-			result.addAll(getOnlyAllowedAnntotations(superClass.getAnnotations(), allowedAnnotations));
-			superClass = superClass.getSuperclass();
-		}
+        Class<?> superClass = theClass.getSuperclass();
+        while (ReflectHelper.isNotPrimitiveClass(superClass)) {
+            result.addAll(getOnlyAllowedAnntotations(superClass.getAnnotations(), allowedAnnotations));
+            superClass = superClass.getSuperclass();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public List<Annotation> getPropertyAnnotations(Class<?> theClass, String propertyName, Class<?>... allowedAnnotations)
-			throws PropertyNotFoundException {
-		if (StringHelper.isEmpty(propertyName)) {
-			throw new PropertyNotFoundException("Could not find property " + propertyName + " in class " + theClass.getName());
-		}
+    public List<Annotation> getPropertyAnnotations(Class<?> theClass, String propertyName, Class<?>... allowedAnnotations)
+            throws PropertyNotFoundException {
+        if (StringHelper.isEmpty(propertyName)) {
+            throw new PropertyNotFoundException("Could not find property " + propertyName + " in class " + theClass.getName());
+        }
 
-		Class<?> thisClass = theClass;
-		while (ReflectHelper.isNotPrimitiveClass(thisClass)) {
-			Field fileds[] = thisClass.getDeclaredFields();
-			for (Field filed : fileds) {
-				if (propertyName.equals(filed.getName())) {
-					return getOnlyAllowedAnntotations(filed.getAnnotations(), allowedAnnotations);
-				}
-			}
-			thisClass = thisClass.getSuperclass();
-		}
+        Class<?> thisClass = theClass;
+        while (ReflectHelper.isNotPrimitiveClass(thisClass)) {
+            Field fileds[] = thisClass.getDeclaredFields();
+            for (Field filed : fileds) {
+                if (propertyName.equals(filed.getName())) {
+                    return getOnlyAllowedAnntotations(filed.getAnnotations(), allowedAnnotations);
+                }
+            }
+            thisClass = thisClass.getSuperclass();
+        }
 
-		throw new PropertyNotFoundException("Could not find property " + propertyName + " in class " + theClass.getName());
-	}
+        throw new PropertyNotFoundException("Could not find property " + propertyName + " in class " + theClass.getName());
+    }
 
-	public Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> theClass, Class<?>... allowedAnnotations) {
-		Map<String, List<Annotation>> result = new HashMap<String, List<Annotation>>();
+    public Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> theClass, Class<?>... allowedAnnotations) {
+        Map<String, List<Annotation>> result = new HashMap<String, List<Annotation>>();
 
-		Class<?> thisClass = theClass;
-		while (ReflectHelper.isNotPrimitiveClass(thisClass)) {
-			Field fileds[] = thisClass.getDeclaredFields();
-			for (Field filed : fileds) {
-				List<Annotation> annotations = getOnlyAllowedAnntotations(filed.getAnnotations(), allowedAnnotations);
-				if ((annotations == null) || (annotations.size() == 0)) {
-					continue;
-				}
+        Class<?> thisClass = theClass;
+        while (ReflectHelper.isNotPrimitiveClass(thisClass)) {
+            Field fileds[] = thisClass.getDeclaredFields();
+            for (Field filed : fileds) {
+                List<Annotation> annotations = getOnlyAllowedAnntotations(filed.getAnnotations(), allowedAnnotations);
+                if ((annotations == null) || (annotations.size() == 0)) {
+                    continue;
+                }
 
-				result.put(filed.getName(), annotations);
-			}
-			thisClass = thisClass.getSuperclass();
-		}
+                result.put(filed.getName(), annotations);
+            }
+            thisClass = thisClass.getSuperclass();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	private List<Annotation> getOnlyAllowedAnntotations(Annotation[] annotations, Class<?>[] allowedAnnotations) {
-		List<Annotation> result = new ArrayList<Annotation>();
-		if (annotations.length == 0) {
-			return result;
-		}
+    private List<Annotation> getOnlyAllowedAnntotations(Annotation[] annotations, Class<?>[] allowedAnnotations) {
+        List<Annotation> result = new ArrayList<Annotation>();
+        if (annotations.length == 0) {
+            return result;
+        }
 
-		for (Annotation annotation : annotations) {
-			for (Class<?> allowedAnnotation : allowedAnnotations) {
-				if (annotation.annotationType().equals(allowedAnnotation)) {
-					result.add(annotation);
-				}
-			}
-		}
+        for (Annotation annotation : annotations) {
+            for (Class<?> allowedAnnotation : allowedAnnotations) {
+                if (annotation.annotationType().equals(allowedAnnotation)) {
+                    result.add(annotation);
+                }
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
 }

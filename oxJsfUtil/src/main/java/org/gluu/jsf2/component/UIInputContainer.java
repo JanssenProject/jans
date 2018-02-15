@@ -130,10 +130,10 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
          */
         if (getValueExpression(getLabelAttributeName()) == null
                 && (!getAttributes().containsKey(getLabelAttributeName()) || labelHasEmptyValue(elements))) {
-        	String label = generateLabel(elements, context);
-        	if (label != null) {
-        		getAttributes().put(getLabelAttributeName(), label);
-        	}
+            String label = generateLabel(elements, context);
+            if (label != null) {
+                getAttributes().put(getLabelAttributeName(), label);
+            }
         }
 
         if (Boolean.TRUE.equals(getAttributes().get(getEncloseAttributeName()))) {
@@ -175,7 +175,7 @@ public class UIInputContainer extends UIComponentBase implements NamingContainer
     protected String generateLabel(final InputContainerElements elements, final FacesContext context) {
         String name = getId().startsWith(UIViewRoot.UNIQUE_ID_PREFIX) ? elements.getPropertyName(context) : getId();
         if (StringHelper.isEmpty(name)) {
-        	return null;
+            return null;
         }
 
         return name.substring(0, 1).toUpperCase() + name.substring(1);

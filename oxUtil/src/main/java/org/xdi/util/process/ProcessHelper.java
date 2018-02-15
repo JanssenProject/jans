@@ -23,164 +23,164 @@ import org.xdi.util.StringHelper;
 
 /**
  * Utility to execute external processes
- * 
+ *
  * @author Yuriy Movchan Date: 11.22.2010
  */
-public class ProcessHelper {
+public final class ProcessHelper {
 
-	private static Logger log = Logger.getLogger(ProcessHelper.class);
+    private static Logger LOG = Logger.getLogger(ProcessHelper.class);
 
-	private static final long PRINT_JOB_TIMEOUT = 100 * 1000;
+    private static final long PRINT_JOB_TIMEOUT = 100 * 1000;
 
-	private ProcessHelper() {
-	}
+    private ProcessHelper() {
+    }
 
-	public static boolean executeProgram(String programPath, boolean executeInBackground, int successExitValue,
-			OutputStream outputStream) {
-		return executeProgram(programPath, null, executeInBackground, successExitValue, outputStream);
-	}
+    public static boolean executeProgram(String programPath, boolean executeInBackground, int successExitValue,
+            OutputStream outputStream) {
+        return executeProgram(programPath, null, executeInBackground, successExitValue, outputStream);
+    }
 
-	public static boolean executeProgram(String programPath, String workingDirectory, boolean executeInBackground,
-			int successExitValue, OutputStream outputStream) {
-		CommandLine commandLine = new CommandLine(programPath);
-		return executeProgram(commandLine, workingDirectory, executeInBackground, successExitValue, outputStream);
-	}
+    public static boolean executeProgram(String programPath, String workingDirectory, boolean executeInBackground,
+            int successExitValue, OutputStream outputStream) {
+        CommandLine commandLine = new CommandLine(programPath);
+        return executeProgram(commandLine, workingDirectory, executeInBackground, successExitValue, outputStream);
+    }
 
-	public static boolean executeProgram(CommandLine commandLine, boolean executeInBackground, int successExitValue,
-			OutputStream outputStream) {
-		return executeProgram(commandLine, null, executeInBackground, successExitValue, outputStream);
-	}
+    public static boolean executeProgram(CommandLine commandLine, boolean executeInBackground, int successExitValue,
+            OutputStream outputStream) {
+        return executeProgram(commandLine, null, executeInBackground, successExitValue, outputStream);
+    }
 
-	public static boolean executeProgram(CommandLine commandLine, String workingDirectory, boolean executeInBackground,
-			int successExitValue, OutputStream outputStream) {
-		long printJobTimeout = PRINT_JOB_TIMEOUT;
+    public static boolean executeProgram(CommandLine commandLine, String workingDirectory, boolean executeInBackground,
+            int successExitValue, OutputStream outputStream) {
+        long printJobTimeout = PRINT_JOB_TIMEOUT;
 
-		ExecuteStreamHandler streamHandler = null;
-		if (outputStream != null) {
-			streamHandler = new PumpStreamHandler(outputStream);
-		}
+        ExecuteStreamHandler streamHandler = null;
+        if (outputStream != null) {
+            streamHandler = new PumpStreamHandler(outputStream);
+        }
 
-		PrintResultHandler printResult = null;
-		try {
-			log.debug(String.format("Preparing to start process %s", commandLine.toString()));
-			printResult = executeProgram(commandLine, workingDirectory, printJobTimeout, executeInBackground,
-					successExitValue, streamHandler);
-			log.debug(String.format("Successfully start process %s", commandLine.toString()));
-		} catch (Exception ex) {
-			log.trace(String.format("Problem during starting process %s", commandLine.toString()), ex);
-			ex.printStackTrace();
-			return false;
-		}
+        PrintResultHandler printResult = null;
+        try {
+            LOG.debug(String.format("Preparing to start process %s", commandLine.toString()));
+            printResult = executeProgram(commandLine, workingDirectory, printJobTimeout, executeInBackground,
+                    successExitValue, streamHandler);
+            LOG.debug(String.format("Successfully start process %s", commandLine.toString()));
+        } catch (Exception ex) {
+            LOG.trace(String.format("Problem during starting process %s", commandLine.toString()), ex);
+            ex.printStackTrace();
+            return false;
+        }
 
-		// come back to check the print result
-		log.debug(String.format("Waiting for the proces %s finish", commandLine.toString()));
-		try {
-			if (printResult == null) {
-				return false;
-			}
-			printResult.waitFor();
-		} catch (InterruptedException ex) {
-			log.error(String.format("Problem during process execution %s", commandLine.toString()), ex);
-		}
+        // come back to check the print result
+        LOG.debug(String.format("Waiting for the proces %s finish", commandLine.toString()));
+        try {
+            if (printResult == null) {
+                return false;
+            }
+            printResult.waitFor();
+        } catch (InterruptedException ex) {
+            LOG.error(String.format("Problem during process execution %s", commandLine.toString()), ex);
+        }
 
-		log.debug(String.format("Process %s has finished", commandLine.toString()));
+        LOG.debug(String.format("Process %s has finished", commandLine.toString()));
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * 
-	 * @param printJobTimeout
-	 *            the printJobTimeout (ms) before the watchdog terminates the print
-	 *            process
-	 * @param printInBackground
-	 *            printing done in the background or blocking
-	 * @param streamHandler
-	 * @return a print result handler (implementing a future)
-	 * @throws IOException
-	 *             the test failed
-	 */
-	public static PrintResultHandler executeProgram(CommandLine commandLine, long printJobTimeout,
-			boolean printInBackground, int successExitValue, ExecuteStreamHandler streamHandler) throws IOException {
-		return executeProgram(commandLine, null, printJobTimeout, printInBackground, successExitValue, streamHandler);
-	}
+    /**
+     *
+     * @param printJobTimeout
+     *            the printJobTimeout (ms) before the watchdog terminates the print
+     *            process
+     * @param printInBackground
+     *            printing done in the background or blocking
+     * @param streamHandler
+     * @return a print result handler (implementing a future)
+     * @throws IOException
+     *             the test failed
+     */
+    public static PrintResultHandler executeProgram(CommandLine commandLine, long printJobTimeout,
+            boolean printInBackground, int successExitValue, ExecuteStreamHandler streamHandler) throws IOException {
+        return executeProgram(commandLine, null, printJobTimeout, printInBackground, successExitValue, streamHandler);
+    }
 
-	/**
-	 * 
-	 * @param printJobTimeout
-	 *            the printJobTimeout (ms) before the watchdog terminates the print
-	 *            process
-	 * @param printInBackground
-	 *            printing done in the background or blocking
-	 * @param streamHandler
-	 * @return a print result handler (implementing a future)
-	 * @throws IOException
-	 *             the test failed
-	 */
-	public static PrintResultHandler executeProgram(CommandLine commandLine, String workingDirectory,
-			long printJobTimeout, boolean printInBackground, int successExitValue, ExecuteStreamHandler streamHandler)
-			throws IOException {
-		ExecuteWatchdog watchdog = null;
-		PrintResultHandler resultHandler;
+    /**
+     *
+     * @param printJobTimeout
+     *            the printJobTimeout (ms) before the watchdog terminates the print
+     *            process
+     * @param printInBackground
+     *            printing done in the background or blocking
+     * @param streamHandler
+     * @return a print result handler (implementing a future)
+     * @throws IOException
+     *             the test failed
+     */
+    public static PrintResultHandler executeProgram(CommandLine commandLine, String workingDirectory,
+            long printJobTimeout, boolean printInBackground, int successExitValue, ExecuteStreamHandler streamHandler)
+            throws IOException {
+        ExecuteWatchdog watchdog = null;
+        PrintResultHandler resultHandler;
 
-		// Create the executor and consider the successExitValue as success
-		Executor executor = new DefaultExecutor();
-		executor.setExitValue(successExitValue);
+        // Create the executor and consider the successExitValue as success
+        Executor executor = new DefaultExecutor();
+        executor.setExitValue(successExitValue);
 
-		if (StringHelper.isNotEmpty(workingDirectory)) {
-			executor.setWorkingDirectory(new File(workingDirectory));
-		}
+        if (StringHelper.isNotEmpty(workingDirectory)) {
+            executor.setWorkingDirectory(new File(workingDirectory));
+        }
 
-		// Redirect streams if needed
-		if (streamHandler != null) {
-			executor.setStreamHandler(streamHandler);
-		}
+        // Redirect streams if needed
+        if (streamHandler != null) {
+            executor.setStreamHandler(streamHandler);
+        }
 
-		// Create a watchdog if requested
-		if (printJobTimeout > 0) {
-			watchdog = new ExecuteWatchdog(printJobTimeout);
-			executor.setWatchdog(watchdog);
-		}
+        // Create a watchdog if requested
+        if (printJobTimeout > 0) {
+            watchdog = new ExecuteWatchdog(printJobTimeout);
+            executor.setWatchdog(watchdog);
+        }
 
-		// Pass a "ExecuteResultHandler" when doing background printing
-		if (printInBackground) {
-			log.debug(String.format("Executing non-blocking process %s", commandLine.toString()));
-			resultHandler = new PrintResultHandler(watchdog);
-			executor.execute(commandLine, resultHandler);
-		} else {
-			log.debug(String.format("Executing blocking process %s", commandLine.toString()));
-			successExitValue = executor.execute(commandLine);
-			resultHandler = new PrintResultHandler(successExitValue);
-		}
+        // Pass a "ExecuteResultHandler" when doing background printing
+        if (printInBackground) {
+            LOG.debug(String.format("Executing non-blocking process %s", commandLine.toString()));
+            resultHandler = new PrintResultHandler(watchdog);
+            executor.execute(commandLine, resultHandler);
+        } else {
+            LOG.debug(String.format("Executing blocking process %s", commandLine.toString()));
+            successExitValue = executor.execute(commandLine);
+            resultHandler = new PrintResultHandler(successExitValue);
+        }
 
-		return resultHandler;
-	}
+        return resultHandler;
+    }
 
-	private static class PrintResultHandler extends DefaultExecuteResultHandler {
+    private static class PrintResultHandler extends DefaultExecuteResultHandler {
 
-		private ExecuteWatchdog watchdog;
+        private ExecuteWatchdog watchdog;
 
-		public PrintResultHandler(ExecuteWatchdog watchdog) {
-			this.watchdog = watchdog;
-		}
+        PrintResultHandler(ExecuteWatchdog watchdog) {
+            this.watchdog = watchdog;
+        }
 
-		public PrintResultHandler(int exitValue) {
-			super.onProcessComplete(exitValue);
-		}
+        PrintResultHandler(int exitValue) {
+            super.onProcessComplete(exitValue);
+        }
 
-		public void onProcessComplete(int exitValue) {
-			super.onProcessComplete(exitValue);
-			log.debug("The process successfully executed");
-		}
+        public void onProcessComplete(int exitValue) {
+            super.onProcessComplete(exitValue);
+            LOG.debug("The process successfully executed");
+        }
 
-		public void onProcessFailed(ExecuteException ex) {
-			super.onProcessFailed(ex);
-			if ((watchdog != null) && watchdog.killedProcess()) {
-				log.debug("The process timed out");
-			} else {
-				log.debug("The process failed to do", ex);
-			}
-		}
-	}
+        public void onProcessFailed(ExecuteException ex) {
+            super.onProcessFailed(ex);
+            if ((watchdog != null) && watchdog.killedProcess()) {
+                LOG.debug("The process timed out");
+            } else {
+                LOG.debug("The process failed to do", ex);
+            }
+        }
+    }
 
 }

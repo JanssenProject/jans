@@ -12,24 +12,24 @@ import javax.inject.Named;
 @ConversationScoped
 public class ConversationService implements Serializable {
 
-	private static final long serialVersionUID = -7432197667275722872L;
-	
-	private static final long CONVERSATION_TIMEOUT = 30 * 60 * 1000L; 
+    private static final long serialVersionUID = -7432197667275722872L;
 
-	@Inject
-	private Conversation conversation;
+    private static final long CONVERSATION_TIMEOUT = 30 * 60 * 1000L;
 
-	public void initConversation() {
-		if (!FacesContext.getCurrentInstance().isPostback() && conversation.isTransient()) {
-			conversation.begin();
-			conversation.setTimeout(CONVERSATION_TIMEOUT);
-		}
-	}
+    @Inject
+    private Conversation conversation;
 
-	public void endConversation() {
-		if (!conversation.isTransient()) {
-			conversation.end();
-		}
-	}
+    public void initConversation() {
+        if (!FacesContext.getCurrentInstance().isPostback() && conversation.isTransient()) {
+            conversation.begin();
+            conversation.setTimeout(CONVERSATION_TIMEOUT);
+        }
+    }
+
+    public void endConversation() {
+        if (!conversation.isTransient()) {
+            conversation.end();
+        }
+    }
 
 }

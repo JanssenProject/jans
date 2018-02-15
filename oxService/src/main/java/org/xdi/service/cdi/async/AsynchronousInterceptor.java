@@ -17,32 +17,32 @@ import javax.interceptor.InvocationContext;
 @Priority(Interceptor.Priority.PLATFORM_BEFORE)
 public class AsynchronousInterceptor implements Serializable {
 
-	private static final long serialVersionUID = 4839412676894893540L;
+    private static final long serialVersionUID = 4839412676894893540L;
 
-	private static final ThreadLocal<Boolean> asyncInvocation = new ThreadLocal<Boolean>();
+    private static final ThreadLocal<Boolean> asyncInvocation = new ThreadLocal<Boolean>();
 
     @AroundInvoke
     public Object invoke(InvocationContext ctx) throws Exception {
-		if (Boolean.TRUE.equals(asyncInvocation.get())) {
-			return ctx.proceed();
-		}
+        if (Boolean.TRUE.equals(asyncInvocation.get())) {
+            return ctx.proceed();
+        }
 
-		final InvocationContext localCtx = ctx;
-		return CompletableFuture.supplyAsync(new Supplier<Object>() {
-			@Override
-			public Object get() {
-				try {
-					asyncInvocation.set(Boolean.TRUE);
-					return localCtx.proceed();
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				} finally {
-					asyncInvocation.remove();
-				}
+        final InvocationContext localCtx = ctx;
+        return CompletableFuture.supplyAsync(new Supplier<Object>() {
+            @Override
+            public Object get() {
+                try {
+                    asyncInvocation.set(Boolean.TRUE);
+                    return localCtx.proceed();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                } finally {
+                    asyncInvocation.remove();
+                }
 
-				return null;
-			}
-		});
-	}
+                return null;
+            }
+        });
+    }
 
 }

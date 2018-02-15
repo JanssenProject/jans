@@ -8,28 +8,28 @@ import org.quartz.Trigger;
  */
 public class JobShedule {
 
-	private JobDetail jobDetail;
-	private Trigger trigger;
+    private JobDetail jobDetail;
+    private Trigger trigger;
 
-	public JobShedule(JobDetail jobDetail, Trigger trigger) {
-		this.jobDetail = jobDetail;
-		this.trigger = trigger;
-	}
+    public JobShedule(JobDetail jobDetail, Trigger trigger) {
+        this.jobDetail = jobDetail;
+        this.trigger = trigger;
+    }
 
-	public JobDetail getJobDetail() {
-		return jobDetail;
-	}
+    public JobDetail getJobDetail() {
+        return jobDetail;
+    }
 
-	public void setJobDetail(JobDetail jobDetail) {
-		this.jobDetail = jobDetail;
-	}
+    public void setJobDetail(JobDetail jobDetail) {
+        this.jobDetail = jobDetail;
+    }
 
-	public Trigger getTrigger() {
-		return trigger;
-	}
+    public Trigger getTrigger() {
+        return trigger;
+    }
 
-	public void setTrigger(Trigger trigger) {
-		this.trigger = trigger;
-	}
+    public void setTrigger(Trigger trigger) {
+        this.trigger = trigger;
+    }
 
 }

@@ -11,16 +11,16 @@ import javax.inject.Named;
 @RequestScoped
 @Named
 public class RememberMe implements Serializable {
-	private static final long serialVersionUID = 7783531488543645695L;
+    private static final long serialVersionUID = 7783531488543645695L;
 
-	private boolean enabled;
+    private boolean enabled;
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
 }

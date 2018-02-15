@@ -13,9 +13,9 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @Vetoed
 public class CacheConfiguration implements Serializable {
 
-	private static final long serialVersionUID = 5047285980342633402L;
+    private static final long serialVersionUID = 5047285980342633402L;
 
-	private CacheProviderType cacheProviderType = CacheProviderType.IN_MEMORY;
+    private CacheProviderType cacheProviderType = CacheProviderType.IN_MEMORY;
 
     private MemcachedConfiguration memcachedConfiguration;
 

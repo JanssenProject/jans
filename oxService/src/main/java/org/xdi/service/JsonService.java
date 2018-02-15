@@ -27,28 +27,28 @@ import org.slf4j.Logger;
 @Named
 public class JsonService implements Serializable {
 
-	private static final long serialVersionUID = -1595376054267897007L;
+    private static final long serialVersionUID = -1595376054267897007L;
 
-	@Inject
+    @Inject
     private Logger log;
 
     private ObjectMapper mapper;
 
     @PostConstruct
     public void init() {
-    	this.mapper = new ObjectMapper();
+        this.mapper = new ObjectMapper();
     }
 
-	public <T> T jsonToObject(String json, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
-		return mapper.readValue(json, clazz);
-	}
+    public <T> T jsonToObject(String json, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+        return mapper.readValue(json, clazz);
+    }
 
-	public <T> String objectToJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
-		return mapper.writeValueAsString(obj);
-	}
+    public <T> String objectToJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
+        return mapper.writeValueAsString(obj);
+    }
 
-	public <T> String objectToPerttyJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
-		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
-	}
+    public <T> String objectToPerttyJson(T obj) throws JsonGenerationException, JsonMappingException, IOException {
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+    }
 
 }

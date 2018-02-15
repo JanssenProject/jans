@@ -10,9 +10,9 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MemcachedConfiguration implements Serializable {
 
-	private static final long serialVersionUID = 3380170170265842427L;
+    private static final long serialVersionUID = 3380170170265842427L;
 
-	private String servers; // server1:11211 server2:11211
+    private String servers; // server1:11211 server2:11211
 
     private int maxOperationQueueLength = 99999999;
 

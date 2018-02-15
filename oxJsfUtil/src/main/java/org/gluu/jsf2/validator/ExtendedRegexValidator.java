@@ -8,20 +8,20 @@ import javax.faces.validator.RegexValidator;
 @FacesValidator("extendedRegexValidator")
 public class ExtendedRegexValidator extends RegexValidator {
 
-	public ExtendedRegexValidator() {
-		String pattern = ".*";
+    public ExtendedRegexValidator() {
+        String pattern = ".*";
 
-		setPattern(pattern);
-	}
+        setPattern(pattern);
+    }
 
-	@Override
-	public void validate(FacesContext context, UIComponent component, Object value) {
-		String pattern = (String) component.getAttributes().get("pattern");
+    @Override
+    public void validate(FacesContext context, UIComponent component, Object value) {
+        String pattern = (String) component.getAttributes().get("pattern");
 
-		if (pattern != null) {
-			setPattern(pattern);
-			super.validate(context, component, value);
-		}
-	}
+        if (pattern != null) {
+            setPattern(pattern);
+            super.validate(context, component, value);
+        }
+    }
 
 }

@@ -12,35 +12,35 @@ import java.io.IOException;
 
 /**
  * Provides an easy way to read a byte array in chunks.
- * 
+ *
  * @author: Yuriy Movchan Date: 05/20/2015
  */
 public class ByteDataInputStream extends DataInputStream {
 
-	public ByteDataInputStream(byte[] data) {
-		super(new ByteArrayInputStream(data));
-	}
+    public ByteDataInputStream(byte[] data) {
+        super(new ByteArrayInputStream(data));
+    }
 
-	public byte[] read(int numberOfBytes) throws IOException {
-		byte[] readBytes = new byte[numberOfBytes];
-		readFully(readBytes);
+    public byte[] read(int numberOfBytes) throws IOException {
+        byte[] readBytes = new byte[numberOfBytes];
+        readFully(readBytes);
 
-		return readBytes;
-	}
+        return readBytes;
+    }
 
-	public byte[] readAll() throws IOException {
-		byte[] readBytes = new byte[available()];
-		readFully(readBytes);
+    public byte[] readAll() throws IOException {
+        byte[] readBytes = new byte[available()];
+        readFully(readBytes);
 
-		return readBytes;
-	}
+        return readBytes;
+    }
 
-	public byte readSigned() throws IOException {
-		return readByte();
-	}
+    public byte readSigned() throws IOException {
+        return readByte();
+    }
 
-	public int readUnsigned() throws IOException {
-		return readUnsignedByte();
-	}
+    public int readUnsigned() throws IOException {
+        return readUnsignedByte();
+    }
 
 }

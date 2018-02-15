@@ -34,28 +34,28 @@ public class LdapSampleBatchJob {
     }
 
     public static void main(String[] args) {
-		// Prepare sample connection details
-		LdapSampleEntryManager ldapSampleEntryManager = new LdapSampleEntryManager();
+        // Prepare sample connection details
+        LdapSampleEntryManager ldapSampleEntryManager = new LdapSampleEntryManager();
 
-		// Create LDAP entry manager
-		final LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
+        // Create LDAP entry manager
+        final LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
 
         BatchOperation<SimpleTokenLdap> tokenLdapBatchOperation = new ProcessBatchOperation<SimpleTokenLdap>() {
-        	private int processedCount = 0;
+            private int processedCount = 0;
 
             @Override
             public void performAction(List<SimpleTokenLdap> objects) {
                 for (SimpleTokenLdap simpleTokenLdap : objects) {
-                	try {
-	                    CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, "oxAuthExpiration", simpleTokenLdap.getAttribute("oxAuthExpiration"));
-	                    simpleTokenLdap.setCustomAttributes(Arrays.asList(new CustomAttribute[]{customAttribute}));
-	                    ldapEntryManager.merge(simpleTokenLdap);
-	                    processedCount++;
-    				} catch (EntryPersistenceException ex) {
-    					log.error("Failed to update entry", ex);
-    				}
+                    try {
+                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, "oxAuthExpiration", simpleTokenLdap.getAttribute("oxAuthExpiration"));
+                        simpleTokenLdap.setCustomAttributes(Arrays.asList(new CustomAttribute[]{customAttribute}));
+                        ldapEntryManager.merge(simpleTokenLdap);
+                        processedCount++;
+                    } catch (EntryPersistenceException ex) {
+                        log.error("Failed to update entry", ex);
+                    }
                 }
-                
+            
                 log.info("Total processed: " + processedCount);
             }
         };
@@ -64,19 +64,19 @@ public class LdapSampleBatchJob {
         ldapEntryManager.findEntries("o=gluu", SimpleTokenLdap.class, filter1, SearchScope.SUB, new String[]{"oxAuthExpiration"}, tokenLdapBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {
-        	private int processedCount = 0;
+            private int processedCount = 0;
 
             @Override
             public void performAction(List<SimpleSession> objects) {
                 for (SimpleSession simpleSession : objects) {
-                	try { 
-	                    CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, "oxLastAccessTime", simpleSession.getAttribute("oxLastAccessTime"));
-	                    simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[]{customAttribute}));
-	                    ldapEntryManager.merge(simpleSession);
-	                    processedCount++;
-					} catch (EntryPersistenceException ex) {
-						log.error("Failed to update entry", ex);
-					}
+                    try {
+                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, "oxLastAccessTime", simpleSession.getAttribute("oxLastAccessTime"));
+                        simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[]{customAttribute}));
+                        ldapEntryManager.merge(simpleSession);
+                        processedCount++;
+                    } catch (EntryPersistenceException ex) {
+                        log.error("Failed to update entry", ex);
+                    }
                 }
 
                 log.info("Total processed: " + processedCount);
@@ -87,7 +87,7 @@ public class LdapSampleBatchJob {
         ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[]{"oxLastAccessTime"}, sessionBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleClient> clientBatchOperation = new ProcessBatchOperation<SimpleClient>() {
-        	private int processedCount = 0;
+            private int processedCount = 0;
 
             @Override
             public void performAction(List<SimpleClient> objects) {
@@ -105,7 +105,7 @@ public class LdapSampleBatchJob {
         log.info("Result count (without collecting results): " + result3.size());
 
         BatchOperation<SimpleClient> clientBatchOperation2 = new DefaultBatchOperation<SimpleClient>() {
-        	private int processedCount = 0;
+            private int processedCount = 0;
 
             @Override
             public void performAction(List<SimpleClient> objects) {
@@ -119,7 +119,7 @@ public class LdapSampleBatchJob {
 
         final Filter filter4 = Filter.createPresenceFilter("oxAuthClientSecretExpiresAt");
         List<SimpleClient> result4 = ldapEntryManager.findEntries("o=gluu", SimpleClient.class, filter4, SearchScope.SUB, new String[]{"oxAuthClientSecretExpiresAt"}, clientBatchOperation2, 0, 0, 1000);
-        
+    
         log.info("Result count (with collecting results): " + result4.size());
     }
 

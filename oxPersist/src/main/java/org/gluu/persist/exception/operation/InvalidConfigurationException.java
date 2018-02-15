@@ -11,18 +11,18 @@ package org.gluu.persist.exception.operation;
  */
 public class InvalidConfigurationException extends RuntimeException {
 
-	private static final long serialVersionUID = 6541769232087073304L;
+    private static final long serialVersionUID = 6541769232087073304L;
 
-	public InvalidConfigurationException(Throwable root) {
-		super(root);
-	}
+    public InvalidConfigurationException(Throwable root) {
+        super(root);
+    }
 
-	public InvalidConfigurationException(String string, Throwable root) {
-		super(string, root);
-	}
+    public InvalidConfigurationException(String string, Throwable root) {
+        super(string, root);
+    }
 
-	public InvalidConfigurationException(String s) {
-		super(s);
-	}
+    public InvalidConfigurationException(String s) {
+        super(s);
+    }
 
 }

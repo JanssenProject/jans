@@ -11,28 +11,28 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
- * Shibboleth IDP CAS-related settings configuration entry. 
- * 
+ * Shibboleth IDP CAS-related settings configuration entry.
+ *
  * @author Dmitry Ognyannikov
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ShibbolethCASProtocolConfiguration implements Serializable {
-    
+
     private static final long serialVersionUID = 1107303245739658346L;
-    
+
     private String inum;
-    
+
     private boolean enabled = true;
-    
+
     private boolean extended = false;
-    
+
     private boolean enableToProxyPatterns;
-    
+
     private String authorizedToProxyPattern;
-    
+
     private String unauthorizedToProxyPattern;
-    
+
     private String sessionStorageType;
 
     /**
@@ -132,5 +132,5 @@ public class ShibbolethCASProtocolConfiguration implements Serializable {
     public void setSessionStorageType(String sessionStorageType) {
         this.sessionStorageType = sessionStorageType;
     }
-    
+
 }

@@ -15,12 +15,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface Authenticated {
 
-	public static final class Literal extends AnnotationLiteral<Authenticated> implements Authenticated {
+    public static final class Literal extends AnnotationLiteral<Authenticated> implements Authenticated {
 
-		public static final Literal INSTANCE = new Literal();
+        public static final Literal INSTANCE = new Literal();
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	}
+    }
 
 }

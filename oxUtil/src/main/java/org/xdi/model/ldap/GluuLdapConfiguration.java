@@ -18,339 +18,322 @@ import org.xdi.model.SimpleProperty;
 
 /**
  * GluuLdapConfiguration
- * 
+ *
  * @author Yuriy Movchan Date: 07.29.2011
  */
 @JsonPropertyOrder({ "configId", "bindDN", "bindPassword", "servers", "maxConnections", "useSSL", "baseDNs",
-		"primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
+        "primaryKey", "localPrimaryKey", "useAnonymousBind", "enabled", "version" })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GluuLdapConfiguration implements Serializable {
 
-	private static final long serialVersionUID = -7160480457430436511L;
+    private static final long serialVersionUID = -7160480457430436511L;
 
-	private String configId;
-	private String bindDN;
-	private String bindPassword;
+    private String configId;
+    private String bindDN;
+    private String bindPassword;
 
-	@JsonIgnore
-	private List<SimpleProperty> servers;
+    @JsonIgnore
+    private List<SimpleProperty> servers;
 
-	@JsonProperty("servers")
-	private List<String> serversStringsList;
+    @JsonProperty("servers")
+    private List<String> serversStringsList;
 
-	private int maxConnections;
-	private boolean useSSL;
+    private int maxConnections;
+    private boolean useSSL;
 
-	@JsonIgnore
-	private List<SimpleProperty> baseDNs;
+    @JsonIgnore
+    private List<SimpleProperty> baseDNs;
 
-	@JsonProperty("baseDNs")
-	private List<String> baseDNsStringsList;
+    @JsonProperty("baseDNs")
+    private List<String> baseDNsStringsList;
 
-	private String primaryKey;
-	private String localPrimaryKey;
-	private boolean useAnonymousBind;
-	private boolean enabled;
-	private int version;
+    private String primaryKey;
+    private String localPrimaryKey;
+    private boolean useAnonymousBind;
+    private boolean enabled;
+    private int version;
 
-	@JsonProperty("level")
-	private int level;
+    @JsonProperty("level")
+    private int level;
 
-	public int getLevel() {
-		return level;
-	}
+    public int getLevel() {
+        return level;
+    }
 
-	public void setLevel(int level) {
-		this.level = level;
-	}
+    public void setLevel(int level) {
+        this.level = level;
+    }
 
-	public GluuLdapConfiguration() {
-		this.servers = new ArrayList<SimpleProperty>();
-		this.baseDNs = new ArrayList<SimpleProperty>();
+    public GluuLdapConfiguration() {
+        this.servers = new ArrayList<SimpleProperty>();
+        this.baseDNs = new ArrayList<SimpleProperty>();
 
-		updateStringsLists();
-	}
+        updateStringsLists();
+    }
 
-	public GluuLdapConfiguration(String configId, String bindDN, String bindPassword, List<String> servers,
-			int maxConnections, boolean useSSL, List<String> baseDNs, String primaryKey, String localPrimaryKey,
-			boolean useAnonymousBind) {
-		this.configId = configId;
-		this.bindDN = bindDN;
-		this.bindPassword = bindPassword;
-		this.serversStringsList = servers;
-		this.maxConnections = maxConnections;
-		this.useSSL = useSSL;
-		this.baseDNsStringsList = baseDNs;
-		this.primaryKey = primaryKey;
-		this.localPrimaryKey = localPrimaryKey;
-		this.useAnonymousBind = useAnonymousBind;
+    public String getConfigId() {
+        return configId;
+    }
 
-		updateSimplePropertiesLists();
-	}
+    public void setConfigId(String configId) {
+        this.configId = configId;
+    }
 
-	public String getConfigId() {
-		return configId;
-	}
+    public String getBindDN() {
+        return bindDN;
+    }
 
-	public void setConfigId(String configId) {
-		this.configId = configId;
-	}
+    public void setBindDN(String bindDN) {
+        this.bindDN = bindDN;
+    }
 
-	public String getBindDN() {
-		return bindDN;
-	}
+    public String getBindPassword() {
+        return bindPassword;
+    }
 
-	public void setBindDN(String bindDN) {
-		this.bindDN = bindDN;
-	}
+    public void setBindPassword(String bindPassword) {
+        this.bindPassword = bindPassword;
+    }
 
-	public String getBindPassword() {
-		return bindPassword;
-	}
+    public List<SimpleProperty> getServers() {
+        return servers;
+    }
 
-	public void setBindPassword(String bindPassword) {
-		this.bindPassword = bindPassword;
-	}
+    public void setServers(List<SimpleProperty> servers) {
+        this.servers = servers;
+    }
 
-	public List<SimpleProperty> getServers() {
-		return servers;
-	}
+    public int getMaxConnections() {
+        return maxConnections;
+    }
 
-	public void setServers(List<SimpleProperty> servers) {
-		this.servers = servers;
-	}
+    public void setMaxConnections(int maxConnections) {
+        this.maxConnections = maxConnections;
+    }
 
-	public int getMaxConnections() {
-		return maxConnections;
-	}
+    public boolean isUseSSL() {
+        return useSSL;
+    }
 
-	public void setMaxConnections(int maxConnections) {
-		this.maxConnections = maxConnections;
-	}
+    public void setUseSSL(boolean useSSL) {
+        this.useSSL = useSSL;
+    }
 
-	public boolean isUseSSL() {
-		return useSSL;
-	}
+    public List<SimpleProperty> getBaseDNs() {
+        return baseDNs;
+    }
 
-	public void setUseSSL(boolean useSSL) {
-		this.useSSL = useSSL;
-	}
+    public void setBaseDNs(List<SimpleProperty> baseDNs) {
+        this.baseDNs = baseDNs;
+    }
 
-	public List<SimpleProperty> getBaseDNs() {
-		return baseDNs;
-	}
+    public String getPrimaryKey() {
+        return primaryKey;
+    }
 
-	public void setBaseDNs(List<SimpleProperty> baseDNs) {
-		this.baseDNs = baseDNs;
-	}
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
+    }
 
-	public String getPrimaryKey() {
-		return primaryKey;
-	}
+    public String getLocalPrimaryKey() {
+        return localPrimaryKey;
+    }
 
-	public void setPrimaryKey(String primaryKey) {
-		this.primaryKey = primaryKey;
-	}
+    public void setLocalPrimaryKey(String localPrimaryKey) {
+        this.localPrimaryKey = localPrimaryKey;
+    }
 
-	public String getLocalPrimaryKey() {
-		return localPrimaryKey;
-	}
+    public boolean isUseAnonymousBind() {
+        return useAnonymousBind;
+    }
 
-	public void setLocalPrimaryKey(String localPrimaryKey) {
-		this.localPrimaryKey = localPrimaryKey;
-	}
+    public void setUseAnonymousBind(boolean useAnonymousBind) {
+        this.useAnonymousBind = useAnonymousBind;
+    }
 
-	public boolean isUseAnonymousBind() {
-		return useAnonymousBind;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-	public void setUseAnonymousBind(boolean useAnonymousBind) {
-		this.useAnonymousBind = useAnonymousBind;
-	}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public int getVersion() {
+        return version;
+    }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public void setVersion(int version) {
+        this.version = version;
+    }
 
-	public int getVersion() {
-		return version;
-	}
+    public List<String> getServersStringsList() {
+        return serversStringsList;
+    }
 
-	public void setVersion(int version) {
-		this.version = version;
-	}
+    public void setServersStringsList(List<String> serversStringsList) {
+        this.serversStringsList = serversStringsList;
 
-	public List<String> getServersStringsList() {
-		return serversStringsList;
-	}
+        updateSimplePropertiesLists();
+    }
 
-	public void setServersStringsList(List<String> serversStringsList) {
-		this.serversStringsList = serversStringsList;
+    public List<String> getBaseDNsStringsList() {
+        return baseDNsStringsList;
+    }
 
-		updateSimplePropertiesLists();
-	}
+    public void setBaseDNsStringsList(List<String> baseDNsStringsList) {
+        this.baseDNsStringsList = baseDNsStringsList;
 
-	public List<String> getBaseDNsStringsList() {
-		return baseDNsStringsList;
-	}
+        updateSimplePropertiesLists();
+    }
 
-	public void setBaseDNsStringsList(List<String> baseDNsStringsList) {
-		this.baseDNsStringsList = baseDNsStringsList;
+    public void updateStringsLists() {
+        this.serversStringsList = toStringList(servers);
+        this.baseDNsStringsList = toStringList(baseDNs);
+    }
 
-		updateSimplePropertiesLists();
-	}
+    public void updateSimplePropertiesLists() {
+        this.servers = toSimpleProperties(serversStringsList);
+        this.baseDNs = toSimpleProperties(baseDNsStringsList);
+    }
 
-	public void updateStringsLists() {
-		this.serversStringsList = toStringList(servers);
-		this.baseDNsStringsList = toStringList(baseDNs);
-	}
+    private List<String> toStringList(List<SimpleProperty> values) {
+        if (values == null) {
+            return null;
+        }
 
-	public void updateSimplePropertiesLists() {
-		this.servers = toSimpleProperties(serversStringsList);
-		this.baseDNs = toSimpleProperties(baseDNsStringsList);
-	}
+        List<String> result = new ArrayList<String>();
 
-	private List<String> toStringList(List<SimpleProperty> values) {
-		if (values == null) {
-			return null;
-		}
+        for (SimpleProperty simpleProperty : values) {
+            result.add(simpleProperty.getValue());
+        }
 
-		List<String> result = new ArrayList<String>();
+        return result;
+    }
 
-		for (SimpleProperty simpleProperty : values) {
-			result.add(simpleProperty.getValue());
-		}
+    private List<SimpleProperty> toSimpleProperties(List<String> values) {
+        if (values == null) {
+            return null;
+        }
 
-		return result;
-	}
+        List<SimpleProperty> result = new ArrayList<SimpleProperty>();
 
-	private List<SimpleProperty> toSimpleProperties(List<String> values) {
-		if (values == null) {
-			return null;
-		}
+        for (String value : values) {
+            result.add(new SimpleProperty(value));
+        }
 
-		List<SimpleProperty> result = new ArrayList<SimpleProperty>();
+        return result;
+    }
 
-		for (String value : values) {
-			result.add(new SimpleProperty(value));
-		}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((baseDNs == null) ? 0 : baseDNs.hashCode());
+        result = prime * result + ((bindDN == null) ? 0 : bindDN.hashCode());
+        result = prime * result + ((bindPassword == null) ? 0 : bindPassword.hashCode());
+        result = prime * result + ((configId == null) ? 0 : configId.hashCode());
+        result = prime * result + (enabled ? 1231 : 1237);
+        result = prime * result + ((localPrimaryKey == null) ? 0 : localPrimaryKey.hashCode());
+        result = prime * result + maxConnections;
+        result = prime * result + ((primaryKey == null) ? 0 : primaryKey.hashCode());
+        result = prime * result + ((servers == null) ? 0 : servers.hashCode());
+        result = prime * result + (useAnonymousBind ? 1231 : 1237);
+        result = prime * result + (useSSL ? 1231 : 1237);
+        result = prime * result + version;
+        return result;
+    }
 
-		return result;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof GluuLdapConfiguration)) {
+            return false;
+        }
+        GluuLdapConfiguration other = (GluuLdapConfiguration) obj;
+        if (baseDNs == null) {
+            if (other.baseDNs != null) {
+                return false;
+            }
+        } else if (!baseDNs.equals(other.baseDNs)) {
+            return false;
+        }
+        if (bindDN == null) {
+            if (other.bindDN != null) {
+                return false;
+            }
+        } else if (!bindDN.equals(other.bindDN)) {
+            return false;
+        }
+        if (bindPassword == null) {
+            if (other.bindPassword != null) {
+                return false;
+            }
+        } else if (!bindPassword.equals(other.bindPassword)) {
+            return false;
+        }
+        if (configId == null) {
+            if (other.configId != null) {
+                return false;
+            }
+        } else if (!configId.equals(other.configId)) {
+            return false;
+        }
+        if (enabled != other.enabled) {
+            return false;
+        }
+        if (localPrimaryKey == null) {
+            if (other.localPrimaryKey != null) {
+                return false;
+            }
+        } else if (!localPrimaryKey.equals(other.localPrimaryKey)) {
+            return false;
+        }
+        if (maxConnections != other.maxConnections) {
+            return false;
+        }
+        if (primaryKey == null) {
+            if (other.primaryKey != null) {
+                return false;
+            }
+        } else if (!primaryKey.equals(other.primaryKey)) {
+            return false;
+        }
+        if (servers == null) {
+            if (other.servers != null) {
+                return false;
+            }
+        } else if (!servers.equals(other.servers)) {
+            return false;
+        }
+        if (useAnonymousBind != other.useAnonymousBind) {
+            return false;
+        }
+        if (useSSL != other.useSSL) {
+            return false;
+        }
+        if (version != other.version) {
+            return false;
+        }
+        return true;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((baseDNs == null) ? 0 : baseDNs.hashCode());
-		result = prime * result + ((bindDN == null) ? 0 : bindDN.hashCode());
-		result = prime * result + ((bindPassword == null) ? 0 : bindPassword.hashCode());
-		result = prime * result + ((configId == null) ? 0 : configId.hashCode());
-		result = prime * result + (enabled ? 1231 : 1237);
-		result = prime * result + ((localPrimaryKey == null) ? 0 : localPrimaryKey.hashCode());
-		result = prime * result + maxConnections;
-		result = prime * result + ((primaryKey == null) ? 0 : primaryKey.hashCode());
-		result = prime * result + ((servers == null) ? 0 : servers.hashCode());
-		result = prime * result + (useAnonymousBind ? 1231 : 1237);
-		result = prime * result + (useSSL ? 1231 : 1237);
-		result = prime * result + version;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof GluuLdapConfiguration)) {
-			return false;
-		}
-		GluuLdapConfiguration other = (GluuLdapConfiguration) obj;
-		if (baseDNs == null) {
-			if (other.baseDNs != null) {
-				return false;
-			}
-		} else if (!baseDNs.equals(other.baseDNs)) {
-			return false;
-		}
-		if (bindDN == null) {
-			if (other.bindDN != null) {
-				return false;
-			}
-		} else if (!bindDN.equals(other.bindDN)) {
-			return false;
-		}
-		if (bindPassword == null) {
-			if (other.bindPassword != null) {
-				return false;
-			}
-		} else if (!bindPassword.equals(other.bindPassword)) {
-			return false;
-		}
-		if (configId == null) {
-			if (other.configId != null) {
-				return false;
-			}
-		} else if (!configId.equals(other.configId)) {
-			return false;
-		}
-		if (enabled != other.enabled) {
-			return false;
-		}
-		if (localPrimaryKey == null) {
-			if (other.localPrimaryKey != null) {
-				return false;
-			}
-		} else if (!localPrimaryKey.equals(other.localPrimaryKey)) {
-			return false;
-		}
-		if (maxConnections != other.maxConnections) {
-			return false;
-		}
-		if (primaryKey == null) {
-			if (other.primaryKey != null) {
-				return false;
-			}
-		} else if (!primaryKey.equals(other.primaryKey)) {
-			return false;
-		}
-		if (servers == null) {
-			if (other.servers != null) {
-				return false;
-			}
-		} else if (!servers.equals(other.servers)) {
-			return false;
-		}
-		if (useAnonymousBind != other.useAnonymousBind) {
-			return false;
-		}
-		if (useSSL != other.useSSL) {
-			return false;
-		}
-		if (version != other.version) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("GluuLdapConfiguration [configId=").append(configId).append(", bindDN=").append(bindDN)
-				.append(", bindPassword=").append(bindPassword).append(", servers=").append(servers)
-				.append(", maxConnections=").append(maxConnections).append(", useSSL=").append(useSSL)
-				.append(", baseDNs=").append(baseDNs).append(", primaryKey=").append(primaryKey)
-				.append(", localPrimaryKey=").append(localPrimaryKey).append(", useAnonymousBind=")
-				.append(useAnonymousBind).append(", enabled=").append(enabled).append(", version=").append(version)
-				.append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("GluuLdapConfiguration [configId=").append(configId).append(", bindDN=").append(bindDN)
+                .append(", bindPassword=").append(bindPassword).append(", servers=").append(servers)
+                .append(", maxConnections=").append(maxConnections).append(", useSSL=").append(useSSL)
+                .append(", baseDNs=").append(baseDNs).append(", primaryKey=").append(primaryKey)
+                .append(", localPrimaryKey=").append(localPrimaryKey).append(", useAnonymousBind=")
+                .append(useAnonymousBind).append(", enabled=").append(enabled).append(", version=").append(version)
+                .append("]");
+        return builder.toString();
+    }
 
 }

@@ -11,48 +11,48 @@ import java.util.Map;
 
 /**
  * Allowed authentication modes
- * 
+ *
  * @author Yuriy Movchan Date: 08/08/2013
  */
 public enum AuthenticationMode {
 
-	BASIC("basic", "Basic"), OAUTH("oauth", "OAuth"), UMA("uma", "UMA");
+    BASIC("basic", "Basic"), OAUTH("oauth", "OAuth"), UMA("uma", "UMA");
 
-	private final String value;
-	private final String displayName;
+    private final String value;
+    private final String displayName;
 
-	private final static Map<String, AuthenticationMode> mapByValues = new HashMap<String, AuthenticationMode>();
+    private static final Map<String, AuthenticationMode> MAP_BY_VALUES = new HashMap<String, AuthenticationMode>();
 
-	static {
-		for (AuthenticationMode enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (AuthenticationMode enumType : values()) {
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
+        }
+    }
 
-	private AuthenticationMode(String value, String displayName) {
-		this.value = value;
-		this.displayName = displayName;
-	}
+    AuthenticationMode(String value, String displayName) {
+        this.value = value;
+        this.displayName = displayName;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public static AuthenticationMode getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static AuthenticationMode getByValue(String value) {
+        return MAP_BY_VALUES.get(value);
+    }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public AuthenticationMode resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public AuthenticationMode resolveByValue(String value) {
+        return getByValue(value);
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

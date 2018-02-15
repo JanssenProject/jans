@@ -16,24 +16,24 @@ import org.xdi.model.SimpleCustomProperty;
  */
 public class DummyCacheRefreshType implements CacheRefreshType {
 
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-		return true;
-	}
+    @Override
+    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
-		return true;
-	}
+    @Override
+    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
 
-	@Override
-	public int getApiVersion() {
-		return 1;
-	}
+    @Override
+    public int getApiVersion() {
+        return 1;
+    }
 
-	@Override
-	public boolean updateUser(Object person, Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
-	}
+    @Override
+    public boolean updateUser(Object person, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
 
 }

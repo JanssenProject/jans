@@ -36,7 +36,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
     private static String REWRITE = "rewrite";
     private static final String DEFAULT_NAVIGATION_PATH = "META-INF/navigation";
     private static final String WEB_INF_PATH = "/WEB-INF";
-    
+
     private Logger log = LoggerFactory.getLogger(AccessRewriteConfiguration.class);
 
     @Override
@@ -60,7 +60,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
             FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't parse rewrite rules", ex);
         } catch (IOException ex) {
             FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't load navigation rules", ex);
-		}
+        }
         return builder;
     }
 
@@ -79,7 +79,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
                     builder.addRule(Join.path(rewriteMap.get(rewriteKey)).to(xhtmlUri + ".htm"));
                     log.debug("Added rule {} from navigation.xml {}", xhtmlUri + ".htm", rewriteMap.get(rewriteKey));
                 } else {
-                	if (!xhtmlUri.startsWith(WEB_INF_PATH)) {
+                    if (!xhtmlUri.startsWith(WEB_INF_PATH)) {
                         String joinPath = xhtmlUri;
                         String to = xhtmlUri + ".htm";
                         if (isTomcat()) {
@@ -89,7 +89,7 @@ public class AccessRewriteConfiguration extends HttpConfigurationProvider {
 
                         builder.addRule(Join.path(joinPath).to(to));
                         log.debug("Added rewrite rule {} to {}", to, joinPath);
-                	}
+                    }
                 }
             } catch (ParameterizedPatternSyntaxException ex) {
                 FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Failed to add rule for " + xhtmlPath, ex);

@@ -19,10 +19,10 @@ import javax.interceptor.InterceptorBinding;
 @Documented
 public @interface Secure {
 
-	/**
+    /**
      * @return The EL expression that should be evaluated. If it evaluates to {@code true}, access will be granted.
      * The EL expression may reference any objects that are in any context
      */
-	String value();
+    String value();
 
 }

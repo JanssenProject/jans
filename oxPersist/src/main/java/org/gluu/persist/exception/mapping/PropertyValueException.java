@@ -17,28 +17,28 @@ import org.xdi.util.StringHelper;
  */
 public class PropertyValueException extends BaseMappingException {
 
-	private static final long serialVersionUID = 6163726276249820546L;
+    private static final long serialVersionUID = 6163726276249820546L;
 
-	private final String entityName;
-	private final String propertyName;
+    private final String entityName;
+    private final String propertyName;
 
-	public PropertyValueException(String s, String entityName, String propertyName) {
-		super(s);
-		this.entityName = entityName;
-		this.propertyName = propertyName;
-	}
+    public PropertyValueException(String s, String entityName, String propertyName) {
+        super(s);
+        this.entityName = entityName;
+        this.propertyName = propertyName;
+    }
 
-	public String getEntityName() {
-		return entityName;
-	}
+    public String getEntityName() {
+        return entityName;
+    }
 
-	public String getPropertyName() {
-		return propertyName;
-	}
+    public String getPropertyName() {
+        return propertyName;
+    }
 
-	@Override
-	public String getMessage() {
-		return super.getMessage() + ": " + StringHelper.qualify(entityName, propertyName);
-	}
+    @Override
+    public String getMessage() {
+        return super.getMessage() + ": " + StringHelper.qualify(entityName, propertyName);
+    }
 
 }

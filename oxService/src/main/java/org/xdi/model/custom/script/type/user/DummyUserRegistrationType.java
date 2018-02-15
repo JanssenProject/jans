@@ -16,43 +16,43 @@ import org.xdi.model.SimpleCustomProperty;
  */
 public class DummyUserRegistrationType implements UserRegistrationType {
 
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-		return true;
-	}
+    @Override
+    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
-		return true;
-	}
+    @Override
+    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
 
-	@Override
-	public int getApiVersion() {
-		return 1;
-	}
+    @Override
+    public int getApiVersion() {
+        return 1;
+    }
 
-	@Override
-	public boolean initRegistration(Object user, Map<String, String[]> requestParameters,
-			Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
-	}
+    @Override
+    public boolean initRegistration(Object user, Map<String, String[]> requestParameters,
+            Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
 
-	@Override
-	public boolean preRegistration(Object user, Map<String, String[]> requestParameters,
-			Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
-	}
+    @Override
+    public boolean preRegistration(Object user, Map<String, String[]> requestParameters,
+            Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
 
-	@Override
-	public boolean postRegistration(Object user, Map<String, String[]> requestParameters,
-			Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
-	}
+    @Override
+    public boolean postRegistration(Object user, Map<String, String[]> requestParameters,
+            Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
 
-	@Override
-	public boolean confirmRegistration(Object user,	Map<String, String[]> requestParameters,
-			Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
-	}
-	
+    @Override
+    public boolean confirmRegistration(Object user,    Map<String, String[]> requestParameters,
+            Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
+
 }

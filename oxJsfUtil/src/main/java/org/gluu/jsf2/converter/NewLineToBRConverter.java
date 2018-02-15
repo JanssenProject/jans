@@ -19,12 +19,12 @@ import org.apache.commons.lang.StringEscapeUtils;
 @FacesConverter("org.gluu.jsf2.converter.newLineToBRConverter")
 public class NewLineToBRConverter implements Converter {
 
-	public Object getAsObject(FacesContext arg0, UIComponent converter, String str) {
-		return str;
-	}
+    public Object getAsObject(FacesContext arg0, UIComponent converter, String str) {
+        return str;
+    }
 
-	public String getAsString(FacesContext arg0, UIComponent converter, Object obj) {
-		return StringEscapeUtils.escapeHtml((String) obj).replace("\r\n", "<br/>").replace("\n", "<br/>");
-	}
+    public String getAsString(FacesContext arg0, UIComponent converter, Object obj) {
+        return StringEscapeUtils.escapeHtml((String) obj).replace("\r\n", "<br/>").replace("\n", "<br/>");
+    }
 
 }

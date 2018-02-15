@@ -20,11 +20,11 @@ public enum SortOrder implements LdapEnum {
 
     private String value;
 
-    private static Map<String, SortOrder> mapByValues = new HashMap<String, SortOrder>();
+    private static Map<String, SortOrder> MAP_BY_VALUES = new HashMap<String, SortOrder>();
 
     static {
         for (SortOrder enumType : values()) {
-            mapByValues.put(enumType.getValue(), enumType);
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
         }
     }
 
@@ -38,7 +38,7 @@ public enum SortOrder implements LdapEnum {
     }
 
     public static SortOrder getByValue(String value) {
-        return mapByValues.get(value);
+        return MAP_BY_VALUES.get(value);
     }
 
     @Override

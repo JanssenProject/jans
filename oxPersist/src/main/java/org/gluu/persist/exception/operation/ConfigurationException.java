@@ -8,27 +8,27 @@ package org.gluu.persist.exception.operation;
 
 /**
  * Configuration exception
- * 
+ *
  * @author Yuriy Movchan
  * @version 0.1, 05/16/2013
  */
 public class ConfigurationException extends RuntimeException {
 
-	private static final long serialVersionUID = -7590161991536595499L;
+    private static final long serialVersionUID = -7590161991536595499L;
 
-	public ConfigurationException() {
-	}
+    public ConfigurationException() {
+    }
 
-	public ConfigurationException(String message) {
-		super(message);
-	}
+    public ConfigurationException(String message) {
+        super(message);
+    }
 
-	public ConfigurationException(Throwable cause) {
-		super(cause);
-	}
+    public ConfigurationException(Throwable cause) {
+        super(cause);
+    }
 
-	public ConfigurationException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public ConfigurationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

@@ -18,6 +18,6 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  */
 public interface DynamicScopeType extends BaseExternalType {
 
-	public boolean update(Object dynamicScopeContext, Map<String, SimpleCustomProperty> configurationAttributes);
+    public boolean update(Object dynamicScopeContext, Map<String, SimpleCustomProperty> configurationAttributes);
 
 }

@@ -14,9 +14,9 @@ import java.util.List;
  */
 public class ListViewResponse<T> implements Serializable {
 
-	private static final long serialVersionUID = -4211997747213144092L;
+    private static final long serialVersionUID = -4211997747213144092L;
 
-	private int totalResults;
+    private int totalResults;
     private int itemsPerPage;
     private int startIndex;
     List<T> result;
@@ -45,12 +45,12 @@ public class ListViewResponse<T> implements Serializable {
         this.startIndex = startIndex;
     }
 
-	public final List<T> getResult() {
-		return result;
-	}
+    public final List<T> getResult() {
+        return result;
+    }
 
-	public final void setResult(List<T> result) {
-		this.result = result;
-	}
+    public final void setResult(List<T> result) {
+        this.result = result;
+    }
 
 }

@@ -23,9 +23,9 @@ import org.xdi.model.custom.script.model.CustomScript;
  */
 public abstract class AbstractCustomScriptService implements Serializable {
 
-	private static final long serialVersionUID = -6187179012715072064L;
+    private static final long serialVersionUID = -6187179012715072064L;
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject
@@ -44,40 +44,40 @@ public abstract class AbstractCustomScriptService implements Serializable {
      }
 
     public CustomScript getCustomScriptByDn(String customScriptDn) {
-		return ldapEntryManager.find(CustomScript.class, customScriptDn);
-	}
+        return ldapEntryManager.find(CustomScript.class, customScriptDn);
+    }
 
     public CustomScript getCustomScriptByDn(Class<?> customScriptType, String customScriptDn) {
-		return (CustomScript) ldapEntryManager.find(customScriptType, customScriptDn);
-	}
+        return (CustomScript) ldapEntryManager.find(customScriptType, customScriptDn);
+    }
 
     public List<CustomScript> findAllCustomScripts(String[] returnAttributes) {
         String baseDn = baseDn();
 
         List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, null, returnAttributes);
 
-		return result;
-	}
+        return result;
+    }
 
     public List<CustomScript> findCustomScripts(List<CustomScriptType> customScriptTypes, String ... returnAttributes) {
         String baseDn = baseDn();
-        
+    
         if ((customScriptTypes == null) || (customScriptTypes.size() == 0)) {
-        	return findAllCustomScripts(returnAttributes);
+            return findAllCustomScripts(returnAttributes);
         }
-        
+    
         List<Filter> customScriptTypeFilters = new ArrayList<Filter>();
         for (CustomScriptType customScriptType : customScriptTypes) {
-        	Filter customScriptTypeFilter = Filter.createEqualityFilter("oxScriptType", customScriptType.getValue());
-        	customScriptTypeFilters.add(customScriptTypeFilter);
+            Filter customScriptTypeFilter = Filter.createEqualityFilter("oxScriptType", customScriptType.getValue());
+            customScriptTypeFilters.add(customScriptTypeFilter);
         }
-        		
+            
         Filter filter = Filter.createORFilter(customScriptTypeFilters);
 
         List<CustomScript> result = ldapEntryManager.findEntries(baseDn, CustomScript.class, filter, returnAttributes);
 
-		return result;
-	}
+        return result;
+    }
 
     public String buildDn(String customScriptId) {
         final StringBuilder dn = new StringBuilder();

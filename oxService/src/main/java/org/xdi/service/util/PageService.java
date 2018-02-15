@@ -10,22 +10,22 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by eugeniuparvan on 12/22/16.
- * 
+ *
  * @author Yuriy Movchan
  */
 @Stateless
 @Named
 public class PageService {
 
-	private static final DateFormat currentDateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+    private static final DateFormat currentDateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
 
-	public String getRootUrlByRequest(HttpServletRequest request) {
-		String url = request.getRequestURL().toString();
-		return url.substring(0, url.length() - request.getRequestURI().length());
-	}
+    public String getRootUrlByRequest(HttpServletRequest request) {
+        String url = request.getRequestURL().toString();
+        return url.substring(0, url.length() - request.getRequestURI().length());
+    }
 
-	public String getCurrentDateTime() {
-		return currentDateTimeFormatter.format(new Date());
-	}
+    public String getCurrentDateTime() {
+        return currentDateTimeFormatter.format(new Date());
+    }
 
 }

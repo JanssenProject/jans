@@ -13,49 +13,49 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * Metric application type
- * 
+ *
  * @author Yuriy Movchan Date: 07/28/2015
  */
 public enum ApplicationType implements LdapEnum {
 
-	OX_AUTH("oxauth", "oxAuth"),
-	OX_TRUST("oxtrust", "oxTrust");
+    OX_AUTH("oxauth", "oxAuth"),
+    OX_TRUST("oxtrust", "oxTrust");
 
-	private String value;
-	private String displayName;
+    private String value;
+    private String displayName;
 
-	private static Map<String, ApplicationType> mapByValues = new HashMap<String, ApplicationType>();
+    private static Map<String, ApplicationType> MAP_BY_VALUES = new HashMap<String, ApplicationType>();
 
-	static {
-		for (ApplicationType enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (ApplicationType enumType : values()) {
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
+        }
+    }
 
-	private ApplicationType(String value, String displayName) {
-		this.value = value;
-		this.displayName = displayName;
-	}
+    private ApplicationType(String value, String displayName) {
+        this.value = value;
+        this.displayName = displayName;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public static ApplicationType getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static ApplicationType getByValue(String value) {
+        return MAP_BY_VALUES.get(value);
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

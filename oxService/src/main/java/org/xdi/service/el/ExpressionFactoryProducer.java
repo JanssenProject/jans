@@ -9,10 +9,10 @@ import javax.enterprise.inject.Produces;
  */
 public class ExpressionFactoryProducer {
 
-	@Produces
-	@ApplicationScoped
-	public ExpressionFactory createExpressionFactory() {
-		return ExpressionFactory.newInstance();
-	}
+    @Produces
+    @ApplicationScoped
+    public ExpressionFactory createExpressionFactory() {
+        return ExpressionFactory.newInstance();
+    }
 
 }

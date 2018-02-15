@@ -18,12 +18,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface ConfigurationUpdate {
 
-	public static final class Literal extends AnnotationLiteral<ConfigurationUpdate> implements ConfigurationUpdate {
+    public static final class Literal extends AnnotationLiteral<ConfigurationUpdate> implements ConfigurationUpdate {
 
-		public static final Literal INSTANCE = new Literal();
+        public static final Literal INSTANCE = new Literal();
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	}
+    }
 
 }

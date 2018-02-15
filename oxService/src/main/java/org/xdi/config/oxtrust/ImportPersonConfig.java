@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * oxTrust configuration
- * 
+ *
  * @author shekhar laad
  * @date 12/10/2015
  */
@@ -16,17 +16,17 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Vetoed
 public class ImportPersonConfig implements Configuration, Serializable {
-	
-	private static final long serialVersionUID = 2686538577505167695L;
 
-	private List <ImportPerson> mappings;
+    private static final long serialVersionUID = 2686538577505167695L;
 
-	public List<ImportPerson> getMappings() {
-		return mappings;
-	}
+    private List <ImportPerson> mappings;
 
-	public void setMappings(List<ImportPerson> mappings) {
-		this.mappings = mappings;
-	}
+    public List<ImportPerson> getMappings() {
+        return mappings;
+    }
+
+    public void setMappings(List<ImportPerson> mappings) {
+        this.mappings = mappings;
+    }
 
 }

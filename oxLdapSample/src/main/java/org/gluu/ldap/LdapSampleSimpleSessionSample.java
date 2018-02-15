@@ -17,74 +17,74 @@ import org.xdi.log.LoggingHelper;
  */
 public class LdapSampleSimpleSessionSample {
 
-	private static final Logger log;
+    private static final Logger log;
 
-	static {
-		StatusLogger.getLogger().setLevel(Level.OFF);
-		LoggingHelper.configureConsoleAppender();
-		log = Logger.getLogger(LdapSampleSimpleSessionSample.class);
-	}
+    static {
+        StatusLogger.getLogger().setLevel(Level.OFF);
+        LoggingHelper.configureConsoleAppender();
+        log = Logger.getLogger(LdapSampleSimpleSessionSample.class);
+    }
 
-	public static void main(String[] args) throws InterruptedException {
-		// Prepare sample connection details
-		LdapSampleEntryManager ldapSampleEntryManager = new LdapSampleEntryManager();
-		final LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
+    public static void main(String[] args) throws InterruptedException {
+        // Prepare sample connection details
+        LdapSampleEntryManager ldapSampleEntryManager = new LdapSampleEntryManager();
+        final LdapEntryManager ldapEntryManager = ldapSampleEntryManager.createLdapEntryManager();
 
-		try {
+        try {
 
-			// Create LDAP entry manager
-			String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad561";
-			final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
-			final String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
+            // Create LDAP entry manager
+            String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad561";
+            final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
+            final String userDn = "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163,o=gluu";
 
-			final SimpleSessionState simpleSessionState = new SimpleSessionState();
-			simpleSessionState.setDn(sessionDn);
-			simpleSessionState.setId(sessionId);
-			simpleSessionState.setLastUsedAt(new Date());
+            final SimpleSessionState simpleSessionState = new SimpleSessionState();
+            simpleSessionState.setDn(sessionDn);
+            simpleSessionState.setId(sessionId);
+            simpleSessionState.setLastUsedAt(new Date());
 
-			ldapEntryManager.persist(simpleSessionState);
-			System.out.println("Persisted");
+            ldapEntryManager.persist(simpleSessionState);
+            System.out.println("Persisted");
 
 
-			int threadCount = 500;
-			ExecutorService executorService = Executors.newFixedThreadPool(threadCount, daemonThreadFactory());
-			for (int i = 0; i < threadCount; i++) {
-				final int count = i;
-				executorService.execute(new Runnable() {
-					@Override
-					public void run() {
-						final SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
-						String beforeUserDn = simpleSessionStateFromLdap.getUserDn();
-						String randomUserDn = count % 2 == 0 ? userDn : "";
+            int threadCount = 500;
+            ExecutorService executorService = Executors.newFixedThreadPool(threadCount, daemonThreadFactory());
+            for (int i = 0; i < threadCount; i++) {
+                final int count = i;
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final SimpleSessionState simpleSessionStateFromLdap = ldapEntryManager.find(SimpleSessionState.class, sessionDn);
+                        String beforeUserDn = simpleSessionStateFromLdap.getUserDn();
+                        String randomUserDn = count % 2 == 0 ? userDn : "";
 
-						try {
-							simpleSessionStateFromLdap.setUserDn(randomUserDn);
-							simpleSessionStateFromLdap.setLastUsedAt(new Date());
-							ldapEntryManager.merge(simpleSessionStateFromLdap);
-							System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn);
-						} catch (Throwable e) {
-							System.out.println("ERROR !!!, thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn + ", error:" + e.getMessage());
-//							e.printStackTrace();
-						}
-					}
-				});
-			}
+                        try {
+                            simpleSessionStateFromLdap.setUserDn(randomUserDn);
+                            simpleSessionStateFromLdap.setLastUsedAt(new Date());
+                            ldapEntryManager.merge(simpleSessionStateFromLdap);
+                            System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn);
+                        } catch (Throwable e) {
+                            System.out.println("ERROR !!!, thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn + ", error:" + e.getMessage());
+//                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
 
-			Thread.sleep(5000L);
-		} finally {
-			ldapEntryManager.getOperationService().getConnectionPool().close();
-		}
-	}
+            Thread.sleep(5000L);
+        } finally {
+            ldapEntryManager.getOperationService().getConnectionPool().close();
+        }
+    }
 
-	public static ThreadFactory daemonThreadFactory() {
-		return new ThreadFactory() {
-			public Thread newThread(Runnable p_r) {
-				Thread thread = new Thread(p_r);
-				thread.setDaemon(true);
-				return thread;
-			}
-		};
-	}
+    public static ThreadFactory daemonThreadFactory() {
+        return new ThreadFactory() {
+            public Thread newThread(Runnable p_r) {
+                Thread thread = new Thread(p_r);
+                thread.setDaemon(true);
+                return thread;
+            }
+        };
+    }
 
 
 }

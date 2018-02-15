@@ -13,13 +13,13 @@ import org.gluu.persist.exception.mapping.PropertyNotFoundException;
  * value of an attribute.
  */
 public interface PropertyAccessor {
-	/**
-	 * Create a "getter" for the named attribute
-	 */
-	public Getter getGetter(Class<?> theClass, String propertyName) throws PropertyNotFoundException;
+    /**
+     * Create a "getter" for the named attribute
+     */
+    public Getter getGetter(Class<?> theClass, String propertyName) throws PropertyNotFoundException;
 
-	/**
-	 * Create a "setter" for the named attribute
-	 */
-	public Setter getSetter(Class<?> theClass, String propertyName) throws PropertyNotFoundException;
+    /**
+     * Create a "setter" for the named attribute
+     */
+    public Setter getSetter(Class<?> theClass, String propertyName) throws PropertyNotFoundException;
 }

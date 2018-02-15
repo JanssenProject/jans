@@ -23,42 +23,42 @@ import org.xdi.util.StringHelper;
 @LdapObjectClass(values = { "top" })
 public class CustomEntry extends BaseEntry implements Serializable {
 
-	private static final long serialVersionUID = -7686468010219068788L;
+    private static final long serialVersionUID = -7686468010219068788L;
 
-	@LdapAttributesList(name = "name", value = "values", sortByName = true)
-	private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    @LdapAttributesList(name = "name", value = "values", sortByName = true)
+    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
     @LdapCustomObjectClass
     private String[] customObjectClasses;
 
-	public List<CustomAttribute> getCustomAttributes() {
-		return customAttributes;
-	}
+    public List<CustomAttribute> getCustomAttributes() {
+        return customAttributes;
+    }
 
-	public String getCustomAttributeValue(String attributeName) {
-		if (customAttributes == null) {
-			return null;
-		}
-		
-		for (CustomAttribute customAttribute : customAttributes) {
-			if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
-				return customAttribute.getValue();
-			}
-		}
+    public String getCustomAttributeValue(String attributeName) {
+        if (customAttributes == null) {
+            return null;
+        }
+    
+        for (CustomAttribute customAttribute : customAttributes) {
+            if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
+                return customAttribute.getValue();
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public void setCustomAttributes(List<CustomAttribute> customAttributes) {
-		this.customAttributes = customAttributes;
-	}
+    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+        this.customAttributes = customAttributes;
+    }
 
-	public String[] getCustomObjectClasses() {
-		return customObjectClasses;
-	}
+    public String[] getCustomObjectClasses() {
+        return customObjectClasses;
+    }
 
-	public void setCustomObjectClasses(String[] customObjectClasses) {
-		this.customObjectClasses = customObjectClasses;
-	}
+    public void setCustomObjectClasses(String[] customObjectClasses) {
+        this.customObjectClasses = customObjectClasses;
+    }
 
 }

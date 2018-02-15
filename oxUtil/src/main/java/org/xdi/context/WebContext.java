@@ -12,118 +12,118 @@ import javax.servlet.http.HttpSession;
 
 /**
  * This is interface for J2E context wrapper
- * 
+ *
  * @author Yuriy Movchan 11/14/2014
  */
 public interface WebContext {
 
-	/**
-	 * Return a request parameter
-	 * 
-	 * @param name
-	 * @return the request parameter
-	 */
-	public String getRequestParameter(String name);
+    /**
+     * Return a request parameter
+     *
+     * @param name
+     * @return the request parameter
+     */
+    String getRequestParameter(String name);
 
-	/**
-	 * Return all request parameters
-	 * 
-	 * @return all request parameters
-	 */
-	public Map<String, String[]> getRequestParameters();
+    /**
+     * Return all request parameters
+     *
+     * @return all request parameters
+     */
+    Map<String, String[]> getRequestParameters();
 
-	/**
-	 * Return a request header
-	 * 
-	 * @param name
-	 * @return the request header
-	 */
-	public String getRequestHeader(String name);
+    /**
+     * Return a request header
+     *
+     * @param name
+     * @return the request header
+     */
+    String getRequestHeader(String name);
 
-	/**
-	 * Save an attribute in session
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	public void setSessionAttribute(String name, Object value);
+    /**
+     * Save an attribute in session
+     *
+     * @param name
+     * @param value
+     */
+    void setSessionAttribute(String name, Object value);
 
-	/**
-	 * Get an attribute from session
-	 * 
-	 * @param name
-	 * @return the session attribute
-	 */
-	public Object getSessionAttribute(String name);
+    /**
+     * Get an attribute from session
+     *
+     * @param name
+     * @return the session attribute
+     */
+    Object getSessionAttribute(String name);
 
-	/**
-	 * Save an attribute in request
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	public void setRequestAttribute(final String name, final Object value);
+    /**
+     * Save an attribute in request
+     *
+     * @param name
+     * @param value
+     */
+    void setRequestAttribute(final String name, final Object value);
 
-	/**
-	 * Get an attribute from request
-	 * 
-	 * @param name
-	 * @return the request attribute
-	 */
-	public Object getRequestAttribute(final String name);
+    /**
+     * Get an attribute from request
+     *
+     * @param name
+     * @return the request attribute
+     */
+    Object getRequestAttribute(final String name);
 
-	/**
-	 * Return the request method
-	 * 
-	 * @return the request method
-	 */
-	public String getRequestMethod();
+    /**
+     * Return the request method
+     *
+     * @return the request method
+     */
+    String getRequestMethod();
 
-	/**
-	 * Write some content in the response
-	 * 
-	 * @param content
-	 */
-	public void writeResponseContent(String content) throws IOException;
+    /**
+     * Write some content in the response
+     *
+     * @param content
+     */
+    void writeResponseContent(String content) throws IOException;
 
-	/**
-	 * Add a header to the response
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	public void setResponseHeader(String name, String value);
+    /**
+     * Add a header to the response
+     *
+     * @param name
+     * @param value
+     */
+    void setResponseHeader(String name, String value);
 
-	/**
-	 * Return the server name
-	 * 
-	 * @return the server name
-	 */
-	public String getServerName();
+    /**
+     * Return the server name
+     *
+     * @return the server name
+     */
+    String getServerName();
 
-	/**
-	 * Return the server port
-	 * 
-	 * @return the server port
-	 */
-	public int getServerPort();
+    /**
+     * Return the server port
+     *
+     * @return the server port
+     */
+    int getServerPort();
 
-	/**
-	 * Return the scheme
-	 * 
-	 * @return the scheme
-	 */
-	public String getScheme();
+    /**
+     * Return the scheme
+     *
+     * @return the scheme
+     */
+    String getScheme();
 
-	/**
-	 * Return the full URL (with query string) the client used to request the server
-	 * 
-	 * @return the Url
-	 */
-	public String getFullRequestURL();
+    /**
+     * Return the full URL (with query string) the client used to request the server
+     *
+     * @return the Url
+     */
+    String getFullRequestURL();
 
-	public void sendRedirect(String location) throws IOException;
+    void sendRedirect(String location) throws IOException;
 
-	public HttpSession getSession(boolean create);
+    HttpSession getSession(boolean create);
 
 }

@@ -27,86 +27,86 @@ import org.xdi.util.StringHelper;
  */
 public class ExternalScriptService implements Serializable {
 
-	private static final long serialVersionUID = -1070021905117441202L;
+    private static final long serialVersionUID = -1070021905117441202L;
 
-	@Inject
-	protected Logger log;
+    @Inject
+    protected Logger log;
 
-	@Inject
-	protected CustomScriptManager customScriptManager;
+    @Inject
+    protected CustomScriptManager customScriptManager;
 
-	protected CustomScriptType customScriptType;
+    protected CustomScriptType customScriptType;
 
-	protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
-	protected List<CustomScriptConfiguration> customScriptConfigurations;
-	protected CustomScriptConfiguration defaultExternalCustomScript;
+    protected Map<String, CustomScriptConfiguration> customScriptConfigurationsNameMap;
+    protected List<CustomScriptConfiguration> customScriptConfigurations;
+    protected CustomScriptConfiguration defaultExternalCustomScript;
 
-	public ExternalScriptService(CustomScriptType customScriptType) {
-		this.customScriptType = customScriptType;
-	}
+    public ExternalScriptService(CustomScriptType customScriptType) {
+        this.customScriptType = customScriptType;
+    }
 
-	public void reload(@Observes @ReloadScript String event) {
-		// Get actual list of external configurations
-		List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(customScriptType);
-		addExternalConfigurations(newCustomScriptConfigurations);
-		
-		this.customScriptConfigurations = newCustomScriptConfigurations; 
-		this.customScriptConfigurationsNameMap = buildExternalConfigurationsNameMap(customScriptConfigurations);
+    public void reload(@Observes @ReloadScript String event) {
+        // Get actual list of external configurations
+        List<CustomScriptConfiguration> newCustomScriptConfigurations = customScriptManager.getCustomScriptConfigurationsByScriptType(customScriptType);
+        addExternalConfigurations(newCustomScriptConfigurations);
+    
+        this.customScriptConfigurations = newCustomScriptConfigurations;
+        this.customScriptConfigurationsNameMap = buildExternalConfigurationsNameMap(customScriptConfigurations);
 
-		// Determine default configuration
-		this.defaultExternalCustomScript = determineDefaultCustomScriptConfiguration(this.customScriptConfigurations);
-		
-		// Allow to execute additional logic
-		reloadExternal();
-	}
+        // Determine default configuration
+        this.defaultExternalCustomScript = determineDefaultCustomScriptConfiguration(this.customScriptConfigurations);
+    
+        // Allow to execute additional logic
+        reloadExternal();
+    }
 
-	protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
-	}
+    protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
+    }
 
-	protected void reloadExternal() {
-	}
+    protected void reloadExternal() {
+    }
 
-	private Map<String, CustomScriptConfiguration> buildExternalConfigurationsNameMap(List<CustomScriptConfiguration> customScriptConfigurations) {
-		Map<String, CustomScriptConfiguration> reloadedExternalConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations.size());
-		
-		for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurations) {
-			reloadedExternalConfigurations.put(StringHelper.toLowerCase(customScriptConfiguration.getName()), customScriptConfiguration);
-		}
+    private Map<String, CustomScriptConfiguration> buildExternalConfigurationsNameMap(List<CustomScriptConfiguration> customScriptConfigurations) {
+        Map<String, CustomScriptConfiguration> reloadedExternalConfigurations = new HashMap<String, CustomScriptConfiguration>(customScriptConfigurations.size());
+    
+        for (CustomScriptConfiguration customScriptConfiguration : customScriptConfigurations) {
+            reloadedExternalConfigurations.put(StringHelper.toLowerCase(customScriptConfiguration.getName()), customScriptConfiguration);
+        }
 
-		return reloadedExternalConfigurations;
-	}
+        return reloadedExternalConfigurations;
+    }
 
-	public CustomScriptConfiguration determineDefaultCustomScriptConfiguration(List<CustomScriptConfiguration> customScriptConfigurations) {
-		CustomScriptConfiguration defaultExternalCustomScript = null;
-		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
-			// Determine default script. It has lower level than others
-			if ((defaultExternalCustomScript == null) ||
-					(defaultExternalCustomScript.getLevel() >= customScriptConfiguration.getLevel())) {
-				defaultExternalCustomScript = customScriptConfiguration;
-			}
-		}
-		
-		return defaultExternalCustomScript;
-	}
+    public CustomScriptConfiguration determineDefaultCustomScriptConfiguration(List<CustomScriptConfiguration> customScriptConfigurations) {
+        CustomScriptConfiguration defaultExternalCustomScript = null;
+        for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+            // Determine default script. It has lower level than others
+            if ((defaultExternalCustomScript == null) ||
+                    (defaultExternalCustomScript.getLevel() >= customScriptConfiguration.getLevel())) {
+                defaultExternalCustomScript = customScriptConfiguration;
+            }
+        }
+    
+        return defaultExternalCustomScript;
+    }
 
-	public boolean isEnabled() {
-		if (this.customScriptConfigurations == null) {
-			return false;
-		}
+    public boolean isEnabled() {
+        if (this.customScriptConfigurations == null) {
+            return false;
+        }
 
-		return this.customScriptConfigurations.size() > 0;
-	}
+        return this.customScriptConfigurations.size() > 0;
+    }
 
-	public CustomScriptConfiguration getCustomScriptConfigurationByName(String name) {
-		return this.customScriptConfigurationsNameMap.get(StringHelper.toLowerCase(name));
-	}
+    public CustomScriptConfiguration getCustomScriptConfigurationByName(String name) {
+        return this.customScriptConfigurationsNameMap.get(StringHelper.toLowerCase(name));
+    }
 
-	public CustomScriptConfiguration getDefaultExternalCustomScript() {
-		return defaultExternalCustomScript;
-	}
+    public CustomScriptConfiguration getDefaultExternalCustomScript() {
+        return defaultExternalCustomScript;
+    }
 
-	public List<CustomScriptConfiguration> getCustomScriptConfigurations() {
-		return this.customScriptConfigurations;
-	}
+    public List<CustomScriptConfiguration> getCustomScriptConfigurations() {
+        return this.customScriptConfigurations;
+    }
 
 }

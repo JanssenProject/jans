@@ -14,19 +14,19 @@ import javax.inject.Inject;
  */
 public class MemcachedProvider extends AbstractCacheProvider<MemcachedClient> {
 
-	@Inject
+    @Inject
     private Logger log;
 
     @Inject
     private CacheConfiguration cacheConfiguration;
 
-	private MemcachedConfiguration memcachedConfiguration;
+    private MemcachedConfiguration memcachedConfiguration;
 
     public MemcachedProvider() {}
 
     @PostConstruct
     public void init() {
-    	this.memcachedConfiguration = cacheConfiguration.getMemcachedConfiguration();
+        this.memcachedConfiguration = cacheConfiguration.getMemcachedConfiguration();
     }
 
     private MemcachedClient client;

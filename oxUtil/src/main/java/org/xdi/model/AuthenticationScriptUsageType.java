@@ -13,48 +13,48 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * Authentication script type
- * 
+ *
  * @author Yuriy Movchan Date: 05/06/2013
  */
 public enum AuthenticationScriptUsageType implements LdapEnum {
 
-	INTERACTIVE("interactive", "Web"), SERVICE("service", "Native"), BOTH("both", "Both methods");
+    INTERACTIVE("interactive", "Web"), SERVICE("service", "Native"), BOTH("both", "Both methods");
 
-	private String value;
-	private String displayName;
+    private String value;
+    private String displayName;
 
-	private static Map<String, AuthenticationScriptUsageType> mapByValues = new HashMap<String, AuthenticationScriptUsageType>();
+    private static Map<String, AuthenticationScriptUsageType> MAP_BY_VALUES = new HashMap<String, AuthenticationScriptUsageType>();
 
-	static {
-		for (AuthenticationScriptUsageType enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (AuthenticationScriptUsageType enumType : values()) {
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
+        }
+    }
 
-	private AuthenticationScriptUsageType(String value, String displayName) {
-		this.value = value;
-		this.displayName = displayName;
-	}
+    AuthenticationScriptUsageType(String value, String displayName) {
+        this.value = value;
+        this.displayName = displayName;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public static AuthenticationScriptUsageType getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static AuthenticationScriptUsageType getByValue(String value) {
+        return MAP_BY_VALUES.get(value);
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

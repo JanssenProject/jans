@@ -21,45 +21,45 @@ import org.apache.tomcat.util.net.jsse.JSSESocketFactory;
 
 /**
  * Combine 2 implementations in one class to allow control re-handshake and delegate to application JSEE support
- * 
+ *
  * @author Yuriy Movchan Date: 02/11/2016
  */
 public class WantCertJSSEImplementation extends JSSEImplementation {
 
-	private static final String DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION = "edu.internet2.middleware.security.tomcat7.DelegateToApplicationJSSEImplementation";
+    private static final String DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION = "edu.internet2.middleware.security.tomcat7.DelegateToApplicationJSSEImplementation";
 
-	private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(WantCertJSSEImplementation.class);
+    private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(WantCertJSSEImplementation.class);
 
     private SSLImplementation delegateToApplicationJSSEImplementation = null;
 
-	public WantCertJSSEImplementation() throws ClassNotFoundException {
-    	try {
-    		this.delegateToApplicationJSSEImplementation = getInstance(DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION);
-		} catch (ClassNotFoundException ex) {
-			if (log.isErrorEnabled() || log.isDebugEnabled()) {
-				log.error("Failed to load " + DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION, ex);
-			}
-		}
-	}
+    public WantCertJSSEImplementation() throws ClassNotFoundException {
+        try {
+            this.delegateToApplicationJSSEImplementation = getInstance(DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION);
+        } catch (ClassNotFoundException ex) {
+            if (log.isErrorEnabled() || log.isDebugEnabled()) {
+                log.error("Failed to load " + DELEGATE_TO_APPLICATION_JSSE_IMPLEMENTATION, ex);
+            }
+        }
+    }
 
-	@Override
+    @Override
     public String getImplementationName() {
-		String suffix = "-WantCertJSSEImplementation";
+        String suffix = "-WantCertJSSEImplementation";
 
-		if (delegateToApplicationJSSEImplementation != null) {
-	        return delegateToApplicationJSSEImplementation.getImplementationName() + suffix;
-		}
+        if (delegateToApplicationJSSEImplementation != null) {
+            return delegateToApplicationJSSEImplementation.getImplementationName() + suffix;
+        }
 
-		return super.getImplementationName() + suffix;
+        return super.getImplementationName() + suffix;
     }
 
     @Override
     public ServerSocketFactory getServerSocketFactory(AbstractEndpoint<?> endpoint)  {
-    	if (delegateToApplicationJSSEImplementation != null) {
+        if (delegateToApplicationJSSEImplementation != null) {
             return delegateToApplicationJSSEImplementation.getServerSocketFactory(endpoint);
-    	}
+        }
 
-    	return super.getServerSocketFactory(endpoint);
+        return super.getServerSocketFactory(endpoint);
     }
 
     @Override

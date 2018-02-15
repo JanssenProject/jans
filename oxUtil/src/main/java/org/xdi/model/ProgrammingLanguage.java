@@ -13,48 +13,48 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * Script languages
- * 
+ *
  * @author Yuriy Movchan Date: 07/10/2013
  */
 public enum ProgrammingLanguage implements LdapEnum {
 
-	PYTHON("python", "Python"), JAVA_SCRIPT("javascript", "JavaScript");
+    PYTHON("python", "Python"), JAVA_SCRIPT("javascript", "JavaScript");
 
-	private String value;
-	private String displayName;
+    private String value;
+    private String displayName;
 
-	private static Map<String, ProgrammingLanguage> mapByValues = new HashMap<String, ProgrammingLanguage>();
+    private static Map<String, ProgrammingLanguage> MAP_BY_VALUES = new HashMap<String, ProgrammingLanguage>();
 
-	static {
-		for (ProgrammingLanguage enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (ProgrammingLanguage enumType : values()) {
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
+        }
+    }
 
-	private ProgrammingLanguage(String value, String displayName) {
-		this.value = value;
-		this.displayName = displayName;
-	}
+    ProgrammingLanguage(String value, String displayName) {
+        this.value = value;
+        this.displayName = displayName;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public static ProgrammingLanguage getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static ProgrammingLanguage getByValue(String value) {
+        return MAP_BY_VALUES.get(value);
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

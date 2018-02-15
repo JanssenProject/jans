@@ -35,158 +35,158 @@ import org.xdi.zip.CompressionHelper;
 
 /**
  * Preapres SAML request
- * 
+ *
  * @author Yuriy Movchan Date: 24/04/2014
  */
 public class AuthRequest {
 
-	private static final Logger log = Logger.getLogger(AuthRequest.class);
-	private static final SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    private static final Logger log = Logger.getLogger(AuthRequest.class);
+    private static final SimpleDateFormat simpleDataFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-	static {
-		simpleDataFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-	}
-
-	private String id;
-	private String issueInstant;
-	private SamlConfiguration samlSettings;
-
-	public AuthRequest(SamlConfiguration samlConfiguration) {
-		this.samlSettings = samlConfiguration;
-		this.id = "_" + UUID.randomUUID().toString();
-		this.issueInstant = simpleDataFormat.format(new Date());
-	}
-
-	public String getRequest(boolean useBase64, String assertionConsumerServiceUrl) throws ParserConfigurationException, XMLStreamException, IOException, TransformerException {
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
- 
-		Document doc = docBuilder.newDocument();
-
-		// Add AuthnRequest
-		Element authnRequestElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:AuthnRequest");
-		authnRequestElement.setAttribute("ID", this.id);
-		authnRequestElement.setAttribute("Version", "2.0");
-		authnRequestElement.setAttribute("IssueInstant", this.issueInstant);
-		authnRequestElement.setAttribute("ProtocolBinding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
-		authnRequestElement.setAttribute("AssertionConsumerServiceURL", assertionConsumerServiceUrl);
-
-		doc.appendChild(authnRequestElement);
-
-		// Add AuthnRequest
-		Element issuerElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "saml:Issuer");
-		issuerElement.appendChild(doc.createTextNode(this.samlSettings.getIssuer()));
-		
-		authnRequestElement.appendChild(issuerElement);
-
-		// Add NameIDPolicy
-		Element nameIDPolicyElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:NameIDPolicy");
-		nameIDPolicyElement.setAttribute("Format", this.samlSettings.getNameIdentifierFormat());
-		nameIDPolicyElement.setAttribute("AllowCreate", "true");
-
-		authnRequestElement.appendChild(nameIDPolicyElement);
-		
-		if (this.samlSettings.isUseRequestedAuthnContext()) {
-			// Add RequestedAuthnContext
-			Element requestedAuthnContextElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:RequestedAuthnContext");
-			requestedAuthnContextElement.setAttribute("Comparison", "exact");
-	
-			authnRequestElement.appendChild(requestedAuthnContextElement);
-	
-			// Add AuthnContextClassRef
-			Element authnContextClassRefElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "saml:AuthnContextClassRef");
-			authnContextClassRefElement.appendChild(doc.createTextNode("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"));
-	
-			requestedAuthnContextElement.appendChild(authnContextClassRefElement);
-		}
-
-		// Convert the content into xml
-		TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-
-		DOMSource source = new DOMSource(doc);
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		StreamResult result = new StreamResult(baos);
-		
- 		transformer.transform(source, result);
-		
-
-		if (log.isDebugEnabled()) {
-			log.debug("Genereated Saml Request " + new String(baos.toByteArray(), "UTF-8"));
-		}
-
-		if (useBase64) {
-			byte[] deflated = CompressionHelper.deflate(baos.toByteArray(), true);
-			String base64 = Base64.encodeBase64String(deflated);
-			String encoded = URLEncoder.encode(base64, "UTF-8");
-
-			return encoded;
-		}
-
-		return new String(baos.toByteArray(), "UTF-8");
-	}
-
-	public String getRequest(boolean useBase64) throws ParserConfigurationException, XMLStreamException, IOException, TransformerException {
-		return getRequest(useBase64, this.samlSettings.getAssertionConsumerServiceUrl());
+    static {
+        simpleDataFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
-																																												
-	public String getStreamedRequest(boolean useBase64) throws XMLStreamException, IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-		XMLOutputFactory factory = XMLOutputFactory.newInstance();
-		XMLStreamWriter writer = factory.createXMLStreamWriter(baos);
+    private String id;
+    private String issueInstant;
+    private SamlConfiguration samlSettings;
 
-		writer.writeStartElement("samlp", "AuthnRequest", "urn:oasis:names:tc:SAML:2.0:protocol");
-		writer.writeNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+    public AuthRequest(SamlConfiguration samlConfiguration) {
+        this.samlSettings = samlConfiguration;
+        this.id = "_" + UUID.randomUUID().toString();
+        this.issueInstant = simpleDataFormat.format(new Date());
+    }
 
-		writer.writeAttribute("ID", id);
-		writer.writeAttribute("Version", "2.0");
-		writer.writeAttribute("IssueInstant", this.issueInstant);
-		writer.writeAttribute("ProtocolBinding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
-		writer.writeAttribute("AssertionConsumerServiceURL", this.samlSettings.getAssertionConsumerServiceUrl());
+    public String getRequest(boolean useBase64, String assertionConsumerServiceUrl) throws ParserConfigurationException, XMLStreamException, IOException, TransformerException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
-		writer.writeStartElement("saml", "Issuer", "urn:oasis:names:tc:SAML:2.0:assertion");
-		writer.writeNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
-		writer.writeCharacters(this.samlSettings.getIssuer());
-		writer.writeEndElement();
+        Document doc = docBuilder.newDocument();
 
-		writer.writeStartElement("samlp", "NameIDPolicy", "urn:oasis:names:tc:SAML:2.0:protocol");
-		writer.writeNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+        // Add AuthnRequest
+        Element authnRequestElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:AuthnRequest");
+        authnRequestElement.setAttribute("ID", this.id);
+        authnRequestElement.setAttribute("Version", "2.0");
+        authnRequestElement.setAttribute("IssueInstant", this.issueInstant);
+        authnRequestElement.setAttribute("ProtocolBinding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
+        authnRequestElement.setAttribute("AssertionConsumerServiceURL", assertionConsumerServiceUrl);
 
-		writer.writeAttribute("Format", this.samlSettings.getNameIdentifierFormat());
-		writer.writeAttribute("AllowCreate", "true");
-		writer.writeEndElement();
+        doc.appendChild(authnRequestElement);
 
-		writer.writeStartElement("samlp", "RequestedAuthnContext", "urn:oasis:names:tc:SAML:2.0:protocol");
-		writer.writeNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+        // Add AuthnRequest
+        Element issuerElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "saml:Issuer");
+        issuerElement.appendChild(doc.createTextNode(this.samlSettings.getIssuer()));
+    
+        authnRequestElement.appendChild(issuerElement);
 
-		writer.writeAttribute("Comparison", "exact");
+        // Add NameIDPolicy
+        Element nameIDPolicyElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:NameIDPolicy");
+        nameIDPolicyElement.setAttribute("Format", this.samlSettings.getNameIdentifierFormat());
+        nameIDPolicyElement.setAttribute("AllowCreate", "true");
 
-		writer.writeStartElement("saml", "AuthnContextClassRef", "urn:oasis:names:tc:SAML:2.0:assertion");
-		writer.writeNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
-		writer.writeCharacters("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
-		writer.writeEndElement();
+        authnRequestElement.appendChild(nameIDPolicyElement);
+    
+        if (this.samlSettings.isUseRequestedAuthnContext()) {
+            // Add RequestedAuthnContext
+            Element requestedAuthnContextElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:protocol", "samlp:RequestedAuthnContext");
+            requestedAuthnContextElement.setAttribute("Comparison", "exact");
 
-		writer.writeEndElement();
+            authnRequestElement.appendChild(requestedAuthnContextElement);
 
-		writer.writeEndElement();
-		writer.flush();
+            // Add AuthnContextClassRef
+            Element authnContextClassRefElement = doc.createElementNS("urn:oasis:names:tc:SAML:2.0:assertion", "saml:AuthnContextClassRef");
+            authnContextClassRefElement.appendChild(doc.createTextNode("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"));
 
-		if (log.isDebugEnabled()) {
-			log.debug("Genereated Saml Request " + new String(baos.toByteArray(), "UTF-8"));
-		}
+            requestedAuthnContextElement.appendChild(authnContextClassRefElement);
+        }
 
-		if (useBase64) {
-			byte[] deflated = CompressionHelper.deflate(baos.toByteArray(), true);
-			String base64 = Base64.encodeBase64String(deflated);
-			String encoded = URLEncoder.encode(base64, "UTF-8");
+        // Convert the content into xml
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 
-			return encoded;
-		}
+        DOMSource source = new DOMSource(doc);
 
-		return new String(baos.toByteArray(), "UTF-8");
-	}
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        StreamResult result = new StreamResult(baos);
+    
+         transformer.transform(source, result);
+    
+
+        if (log.isDebugEnabled()) {
+            log.debug("Genereated Saml Request " + new String(baos.toByteArray(), "UTF-8"));
+        }
+
+        if (useBase64) {
+            byte[] deflated = CompressionHelper.deflate(baos.toByteArray(), true);
+            String base64 = Base64.encodeBase64String(deflated);
+            String encoded = URLEncoder.encode(base64, "UTF-8");
+
+            return encoded;
+        }
+
+        return new String(baos.toByteArray(), "UTF-8");
+    }
+
+    public String getRequest(boolean useBase64) throws ParserConfigurationException, XMLStreamException, IOException, TransformerException {
+        return getRequest(useBase64, this.samlSettings.getAssertionConsumerServiceUrl());
+    }
+                                                                                                                                                                            
+    public String getStreamedRequest(boolean useBase64) throws XMLStreamException, IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        XMLOutputFactory factory = XMLOutputFactory.newInstance();
+        XMLStreamWriter writer = factory.createXMLStreamWriter(baos);
+
+        writer.writeStartElement("samlp", "AuthnRequest", "urn:oasis:names:tc:SAML:2.0:protocol");
+        writer.writeNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+
+        writer.writeAttribute("ID", id);
+        writer.writeAttribute("Version", "2.0");
+        writer.writeAttribute("IssueInstant", this.issueInstant);
+        writer.writeAttribute("ProtocolBinding", "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST");
+        writer.writeAttribute("AssertionConsumerServiceURL", this.samlSettings.getAssertionConsumerServiceUrl());
+
+        writer.writeStartElement("saml", "Issuer", "urn:oasis:names:tc:SAML:2.0:assertion");
+        writer.writeNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
+        writer.writeCharacters(this.samlSettings.getIssuer());
+        writer.writeEndElement();
+
+        writer.writeStartElement("samlp", "NameIDPolicy", "urn:oasis:names:tc:SAML:2.0:protocol");
+        writer.writeNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+
+        writer.writeAttribute("Format", this.samlSettings.getNameIdentifierFormat());
+        writer.writeAttribute("AllowCreate", "true");
+        writer.writeEndElement();
+
+        writer.writeStartElement("samlp", "RequestedAuthnContext", "urn:oasis:names:tc:SAML:2.0:protocol");
+        writer.writeNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+
+        writer.writeAttribute("Comparison", "exact");
+
+        writer.writeStartElement("saml", "AuthnContextClassRef", "urn:oasis:names:tc:SAML:2.0:assertion");
+        writer.writeNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
+        writer.writeCharacters("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
+        writer.writeEndElement();
+
+        writer.writeEndElement();
+
+        writer.writeEndElement();
+        writer.flush();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Genereated Saml Request " + new String(baos.toByteArray(), "UTF-8"));
+        }
+
+        if (useBase64) {
+            byte[] deflated = CompressionHelper.deflate(baos.toByteArray(), true);
+            String base64 = Base64.encodeBase64String(deflated);
+            String encoded = URLEncoder.encode(base64, "UTF-8");
+
+            return encoded;
+        }
+
+        return new String(baos.toByteArray(), "UTF-8");
+    }
 
 }

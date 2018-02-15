@@ -18,132 +18,132 @@ import java.util.List;
 
 /**
  * Find pointer to specified count of lines
- * 
+ *
  * @author Yuriy Movchan Date: 07/12/2013
  */
 public class ReverseLineReader {
 
-	private static final int BUFFER_SIZE = 8192;
+    private static final int BUFFER_SIZE = 8192;
 
-	private final File file;
-	private final String encoding;
+    private final File file;
+    private final String encoding;
 
-	private RandomAccessFile raf;
-	private FileChannel channel;
-	private long filePos;
+    private RandomAccessFile raf;
+    private FileChannel channel;
+    private long filePos;
 
-	private ByteBuffer buf;
-	private long bufPos;
+    private ByteBuffer buf;
+    private long bufPos;
 
-	private ByteArrayOutputStream baos;
+    private ByteArrayOutputStream baos;
 
-	private boolean initialized = false;
+    private boolean initialized = false;
 
-	public ReverseLineReader(File file, String encoding) {
-		this.file = file;
-		this.encoding = encoding;
-	}
+    public ReverseLineReader(File file, String encoding) {
+        this.file = file;
+        this.encoding = encoding;
+    }
 
-	private void init() throws IOException {
-		synchronized (this) {
-			if (this.raf == null) {
-				this.raf = new RandomAccessFile(file, "r");
-				this.channel = raf.getChannel();
-				this.filePos = raf.length();
+    private void init() throws IOException {
+        synchronized (this) {
+            if (this.raf == null) {
+                this.raf = new RandomAccessFile(file, "r");
+                this.channel = raf.getChannel();
+                this.filePos = raf.length();
 
-				this.bufPos = 0;
+                this.bufPos = 0;
 
-				this.baos = new ByteArrayOutputStream();
+                this.baos = new ByteArrayOutputStream();
 
-				this.initialized = true;
-			}
-		}
+                this.initialized = true;
+            }
+        }
 
-	}
+    }
 
-	public String readLastLine() throws IOException {
-		if (!initialized) {
-			init();
-		}
+    public String readLastLine() throws IOException {
+        if (!initialized) {
+            init();
+        }
 
-		while (true) {
-			if (bufPos < 0) {
-				if (filePos == 0) {
-					if (baos == null) {
-						return null;
-					}
+        while (true) {
+            if (bufPos < 0) {
+                if (filePos == 0) {
+                    if (baos == null) {
+                        return null;
+                    }
 
-					String line = buildResultString();
-					baos = null;
+                    String line = buildResultString();
+                    baos = null;
 
-					return line;
-				}
+                    return line;
+                }
 
-				long start = Math.max(filePos - BUFFER_SIZE, 0);
-				long end = filePos;
-				long len = end - start;
+                long start = Math.max(filePos - BUFFER_SIZE, 0);
+                long end = filePos;
+                long len = end - start;
 
-				buf = this.channel.map(FileChannel.MapMode.READ_ONLY, start, len);
-				bufPos = len;
-			}
+                buf = this.channel.map(FileChannel.MapMode.READ_ONLY, start, len);
+                bufPos = len;
+            }
 
-			while (bufPos-- > 0) {
-				byte c = buf.get((int) bufPos);
-				filePos--;
-				if (c == '\r' || c == '\n') {
-					if (baos.size() == 0) {
-						continue;
-					} else {
-						return buildResultString();
-					}
-				} else {
-					baos.write(c);
-				}
-			}
-		}
-	}
+            while (bufPos-- > 0) {
+                byte c = buf.get((int) bufPos);
+                filePos--;
+                if (c == '\r' || c == '\n') {
+                    if (baos.size() == 0) {
+                        continue;
+                    } else {
+                        return buildResultString();
+                    }
+                } else {
+                    baos.write(c);
+                }
+            }
+        }
+    }
 
-	public List<String> readLastLines(int countLines) throws IOException {
-		List<String> lastLines = new ArrayList<String>(countLines);
-		for (int i = 0; i < countLines; i++) {
-			String line = readLastLine();
-			if (line == null) {
-				break;
-			}
-			lastLines.add(0, line);
-		}
+    public List<String> readLastLines(int countLines) throws IOException {
+        List<String> lastLines = new ArrayList<String>(countLines);
+        for (int i = 0; i < countLines; i++) {
+            String line = readLastLine();
+            if (line == null) {
+                break;
+            }
+            lastLines.add(0, line);
+        }
 
-		return lastLines;
-	}
+        return lastLines;
+    }
 
-	private String buildResultString() throws UnsupportedEncodingException {
-		if (baos.size() == 0) {
-			return "";
-		}
+    private String buildResultString() throws UnsupportedEncodingException {
+        if (baos.size() == 0) {
+            return "";
+        }
 
-		byte[] bytes = baos.toByteArray();
-		swapBytes(bytes);
+        byte[] bytes = baos.toByteArray();
+        swapBytes(bytes);
 
-		baos.reset();
-		return new String(bytes, encoding);
-	}
+        baos.reset();
+        return new String(bytes, encoding);
+    }
 
-	public void swapBytes(byte[] bytes) {
-		for (int i = 0; i < bytes.length / 2; i++) {
-			byte t = bytes[i];
-			bytes[i] = bytes[bytes.length - i - 1];
-			bytes[bytes.length - i - 1] = t;
-		}
-	}
+    public void swapBytes(byte[] bytes) {
+        for (int i = 0; i < bytes.length / 2; i++) {
+            byte t = bytes[i];
+            bytes[i] = bytes[bytes.length - i - 1];
+            bytes[bytes.length - i - 1] = t;
+        }
+    }
 
-	public void close() throws IOException {
-		if (this.channel != null) {
-			this.channel.close();
-		}
+    public void close() throws IOException {
+        if (this.channel != null) {
+            this.channel.close();
+        }
 
-		if (this.raf != null) {
-			this.raf.close();
-		}
-	}
+        if (this.raf != null) {
+            this.raf.close();
+        }
+    }
 
 }

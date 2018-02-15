@@ -20,32 +20,32 @@ import org.xdi.model.passport.PassportConfiguration;
 @LdapObjectClass(values = { "top", "oxPassportConfiguration" })
 public class LdapOxPassportConfiguration extends Entry {
 
-	private static final long serialVersionUID = -8451013277721189767L;
+    private static final long serialVersionUID = -8451013277721189767L;
 
-	@LdapDN
-	private String dn;
+    @LdapDN
+    private String dn;
 
-	@LdapJsonObject
-	@LdapAttribute(name = "gluuPassportConfiguration")
-	private List<PassportConfiguration> passportConfigurations;
+    @LdapJsonObject
+    @LdapAttribute(name = "gluuPassportConfiguration")
+    private List<PassportConfiguration> passportConfigurations;
 
-	@LdapAttribute(name = "gluuStatus")
-	private String status;
+    @LdapAttribute(name = "gluuStatus")
+    private String status;
 
-	public List<PassportConfiguration> getPassportConfigurations() {
-		return passportConfigurations;
-	}
+    public List<PassportConfiguration> getPassportConfigurations() {
+        return passportConfigurations;
+    }
 
-	public void setPassportConfigurations(List<PassportConfiguration> passportConfigurations) {
-		this.passportConfigurations = passportConfigurations;
-	}
+    public void setPassportConfigurations(List<PassportConfiguration> passportConfigurations) {
+        this.passportConfigurations = passportConfigurations;
+    }
 
-	public String getStatus() {
-		return status;
-	}
+    public String getStatus() {
+        return status;
+    }
 
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
 }
