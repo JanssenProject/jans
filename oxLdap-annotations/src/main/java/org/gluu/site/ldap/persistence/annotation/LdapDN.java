@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * LDAP DN
- * 
+ *
  * @author Yuriy Movchan Date: 10.07.2010
  */
 @Target({ FIELD })
