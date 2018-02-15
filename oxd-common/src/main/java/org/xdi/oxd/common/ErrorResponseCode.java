@@ -6,6 +6,9 @@ package org.xdi.oxd.common;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonValue;
+import org.xdi.oxauth.model.crypto.signature.SignatureAlgorithm;
+
+import java.util.Arrays;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -49,6 +52,7 @@ public enum ErrorResponseCode {
     INVALID_AUTHORIZATION_REDIRECT_URI("invalid_authorization_redirect_uri", "Invalid authorization_redirect_uri (empty or blank)."),
     INVALID_SCOPE("invalid_scope", "Invalid scope parameter (empty or blank)."),
     INVALID_ACR_VALUES("invalid_acr_values", "Invalid acr_values parameter (empty or blank)."),
+    INVALID_ALGORITHM("invalid_algorithm", "Invalid algorithm provided. Valid algorithms are: " + Arrays.toString(SignatureAlgorithm.values())),
     NO_CONNECT_DISCOVERY_RESPONSE("no_connect_discovery_response", "Unable to fetch Connect discovery response /.well-known/openid-configuration"),
     NO_REGISTRATION_ENDPOINT("invalid_request", "OP does not support dynamic client registration. Please register client manually and provide client_id and client_secret to register_site command."),
     NO_UMA_DISCOVERY_RESPONSE("no_uma_discovery_response", "Unable to fetch UMA discovery response /.well-known/uma2-configuration"),
