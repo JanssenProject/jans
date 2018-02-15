@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 
 /**
  * Mark POJO class as LDAP schema entry
- * 
+ *
  * @author Yuriy Movchan Date: 10.07.2010
  */
 @Target({ ElementType.TYPE })

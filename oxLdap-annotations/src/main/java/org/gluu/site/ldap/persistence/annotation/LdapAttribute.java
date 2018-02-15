@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 
 /**
  * LDAP Attribute
- * 
+ *
  * @author Yuriy Movchan Date: 10.07.2010
  */
 @Target({ ElementType.FIELD })
