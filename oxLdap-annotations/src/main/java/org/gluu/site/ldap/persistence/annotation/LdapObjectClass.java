@@ -13,11 +13,11 @@ import java.lang.annotation.Target;
 
 /**
  * LDAP Object Class
- * 
+ *
  * @author Yuriy Movchan Date: 10.07.2010
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LdapObjectClass {
-	String[] values();
+    String[] values();
 }

@@ -20,25 +20,25 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LdapAttributesList {
 
-	/**
-	 * (Required) The class property name which contains LDAP attribute name.
-	 */
-	String name();
+    /**
+     * (Required) The class property name which contains LDAP attribute name.
+     */
+    String name();
 
-	/**
-	 * (Required) The class property name which contains LDAP attribute value.
-	 */
-	String value();
+    /**
+     * (Required) The class property name which contains LDAP attribute value.
+     */
+    String value();
 
-	/**
-	 * (Optional) Holds additional configuration for LDAP attributes. Defaults
-	 * value not provides additional configuration.
-	 */
-	LdapAttribute[] attributesConfiguration() default {};
+    /**
+     * (Optional) Holds additional configuration for LDAP attributes. Defaults
+     * value not provides additional configuration.
+     */
+    LdapAttribute[] attributesConfiguration() default {};
 
-	/**
-	 * (Optional) Specify if attributes should be sorted by property name value.
-	 */
-	boolean sortByName() default false;
+    /**
+     * (Optional) Specify if attributes should be sorted by property name value.
+     */
+    boolean sortByName() default false;
 
 }
