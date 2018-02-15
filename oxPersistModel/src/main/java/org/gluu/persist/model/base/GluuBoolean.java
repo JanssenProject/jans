@@ -33,7 +33,7 @@ public enum GluuBoolean implements LdapEnum {
         }
     }
 
-    private GluuBoolean(boolean booleanValue, String value, String displayName) {
+    GluuBoolean(boolean booleanValue, String value, String displayName) {
         this.booleanValue = booleanValue;
         this.value = value;
         this.displayName = displayName;

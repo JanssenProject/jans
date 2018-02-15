@@ -61,7 +61,7 @@ public class SimpleUser implements Serializable {
         return oxAuthPersistentJwt;
     }
 
-    public void setOxAuthPersistentJwt(String oxAuthPersistentJwt[]) {
+    public void setOxAuthPersistentJwt(String[] oxAuthPersistentJwt) {
         this.oxAuthPersistentJwt = oxAuthPersistentJwt;
     }
 
