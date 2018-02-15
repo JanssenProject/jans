@@ -36,7 +36,7 @@ public final class StringHelper {
 	private StringHelper() {
 	}
 
-	public static String getRandomString(int length) {
+	public static String getRandomString(final int length) {
 		if (rand == null) {
 			rand = new Random(System.currentTimeMillis());
 		}
@@ -48,7 +48,7 @@ public final class StringHelper {
 		return sb.toString();
 	}
 
-	public static String[] add(String[] x, String sep, String[] y) {
+	public static String[] add(final String[] x, String sep, String[] y) {
 		String[] result = new String[x.length];
 		for (int i = 0; i < x.length; i++) {
 			result[i] = x[i] + sep + y[i];
@@ -56,7 +56,7 @@ public final class StringHelper {
 		return result;
 	}
 
-	public static String repeat(String string, int times) {
+	public static String repeat(final String string, int times) {
 		StringBuffer buf = new StringBuffer(string.length() * times);
 		for (int i = 0; i < times; i++)
 			buf.append(string);
@@ -69,11 +69,11 @@ public final class StringHelper {
 		return new String(buffer);
 	}
 
-	public static String[] split(String str, String delim) {
+	public static String[] split(final String str, String delim) {
 		return split(str, delim, true, false);
 	}
 
-	public static String[] split(String str, String delim, boolean trim, boolean include) {
+	public static String[] split(final String str, String delim, boolean trim, boolean include) {
 		StringTokenizer tokens = new StringTokenizer(str, delim, include);
 		String[] result = new String[tokens.countTokens()];
 		int i = 0;
@@ -87,21 +87,21 @@ public final class StringHelper {
 		return result;
 	}
 
-	public static String unqualify(String qualifiedName) {
+	public static String unqualify(final String qualifiedName) {
 		int loc = qualifiedName.lastIndexOf(".");
 		return (loc < 0) ? qualifiedName : qualifiedName.substring(loc + 1);
 	}
 
-	public static String qualifier(String qualifiedName) {
+	public static String qualifier(final String qualifiedName) {
 		int loc = qualifiedName.lastIndexOf(".");
 		return (loc < 0) ? "" : qualifiedName.substring(0, loc);
 	}
 
-	public static String suffix(String name, String suffix) {
+	public static String suffix(final String name, String suffix) {
 		return (suffix == null) ? name : name + suffix;
 	}
 
-	public static boolean booleanValue(String tfString) {
+	public static boolean booleanValue(final String tfString) {
 		String trimmed = tfString.trim().toLowerCase();
 		return trimmed.equals("true") || trimmed.equals("t");
 	}
@@ -117,11 +117,11 @@ public final class StringHelper {
 		return buf.append(array[len - 1]).toString();
 	}
 
-	public static boolean isNotEmpty(String str) {
+	public static boolean isNotEmpty(final String str) {
 		return !StringHelper.isEmpty(str);
 	}
 
-	public static boolean isEmpty(String str) {
+	public static boolean isEmpty(final String str) {
 		int strLen;
 		if (str == null || (strLen = str.length()) == 0) {
 			return true;
@@ -136,7 +136,7 @@ public final class StringHelper {
 		return true;
 	}
 
-	public static String truncate(String string, int length) {
+	public static String truncate(final String string, int length) {
 		if (string.length() <= length) {
 			return string;
 		} else {
@@ -144,25 +144,15 @@ public final class StringHelper {
 		}
 	}
 
-	public static String toUpperCase(String str) {
+	public static String toUpperCase(final String str) {
 		return str == null ? null : str.toUpperCase();
 	}
 
-	public static String toLowerCase(String str) {
+	public static String toLowerCase(final String str) {
 		return str == null ? null : str.toLowerCase();
 	}
 
-	public static String moveAndToBeginning(String filter) {
-		if (filter.trim().length() > 0) {
-			filter += " and ";
-			if (filter.startsWith(" and "))
-				filter = filter.substring(4);
-		}
-
-		return filter;
-	}
-
-	public static String removePunctuation(String punctuatedString) {
+	public static String removePunctuation(final String punctuatedString) {
 		return punctuatedString == null ? null : punctuatedString.replaceAll("[\\.@!,:/]", "");
 	}
 
@@ -176,7 +166,7 @@ public final class StringHelper {
 		return String.format(format, n);
 	}
 
-	public static boolean compare(String str1, String str2) {
+	public static boolean compare(final String str1, String str2) {
 		if (str1 == null) {
 			if (str2 != null) {
 				return false;
@@ -188,7 +178,7 @@ public final class StringHelper {
 		return true;
 	}
 
-	public static boolean equalsIgnoreCase(String str1, String str2) {
+	public static boolean equalsIgnoreCase(final String str1, String str2) {
 		if (str1 == null) {
 			if (str2 != null) {
 				return false;
@@ -200,7 +190,7 @@ public final class StringHelper {
 		return true;
 	}
 
-	public static boolean equals(String str1, String str2) {
+	public static boolean equals(final String str1, String str2) {
 		if (str1 == null) {
 			if (str2 != null) {
 				return false;
@@ -212,7 +202,7 @@ public final class StringHelper {
 		return true;
 	}
 
-	public static String encodeString(String str) {
+	public static String encodeString(final String str) {
 		if ((str == null) || (str.length() == 0)) {
 			return str;
 		}
@@ -223,15 +213,15 @@ public final class StringHelper {
 		}
 	}
 
-	public static String getEmtpyStringIfNull(String str) {
+	public static String getEmtpyStringIfNull(final String str) {
 		return (str == null) ? "" : str;
 	}
 
-	public static String getNullIfEmtpyString(String str) {
+	public static String getNullIfEmtpyString(final String str) {
 		return (str == null) || (str.trim().length() == 0) ? null : str;
 	}
 
-	public static String getValueFromDelimitedString(String delimitedString, int attrIndex) {
+	public static String getValueFromDelimitedString(final String delimitedString, int attrIndex) {
 		if (isEmpty(delimitedString)) {
 			return "";
 		}
@@ -247,14 +237,14 @@ public final class StringHelper {
 		return "";
 	}
 
-	public static Map<String, String> getValueMapForDelimitedString(String delimitedString) {
+	public static Map<String, String> getValueMapForDelimitedString(final String delimitedString) {
 		Map<String, String> result = new HashMap<String, String>();
 		if (isEmpty(delimitedString)) {
 			return result;
 		}
 
 		String[] parts = delimitedString.split("\\|");
-		for (String part : parts) {
+		for (final String part : parts) {
 			String[] paramPararts = part.split("\\:");
 			if (paramPararts.length == 2) {
 				result.put(paramPararts[0].trim().toLowerCase(), paramPararts[1].trim());
@@ -264,7 +254,7 @@ public final class StringHelper {
 		return result;
 	}
 
-	public static String[] getValuesFromColonDelimitedString(String delimitedString) {
+	public static String[] getValuesFromColonDelimitedString(final String delimitedString) {
 		if (isEmpty(delimitedString)) {
 			return new String[0];
 		}
@@ -280,7 +270,7 @@ public final class StringHelper {
 		return result;
 	}
 
-	public static String buildDelimitedString(String[] attributes, String... values) {
+	public static String buildDelimitedString(final String[] attributes, String... values) {
 		if ((attributes == null) || (values == null) || (attributes.length != values.length)) {
 			return null;
 		}
@@ -300,11 +290,11 @@ public final class StringHelper {
 		return result.toString();
 	}
 
-	public static String buildColonDelimitedString(String... values) {
+	public static String buildColonDelimitedString(final String... values) {
 		return buildDelimitedString(" : ", values);
 	}
 
-	public static String buildDelimitedString(String delimiter, String... values) {
+	public static String buildDelimitedString(final String delimiter, String... values) {
 		if (values == null) {
 			return null;
 		}
@@ -320,7 +310,7 @@ public final class StringHelper {
 		return result.toString();
 	}
 
-	public static float toFloat(String string) {
+	public static float toFloat(final String string) {
 		if (isEmpty(string)) {
 			return 0.0f;
 		}
@@ -332,7 +322,7 @@ public final class StringHelper {
 		}
 	}
 
-	public static int toInteger(String string) {
+	public static int toInteger(final String string) {
 		if (isEmpty(string)) {
 			return 0;
 		}
@@ -344,7 +334,7 @@ public final class StringHelper {
 		}
 	}
 
-	public static int toInteger(String string, int defaultValue) {
+	public static int toInteger(final String string, int defaultValue) {
 		if (isEmpty(string)) {
 			return defaultValue;
 		}
@@ -356,7 +346,7 @@ public final class StringHelper {
 		}
 	}
 
-	public static Integer toInteger(String string, Integer defaultValue) {
+	public static Integer toInteger(final String string, Integer defaultValue) {
 		if (isEmpty(string)) {
 			return defaultValue;
 		}
@@ -368,7 +358,7 @@ public final class StringHelper {
 		}
 	}
 
-	public static int toInt(String string, int defaultValue) {
+	public static int toInt(final String string, int defaultValue) {
 		if (isEmpty(string)) {
 			return defaultValue;
 		}
@@ -380,7 +370,7 @@ public final class StringHelper {
 		}
 	}
 
-	public static boolean toBoolean(String string, boolean defaultValue) {
+	public static boolean toBoolean(final String string, boolean defaultValue) {
 		if (isEmpty(string)) {
 			return defaultValue;
 		}
@@ -400,7 +390,7 @@ public final class StringHelper {
 		return value;
 	}
 
-	public static String getFirstPositiveNumber(String string) {
+	public static String getFirstPositiveNumber(final String string) {
 		if (isEmpty(string)) {
 			return "";
 		}
@@ -414,7 +404,7 @@ public final class StringHelper {
 		return "";
 	}
 
-	public static String removeMultipleSpaces(String string) {
+	public static String removeMultipleSpaces(final String string) {
 		if (isEmpty(string)) {
 			return string;
 		}
@@ -453,7 +443,7 @@ public final class StringHelper {
 		}
 	}
 
-	public static String replaceLast(String string, String toReplace, String replacement) {
+	public static String replaceLast(final String string, String toReplace, String replacement) {
 		int pos = string.lastIndexOf(toReplace);
 		if (pos > -1) {
 			return string.substring(0, pos) + replacement + string.substring(pos + toReplace.length(), string.length());
@@ -462,7 +452,7 @@ public final class StringHelper {
 		}
 	}
 
-	public static String doubleQuotes(String string) {
+	public static String doubleQuotes(final String string) {
 		if (isEmpty(string)) {
 			return string;
 		}
@@ -474,7 +464,7 @@ public final class StringHelper {
 		return string;
 	}
 
-	public static String addQuote(String string) {
+	public static String addQuote(final String string) {
 		if (isEmpty(string)) {
 			return "";
 		}
@@ -494,14 +484,14 @@ public final class StringHelper {
 		return (object == null) ? null : object.toString();
 	}
 
-	public static String qualify(String prefix, String name) {
+	public static String qualify(final String prefix, String name) {
 		if (name == null || prefix == null) {
 			throw new NullPointerException();
 		}
 		return new StringBuffer(prefix.length() + name.length() + 1).append(prefix).append('.').append(name).toString();
 	}
 
-	public static String trimAll(String string) {
+	public static String trimAll(final String string) {
 		if (isEmpty(string)) {
 			return string;
 		}
