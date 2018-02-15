@@ -12,26 +12,26 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
- * Asimba settings configuration entry. 
- * 
+ * Asimba settings configuration entry.
+ *
  * @author Dmitry Ognyannikov
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AsimbaConfiguration implements Serializable {
-    
+
     private static final long serialVersionUID = -1207383545739619576L;
-    
+
     private String orgInum;
-    
+
     private String oxasimba;
-    
+
     private String idps;
-    
+
     private String selectors;
-    
+
     private String requestors;
-    
+
     private String requestorpools;
 
     /**
@@ -117,5 +117,5 @@ public class AsimbaConfiguration implements Serializable {
     public void setRequestorpools(String requestorpools) {
         this.requestorpools = requestorpools;
     }
-    
+
 }

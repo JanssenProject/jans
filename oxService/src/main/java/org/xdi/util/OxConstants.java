@@ -4,32 +4,37 @@
  * Copyright (c) 2014, Gluu
  */package org.xdi.util;
 
-import org.xdi.util.LDAPConstants;
-
 /**
  * Constants loads the LDAP schema attribute names like uid, iname
- * 
+ *
  * @author Yuriy Movchan
  * @version 0.1, 10/14/2010
  */
-public  class OxConstants extends LDAPConstants {
+public  class OxConstants {
+	public static final String dn = "dn";
+	public static final String uid = "uid";
+	public static final String success = "success";
+	public static final String userPassword = "userPassword";
+	public static final String objectClass = "objectClass";
+	public static final String inum = "inum";
+
 	public static final String INUM = "inum";
-	public static final String INAME = "iname";
-	public static final String DISPLAY_NAME = "displayName";
-	public static final String DESCRIPTION = "description";
-	public static final String ORIGIN = "gluuAttributeOrigin";
-	public static final String MAIL = "mail";
+    public static final String INAME = "iname";
+    public static final String DISPLAY_NAME = "displayName";
+    public static final String DESCRIPTION = "description";
+    public static final String ORIGIN = "gluuAttributeOrigin";
+    public static final String MAIL = "mail";
 
-	public static final String CACHE_ORGANIZATION_KEY = "organization";
-	public static final String CACHE_METRICS_KEY = "metrics";
-	public static final String CACHE_APPLICATION_NAME = "ApplicationCache";
-	public static final String CACHE_ATTRIBUTE_NAME = "AttributeCache";
-	public static final String CACHE_LOOKUP_NAME = "LookupCache";
-	public static final String CACHE_METRICS_NAME = "metricsCache";
+    public static final String CACHE_ORGANIZATION_KEY = "organization";
+    public static final String CACHE_METRICS_KEY = "metrics";
+    public static final String CACHE_APPLICATION_NAME = "ApplicationCache";
+    public static final String CACHE_ATTRIBUTE_NAME = "AttributeCache";
+    public static final String CACHE_LOOKUP_NAME = "LookupCache";
+    public static final String CACHE_METRICS_NAME = "metricsCache";
 
-	public static final String CACHE_ATTRIBUTE_KEY_LIST = "attributeList";
-	public static final String CACHE_ACTIVE_ATTRIBUTE_KEY_LIST = "activeAttributeList";
-	public static final String CACHE_ACTIVE_ATTRIBUTE_NAME = "ActiveAttributeCache";
+    public static final String CACHE_ATTRIBUTE_KEY_LIST = "attributeList";
+    public static final String CACHE_ACTIVE_ATTRIBUTE_KEY_LIST = "activeAttributeList";
+    public static final String CACHE_ACTIVE_ATTRIBUTE_NAME = "ActiveAttributeCache";
 
-	public static final String SCRIPT_TYPE_INTERNAL_RESERVED_NAME = "simple_password_auth";
+    public static final String SCRIPT_TYPE_INTERNAL_RESERVED_NAME = "simple_password_auth";
 }

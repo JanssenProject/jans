@@ -24,13 +24,13 @@ import org.xdi.util.StringHelper;
 @Named
 public class NetworkService implements Serializable {
 
-	private static final long serialVersionUID = -1393318600428448743L;
+    private static final long serialVersionUID = -1393318600428448743L;
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
     public String getRemoteIp() {
-    	String remoteIp = "";
+        String remoteIp = "";
         try {
             FacesContext facesContext = FacesContext.getCurrentInstance();
             if (facesContext == null) {
@@ -41,14 +41,14 @@ public class NetworkService implements Serializable {
 
             remoteIp = request.getHeader("X-FORWARDED-FOR");
             if (StringHelper.isEmpty(remoteIp)) {
-            	remoteIp = request.getRemoteAddr();
+                remoteIp = request.getRemoteAddr();
             }
-            
+        
             return remoteIp;
         } catch (Exception ex) {
             log.error("Failed to get remote IP", ex);
         }
-        
+    
         return remoteIp;
     }
 

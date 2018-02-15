@@ -12,9 +12,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SecureVariable {
 
-	/**
-	 * @return Name of the variable
-	 */
-	String value();
+    /**
+     * @return Name of the variable
+     */
+    String value();
 
 }

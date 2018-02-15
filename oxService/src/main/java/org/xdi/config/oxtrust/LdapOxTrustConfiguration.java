@@ -21,81 +21,81 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 @LdapObjectClass(values = {"top", "oxTrustConfiguration"})
 public class LdapOxTrustConfiguration extends Entry {
 
-	private static final long serialVersionUID = -15289347651306279L;
+    private static final long serialVersionUID = -15289347651306279L;
 
-	@LdapDN
+    @LdapDN
     private String dn;
 
-	@LdapJsonObject
-	@LdapAttribute(name = "oxTrustConfApplication")
+    @LdapJsonObject
+    @LdapAttribute(name = "oxTrustConfApplication")
     private AppConfiguration application;
 
-	@LdapJsonObject
-	@LdapAttribute(name = "oxTrustConfCacheRefresh")
+    @LdapJsonObject
+    @LdapAttribute(name = "oxTrustConfCacheRefresh")
     private CacheRefreshConfiguration cacheRefresh;
 
     @LdapAttribute(name = "oxRevision")
     private long revision;
-    
+
     @LdapJsonObject //issue 102 - begin  : changed by shekhar
     @LdapAttribute(name = "oxTrustConfImportPerson")
     private ImportPersonConfig importPersonConfig; //issue 102 - end  : changed by shekhar
-    
-	@LdapJsonObject
+
+    @LdapJsonObject
     @LdapAttribute(name = "oxTrustConfAttributeResolver")
     private AttributeResolverConfiguration attributeResolverConfig;
 
-	public LdapOxTrustConfiguration() {
-	}
+    public LdapOxTrustConfiguration() {
+    }
 
-	public AppConfiguration getApplication() {
-		return application;
-	}
+    public AppConfiguration getApplication() {
+        return application;
+    }
 
-	public void setApplication(AppConfiguration application) {
-		this.application = application;
-	}
+    public void setApplication(AppConfiguration application) {
+        this.application = application;
+    }
 
-	public CacheRefreshConfiguration getCacheRefresh() {
-		return cacheRefresh;
-	}
+    public CacheRefreshConfiguration getCacheRefresh() {
+        return cacheRefresh;
+    }
 
-	public void setCacheRefresh(CacheRefreshConfiguration cacheRefresh) {
-		this.cacheRefresh = cacheRefresh;
-	}
+    public void setCacheRefresh(CacheRefreshConfiguration cacheRefresh) {
+        this.cacheRefresh = cacheRefresh;
+    }
 
-	public long getRevision() {
-		return revision;
-	}
+    public long getRevision() {
+        return revision;
+    }
 
-	public void setRevision(long revision) {
-		this.revision = revision;
-	}
+    public void setRevision(long revision) {
+        this.revision = revision;
+    }
 
-	//issue 102 - begin  : changed by shekhar
-	public ImportPersonConfig getImportPersonConfig() {
-		return importPersonConfig;
-	}
+    //issue 102 - begin  : changed by shekhar
+    public ImportPersonConfig getImportPersonConfig() {
+        return importPersonConfig;
+    }
 
-	public void setImportPersonConfig(ImportPersonConfig importPersonConfig) {
-		this.importPersonConfig = importPersonConfig;
-	}//issue 102 - end  : changed by shekhar
-	
+    public void setImportPersonConfig(ImportPersonConfig importPersonConfig) {
+        this.importPersonConfig = importPersonConfig;
+    }//issue 102 - end  : changed by shekhar
 
-	public AttributeResolverConfiguration getAttributeResolverConfig() {
-		return attributeResolverConfig;
-	}
 
-	public void setAttributeResolverConfig(AttributeResolverConfiguration attributeResolverConfig) {
-		this.attributeResolverConfig = attributeResolverConfig;
-	}
+    public AttributeResolverConfiguration getAttributeResolverConfig() {
+        return attributeResolverConfig;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("LdapOxTrustConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=").append(cacheRefresh)
-				.append(", revision=").append(revision).append("]");
-		return builder.toString();
-	}
+    public void setAttributeResolverConfig(AttributeResolverConfiguration attributeResolverConfig) {
+        this.attributeResolverConfig = attributeResolverConfig;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("LdapOxTrustConfiguration [dn=").append(dn).append(", application=").append(application).append(", cacheRefresh=").append(cacheRefresh)
+                .append(", revision=").append(revision).append("]");
+        return builder.toString();
+    }
 
 }

@@ -16,47 +16,49 @@ import org.apache.commons.io.IOUtils;
 
 /**
  * Allow to defltate/infalte byte array
- * 
+ *
  * @author Yuriy Movchan Date: 04/24/2014
  */
-public class CompressionHelper {
+public final class CompressionHelper {
 
-	public static byte[] deflate(byte[] data, boolean nowrap) throws IOException {
-		Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, nowrap);
-		deflater.setInput(data);
-		deflater.finish();
+    private CompressionHelper() { }
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
+    public static byte[] deflate(byte[] data, boolean nowrap) throws IOException {
+        Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, nowrap);
+        deflater.setInput(data);
+        deflater.finish();
 
-		try {
-			byte[] buffer = new byte[1024];
-			while (!deflater.finished()) {
-				int count = deflater.deflate(buffer);
-				os.write(buffer, 0, count);
-			}
-		} finally {
-			IOUtils.closeQuietly(os);
-		}
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-		return os.toByteArray();
-	}
+        try {
+            byte[] buffer = new byte[1024];
+            while (!deflater.finished()) {
+                int count = deflater.deflate(buffer);
+                os.write(buffer, 0, count);
+            }
+        } finally {
+            IOUtils.closeQuietly(os);
+        }
 
-	public static byte[] inflate(byte[] data, boolean nowrap) throws IOException, DataFormatException {
-		Inflater inflater = new Inflater(nowrap);
-		inflater.setInput(data);
+        return os.toByteArray();
+    }
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream(data.length);
-		try {
-			byte[] buffer = new byte[1024];
-			while (!inflater.finished()) {
-				int count = inflater.inflate(buffer);
-				os.write(buffer, 0, count);
-			}
-		} finally {
-			IOUtils.closeQuietly(os);
-		}
+    public static byte[] inflate(byte[] data, boolean nowrap) throws IOException, DataFormatException {
+        Inflater inflater = new Inflater(nowrap);
+        inflater.setInput(data);
 
-		return os.toByteArray();
-	}
+        ByteArrayOutputStream os = new ByteArrayOutputStream(data.length);
+        try {
+            byte[] buffer = new byte[1024];
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                os.write(buffer, 0, count);
+            }
+        } finally {
+            IOUtils.closeQuietly(os);
+        }
+
+        return os.toByteArray();
+    }
 
 }

@@ -7,6 +7,6 @@ import javax.el.ELContext;
  */
 public abstract class ExtendedELContext extends ELContext {
 
-	public abstract ConstantResolver getConstantResolver();
+    public abstract ConstantResolver getConstantResolver();
 
 }

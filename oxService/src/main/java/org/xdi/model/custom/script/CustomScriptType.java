@@ -39,82 +39,82 @@ import java.util.Map;
  * @author Yuriy Movchan Date: 11/11/2014
  */
 public enum CustomScriptType implements LdapEnum {
-	
-	PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class, "PersonAuthentication", new DummyPersonAuthenticationType()),
-	APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession", new DummyApplicationSessionType()),
-	CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh", new DummyCacheRefreshType()),
-	UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
-	USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
-	CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration", new DummyClientRegistrationType()),
-	ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator", new DummyIdGeneratorType()),
-	UMA_RPT_POLICY("uma_rpt_policy", "UMA RPT Policies", UmaRptPolicyType.class, CustomScript.class, "UmaRptPolicy", new UmaDummyRptPolicyType()),
-	UMA_CLAIMS_GATHERING("uma_claims_gathering", "UMA Claims Gathering", UmaClaimsGatheringType.class, CustomScript.class, "UmaClaimsGathering", new UmaDummyClaimsGatheringType()),
-	CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering", new DummyConsentGatheringType()),
-	DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope", new DummyDynamicScopeType()),
-	SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
 
-	private String value;
-	private String displayName;
-	private Class<? extends BaseExternalType> customScriptType;
-	private Class<? extends CustomScript> customScriptModel;
-	private String pythonClass;
-	private BaseExternalType defaultImplementation;
-	
-	private static Map<String, CustomScriptType> mapByValues = new HashMap<String, CustomScriptType>();
-	static {
-		for (CustomScriptType enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    PERSON_AUTHENTICATION("person_authentication", "Person Authentication", PersonAuthenticationType.class, AuthenticationCustomScript.class, "PersonAuthentication", new DummyPersonAuthenticationType()),
+    APPLICATION_SESSION("application_session", "Application Session", ApplicationSessionType.class, CustomScript.class, "ApplicationSession", new DummyApplicationSessionType()),
+    CACHE_REFRESH("cache_refresh", "Cache Refresh", CacheRefreshType.class, CustomScript.class, "CacheRefresh", new DummyCacheRefreshType()),
+    UPDATE_USER("update_user", "Update User", UpdateUserType.class, CustomScript.class, "UpdateUser", new DummyUpdateUserType()),
+    USER_REGISTRATION("user_registration", "User Registration", UserRegistrationType.class, CustomScript.class, "UserRegistration", new DummyUserRegistrationType()),
+    CLIENT_REGISTRATION("client_registration", "Client Registration", ClientRegistrationType.class, CustomScript.class, "ClientRegistration", new DummyClientRegistrationType()),
+    ID_GENERATOR("id_generator", "Id Generator", IdGeneratorType.class, CustomScript.class, "IdGenerator", new DummyIdGeneratorType()),
+    UMA_RPT_POLICY("uma_rpt_policy", "UMA RPT Policies", UmaRptPolicyType.class, CustomScript.class, "UmaRptPolicy", new UmaDummyRptPolicyType()),
+    UMA_CLAIMS_GATHERING("uma_claims_gathering", "UMA Claims Gathering", UmaClaimsGatheringType.class, CustomScript.class, "UmaClaimsGathering", new UmaDummyClaimsGatheringType()),
+    CONSENT_GATHERING("consent_gathering", "Consent Gathering", ConsentGatheringType.class, CustomScript.class, "ConsentGathering", new DummyConsentGatheringType()),
+    DYNAMIC_SCOPE("dynamic_scope", "Dynamic Scopes", DynamicScopeType.class, CustomScript.class, "DynamicScope", new DummyDynamicScopeType()),
+    SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType());
 
-	private CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType, Class<? extends CustomScript> customScriptModel, String pythonClass, BaseExternalType defaultImplementation) {
-		this.displayName = displayName;
-		this.value = value;
-		this.customScriptType = customScriptType;
-		this.customScriptModel = customScriptModel;
-		this.pythonClass = pythonClass;
-		this.defaultImplementation = defaultImplementation;
-	}
+    private String value;
+    private String displayName;
+    private Class<? extends BaseExternalType> customScriptType;
+    private Class<? extends CustomScript> customScriptModel;
+    private String pythonClass;
+    private BaseExternalType defaultImplementation;
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    private static Map<String, CustomScriptType> MAP_BY_VALUES = new HashMap<String, CustomScriptType>();
+    static {
+        for (CustomScriptType enumType : values()) {
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
+        }
+    }
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
+    private CustomScriptType(String value, String displayName, Class<? extends BaseExternalType> customScriptType, Class<? extends CustomScript> customScriptModel, String pythonClass, BaseExternalType defaultImplementation) {
+        this.displayName = displayName;
+        this.value = value;
+        this.customScriptType = customScriptType;
+        this.customScriptModel = customScriptModel;
+        this.pythonClass = pythonClass;
+        this.defaultImplementation = defaultImplementation;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public Class<? extends BaseExternalType> getCustomScriptType() {
-		return customScriptType;
-	}
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 
-	public Class<? extends CustomScript> getCustomScriptModel() {
-		return customScriptModel;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public String getPythonClass() {
-		return pythonClass;
-	}
+    public Class<? extends BaseExternalType> getCustomScriptType() {
+        return customScriptType;
+    }
 
-	public BaseExternalType getDefaultImplementation() {
-		return defaultImplementation;
-	}
+    public Class<? extends CustomScript> getCustomScriptModel() {
+        return customScriptModel;
+    }
 
-	public static CustomScriptType getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public String getPythonClass() {
+        return pythonClass;
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public BaseExternalType getDefaultImplementation() {
+        return defaultImplementation;
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    public static CustomScriptType getByValue(String value) {
+        return MAP_BY_VALUES.get(value);
+    }
+
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

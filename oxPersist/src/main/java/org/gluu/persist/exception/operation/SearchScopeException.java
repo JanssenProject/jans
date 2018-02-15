@@ -8,15 +8,15 @@ package org.gluu.persist.exception.operation;
 
 /**
  * Exception thrown when a search scope problem occurs
- * 
+ *
  * @author Yuriy Movchan Date: 29/01/2018
  */
 public class SearchScopeException extends PersistentException {
 
-	private static final long serialVersionUID = -4554637442590218891L;
+    private static final long serialVersionUID = -4554637442590218891L;
 
-	public SearchScopeException(String message) {
-		super(message);
-	}
+    public SearchScopeException(String message) {
+        super(message);
+    }
 
 }

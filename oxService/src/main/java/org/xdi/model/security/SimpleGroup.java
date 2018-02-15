@@ -13,63 +13,63 @@ import java.util.Set;
  */
 public class SimpleGroup implements Group, Serializable {
 
-	private static final long serialVersionUID = 391089759338334557L;
+    private static final long serialVersionUID = 391089759338334557L;
 
-	/**
-	 * The name of the group
-	 */
-	private String name;
+    /**
+     * The name of the group
+     */
+    private String name;
 
-	/**
-	 * The members of this group
-	 */
-	private Set<Principal> members = new HashSet<Principal>();
+    /**
+     * The members of this group
+     */
+    private Set<Principal> members = new HashSet<Principal>();
 
-	public SimpleGroup(String name) {
-		this.name = name;
-	}
+    public SimpleGroup(String name) {
+        this.name = name;
+    }
 
-	public boolean addMember(Principal user) {
-		return members.add(user);
-	}
+    public boolean addMember(Principal user) {
+        return members.add(user);
+    }
 
-	public boolean isMember(Principal member) {
-		if (members.contains(member)) {
-			return true;
-		} else {
-			for (Principal m : members) {
-				if (m instanceof Group && ((Group) m).isMember(member)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public boolean isMember(Principal member) {
+        if (members.contains(member)) {
+            return true;
+        } else {
+            for (Principal m : members) {
+                if (m instanceof Group && ((Group) m).isMember(member)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-	public Enumeration<? extends Principal> members() {
-		return Collections.enumeration(members);
-	}
+    public Enumeration<? extends Principal> members() {
+        return Collections.enumeration(members);
+    }
 
-	public boolean removeMember(Principal user) {
-		return members.remove(user);
-	}
+    public boolean removeMember(Principal user) {
+        return members.remove(user);
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof SimpleGroup) {
-			SimpleGroup other = (SimpleGroup) obj;
-			return other.name.equals(name);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SimpleGroup) {
+            SimpleGroup other = (SimpleGroup) obj;
+            return other.name.equals(name);
+        } else {
+            return false;
+        }
+    }
 
-	@Override
-	public int hashCode() {
-		return name.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
 }

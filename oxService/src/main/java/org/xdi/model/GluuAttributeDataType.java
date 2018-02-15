@@ -11,7 +11,7 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * Attribute Data Type
- * 
+ *
  * @author Yuriy Movchan
  * @author Javier Rojas Blum
  *
@@ -19,48 +19,48 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum GluuAttributeDataType implements LdapEnum {
 
-	STRING("string", "Text"),
-	NUMERIC("numeric", "Numeric"),
-	BOOLEAN("boolean", "Boolean"),
-	PHOTO("photo", "Photo"),
-	CERTIFICATE("certificate", "Certificate"),
-	DATE("generalizedTime", "Date");
+    STRING("string", "Text"),
+    NUMERIC("numeric", "Numeric"),
+    BOOLEAN("boolean", "Boolean"),
+    PHOTO("photo", "Photo"),
+    CERTIFICATE("certificate", "Certificate"),
+    DATE("generalizedTime", "Date");
 
-	private String value;
-	private String displayName;
+    private String value;
+    private String displayName;
 
-	private static Map<String, GluuAttributeDataType> mapByValues = new HashMap<String, GluuAttributeDataType>();
+    private static Map<String, GluuAttributeDataType> MAP_BY_VALUES = new HashMap<String, GluuAttributeDataType>();
 
-	static {
-		for (GluuAttributeDataType enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (GluuAttributeDataType enumType : values()) {
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
+        }
+    }
 
-	private GluuAttributeDataType(String value, String displayName) {
-		this.value = value;
-		this.displayName = displayName;
-	}
+    private GluuAttributeDataType(String value, String displayName) {
+        this.value = value;
+        this.displayName = displayName;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public static GluuAttributeDataType getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static GluuAttributeDataType getByValue(String value) {
+        return MAP_BY_VALUES.get(value);
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

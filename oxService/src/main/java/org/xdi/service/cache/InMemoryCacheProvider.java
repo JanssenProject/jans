@@ -29,7 +29,7 @@ public class InMemoryCacheProvider extends AbstractCacheProvider<ExpiringMap> {
 
     @PostConstruct
     public void init() {
-    	this.inMemoryConfiguration = cacheConfiguration.getInMemoryConfiguration();
+        this.inMemoryConfiguration = cacheConfiguration.getInMemoryConfiguration();
     }
 
     public void create() {

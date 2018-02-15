@@ -21,66 +21,68 @@ import org.xdi.util.EasySSLProtocolSocketFactory;
 /**
  * @author: Yuriy Movchan Date: 11.21.2010
  */
-public class HTTPFileDownloader {
+public final class HTTPFileDownloader {
 
-	private static Logger log = Logger.getLogger(HTTPFileDownloader.class);
-	private static Protocol easyhttps;
+    private HTTPFileDownloader() { }
 
-	public static String getResource(String path, String contentType, String user, String password) {
-		boolean isUseAuthentication = (user != null) && (password != null);
+    private static Logger LOG = Logger.getLogger(HTTPFileDownloader.class);
+    private static Protocol EASY_HTTPS;
 
-		if (!path.contains("://")) {
-			path = "http://" + path;
-		}
-		String result = null;
+    public static String getResource(String path, String contentType, String user, String password) {
+        boolean isUseAuthentication = (user != null) && (password != null);
 
-		GetMethod method = new GetMethod(path);
-		try {
-			method.setRequestHeader("Accept", contentType);
+        if (!path.contains("://")) {
+            path = "http://" + path;
+        }
+        String result = null;
 
-			if (getEasyhttps() == null) {
-				setEasyhttps(new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
-			}
-			Protocol.registerProtocol("https", getEasyhttps());
+        GetMethod method = new GetMethod(path);
+        try {
+            method.setRequestHeader("Accept", contentType);
 
-			final HttpClient httpClient;
-			if (isUseAuthentication) {
-				httpClient = createHttpClientWithBasicAuth(user, password);
-			} else {
-				httpClient = new HttpClient();
-			}
+            if (getEasyhttps() == null) {
+                setEasyhttps(new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
+            }
+            Protocol.registerProtocol("https", getEasyhttps());
 
-			httpClient.executeMethod(method);
-			if (method.getStatusCode() == HttpStatus.SC_OK) {
-				result = method.getResponseBodyAsString();
-			}
-		} catch (IOException ex) {
-			result = null;
-			log.error(String.format("Failed to get resource %s", path), ex);
-		} catch (Exception ex) {
-			result = null;
-			log.error(String.format("Failed to get resource %s", path), ex);
-		} finally {
-			method.releaseConnection();
-		}
+            final HttpClient httpClient;
+            if (isUseAuthentication) {
+                httpClient = createHttpClientWithBasicAuth(user, password);
+            } else {
+                httpClient = new HttpClient();
+            }
 
-		return result;
-	}
+            httpClient.executeMethod(method);
+            if (method.getStatusCode() == HttpStatus.SC_OK) {
+                result = method.getResponseBodyAsString();
+            }
+        } catch (IOException ex) {
+            result = null;
+            LOG.error(String.format("Failed to get resource %s", path), ex);
+        } catch (Exception ex) {
+            result = null;
+            LOG.error(String.format("Failed to get resource %s", path), ex);
+        } finally {
+            method.releaseConnection();
+        }
 
-	private static HttpClient createHttpClientWithBasicAuth(String userid, String password) {
-		Credentials credentials = new UsernamePasswordCredentials(userid, password);
-		HttpClient httpClient = new HttpClient();
-		httpClient.getState().setCredentials(AuthScope.ANY, credentials);
-		httpClient.getParams().setAuthenticationPreemptive(true);
-		return httpClient;
-	}
+        return result;
+    }
 
-	public static void setEasyhttps(Protocol easyhttps) {
-		HTTPFileDownloader.easyhttps = easyhttps;
-	}
+    private static HttpClient createHttpClientWithBasicAuth(String userid, String password) {
+        Credentials credentials = new UsernamePasswordCredentials(userid, password);
+        HttpClient httpClient = new HttpClient();
+        httpClient.getState().setCredentials(AuthScope.ANY, credentials);
+        httpClient.getParams().setAuthenticationPreemptive(true);
+        return httpClient;
+    }
 
-	public static Protocol getEasyhttps() {
-		return easyhttps;
-	}
+    public static void setEasyhttps(Protocol easyhttps) {
+        HTTPFileDownloader.EASY_HTTPS = easyhttps;
+    }
+
+    public static Protocol getEasyhttps() {
+        return EASY_HTTPS;
+    }
 
 }

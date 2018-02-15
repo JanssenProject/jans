@@ -15,23 +15,23 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 
 
 public class PassportConfiguration {
-	private String strategy;
-	
-	public String getStrategy() {
-		return strategy;
-	}
+    private String strategy;
 
-	public void setStrategy(String strategy) {
-		this.strategy = strategy;
-	}
+    public String getStrategy() {
+        return strategy;
+    }
 
-	private List <FieldSet> fieldset = new ArrayList <FieldSet>();
+    public void setStrategy(String strategy) {
+        this.strategy = strategy;
+    }
 
-	public List <FieldSet> getFieldset() {
-		return fieldset;
-	}
+    private List <FieldSet> fieldset = new ArrayList <FieldSet>();
 
-	public void setFieldset(List <FieldSet> fieldset) {
-		this.fieldset = fieldset;
-	}
+    public List <FieldSet> getFieldset() {
+        return fieldset;
+    }
+
+    public void setFieldset(List <FieldSet> fieldset) {
+        this.fieldset = fieldset;
+    }
 }

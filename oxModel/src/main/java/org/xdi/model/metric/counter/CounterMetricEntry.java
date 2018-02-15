@@ -19,29 +19,29 @@ public class CounterMetricEntry extends MetricEntry {
 
     @LdapJsonObject
     @LdapAttribute(name = "oxData")
-	private CounterMetricData metricData;
+    private CounterMetricData metricData;
 
-	public CounterMetricEntry() {}
+    public CounterMetricEntry() {}
 
-	public CounterMetricEntry(String dn, String id, Date creationDate, CounterMetricData metricData) {
-		super(dn, id, creationDate);
+    public CounterMetricEntry(String dn, String id, Date creationDate, CounterMetricData metricData) {
+        super(dn, id, creationDate);
 
-		this.metricData = metricData;
-	}
+        this.metricData = metricData;
+    }
 
-	public CounterMetricData getMetricData() {
-		return metricData;
-	}
+    public CounterMetricData getMetricData() {
+        return metricData;
+    }
 
-	public void setMetricData(CounterMetricData metricData) {
-		this.metricData = metricData;
-	}
+    public void setMetricData(CounterMetricData metricData) {
+        this.metricData = metricData;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("CounterMetricEntry [metricData=").append(metricData).append(", toString()=").append(super.toString()).append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CounterMetricEntry [metricData=").append(metricData).append(", toString()=").append(super.toString()).append("]");
+        return builder.toString();
+    }
 
 }

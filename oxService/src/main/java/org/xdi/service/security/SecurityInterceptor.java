@@ -22,20 +22,20 @@ import org.xdi.service.el.ExpressionEvaluator;
 @Priority(Interceptor.Priority.PLATFORM_AFTER)
 public class SecurityInterceptor implements Serializable {
 
-	private static final long serialVersionUID = 8227941471496200128L;
+    private static final long serialVersionUID = 8227941471496200128L;
 
-	@Inject
-	private Logger log;
-	
-	@Inject
-	private SecurityExtension securityExtension;
-    
+    @Inject
+    private Logger log;
+
+    @Inject
+    private SecurityExtension securityExtension;
+
     @Inject
     private ExpressionEvaluator expressionEvaluator;
 
     @AroundInvoke
     public Object invoke(InvocationContext ctx) throws Exception {
-    	InterceptSecure is = securityExtension.getInterceptSecure(ctx.getMethod());
+        InterceptSecure is = securityExtension.getInterceptSecure(ctx.getMethod());
 
         // SecurityChecking  restrictions
         Secure[] constraints = (is == null) ? new Secure[0] : is.value();
@@ -47,7 +47,7 @@ public class SecurityInterceptor implements Serializable {
             Boolean expressionValue = expressionEvaluator.evaluateValueExpression(constraint.value(), Boolean.class, secureVars);
 
             if ((expressionValue == null) || !expressionValue) {
-            	log.debug("Method: '{}' constrain '{}' evaluation is null or false!", ctx.getMethod(), constraint);
+                log.debug("Method: '{}' constrain '{}' evaluation is null or false!", ctx.getMethod(), constraint);
                 throw new SecurityEvaluationException();
             }
         }
@@ -62,7 +62,7 @@ public class SecurityInterceptor implements Serializable {
             Annotation[] parameterAnnotations = parametersAnnotations[i];
             for (Annotation parameterAnnotation : parameterAnnotations) {
                 if (SecureVariable.class.isAssignableFrom(parameterAnnotation.annotationType())) {
-                	SecureVariable secureVariable = (SecureVariable) parameterAnnotation;
+                    SecureVariable secureVariable = (SecureVariable) parameterAnnotation;
                     Object paramValue = ctx.getParameters()[i];
                     secureVariables.put(secureVariable.value(), paramValue);
                 }

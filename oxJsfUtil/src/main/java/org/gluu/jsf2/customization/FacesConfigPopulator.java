@@ -48,13 +48,13 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
         log.debug("Starting configuration populator");
 
         if (Utils.isCustomPagesDirExists()) {
-        	String customPath = Utils.getCustomPagesPath();
+            String customPath = Utils.getCustomPagesPath();
             log.debug("Adding navigation rules from custom dir folder: {}", customPath);
-	        try {
-	            findAndUpdateNavigationRules(toPopulate, customPath);
-	        } catch (Exception ex) {
-	            FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't add customized navigation rules");
-	        }
+            try {
+                findAndUpdateNavigationRules(toPopulate, customPath);
+            } catch (Exception ex) {
+                FacesLogger.CONFIG.getLogger().log(Level.SEVERE, "Can't add customized navigation rules");
+            }
         }
 
         try {
@@ -65,7 +65,7 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
                 findAndUpdateNavigationRules(toPopulate, url.getPath());
             }
         } catch (Exception ex) {
-        	log.error("Failed to populate application configuraton", ex);
+            log.error("Failed to populate application configuraton", ex);
         }
     }
 
@@ -104,11 +104,11 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
         try {
             InputStream xml = new FileInputStream(faceConfig);
 //            try {
-//            	if (!isValidFacesConfig(xml)) {
-//            		return;
-//            	}
+//                if (!isValidFacesConfig(xml)) {
+//                    return;
+//                }
 //            } finally {
-//            	xml.close();
+//                xml.close();
 //            }
             Document document = docBuilder.parse(new File(faceConfig));
             Element root = toPopulate.getDocumentElement();
@@ -118,7 +118,7 @@ public class FacesConfigPopulator extends ApplicationConfigurationPopulator {
                 root.appendChild(importedNode);
             }
         } catch (Exception ex) {
-        	log.error("Failed to update navigation rules", ex);
+            log.error("Failed to update navigation rules", ex);
         }
     }
 

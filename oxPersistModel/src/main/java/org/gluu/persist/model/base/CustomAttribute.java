@@ -42,7 +42,7 @@ public class CustomAttribute implements Serializable, Comparable<CustomAttribute
         this.name = name;
         this.values = values;
     }
-    
+
     public String getValue() {
         if (this.values == null) {
             return null;

@@ -18,18 +18,18 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.deploy.LoginConfig;
 /**
  * Allow to proceed container authentication with client certificate or without it
- * 
+ *
  * @author Yuriy Movchan Date: 02/11/2016
  */
 public class WantSslAuthenticator extends SSLAuthenticator {
-    
-	private String infoStr = null;
-	
-    public WantSslAuthenticator() {
-		this.infoStr = this.getClass().getName();
-	}
 
-	@Override
+    private String infoStr = null;
+
+    public WantSslAuthenticator() {
+        this.infoStr = this.getClass().getName();
+    }
+
+    @Override
     public boolean authenticate(Request request,
                                 HttpServletResponse response,
                                 LoginConfig config)
@@ -76,9 +76,9 @@ public class WantSslAuthenticator extends SSLAuthenticator {
         return true;
     }
 
-	@Override
-	public String getInfo() {
-		return infoStr;
-	}
+    @Override
+    public String getInfo() {
+        return infoStr;
+    }
 
 }

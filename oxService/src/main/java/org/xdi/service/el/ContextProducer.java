@@ -23,60 +23,60 @@ import com.sun.el.lang.VariableMapperImpl;
  */
 public class ContextProducer {
 
-	@Inject
+    @Inject
     private BeanManager beanManager;
-    
-	@Produces @RequestScoped
-	public ExtendedELContext createELContext() {
-		ConstantResolver constantResolver = new ConstantResolver();
 
-		CompositeELResolver resolver = createELResolver(constantResolver);
+    @Produces @RequestScoped
+    public ExtendedELContext createELContext() {
+        ConstantResolver constantResolver = new ConstantResolver();
 
-		return createELContext(resolver, new FunctionMapperImpl(), new VariableMapperImpl(), constantResolver);
-	}
+        CompositeELResolver resolver = createELResolver(constantResolver);
 
-	private CompositeELResolver createELResolver(ConstantResolver constantResolver) {
+        return createELContext(resolver, new FunctionMapperImpl(), new VariableMapperImpl(), constantResolver);
+    }
+
+    private CompositeELResolver createELResolver(ConstantResolver constantResolver) {
         CompositeELResolver resolver = new CompositeELResolver();
         resolver.add(constantResolver);
-		resolver.add(beanManager.getELResolver());
+        resolver.add(beanManager.getELResolver());
 
-		FacesContext facesContext = FacesContext.getCurrentInstance();
-		if (facesContext != null) {
-			resolver.add(facesContext.getELContext().getELResolver());
-		}
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        if (facesContext != null) {
+            resolver.add(facesContext.getELContext().getELResolver());
+        }
 
-		resolver.add(new MapELResolver());
-		resolver.add(new ListELResolver());
-		resolver.add(new ArrayELResolver());
-		resolver.add(new ResourceBundleELResolver());
-		resolver.add(new BeanELResolver());
+        resolver.add(new MapELResolver());
+        resolver.add(new ListELResolver());
+        resolver.add(new ArrayELResolver());
+        resolver.add(new ResourceBundleELResolver());
+        resolver.add(new BeanELResolver());
 
-		return resolver;
-	}
+        return resolver;
+    }
 
-	private ExtendedELContext createELContext(final ELResolver resolver, final FunctionMapper functionMapper,
-			final VariableMapper variableMapper, final ConstantResolver constantResolver) {
-		return new ExtendedELContext() {
-			@Override
-			public ELResolver getELResolver() {
-				return resolver;
-			}
+    private ExtendedELContext createELContext(final ELResolver resolver, final FunctionMapper functionMapper,
+            final VariableMapper variableMapper, final ConstantResolver constantResolver) {
+        return new ExtendedELContext() {
+            @Override
+            public ELResolver getELResolver() {
+                return resolver;
+            }
 
-			@Override
-			public FunctionMapper getFunctionMapper() {
-				return functionMapper;
-			}
+            @Override
+            public FunctionMapper getFunctionMapper() {
+                return functionMapper;
+            }
 
-			@Override
-			public VariableMapper getVariableMapper() {
-				return variableMapper;
-			}
+            @Override
+            public VariableMapper getVariableMapper() {
+                return variableMapper;
+            }
 
-			@Override
-			public ConstantResolver getConstantResolver() {
-				return constantResolver;
-			}
-		};
-	}
+            @Override
+            public ConstantResolver getConstantResolver() {
+                return constantResolver;
+            }
+        };
+    }
 
 }

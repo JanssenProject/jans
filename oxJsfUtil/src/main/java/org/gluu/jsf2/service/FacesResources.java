@@ -12,32 +12,32 @@ import javax.faces.context.FacesContext;
  */
 public class FacesResources {
 
-	@Produces
-	@Dependent
-	public FacesContext getFacesContext() {
-		return FacesContext.getCurrentInstance();
-	}
+    @Produces
+    @Dependent
+    public FacesContext getFacesContext() {
+        return FacesContext.getCurrentInstance();
+    }
 
-	@Produces
-	@Dependent
-	public ExternalContext getExternalContext() {
-		FacesContext facesContext = getFacesContext();
-		if (facesContext != null) {
-			return facesContext.getExternalContext();
-		}
-		
-		return null;
-	}
+    @Produces
+    @Dependent
+    public ExternalContext getExternalContext() {
+        FacesContext facesContext = getFacesContext();
+        if (facesContext != null) {
+            return facesContext.getExternalContext();
+        }
+    
+        return null;
+    }
 
-	@Produces
-	@Dependent
-	public ViewHandler getViewHandler() {
-		FacesContext facesContext = getFacesContext();
-		if (facesContext != null) {
-			return facesContext.getApplication().getViewHandler();
-		}
-		
-		return null;
-	}
+    @Produces
+    @Dependent
+    public ViewHandler getViewHandler() {
+        FacesContext facesContext = getFacesContext();
+        if (facesContext != null) {
+            return facesContext.getApplication().getViewHandler();
+        }
+    
+        return null;
+    }
 
 }

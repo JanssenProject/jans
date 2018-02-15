@@ -24,42 +24,42 @@ import org.xdi.model.custom.script.CustomScriptType;
 import org.xdi.util.StringHelper;
 
 /**
- * Custom script configuration 
+ * Custom script configuration
  *
  * @author Yuriy Movchan Date: 12/03/2014
  */
 @LdapEntry(sortBy = "level")
 @LdapObjectClass(values = {"top", "oxCustomScript"})
 public class CustomScript extends BaseEntry {
-	
-	public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
-	public static final String LOCATION_PATH_MODEL_PROPERTY = "location_path";
 
-	@LdapAttribute(ignoreDuringUpdate = true)
-	private String inum;
+    public static final String LOCATION_TYPE_MODEL_PROPERTY = "location_type";
+    public static final String LOCATION_PATH_MODEL_PROPERTY = "location_path";
+
+    @LdapAttribute(ignoreDuringUpdate = true)
+    private String inum;
 
     @LdapAttribute(name = "displayName")
-	private String name;
+    private String name;
 
     @LdapAttribute(name = "description")
-	private String description;
+    private String description;
 
     @LdapAttribute(name = "oxScript")
-	private String script;
+    private String script;
 
     @LdapAttribute(name = "oxScriptType")
-	private CustomScriptType scriptType;
+    private CustomScriptType scriptType;
 
     @LdapAttribute(name = "programmingLanguage")
     private ProgrammingLanguage programmingLanguage;
 
     @LdapJsonObject
     @LdapAttribute(name = "oxModuleProperty")
-	private List<SimpleCustomProperty> moduleProperties;
-    
+    private List<SimpleCustomProperty> moduleProperties;
+
     @LdapJsonObject
     @LdapAttribute(name = "oxConfigurationProperty")
-	private List<SimpleExtendedCustomProperty> configurationProperties;
+    private List<SimpleExtendedCustomProperty> configurationProperties;
 
     @LdapAttribute(name = "oxLevel")
     private int level;
@@ -76,209 +76,209 @@ public class CustomScript extends BaseEntry {
     @Transient
     private boolean internal;
 
-	public CustomScript() {}
+    public CustomScript() {}
 
-	public CustomScript(String dn, String inum, String name) {
-		super(dn);
-		this.inum = inum;
-		this.name = name;
-	}
+    public CustomScript(String dn, String inum, String name) {
+        super(dn);
+        this.inum = inum;
+        this.name = name;
+    }
 
-	public CustomScript(CustomScript customScript) {
-		super(customScript.getDn());
-		this.inum = customScript.inum;
-		this.name = customScript.name;
-		this.description = customScript.description;
-		this.script = customScript.script;
-		this.scriptType = customScript.scriptType;
-		this.programmingLanguage = customScript.programmingLanguage;
-		this.moduleProperties = customScript.moduleProperties;
-		this.configurationProperties = customScript.configurationProperties;
-		this.level = customScript.level;
-		this.revision = customScript.revision;
-		this.enabled = customScript.enabled;
-		this.modified = customScript.modified;
-		this.internal = customScript.internal;
-	}
+    public CustomScript(CustomScript customScript) {
+        super(customScript.getDn());
+        this.inum = customScript.inum;
+        this.name = customScript.name;
+        this.description = customScript.description;
+        this.script = customScript.script;
+        this.scriptType = customScript.scriptType;
+        this.programmingLanguage = customScript.programmingLanguage;
+        this.moduleProperties = customScript.moduleProperties;
+        this.configurationProperties = customScript.configurationProperties;
+        this.level = customScript.level;
+        this.revision = customScript.revision;
+        this.enabled = customScript.enabled;
+        this.modified = customScript.modified;
+        this.internal = customScript.internal;
+    }
 
-	public String getInum() {
-		return inum;
-	}
+    public String getInum() {
+        return inum;
+    }
 
-	public void setInum(String inum) {
-		this.inum = inum;
-	}
+    public void setInum(String inum) {
+        this.inum = inum;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public String getScript() {
-		return script;
-	}
+    public String getScript() {
+        return script;
+    }
 
-	public void setScript(String script) {
-		this.script = script;
-	}
+    public void setScript(String script) {
+        this.script = script;
+    }
 
-	public CustomScriptType getScriptType() {
-		return scriptType;
-	}
+    public CustomScriptType getScriptType() {
+        return scriptType;
+    }
 
-	public void setScriptType(CustomScriptType scriptType) {
-		this.scriptType = scriptType;
-	}
+    public void setScriptType(CustomScriptType scriptType) {
+        this.scriptType = scriptType;
+    }
 
-	public ProgrammingLanguage getProgrammingLanguage() {
-		return programmingLanguage;
-	}
+    public ProgrammingLanguage getProgrammingLanguage() {
+        return programmingLanguage;
+    }
 
-	public void setProgrammingLanguage(ProgrammingLanguage programmingLanguage) {
-		this.programmingLanguage = programmingLanguage;
-	}
+    public void setProgrammingLanguage(ProgrammingLanguage programmingLanguage) {
+        this.programmingLanguage = programmingLanguage;
+    }
 
-	public List<SimpleCustomProperty> getModuleProperties() {
-		return moduleProperties;
-	}
+    public List<SimpleCustomProperty> getModuleProperties() {
+        return moduleProperties;
+    }
 
-	public void setModuleProperties(List<SimpleCustomProperty> moduleProperties) {
-		this.moduleProperties = moduleProperties;
-	}
+    public void setModuleProperties(List<SimpleCustomProperty> moduleProperties) {
+        this.moduleProperties = moduleProperties;
+    }
 
-	
-	public List<SimpleExtendedCustomProperty> getConfigurationProperties() {
-		return configurationProperties;
-	}
 
-	public void setConfigurationProperties(List<SimpleExtendedCustomProperty> properties) {
-		this.configurationProperties = properties;
-	}
+    public List<SimpleExtendedCustomProperty> getConfigurationProperties() {
+        return configurationProperties;
+    }
 
-	public int getLevel() {
-		return level;
-	}
+    public void setConfigurationProperties(List<SimpleExtendedCustomProperty> properties) {
+        this.configurationProperties = properties;
+    }
 
-	public void setLevel(int level) {
-		this.level = level;
-	}
+    public int getLevel() {
+        return level;
+    }
 
-	public long getRevision() {
-		return revision;
-	}
+    public void setLevel(int level) {
+        this.level = level;
+    }
 
-	public void setRevision(long revision) {
-		this.revision = revision;
-	}
+    public long getRevision() {
+        return revision;
+    }
 
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public void setRevision(long revision) {
+        this.revision = revision;
+    }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public boolean isEnabled() {
+        return enabled;
+    }
 
-	public boolean isModified() {
-		return modified;
-	}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
-	public void setModified(boolean modified) {
-		this.modified = modified;
-	}
+    public boolean isModified() {
+        return modified;
+    }
 
-	public boolean isInternal() {
-		return internal;
-	}
+    public void setModified(boolean modified) {
+        this.modified = modified;
+    }
 
-	public void setInternal(boolean internal) {
-		this.internal = internal;
-	}
+    public boolean isInternal() {
+        return internal;
+    }
 
-	public ScriptLocationType getLocationType() {
-		SimpleCustomProperty moduleProperty = getModuleProperty(LOCATION_TYPE_MODEL_PROPERTY);
-		if (moduleProperty == null) {
-			return null;
-		}
+    public void setInternal(boolean internal) {
+        this.internal = internal;
+    }
 
-		return ScriptLocationType.getByValue(moduleProperty.getValue2());
-	}
+    public ScriptLocationType getLocationType() {
+        SimpleCustomProperty moduleProperty = getModuleProperty(LOCATION_TYPE_MODEL_PROPERTY);
+        if (moduleProperty == null) {
+            return null;
+        }
 
-	public void setLocationType(ScriptLocationType locationType) {
-		if(locationType != null)
-			setModuleProperty(LOCATION_TYPE_MODEL_PROPERTY, locationType.getValue());
-	}
+        return ScriptLocationType.getByValue(moduleProperty.getValue2());
+    }
 
-	public String getLocationPath() {
-		SimpleCustomProperty moduleProperty = getModuleProperty(LOCATION_PATH_MODEL_PROPERTY);
-		if (moduleProperty == null) {
-			return null;
-		}
+    public void setLocationType(ScriptLocationType locationType) {
+        if(locationType != null)
+            setModuleProperty(LOCATION_TYPE_MODEL_PROPERTY, locationType.getValue());
+    }
 
-		return moduleProperty.getValue2();
-	}
+    public String getLocationPath() {
+        SimpleCustomProperty moduleProperty = getModuleProperty(LOCATION_PATH_MODEL_PROPERTY);
+        if (moduleProperty == null) {
+            return null;
+        }
 
-	public void setLocationPath(String locationPath) {
-		setModuleProperty(LOCATION_PATH_MODEL_PROPERTY, locationPath);
-	}
+        return moduleProperty.getValue2();
+    }
 
-	protected SimpleCustomProperty getModuleProperty(final String modulePropertyName) {
-		SimpleCustomProperty result = null;
+    public void setLocationPath(String locationPath) {
+        setModuleProperty(LOCATION_PATH_MODEL_PROPERTY, locationPath);
+    }
 
-		List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-		if (moduleProperties == null) {
-			return result;
-		}
+    protected SimpleCustomProperty getModuleProperty(final String modulePropertyName) {
+        SimpleCustomProperty result = null;
 
-		for (SimpleCustomProperty moduleProperty : getModuleProperties()) {
-			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
-				result = moduleProperty;
-				break;
-			}
-		}
+        List<SimpleCustomProperty> moduleProperties = getModuleProperties();
+        if (moduleProperties == null) {
+            return result;
+        }
 
-		return result;
-	}
+        for (SimpleCustomProperty moduleProperty : getModuleProperties()) {
+            if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
+                result = moduleProperty;
+                break;
+            }
+        }
 
-	protected void setModuleProperty(String name, String value) {
-		SimpleCustomProperty moduleProperty = getModuleProperty(name);
-		
-		if (moduleProperty == null) {
-			addModuleProperty(name, value);
-		} else {
-			moduleProperty.setValue2(value);
-		}
-	}
+        return result;
+    }
 
-	public void addModuleProperty(final String name, final String value) {
-		SimpleCustomProperty usageTypeModuleProperties = new SimpleCustomProperty(name, value);
-		getModuleProperties().add(usageTypeModuleProperties);
-	}
+    protected void setModuleProperty(String name, String value) {
+        SimpleCustomProperty moduleProperty = getModuleProperty(name);
+    
+        if (moduleProperty == null) {
+            addModuleProperty(name, value);
+        } else {
+            moduleProperty.setValue2(value);
+        }
+    }
 
-	public void removeModuleProperty(final String modulePropertyName) {
-		List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-		if (moduleProperties == null) {
-			return;
-		}
+    public void addModuleProperty(final String name, final String value) {
+        SimpleCustomProperty usageTypeModuleProperties = new SimpleCustomProperty(name, value);
+        getModuleProperties().add(usageTypeModuleProperties);
+    }
 
-		for (Iterator<SimpleCustomProperty> it = moduleProperties.iterator(); it.hasNext();) {
-			SimpleCustomProperty moduleProperty = (SimpleCustomProperty) it.next();
-			if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
-				it.remove();
-				break;
-			}
-		}
-	}
+    public void removeModuleProperty(final String modulePropertyName) {
+        List<SimpleCustomProperty> moduleProperties = getModuleProperties();
+        if (moduleProperties == null) {
+            return;
+        }
+
+        for (Iterator<SimpleCustomProperty> it = moduleProperties.iterator(); it.hasNext();) {
+            SimpleCustomProperty moduleProperty = (SimpleCustomProperty) it.next();
+            if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
+                it.remove();
+                break;
+            }
+        }
+    }
 
 }

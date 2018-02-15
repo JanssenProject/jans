@@ -13,12 +13,12 @@ import org.quartz.spi.TriggerFiredBundle;
  */
 public class JobExecutionFactory implements JobFactory {
 
-	@Inject
-	private JobExecutionDelegate jobExecutionDelegate;
+    @Inject
+    private JobExecutionDelegate jobExecutionDelegate;
 
-	public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler)
-			throws SchedulerException {
-		return jobExecutionDelegate;
-	}
+    public Job newJob(TriggerFiredBundle bundle, Scheduler scheduler)
+            throws SchedulerException {
+        return jobExecutionDelegate;
+    }
 
 }

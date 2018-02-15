@@ -15,24 +15,24 @@ import org.xdi.model.SimpleCustomProperty;
  */
 public class DummyDynamicScopeType implements DynamicScopeType {
 
-	@Override
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
-		return true;
-	}
+    @Override
+    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
 
-	@Override
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
-		return true;
-	}
+    @Override
+    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {
+        return true;
+    }
 
-	@Override
-	public int getApiVersion() {
-		return 1;
-	}
+    @Override
+    public int getApiVersion() {
+        return 1;
+    }
 
-	@Override
-	public boolean update(Object dynamicScopeContext, Map<String, SimpleCustomProperty> configurationAttributes) {
-		return false;
-	}
+    @Override
+    public boolean update(Object dynamicScopeContext, Map<String, SimpleCustomProperty> configurationAttributes) {
+        return false;
+    }
 
 }

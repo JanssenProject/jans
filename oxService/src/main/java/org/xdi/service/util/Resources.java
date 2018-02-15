@@ -17,9 +17,9 @@ public class Resources {
 
     private static Map<String, Logger> cache = new HashMap<String, Logger>();
 
-	@Produces
-	public Logger getLogger(InjectionPoint ip) {
-		Class<?> clazz = ip.getMember().getDeclaringClass();
+    @Produces
+    public Logger getLogger(InjectionPoint ip) {
+        Class<?> clazz = ip.getMember().getDeclaringClass();
 
         String clazzName = clazz.getName();
         Logger cached = cache.get(clazzName);
@@ -30,5 +30,5 @@ public class Resources {
         Logger logger = LoggerFactory.getLogger(clazz);
         cache.put(clazzName, logger);
         return logger;
-	}
+    }
 }

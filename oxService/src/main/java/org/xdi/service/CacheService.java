@@ -14,7 +14,7 @@ import org.xdi.service.cache.CacheProvider;
 
 /**
  * Provides operations with cache
- * 
+ *
  * @author Yuriy Movchan Date: 01.24.2012
  * @author Yuriy Zabrovarnyy Date: 02.02.2017
  */
@@ -22,47 +22,47 @@ import org.xdi.service.cache.CacheProvider;
 @Named
 public class CacheService {
 
-	@Inject
-	private CacheProvider cacheProvider;
+    @Inject
+    private CacheProvider cacheProvider;
 
-	@Inject
+    @Inject
     private Logger log;
 
-	public Object get(String region, String key) {
-		if (cacheProvider == null) {
-			return null;
-		}
-		
-		return cacheProvider.get(region, key);
-	}
+    public Object get(String region, String key) {
+        if (cacheProvider == null) {
+            return null;
+        }
+    
+        return cacheProvider.get(region, key);
+    }
 
-	public void put(String region, String key, Object object) {
-		if (cacheProvider != null) {
-			cacheProvider.put(region, key, object);
-		}
-	}
+    public void put(String region, String key, Object object) {
+        if (cacheProvider != null) {
+            cacheProvider.put(region, key, object);
+        }
+    }
 
-	public void remove(String region, String key) {
-		if (cacheProvider == null) {
-			return;
-		}
-		
-		cacheProvider.remove(region, key);
-	}
+    public void remove(String region, String key) {
+        if (cacheProvider == null) {
+            return;
+        }
+    
+        cacheProvider.remove(region, key);
+    }
 
-	@Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
-	public void removeAll(String name) {
-		cacheProvider.clear(); // for non ehcache clear all cache (e.g. in memcache we don't have regions)
-	}
+    @Deprecated // todo we must not stick to ehcache specific classes ! Scheduled for removing!
+    public void removeAll(String name) {
+        cacheProvider.clear(); // for non ehcache clear all cache (e.g. in memcache we don't have regions)
+    }
 
-	public void clear() {
-		if (cacheProvider != null) {
-			cacheProvider.clear();
-		}
-	}
+    public void clear() {
+        if (cacheProvider != null) {
+            cacheProvider.clear();
+        }
+    }
 
-	public CacheProvider<?> getCacheProvider() {
-		return cacheProvider;
-	}
+    public CacheProvider<?> getCacheProvider() {
+        return cacheProvider;
+    }
 
 }

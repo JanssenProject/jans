@@ -36,17 +36,17 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 
 /**
- * A reporter which outputs measurements to LDAP 
+ * A reporter which outputs measurements to LDAP
  *
  * @author Yuriy Movchan Date: 08/03/2015
  */
 public class LdapEntryReporter extends ScheduledReporter {
 
     private final Clock clock;
-	private final MetricService metricService;
-	private Date startTime;
+    private final MetricService metricService;
+    private Date startTime;
 
-	/**
+    /**
      * Returns a new {@link Builder} for {@link LdapEntryReporter}.
      *
      * @param registry the registry to report
@@ -68,7 +68,7 @@ public class LdapEntryReporter extends ScheduledReporter {
         private TimeUnit rateUnit;
         private TimeUnit durationUnit;
         private MetricFilter filter;
-		private MetricService metricService;
+        private MetricService metricService;
 
         private Builder(MetricRegistry registry, MetricService metricService) {
             this.registry = registry;
@@ -152,7 +152,7 @@ public class LdapEntryReporter extends ScheduledReporter {
     }
 
     @SuppressWarnings("rawtypes")
-	@Override
+    @Override
     public void report(SortedMap<String, Gauge> gauges,
                        SortedMap<String, Counter> counters,
                        SortedMap<String, Histogram> histograms,
@@ -161,112 +161,112 @@ public class LdapEntryReporter extends ScheduledReporter {
         reportImpl(counters, timers);
     }
 
-	private void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
+    private void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
         final Date currentRunTime = new Date(clock.getTime());
 
         List<MetricEntry> metricEntries = new ArrayList<MetricEntry>();
         if (counters != null && !counters.isEmpty()) {
-        	List<MetricEntry> result = builCounterEntries(counters, metricService.getRegisteredMetricTypes());
-        	metricEntries.addAll(result);
+            List<MetricEntry> result = builCounterEntries(counters, metricService.getRegisteredMetricTypes());
+            metricEntries.addAll(result);
         }
 
         if (timers != null && !timers.isEmpty()) {
-        	List<MetricEntry> result = builTimerEntries(timers, metricService.getRegisteredMetricTypes());
-        	metricEntries.addAll(result);
+            List<MetricEntry> result = builTimerEntries(timers, metricService.getRegisteredMetricTypes());
+            metricEntries.addAll(result);
         }
 
-        // Remove 1 millisecond to avoid overlapping periods 
+        // Remove 1 millisecond to avoid overlapping periods
         final Calendar cal = Calendar.getInstance();
-		cal.setTime(currentRunTime);
-		cal.add(Calendar.MILLISECOND, -1);
-		final Date endTime = cal.getTime();
+        cal.setTime(currentRunTime);
+        cal.add(Calendar.MILLISECOND, -1);
+        final Date endTime = cal.getTime();
 
-		Date creationTime = new Date();
+        Date creationTime = new Date();
 
-		if (metricEntries.size() > 0) {
-			addMandatoryAttributes(metricService, startTime, endTime, metricEntries, creationTime);
-		}
+        if (metricEntries.size() > 0) {
+            addMandatoryAttributes(metricService, startTime, endTime, metricEntries, creationTime);
+        }
 
-		startTime = currentRunTime;
-        
+        startTime = currentRunTime;
+    
         metricService.add(metricEntries, creationTime);
-	}
+    }
 
-	private List<MetricEntry> builCounterEntries(SortedMap<String, Counter> counters, Set<MetricType> registeredMetricTypes) {
+    private List<MetricEntry> builCounterEntries(SortedMap<String, Counter> counters, Set<MetricType> registeredMetricTypes) {
         List<MetricEntry> result = new ArrayList<MetricEntry>();
 
-		Set<MetricType> currentRegisteredMetricTypes = new HashSet<MetricType>(registeredMetricTypes);
-		for (MetricType metricType : currentRegisteredMetricTypes) {
-			Counter counter = counters.get(metricType.getValue());
-        	if (counter != null) {
-	        	long count = counter.getCount();
-				
-				// Remove to avoid writing not changed statistic
-	        	// registeredMetricTypes.remove(metricType);
-	        	
-	        	CounterMetricData counterMetricData = new CounterMetricData(count);
-				CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
-				counterMetricEntry.setMetricData(counterMetricData);
-				counterMetricEntry.setMetricType(metricType);
+        Set<MetricType> currentRegisteredMetricTypes = new HashSet<MetricType>(registeredMetricTypes);
+        for (MetricType metricType : currentRegisteredMetricTypes) {
+            Counter counter = counters.get(metricType.getValue());
+            if (counter != null) {
+                long count = counter.getCount();
+            
+                // Remove to avoid writing not changed statistic
+                // registeredMetricTypes.remove(metricType);
+            
+                CounterMetricData counterMetricData = new CounterMetricData(count);
+                CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
+                counterMetricEntry.setMetricData(counterMetricData);
+                counterMetricEntry.setMetricType(metricType);
 
-				result.add(counterMetricEntry);
-        	}
+                result.add(counterMetricEntry);
+            }
         }
-        
+    
         return result;
-	}
+    }
 
-	private List<MetricEntry> builTimerEntries(SortedMap<String, Timer> timers, Set<MetricType> registeredMetricTypes) {
+    private List<MetricEntry> builTimerEntries(SortedMap<String, Timer> timers, Set<MetricType> registeredMetricTypes) {
         List<MetricEntry> result = new ArrayList<MetricEntry>();
 
-		for (MetricType metricType : registeredMetricTypes) {
-			Timer timer = timers.get(metricType.getValue());
-        	if (timer != null) {
-				Snapshot snapshot = timer .getSnapshot();
-	
-				TimerMetricData timerMetricData = new TimerMetricData(
-						timer.getCount(),
-						convertRate(timer.getMeanRate()),
-						convertRate(timer.getOneMinuteRate()),
-						convertRate(timer.getFiveMinuteRate()),
-						convertRate(timer.getFifteenMinuteRate()),
-						getRateUnit(),
-						convertDuration(snapshot.getMin()),
-						convertDuration(snapshot.getMax()),
-						convertDuration(snapshot.getMean()),
-						convertDuration(snapshot.getStdDev()),
-						convertDuration(snapshot.getMedian()),
-						convertDuration(snapshot.get75thPercentile()),
-						convertDuration(snapshot.get95thPercentile()),
-						convertDuration(snapshot.get98thPercentile()),
-						convertDuration(snapshot.get99thPercentile()),
-						convertDuration(snapshot.get999thPercentile()),
-						getDurationUnit());
-				TimerMetricEntry timerMetricEntry = new TimerMetricEntry();
-				timerMetricEntry.setMetricData(timerMetricData);
-				timerMetricEntry.setMetricType(metricType);
+        for (MetricType metricType : registeredMetricTypes) {
+            Timer timer = timers.get(metricType.getValue());
+            if (timer != null) {
+                Snapshot snapshot = timer .getSnapshot();
 
-				result.add(timerMetricEntry);
-        	}
+                TimerMetricData timerMetricData = new TimerMetricData(
+                        timer.getCount(),
+                        convertRate(timer.getMeanRate()),
+                        convertRate(timer.getOneMinuteRate()),
+                        convertRate(timer.getFiveMinuteRate()),
+                        convertRate(timer.getFifteenMinuteRate()),
+                        getRateUnit(),
+                        convertDuration(snapshot.getMin()),
+                        convertDuration(snapshot.getMax()),
+                        convertDuration(snapshot.getMean()),
+                        convertDuration(snapshot.getStdDev()),
+                        convertDuration(snapshot.getMedian()),
+                        convertDuration(snapshot.get75thPercentile()),
+                        convertDuration(snapshot.get95thPercentile()),
+                        convertDuration(snapshot.get98thPercentile()),
+                        convertDuration(snapshot.get99thPercentile()),
+                        convertDuration(snapshot.get999thPercentile()),
+                        getDurationUnit());
+                TimerMetricEntry timerMetricEntry = new TimerMetricEntry();
+                timerMetricEntry.setMetricData(timerMetricData);
+                timerMetricEntry.setMetricType(metricType);
+
+                result.add(timerMetricEntry);
+            }
         }
 
         return result;
-	}
+    }
 
-	private void addMandatoryAttributes(MetricService metricService, Date startTime, Date endTime, List<MetricEntry> metricEntries, Date creationTime) {
-		for (MetricEntry metricEntry : metricEntries) {
-			String id = metricService.getuUiqueIdentifier();
-			String dn = metricService.buildDn(id, creationTime, ApplicationType.OX_AUTH);
+    private void addMandatoryAttributes(MetricService metricService, Date startTime, Date endTime, List<MetricEntry> metricEntries, Date creationTime) {
+        for (MetricEntry metricEntry : metricEntries) {
+            String id = metricService.getuUiqueIdentifier();
+            String dn = metricService.buildDn(id, creationTime, ApplicationType.OX_AUTH);
 
-			metricEntry.setId(id);
-			metricEntry.setDn(dn);
+            metricEntry.setId(id);
+            metricEntry.setDn(dn);
 
-			metricEntry.setApplicationType(ApplicationType.OX_AUTH);
+            metricEntry.setApplicationType(ApplicationType.OX_AUTH);
 
-			metricEntry.setStartDate(startTime);
-			metricEntry.setEndDate(endTime);
-			metricEntry.setCreationDate(creationTime);
+            metricEntry.setStartDate(startTime);
+            metricEntry.setEndDate(endTime);
+            metricEntry.setCreationDate(creationTime);
         }
-	}
+    }
 
 }

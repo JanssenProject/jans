@@ -15,10 +15,10 @@ import org.xdi.model.SimpleCustomProperty;
  */
 public interface BaseExternalType {
 
-	public boolean init(Map<String, SimpleCustomProperty> configurationAttributes);
+    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes);
 
-	public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes);
+    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes);
 
-	public int getApiVersion();
+    public int getApiVersion();
 
 }

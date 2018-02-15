@@ -12,28 +12,28 @@ import org.gluu.persist.ldap.impl.LdapEntryManagerFactory;
  */
 public class LdapSampleEntryManager {
 
-	private static final Logger log = Logger.getLogger(LdapSampleEntryManager.class);
+    private static final Logger log = Logger.getLogger(LdapSampleEntryManager.class);
 
-	private Properties getSampleConnectionProperties() {
-		Properties connectionProperties = new Properties();
+    private Properties getSampleConnectionProperties() {
+        Properties connectionProperties = new Properties();
 
-		connectionProperties.put("bindDN", "cn=Directory Manager");
-		connectionProperties.put("bindPassword", "test");
-		connectionProperties.put("servers", "localhost:1636");
-		connectionProperties.put("useSSL", "true");
-		connectionProperties.put("maxconnections", "3");
+        connectionProperties.put("bindDN", "cn=Directory Manager");
+        connectionProperties.put("bindPassword", "test");
+        connectionProperties.put("servers", "localhost:1636");
+        connectionProperties.put("useSSL", "true");
+        connectionProperties.put("maxconnections", "3");
 
-		return connectionProperties;
-	}
+        return connectionProperties;
+    }
 
-	public LdapEntryManager createLdapEntryManager() {
-		LdapEntryManagerFactory ldapEntryManagerFactory = new LdapEntryManagerFactory();
-		Properties connectionProperties = getSampleConnectionProperties();
+    public LdapEntryManager createLdapEntryManager() {
+        LdapEntryManagerFactory ldapEntryManagerFactory = new LdapEntryManagerFactory();
+        Properties connectionProperties = getSampleConnectionProperties();
 
-		LdapEntryManager ldapEntryManager = ldapEntryManagerFactory.createEntryManager(connectionProperties);
-		log.debug("Created LdapEntryManager: " + ldapEntryManager);
+        LdapEntryManager ldapEntryManager = ldapEntryManagerFactory.createEntryManager(connectionProperties);
+        log.debug("Created LdapEntryManager: " + ldapEntryManager);
 
-		return ldapEntryManager;
-	}
+        return ldapEntryManager;
+    }
 
 }

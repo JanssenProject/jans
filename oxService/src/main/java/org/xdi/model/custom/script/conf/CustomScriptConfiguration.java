@@ -16,39 +16,39 @@ import org.xdi.model.custom.script.type.BaseExternalType;
  * @author Yuriy Movchan Date: 12/04/2014
  */
 public class CustomScriptConfiguration {
-	private CustomScript customScript;
-	private BaseExternalType externalType;
-	private Map<String, SimpleCustomProperty> configurationAttributes;
+    private CustomScript customScript;
+    private BaseExternalType externalType;
+    private Map<String, SimpleCustomProperty> configurationAttributes;
 
-	public CustomScriptConfiguration(
-			CustomScript customScript, BaseExternalType externalType, Map<String, SimpleCustomProperty> configurationAttributes) {
-		this.customScript = customScript;
-		this.externalType = externalType;
-		this.configurationAttributes = configurationAttributes;
-	}
+    public CustomScriptConfiguration(
+            CustomScript customScript, BaseExternalType externalType, Map<String, SimpleCustomProperty> configurationAttributes) {
+        this.customScript = customScript;
+        this.externalType = externalType;
+        this.configurationAttributes = configurationAttributes;
+    }
 
-	public String getInum() {
-		return customScript.getInum();
-	}
+    public String getInum() {
+        return customScript.getInum();
+    }
 
-	public CustomScript getCustomScript() {
-		return customScript;
-	}
+    public CustomScript getCustomScript() {
+        return customScript;
+    }
 
-	public BaseExternalType getExternalType() {
-		return externalType;
-	}
+    public BaseExternalType getExternalType() {
+        return externalType;
+    }
 
-	public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
-		return configurationAttributes;
-	}
+    public Map<String, SimpleCustomProperty> getConfigurationAttributes() {
+        return configurationAttributes;
+    }
 
-	public String getName() {
-		return this.customScript.getName();
-	}
+    public String getName() {
+        return this.customScript.getName();
+    }
 
-	public int getLevel() {
-		return this.customScript.getLevel();
-	}
+    public int getLevel() {
+        return this.customScript.getLevel();
+    }
 
 }

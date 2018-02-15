@@ -18,30 +18,30 @@ import org.xdi.util.StringHelper;
  */
 public class PropertyAccessException extends BaseMappingException {
 
-	private static final long serialVersionUID = 1076767768405558202L;
+    private static final long serialVersionUID = 1076767768405558202L;
 
-	private final Class<?> persistentClass;
-	private final String propertyName;
-	private final boolean wasSetter;
+    private final Class<?> persistentClass;
+    private final String propertyName;
+    private final boolean wasSetter;
 
-	public PropertyAccessException(Throwable root, String s, boolean wasSetter, Class<?> persistentClass, String propertyName) {
-		super(s, root);
-		this.persistentClass = persistentClass;
-		this.wasSetter = wasSetter;
-		this.propertyName = propertyName;
-	}
+    public PropertyAccessException(Throwable root, String s, boolean wasSetter, Class<?> persistentClass, String propertyName) {
+        super(s, root);
+        this.persistentClass = persistentClass;
+        this.wasSetter = wasSetter;
+        this.propertyName = propertyName;
+    }
 
-	public Class<?> getPersistentClass() {
-		return persistentClass;
-	}
+    public Class<?> getPersistentClass() {
+        return persistentClass;
+    }
 
-	public String getPropertyName() {
-		return propertyName;
-	}
+    public String getPropertyName() {
+        return propertyName;
+    }
 
-	@Override
-	public String getMessage() {
-		return super.getMessage() + (wasSetter ? " setter of " : " getter of ")
-				+ StringHelper.qualify(persistentClass.getName(), propertyName);
-	}
+    @Override
+    public String getMessage() {
+        return super.getMessage() + (wasSetter ? " setter of " : " getter of ")
+                + StringHelper.qualify(persistentClass.getName(), propertyName);
+    }
 }

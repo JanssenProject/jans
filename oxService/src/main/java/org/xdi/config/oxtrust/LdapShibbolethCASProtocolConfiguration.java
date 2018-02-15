@@ -14,8 +14,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 /**
- * Shibboleth IDP CAS-related settings configuration entry. 
- * 
+ * Shibboleth IDP CAS-related settings configuration entry.
+ *
  * @author Dmitry Ognyannikov
  */
 @LdapEntry
@@ -26,14 +26,14 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
 
     @LdapAttribute(ignoreDuringUpdate = true)
     private String inum;
-    
+
     @LdapJsonObject
     @LdapAttribute(name = "oxConfApplication")
     private ShibbolethCASProtocolConfiguration casProtocolConfiguration;
 
     @LdapAttribute(name = "oxRevision")
     private long revision;
-    
+
     public LdapShibbolethCASProtocolConfiguration() {}
 
     public String getInum() {
@@ -43,7 +43,7 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     public void setInum(String inum) {
         if (casProtocolConfiguration != null)
             casProtocolConfiguration.setInum(inum);
-        
+    
         this.inum = inum;
     }
 
@@ -74,5 +74,5 @@ public class LdapShibbolethCASProtocolConfiguration extends Entry implements Ser
     public void setRevision(long revision) {
         this.revision = revision;
     }
-    
+
 }

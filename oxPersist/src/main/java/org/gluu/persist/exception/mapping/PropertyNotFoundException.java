@@ -12,10 +12,10 @@ package org.gluu.persist.exception.mapping;
  */
 public class PropertyNotFoundException extends MappingException {
 
-	private static final long serialVersionUID = 2351260797243441135L;
+    private static final long serialVersionUID = 2351260797243441135L;
 
-	public PropertyNotFoundException(String s) {
-		super(s);
-	}
+    public PropertyNotFoundException(String s) {
+        super(s);
+    }
 
 }

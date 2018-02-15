@@ -15,36 +15,36 @@ import org.gluu.site.ldap.persistence.annotation.LdapDN;
  */
 public class BaseEntry {
 
-	@LdapDN
-	private String dn;
+    @LdapDN
+    private String dn;
 
-	public BaseEntry() {
-	}
+    public BaseEntry() {
+    }
 
-	public BaseEntry(String dn) {
-		super();
-		this.dn = dn;
-	}
+    public BaseEntry(String dn) {
+        super();
+        this.dn = dn;
+    }
 
-	public String getDn() {
-		return dn;
-	}
+    public String getDn() {
+        return dn;
+    }
 
-	public void setDn(String dn) {
-		this.dn = dn;
-	}
+    public void setDn(String dn) {
+        this.dn = dn;
+    }
 
-	public String getBaseDn() {
-		return dn;
-	}
+    public String getBaseDn() {
+        return dn;
+    }
 
-	public void setBaseDn(String dn) {
-		this.dn = dn;
-	}
+    public void setBaseDn(String dn) {
+        this.dn = dn;
+    }
 
-	@Override
-	public String toString() {
-		return String.format("BaseEntry [dn=%s]", dn);
-	}
+    @Override
+    public String toString() {
+        return String.format("BaseEntry [dn=%s]", dn);
+    }
 
 }

@@ -14,19 +14,19 @@ import org.quartz.JobExecutionException;
 @RequestScoped
 public class JobExecutionDelegate implements Job {
 
-	@Inject
-	private Instance<Job> jobInstance;
+    @Inject
+    private Instance<Job> jobInstance;
 
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		Instance<? extends Job> job = jobInstance.select(context.getJobDetail().getJobClass());
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        Instance<? extends Job> job = jobInstance.select(context.getJobDetail().getJobClass());
 
-		if (job.isAmbiguous())
-			throw new IllegalStateException("Cannot produce job: ambiguous instance");
+        if (job.isAmbiguous())
+            throw new IllegalStateException("Cannot produce job: ambiguous instance");
 
-		if (job.isUnsatisfied())
-			throw new IllegalStateException("Cannot produce job: unsatisfied instance");
+        if (job.isUnsatisfied())
+            throw new IllegalStateException("Cannot produce job: unsatisfied instance");
 
-		job.get().execute(context);
-	}
+        job.get().execute(context);
+    }
 
 }

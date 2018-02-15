@@ -13,48 +13,48 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
 
 /**
  * Attribute Usage Type
- * 
+ *
  * @author Yuriy Movchan Date: 02/12/2014
  */
 public enum GluuAttributeUsageType implements LdapEnum {
 
-	OPENID("openid", "OpenID");
+    OPENID("openid", "OpenID");
 
-	private String value;
-	private String displayName;
+    private String value;
+    private String displayName;
 
-	private static Map<String, GluuAttributeUsageType> mapByValues = new HashMap<String, GluuAttributeUsageType>();
+    private static Map<String, GluuAttributeUsageType> MAP_BY_VALUES = new HashMap<String, GluuAttributeUsageType>();
 
-	static {
-		for (GluuAttributeUsageType enumType : values()) {
-			mapByValues.put(enumType.getValue(), enumType);
-		}
-	}
+    static {
+        for (GluuAttributeUsageType enumType : values()) {
+            MAP_BY_VALUES.put(enumType.getValue(), enumType);
+        }
+    }
 
-	private GluuAttributeUsageType(String value, String displayName) {
-		this.value = value;
-		this.displayName = displayName;
-	}
+    private GluuAttributeUsageType(String value, String displayName) {
+        this.value = value;
+        this.displayName = displayName;
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 
-	public String getDisplayName() {
-		return displayName;
-	}
+    public String getDisplayName() {
+        return displayName;
+    }
 
-	public static GluuAttributeUsageType getByValue(String value) {
-		return mapByValues.get(value);
-	}
+    public static GluuAttributeUsageType getByValue(String value) {
+        return MAP_BY_VALUES.get(value);
+    }
 
-	public Enum<? extends LdapEnum> resolveByValue(String value) {
-		return getByValue(value);
-	}
+    public Enum<? extends LdapEnum> resolveByValue(String value) {
+        return getByValue(value);
+    }
 
-	@Override
-	public String toString() {
-		return value;
-	}
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }

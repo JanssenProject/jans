@@ -49,336 +49,336 @@ import com.codahale.metrics.Timer;
  */
 public abstract class MetricService implements Serializable {
 
-	private static final long serialVersionUID = -3393618600428448743L;
+    private static final long serialVersionUID = -3393618600428448743L;
 
-	private static final String EVENT_TYPE = "MetricServiceTimerEvent";
+    private static final String EVENT_TYPE = "MetricServiceTimerEvent";
 
-	private static final int DEFAULT_METRIC_REPORTER_INTERVAL = 60;
+    private static final int DEFAULT_METRIC_REPORTER_INTERVAL = 60;
 
-	private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
-	
-	private static final AtomicLong initialId = new AtomicLong(System.currentTimeMillis());
+    private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
 
-	private MetricRegistry metricRegistry;
+    private static final AtomicLong initialId = new AtomicLong(System.currentTimeMillis());
 
-	private Set<MetricType> registeredMetricTypes;
+    private MetricRegistry metricRegistry;
 
-	@Inject
-	private Logger log;
+    private Set<MetricType> registeredMetricTypes;
 
-	@Inject
-	private LdapEntryManager ldapEntryManager;
+    @Inject
+    private Logger log;
+
+    @Inject
+    private LdapEntryManager ldapEntryManager;
 
     public void initTimer(int metricInterval) {
-    	this.metricRegistry = new MetricRegistry();
-    	this.registeredMetricTypes = new HashSet<MetricType>();
+        this.metricRegistry = new MetricRegistry();
+        this.registeredMetricTypes = new HashSet<MetricType>();
 
-    	LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
+        LdapEntryReporter ldapEntryReporter = LdapEntryReporter.forRegistry(this.metricRegistry, getMetricServiceInstance()).build();
 
-    	int metricReporterInterval = metricInterval;
-    	if (metricReporterInterval <= 0) {
-    		metricReporterInterval = DEFAULT_METRIC_REPORTER_INTERVAL;
-    	}
-    	ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
+        int metricReporterInterval = metricInterval;
+        if (metricReporterInterval <= 0) {
+            metricReporterInterval = DEFAULT_METRIC_REPORTER_INTERVAL;
+        }
+        ldapEntryReporter.start(metricReporterInterval, TimeUnit.SECONDS);
     }
 
     @Asynchronous
-	public void writeMetricEntries(@Observes @ReportMetric MetricReport metricReport) {
-    	add(metricReport.getMetricEntries(), metricReport.getCreationTime());
+    public void writeMetricEntries(@Observes @ReportMetric MetricReport metricReport) {
+        add(metricReport.getMetricEntries(), metricReport.getCreationTime());
     }
 
-	public void addBranch(String branchDn, String ou) {
-		SimpleBranch branch = new SimpleBranch();
-		branch.setOrganizationalUnitName(ou);
-		branch.setDn(branchDn);
+    public void addBranch(String branchDn, String ou) {
+        SimpleBranch branch = new SimpleBranch();
+        branch.setOrganizationalUnitName(ou);
+        branch.setDn(branchDn);
 
-		ldapEntryManager.persist(branch);
-	}
+        ldapEntryManager.persist(branch);
+    }
 
-	public boolean containsBranch(String branchDn) {
-		return ldapEntryManager.contains(SimpleBranch.class, branchDn);
-	}
+    public boolean containsBranch(String branchDn) {
+        return ldapEntryManager.contains(SimpleBranch.class, branchDn);
+    }
 
-	public void createBranch(String branchDn, String ou) {
-		try {
-			addBranch(branchDn, ou);
-		} catch (EntryPersistenceException ex) {
-			// Check if another process added this branch already
-			if (!containsBranch(branchDn)) {
-				throw ex;
-			}
-		}
-	}
+    public void createBranch(String branchDn, String ou) {
+        try {
+            addBranch(branchDn, ou);
+        } catch (EntryPersistenceException ex) {
+            // Check if another process added this branch already
+            if (!containsBranch(branchDn)) {
+                throw ex;
+            }
+        }
+    }
 
-	public void prepareBranch(Date creationDate, ApplicationType applicationType) {
-		String baseDn = buildDn(null, creationDate, applicationType);
-		// Create ou=YYYY-MM branch if needed
-		if (!containsBranch(baseDn)) {
-			// Create ou=application_type branch if needed
-			String applicationBaseDn = buildDn(null, null, applicationType);
-			if (!containsBranch(applicationBaseDn)) {
-				// Create ou=appliance_inum branch if needed
-				String applianceBaseDn = buildDn(null, null, null);
-				if (!containsBranch(applianceBaseDn)) {
-					createBranch(applianceBaseDn, applianceInum());
-				}
+    public void prepareBranch(Date creationDate, ApplicationType applicationType) {
+        String baseDn = buildDn(null, creationDate, applicationType);
+        // Create ou=YYYY-MM branch if needed
+        if (!containsBranch(baseDn)) {
+            // Create ou=application_type branch if needed
+            String applicationBaseDn = buildDn(null, null, applicationType);
+            if (!containsBranch(applicationBaseDn)) {
+                // Create ou=appliance_inum branch if needed
+                String applianceBaseDn = buildDn(null, null, null);
+                if (!containsBranch(applianceBaseDn)) {
+                    createBranch(applianceBaseDn, applianceInum());
+                }
 
-				createBranch(applicationBaseDn, applicationType.getValue());
-			}
+                createBranch(applicationBaseDn, applicationType.getValue());
+            }
 
-			if (creationDate != null) {
-				createBranch(baseDn, PERIOD_DATE_FORMAT.format(creationDate));
-			}
-		}
-	}
+            if (creationDate != null) {
+                createBranch(baseDn, PERIOD_DATE_FORMAT.format(creationDate));
+            }
+        }
+    }
 
-	public void add(List<MetricEntry> metricEntries, Date creationTime) {
-		prepareBranch(creationTime, ApplicationType.OX_AUTH);
+    public void add(List<MetricEntry> metricEntries, Date creationTime) {
+        prepareBranch(creationTime, ApplicationType.OX_AUTH);
 
-		for (MetricEntry metricEntry : metricEntries) {
-			ldapEntryManager.persist(metricEntry);
-		}
-	}
+        for (MetricEntry metricEntry : metricEntries) {
+            ldapEntryManager.persist(metricEntry);
+        }
+    }
 
-	public void add(MetricEntry metricEntry) {
-		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
+    public void add(MetricEntry metricEntry) {
+        prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
-		ldapEntryManager.persist(metricEntry);
-	}
+        ldapEntryManager.persist(metricEntry);
+    }
 
-	public void update(MetricEntry metricEntry) {
-		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
+    public void update(MetricEntry metricEntry) {
+        prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
-		ldapEntryManager.merge(metricEntry);
-	}
+        ldapEntryManager.merge(metricEntry);
+    }
 
-	public void remove(MetricEntry metricEntry) {
-		prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
+    public void remove(MetricEntry metricEntry) {
+        prepareBranch(metricEntry.getCreationDate(), metricEntry.getApplicationType());
 
-		ldapEntryManager.remove(metricEntry);
-	}
+        ldapEntryManager.remove(metricEntry);
+    }
 
-	public void removeBranch(String branchDn) {
-		ldapEntryManager.removeRecursively(branchDn);
-	}
+    public void removeBranch(String branchDn) {
+        ldapEntryManager.removeRecursively(branchDn);
+    }
 
-	public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
-		return ldapEntryManager.find(metricType.getMetricEntryType(), metricEventDn);
-	}
+    public MetricEntry getMetricEntryByDn(MetricType metricType, String metricEventDn) {
+        return ldapEntryManager.find(metricType.getMetricEntryType(), metricEventDn);
+    }
 
-	public Map<MetricType, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
-			List<MetricType> metricTypes, Date startDate, Date endDate, String... returnAttributes) {
-		prepareBranch(null, applicationType);
+    public Map<MetricType, List<? extends MetricEntry>> findMetricEntry(ApplicationType applicationType, String applianceInum,
+            List<MetricType> metricTypes, Date startDate, Date endDate, String... returnAttributes) {
+        prepareBranch(null, applicationType);
 
-		Map<MetricType, List<? extends MetricEntry>> result = new HashMap<MetricType, List<? extends MetricEntry>>();
+        Map<MetricType, List<? extends MetricEntry>> result = new HashMap<MetricType, List<? extends MetricEntry>>();
 
-		if ((metricTypes == null) || (metricTypes.size() == 0)) {
-			return result;
-		}
+        if ((metricTypes == null) || (metricTypes.size() == 0)) {
+            return result;
+        }
 
-		// Prepare list of DNs
-		Set<String> metricDns = getBaseDnForPeriod(applicationType, applianceInum, startDate, endDate);
+        // Prepare list of DNs
+        Set<String> metricDns = getBaseDnForPeriod(applicationType, applianceInum, startDate, endDate);
 
-		if (metricDns.size() == 0) {
-			return result;
-		}
+        if (metricDns.size() == 0) {
+            return result;
+        }
 
-		for (MetricType metricType : metricTypes) {
-			List<MetricEntry> metricTypeResult = new LinkedList<MetricEntry>();
-			for (String metricDn : metricDns) {
-				List<Filter> metricTypeFilters = new ArrayList<Filter>();
+        for (MetricType metricType : metricTypes) {
+            List<MetricEntry> metricTypeResult = new LinkedList<MetricEntry>();
+            for (String metricDn : metricDns) {
+                List<Filter> metricTypeFilters = new ArrayList<Filter>();
 
-				Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
-				Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxMetricType", metricType.getValue());
-				Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime((startDate)));
-				Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeGeneralizedTime(endDate));
+                Filter applicationTypeFilter = Filter.createEqualityFilter("oxApplicationType", applicationType.getValue());
+                Filter eventTypeTypeFilter = Filter.createEqualityFilter("oxMetricType", metricType.getValue());
+                Filter startDateFilter = Filter.createGreaterOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime((startDate)));
+                Filter endDateFilter = Filter.createLessOrEqualFilter("oxEndDate", ldapEntryManager.encodeGeneralizedTime(endDate));
 
-				metricTypeFilters.add(applicationTypeFilter);
-				metricTypeFilters.add(eventTypeTypeFilter);
-				metricTypeFilters.add(startDateFilter);
-				metricTypeFilters.add(endDateFilter);
+                metricTypeFilters.add(applicationTypeFilter);
+                metricTypeFilters.add(eventTypeTypeFilter);
+                metricTypeFilters.add(startDateFilter);
+                metricTypeFilters.add(endDateFilter);
 
-				Filter filter = Filter.createANDFilter(metricTypeFilters);
+                Filter filter = Filter.createANDFilter(metricTypeFilters);
 
-				List<? extends MetricEntry> metricTypeMonthResult = (List<? extends MetricEntry>) ldapEntryManager.findEntries(metricDn,
-						metricType.getMetricEntryType(), filter, returnAttributes);
-				metricTypeResult.addAll(metricTypeMonthResult);
-			}
-			// Sort entries to avoid calculation errors
-			ldapEntryManager.sortListByProperties(MetricEntry.class, metricTypeResult, false, "creationDate");
+                List<? extends MetricEntry> metricTypeMonthResult = (List<? extends MetricEntry>) ldapEntryManager.findEntries(metricDn,
+                        metricType.getMetricEntryType(), filter, returnAttributes);
+                metricTypeResult.addAll(metricTypeMonthResult);
+            }
+            // Sort entries to avoid calculation errors
+            ldapEntryManager.sortListByProperties(MetricEntry.class, metricTypeResult, false, "creationDate");
 
-			result.put(metricType, metricTypeResult);
-		}
+            result.put(metricType, metricTypeResult);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate, int sizeLimit, int chunkSize) {
-		Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
+    public List<MetricEntry> getExpiredMetricEntries(DefaultBatchOperation<MetricEntry> batchOperation, String baseDnForPeriod, Date expirationDate, int sizeLimit, int chunkSize) {
+        Filter expiratioFilter = Filter.createLessOrEqualFilter("oxStartDate", ldapEntryManager.encodeGeneralizedTime(expirationDate));
 
-		List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB, new String[] { "uniqueIdentifier" }, batchOperation, 0, sizeLimit, chunkSize);
+        List<MetricEntry> metricEntries = ldapEntryManager.findEntries(baseDnForPeriod, MetricEntry.class, expiratioFilter, SearchScope.SUB, new String[] { "uniqueIdentifier" }, batchOperation, 0, sizeLimit, chunkSize);
 
-		return metricEntries;
-	}
+        return metricEntries;
+    }
 
-	public List<SimpleBranch> findAllPeriodBranches(DefaultBatchOperation<SimpleBranch> batchOperation, ApplicationType applicationType, String applianceInum, int sizeLimit, int chunkSize) {
-		String baseDn = buildDn(null, null, applicationType, applianceInum);
+    public List<SimpleBranch> findAllPeriodBranches(DefaultBatchOperation<SimpleBranch> batchOperation, ApplicationType applicationType, String applianceInum, int sizeLimit, int chunkSize) {
+        String baseDn = buildDn(null, null, applicationType, applianceInum);
 
-		Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
-		return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0, sizeLimit, chunkSize);
-	}
+        Filter skipRootDnFilter = Filter.createNOTFilter(Filter.createEqualityFilter("ou", applicationType.getValue()));
+        return ldapEntryManager.findEntries(baseDn, SimpleBranch.class, skipRootDnFilter, SearchScope.SUB, new String[] { "ou" }, batchOperation, 0, sizeLimit, chunkSize);
+    }
 
-	public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum, int sizeLimit, int chunkSize) {
-		final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
-		// Remove expired entries
-		for (final String baseDnForPeriod : keepBaseDnForPeriod) {
-			DefaultBatchOperation<MetricEntry> metricEntryBatchOperation = new DefaultBatchOperation<MetricEntry>() {
-	            @Override
-				public boolean collectSearchResult(int size) {
-					return false;
-				}
+    public void removeExpiredMetricEntries(final Date expirationDate, final ApplicationType applicationType, final String applianceInum, int sizeLimit, int chunkSize) {
+        final Set<String> keepBaseDnForPeriod = getBaseDnForPeriod(applicationType, applianceInum, expirationDate, new Date());
+        // Remove expired entries
+        for (final String baseDnForPeriod : keepBaseDnForPeriod) {
+            DefaultBatchOperation<MetricEntry> metricEntryBatchOperation = new DefaultBatchOperation<MetricEntry>() {
+                @Override
+                public boolean collectSearchResult(int size) {
+                    return false;
+                }
 
-				@Override
-				public void performAction(List<MetricEntry> entries) {
-					for (MetricEntry metricEntry : entries) {
-						remove(metricEntry);
-					}
-				}
-			};
-			getExpiredMetricEntries(metricEntryBatchOperation, baseDnForPeriod, expirationDate, sizeLimit, chunkSize);
-		}
+                @Override
+                public void performAction(List<MetricEntry> entries) {
+                    for (MetricEntry metricEntry : entries) {
+                        remove(metricEntry);
+                    }
+                }
+            };
+            getExpiredMetricEntries(metricEntryBatchOperation, baseDnForPeriod, expirationDate, sizeLimit, chunkSize);
+        }
 
-		DefaultBatchOperation<SimpleBranch> batchOperation = new DefaultBatchOperation<SimpleBranch>() {
+        DefaultBatchOperation<SimpleBranch> batchOperation = new DefaultBatchOperation<SimpleBranch>() {
             @Override
-			public boolean collectSearchResult(int size) {
-				return false;
-			}
+            public boolean collectSearchResult(int size) {
+                return false;
+            }
 
-			@Override
-			public void performAction(List<SimpleBranch> objects) {
-				String baseDn = buildDn(null, null, applicationType, applianceInum);
-				Set<String> periodBranchesStrings = new HashSet<String>();
-				for (SimpleBranch periodBranch: objects) {
-					if (!StringHelper.equalsIgnoreCase(baseDn, periodBranch.getDn())) {
-						periodBranchesStrings.add(periodBranch.getDn());
-					}
-				}
-				periodBranchesStrings.removeAll(keepBaseDnForPeriod);
+            @Override
+            public void performAction(List<SimpleBranch> objects) {
+                String baseDn = buildDn(null, null, applicationType, applianceInum);
+                Set<String> periodBranchesStrings = new HashSet<String>();
+                for (SimpleBranch periodBranch: objects) {
+                    if (!StringHelper.equalsIgnoreCase(baseDn, periodBranch.getDn())) {
+                        periodBranchesStrings.add(periodBranch.getDn());
+                    }
+                }
+                periodBranchesStrings.removeAll(keepBaseDnForPeriod);
 
-				// Remove expired months
-				for (String baseDnForPeriod : periodBranchesStrings) {
-					removeBranch(baseDnForPeriod);
-				}
-			}
-		};
-		findAllPeriodBranches(batchOperation, applicationType, applianceInum, sizeLimit, chunkSize);
-	}
-	
-	private Set<String> getBaseDnForPeriod(ApplicationType applicationType, String applianceInum, Date startDate, Date endDate) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
-		cal.setTime(startDate);
+                // Remove expired months
+                for (String baseDnForPeriod : periodBranchesStrings) {
+                    removeBranch(baseDnForPeriod);
+                }
+            }
+        };
+        findAllPeriodBranches(batchOperation, applicationType, applianceInum, sizeLimit, chunkSize);
+    }
 
-		Calendar calEndMonth = Calendar.getInstance();
-		calEndMonth.setTimeZone(TimeZone.getTimeZone("UTC"));
-		calEndMonth.setTime(endDate);
-		int endMonth = calEndMonth.get(Calendar.MONTH);
+    private Set<String> getBaseDnForPeriod(ApplicationType applicationType, String applianceInum, Date startDate, Date endDate) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        cal.setTime(startDate);
 
-		Set<String> metricDns = new HashSet<String>();
+        Calendar calEndMonth = Calendar.getInstance();
+        calEndMonth.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calEndMonth.setTime(endDate);
+        int endMonth = calEndMonth.get(Calendar.MONTH);
 
-		boolean stopCondition = cal.getTime().equals(endDate);
-		cal.setTime(startDate);
-		while (true) {  // Add at least one month if the data exists
-			int currentMonth = cal.get(Calendar.MONTH);
-			Date currentStartDate = cal.getTime();
+        Set<String> metricDns = new HashSet<String>();
 
-			String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
-			if (containsBranch(baseDn)) {
-				metricDns.add(baseDn);
-			}
+        boolean stopCondition = cal.getTime().equals(endDate);
+        cal.setTime(startDate);
+        while (true) {  // Add at least one month if the data exists
+            int currentMonth = cal.get(Calendar.MONTH);
+            Date currentStartDate = cal.getTime();
 
-			if (stopCondition) {
-				break;
-			} else {
-				cal.add(Calendar.MONTH, 1);
+            String baseDn = buildDn(null, currentStartDate, applicationType, applianceInum);
+            if (containsBranch(baseDn)) {
+                metricDns.add(baseDn);
+            }
 
-				if (cal.getTime().after(endDate)) { // Stop condition which allows to add DN for end of the period
-					stopCondition = true;
-					if (currentMonth == endMonth) {
-						break;
-					}
-				}
-			}
-		}
+            if (stopCondition) {
+                break;
+            } else {
+                cal.add(Calendar.MONTH, 1);
 
-		return metricDns;
-	}
+                if (cal.getTime().after(endDate)) { // Stop condition which allows to add DN for end of the period
+                    stopCondition = true;
+                    if (currentMonth == endMonth) {
+                        break;
+                    }
+                }
+            }
+        }
 
-	public String getuUiqueIdentifier() {
-		return String.valueOf(initialId.incrementAndGet());
-	}
+        return metricDns;
+    }
 
-	public Counter getCounter(MetricType metricType) {
-		if (!registeredMetricTypes.contains(metricType)) {
-			registeredMetricTypes.add(metricType);
-		}
+    public String getuUiqueIdentifier() {
+        return String.valueOf(initialId.incrementAndGet());
+    }
 
-		return metricRegistry.counter(metricType.getMetricName());
-	}
+    public Counter getCounter(MetricType metricType) {
+        if (!registeredMetricTypes.contains(metricType)) {
+            registeredMetricTypes.add(metricType);
+        }
 
-	public Timer getTimer(MetricType metricType) {
-		if (!registeredMetricTypes.contains(metricType)) {
-			registeredMetricTypes.add(metricType);
-		}
+        return metricRegistry.counter(metricType.getMetricName());
+    }
 
-		return metricRegistry.timer(metricType.getMetricName());
-	}
+    public Timer getTimer(MetricType metricType) {
+        if (!registeredMetricTypes.contains(metricType)) {
+            registeredMetricTypes.add(metricType);
+        }
 
-	public void incCounter(MetricType metricType) {
-		Counter counter = getCounter(metricType);
-		counter.inc();
-	}
+        return metricRegistry.timer(metricType.getMetricName());
+    }
 
-	public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
-		return buildDn(uniqueIdentifier, creationDate, applicationType, null);
-	}
+    public void incCounter(MetricType metricType) {
+        Counter counter = getCounter(metricType);
+        counter.inc();
+    }
 
-	/*
-	 * Should return similar to this pattern DN:
-	 * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=metric,ou=organization_name,o=gluu
-	 */
-	public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType, String currentApplianceInum) {
-		final StringBuilder dn = new StringBuilder();
-		if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
-			dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
-		}
-		if ((creationDate != null) && (applicationType != null)) {
-			dn.append(String.format("ou=%s,", PERIOD_DATE_FORMAT.format(creationDate)));
-		}
-		if (applicationType != null) {
-			dn.append(String.format("ou=%s,", applicationType.getValue()));
-		}
+    public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType) {
+        return buildDn(uniqueIdentifier, creationDate, applicationType, null);
+    }
 
-		if (currentApplianceInum == null) {
-			dn.append(String.format("ou=%s,", applianceInum()));
-		} else {
-			dn.append(String.format("ou=%s,", currentApplianceInum));
-		}
-		dn.append(baseDn());
+    /*
+     * Should return similar to this pattern DN:
+     * uniqueIdentifier=id,ou=YYYY-MM,ou=application_type,ou=appliance_inum,ou=metric,ou=organization_name,o=gluu
+     */
+    public String buildDn(String uniqueIdentifier, Date creationDate, ApplicationType applicationType, String currentApplianceInum) {
+        final StringBuilder dn = new StringBuilder();
+        if (StringHelper.isNotEmpty(uniqueIdentifier) && (creationDate != null) && (applicationType != null)) {
+            dn.append(String.format("uniqueIdentifier=%s,", uniqueIdentifier));
+        }
+        if ((creationDate != null) && (applicationType != null)) {
+            dn.append(String.format("ou=%s,", PERIOD_DATE_FORMAT.format(creationDate)));
+        }
+        if (applicationType != null) {
+            dn.append(String.format("ou=%s,", applicationType.getValue()));
+        }
 
-		return dn.toString();
-	}
+        if (currentApplianceInum == null) {
+            dn.append(String.format("ou=%s,", applianceInum()));
+        } else {
+            dn.append(String.format("ou=%s,", currentApplianceInum));
+        }
+        dn.append(baseDn());
 
-	public Set<MetricType> getRegisteredMetricTypes() {
-		return registeredMetricTypes;
-	}
+        return dn.toString();
+    }
 
-	// Should return ou=metric,o=gluu
-	public abstract String baseDn();
+    public Set<MetricType> getRegisteredMetricTypes() {
+        return registeredMetricTypes;
+    }
 
-	// Should return appliance Inum
-	public abstract String applianceInum();
+    // Should return ou=metric,o=gluu
+    public abstract String baseDn();
 
-	public abstract MetricService getMetricServiceInstance();
+    // Should return appliance Inum
+    public abstract String applianceInum();
+
+    public abstract MetricService getMetricServiceInstance();
 
 }

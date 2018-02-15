@@ -17,12 +17,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ METHOD, FIELD, PARAMETER, TYPE })
 public @interface Scheduled {
 
-	public static final class Literal extends AnnotationLiteral<Scheduled> implements Scheduled {
+    public static final class Literal extends AnnotationLiteral<Scheduled> implements Scheduled {
 
-		public static final Literal INSTANCE = new Literal();
+        public static final Literal INSTANCE = new Literal();
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	}
+    }
 
 }

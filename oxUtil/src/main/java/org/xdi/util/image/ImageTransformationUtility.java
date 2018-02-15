@@ -13,118 +13,120 @@ import java.awt.image.BufferedImage;
 
 /**
  * Utility to do high quality image resize
- * 
+ *
  * @author Yuriy Movchan Date: 11.03.2010
  */
-public class ImageTransformationUtility {
+public final class ImageTransformationUtility {
 
-	/**
-	 * 
-	 * @param img
-	 *            the original image to be scaled
-	 * @param maxWidth
-	 *            the desired width of the scaled instance, in pixels
-	 * @param maxHeight
-	 *            the desired height of the scaled instance, in pixels
-	 * @return a scaled version of the original {@code BufferedImage}
-	 */
-	public static BufferedImage scaleImage(BufferedImage img, int maxWidth, int maxHeight) {
-		return scaleImage(img, maxWidth, maxHeight, RenderingHints.VALUE_INTERPOLATION_BICUBIC, true);
-	}
+    private ImageTransformationUtility() { }
 
-	/**
-	 * Convenience method that returns a scaled instance of the provided
-	 * {@code BufferedImage}.
-	 * 
-	 * @param img
-	 *            the original image to be scaled
-	 * @param maxWidth
-	 *            the desired width of the scaled instance, in pixels
-	 * @param maxHeight
-	 *            the desired height of the scaled instance, in pixels
-	 * @param hint
-	 *            one of the rendering hints that corresponds to
-	 *            {@code RenderingHints.KEY_INTERPOLATION} (e.g.
-	 *            {@code RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR},
-	 *            {@code RenderingHints.VALUE_INTERPOLATION_BILINEAR},
-	 *            {@code RenderingHints.VALUE_INTERPOLATION_BICUBIC})
-	 * @param higherQuality
-	 *            if true, this method will use a multi-step scaling technique that
-	 *            provides higher quality than the usual one-step technique (only
-	 *            useful in downscaling cases, where {@code targetWidth} or
-	 *            {@code targetHeight} is smaller than the original dimensions, and
-	 *            generally only when the {@code BILINEAR} hint is specified)
-	 * @return a scaled version of the original {@code BufferedImage}
-	 */
-	public static BufferedImage scaleImage(BufferedImage img, int maxWidth, int maxHeight, Object hint,
-			boolean higherQuality) {
-		BufferedImage ret = img;
-		if ((img.getWidth() <= maxWidth) && (img.getHeight() <= maxHeight)) {
-			return ret;
-		}
+    /**
+     *
+     * @param img
+     *            the original image to be scaled
+     * @param maxWidth
+     *            the desired width of the scaled instance, in pixels
+     * @param maxHeight
+     *            the desired height of the scaled instance, in pixels
+     * @return a scaled version of the original {@code BufferedImage}
+     */
+    public static BufferedImage scaleImage(BufferedImage img, int maxWidth, int maxHeight) {
+        return scaleImage(img, maxWidth, maxHeight, RenderingHints.VALUE_INTERPOLATION_BICUBIC, true);
+    }
 
-		int type = (img.getTransparency() == Transparency.OPAQUE) ? BufferedImage.TYPE_INT_RGB
-				: BufferedImage.TYPE_INT_ARGB;
+    /**
+     * Convenience method that returns a scaled instance of the provided
+     * {@code BufferedImage}.
+     *
+     * @param img
+     *            the original image to be scaled
+     * @param maxWidth
+     *            the desired width of the scaled instance, in pixels
+     * @param maxHeight
+     *            the desired height of the scaled instance, in pixels
+     * @param hint
+     *            one of the rendering hints that corresponds to
+     *            {@code RenderingHints.KEY_INTERPOLATION} (e.g.
+     *            {@code RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR},
+     *            {@code RenderingHints.VALUE_INTERPOLATION_BILINEAR},
+     *            {@code RenderingHints.VALUE_INTERPOLATION_BICUBIC})
+     * @param higherQuality
+     *            if true, this method will use a multi-step scaling technique that
+     *            provides higher quality than the usual one-step technique (only
+     *            useful in downscaling cases, where {@code targetWidth} or
+     *            {@code targetHeight} is smaller than the original dimensions, and
+     *            generally only when the {@code BILINEAR} hint is specified)
+     * @return a scaled version of the original {@code BufferedImage}
+     */
+    public static BufferedImage scaleImage(BufferedImage img, int maxWidth, int maxHeight, Object hint,
+            boolean higherQuality) {
+        BufferedImage ret = img;
+        if ((img.getWidth() <= maxWidth) && (img.getHeight() <= maxHeight)) {
+            return ret;
+        }
 
-		int targetWidth = img.getWidth();
-		int targetHeight = img.getHeight();
-		double wRatio = (double) targetWidth / (double) maxWidth;
-		double hRatio = (double) targetHeight / (double) maxHeight;
-		if (wRatio > hRatio) {
-			targetWidth = maxWidth;
-			targetHeight = (int) (targetHeight / wRatio);
-		} else {
-			targetWidth = (int) (targetWidth / hRatio);
-			targetHeight = maxHeight;
-		}
+        int type = (img.getTransparency() == Transparency.OPAQUE) ? BufferedImage.TYPE_INT_RGB
+                : BufferedImage.TYPE_INT_ARGB;
 
-		boolean downScale = img.getWidth() > maxWidth || img.getHeight() > maxHeight;
+        int targetWidth = img.getWidth();
+        int targetHeight = img.getHeight();
+        double wRatio = (double) targetWidth / (double) maxWidth;
+        double hRatio = (double) targetHeight / (double) maxHeight;
+        if (wRatio > hRatio) {
+            targetWidth = maxWidth;
+            targetHeight = (int) (targetHeight / wRatio);
+        } else {
+            targetWidth = (int) (targetWidth / hRatio);
+            targetHeight = maxHeight;
+        }
 
-		int currentWidth, currentheight;
-		if (higherQuality) {
-			// Use multi-step technique: start with original size, then
-			// scale down in multiple passes with drawImage()
-			// until the target size is reached
-			currentWidth = img.getWidth();
-			currentheight = img.getHeight();
-		} else {
-			// Use one-step technique: scale directly from original
-			// size to target size with a single drawImage() call
-			currentWidth = targetWidth;
-			currentheight = targetHeight;
-		}
+        boolean downScale = img.getWidth() > maxWidth || img.getHeight() > maxHeight;
 
-		do {
-			if (downScale) {
-				if (higherQuality && currentWidth > targetWidth) {
-					currentWidth /= 2;
-					if (currentWidth < targetWidth) {
-						currentWidth = targetWidth;
-					}
-				}
+        int currentWidth, currentheight;
+        if (higherQuality) {
+            // Use multi-step technique: start with original size, then
+            // scale down in multiple passes with drawImage()
+            // until the target size is reached
+            currentWidth = img.getWidth();
+            currentheight = img.getHeight();
+        } else {
+            // Use one-step technique: scale directly from original
+            // size to target size with a single drawImage() call
+            currentWidth = targetWidth;
+            currentheight = targetHeight;
+        }
 
-				if (higherQuality && currentheight > targetHeight) {
-					currentheight /= 2;
-					if (currentheight < targetHeight) {
-						currentheight = targetHeight;
-					}
-				}
-			} else {
-				currentWidth = targetWidth;
-				currentheight = targetWidth;
-			}
+        do {
+            if (downScale) {
+                if (higherQuality && currentWidth > targetWidth) {
+                    currentWidth /= 2;
+                    if (currentWidth < targetWidth) {
+                        currentWidth = targetWidth;
+                    }
+                }
 
-			BufferedImage tmp = new BufferedImage(currentWidth, currentheight, type);
-			Graphics2D g2 = tmp.createGraphics();
-			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
-			g2.drawImage(ret, 0, 0, currentWidth, currentheight, null);
-			g2.dispose();
+                if (higherQuality && currentheight > targetHeight) {
+                    currentheight /= 2;
+                    if (currentheight < targetHeight) {
+                        currentheight = targetHeight;
+                    }
+                }
+            } else {
+                currentWidth = targetWidth;
+                currentheight = targetWidth;
+            }
 
-			ret = tmp;
-		} while (currentWidth != targetWidth || currentheight != targetHeight);
+            BufferedImage tmp = new BufferedImage(currentWidth, currentheight, type);
+            Graphics2D g2 = tmp.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
+            g2.drawImage(ret, 0, 0, currentWidth, currentheight, null);
+            g2.dispose();
 
-		return ret;
+            ret = tmp;
+        } while (currentWidth != targetWidth || currentheight != targetHeight);
 
-	}
+        return ret;
+
+    }
 
 }

@@ -10,13 +10,13 @@
  */
 public class OxIntializationException extends Exception {
 
-	private static final long serialVersionUID = 2148886143372789053L;
+    private static final long serialVersionUID = 2148886143372789053L;
 
-	public OxIntializationException(String message) {
-		super(message);
-	}
+    public OxIntializationException(String message) {
+        super(message);
+    }
 
-	public OxIntializationException(String message, Throwable cause) {
+    public OxIntializationException(String message, Throwable cause) {
         super(message, cause);
     }
 

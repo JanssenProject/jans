@@ -22,89 +22,89 @@ import org.xdi.config.oxauth.WebKeysSettings;
 @LdapObjectClass(values = {"top", "oxAuthConfiguration"})
 public class LdapOxAuthConfiguration extends Entry {
 
-	private static final long serialVersionUID = 2453308522994526877L;
+    private static final long serialVersionUID = 2453308522994526877L;
 
-	@LdapDN
+    @LdapDN
     private String dn;
 
-	@LdapAttribute(name = "oxAuthConfDynamic")
+    @LdapAttribute(name = "oxAuthConfDynamic")
     private String oxAuthConfigDynamic;
-	
-	@LdapAttribute(name = "oxAuthConfStatic")
+
+    @LdapAttribute(name = "oxAuthConfStatic")
     private String oxAuthConfstatic;
 
-	@LdapAttribute(name = "oxAuthConfErrors")
+    @LdapAttribute(name = "oxAuthConfErrors")
     private String oxAuthConfErrors;
 
-	@LdapAttribute(name = "oxAuthConfWebKeys")
+    @LdapAttribute(name = "oxAuthConfWebKeys")
     private String oxAuthConfWebKeys;
-	
+
     @LdapJsonObject
     @LdapAttribute(name = "oxWebKeysSettings")
     private WebKeysSettings oxWebKeysSettings;
 
-	@LdapAttribute(name = "oxRevision")
+    @LdapAttribute(name = "oxRevision")
     private long revision;
 
-	public LdapOxAuthConfiguration() {
-	}
+    public LdapOxAuthConfiguration() {
+    }
 
 
-	public WebKeysSettings getOxWebKeysSettings() {
-		return oxWebKeysSettings;
-	}
+    public WebKeysSettings getOxWebKeysSettings() {
+        return oxWebKeysSettings;
+    }
 
 
-	public void setOxWebKeysSettings(WebKeysSettings oxWebKeysSettings) {
-		this.oxWebKeysSettings = oxWebKeysSettings;
-	}
-	
-	public String getOxAuthConfigDynamic() {
-		return oxAuthConfigDynamic;
-	}
+    public void setOxWebKeysSettings(WebKeysSettings oxWebKeysSettings) {
+        this.oxWebKeysSettings = oxWebKeysSettings;
+    }
 
-	public void setOxAuthConfigDynamic(String oxAuthConfigDynamic) {
-		this.oxAuthConfigDynamic = oxAuthConfigDynamic;
-	}
+    public String getOxAuthConfigDynamic() {
+        return oxAuthConfigDynamic;
+    }
+
+    public void setOxAuthConfigDynamic(String oxAuthConfigDynamic) {
+        this.oxAuthConfigDynamic = oxAuthConfigDynamic;
+    }
 
     public String getOxAuthConfstatic() {
-		return oxAuthConfstatic;
-	}
+        return oxAuthConfstatic;
+    }
 
-	public void setOxAuthConfstatic(String oxAuthConfstatic) {
-		this.oxAuthConfstatic = oxAuthConfstatic;
-	}
-	
-	public String getOxAuthConfErrors() {
-		return oxAuthConfErrors;
-	}
+    public void setOxAuthConfstatic(String oxAuthConfstatic) {
+        this.oxAuthConfstatic = oxAuthConfstatic;
+    }
 
-	public void setOxAuthConfErrors(String oxAuthConfErrors) {
-		this.oxAuthConfErrors = oxAuthConfErrors;
-	}
+    public String getOxAuthConfErrors() {
+        return oxAuthConfErrors;
+    }
 
-	public String getOxAuthConfWebKeys() {
-		return oxAuthConfWebKeys;
-	}
+    public void setOxAuthConfErrors(String oxAuthConfErrors) {
+        this.oxAuthConfErrors = oxAuthConfErrors;
+    }
 
-	public void setOxAuthConfWebKeys(String oxAuthConfWebKeys) {
-		this.oxAuthConfWebKeys = oxAuthConfWebKeys;
-	}
+    public String getOxAuthConfWebKeys() {
+        return oxAuthConfWebKeys;
+    }
 
-	public long getRevision() {
-		return revision;
-	}
+    public void setOxAuthConfWebKeys(String oxAuthConfWebKeys) {
+        this.oxAuthConfWebKeys = oxAuthConfWebKeys;
+    }
 
-	public void setRevision(long revision) {
-		this.revision = revision;
-	}
-	
+    public long getRevision() {
+        return revision;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("LdapAppConfiguration [dn=").append(dn).append(", application=").append(oxAuthConfigDynamic).append("]");
-		return builder.toString();
-	}
+    public void setRevision(long revision) {
+        this.revision = revision;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("LdapAppConfiguration [dn=").append(dn).append(", application=").append(oxAuthConfigDynamic).append("]");
+        return builder.toString();
+    }
 
 }

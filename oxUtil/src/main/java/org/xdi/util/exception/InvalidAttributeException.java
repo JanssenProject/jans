@@ -11,18 +11,18 @@ package org.xdi.util.exception;
  */
 public class InvalidAttributeException extends RuntimeException {
 
-	private static final long serialVersionUID = -3072969232087073304L;
+    private static final long serialVersionUID = -3072969232087073304L;
 
-	public InvalidAttributeException(Throwable root) {
-		super(root);
-	}
+    public InvalidAttributeException(Throwable root) {
+        super(root);
+    }
 
-	public InvalidAttributeException(String string, Throwable root) {
-		super(string, root);
-	}
+    public InvalidAttributeException(String string, Throwable root) {
+        super(string, root);
+    }
 
-	public InvalidAttributeException(String s) {
-		super(s);
-	}
+    public InvalidAttributeException(String s) {
+        super(s);
+    }
 
 }

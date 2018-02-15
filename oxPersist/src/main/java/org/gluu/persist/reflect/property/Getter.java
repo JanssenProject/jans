@@ -15,28 +15,28 @@ import org.gluu.persist.exception.mapping.BaseMappingException;
  * Gets values of a particular property
  */
 public interface Getter extends Serializable {
-	/**
-	 * Get the property value from the given instance.
-	 * 
-	 * @param owner
-	 *            The instance containing the value to be retreived.
-	 * @return The extracted value.
-	 * @throws BaseMappingException
-	 */
-	public Object get(Object owner) throws BaseMappingException;
+    /**
+     * Get the property value from the given instance.
+     *
+     * @param owner
+     *            The instance containing the value to be retreived.
+     * @return The extracted value.
+     * @throws BaseMappingException
+     */
+    public Object get(Object owner) throws BaseMappingException;
 
-	/**
-	 * Get the declared Java type
-	 */
-	public Class<?> getReturnType();
+    /**
+     * Get the declared Java type
+     */
+    public Class<?> getReturnType();
 
-	/**
-	 * Optional operation (return null)
-	 */
-	public String getMethodName();
+    /**
+     * Optional operation (return null)
+     */
+    public String getMethodName();
 
-	/**
-	 * Optional operation (return null)
-	 */
-	public Method getMethod();
+    /**
+     * Optional operation (return null)
+     */
+    public Method getMethod();
 }

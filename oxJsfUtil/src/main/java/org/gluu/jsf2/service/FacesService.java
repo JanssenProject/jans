@@ -25,117 +25,117 @@ import org.gluu.jsf2.exception.RedirectException;
 @Named
 public class FacesService {
 
-	@Inject
-	private FacesContext facesContext;
+    @Inject
+    private FacesContext facesContext;
 
-	@Inject
-	private ExternalContext externalContext;
+    @Inject
+    private ExternalContext externalContext;
 
-	public void redirect(String viewId) {
-		redirect(viewId, null);
-	}
+    public void redirect(String viewId) {
+        redirect(viewId, null);
+    }
 
-	public void redirectWithExternal(String redirectTo, Map<String, Object> parameters) {
-		if (redirectTo.startsWith("https") || redirectTo.startsWith("http")) {
-			redirectToExternalURL(redirectTo);
-		} else {
-			redirect(redirectTo, parameters);
-		}
-	}
+    public void redirectWithExternal(String redirectTo, Map<String, Object> parameters) {
+        if (redirectTo.startsWith("https") || redirectTo.startsWith("http")) {
+            redirectToExternalURL(redirectTo);
+        } else {
+            redirect(redirectTo, parameters);
+        }
+    }
 
-	public void redirect(String viewId, Map<String, Object> parameters) {
-		if (viewId == null) {
-			throw new RedirectException("cannot redirect to a null viewId");
-		}
+    public void redirect(String viewId, Map<String, Object> parameters) {
+        if (viewId == null) {
+            throw new RedirectException("cannot redirect to a null viewId");
+        }
 
-		String url = facesContext.getApplication().getViewHandler().getRedirectURL(facesContext, viewId,
-				Collections.<String, List<String>>emptyMap(), false);
+        String url = facesContext.getApplication().getViewHandler().getRedirectURL(facesContext, viewId,
+                Collections.<String, List<String>>emptyMap(), false);
 
-		if (parameters != null) {
-			url = encodeParameters(url, parameters);
-		}
+        if (parameters != null) {
+            url = encodeParameters(url, parameters);
+        }
 
-		try {
-			externalContext.redirect(externalContext.encodeActionURL(url));
-		} catch (IOException ioe) {
-			throw new RedirectException(ioe);
-		} catch (IllegalStateException ise) {
-			throw new RedirectException(ise.getMessage());
-		}
-	}
+        try {
+            externalContext.redirect(externalContext.encodeActionURL(url));
+        } catch (IOException ioe) {
+            throw new RedirectException(ioe);
+        } catch (IllegalStateException ise) {
+            throw new RedirectException(ise.getMessage());
+        }
+    }
 
-	public void redirectToExternalURL(String url) {
-		try {
-			externalContext.redirect(url);
-		} catch (IOException e) {
-			throw new RedirectException(e);
-		}
-	}
+    public void redirectToExternalURL(String url) {
+        try {
+            externalContext.redirect(url);
+        } catch (IOException e) {
+            throw new RedirectException(e);
+        }
+    }
 
-	public String encodeParameters(String url, Map<String, Object> parameters) {
-		if (parameters.isEmpty()) {
-			return url;
-		}
+    public String encodeParameters(String url, Map<String, Object> parameters) {
+        if (parameters.isEmpty()) {
+            return url;
+        }
 
-		StringBuilder builder = new StringBuilder(url);
-		for (Map.Entry<String, Object> param : parameters.entrySet()) {
-			String parameterName = param.getKey();
-			if (!containsParameter(url, parameterName)) {
-				Object parameterValue = param.getValue();
-				if (parameterValue instanceof Iterable) {
-					for (Object value : (Iterable<?>) parameterValue) {
-						builder.append('&').append(parameterName).append('=');
-						if (value != null) {
-							builder.append(encode(value));
-						}
-					}
-				} else {
-					builder.append('&').append(parameterName).append('=');
-					if (parameterValue != null) {
-						builder.append(encode(parameterValue));
-					}
-				}
-			}
-		}
+        StringBuilder builder = new StringBuilder(url);
+        for (Map.Entry<String, Object> param : parameters.entrySet()) {
+            String parameterName = param.getKey();
+            if (!containsParameter(url, parameterName)) {
+                Object parameterValue = param.getValue();
+                if (parameterValue instanceof Iterable) {
+                    for (Object value : (Iterable<?>) parameterValue) {
+                        builder.append('&').append(parameterName).append('=');
+                        if (value != null) {
+                            builder.append(encode(value));
+                        }
+                    }
+                } else {
+                    builder.append('&').append(parameterName).append('=');
+                    if (parameterValue != null) {
+                        builder.append(encode(parameterValue));
+                    }
+                }
+            }
+        }
 
-		if (url.indexOf('?') < 0) {
-			builder.setCharAt(url.length(), '?');
-		}
-		return builder.toString();
-	}
+        if (url.indexOf('?') < 0) {
+            builder.setCharAt(url.length(), '?');
+        }
+        return builder.toString();
+    }
 
-	public void renderView(String viewId) {
-		final FacesContext fc = FacesContext.getCurrentInstance();
-		final ViewHandler viewHandler = fc.getApplication().getViewHandler();
+    public void renderView(String viewId) {
+        final FacesContext fc = FacesContext.getCurrentInstance();
+        final ViewHandler viewHandler = fc.getApplication().getViewHandler();
 
-		fc.setViewRoot(viewHandler.createView(fc, viewId));
-		fc.getPartialViewContext().setRenderAll(true);
-		fc.renderResponse();
-	}
+        fc.setViewRoot(viewHandler.createView(fc, viewId));
+        fc.getPartialViewContext().setRenderAll(true);
+        fc.renderResponse();
+    }
 
-	public void navigateToView(String fromAction, String outcome, Map<String, Object> parameters) {
-		final FacesContext fc = FacesContext.getCurrentInstance();
+    public void navigateToView(String fromAction, String outcome, Map<String, Object> parameters) {
+        final FacesContext fc = FacesContext.getCurrentInstance();
 
-		Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
-		NavigationHandler nav = fc.getApplication().getNavigationHandler();
+        Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
+        NavigationHandler nav = fc.getApplication().getNavigationHandler();
 
-		if (parameters != null) {
-			requestMap.putAll(parameters);
-		}
-		nav.handleNavigation(fc, fromAction, outcome);
-		fc.renderResponse();
-	}
+        if (parameters != null) {
+            requestMap.putAll(parameters);
+        }
+        nav.handleNavigation(fc, fromAction, outcome);
+        fc.renderResponse();
+    }
 
-	private boolean containsParameter(String url, String parameterName) {
-		return url.indexOf('?' + parameterName + '=') > 0 || url.indexOf('&' + parameterName + '=') > 0;
-	}
+    private boolean containsParameter(String url, String parameterName) {
+        return url.indexOf('?' + parameterName + '=') > 0 || url.indexOf('&' + parameterName + '=') > 0;
+    }
 
-	private String encode(Object value) {
-		try {
-			return URLEncoder.encode(String.valueOf(value), "UTF-8");
-		} catch (UnsupportedEncodingException iee) {
-			throw new RuntimeException(iee);
-		}
-	}
+    private String encode(Object value) {
+        try {
+            return URLEncoder.encode(String.valueOf(value), "UTF-8");
+        } catch (UnsupportedEncodingException iee) {
+            throw new RuntimeException(iee);
+        }
+    }
 
 }

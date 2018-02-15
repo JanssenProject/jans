@@ -26,67 +26,67 @@ import org.xdi.util.StringHelper;
 @ApplicationScoped
 public class CustomLibrariesLoader implements Serializable {
 
-	private static final long serialVersionUID = 3918267172467576424L;
+    private static final long serialVersionUID = 3918267172467576424L;
 
-	private static final String SERVER_BASE_PATH = "server.base";
-	private static final String CUSTOM_LIBS_PATH = "/custom/libs";
+    private static final String SERVER_BASE_PATH = "server.base";
+    private static final String CUSTOM_LIBS_PATH = "/custom/libs";
 
-	@Inject
-	protected Logger log;
+    @Inject
+    protected Logger log;
 
-	public void init() {
-		loadCustomLibraries();
-	}
+    public void init() {
+        loadCustomLibraries();
+    }
 
-	private void loadCustomLibraries() {
-		try {
-			String customLibrariesPath = getCustomLibrariesPath();
-			if (StringHelper.isEmpty(customLibrariesPath)) {
-				return;
-			}
+    private void loadCustomLibraries() {
+        try {
+            String customLibrariesPath = getCustomLibrariesPath();
+            if (StringHelper.isEmpty(customLibrariesPath)) {
+                return;
+            }
 
-			// Get the method URLClassLoader#addURL(URL)
-			Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-			// Make it accessible as the method is protected
-			method.setAccessible(true);
+            // Get the method URLClassLoader#addURL(URL)
+            Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+            // Make it accessible as the method is protected
+            method.setAccessible(true);
 
-			ClassLoader webAppClassLoader = Thread.currentThread().getContextClassLoader();
-			String[] paths = { customLibrariesPath };
-			for (String path : paths) {
-				File parent = new File(path);
-				File[] jars = parent.listFiles(new FilenameFilter() {
-					@Override
-					public boolean accept(final File dir, final String name) {
-						return name.endsWith(".jar");
-					}
-				});
+            ClassLoader webAppClassLoader = Thread.currentThread().getContextClassLoader();
+            String[] paths = { customLibrariesPath };
+            for (String path : paths) {
+                File parent = new File(path);
+                File[] jars = parent.listFiles(new FilenameFilter() {
+                    @Override
+                    public boolean accept(final File dir, final String name) {
+                        return name.endsWith(".jar");
+                    }
+                });
 
-				if (jars == null) {
-					continue;
-				}
+                if (jars == null) {
+                    continue;
+                }
 
-				for (File jar : jars) {
-					method.invoke(webAppClassLoader, jar.toURI().toURL());
-					log.debug("Loaded custom librarty '{}'", jar.toURI().toURL());
-				}
-			}
+                for (File jar : jars) {
+                    method.invoke(webAppClassLoader, jar.toURI().toURL());
+                    log.debug("Loaded custom librarty '{}'", jar.toURI().toURL());
+                }
+            }
 
-			// Restore previous state
-			method.setAccessible(false);
-		} catch (Exception ex) {
-			log.error("Failed to register custom librarties");
-		}
-	}
+            // Restore previous state
+            method.setAccessible(false);
+        } catch (Exception ex) {
+            log.error("Failed to register custom librarties");
+        }
+    }
 
-	public static String getCustomLibrariesPath() {
-		String externalResourceBase = System.getProperty(SERVER_BASE_PATH);
-		if (StringHelper.isNotEmpty(externalResourceBase)) {
-			externalResourceBase += CUSTOM_LIBS_PATH;
+    public static String getCustomLibrariesPath() {
+        String externalResourceBase = System.getProperty(SERVER_BASE_PATH);
+        if (StringHelper.isNotEmpty(externalResourceBase)) {
+            externalResourceBase += CUSTOM_LIBS_PATH;
 
-			return externalResourceBase;
-		}
+            return externalResourceBase;
+        }
 
-		return null;
-	}
+        return null;
+    }
 
 }

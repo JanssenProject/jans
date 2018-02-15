@@ -12,12 +12,12 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
  * Base metric data class
- * 
+ *
  * @author Yuriy Movchan Date: 07/28/2015
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetricData implements Serializable {
 
-	private static final long serialVersionUID = -2520744744010853187L;
+    private static final long serialVersionUID = -2520744744010853187L;
 
 }

@@ -15,29 +15,29 @@ import java.util.List;
  */
 public class MetricReport {
 
-	private List<MetricEntry> metricEntries;
+    private List<MetricEntry> metricEntries;
 
-	private Date creationTime;
+    private Date creationTime;
 
-	public MetricReport(List<MetricEntry> metricEntries, Date creationTime) {
-		this.metricEntries = metricEntries;
-		this.creationTime = creationTime;
-	}
+    public MetricReport(List<MetricEntry> metricEntries, Date creationTime) {
+        this.metricEntries = metricEntries;
+        this.creationTime = creationTime;
+    }
 
-	public List<MetricEntry> getMetricEntries() {
-		return metricEntries;
-	}
+    public List<MetricEntry> getMetricEntries() {
+        return metricEntries;
+    }
 
-	public void setMetricEntries(List<MetricEntry> metricEntries) {
-		this.metricEntries = metricEntries;
-	}
+    public void setMetricEntries(List<MetricEntry> metricEntries) {
+        this.metricEntries = metricEntries;
+    }
 
-	public Date getCreationTime() {
-		return creationTime;
-	}
+    public Date getCreationTime() {
+        return creationTime;
+    }
 
-	public void setCreationTime(Date creationTime) {
-		this.creationTime = creationTime;
-	}
+    public void setCreationTime(Date creationTime) {
+        this.creationTime = creationTime;
+    }
 
 }

@@ -13,29 +13,31 @@ import org.xdi.model.SelectableEntity;
 
 /**
  * Converts lis of entities to list of selectable entities
- * 
+ *
  * @author Yuriy Movchan Date: 04/25/2013
  */
-public class SelectableEntityHelper {
+public final class SelectableEntityHelper {
 
-	public static <T> List<SelectableEntity<T>> convertToSelectableEntityModel(List<T> entities) {
-		List<SelectableEntity<T>> result = new ArrayList<SelectableEntity<T>>(entities.size());
+    private SelectableEntityHelper() { }
 
-		for (T entity : entities) {
-			result.add(new SelectableEntity<T>(entity, false));
-		}
+    public static <T> List<SelectableEntity<T>> convertToSelectableEntityModel(List<T> entities) {
+        List<SelectableEntity<T>> result = new ArrayList<SelectableEntity<T>>(entities.size());
 
-		return result;
-	}
+        for (T entity : entities) {
+            result.add(new SelectableEntity<T>(entity, false));
+        }
 
-	public static <T> List<T> convertToEntities(List<SelectableEntity<T>> selectableEntities) {
-		List<T> result = new ArrayList<T>(selectableEntities.size());
+        return result;
+    }
 
-		for (SelectableEntity<T> selectableEntity : selectableEntities) {
-			result.add(selectableEntity.getEntity());
-		}
+    public static <T> List<T> convertToEntities(List<SelectableEntity<T>> selectableEntities) {
+        List<T> result = new ArrayList<T>(selectableEntities.size());
 
-		return result;
-	}
+        for (SelectableEntity<T> selectableEntity : selectableEntities) {
+            result.add(selectableEntity.getEntity());
+        }
+
+        return result;
+    }
 
 }

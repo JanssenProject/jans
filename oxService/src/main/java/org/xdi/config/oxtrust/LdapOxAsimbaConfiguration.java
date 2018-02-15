@@ -12,8 +12,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapJsonObject;
 import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 
 /**
- * Asimba LDAP settings configuration entry. 
- * 
+ * Asimba LDAP settings configuration entry.
+ *
  * @author Dmitry Ognyannikov
  */
 @LdapEntry
@@ -21,14 +21,14 @@ import org.gluu.site.ldap.persistence.annotation.LdapObjectClass;
 public class LdapOxAsimbaConfiguration extends Entry {
 
     private static final long serialVersionUID = -12489397651302948L;
-    
+
     @LdapJsonObject
     @LdapAttribute(name = "oxConfApplication")
     private AsimbaConfiguration applicationConfiguration;
 
     @LdapAttribute(name = "oxRevision")
     private long revision;
-    
+
     public LdapOxAsimbaConfiguration() {}
 
     /**
@@ -58,5 +58,5 @@ public class LdapOxAsimbaConfiguration extends Entry {
     public void setRevision(long revision) {
         this.revision = revision;
     }
-    
+
 }

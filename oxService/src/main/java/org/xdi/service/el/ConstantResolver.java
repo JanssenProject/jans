@@ -12,52 +12,52 @@ import javax.el.ELResolver;
  * @author Yuriy Movchan Date: 05/22/2017
  */
 public class ConstantResolver extends ELResolver {
-	private final Map<String, Object> constants = new HashMap<String, Object>();
+    private final Map<String, Object> constants = new HashMap<String, Object>();
 
-	public void addConstant(String name, Object value) {
-		constants.put(name, value);
-	}
+    public void addConstant(String name, Object value) {
+        constants.put(name, value);
+    }
 
-	public void removeConstant(String name) {
-		constants.remove(name);
-	}
+    public void removeConstant(String name) {
+        constants.remove(name);
+    }
 
-	@Override
-	public Object getValue(ELContext context, Object base, Object property) {
-		if (base == null && constants.containsKey(property)) {
-			context.setPropertyResolved(true);
-			return constants.get(property);
-		}
+    @Override
+    public Object getValue(ELContext context, Object base, Object property) {
+        if (base == null && constants.containsKey(property)) {
+            context.setPropertyResolved(true);
+            return constants.get(property);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	@Override
-	public Class<?> getType(ELContext context, Object base, Object property) {
-		if (base == null && constants.containsKey(property)) {
-			return constants.get(property).getClass();
-		}
+    @Override
+    public Class<?> getType(ELContext context, Object base, Object property) {
+        if (base == null && constants.containsKey(property)) {
+            return constants.get(property).getClass();
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	@Override
-	public void setValue(ELContext context, Object base, Object property, Object value) {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void setValue(ELContext context, Object base, Object property, Object value) {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public boolean isReadOnly(ELContext context, Object base, Object property) {
-		return true;
-	}
+    @Override
+    public boolean isReadOnly(ELContext context, Object base, Object property) {
+        return true;
+    }
 
-	@Override
-	public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
-		return null;
-	}
+    @Override
+    public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object base) {
+        return null;
+    }
 
-	@Override
-	public Class<?> getCommonPropertyType(ELContext context, Object base) {
-		return null;
-	}
+    @Override
+    public Class<?> getCommonPropertyType(ELContext context, Object base) {
+        return null;
+    }
 }

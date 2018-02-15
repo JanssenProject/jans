@@ -65,7 +65,7 @@ public class SimpleUser implements Serializable {
         this.oxAuthPersistentJwt = oxAuthPersistentJwt;
     }
 
-	public List<CustomAttribute> getCustomAttributes() {
+    public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
@@ -88,11 +88,11 @@ public class SimpleUser implements Serializable {
     }
 
     public List<String> getAttributeValues(String ldapAttribute) {
-    	List<String> values = null;
+        List<String> values = null;
         if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
             for (CustomAttribute customAttribute : customAttributes) {
                 if (StringHelper.equalsIgnoreCase(customAttribute.getName(), ldapAttribute)) {
-                	values = customAttribute.getValues();
+                    values = customAttribute.getValues();
                     break;
                 }
             }
@@ -101,12 +101,12 @@ public class SimpleUser implements Serializable {
         return values;
     }
 
-	public String[] getCustomObjectClasses() {
-		return customObjectClasses;
-	}
+    public String[] getCustomObjectClasses() {
+        return customObjectClasses;
+    }
 
-	public void setCustomObjectClasses(String[] customObjectClasses) {
-		this.customObjectClasses = customObjectClasses;
-	}
+    public void setCustomObjectClasses(String[] customObjectClasses) {
+        this.customObjectClasses = customObjectClasses;
+    }
 
 }

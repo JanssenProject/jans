@@ -3,7 +3,6 @@
  *
  * Copyright (c) 2014, Gluu
  */
-
 package org.xdi.model;
 
 import javax.persistence.Transient;
@@ -14,118 +13,123 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * Hold SMTP configuration
- * 
+ *
  * @author Yuriy Movchan Date: 04/20/2014
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SmtpConfiguration implements java.io.Serializable {
 
-	private static final long serialVersionUID = -5675038049444038755L;
+    private static final long serialVersionUID = -5675038049444038755L;
 
-	@JsonProperty("host")
-	private String host;
-	@JsonProperty("port")
-	private int port;
-	@JsonProperty("requires-ssl")
-	private boolean requiresSsl;
-	@JsonProperty("trust-host")
-	private boolean serverTrust;
+    @JsonProperty("host")
+    private String host;
 
-	@JsonProperty("from-name")
-	private String fromName;
-	@JsonProperty("from-email-address")
-	private String fromEmailAddress;
+    @JsonProperty("port")
+    private int port;
 
-	@JsonProperty("requires-authentication")
-	private boolean requiresAuthentication;
+    @JsonProperty("requires-ssl")
+    private boolean requiresSsl;
 
-	@JsonProperty("user-name")
-	private String userName;
-	@JsonProperty("password")
-	private String password;
+    @JsonProperty("trust-host")
+    private boolean serverTrust;
 
-	@Transient
-	@JsonIgnore
-	private String passwordDecrypted;
+    @JsonProperty("from-name")
+    private String fromName;
 
-	public String getHost() {
-		return host;
-	}
+    @JsonProperty("from-email-address")
+    private String fromEmailAddress;
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+    @JsonProperty("requires-authentication")
+    private boolean requiresAuthentication;
 
-	public int getPort() {
-		return port;
-	}
+    @JsonProperty("user-name")
+    private String userName;
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    @JsonProperty("password")
+    private String password;
 
-	public boolean isRequiresSsl() {
-		return requiresSsl;
-	}
+    @Transient
+    @JsonIgnore
+    private String passwordDecrypted;
 
-	public void setRequiresSsl(boolean requiresSsl) {
-		this.requiresSsl = requiresSsl;
-	}
+    public String getHost() {
+        return host;
+    }
 
-	public boolean isServerTrust() {
-		return serverTrust;
-	}
+    public void setHost(String host) {
+        this.host = host;
+    }
 
-	public void setServerTrust(boolean serverTrust) {
-		this.serverTrust = serverTrust;
-	}
+    public int getPort() {
+        return port;
+    }
 
-	public String getFromName() {
-		return fromName;
-	}
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-	public void setFromName(String fromName) {
-		this.fromName = fromName;
-	}
+    public boolean isRequiresSsl() {
+        return requiresSsl;
+    }
 
-	public String getFromEmailAddress() {
-		return fromEmailAddress;
-	}
+    public void setRequiresSsl(boolean requiresSsl) {
+        this.requiresSsl = requiresSsl;
+    }
 
-	public void setFromEmailAddress(String fromEmailAddress) {
-		this.fromEmailAddress = fromEmailAddress;
-	}
+    public boolean isServerTrust() {
+        return serverTrust;
+    }
 
-	public boolean isRequiresAuthentication() {
-		return requiresAuthentication;
-	}
+    public void setServerTrust(boolean serverTrust) {
+        this.serverTrust = serverTrust;
+    }
 
-	public void setRequiresAuthentication(boolean requiresAuthentication) {
-		this.requiresAuthentication = requiresAuthentication;
-	}
+    public String getFromName() {
+        return fromName;
+    }
 
-	public String getUserName() {
-		return userName;
-	}
+    public void setFromName(String fromName) {
+        this.fromName = fromName;
+    }
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    public String getFromEmailAddress() {
+        return fromEmailAddress;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public void setFromEmailAddress(String fromEmailAddress) {
+        this.fromEmailAddress = fromEmailAddress;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public boolean isRequiresAuthentication() {
+        return requiresAuthentication;
+    }
 
-	public String getPasswordDecrypted() {
-		return passwordDecrypted;
-	}
+    public void setRequiresAuthentication(boolean requiresAuthentication) {
+        this.requiresAuthentication = requiresAuthentication;
+    }
 
-	public void setPasswordDecrypted(String passwordDecrypted) {
-		this.passwordDecrypted = passwordDecrypted;
-	}
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPasswordDecrypted() {
+        return passwordDecrypted;
+    }
+
+    public void setPasswordDecrypted(String passwordDecrypted) {
+        this.passwordDecrypted = passwordDecrypted;
+    }
 
 }

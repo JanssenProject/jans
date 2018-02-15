@@ -14,87 +14,87 @@ import org.gluu.search.filter.Filter;
 
 /**
  * Methods which Entry Manager must provide
- * 
+ *
  * @author Yuriy Movchan Date: 01/29/2018
  */
 public interface PersistenceEntryManager {
 
-	void persist(Object entry);
-	<T> T merge(T entry);
+    void persist(Object entry);
+    <T> T merge(T entry);
 
-	void remove(Object entry);
-	void removeRecursively(String dn);
+    void remove(Object entry);
+    void removeRecursively(String dn);
 
-	boolean contains(Object entry);
-	<T> boolean contains(Class<T> entryClass, String primaryKey);
-	<T> boolean contains(String baseDN, Class<T> entryClass, Filter filter);
+    boolean contains(Object entry);
+    <T> boolean contains(Class<T> entryClass, String primaryKey);
+    <T> boolean contains(String baseDN, Class<T> entryClass, Filter filter);
 
-	<T> List<T> findEntries(Object entry);
+    <T> List<T> findEntries(Object entry);
 
-	<T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes);
+    <T> T find(Class<T> entryClass, Object primaryKey, String[] ldapReturnAttributes);
 
-	/**
-	 * Search by sample
-	 * 
-	 * @param entry Sample
-	 * @param sizeLimit Maximum result set size  
-	 * @return Result entries
-	 */
-	<T> List<T> findEntries(Object entry, int sizeLimit);
-	
-	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter);
-	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int sizeLimit);
+    /**
+     * Search by sample
+     *
+     * @param entry Sample
+     * @param sizeLimit Maximum result set size
+     * @return Result entries
+     */
+    <T> List<T> findEntries(Object entry, int sizeLimit);
 
-	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes);
-	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int sizeLimit);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, int sizeLimit);
 
-	/**
-	 * Search from baseDN
-	 * 
-	 * @param baseDN
-	 * @param entryClass
-	 * @param filter
-	 * @param scope
-	 * @param ldapReturnAttributes
-	 * @param sizeLimit
-	 * @param chunkSize Specify LDAP/DB pagination data set size  
-	 * @return Result entries
-	 */
-	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit, int chunkSize);
-	<T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, int sizeLimit);
 
-	<T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize, String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes);
+    /**
+     * Search from baseDN
+     *
+     * @param baseDN
+     * @param entryClass
+     * @param filter
+     * @param scope
+     * @param ldapReturnAttributes
+     * @param sizeLimit
+     * @param chunkSize Specify LDAP/DB pagination data set size
+     * @return Result entries
+     */
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, int sizeLimit, int chunkSize);
+    <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes, BatchOperation<T> batchOperation, int startIndex, int sizeLimit, int chunkSize);
 
-	boolean authenticate(String bindDn, String password);
-	boolean authenticate(String userName, String password, String baseDN);
+    <T> ListViewResponse<T> findListViewResponse(String baseDN, Class<T> entryClass, Filter filter, int startIndex, int count, int chunkSize, String sortBy, SortOrder sortOrder, String[] ldapReturnAttributes);
 
-	<T> int countEntries(Object entry);
-	<T> int countEntries(String baseDN, Class<T> entryClass, Filter filter);
+    boolean authenticate(String bindDn, String password);
+    boolean authenticate(String userName, String password, String baseDN);
 
-	int getHashCode(Object entry);
+    <T> int countEntries(Object entry);
+    <T> int countEntries(String baseDN, Class<T> entryClass, Filter filter);
 
-	String[] getObjectClasses(Object entry, Class<?> entryClass);
-	<T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes);
+    int getHashCode(Object entry);
 
-	public String encodeGeneralizedTime(Date date);
-	Date decodeGeneralizedTime(String date);
+    String[] getObjectClasses(Object entry, Class<?> entryClass);
+    <T> List<T> createEntities(Class<T> entryClass, Map<String, List<AttributeData>> entriesAttributes);
 
-	// TODO: use close
-	boolean destroy();
+    public String encodeGeneralizedTime(Date date);
+    Date decodeGeneralizedTime(String date);
 
-	<T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
-	<T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String groupByProperties, String sumByProperties);
+    // TODO: use close
+    boolean destroy();
 
-	void addDeleteSubscriber(DeleteNotifier subscriber);
-	void removeDeleteSubscriber(DeleteNotifier subscriber);
+    <T> void sortListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String... sortByProperties);
+    <T> Map<T, List<T>> groupListByProperties(Class<T> entryClass, List<T> entries, boolean caseSensetive, String groupByProperties, String sumByProperties);
 
-	// TODO: 3.2.0: Change name
-	String[] getLDIF(String dn);
+    void addDeleteSubscriber(DeleteNotifier subscriber);
+    void removeDeleteSubscriber(DeleteNotifier subscriber);
 
-	// TODO: 3.2.0: Change name
-	List<String[]> getLDIF(String dn, String[] attributes);
+    // TODO: 3.2.0: Change name
+    String[] getLDIF(String dn);
 
-	// TODO: 3.2.0: Change name
-	List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes);
+    // TODO: 3.2.0: Change name
+    List<String[]> getLDIF(String dn, String[] attributes);
+
+    // TODO: 3.2.0: Change name
+    List<String[]> getLDIFTree(String baseDN, Filter searchFilter, String... attributes);
 
 }

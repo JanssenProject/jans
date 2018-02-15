@@ -11,18 +11,18 @@ package org.gluu.persist.exception.mapping;
  */
 public class InvalidArgumentException extends BaseMappingException {
 
-	private static final long serialVersionUID = -2223352885909511209L;
+    private static final long serialVersionUID = -2223352885909511209L;
 
-	public InvalidArgumentException(String msg, Throwable root) {
-		super(msg, root);
-	}
+    public InvalidArgumentException(String msg, Throwable root) {
+        super(msg, root);
+    }
 
-	public InvalidArgumentException(Throwable root) {
-		super(root);
-	}
+    public InvalidArgumentException(Throwable root) {
+        super(root);
+    }
 
-	public InvalidArgumentException(String s) {
-		super(s);
-	}
+    public InvalidArgumentException(String s) {
+        super(s);
+    }
 
 }

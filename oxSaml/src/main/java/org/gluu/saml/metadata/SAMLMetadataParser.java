@@ -30,13 +30,13 @@ import org.xdi.xml.GluuErrorHandler;
 import org.xml.sax.SAXException;
 
 /**
- * SAML metadata parser. 
- * 
+ * SAML metadata parser.
+ *
  * @author Dmitry Ognyannikov
  */
 public class SAMLMetadataParser {
     private static final Log log = LogFactory.getLog(SAMLMetadataParser.class);
-    
+
     public static List<String> getEntityIdFromMetadataFile(File metadataFile) {
         if (!metadataFile.isFile()) {
             return null;
@@ -73,7 +73,7 @@ public class SAMLMetadataParser {
         InputStream is = null;
         try {
             is = FileUtils.openInputStream(metadataFile);
-            
+        
             return parseMetadata(is);
         } catch (IOException ex) {
             log.error("Failed to read SAML metadata file: " + metadataFile.getAbsolutePath(), ex);
@@ -82,7 +82,7 @@ public class SAMLMetadataParser {
             IOUtils.closeQuietly(is);
         }
     }
-    
+
     public static EntityIDHandler parseMetadata(InputStream is) {
         InputStreamReader isr = null;
         EntityIDHandler handler = null;
@@ -105,16 +105,16 @@ public class SAMLMetadataParser {
 
         return handler;
     }
-    
+
     public static EntityIDHandler parseMetadata(URL metadataURL) {
         String metadataFileContent = HTTPFileDownloader.getResource(metadataURL.toExternalForm(), "application/xml, text/xml", null, null);
         return parseMetadata(metadataFileContent);
     }
-    
+
     public static EntityIDHandler parseMetadata(String metadata) {
         if (metadata == null)
             return null;
-        
+    
         InputStream is = new StringBufferInputStream(metadata);
         return parseMetadata(is);
     }

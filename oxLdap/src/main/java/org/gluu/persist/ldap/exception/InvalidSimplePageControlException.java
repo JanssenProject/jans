@@ -12,27 +12,27 @@ import com.unboundid.ldap.sdk.ResultCode;
 
 /**
  * Invalid page control LDAP exception -- thrown when Simple Page Control returns result without cookie
- * 
+ *
  * @author Yuriy Movchan Date: 12/30/2016
  */
 public class InvalidSimplePageControlException extends PersistentException {
 
-	private static final long serialVersionUID = 1756816743469359856L;
-	
-	private ResultCode resultCode;
+    private static final long serialVersionUID = 1756816743469359856L;
 
-	public InvalidSimplePageControlException(String message) {
-		super(message);
-	}
+    private ResultCode resultCode;
 
-	public InvalidSimplePageControlException(ResultCode resultCode, String message) {
-		super(message);
+    public InvalidSimplePageControlException(String message) {
+        super(message);
+    }
 
-		this.resultCode = resultCode;
-	}
+    public InvalidSimplePageControlException(ResultCode resultCode, String message) {
+        super(message);
 
-	public ResultCode getResultCode() {
-		return resultCode;
-	}
+        this.resultCode = resultCode;
+    }
+
+    public ResultCode getResultCode() {
+        return resultCode;
+    }
 
 }

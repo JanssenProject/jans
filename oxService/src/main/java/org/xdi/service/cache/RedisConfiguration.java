@@ -10,11 +10,11 @@ import java.io.Serializable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RedisConfiguration implements Serializable {
 
-	private static final long serialVersionUID = 5513197227832695471L;
+    private static final long serialVersionUID = 5513197227832695471L;
 
     private RedisProviderType redisProviderType = RedisProviderType.STANDALONE;
 
-	private String servers = "localhost:6379"; // server1:11211 server2:11211
+    private String servers = "localhost:6379"; // server1:11211 server2:11211
 
     private int defaultPutExpiration = 60; // in seconds
 

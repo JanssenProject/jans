@@ -46,77 +46,77 @@ import org.xml.sax.SAXException;
 
 /**
  * Loads and validates SAML response
- * 
+ *
  * @author Yuriy Movchan Date: 24/04/2014
  */
 public class Response {
-	private final static SimpleNamespaceContext NAMESPACES;
-        
-        public final static String SAML_RESPONSE_STATUS_SUCCESS = "urn:oasis:names:tc:SAML:2.0:status:Success"; 
-        public final static String SAML_RESPONSE_STATUS_RESPONDER = "urn:oasis:names:tc:SAML:2.0:status:Responder";
-        public final static String SAML_RESPONSE_STATUS_AUTHNFAILED = "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed";
-        
-	static {
-		HashMap<String, String> preferences = new HashMap<String, String>() {
-			{
-				put("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
-				put("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
-			}
-		};
-		NAMESPACES = new SimpleNamespaceContext(preferences);
-	}
+    private final static SimpleNamespaceContext NAMESPACES;
+    
+    public final static String SAML_RESPONSE_STATUS_SUCCESS = "urn:oasis:names:tc:SAML:2.0:status:Success";
+    public final static String SAML_RESPONSE_STATUS_RESPONDER = "urn:oasis:names:tc:SAML:2.0:status:Responder";
+    public final static String SAML_RESPONSE_STATUS_AUTHNFAILED = "urn:oasis:names:tc:SAML:2.0:status:AuthnFailed";
+    
+    static {
+        HashMap<String, String> preferences = new HashMap<String, String>() {
+            {
+                put("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+                put("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
+            }
+        };
+        NAMESPACES = new SimpleNamespaceContext(preferences);
+    }
 
-	private Document xmlDoc;
-	private SamlConfiguration samlSettings;
+    private Document xmlDoc;
+    private SamlConfiguration samlSettings;
 
-	public Response(SamlConfiguration samlSettings) throws CertificateException {
-		this.samlSettings = samlSettings;
-	}
+    public Response(SamlConfiguration samlSettings) throws CertificateException {
+        this.samlSettings = samlSettings;
+    }
 
-	public void loadXml(String xml) throws ParserConfigurationException, SAXException, IOException {
-		DocumentBuilderFactory fty = DocumentBuilderFactory.newInstance();
+    public void loadXml(String xml) throws ParserConfigurationException, SAXException, IOException {
+        DocumentBuilderFactory fty = DocumentBuilderFactory.newInstance();
 
-		fty.setNamespaceAware(true);
+        fty.setNamespaceAware(true);
 
-		// Fix XXE vulnerability
-		fty.setXIncludeAware(false);
-		fty.setExpandEntityReferences(false);
-		fty.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-		fty.setFeature("http://xml.org/sax/features/external-general-entities", false);
-		fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        // Fix XXE vulnerability
+        fty.setXIncludeAware(false);
+        fty.setExpandEntityReferences(false);
+        fty.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        fty.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 
-		DocumentBuilder builder = fty.newDocumentBuilder();
-		ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
-		xmlDoc = builder.parse(bais);
-	}
+        DocumentBuilder builder = fty.newDocumentBuilder();
+        ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
+        xmlDoc = builder.parse(bais);
+    }
 
-	public void loadXmlFromBase64(String response) throws ParserConfigurationException, SAXException, IOException {
-		Base64 base64 = new Base64();
-		byte[] decodedResponse = base64.decode(response);
-		String decodedS = new String(decodedResponse);
-		loadXml(decodedS);
-	}
+    public void loadXmlFromBase64(String response) throws ParserConfigurationException, SAXException, IOException {
+        Base64 base64 = new Base64();
+        byte[] decodedResponse = base64.decode(response);
+        String decodedS = new String(decodedResponse);
+        loadXml(decodedS);
+    }
 
-	public boolean isValid() throws Exception {
-		NodeList nodes = xmlDoc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+    public boolean isValid() throws Exception {
+        NodeList nodes = xmlDoc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 
-		if (nodes == null || nodes.getLength() == 0) {
-			throw new Exception("Can't find signature in document.");
-		}
+        if (nodes == null || nodes.getLength() == 0) {
+            throw new Exception("Can't find signature in document.");
+        }
 
-		if (setIdAttributeExists()) {
-			tagIdAttributes(xmlDoc);
-		}
+        if (setIdAttributeExists()) {
+            tagIdAttributes(xmlDoc);
+        }
 
-		X509Certificate cert = samlSettings.getCertificate();
-		DOMValidateContext ctx = new DOMValidateContext(cert.getPublicKey(), nodes.item(0));
-		XMLSignatureFactory sigF = XMLSignatureFactory.getInstance("DOM");
-		XMLSignature xmlSignature = sigF.unmarshalXMLSignature(ctx);
+        X509Certificate cert = samlSettings.getCertificate();
+        DOMValidateContext ctx = new DOMValidateContext(cert.getPublicKey(), nodes.item(0));
+        XMLSignatureFactory sigF = XMLSignatureFactory.getInstance("DOM");
+        XMLSignature xmlSignature = sigF.unmarshalXMLSignature(ctx);
 
-		return xmlSignature.validate(ctx);
-	}
+        return xmlSignature.validate(ctx);
+    }
 
-	public boolean isAuthnFailed() throws Exception {
+    public boolean isAuthnFailed() throws Exception {
             XPath xPath = XPathFactory.newInstance().newXPath();
 
             xPath.setNamespaceContext(NAMESPACES);
@@ -136,86 +136,86 @@ public class Response {
                     else if (SAML_RESPONSE_STATUS_RESPONDER.equalsIgnoreCase(statusCode))
                         ;// nothing?
             }
-            
+        
             return false;
         }
-        
-	private void tagIdAttributes(Document xmlDoc) {
-		NodeList nodeList = xmlDoc.getElementsByTagName("*");
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node node = nodeList.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				if (node.getAttributes().getNamedItem("ID") != null) {
-					((Element) node).setIdAttribute("ID", true);
-				}
-			}
-		}
-	}
+    
+    private void tagIdAttributes(Document xmlDoc) {
+        NodeList nodeList = xmlDoc.getElementsByTagName("*");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            Node node = nodeList.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                if (node.getAttributes().getNamedItem("ID") != null) {
+                    ((Element) node).setIdAttribute("ID", true);
+                }
+            }
+        }
+    }
 
-	private boolean setIdAttributeExists() {
-		for (Method method : Element.class.getDeclaredMethods()) {
-			if (method.getName().equals("setIdAttribute")) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private boolean setIdAttributeExists() {
+        for (Method method : Element.class.getDeclaredMethods()) {
+            if (method.getName().equals("setIdAttribute")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	public String getNameId() throws XPathExpressionException {
-		XPath xPath = XPathFactory.newInstance().newXPath();
+    public String getNameId() throws XPathExpressionException {
+        XPath xPath = XPathFactory.newInstance().newXPath();
 
-		xPath.setNamespaceContext(NAMESPACES);
-		XPathExpression query = xPath.compile("/samlp:Response/saml:Assertion/saml:Subject/saml:NameID");
-		return query.evaluate(xmlDoc);
-	}
+        xPath.setNamespaceContext(NAMESPACES);
+        XPathExpression query = xPath.compile("/samlp:Response/saml:Assertion/saml:Subject/saml:NameID");
+        return query.evaluate(xmlDoc);
+    }
 
-	public Map<String, List<String>> getAttributes() throws XPathExpressionException {
-		Map<String, List<String>> result = new HashMap<String, List<String>>();
-		XPath xPath = XPathFactory.newInstance().newXPath();
+    public Map<String, List<String>> getAttributes() throws XPathExpressionException {
+        Map<String, List<String>> result = new HashMap<String, List<String>>();
+        XPath xPath = XPathFactory.newInstance().newXPath();
 
-		xPath.setNamespaceContext(NAMESPACES);
-		XPathExpression query = xPath.compile("/samlp:Response/saml:Assertion/saml:AttributeStatement/saml:Attribute");
-		NodeList nodes = (NodeList) query.evaluate(xmlDoc, XPathConstants.NODESET);
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Node node = nodes.item(i);
+        xPath.setNamespaceContext(NAMESPACES);
+        XPathExpression query = xPath.compile("/samlp:Response/saml:Assertion/saml:AttributeStatement/saml:Attribute");
+        NodeList nodes = (NodeList) query.evaluate(xmlDoc, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node node = nodes.item(i);
 
-			Node nameNode = node.getAttributes().getNamedItem("Name");
-			if (nameNode == null) {
-				continue;
-			}
+            Node nameNode = node.getAttributes().getNamedItem("Name");
+            if (nameNode == null) {
+                continue;
+            }
 
-			String attributeName = nameNode.getNodeValue();
-			List<String> attributeValues = new ArrayList<String>();
+            String attributeName = nameNode.getNodeValue();
+            List<String> attributeValues = new ArrayList<String>();
 
-			NodeList nameChildNodes = node.getChildNodes();
-			for (int j = 0; j < nameChildNodes.getLength(); j++) {
-				Node nameChildNode = nameChildNodes.item(j);
+            NodeList nameChildNodes = node.getChildNodes();
+            for (int j = 0; j < nameChildNodes.getLength(); j++) {
+                Node nameChildNode = nameChildNodes.item(j);
 
-				if (nameChildNode.getNamespaceURI().equalsIgnoreCase("urn:oasis:names:tc:SAML:2.0:assertion")
-						&& nameChildNode.getLocalName().equals("AttributeValue")) {
-					NodeList valueChildNodes = nameChildNode.getChildNodes();
-					for (int k = 0; k < valueChildNodes.getLength(); k++) {
-						Node valueChildNode = valueChildNodes.item(k);
-						attributeValues.add(valueChildNode.getNodeValue());
-					}
-				}
-			}
+                if (nameChildNode.getNamespaceURI().equalsIgnoreCase("urn:oasis:names:tc:SAML:2.0:assertion")
+                        && nameChildNode.getLocalName().equals("AttributeValue")) {
+                    NodeList valueChildNodes = nameChildNode.getChildNodes();
+                    for (int k = 0; k < valueChildNodes.getLength(); k++) {
+                        Node valueChildNode = valueChildNodes.item(k);
+                        attributeValues.add(valueChildNode.getNodeValue());
+                    }
+                }
+            }
 
-			result.put(attributeName, attributeValues);
-		}
+            result.put(attributeName, attributeValues);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public void printDocument(OutputStream out) throws IOException, TransformerException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		Transformer transformer = tf.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+    public void printDocument(OutputStream out) throws IOException, TransformerException {
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
-		transformer.transform(new DOMSource(xmlDoc), new StreamResult(new OutputStreamWriter(out, "UTF-8")));
-	}
+        transformer.transform(new DOMSource(xmlDoc), new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+    }
 }

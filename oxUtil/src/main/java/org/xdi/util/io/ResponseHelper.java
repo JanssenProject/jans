@@ -28,148 +28,150 @@ import org.xdi.util.StringHelper;
 /**
  * @author Yuriy Movchan Date: 11.24.2010
  */
-public class ResponseHelper {
+public final class ResponseHelper {
 
-	private static Logger log = LoggerFactory.getLogger(ResponseHelper.class);
+    private ResponseHelper() { }
 
-	public static boolean downloadFile(String filePath, String contentType, FacesContext facesContext) {
-		if (filePath == null) {
-			return false;
-		}
+    private static Logger LOG = LoggerFactory.getLogger(ResponseHelper.class);
 
-		File file = new File(filePath);
-		if (!file.exists()) {
-			log.error(String.format("Failed to send file %s. File doesn't exist.", file.getAbsolutePath()));
-			return true;
-		}
+    public static boolean downloadFile(String filePath, String contentType, FacesContext facesContext) {
+        if (filePath == null) {
+            return false;
+        }
 
-		HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
-		InputStream is = null;
-		try {
-			is = FileUtils.openInputStream(file);
-			DownloadWrapper downloadWrapper = new DownloadWrapper(is, file.getName(), contentType,
-					new Date(file.lastModified()), (int) file.length());
-			FileDownloader.writeOutput(downloadWrapper, false, response);
+        File file = new File(filePath);
+        if (!file.exists()) {
+            LOG.error(String.format("Failed to send file %s. File doesn't exist.", file.getAbsolutePath()));
+            return true;
+        }
 
-			facesContext.responseComplete();
-		} catch (Exception ex) {
-			log.error(String.format("Failed to send file %s", file.getAbsolutePath()), ex);
-			return false;
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
+        HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+        InputStream is = null;
+        try {
+            is = FileUtils.openInputStream(file);
+            DownloadWrapper downloadWrapper = new DownloadWrapper(is, file.getName(), contentType,
+                    new Date(file.lastModified()), (int) file.length());
+            FileDownloader.writeOutput(downloadWrapper, false, response);
 
-		return true;
-	}
+            facesContext.responseComplete();
+        } catch (Exception ex) {
+            LOG.error(String.format("Failed to send file %s", file.getAbsolutePath()), ex);
+            return false;
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
 
-	public static boolean downloadFile(String fileName, String contentType, byte[] file, FacesContext facesContext) {
-		return downloadFile(fileName, contentType, file, FileDownloader.ContentDisposition.ATTACHEMENT, facesContext);
-	}
+        return true;
+    }
 
-	public static boolean downloadFile(String fileName, String contentType, byte[] file,
-			FileDownloader.ContentDisposition contentDisposition, FacesContext facesContext) {
-		HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
-		InputStream is = null;
-		try {
-			is = new ByteArrayInputStream(file);
-			DownloadWrapper downloadWrapper = new DownloadWrapper(is, fileName, contentType, new Date(), file.length);
-			FileDownloader.writeOutput(downloadWrapper, contentDisposition, response);
+    public static boolean downloadFile(String fileName, String contentType, byte[] file, FacesContext facesContext) {
+        return downloadFile(fileName, contentType, file, FileDownloader.ContentDisposition.ATTACHEMENT, facesContext);
+    }
 
-			facesContext.responseComplete();
-		} catch (Exception ex) {
-			log.error("Failed to send file", ex);
-			return false;
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
+    public static boolean downloadFile(String fileName, String contentType, byte[] file,
+            FileDownloader.ContentDisposition contentDisposition, FacesContext facesContext) {
+        HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+        InputStream is = null;
+        try {
+            is = new ByteArrayInputStream(file);
+            DownloadWrapper downloadWrapper = new DownloadWrapper(is, fileName, contentType, new Date(), file.length);
+            FileDownloader.writeOutput(downloadWrapper, contentDisposition, response);
 
-		return true;
-	}
+            facesContext.responseComplete();
+        } catch (Exception ex) {
+            LOG.error("Failed to send file", ex);
+            return false;
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
 
-	public static ZipOutputStream createZipStream(OutputStream output, String comment) {
-		ZipOutputStream zos = new ZipOutputStream(output);
+        return true;
+    }
 
-		zos.setComment("Shibboleth2 SP configuration files");
-		zos.setMethod(ZipOutputStream.DEFLATED);
-		zos.setLevel(Deflater.DEFAULT_COMPRESSION);
+    public static ZipOutputStream createZipStream(OutputStream output, String comment) {
+        ZipOutputStream zos = new ZipOutputStream(output);
 
-		return zos;
-	}
+        zos.setComment("Shibboleth2 SP configuration files");
+        zos.setMethod(ZipOutputStream.DEFLATED);
+        zos.setLevel(Deflater.DEFAULT_COMPRESSION);
 
-	public static boolean addFileToZip(String filePath, ZipOutputStream zos, String fileName) {
-		if (StringHelper.isEmpty(filePath)) {
-			return false;
-		}
+        return zos;
+    }
 
-		File file = new File(filePath);
-		if (!file.exists()) {
-			log.error(String.format("Failed to add file %s to zip archive", file.getName()));
-			return false;
-		}
+    public static boolean addFileToZip(String filePath, ZipOutputStream zos, String fileName) {
+        if (StringHelper.isEmpty(filePath)) {
+            return false;
+        }
 
-		boolean result = false;
-		InputStream is = null;
-		try {
-			is = FileUtils.openInputStream(file);
-			String zipFileName = fileName == null ? file.getName() : fileName;
-			result = addInputStream(zos, zipFileName, is);
-		} catch (IOException ex) {
-			log.error(String.format("Failed to add file %s to zip archive", file.getName()), ex);
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
+        File file = new File(filePath);
+        if (!file.exists()) {
+            LOG.error(String.format("Failed to add file %s to zip archive", file.getName()));
+            return false;
+        }
 
-		return result;
-	}
+        boolean result = false;
+        InputStream is = null;
+        try {
+            is = FileUtils.openInputStream(file);
+            String zipFileName = fileName == null ? file.getName() : fileName;
+            result = addInputStream(zos, zipFileName, is);
+        } catch (IOException ex) {
+            LOG.error(String.format("Failed to add file %s to zip archive", file.getName()), ex);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
 
-	public static boolean addFileContentToZip(String fileContent, ZipOutputStream zos, String fileName) {
-		if (StringHelper.isEmpty(fileContent) || StringHelper.isEmpty(fileName)) {
-			return false;
-		}
+        return result;
+    }
 
-		boolean result = false;
-		InputStream is = null;
-		try {
-			is = new ByteArrayInputStream(fileContent.getBytes("UTF-8"));
-			result = addInputStream(zos, fileName, is);
-		} catch (IOException ex) {
-			log.error(String.format("Failed to add file %s to zip archive", fileName), ex);
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
+    public static boolean addFileContentToZip(String fileContent, ZipOutputStream zos, String fileName) {
+        if (StringHelper.isEmpty(fileContent) || StringHelper.isEmpty(fileName)) {
+            return false;
+        }
 
-		return result;
-	}
+        boolean result = false;
+        InputStream is = null;
+        try {
+            is = new ByteArrayInputStream(fileContent.getBytes("UTF-8"));
+            result = addInputStream(zos, fileName, is);
+        } catch (IOException ex) {
+            LOG.error(String.format("Failed to add file %s to zip archive", fileName), ex);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
 
-	public static boolean addResourceToZip(InputStream is, String fileName, ZipOutputStream zos) {
-		boolean result = false;
+        return result;
+    }
 
-		// String fileName = (new File(resourceName)).getName();
-		// InputStream is =
-		// ResponseHelper.class.getClassLoader().getResourceAsStream(resourceName);
-		try {
-			result = addInputStream(zos, fileName, is);
-		} catch (Exception ex) {
-			log.error(String.format("Failed to add resource %s to zip archive", fileName), ex);
-		} finally {
-			IOUtils.closeQuietly(is);
-		}
+    public static boolean addResourceToZip(InputStream is, String fileName, ZipOutputStream zos) {
+        boolean result = false;
 
-		return result;
-	}
+        // String fileName = (new File(resourceName)).getName();
+        // InputStream is =
+        // ResponseHelper.class.getClassLoader().getResourceAsStream(resourceName);
+        try {
+            result = addInputStream(zos, fileName, is);
+        } catch (Exception ex) {
+            LOG.error(String.format("Failed to add resource %s to zip archive", fileName), ex);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
 
-	private static boolean addInputStream(ZipOutputStream zos, String fileName, InputStream is) {
-		try {
-			ZipEntry configurationFileEntry = new ZipEntry(fileName);
-			zos.putNextEntry(configurationFileEntry);
+        return result;
+    }
 
-			IOUtils.copy(is, zos);
-		} catch (IOException ex) {
-			log.error(String.format("Failed to add file %s to zip archive", fileName), ex);
-			return false;
-		}
+    private static boolean addInputStream(ZipOutputStream zos, String fileName, InputStream is) {
+        try {
+            ZipEntry configurationFileEntry = new ZipEntry(fileName);
+            zos.putNextEntry(configurationFileEntry);
 
-		return true;
-	}
+            IOUtils.copy(is, zos);
+        } catch (IOException ex) {
+            LOG.error(String.format("Failed to add file %s to zip archive", fileName), ex);
+            return false;
+        }
+
+        return true;
+    }
 
 }

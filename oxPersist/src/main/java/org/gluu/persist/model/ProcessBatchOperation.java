@@ -5,8 +5,8 @@ package org.gluu.persist.model;
  */
 public abstract class ProcessBatchOperation<T> implements BatchOperation<T> {
 
-	public boolean collectSearchResult(int size) {
-		return false;
-	}
+    public boolean collectSearchResult(int size) {
+        return false;
+    }
 
 }

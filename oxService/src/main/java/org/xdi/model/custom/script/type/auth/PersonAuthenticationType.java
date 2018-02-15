@@ -20,26 +20,26 @@ import java.util.Map;
  */
 public interface PersonAuthenticationType extends BaseExternalType {
 
-	public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
+    public boolean isValidAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
 
-	public String getAlternativeAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
+    public String getAlternativeAuthenticationMethod(AuthenticationScriptUsageType usageType, Map<String, SimpleCustomProperty> configurationAttributes);
 
-	public boolean authenticate(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
+    public boolean authenticate(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
 
-	public int getNextStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
+    public int getNextStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
 
-	public boolean prepareForStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
-	
-	public int getCountAuthenticationSteps(Map<String, SimpleCustomProperty> configurationAttributes);
+    public boolean prepareForStep(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters, int step);
 
-	public String getPageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
+    public int getCountAuthenticationSteps(Map<String, SimpleCustomProperty> configurationAttributes);
 
-	public List<String> getExtraParametersForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
+    public String getPageForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
 
-	public boolean logout(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
+    public List<String> getExtraParametersForStep(Map<String, SimpleCustomProperty> configurationAttributes, int step);
 
-	public String getLogoutExternalUrl(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
+    public boolean logout(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
 
-	public Map<String, String> getAuthenticationMethodClaims();
+    public String getLogoutExternalUrl(Map<String, SimpleCustomProperty> configurationAttributes, Map<String, String[]> requestParameters);
+
+    public Map<String, String> getAuthenticationMethodClaims();
 
 }

@@ -11,18 +11,18 @@ package org.gluu.persist.exception.mapping;
  */
 public class MappingException extends BaseMappingException {
 
-	private static final long serialVersionUID = 1113352885909511209L;
+    private static final long serialVersionUID = 1113352885909511209L;
 
-	public MappingException(String msg, Throwable root) {
-		super(msg, root);
-	}
+    public MappingException(String msg, Throwable root) {
+        super(msg, root);
+    }
 
-	public MappingException(Throwable root) {
-		super(root);
-	}
+    public MappingException(Throwable root) {
+        super(root);
+    }
 
-	public MappingException(String s) {
-		super(s);
-	}
+    public MappingException(String s) {
+        super(s);
+    }
 
 }

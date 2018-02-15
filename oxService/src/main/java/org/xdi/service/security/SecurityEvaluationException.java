@@ -8,22 +8,22 @@ import javax.ejb.ApplicationException;
 @ApplicationException(rollback=true)
 public class SecurityEvaluationException extends RuntimeException {
 
-	private static final long serialVersionUID = 7115786700134354355L;
+    private static final long serialVersionUID = 7115786700134354355L;
 
-	public SecurityEvaluationException() {
-		super();
-	}
+    public SecurityEvaluationException() {
+        super();
+    }
 
-	public SecurityEvaluationException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public SecurityEvaluationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public SecurityEvaluationException(String message) {
-		super(message);
-	}
+    public SecurityEvaluationException(String message) {
+        super(message);
+    }
 
-	public SecurityEvaluationException(Throwable cause) {
-		super(cause);
-	}
+    public SecurityEvaluationException(Throwable cause) {
+        super(cause);
+    }
 
 }

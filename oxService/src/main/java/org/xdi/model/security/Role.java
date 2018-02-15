@@ -5,18 +5,18 @@ package org.xdi.model.security;
  * assigned to a user based on the contextual state of a permission check.
  */
 public class Role extends SimplePrincipal {
-	private boolean conditional;
+    private boolean conditional;
 
-	public Role(String name) {
-		super(name);
-	}
+    public Role(String name) {
+        super(name);
+    }
 
-	public Role(String name, boolean conditional) {
-		this(name);
-		this.conditional = conditional;
-	}
+    public Role(String name, boolean conditional) {
+        this(name);
+        this.conditional = conditional;
+    }
 
-	public boolean isConditional() {
-		return conditional;
-	}
+    public boolean isConditional() {
+        return conditional;
+    }
 }

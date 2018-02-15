@@ -15,7 +15,7 @@ import org.xdi.model.ApplicationType;
 import org.xdi.model.metric.MetricType;
 
 /**
- * Base metric entry 
+ * Base metric entry
  *
  * @author Yuriy Movchan Date: 07/27/2015
  */
@@ -23,98 +23,98 @@ import org.xdi.model.metric.MetricType;
 @LdapObjectClass(values = {"top", "oxMetric"})
 public class MetricEntry {
 
-	@LdapDN
-	private String dn;
+    @LdapDN
+    private String dn;
 
-	@LdapAttribute(name = "uniqueIdentifier", ignoreDuringUpdate = true)
-	private String id;
+    @LdapAttribute(name = "uniqueIdentifier", ignoreDuringUpdate = true)
+    private String id;
 
     @LdapAttribute(name = "oxStartDate")
-	private Date startDate;
+    private Date startDate;
 
     @LdapAttribute(name = "oxEndDate")
-	private Date endDate;
+    private Date endDate;
 
     @LdapAttribute(name = "oxApplicationType")
-	private ApplicationType applicationType;
+    private ApplicationType applicationType;
 
     @LdapAttribute(name = "oxMetricType")
-	private MetricType metricType;
+    private MetricType metricType;
 
     @LdapAttribute(name = "creationDate")
-	private Date creationDate;
+    private Date creationDate;
 
-	public MetricEntry() {}
+    public MetricEntry() {}
 
-	public MetricEntry(String dn, String id, Date creationDate) {
-		this.dn = dn;
-		this.id = id;
-		this.creationDate = creationDate;
-	}
+    public MetricEntry(String dn, String id, Date creationDate) {
+        this.dn = dn;
+        this.id = id;
+        this.creationDate = creationDate;
+    }
 
-	public String getDn() {
-		return dn;
-	}
+    public String getDn() {
+        return dn;
+    }
 
-	public void setDn(String dn) {
-		this.dn = dn;
-	}
+    public void setDn(String dn) {
+        this.dn = dn;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public Date getStartDate() {
-		return startDate;
-	}
+    public Date getStartDate() {
+        return startDate;
+    }
 
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
 
-	public Date getEndDate() {
-		return endDate;
-	}
+    public Date getEndDate() {
+        return endDate;
+    }
 
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
 
-	public ApplicationType getApplicationType() {
-		return applicationType;
-	}
+    public ApplicationType getApplicationType() {
+        return applicationType;
+    }
 
-	public void setApplicationType(ApplicationType applicationType) {
-		this.applicationType = applicationType;
-	}
+    public void setApplicationType(ApplicationType applicationType) {
+        this.applicationType = applicationType;
+    }
 
-	public MetricType getMetricType() {
-		return metricType;
-	}
+    public MetricType getMetricType() {
+        return metricType;
+    }
 
-	public void setMetricType(MetricType metricType) {
-		this.metricType = metricType;
-	}
+    public void setMetricType(MetricType metricType) {
+        this.metricType = metricType;
+    }
 
-	public Date getCreationDate() {
-		return creationDate;
-	}
+    public Date getCreationDate() {
+        return creationDate;
+    }
 
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
-	}
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("MetricEntry [dn=").append(dn).append(", id=").append(id).append(", startDate=").append(startDate).append(", endDate=").append(endDate)
-				.append(", applicationType=").append(applicationType).append(", metricType=").append(metricType).append(", creationDate=").append(creationDate)
-				.append("]");
-		return builder.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("MetricEntry [dn=").append(dn).append(", id=").append(id).append(", startDate=").append(startDate).append(", endDate=").append(endDate)
+                .append(", applicationType=").append(applicationType).append(", metricType=").append(metricType).append(", creationDate=").append(creationDate)
+                .append("]");
+        return builder.toString();
+    }
 
 }

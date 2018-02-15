@@ -18,6 +18,6 @@ import org.gluu.site.ldap.persistence.annotation.LdapEntry;
 @LdapEntry
 public class DummyEntry extends BaseEntry implements Serializable {
 
-	private static final long serialVersionUID = -1111582184398161100L;
+    private static final long serialVersionUID = -1111582184398161100L;
 
 }

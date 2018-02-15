@@ -35,12 +35,12 @@ import com.unboundid.ldif.LDIFReader;
 
 /**
  * Utility class to import ldif file to LDAP.
- * 
+ *
  * @author Yuriy Movchan Date: 08.06.2010
  */
 public final class LdifDataUtility {
 
-	private static final Logger log = Logger.getLogger(LdifDataUtility.class);
+    private static final Logger log = Logger.getLogger(LdifDataUtility.class);
 
     //Just define the singleton as a static field in a separate class.
     // The semantics of Java guarantee that the field will not be initialized until the field is referenced,
@@ -50,294 +50,294 @@ public final class LdifDataUtility {
         static LdifDataUtility instance = new LdifDataUtility();
     }
 
-	private LdifDataUtility() {
-	}
+    private LdifDataUtility() {
+    }
 
-	public static LdifDataUtility instance() {
-		return Holder.instance;
-	}
+    public static LdifDataUtility instance() {
+        return Holder.instance;
+    }
 
-	/**
-	 * Performs ldif file import
-	 * 
-	 * @param connection
-	 *            Connection to LDAP server
-	 * @param ldifFileName
-	 *            LDIF file
-	 * @return The result code for the processing that was performed
-	 */
-	public ResultCode importLdifFile(LDAPConnection connection, String ldifFileName) {
-		LDIFReader ldifReader = createLdifReader(ldifFileName);
-		if (ldifReader == null) {
-			return ResultCode.LOCAL_ERROR;
-		}
-		try {
-			return importLdifFile(connection, ldifReader);
-		} finally {
-		    disposeLdifReader(ldifReader);
-		}
-	}
+    /**
+     * Performs ldif file import
+     *
+     * @param connection
+     *            Connection to LDAP server
+     * @param ldifFileName
+     *            LDIF file
+     * @return The result code for the processing that was performed
+     */
+    public ResultCode importLdifFile(LDAPConnection connection, String ldifFileName) {
+        LDIFReader ldifReader = createLdifReader(ldifFileName);
+        if (ldifReader == null) {
+            return ResultCode.LOCAL_ERROR;
+        }
+        try {
+            return importLdifFile(connection, ldifReader);
+        } finally {
+            disposeLdifReader(ldifReader);
+        }
+    }
 
-	/**
-	 * Performs ldif file conent import
-	 * 
-	 * @param connection
-	 *            Connection to LDAP server
-	 * @param ldifFileContent
-	 *            LDIF file
-	 * @return The result code for the processing that was performed
-	 */
-	public ResultCode importLdifFileContent(LDAPConnection connection, String ldifFileContent) {
-		BufferedReader is = null;
-		LDIFReader ldifReader = null;
-		try {
-			is = new BufferedReader(new StringReader(ldifFileContent));
-			ldifReader = new LDIFReader(is);
+    /**
+     * Performs ldif file conent import
+     *
+     * @param connection
+     *            Connection to LDAP server
+     * @param ldifFileContent
+     *            LDIF file
+     * @return The result code for the processing that was performed
+     */
+    public ResultCode importLdifFileContent(LDAPConnection connection, String ldifFileContent) {
+        BufferedReader is = null;
+        LDIFReader ldifReader = null;
+        try {
+            is = new BufferedReader(new StringReader(ldifFileContent));
+            ldifReader = new LDIFReader(is);
 
-			return importLdifFile(connection, ldifReader);
-		} finally {
-			IOUtils.closeQuietly(is);
-			if (ldifReader != null) {
-				disposeLdifReader(ldifReader);
-			}
-		}
-	}
+            return importLdifFile(connection, ldifReader);
+        } finally {
+            IOUtils.closeQuietly(is);
+            if (ldifReader != null) {
+                disposeLdifReader(ldifReader);
+            }
+        }
+    }
 
-	/**
-	 * Performs ldif file import
-	 * 
-	 * @param connection
-	 *            Connection to LDAP server
-	 * @param ldifReader
-	 *            LDIF reader
-	 * @return The result code for the processing that was performed
-	 */
-	public ResultCode importLdifFile(LDAPConnection connection, LDIFReader ldifReader) {
-		// Attempt to process and apply the changes to the server
-		ResultCode resultCode = ResultCode.SUCCESS;
-		while (true) {
-			// Read the next change to process
-			LDIFChangeRecord ldifRecord = null;
-			try {
-				ldifRecord = ldifReader.readChangeRecord(true);
-			} catch (LDIFException le) {
-				log.error("Malformed ldif record", le);
-				if (!le.mayContinueReading()) {
-					resultCode = ResultCode.DECODING_ERROR;
-					break;
-				}
-			} catch (IOException ioe) {
-				log.error("I/O error encountered while reading a change record", ioe);
-				resultCode = ResultCode.LOCAL_ERROR;
-				break;
-			}
+    /**
+     * Performs ldif file import
+     *
+     * @param connection
+     *            Connection to LDAP server
+     * @param ldifReader
+     *            LDIF reader
+     * @return The result code for the processing that was performed
+     */
+    public ResultCode importLdifFile(LDAPConnection connection, LDIFReader ldifReader) {
+        // Attempt to process and apply the changes to the server
+        ResultCode resultCode = ResultCode.SUCCESS;
+        while (true) {
+            // Read the next change to process
+            LDIFChangeRecord ldifRecord = null;
+            try {
+                ldifRecord = ldifReader.readChangeRecord(true);
+            } catch (LDIFException le) {
+                log.error("Malformed ldif record", le);
+                if (!le.mayContinueReading()) {
+                    resultCode = ResultCode.DECODING_ERROR;
+                    break;
+                }
+            } catch (IOException ioe) {
+                log.error("I/O error encountered while reading a change record", ioe);
+                resultCode = ResultCode.LOCAL_ERROR;
+                break;
+            }
 
-			// If the change record was null, then it means there are no more
-			// changes to be processed.
-			if (ldifRecord == null) {
-				break;
-			}
+            // If the change record was null, then it means there are no more
+            // changes to be processed.
+            if (ldifRecord == null) {
+                break;
+            }
 
-			// Apply the target change to the server.
-			try {
-				ldifRecord.processChange(connection);
-			} catch (LDAPException le) {
-				if (ResultCode.ENTRY_ALREADY_EXISTS.equals(le.getResultCode())) {
-					continue;
-				}
-				if (ldifRecord.getChangeType().equals(ChangeType.DELETE)) {
-					continue;
-				}
+            // Apply the target change to the server.
+            try {
+                ldifRecord.processChange(connection);
+            } catch (LDAPException le) {
+                if (ResultCode.ENTRY_ALREADY_EXISTS.equals(le.getResultCode())) {
+                    continue;
+                }
+                if (ldifRecord.getChangeType().equals(ChangeType.DELETE)) {
+                    continue;
+                }
 
-				log.error("Failed to inserting ldif record", le);
-			}
-		}
+                log.error("Failed to inserting ldif record", le);
+            }
+        }
 
-		return resultCode;
-	}
+        return resultCode;
+    }
 
-	/**
-	 * Check if DS has at least one DN simular to specified in ldif file.
-	 * 
-	 * @param connection
-	 *            Connection to LDAP server
-	 * @param ldifFileName
-	 *            LDIF file
-	 * @return true if server contains at least one DN simular to specified in
-	 *         ldif file.
-	 */
-	public boolean checkIfSerrverHasEntryFromLDIFFile(LDAPConnection connection, String ldifFileName) {
-		// Set up the LDIF reader that will be used to read the changes to apply
-		LDIFReader ldifReader = createLdifReader(ldifFileName);
-		if (ldifReader == null) {
-			return true;
-		}
+    /**
+     * Check if DS has at least one DN simular to specified in ldif file.
+     *
+     * @param connection
+     *            Connection to LDAP server
+     * @param ldifFileName
+     *            LDIF file
+     * @return true if server contains at least one DN simular to specified in
+     *         ldif file.
+     */
+    public boolean checkIfSerrverHasEntryFromLDIFFile(LDAPConnection connection, String ldifFileName) {
+        // Set up the LDIF reader that will be used to read the changes to apply
+        LDIFReader ldifReader = createLdifReader(ldifFileName);
+        if (ldifReader == null) {
+            return true;
+        }
 
-		// Check all ldif entries
-		while (true) {
-			// Read the next change to process.
-			Entry entry = null;
-			try {
-				entry = ldifReader.readEntry();
-			} catch (LDIFException le) {
-				log.error("Malformed ldif record", le);
-				if (!le.mayContinueReading()) {
-					return true;
-				}
-			} catch (IOException ioe) {
-				log.error("I/O error encountered while reading a change record", ioe);
-				return true;
-			}
+        // Check all ldif entries
+        while (true) {
+            // Read the next change to process.
+            Entry entry = null;
+            try {
+                entry = ldifReader.readEntry();
+            } catch (LDIFException le) {
+                log.error("Malformed ldif record", le);
+                if (!le.mayContinueReading()) {
+                    return true;
+                }
+            } catch (IOException ioe) {
+                log.error("I/O error encountered while reading a change record", ioe);
+                return true;
+            }
 
-			// If the change record was null, then it means there are no more
-			// changes to be processed.
-			if (entry == null) {
-				break;
-			}
+            // If the change record was null, then it means there are no more
+            // changes to be processed.
+            if (entry == null) {
+                break;
+            }
 
-			// Search entry in the server.
-			try {
-				SearchResult sr = connection.search(entry.getDN(), SearchScope.BASE, "objectClass=*");
-				if ((sr != null) && (sr.getEntryCount() > 0)) {
-					return true;
-				}
-			} catch (LDAPException le) {
-				if (le.getResultCode() != ResultCode.NO_SUCH_OBJECT) {
-					log.error("Failed to search ldif record", le);
-					return true;
-				}
-			}
-		}
+            // Search entry in the server.
+            try {
+                SearchResult sr = connection.search(entry.getDN(), SearchScope.BASE, "objectClass=*");
+                if ((sr != null) && (sr.getEntryCount() > 0)) {
+                    return true;
+                }
+            } catch (LDAPException le) {
+                if (le.getResultCode() != ResultCode.NO_SUCH_OBJECT) {
+                    log.error("Failed to search ldif record", le);
+                    return true;
+                }
+            }
+        }
 
-		disposeLdifReader(ldifReader);
+        disposeLdifReader(ldifReader);
 
-		return false;
-	}
+        return false;
+    }
 
-	/**
-	 * Remove base entry with all sub entries
-	 * 
-	 * @param connection
-	 *            Connection to LDAP server
-	 * @param baseDN
-	 *            Base DN entry
-	 * @return The result code for the processing that was performed.
-	 */
-	public ResultCode deleteEntryWithAllSubs(LDAPConnection connection, String baseDN) {
-		ResultCode resultCode = ResultCode.SUCCESS;
-		SearchResult searchResult = null;
-		try {
-			searchResult = connection.search(baseDN, SearchScope.SUB, "objectClass=*");
-			if ((searchResult == null) || (searchResult.getEntryCount() == 0)) {
-				return ResultCode.LOCAL_ERROR;
-			}
-		} catch (LDAPSearchException le) {
-			log.error("Failed to search subordinate entries", le);
-			return ResultCode.LOCAL_ERROR;
-		}
+    /**
+     * Remove base entry with all sub entries
+     *
+     * @param connection
+     *            Connection to LDAP server
+     * @param baseDN
+     *            Base DN entry
+     * @return The result code for the processing that was performed.
+     */
+    public ResultCode deleteEntryWithAllSubs(LDAPConnection connection, String baseDN) {
+        ResultCode resultCode = ResultCode.SUCCESS;
+        SearchResult searchResult = null;
+        try {
+            searchResult = connection.search(baseDN, SearchScope.SUB, "objectClass=*");
+            if ((searchResult == null) || (searchResult.getEntryCount() == 0)) {
+                return ResultCode.LOCAL_ERROR;
+            }
+        } catch (LDAPSearchException le) {
+            log.error("Failed to search subordinate entries", le);
+            return ResultCode.LOCAL_ERROR;
+        }
 
-		LinkedList<String> dns = new LinkedList<String>();
-		for (SearchResultEntry entry : searchResult.getSearchEntries()) {
-			dns.add(entry.getDN());
-		}
+        LinkedList<String> dns = new LinkedList<String>();
+        for (SearchResultEntry entry : searchResult.getSearchEntries()) {
+            dns.add(entry.getDN());
+        }
 
-		ListIterator<String> listIterator = dns.listIterator(dns.size());
-		while (listIterator.hasPrevious()) {
-			try {
-				connection.delete(listIterator.previous());
-			} catch (LDAPException le) {
-				log.error("Failed to delete entry", le);
-				resultCode = ResultCode.LOCAL_ERROR;
-				break;
-			}
-		}
+        ListIterator<String> listIterator = dns.listIterator(dns.size());
+        while (listIterator.hasPrevious()) {
+            try {
+                connection.delete(listIterator.previous());
+            } catch (LDAPException le) {
+                log.error("Failed to delete entry", le);
+                resultCode = ResultCode.LOCAL_ERROR;
+                break;
+            }
+        }
 
-		return resultCode;
-	}
+        return resultCode;
+    }
 
-	private LDIFReader createLdifReader(String ldifFileNamePath) {
-		// Set up the LDIF reader that will be used to read the changes to apply
-		File ldifFile = new File(ldifFileNamePath);
-		LDIFReader ldifReader;
-		try {
-			if (!ldifFile.exists()) {
-				return null;
-			}
-			ldifReader = new LDIFReader(ldifFile);
-		} catch (IOException ex) {
-			log.error("I/O error creating the LDIF reader", ex);
-			return null;
-		}
+    private LDIFReader createLdifReader(String ldifFileNamePath) {
+        // Set up the LDIF reader that will be used to read the changes to apply
+        File ldifFile = new File(ldifFileNamePath);
+        LDIFReader ldifReader;
+        try {
+            if (!ldifFile.exists()) {
+                return null;
+            }
+            ldifReader = new LDIFReader(ldifFile);
+        } catch (IOException ex) {
+            log.error("I/O error creating the LDIF reader", ex);
+            return null;
+        }
 
-		return ldifReader;
-	}
+        return ldifReader;
+    }
 
-	private void disposeLdifReader(LDIFReader ldifReader) {
-		if (ldifReader != null) {
-			try {
-				ldifReader.close();
-			} catch (IOException ex) {
-			}
-		}
-	}
-	
-	public ResultCode validateLDIF(LDIFReader ldifReader, String dn) {
-		String baseDn = dn.toLowerCase();
-		ResultCode resultCode = ResultCode.SUCCESS;
-		while (true) {
-			// Read the next change to process
-			LDIFChangeRecord ldifRecord = null;
-			try {
-				ldifRecord = ldifReader.readChangeRecord(true);
-				if (ldifRecord != null) {
-					if (StringHelper.isNotEmpty(baseDn)) {
-						if (!ldifRecord.getDN().toLowerCase().endsWith(baseDn)) {
-							resultCode = ResultCode.NOT_SUPPORTED;
-							break;
-						}
-					}
-				}
+    private void disposeLdifReader(LDIFReader ldifReader) {
+        if (ldifReader != null) {
+            try {
+                ldifReader.close();
+            } catch (IOException ex) {
+            }
+        }
+    }
 
-			} catch (LDIFException le) {
-				log.info("Malformed ldif record " + ldifRecord);
-				log.error("Malformed ldif record", le);
-				resultCode = ResultCode.DECODING_ERROR;
-				break;
-			} catch (IOException ioe) {
-				log.error("I/O error encountered while reading a change record", ioe);
-				resultCode = ResultCode.LOCAL_ERROR;
-				break;
-			}
+    public ResultCode validateLDIF(LDIFReader ldifReader, String dn) {
+        String baseDn = dn.toLowerCase();
+        ResultCode resultCode = ResultCode.SUCCESS;
+        while (true) {
+            // Read the next change to process
+            LDIFChangeRecord ldifRecord = null;
+            try {
+                ldifRecord = ldifReader.readChangeRecord(true);
+                if (ldifRecord != null) {
+                    if (StringHelper.isNotEmpty(baseDn)) {
+                        if (!ldifRecord.getDN().toLowerCase().endsWith(baseDn)) {
+                            resultCode = ResultCode.NOT_SUPPORTED;
+                            break;
+                        }
+                    }
+                }
 
-			// If the change record was null, then it means there are no more
-			// changes to be processed.
-			if (ldifRecord == null) {
-				break;
-			}
-		}
+            } catch (LDIFException le) {
+                log.info("Malformed ldif record " + ldifRecord);
+                log.error("Malformed ldif record", le);
+                resultCode = ResultCode.DECODING_ERROR;
+                break;
+            } catch (IOException ioe) {
+                log.error("I/O error encountered while reading a change record", ioe);
+                resultCode = ResultCode.LOCAL_ERROR;
+                break;
+            }
 
-		return resultCode;
-	}
-	
-	public List<SearchResultEntry> getAttributeResultEntryLDIF(LDAPConnection connection, List<String> patterns, String baseDN) {
-		List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
-		try {
-			for (String pattern : patterns) {
-				String[] targetArray = new String[] { pattern };
-				Filter inumFilter = Filter.createSubstringFilter("inum", null,targetArray, null);
-				Filter searchFilter = Filter.createORFilter(inumFilter);
-				SearchResultEntry sr = connection.searchForEntry(baseDN,SearchScope.SUB, searchFilter, null);
-				searchResultEntryList.add(sr);
-			}
+            // If the change record was null, then it means there are no more
+            // changes to be processed.
+            if (ldifRecord == null) {
+                break;
+            }
+        }
 
-			return searchResultEntryList;
-		} catch (LDAPException le) {
-			if (le.getResultCode() != ResultCode.NO_SUCH_OBJECT) {
-				log.error("Failed to search ldif record", le);
-				return null;
-			}
-		}
-		return null;
-	}
+        return resultCode;
+    }
+
+    public List<SearchResultEntry> getAttributeResultEntryLDIF(LDAPConnection connection, List<String> patterns, String baseDN) {
+        List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
+        try {
+            for (String pattern : patterns) {
+                String[] targetArray = new String[] { pattern };
+                Filter inumFilter = Filter.createSubstringFilter("inum", null,targetArray, null);
+                Filter searchFilter = Filter.createORFilter(inumFilter);
+                SearchResultEntry sr = connection.searchForEntry(baseDN,SearchScope.SUB, searchFilter, null);
+                searchResultEntryList.add(sr);
+            }
+
+            return searchResultEntryList;
+        } catch (LDAPException le) {
+            if (le.getResultCode() != ResultCode.NO_SUCH_OBJECT) {
+                log.error("Failed to search ldif record", le);
+                return null;
+            }
+        }
+        return null;
+    }
 
 }
