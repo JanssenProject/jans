@@ -7,11 +7,12 @@ package org.gluu.search.filter;
  */
 public enum FilterType {
 
-    RAW(""), PRESENCE("*"), EQUALITY("="), LESS_OR_EQUAL("<="), GREATER_OR_EQUAL(">="), APPROXIMATE_MATCH("~"), SUBSTRING("="), NOT("!"), OR("|"), AND("&");
+    RAW(""), PRESENCE("*"), EQUALITY("="), LESS_OR_EQUAL("<="), GREATER_OR_EQUAL(">="), APPROXIMATE_MATCH("~"), SUBSTRING("="), NOT("!"),
+    OR("|"), AND("&");
 
     private String sign;
 
-    private FilterType(String sign) {
+    FilterType(String sign) {
         this.sign = sign;
     }
 
