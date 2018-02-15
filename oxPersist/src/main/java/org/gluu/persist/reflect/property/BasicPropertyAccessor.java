@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BasicPropertyAccessor implements PropertyAccessor {
 
-    private static final Logger log = LoggerFactory.getLogger(BasicPropertyAccessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BasicPropertyAccessor.class);
 
     public static final class BasicSetter implements Setter {
 
@@ -41,7 +41,7 @@ public class BasicPropertyAccessor implements PropertyAccessor {
 
         public void set(Object target, Object value) throws BaseMappingException {
             try {
-                method.invoke(target, new Object[] { value });
+                method.invoke(target, new Object[] {value});
             } catch (NullPointerException npe) {
                 if (value == null && method.getParameterTypes()[0].isPrimitive()) {
                     throw new PropertyAccessException(npe, "Null value was assigned to a property of primitive type", true, clazz,
@@ -59,8 +59,8 @@ public class BasicPropertyAccessor implements PropertyAccessor {
                     throw new PropertyAccessException(iae, "Null value was assigned to a property of primitive type", true, clazz,
                             propertyName);
                 } else {
-                    log.error("IllegalArgumentException in class: " + clazz.getName() + ", setter method of property: " + propertyName);
-                    log.error("expected type: " + method.getParameterTypes()[0].getName() + ", actual value: "
+                    LOG.error("IllegalArgumentException in class: " + clazz.getName() + ", setter method of property: " + propertyName);
+                    LOG.error("expected type: " + method.getParameterTypes()[0].getName() + ", actual value: "
                             + (value == null ? null : value.getClass().getName()));
                     throw new PropertyAccessException(iae, "IllegalArgumentException occurred while calling", true, clazz, propertyName);
                 }
@@ -108,7 +108,7 @@ public class BasicPropertyAccessor implements PropertyAccessor {
                 throw new PropertyAccessException(iae, "IllegalAccessException occurred while calling", false, clazz, propertyName);
                 // cannot occur
             } catch (IllegalArgumentException iae) {
-                log.error("IllegalArgumentException in class: " + clazz.getName() + ", getter method of property: " + propertyName);
+                LOG.error("IllegalArgumentException in class: " + clazz.getName() + ", getter method of property: " + propertyName);
                 throw new PropertyAccessException(iae, "IllegalArgumentException occurred calling", false, clazz, propertyName);
             }
         }
@@ -148,15 +148,17 @@ public class BasicPropertyAccessor implements PropertyAccessor {
     }
 
     private static BasicSetter getSetterOrNull(Class<?> theClass, String propertyName) {
-
-        if (theClass == Object.class || theClass == null)
+        if ((theClass == Object.class) || (theClass == null)) {
             return null;
+        }
 
         Method method = setterMethod(theClass, propertyName);
 
         if (method != null) {
-            if (!ReflectHelper.isPublic(theClass, method))
+            if (!ReflectHelper.isPublic(theClass, method)) {
                 method.setAccessible(true);
+            }
+
             return new BasicSetter(theClass, method, propertyName);
         } else {
             BasicSetter setter = getSetterOrNull(theClass.getSuperclass(), propertyName);
@@ -209,15 +211,17 @@ public class BasicPropertyAccessor implements PropertyAccessor {
     }
 
     private static BasicGetter getGetterOrNull(Class<?> theClass, String propertyName) {
-
-        if (theClass == Object.class || theClass == null)
+        if ((theClass == Object.class) || (theClass == null)) {
             return null;
+        }
 
         Method method = getterMethod(theClass, propertyName);
 
         if (method != null) {
-            if (!ReflectHelper.isPublic(theClass, method))
+            if (!ReflectHelper.isPublic(theClass, method)) {
                 method.setAccessible(true);
+            }
+
             return new BasicGetter(theClass, method, propertyName);
         } else {
             BasicGetter getter = getGetterOrNull(theClass.getSuperclass(), propertyName);

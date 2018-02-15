@@ -44,7 +44,7 @@ public class BasicPropertyAnnotationResolver implements PropertyAnnotationResolv
 
         Class<?> thisClass = theClass;
         while (ReflectHelper.isNotPrimitiveClass(thisClass)) {
-            Field fileds[] = thisClass.getDeclaredFields();
+            Field[] fileds = thisClass.getDeclaredFields();
             for (Field filed : fileds) {
                 if (propertyName.equals(filed.getName())) {
                     return getOnlyAllowedAnntotations(filed.getAnnotations(), allowedAnnotations);
@@ -61,7 +61,7 @@ public class BasicPropertyAnnotationResolver implements PropertyAnnotationResolv
 
         Class<?> thisClass = theClass;
         while (ReflectHelper.isNotPrimitiveClass(thisClass)) {
-            Field fileds[] = thisClass.getDeclaredFields();
+            Field[] fileds = thisClass.getDeclaredFields();
             for (Field filed : fileds) {
                 List<Annotation> annotations = getOnlyAllowedAnntotations(filed.getAnnotations(), allowedAnnotations);
                 if ((annotations == null) || (annotations.size() == 0)) {

@@ -15,8 +15,8 @@ import org.gluu.site.ldap.persistence.annotation.LdapEnum;
  */
 public enum SortOrder implements LdapEnum {
 
-    ASCENDING ("ascending"),
-    DESCENDING ("descending");
+    ASCENDING("ascending"),
+    DESCENDING("descending");
 
     private String value;
 
@@ -28,7 +28,7 @@ public enum SortOrder implements LdapEnum {
         }
     }
 
-    private SortOrder(String value) {
+    SortOrder(String value) {
         this.value = value;
     }
 

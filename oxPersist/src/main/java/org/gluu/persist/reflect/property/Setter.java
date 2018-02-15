@@ -24,15 +24,15 @@ public interface Setter extends Serializable {
      *            The value to be set on the target.
      * @throws BaseMappingException
      */
-    public void set(Object target, Object value) throws BaseMappingException;
+    void set(Object target, Object value) throws BaseMappingException;
 
     /**
      * Optional operation (return null)
      */
-    public String getMethodName();
+    String getMethodName();
 
     /**
      * Optional operation (return null)
      */
-    public Method getMethod();
+    Method getMethod();
 }

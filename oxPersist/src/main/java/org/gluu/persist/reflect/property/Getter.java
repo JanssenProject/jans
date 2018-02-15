@@ -23,20 +23,20 @@ public interface Getter extends Serializable {
      * @return The extracted value.
      * @throws BaseMappingException
      */
-    public Object get(Object owner) throws BaseMappingException;
+    Object get(Object owner) throws BaseMappingException;
 
     /**
      * Get the declared Java type
      */
-    public Class<?> getReturnType();
+    Class<?> getReturnType();
 
     /**
      * Optional operation (return null)
      */
-    public String getMethodName();
+    String getMethodName();
 
     /**
      * Optional operation (return null)
      */
-    public Method getMethod();
+    Method getMethod();
 }
