@@ -56,22 +56,22 @@
 		<developerConnection>scm:git:git@github.com:GluuFederation/oxCore.git</developerConnection>
 	</scm>
 
-  <modules>
-      <module>oxUtil</module>
-      <module>oxFilter</module>
-      <module>oxPersistModel</module>
-      <module>oxPersist</module>
-      <module>oxLdap</module>
-      <module>oxLdap-annotations</module>
-      <module>oxLdapSample</module>
-      <module>oxModel</module>
-      <module>oxSaml</module>
-      <module>oxService</module>
-      <module>oxTomcat</module>
-      <module>oxServer</module>
-      <module>oxGwt</module>
-      <module>oxJsfUtil</module>
-  </modules>
+	<modules>
+		<module>oxUtil</module>
+		<module>oxFilter</module>
+		<module>oxPersistModel</module>
+		<module>oxPersist</module>
+		<module>oxLdap</module>
+		<module>oxLdap-annotations</module>
+		<module>oxLdapSample</module>
+		<module>oxModel</module>
+		<module>oxSaml</module>
+		<module>oxService</module>
+		<module>oxTomcat</module>
+		<module>oxServer</module>
+		<module>oxGwt</module>
+		<module>oxJsfUtil</module>
+	</modules>
 
 
 	<dependencyManagement>
@@ -293,14 +293,14 @@
 				<version>3.1.2</version>
 			</dependency>
 
-      <!-- Tests -->
-      <dependency>
-        <groupId>org.testng</groupId>
-        <artifactId>testng</artifactId>
-        <version>6.9.4</version>
-        <scope>test</scope>
-      </dependency>
-			
+			<!-- Tests -->
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>6.9.4</version>
+				<scope>test</scope>
+			</dependency>
+
 			<!-- Other -->
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -403,13 +403,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.17</version>
+					<version>3.0.0</version>
 					<configuration>
 						<configLocation>checkstyle.xml</configLocation>
-								<encoding>UTF-8</encoding>
-								<consoleOutput>true</consoleOutput>
-								<failsOnError>true</failsOnError>
-								<linkXRef>false</linkXRef>
+						<encoding>UTF-8</encoding>
+						<consoleOutput>true</consoleOutput>
+						<failsOnError>true</failsOnError>
+						<linkXRef>false</linkXRef>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -421,7 +421,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.17</version>
+				<version>3.0.0</version>
 				<reportSets>
 					<reportSet>
 						<reports>
