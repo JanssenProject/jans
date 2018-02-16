@@ -8,6 +8,7 @@ import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.inject.Inject;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xdi.oxd.common.CoreUtils;
@@ -112,10 +113,17 @@ public class LicenseService {
             metadata = null;
             licenseValid = false;
 
-            final Optional<LicenseFile> licenseFile = LicenseFile.load();
+            Optional<LicenseFile> licenseFile = LicenseFile.load();
             if (!licenseFile.isPresent() || Strings.isNullOrEmpty(licenseFile.get().getEncodedLicense())) {
                 LOG.error("Failed to load license file : " + LicenseFile.getLicenseFile().getAbsolutePath());
                 return false;
+            }
+
+            if (StringUtils.isBlank(licenseFile.get().getLicenseId()) || !licenseFile.get().getLicenseId().equals(conf.getLicenseId())) {
+                LOG.info(String.format("Deleting license file ... license id in file (%s) does not match license id from oxd-conf.json (%s)", licenseFile.get().getLicenseId(), conf.getLicenseId()));
+                LicenseFile.deleteContent();
+                this.updateService.updateLicenseFromServer();
+                licenseFile = LicenseFile.load();
             }
 
             LicenseContent licenseContent = LicenseValidator.validate(
